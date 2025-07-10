@@ -1,0 +1,9 @@
+[submodule "libopenschichtplaner5"]
+	path = libopenschichtplaner5
+	url = git@github.com:mschabhuettl/libopenschichtplaner5.git
+[submodule "openschichtplaner5-cli"]
+	path = openschichtplaner5-cli
+	url = git@github.com:mschabhuettl/openschichtplaner5-cli.git
+[submodule "openschichtplaner5-gui"]
+	path = openschichtplaner5-gui
+	url = git@github.com:mschabhuettl/openschichtplaner5-gui.git

@@ -3,18 +3,16 @@ set -e
 
 echo "🔄 Initializing and updating git submodules..."
 
-# 0. Submodule initialisieren und auf main setzen
+# 0. Submodule initialisieren und auf main setzen (ohne unnötiges cd)
 git submodule update --init --recursive
 
-# Versuche alle Submodule auf main zu setzen (falls der Branch existiert)
 git submodule foreach '
-  echo "➡️ Processing $name in $path"
-  cd $path
+  echo "➡️ Processing $name"
   if git show-ref --verify --quiet refs/heads/main || git ls-remote --exit-code --heads origin main > /dev/null; then
     git checkout main
     git pull origin main
   else
-    echo "⚠️  Branch 'main' not found in $name"
+    echo "⚠️  Branch main not found in $name"
   fi
 '
 
@@ -40,4 +38,25 @@ else
   echo "⚠️ requirements.txt not found!"
 fi
 
-echo "✅ Environment setup complete."
+# 5. PyCharm misc.xml generieren mit lokalem venv-Pfad
+echo "🧠 Generating PyCharm .idea/misc.xml..."
+
+PYTHON_VERSION=$(python3 --version | awk '{print $2}')
+VENV_PATH="$(pwd)/.venv"
+
+mkdir -p .idea
+
+cat > .idea/misc.xml <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Black">
+    <option name="sdkName" value="Python ${PYTHON_VERSION} virtualenv at ${VENV_PATH}" />
+  </component>
+  <component name="ProjectRootManager"
+             version="2"
+             project-jdk-name="Python ${PYTHON_VERSION} virtualenv at ${VENV_PATH}"
+             project-jdk-type="Python SDK" />
+</project>
+EOF
+
+echo "✅ Environment and PyCharm config complete."

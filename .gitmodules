@@ -7,3 +7,9 @@
 [submodule "openschichtplaner5-gui"]
 	path = openschichtplaner5-gui
 	url = git@github.com:mschabhuettl/openschichtplaner5-gui.git
+[submodule "openschichtplaner5-api"]
+	path = openschichtplaner5-api
+	url = git@github.com:mschabhuettl/openschichtplaner5-api.git
+[submodule "openschichtplaner5-webserver"]
+	path = openschichtplaner5-webserver
+	url = git@github.com:mschabhuettl/openschichtplaner5-webserver.git

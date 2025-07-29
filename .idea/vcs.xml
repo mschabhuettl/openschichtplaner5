@@ -3,7 +3,9 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/libopenschichtplaner5" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/openschichtplaner5-api" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/openschichtplaner5-cli" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/openschichtplaner5-gui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/openschichtplaner5-webserver" vcs="Git" />
   </component>
 </project>

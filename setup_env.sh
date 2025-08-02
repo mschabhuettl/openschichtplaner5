@@ -1,62 +1,58 @@
 #!/bin/bash
-set -e
+# Environment setup script for OpenSchichtplaner5
 
-echo "🔄 Initializing and updating git submodules..."
+set -e  # Exit on any error
 
-# 0. Submodule initialisieren und auf main setzen (ohne unnötiges cd)
-git submodule update --init --recursive
+echo "🚀 Setting up OpenSchichtplaner5 development environment..."
+echo "=========================================================="
 
-git submodule foreach '
-  echo "➡️ Processing $name"
-  if git show-ref --verify --quiet refs/heads/main || git ls-remote --exit-code --heads origin main > /dev/null; then
-    git checkout main
-    git pull origin main
-  else
-    echo "⚠️  Branch main not found in $name"
-  fi
-'
-
-echo "✅ Submodules ready."
-
-# 1. Virtuelle Umgebung anlegen, falls nicht vorhanden
-if [ ! -d ".venv" ]; then
-  echo "📦 Creating virtual environment..."
-  python3 -m venv .venv
+# Check if Python 3.8+ is available
+if ! command -v python3 &> /dev/null; then
+    echo "❌ Python 3 is not installed. Please install Python 3.8 or later."
+    exit 1
 fi
 
-# 2. Aktivieren (für direktes Testing im Terminal)
+PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
+echo "✅ Found Python $PYTHON_VERSION"
+
+# Create virtual environment if it doesn't exist
+if [ ! -d ".venv" ]; then
+    echo "📦 Creating virtual environment..."
+    python3 -m venv .venv
+else
+    echo "✅ Virtual environment already exists"
+fi
+
+# Activate virtual environment
+echo "🔧 Activating virtual environment..."
 source .venv/bin/activate
 
-# 3. Pip und wheel upgraden
-pip install --upgrade pip wheel
+# Upgrade pip
+echo "⬆️  Upgrading pip..."
+pip install --upgrade pip
 
-# 4. Requirements installieren
+# Install requirements
 if [ -f "requirements.txt" ]; then
-  echo "📚 Installing requirements..."
-  pip install -r requirements.txt
+    echo "📋 Installing dependencies from requirements.txt..."
+    pip install -r requirements.txt
 else
-  echo "⚠️ requirements.txt not found!"
+    echo "❌ requirements.txt not found!"
+    exit 1
 fi
 
-# 5. PyCharm misc.xml generieren mit lokalem venv-Pfad
-echo "🧠 Generating PyCharm .idea/misc.xml..."
+# Initialize submodules if needed
+if [ -f ".gitmodules" ]; then
+    echo "🔄 Initializing git submodules..."
+    git submodule update --init --recursive
+fi
 
-PYTHON_VERSION=$(python3 --version | awk '{print $2}')
-VENV_PATH="$(pwd)/.venv"
-
-mkdir -p .idea
-
-cat > .idea/misc.xml <<EOF
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="Black">
-    <option name="sdkName" value="Python ${PYTHON_VERSION} virtualenv at ${VENV_PATH}" />
-  </component>
-  <component name="ProjectRootManager"
-             version="2"
-             project-jdk-name="Python ${PYTHON_VERSION} virtualenv at ${VENV_PATH}"
-             project-jdk-type="Python SDK" />
-</project>
-EOF
-
-echo "✅ Environment and PyCharm config complete."
+echo ""
+echo "✅ Environment setup complete!"
+echo ""
+echo "🎯 Next steps:"
+echo "  1. Activate the environment: source .venv/bin/activate"
+echo "  2. Test installation: python test_installation.py"
+echo "  3. Start web server: ./start_webserver.sh"
+echo "  4. Open http://localhost:8080 in your browser"
+echo ""
+echo "💡 Tip: Run './start_webserver.sh' to start the application"

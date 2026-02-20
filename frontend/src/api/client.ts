@@ -1,0 +1,753 @@
+import type { Employee, Group, ShiftType, LeaveType, Holiday, Workplace, ScheduleEntry, User, Stats, ExtraCharge } from '../types';
+
+// ─── Workplace Employee (minimal employee info for assignment) ─
+export interface WorkplaceEmployee {
+  ID: number;
+  NAME: string;
+  FIRSTNAME: string;
+  SHORTNAME: string;
+  NUMBER: string;
+}
+
+// ─── Dashboard Summary Types ───────────────────────────────
+export interface DashboardSummary {
+  employees: { total: number; active: number };
+  shifts_today: {
+    count: number;
+    by_shift: { name: string; count: number; color: string }[];
+  };
+  shifts_this_month: { scheduled: number; absent: number; coverage_pct: number };
+  absences_this_month: {
+    total: number;
+    by_type: { short: string; name: string; count: number; color: string }[];
+  };
+  zeitkonto_alerts: { employee: string; employee_short: string; hours_diff: number }[];
+  upcoming_birthdays: { name: string; date: string; days_until: number }[];
+  staffing_warnings: {
+    date: string;
+    shift: string;
+    shift_name: string;
+    actual: number;
+    required: number;
+    color: string;
+  }[];
+  groups: number;
+  month_label: string;
+}
+
+// ─── Shift Cycle Types ─────────────────────────────────────
+export interface CycleDay {
+  index: number;
+  weekday: number;
+  shift_id: number | null;
+  shift_name: string;
+  shift_short: string;
+  color_bk: string;
+  color_text: string;
+  workplace_id: number | null;
+}
+
+export interface ShiftCycle {
+  ID: number;
+  name: string;
+  weeks: number;
+  unit: number;
+  position: number;
+  pattern: string;
+  schedule: CycleDay[][];  // [week][day]
+}
+
+export interface CycleAssignment {
+  id: number;
+  employee_id: number;
+  cycle_id: number;
+  start: string;
+  end: string;
+}
+
+// ─── Staffing Types ────────────────────────────────────────
+export interface ShiftRequirement {
+  id: number;
+  group_id: number;
+  weekday: number;
+  shift_id: number;
+  shift_name: string;
+  shift_short: string;
+  color_bk: string;
+  color_text: string;
+  workplace_id: number | null;
+  min: number;
+  max: number;
+}
+
+export interface StaffingRequirements {
+  shift_requirements: ShiftRequirement[];
+  daily_requirements: unknown[];
+}
+
+// ─── Note Types ────────────────────────────────────────────
+export interface Note {
+  id: number;
+  employee_id: number;
+  date: string;
+  text1: string;
+  text2: string;
+}
+
+export interface NoteCreate {
+  date: string;
+  text: string;
+  employee_id?: number;
+  text2?: string;
+}
+
+export interface NoteUpdate {
+  text?: string;
+  text2?: string;
+  employee_id?: number;
+  date?: string;
+}
+
+// ─── Zeitkonto Types ───────────────────────────────────────
+export interface ZeitkontoRow {
+  employee_id: number;
+  employee_name: string;
+  employee_short: string;
+  total_target_hours: number;
+  total_actual_hours: number;
+  total_difference: number;
+  total_adjustment: number;
+  total_saldo: number;
+}
+
+export interface ZeitkontoMonthDetail {
+  month: number;
+  target_hours: number;
+  actual_hours: number;
+  overtime_adjustment: number;
+  booking_adjustment: number;
+  absence_days: number;
+  difference: number;
+  adjustment: number;
+  saldo: number;
+  running_saldo: number;
+}
+
+export interface ZeitkontoDetail {
+  employee_id: number;
+  employee_name: string;
+  employee_short: string;
+  year: number;
+  total_target_hours: number;
+  total_actual_hours: number;
+  total_difference: number;
+  total_adjustment: number;
+  total_saldo: number;
+  months: ZeitkontoMonthDetail[];
+}
+
+export interface ZeitkontoSummary {
+  year: number;
+  group_id: number | null;
+  employee_count: number;
+  total_target_hours: number;
+  total_actual_hours: number;
+  total_saldo: number;
+  positive_count: number;
+  negative_count: number;
+}
+
+export interface Booking {
+  id: number;
+  employee_id: number;
+  date: string;
+  type: number;
+  value: number;
+  note: string;
+}
+
+// ─── User Management Types ─────────────────────────────────
+export interface UserCreate {
+  NAME: string;
+  DESCRIP?: string;
+  PASSWORD: string;
+  role: 'Admin' | 'Planer' | 'Leser';
+}
+
+export interface UserUpdate {
+  NAME?: string;
+  DESCRIP?: string;
+  PASSWORD?: string;
+  role?: 'Admin' | 'Planer' | 'Leser';
+}
+
+export interface LoginResponse {
+  ok: boolean;
+  token: string;
+  user: {
+    ID: number;
+    NAME: string;
+    DESCRIP: string;
+    ADMIN: boolean;
+    RIGHTS: number;
+    role: string;
+  };
+}
+
+// ─── Conflict Types ───────────────────────────────────────
+export interface ConflictEntry {
+  employee_id: number;
+  date: string;
+  type: 'shift_and_absence' | 'holiday_ban' | 'understaffing';
+  message: string;
+}
+
+export interface ScheduleConflicts {
+  conflicts: ConflictEntry[];
+}
+
+// ─── Settings Types ───────────────────────────────────────
+export interface UsettSettings {
+  ID: number;
+  LOGIN: number;
+  SPSHCAT: number;
+  OVERTCAT: number;
+  ANOANAME: string;
+  ANOASHORT: string;
+  ANOACRTXT: number;
+  ANOACRBAR: number;
+  ANOACRBK: number;
+  ANOABOLD: number;
+  BACKUPFR: number;
+}
+
+// ─── Special Staffing Types ───────────────────────────────
+export interface SpecialStaffingReq {
+  id: number;
+  group_id: number;
+  date: string;
+  shift_id: number;
+  shift_name: string;
+  shift_short: string;
+  color_bk: string;
+  color_text: string;
+  workplace_id: number | null;
+  workplace_name: string;
+  min: number;
+  max: number;
+}
+
+// ─── Restriction Types ────────────────────────────────────
+export interface Restriction {
+  id: number;
+  employee_id: number;
+  shift_id: number;
+  weekday: number;
+  restrict: number;
+  reason: string;
+  shift_name: string;
+  shift_short: string;
+}
+
+// ─── Period Types ──────────────────────────────────────────
+export interface Period {
+  id: number;
+  group_id: number;
+  start: string;
+  end: string;
+  color: string | null;
+  description: string;
+}
+
+const BASE_URL = import.meta.env.VITE_API_URL ?? '';
+
+async function fetchJSON<T>(path: string): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`);
+  if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+async function postJSON<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+async function putJSON<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+async function deleteReq<T>(path: string): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+// ─── Einsatzplan (SPSHI) Types ─────────────────────────────
+export interface EinsatzplanEntryCreate {
+  employee_id: number;
+  date: string;
+  name?: string;
+  shortname?: string;
+  shift_id?: number;
+  workplace_id?: number;
+  startend?: string;
+  duration?: number;
+  colortext?: number;
+  colorbar?: number;
+  colorbk?: number;
+}
+
+export interface EinsatzplanEntryUpdate {
+  name?: string;
+  shortname?: string;
+  shift_id?: number;
+  workplace_id?: number;
+  startend?: string;
+  duration?: number;
+  colortext?: number;
+  colorbar?: number;
+  colorbk?: number;
+}
+
+export interface DeviationCreate {
+  employee_id: number;
+  date: string;
+  name?: string;
+  shortname?: string;
+  startend?: string;
+  duration?: number;
+  colortext?: number;
+  colorbar?: number;
+  colorbk?: number;
+}
+
+export interface SpshiEntry {
+  id: number;
+  employee_id: number;
+  date: string;
+  name: string;
+  shortname: string;
+  shift_id: number;
+  shift_name: string;
+  shift_short: string;
+  workplace_id: number;
+  workplace_name: string;
+  type: number;   // 0=Sonderdienst, 1=Abweichung
+  startend: string;
+  duration: number;
+  colortext: number;
+  colorbar: number;
+  colorbk: number;
+  color_bk: string;
+  color_text: string;
+}
+
+// ─── Types for new endpoints ────────────────────────────────
+export interface DayEntry {
+  employee_id: number;
+  employee_name: string;
+  employee_short: string;
+  shift_id: number | null;
+  shift_name: string;
+  shift_short: string;
+  color_bk: string;
+  color_text: string;
+  workplace_id: number | null;
+  workplace_name: string;
+  kind: 'shift' | 'special_shift' | 'absence' | null;
+  leave_name: string;
+  display_name: string;
+  // SPSHI-specific fields (present when kind === 'special_shift')
+  spshi_id?: number | null;
+  spshi_type?: number | null;
+  spshi_startend?: string;
+  spshi_duration?: number;
+}
+
+export interface EmployeeStats {
+  employee_id: number;
+  employee_name: string;
+  employee_short: string;
+  target_hours: number;
+  actual_hours: number;
+  absence_days: number;
+  overtime_hours: number;
+  vacation_used: number;
+}
+
+export interface MonthSummary {
+  month: number;
+  shifts: number;
+  absences: number;
+  target_hours: number;
+  actual_hours: number;
+  label_counts: Record<string, number>;
+}
+
+export interface ExtraChargeSummary {
+  charge_id: number;
+  charge_name: string;
+  hours: number;
+  shift_count: number;
+  start_time: number;
+  end_time: number;
+  validdays: string;
+  holrule: number;
+}
+
+export interface WeekSchedule {
+  week_start: string;
+  week_end: string;
+  days: {
+    date: string;
+    entries: DayEntry[];
+  }[];
+}
+
+// ─── API ───────────────────────────────────────────────────
+export const api = {
+  getStats: () => fetchJSON<Stats>('/api/stats'),
+  getDashboardSummary: (year: number, month: number) =>
+    fetchJSON<DashboardSummary>(`/api/dashboard/summary?year=${year}&month=${month}`),
+  getEmployees: () => fetchJSON<Employee[]>('/api/employees'),
+  getGroups: () => fetchJSON<Group[]>('/api/groups'),
+  getShifts: () => fetchJSON<ShiftType[]>('/api/shifts'),
+  getLeaveTypes: () => fetchJSON<LeaveType[]>('/api/leave-types'),
+  getWorkplaces: () => fetchJSON<Workplace[]>('/api/workplaces'),
+  getHolidays: (year?: number) => fetchJSON<Holiday[]>(`/api/holidays${year ? `?year=${year}` : ''}`),
+  getSchedule: (year: number, month: number, groupId?: number) =>
+    fetchJSON<ScheduleEntry[]>(`/api/schedule?year=${year}&month=${month}${groupId ? `&group_id=${groupId}` : ''}`),
+  getUsers: () => fetchJSON<User[]>('/api/users'),
+
+  // New endpoints
+  getScheduleDay: (date: string, groupId?: number) =>
+    fetchJSON<DayEntry[]>(`/api/schedule/day?date=${date}${groupId ? `&group_id=${groupId}` : ''}`),
+
+  getStatistics: (year: number, month: number, groupId?: number) =>
+    fetchJSON<EmployeeStats[]>(`/api/statistics?year=${year}&month=${month}${groupId ? `&group_id=${groupId}` : ''}`),
+
+  getScheduleYear: (year: number, employeeId: number) =>
+    fetchJSON<MonthSummary[]>(`/api/schedule/year?year=${year}&employee_id=${employeeId}`),
+
+  getScheduleWeek: (date: string, groupId?: number) =>
+    fetchJSON<WeekSchedule>(`/api/schedule/week?date=${date}${groupId ? `&group_id=${groupId}` : ''}`),
+
+  getConflicts: (params: { year: number; month: number; group_id?: number }) => {
+    const p = new URLSearchParams({ year: String(params.year), month: String(params.month) });
+    if (params.group_id != null) p.set('group_id', String(params.group_id));
+    return fetchJSON<ScheduleConflicts>(`/api/schedule/conflicts?${p}`);
+  },
+
+  getGroupMembers: (groupId: number) =>
+    fetchJSON<Employee[]>(`/api/groups/${groupId}/members`),
+
+  createScheduleEntry: (employee_id: number, date: string, shift_id: number) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/schedule', { employee_id, date, shift_id }),
+
+  deleteScheduleEntry: (employee_id: number, date: string) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/schedule/${employee_id}/${date}`),
+
+  bulkSchedule: (
+    entries: Array<{ employee_id: number; date: string; shift_id: number | null }>,
+    overwrite = true,
+  ) => postJSON<{ created: number; updated: number; deleted: number }>(
+    '/api/schedule/bulk',
+    { entries, overwrite },
+  ),
+
+  generateSchedule: (params: {
+    year: number;
+    month: number;
+    employee_ids?: number[];
+    force?: boolean;
+  }) =>
+    postJSON<{ created: number; skipped: number; errors: string[]; message: string }>(
+      '/api/schedule/generate',
+      params,
+    ),
+
+  getAbsences: (params?: { year?: number; employee_id?: number; leave_type_id?: number }) => {
+    const qs = params ? new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([,v]) => v != null).map(([k,v]) => [k, String(v)]))).toString() : '';
+    return fetchJSON<{ id: number; employee_id: number; date: string; leave_type_id: number; leave_type_name: string; leave_type_short: string }[]>(`/api/absences${qs ? `?${qs}` : ''}`);
+  },
+  createAbsence: (employee_id: number, date: string, leave_type_id: number) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/absences', { employee_id, date, leave_type_id }),
+
+  getGroupAssignments: () =>
+    fetchJSON<{ employee_id: number; group_id: number }[]>('/api/group-assignments'),
+
+  getLeaveEntitlements: (params?: { year?: number; employee_id?: number }) => {
+    const qs = params ? new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([,v]) => v != null).map(([k,v]) => [k, String(v)]))).toString() : '';
+    return fetchJSON<{ id: number; employee_id: number; year: number; leave_type_id: number; leave_type_name: string; entitlement: number; carry_forward: number; in_days: boolean }[]>(`/api/leave-entitlements${qs ? `?${qs}` : ''}`);
+  },
+
+  // ─── Shift Cycles ─────────────────────────────────────────
+  getShiftCycles: () => fetchJSON<ShiftCycle[]>('/api/shift-cycles'),
+  getShiftCycle: (id: number) => fetchJSON<ShiftCycle>(`/api/shift-cycles/${id}`),
+  getCycleAssignments: () => fetchJSON<CycleAssignment[]>('/api/shift-cycles/assign'),
+  assignCycle: (employee_id: number, cycle_id: number, start_date: string) =>
+    postJSON<{ ok: boolean; record: CycleAssignment }>('/api/shift-cycles/assign', { employee_id, cycle_id, start_date }),
+  removeCycleAssignment: (employee_id: number) =>
+    deleteReq<{ ok: boolean; removed: number }>(`/api/shift-cycles/assign/${employee_id}`),
+  createShiftCycle: (name: string, size_weeks: number) =>
+    postJSON<{ ok: boolean; cycle: ShiftCycle }>('/api/shift-cycles', { name, size_weeks }),
+  updateShiftCycle: (id: number, name: string, size_weeks: number, entries: { index: number; shift_id: number | null }[]) =>
+    putJSON<{ ok: boolean; cycle: ShiftCycle }>(`/api/shift-cycles/${id}`, { name, size_weeks, entries }),
+  deleteShiftCycle: (id: number) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/shift-cycles/${id}`),
+
+  // ─── Staffing Requirements ────────────────────────────────
+  getStaffingRequirements: (year?: number, month?: number) => {
+    const params = new URLSearchParams();
+    if (year) params.set('year', String(year));
+    if (month) params.set('month', String(month));
+    const qs = params.toString();
+    return fetchJSON<StaffingRequirements>(`/api/staffing-requirements${qs ? `?${qs}` : ''}`);
+  },
+
+  // ─── Notes ────────────────────────────────────────────────
+  getNotes: (params?: { date?: string; employee_id?: number; year?: number; month?: number }) => {
+    const p = params ?? {};
+    const urlParams = new URLSearchParams();
+    if (p.date) urlParams.set('date', p.date);
+    if (p.employee_id != null) urlParams.set('employee_id', String(p.employee_id));
+    if (p.year != null) urlParams.set('year', String(p.year));
+    if (p.month != null) urlParams.set('month', String(p.month));
+    const qs = urlParams.toString();
+    return fetchJSON<Note[]>(`/api/notes${qs ? `?${qs}` : ''}`);
+  },
+  addNote: (date: string, text: string, employee_id?: number, text2?: string) =>
+    postJSON<{ ok: boolean; record: Note }>('/api/notes', { date, text, employee_id: employee_id ?? 0, text2: text2 ?? '' }),
+  updateNote: (id: number, data: NoteUpdate) =>
+    putJSON<{ ok: boolean; record: Note }>(`/api/notes/${id}`, data),
+  deleteNote: (id: number) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/notes/${id}`),
+
+  // ─── Periods ──────────────────────────────────────────────
+  getPeriods: (group_id?: number) =>
+    fetchJSON<Period[]>(`/api/periods${group_id ? `?group_id=${group_id}` : ''}`),
+  createPeriod: (data: { group_id: number; start: string; end: string; description?: string }) =>
+    postJSON<{ ok: boolean; record: Period }>('/api/periods', data),
+  deletePeriod: (id: number) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/periods/${id}`),
+
+  // ─── Staffing Requirements Write ──────────────────────────
+  setStaffingRequirement: (data: { shift_id: number; weekday: number; min: number; max: number; group_id: number }) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/staffing-requirements', data),
+
+  // ─── Zeitkonto ────────────────────────────────────────────
+  getZeitkonto: (year: number, groupId?: number, employeeId?: number) => {
+    const params = new URLSearchParams({ year: String(year) });
+    if (groupId) params.set('group_id', String(groupId));
+    if (employeeId) params.set('employee_id', String(employeeId));
+    return fetchJSON<ZeitkontoRow[]>(`/api/zeitkonto?${params}`);
+  },
+  getZeitkontoDetail: (year: number, employeeId: number) =>
+    fetchJSON<ZeitkontoDetail>(`/api/zeitkonto/detail?year=${year}&employee_id=${employeeId}`),
+  getZeitkontoSummary: (year: number, groupId?: number) => {
+    const params = new URLSearchParams({ year: String(year) });
+    if (groupId) params.set('group_id', String(groupId));
+    return fetchJSON<ZeitkontoSummary>(`/api/zeitkonto/summary?${params}`);
+  },
+  getBookings: (year?: number, month?: number, employeeId?: number) => {
+    const params = new URLSearchParams();
+    if (year) params.set('year', String(year));
+    if (month) params.set('month', String(month));
+    if (employeeId) params.set('employee_id', String(employeeId));
+    const qs = params.toString();
+    return fetchJSON<Booking[]>(`/api/bookings${qs ? `?${qs}` : ''}`);
+  },
+  createBooking: (data: { employee_id: number; date: string; type: number; value: number; note?: string }) =>
+    postJSON<{ ok: boolean; record: Booking }>('/api/bookings', data),
+  deleteBooking: (id: number) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/bookings/${id}`),
+
+  // ─── CRUD: Employees ──────────────────────────────────────
+  createEmployee: (data: Partial<Employee>) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/employees', data),
+  updateEmployee: (id: number, data: Partial<Employee>) =>
+    putJSON<{ ok: boolean; record: unknown }>(`/api/employees/${id}`, data),
+  deleteEmployee: (id: number) =>
+    deleteReq<{ ok: boolean; hidden: number }>(`/api/employees/${id}`),
+
+  // ─── CRUD: Groups ─────────────────────────────────────────
+  createGroup: (data: Partial<Group>) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/groups', data),
+  updateGroup: (id: number, data: Partial<Group>) =>
+    putJSON<{ ok: boolean; record: unknown }>(`/api/groups/${id}`, data),
+  deleteGroup: (id: number) =>
+    deleteReq<{ ok: boolean; hidden: number }>(`/api/groups/${id}`),
+  addGroupMember: (groupId: number, employee_id: number) =>
+    postJSON<{ ok: boolean; record: unknown }>(`/api/groups/${groupId}/members`, { employee_id }),
+  removeGroupMember: (groupId: number, empId: number) =>
+    deleteReq<{ ok: boolean; removed: number }>(`/api/groups/${groupId}/members/${empId}`),
+
+  // ─── CRUD: Shifts ─────────────────────────────────────────
+  createShift: (data: Partial<ShiftType>) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/shifts', data),
+  updateShift: (id: number, data: Partial<ShiftType>) =>
+    putJSON<{ ok: boolean; record: unknown }>(`/api/shifts/${id}`, data),
+  deleteShift: (id: number) =>
+    deleteReq<{ ok: boolean; hidden: number }>(`/api/shifts/${id}`),
+
+  // ─── CRUD: Leave Types ────────────────────────────────────
+  createLeaveType: (data: Partial<LeaveType>) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/leave-types', data),
+  updateLeaveType: (id: number, data: Partial<LeaveType>) =>
+    putJSON<{ ok: boolean; record: unknown }>(`/api/leave-types/${id}`, data),
+  deleteLeaveType: (id: number) =>
+    deleteReq<{ ok: boolean; hidden: number }>(`/api/leave-types/${id}`),
+
+  // ─── CRUD: Holidays ───────────────────────────────────────
+  createHoliday: (data: { DATE: string; NAME: string; INTERVAL?: number }) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/holidays', data),
+  updateHoliday: (id: number, data: Partial<Holiday>) =>
+    putJSON<{ ok: boolean; record: unknown }>(`/api/holidays/${id}`, data),
+  deleteHoliday: (id: number) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/holidays/${id}`),
+
+  // ─── CRUD: Workplaces ─────────────────────────────────────
+  createWorkplace: (data: Partial<Workplace>) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/workplaces', data),
+  updateWorkplace: (id: number, data: Partial<Workplace>) =>
+    putJSON<{ ok: boolean; record: unknown }>(`/api/workplaces/${id}`, data),
+  deleteWorkplace: (id: number) =>
+    deleteReq<{ ok: boolean; hidden: number }>(`/api/workplaces/${id}`),
+
+  // ─── Workplace ↔ Employee Assignments ─────────────────────
+  getWorkplaceEmployees: (workplaceId: number) =>
+    fetchJSON<WorkplaceEmployee[]>(`/api/workplaces/${workplaceId}/employees`),
+  assignEmployeeToWorkplace: (workplaceId: number, employeeId: number) =>
+    postJSON<{ ok: boolean; added: boolean }>(`/api/workplaces/${workplaceId}/employees/${employeeId}`, {}),
+  removeEmployeeFromWorkplace: (workplaceId: number, employeeId: number) =>
+    deleteReq<{ ok: boolean; removed: boolean }>(`/api/workplaces/${workplaceId}/employees/${employeeId}`),
+
+  // ─── CRUD: Extra Charges ──────────────────────────────────
+  getExtraCharges: (include_hidden = false) =>
+    fetchJSON<ExtraCharge[]>(`/api/extracharges${include_hidden ? '?include_hidden=true' : ''}`),
+  createExtraCharge: (data: Partial<ExtraCharge>) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/extracharges', data),
+  updateExtraCharge: (id: number, data: Partial<ExtraCharge>) =>
+    putJSON<{ ok: boolean; record: unknown }>(`/api/extracharges/${id}`, data),
+  deleteExtraCharge: (id: number) =>
+    deleteReq<{ ok: boolean; hidden: number }>(`/api/extracharges/${id}`),
+  getExtraChargesSummary: (year: number, month: number, employeeId?: number) =>
+    fetchJSON<ExtraChargeSummary[]>(
+      `/api/extracharges/summary?year=${year}&month=${month}${employeeId != null ? `&employee_id=${employeeId}` : ''}`
+    ),
+
+  // ─── Auth ─────────────────────────────────────────────────
+  login: (username: string, password: string) =>
+    postJSON<LoginResponse>('/api/auth/login', { username, password }),
+
+  // ─── CRUD: Users ──────────────────────────────────────────
+  createUser: (data: UserCreate) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/users', data),
+  updateUser: (id: number, data: UserUpdate) =>
+    putJSON<{ ok: boolean; record: unknown }>(`/api/users/${id}`, data),
+  deleteUser: (id: number) =>
+    deleteReq<{ ok: boolean; hidden: number }>(`/api/users/${id}`),
+
+  // ─── Einsatzplan / SPSHI ─────────────────────────────────
+  getEinsatzplan: (date: string, groupId?: number) =>
+    fetchJSON<SpshiEntry[]>(`/api/einsatzplan?date=${date}${groupId != null ? `&group_id=${groupId}` : ''}`),
+  createEinsatzplanEntry: (data: EinsatzplanEntryCreate) =>
+    postJSON<{ ok: boolean; record: SpshiEntry }>('/api/einsatzplan', data),
+  updateEinsatzplanEntry: (id: number, data: EinsatzplanEntryUpdate) =>
+    putJSON<{ ok: boolean; record: unknown }>(`/api/einsatzplan/${id}`, data),
+  deleteEinsatzplanEntry: (id: number) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/einsatzplan/${id}`),
+  createDeviation: (data: DeviationCreate) =>
+    postJSON<{ ok: boolean; record: SpshiEntry }>('/api/einsatzplan/deviation', data),
+
+  // ─── Restrictions ─────────────────────────────────────────
+  getRestrictions: (employeeId?: number) =>
+    fetchJSON<Restriction[]>(employeeId != null ? `/api/restrictions?employee_id=${employeeId}` : '/api/restrictions'),
+  addRestriction: (data: { employee_id: number; shift_id: number; reason?: string; weekday?: number }) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/restrictions', data),
+  removeRestriction: (employeeId: number, shiftId: number, weekday = 0) =>
+    deleteReq<{ ok: boolean; removed: number }>(`/api/restrictions/${employeeId}/${shiftId}?weekday=${weekday}`),
+
+  // ─── Settings (USETT) ────────────────────────────────────
+  getSettings: () => fetchJSON<UsettSettings>('/api/settings'),
+  updateSettings: (data: Partial<UsettSettings>) =>
+    putJSON<{ ok: boolean; record: UsettSettings }>('/api/settings', data),
+
+  // ─── Special Staffing Requirements (SPDEM) ───────────────
+  getSpecialStaffing: (date?: string, groupId?: number) => {
+    const p = new URLSearchParams();
+    if (date) p.set('date', date);
+    if (groupId != null) p.set('group_id', String(groupId));
+    const qs = p.toString();
+    return fetchJSON<SpecialStaffingReq[]>(`/api/staffing-requirements/special${qs ? `?${qs}` : ''}`);
+  },
+  createSpecialStaffing: (data: {
+    group_id: number; date: string; shift_id: number;
+    workplace_id?: number; min: number; max: number;
+  }) => postJSON<{ ok: boolean; record: unknown }>('/api/staffing-requirements/special', data),
+  updateSpecialStaffing: (id: number, data: Partial<{
+    group_id: number; date: string; shift_id: number;
+    workplace_id: number; min: number; max: number;
+  }>) => putJSON<{ ok: boolean; record: unknown }>(`/api/staffing-requirements/special/${id}`, data),
+  deleteSpecialStaffing: (id: number) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/staffing-requirements/special/${id}`),
+
+  // ─── Cycle Exceptions ─────────────────────────────────────
+  getCycleExceptions: (params?: { employee_id?: number; cycle_assignment_id?: number }) => {
+    const qs = params ? new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([,v]) => v != null).map(([k,v]) => [k, String(v)]))).toString() : '';
+    return fetchJSON<{ id: number; employee_id: number; cycle_assignment_id: number; date: string; type: number }[]>(
+      `/api/cycle-exceptions${qs ? `?${qs}` : ''}`);
+  },
+  setCycleException: (data: { employee_id: number; cycle_assignment_id: number; date: string; type?: number }) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/cycle-exceptions', data),
+  deleteCycleException: (id: number) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/cycle-exceptions/${id}`),
+
+  // ─── Employee Access ───────────────────────────────────────
+  getEmployeeAccess: (user_id?: number) => {
+    const qs = user_id != null ? `?user_id=${user_id}` : '';
+    return fetchJSON<{ id: number; user_id: number; employee_id: number; rights: number }[]>(`/api/employee-access${qs}`);
+  },
+  setEmployeeAccess: (data: { user_id: number; employee_id: number; rights: number }) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/employee-access', data),
+  deleteEmployeeAccess: (id: number) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/employee-access/${id}`),
+
+  // ─── Group Access ──────────────────────────────────────────
+  getGroupAccess: (user_id?: number) => {
+    const qs = user_id != null ? `?user_id=${user_id}` : '';
+    return fetchJSON<{ id: number; user_id: number; group_id: number; rights: number }[]>(`/api/group-access${qs}`);
+  },
+  setGroupAccess: (data: { user_id: number; group_id: number; rights: number }) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/group-access', data),
+  deleteGroupAccess: (id: number) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/group-access/${id}`),
+
+  // ─── Backup / Restore ─────────────────────────────────────
+  getBackupUrl: (): string => `${BASE_URL}/api/backup/download`,
+
+  restoreBackup: async (file: File): Promise<{ restored: number; files: string[] }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch(`${BASE_URL}/api/backup/restore`, {
+      method: 'POST',
+      body: formData,
+    });
+    if (!res.ok) {
+      const detail = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(detail.detail || res.statusText);
+    }
+    return res.json();
+  },
+};

@@ -329,17 +329,35 @@ interface ContextMenuState {
   dateStr: string;
 }
 
-function NoteContextMenu({
-  state,
-  onClose,
-  onAddNote,
-}: {
+// ── Full cell context menu (replaces old NoteContextMenu) ─────
+type CellMenuMode = 'menu' | 'shift-select' | 'absence-select' | 'sonderdienst' | 'deviation' | 'note';
+
+interface CellContextMenuProps {
   state: ContextMenuState;
+  entry: ScheduleEntry | null;
+  shifts: ShiftType[];
+  leaveTypes: LeaveType[];
+  hasClipboard: boolean;
   onClose: () => void;
   onAddNote: (empId: number, dateStr: string, text: string) => Promise<void>;
-}) {
-  const [mode, setMode] = useState<'menu' | 'input'>('menu');
+  onAssignShift: (empId: number, day: number, shiftId: number) => void;
+  onAddAbsence: (empId: number, day: number, leaveTypeId: number) => void;
+  onAddSonderdienst: (empId: number, dateStr: string, shiftId: number | null, startTime: string, endTime: string) => Promise<void>;
+  onAddDeviation: (empId: number, dateStr: string, startTime: string, endTime: string) => Promise<void>;
+  onDelete: (empId: number, day: number) => void;
+  onCopy: (empId: number, day: number) => void;
+  onPaste: (empId: number, day: number) => void;
+}
+
+function CellContextMenu({
+  state, entry, shifts, leaveTypes, hasClipboard,
+  onClose, onAddNote, onAssignShift, onAddAbsence,
+  onAddSonderdienst, onAddDeviation, onDelete, onCopy, onPaste,
+}: CellContextMenuProps) {
+  const [mode, setMode] = useState<CellMenuMode>('menu');
   const [noteText, setNoteText] = useState('');
+  const [sonderdienst, setSonderdienst] = useState({ shiftId: '' as number | '', startTime: '08:00', endTime: '16:00' });
+  const [deviation, setDeviation] = useState({ startTime: '08:00', endTime: '16:00' });
   const [saving, setSaving] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -351,10 +369,28 @@ function NoteContextMenu({
     return () => document.removeEventListener('mousedown', handler);
   }, [onClose]);
 
-  const handleSave = async () => {
+  const handleSaveNote = async () => {
     if (!noteText.trim()) return;
     setSaving(true);
     await onAddNote(state.empId, state.dateStr, noteText.trim());
+    setSaving(false);
+    onClose();
+  };
+
+  const handleSaveSonderdienst = async () => {
+    setSaving(true);
+    await onAddSonderdienst(
+      state.empId, state.dateStr,
+      sonderdienst.shiftId !== '' ? sonderdienst.shiftId : null,
+      sonderdienst.startTime, sonderdienst.endTime,
+    );
+    setSaving(false);
+    onClose();
+  };
+
+  const handleSaveDeviation = async () => {
+    setSaving(true);
+    await onAddDeviation(state.empId, state.dateStr, deviation.startTime, deviation.endTime);
     setSaving(false);
     onClose();
   };
@@ -363,21 +399,227 @@ function NoteContextMenu({
     <div
       ref={ref}
       className="fixed z-[100] bg-white rounded-lg shadow-xl border border-gray-200 text-xs"
-      style={{ left: state.x, top: state.y, minWidth: 180 }}
+      style={{ left: state.x, top: state.y, minWidth: 215 }}
     >
-      {mode === 'menu' ? (
+      {mode === 'menu' && (
         <div className="py-1">
           <div className="px-3 py-1 text-gray-400 text-[10px] font-medium border-b mb-1">
             {state.dateStr}
           </div>
           <button
             className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
-            onClick={() => setMode('input')}
+            onClick={() => setMode('shift-select')}
+          >
+            📋 Schicht zuweisen...
+          </button>
+          <button
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
+            onClick={() => setMode('absence-select')}
+          >
+            🏖️ Abwesenheit eintragen...
+          </button>
+          <button
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
+            onClick={() => setMode('sonderdienst')}
+          >
+            ⚡ Sonderdienst...
+          </button>
+          {entry?.kind === 'shift' && (
+            <button
+              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
+              onClick={() => setMode('deviation')}
+            >
+              ⏱️ Arbeitszeitabweichung...
+            </button>
+          )}
+          <button
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
+            onClick={() => setMode('note')}
           >
             💬 Notiz hinzufügen
           </button>
+          {entry && (
+            <button
+              className="w-full px-3 py-1.5 text-left hover:bg-red-50 text-red-600 flex items-center gap-2"
+              onClick={() => { onDelete(state.empId, state.day); onClose(); }}
+            >
+              🗑️ Löschen
+            </button>
+          )}
+          <div className="border-t my-1" />
+          <button
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
+            onClick={() => { onCopy(state.empId, state.day); onClose(); }}
+          >
+            📄 Kopieren
+          </button>
+          {hasClipboard && (
+            <button
+              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
+              onClick={() => { onPaste(state.empId, state.day); onClose(); }}
+            >
+              📌 Einfügen
+            </button>
+          )}
         </div>
-      ) : (
+      )}
+
+      {mode === 'shift-select' && (
+        <div className="py-1">
+          <div className="px-3 py-1 text-gray-400 text-[10px] font-medium border-b mb-1">Schicht wählen</div>
+          <div className="overflow-y-auto max-h-60">
+            {shifts.filter(s => !s.HIDE).map(s => (
+              <button
+                key={s.ID}
+                onClick={() => { onAssignShift(state.empId, state.day, s.ID); onClose(); }}
+                className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 text-left"
+              >
+                <span
+                  className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
+                  style={{ backgroundColor: s.COLORBK_HEX, color: s.COLORTEXT_HEX }}
+                >
+                  {s.SHORTNAME?.[0] || '?'}
+                </span>
+                <span>{s.SHORTNAME} – {s.NAME}</span>
+              </button>
+            ))}
+          </div>
+          <div className="border-t my-1" />
+          <button
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 text-gray-500 flex items-center gap-1"
+            onClick={() => setMode('menu')}
+          >
+            ← Zurück
+          </button>
+        </div>
+      )}
+
+      {mode === 'absence-select' && (
+        <div className="py-1">
+          <div className="px-3 py-1 text-gray-400 text-[10px] font-medium border-b mb-1">Abwesenheitsart wählen</div>
+          <div className="overflow-y-auto max-h-60">
+            {leaveTypes.filter(lt => !lt.HIDE).map(lt => (
+              <button
+                key={lt.ID}
+                onClick={() => { onAddAbsence(state.empId, state.day, lt.ID); onClose(); }}
+                className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 text-left"
+              >
+                <span
+                  className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
+                  style={{ backgroundColor: lt.COLORBK_HEX, color: '#333' }}
+                >
+                  {lt.SHORTNAME?.[0] || '?'}
+                </span>
+                <span>{lt.SHORTNAME} – {lt.NAME}</span>
+              </button>
+            ))}
+          </div>
+          <div className="border-t my-1" />
+          <button
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 text-gray-500 flex items-center gap-1"
+            onClick={() => setMode('menu')}
+          >
+            ← Zurück
+          </button>
+        </div>
+      )}
+
+      {mode === 'sonderdienst' && (
+        <div className="p-2" style={{ minWidth: 225 }}>
+          <div className="text-gray-500 mb-2 font-medium text-[11px] border-b pb-1">⚡ Sonderdienst</div>
+          <div className="mb-2">
+            <label className="text-gray-400 text-[10px] block mb-0.5">Schichtart (optional)</label>
+            <select
+              className="w-full border rounded p-1 text-xs focus:outline-blue-400"
+              value={sonderdienst.shiftId}
+              onChange={e => setSonderdienst(d => ({ ...d, shiftId: e.target.value ? Number(e.target.value) : '' }))}
+            >
+              <option value="">– keine –</option>
+              {shifts.filter(s => !s.HIDE).map(s => (
+                <option key={s.ID} value={s.ID}>{s.SHORTNAME} – {s.NAME}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex gap-2 mb-2">
+            <div className="flex-1">
+              <label className="text-gray-400 text-[10px] block mb-0.5">Von</label>
+              <input
+                type="time"
+                className="w-full border rounded p-1 text-xs focus:outline-blue-400"
+                value={sonderdienst.startTime}
+                onChange={e => setSonderdienst(d => ({ ...d, startTime: e.target.value }))}
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-gray-400 text-[10px] block mb-0.5">Bis</label>
+              <input
+                type="time"
+                className="w-full border rounded p-1 text-xs focus:outline-blue-400"
+                value={sonderdienst.endTime}
+                onChange={e => setSonderdienst(d => ({ ...d, endTime: e.target.value }))}
+              />
+            </div>
+          </div>
+          <div className="flex gap-1">
+            <button
+              className="flex-1 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              onClick={handleSaveSonderdienst}
+              disabled={saving}
+            >
+              {saving ? '…' : 'Speichern'}
+            </button>
+            <button
+              className="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200"
+              onClick={() => setMode('menu')}
+            >
+              ←
+            </button>
+          </div>
+        </div>
+      )}
+
+      {mode === 'deviation' && (
+        <div className="p-2" style={{ minWidth: 225 }}>
+          <div className="text-gray-500 mb-2 font-medium text-[11px] border-b pb-1">⏱️ Arbeitszeitabweichung</div>
+          <div className="flex gap-2 mb-2">
+            <div className="flex-1">
+              <label className="text-gray-400 text-[10px] block mb-0.5">Von</label>
+              <input
+                type="time"
+                className="w-full border rounded p-1 text-xs focus:outline-blue-400"
+                value={deviation.startTime}
+                onChange={e => setDeviation(d => ({ ...d, startTime: e.target.value }))}
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-gray-400 text-[10px] block mb-0.5">Bis</label>
+              <input
+                type="time"
+                className="w-full border rounded p-1 text-xs focus:outline-blue-400"
+                value={deviation.endTime}
+                onChange={e => setDeviation(d => ({ ...d, endTime: e.target.value }))}
+              />
+            </div>
+          </div>
+          <div className="flex gap-1">
+            <button
+              className="flex-1 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              onClick={handleSaveDeviation}
+              disabled={saving}
+            >
+              {saving ? '…' : 'Speichern'}
+            </button>
+            <button
+              className="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200"
+              onClick={() => setMode('menu')}
+            >
+              ←
+            </button>
+          </div>
+        </div>
+      )}
+
+      {mode === 'note' && (
         <div className="p-2">
           <div className="text-gray-500 mb-1 font-medium">Notiz:</div>
           <textarea
@@ -388,23 +630,23 @@ function NoteContextMenu({
             onChange={e => setNoteText(e.target.value)}
             placeholder="Notiz eingeben..."
             onKeyDown={e => {
-              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSave(); }
+              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSaveNote(); }
               if (e.key === 'Escape') onClose();
             }}
           />
           <div className="flex gap-1 mt-1">
             <button
               className="flex-1 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-              onClick={handleSave}
+              onClick={handleSaveNote}
               disabled={saving || !noteText.trim()}
             >
               {saving ? '…' : 'Speichern'}
             </button>
             <button
               className="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200"
-              onClick={onClose}
+              onClick={() => setMode('menu')}
             >
-              Abbruch
+              ←
             </button>
           </div>
         </div>
@@ -1447,6 +1689,65 @@ export default function Schedule() {
     }
   };
 
+  // ── Single-cell Sonderdienst ───────────────────────────────
+  const handleAddSonderdienst = async (
+    empId: number, dateStr: string,
+    shiftId: number | null, startTime: string, endTime: string,
+  ) => {
+    const startend = `${startTime}-${endTime}`;
+    const shift = shiftId ? shifts.find(s => s.ID === shiftId) : null;
+    setSaving(true);
+    try {
+      await api.createEinsatzplanEntry({
+        employee_id: empId,
+        date: dateStr,
+        shift_id: shiftId ?? undefined,
+        startend,
+        name: shift ? shift.NAME : 'Sonderdienst',
+        shortname: shift ? shift.SHORTNAME : 'SD',
+      });
+      showToast('Sonderdienst eingetragen', 'success');
+      loadSchedule();
+    } catch (e) {
+      showToast('Fehler beim Speichern: ' + (e as Error).message, 'error');
+    }
+    setSaving(false);
+  };
+
+  // ── Arbeitszeitabweichung ──────────────────────────────────
+  const handleAddDeviation = async (
+    empId: number, dateStr: string, startTime: string, endTime: string,
+  ) => {
+    const startend = `${startTime}-${endTime}`;
+    setSaving(true);
+    try {
+      await api.createDeviation({
+        employee_id: empId,
+        date: dateStr,
+        startend,
+        name: 'Arbeitszeitabweichung',
+        shortname: 'AZA',
+      });
+      showToast('Arbeitszeitabweichung gespeichert', 'success');
+      loadSchedule();
+    } catch (e) {
+      showToast('Fehler beim Speichern: ' + (e as Error).message, 'error');
+    }
+    setSaving(false);
+  };
+
+  // ── Single-cell copy/paste ─────────────────────────────────
+  const handleSingleCellCopy = (empId: number, day: number) => {
+    const empIdx = empIndexMap.get(empId) ?? 0;
+    const entry = entryMap.get(`${empId}-${day}`);
+    setClipboard({
+      entries: [{ relEmpIdx: 0, relDay: 0, shiftId: entry?.shift_id ?? null }],
+      anchorEmpIdx: empIdx,
+      anchorDay: day,
+    });
+    showToast('Zelle kopiert', 'success');
+  };
+
   const handleNoteEdited = async (noteId: number, newText: string) => {
     try {
       await api.updateNote(noteId, { text: newText });
@@ -1861,10 +2162,21 @@ export default function Schedule() {
       `}</style>
       {/* Context menu */}
       {contextMenu && (
-        <NoteContextMenu
+        <CellContextMenu
           state={contextMenu}
+          entry={entryMap.get(`${contextMenu.empId}-${contextMenu.day}`) ?? null}
+          shifts={shifts}
+          leaveTypes={leaveTypes}
+          hasClipboard={!!clipboard}
           onClose={() => setContextMenu(null)}
           onAddNote={handleAddNote}
+          onAssignShift={handleAddShift}
+          onAddAbsence={handleAddAbsence}
+          onAddSonderdienst={handleAddSonderdienst}
+          onAddDeviation={handleAddDeviation}
+          onDelete={handleDeleteEntry}
+          onCopy={handleSingleCellCopy}
+          onPaste={(empId, day) => handleBulkPaste(empId, day)}
         />
       )}
       {/* Auto-Plan Modal */}

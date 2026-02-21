@@ -1,276 +1,161 @@
 # OpenSchichtplaner5
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Node 18+](https://img.shields.io/badge/node-18+-green.svg)](https://nodejs.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://react.dev)
-
-**Open-source replacement for Schichtplaner5** — a Windows shift planning application used in healthcare and care facilities. Reads and writes the original FoxPro/DBF database files directly, so it runs side-by-side with the original software without any data migration.
-
-![Dienstplan Screenshot](docs/screenshots/dienstplan.png)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Python 3](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688.svg?logo=fastapi)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-18%2B-61DAFB.svg?logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5%2B-3178C6.svg?logo=typescript)](https://www.typescriptlang.org/)
 
 ---
 
-## ✨ Features
+**OpenSchichtplaner5 ist ein Open-Source-Ersatz für die Windows-Software Schichtplaner5.**  
+Liest und schreibt die originalen DBF-Datenbankdateien direkt — keine Migration nötig.  
+SP5 und OpenSchichtplaner5 können parallel auf denselben Daten laufen.
 
-### 📅 Shift Planning (Dienstplan)
-- **Monthly shift grid** with all employees and all days in view
-- **Drag & drop** shift assignment — move shifts between employees and days
-- **Keyboard shortcuts** for efficient scheduling
-- **Undo/Redo** support (Ctrl+Z / Ctrl+Y)
-- **Auto-plan** from shift cycle templates (Schichtmodelle)
-- **Conflict detection** — automatic detection of double bookings, staffing violations, and restrictions
-- **Bulk operations** — assign shifts to multiple employees at once
-- **Notes** per day/employee with visual indicators in the grid
-
-### 📋 Deployment View (Einsatzplan)
-- **Day/week deployment view** showing who works which shift
-- **Print support** — exports as landscape PDF
-- Clear overview of daily staffing levels
-
-### 📆 Annual Overview (Jahresübersicht)
-- **Employee × 12-month grid** — see the whole year at a glance
-- Toggle between shifts, hours, vacation, or absences view
-- Instant identification of understaffed periods
-
-### 📊 Dashboard
-- **KPI cards** — active employees, planned shifts, open conflicts, absences today
-- **Today's shifts** at a glance
-- **Conflict overview** with quick navigation
-- **Upcoming absences** widget
-- **Monthly statistics** summary
-
-### 📈 Statistics & Time Tracking
-- **Soll/Ist/Überstunden** tracking per employee and period
-- **Accounting periods** (Perioden) with flexible date ranges
-- **Booking entries** (Kontobuchungen) for detailed time accounting
-- **Annual closing** (Jahresabschluss) for vacation carry-overs
-
-### 👥 Master Data (Stammdaten)
-Full CRUD management for all reference data:
-- **Employees** (Mitarbeiter) — personal data, work hours, group assignment
-- **Groups** (Gruppen) — organizational structure
-- **Shift types** (Schichtarten) — names, abbreviations, colors, times, calculation bases
-- **Leave types** (Abwesenheitsarten) — vacation, sick, training, etc.
-- **Holidays** (Feiertage) — per year and region
-- **Workplaces** (Arbeitsplätze) — locations and departments
-- **Extra charges** (Zeitzuschläge) — night, weekend, holiday surcharges
-- **Shift cycles** (Schichtmodelle) — rotating schedule templates
-
-### 🏖️ Vacation & Absences
-- **Leave entitlements** — annual vacation days per employee
-- **Lock periods** — block vacation during critical periods
-- **Year-end closing** — automatic carry-over calculation
-
-### 💾 Backup & Restore
-- **ZIP download** of the full database directory
-- **ZIP upload restore** — one-click database restore
-- Works directly with the `.DBF` files
-
-### 🔐 User Management
-- **Multi-user support** with individual login credentials
-- **Permission levels** — read/write access per employee and group
-- Secure session management
-
-### 📱 Mobile-Ready
-- **Responsive layout** with hamburger menu + drawer navigation
-- Works on tablets and smartphones
-
-### 🔧 Additional Tools
-- **CSV Export** for all main views
-- **CSV Import** for employees, shifts, and absences
-- **Print reports** (landscape PDF) for all main views
-- **Notes** per day/employee
-- **Staffing requirements** (Personalbedarf) definition
-- **Anonymization** mode for privacy
+**OpenSchichtplaner5 is an open-source replacement for the Windows software Schichtplaner5.**  
+It reads and writes the original DBF database files directly — no migration needed.  
+SP5 and OpenSchichtplaner5 can run simultaneously on the same data.
 
 ---
 
 ## 📸 Screenshots
 
-| | |
-|---|---|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Dienstplan](docs/screenshots/dienstplan.png) |
-| *Dashboard — KPIs, heutige Belegung, Konflikte* | *Dienstplan — Monatsansicht mit Schichtzuweisung* |
-| ![Einsatzplan](docs/screenshots/einsatzplan.png) | ![Jahresübersicht](docs/screenshots/jahresuebersicht.png) |
-| *Einsatzplan — Wochenansicht nach Schichten* | *Jahresübersicht — Mitarbeiter × 12 Monate* |
-| ![Mitarbeiter](docs/screenshots/mitarbeiter.png) | ![Statistiken](docs/screenshots/statistiken.png) |
-| *Mitarbeiterverwaltung — Stammdaten* | *Statistiken — Soll/Ist-Vergleich & Zeitkonto* |
+| Dashboard | Dienstplan | Statistiken |
+|:---------:|:----------:|:-----------:|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Dienstplan](docs/screenshots/dienstplan.png) | ![Statistiken](docs/screenshots/statistiken.png) |
 
-![Backup](docs/screenshots/backup.png)
-*Backup & Restore — Datenbanksicherung per ZIP-Download*
+| Mitarbeiter | Jahresübersicht | Urlaubsverwaltung |
+|:-----------:|:---------------:|:-----------------:|
+| ![Mitarbeiter](docs/screenshots/mitarbeiter.png) | ![Jahresübersicht](docs/screenshots/jahresuebersicht.png) | ![Urlaubsverwaltung](docs/screenshots/urlaub.png) |
+
+| Einsatzplan | Zeitkonto | Schichtmodelle |
+|:-----------:|:---------:|:--------------:|
+| ![Einsatzplan](docs/screenshots/einsatzplan.png) | ![Zeitkonto](docs/screenshots/zeitkonto.png) | ![Schichtmodelle](docs/screenshots/schichtmodelle.png) |
+
+| Personalbedarf | Export | Backup |
+|:--------------:|:------:|:------:|
+| ![Personalbedarf](docs/screenshots/personalbedarf.png) | ![Export](docs/screenshots/export.png) | ![Backup](docs/screenshots/backup.png) |
 
 ---
 
-## 🚀 Quick Start
+## ✨ Features
 
-### Prerequisites
+- ✅ **Dienstplan** — Monatsansicht, editierbar per Rechtsklick-Kontextmenü
+- ✅ **Einsatzplan** — Tages- und Wochenansicht
+- ✅ **Jahresübersicht** — Mitarbeiter × 12 Monate auf einen Blick
+- ✅ **Statistiken** — Soll/Ist-Stunden, Überstunden-Auswertung
+- ✅ **Urlaubsverwaltung** — Anspruch, Saldo, Sperrtage, Jahresabschluss
+- ✅ **Zeitkonto & Kontobuchungen** — Arbeitszeitkonten mit Buchungshistorie
+- ✅ **Schichtmodelle & Personalbedarf** — Vorlagen und Bedarfsplanung
+- ✅ **Stammdaten** — Mitarbeiter, Gruppen, Schichtarten, Abwesenheitsarten, Feiertage, Arbeitsstätten, Zulagen
+- ✅ **Berichte & CSV-Export** — Auswertungen als Datei exportieren
+- ✅ **Import & Backup/Restore** — Datensicherung und Wiederherstellung
+- ✅ **Notizen & Perioden** — Kommentare und Abrechnungsperioden
+- ✅ **Benutzerverwaltung** — Zugriffsrechte und Login
+- ✅ **Mobile-freundliche Oberfläche** — Responsive Design mit Hamburger-Menü
 
-- **Python 3.11+**
-- **Node.js 18+**
-- Original **Schichtplaner5 database files** (`.DBF` + `.CDX` files from the `Daten/` directory)
+---
 
-### 1. Clone the repository
+## 🔄 Kompatibilität
 
-```bash
-git clone https://github.com/mschabhuettl/openschichtplaner5.git
-cd openschichtplaner5
-```
+OpenSchichtplaner5 liest und schreibt die originalen **Schichtplaner5 DBF-Dateien** im FoxPro-Format direkt.
 
-### 2. Start the Backend
+- ✅ Keine Datenmigration notwendig
+- ✅ SP5 (Windows) und OpenSP5 (Browser) können **gleichzeitig** auf denselben Dateien arbeiten
+- ✅ Alle bestehenden Daten bleiben vollständig erhalten
+
+---
+
+## 🚀 Installation
+
+### Voraussetzungen
+
+- Python 3.10+
+- Node.js 18+
+- Zugriff auf das Verzeichnis mit den Schichtplaner5-Datenbankdateien (`.dbf`)
+
+### Backend (Python / FastAPI)
 
 ```bash
 cd backend
 pip install -r requirements.txt
 
-SP5_DB_PATH=/path/to/your/sp5/Daten \
-  uvicorn api.main:app --host 0.0.0.0 --port 8000
+# Pfad zur SP5-Datenbank setzen und Server starten
+SP5_DB_PATH=/pfad/zu/sp5-daten uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
-The API will be available at `http://localhost:8000`.  
-Interactive API docs: `http://localhost:8000/docs`
+Die API ist dann erreichbar unter: `http://localhost:8000`  
+Swagger-Dokumentation: `http://localhost:8000/docs`
 
-### 3. Start the Frontend
+### Frontend (React / Vite)
 
 ```bash
 cd frontend
 npm install
-npm run dev -- --host 0.0.0.0 --port 5173
+npm run dev
 ```
 
-Open **[http://localhost:5173](http://localhost:5173)** in your browser.
+Das Frontend läuft standardmäßig unter: `http://localhost:5173`
 
-### Quick Start Script
-
-A convenience script is provided:
+### Produktiv-Build
 
 ```bash
-SP5_DB_PATH=/path/to/your/sp5/Daten ./start.sh
-```
-
----
-
-## 🏗️ Architecture
-
-```
-openschichtplaner5/
-├── backend/
-│   ├── api/
-│   │   └── main.py              # FastAPI REST API (~2800 lines)
-│   │                            # Endpoints for all entities: employees, shifts,
-│   │                            # absences, groups, statistics, backup, ...
-│   └── sp5lib/
-│       ├── dbf_reader.py        # Pure-Python DBF/FoxPro reader (UTF-16 LE support)
-│       ├── dbf_writer.py        # DBF write support (append, update, soft-delete)
-│       ├── database.py          # High-level DB access + business logic
-│       └── color_utils.py       # BGR→RGB color conversion (FoxPro color format)
-└── frontend/
-    ├── src/
-    │   ├── pages/               # 25 React pages (~16 000 lines TypeScript)
-    │   │   ├── Schedule.tsx     # Dienstplan (monthly grid)
-    │   │   ├── Dashboard.tsx    # Dashboard with KPIs
-    │   │   ├── Einsatzplan.tsx  # Weekly deployment view
-    │   │   ├── Jahresuebersicht.tsx  # Annual overview
-    │   │   ├── Statistiken.tsx  # Statistics & time tracking
-    │   │   ├── Employees.tsx    # Employee management
-    │   │   ├── Backup.tsx       # Backup/Restore
-    │   │   └── ...              # 18 more pages
-    │   ├── api/client.ts        # Typed API client (auto-generated types)
-    │   └── components/          # Shared UI components
-    └── ...                      # Vite + React + TypeScript + Tailwind CSS
-```
-
-### Key Design Decisions
-
-**Direct DBF access:** The app reads and writes the original `.DBF` files directly using a pure-Python implementation. CDX index files are intentionally left untouched — Schichtplaner5 rebuilds them on next start. This allows both applications to run **side-by-side without any data migration**.
-
-**Pure Python DBF library:** No external DBF library is used. The custom reader/writer handles the UTF-16 LE encoding used by Schichtplaner5's FoxPro database, which standard DBF libraries do not support correctly.
-
-**REST + React SPA:** Clean separation between backend (FastAPI) and frontend (React/TypeScript). The frontend communicates exclusively via the REST API, making it easy to replace either side.
-
----
-
-## ⚙️ Configuration
-
-### Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `SP5_DB_PATH` | `../sp5_db/Daten` | Path to the directory containing the `.DBF` files |
-
-### Backend Options
-
-```bash
-# Development (with auto-reload)
-SP5_DB_PATH=/path/to/Daten uvicorn api.main:app --reload --port 8000
-
-# Production (with multiple workers)
-SP5_DB_PATH=/path/to/Daten uvicorn api.main:app --host 0.0.0.0 --port 8000 --workers 4
-```
-
-### Frontend Options
-
-```bash
-# Development server (with HMR)
-npm run dev -- --host 0.0.0.0 --port 5173
-
-# Production build
+cd frontend
 npm run build
-npm run preview
+# Statische Dateien werden in frontend/dist/ generiert
 ```
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| **Backend** | Python 3.11+ · FastAPI · Pydantic v2 |
-| **Database** | FoxPro `.DBF` files (original Schichtplaner5 format) |
-| **Frontend** | React 18 · TypeScript · Vite |
+| Schicht | Technologie |
+|---------|-------------|
+| **Backend** | Python 3, FastAPI, Uvicorn |
+| **Datenbank** | DBF (FoxPro-Format), via `dbfread` / `dbf` |
+| **Frontend** | React 18, TypeScript, Vite |
 | **Styling** | Tailwind CSS |
-| **API Docs** | OpenAPI (Swagger) via FastAPI |
+| **API** | REST (OpenAPI / Swagger) |
 
 ---
 
-## 🤝 Contributing
+## 📂 Projektstruktur
 
-Contributions are welcome! Please:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/my-feature`)
-3. Commit your changes (`git commit -m 'feat: add my feature'`)
-4. Push to the branch (`git push origin feature/my-feature`)
-5. Open a Pull Request
-
-**Areas where contributions are especially welcome:**
-- Additional language support (currently German/Austrian)
-- Mobile UI improvements
-- Report templates
-- Performance optimizations for large databases
-- Additional export formats
-
----
-
-## 📚 Documentation
-
-Full documentation is available in the [GitHub Wiki](https://github.com/mschabhuettl/openschichtplaner5/wiki):
-
-- [Installation](https://github.com/mschabhuettl/openschichtplaner5/wiki/Installation)
-- [Dienstplan — Schichten planen](https://github.com/mschabhuettl/openschichtplaner5/wiki/Dienstplan)
-- [Stammdaten verwalten](https://github.com/mschabhuettl/openschichtplaner5/wiki/Stammdaten)
-- [Urlaub & Abwesenheiten](https://github.com/mschabhuettl/openschichtplaner5/wiki/Urlaub-und-Abwesenheiten)
-- [Statistiken & Zeitkonto](https://github.com/mschabhuettl/openschichtplaner5/wiki/Zeitkonto-und-Statistiken)
-- [Export & Import](https://github.com/mschabhuettl/openschichtplaner5/wiki/Export-und-Import)
-- [Datenbankformat (DBF)](https://github.com/mschabhuettl/openschichtplaner5/wiki/Datenbank)
+```
+openschichtplaner5/
+├── backend/
+│   ├── api/
+│   │   └── main.py          # FastAPI-Anwendung
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── components/      # React-Komponenten
+│   │   ├── pages/           # Seiten / Views
+│   │   └── main.tsx
+│   ├── package.json
+│   └── vite.config.ts
+└── docs/
+    └── screenshots/         # Screenshots für die Dokumentation
+```
 
 ---
 
-## 📄 License
+## 📄 Lizenz
 
-MIT — do whatever you want, but attribution is appreciated.
+Dieses Projekt steht unter der **MIT License** — siehe [LICENSE](LICENSE) für Details.
 
 ---
 
-*Built as a drop-in open-source replacement for the proprietary Windows application Schichtplaner5. All DBF file format knowledge was obtained by reverse engineering and documentation research. This project is not affiliated with the original Schichtplaner5 software or its developers.*
+## 🤝 Beiträge
+
+Pull Requests sind willkommen! Bitte öffne zuerst ein Issue, um größere Änderungen zu besprechen.
+
+1. Fork das Repository
+2. Erstelle einen Feature-Branch (`git checkout -b feature/mein-feature`)
+3. Committe deine Änderungen (`git commit -m 'feat: mein neues Feature'`)
+4. Pushe den Branch (`git push origin feature/mein-feature`)
+5. Öffne einen Pull Request
+
+---
+
+> **Hinweis:** Dieses Projekt ist kein offizielles Produkt und steht in keiner Verbindung zu den Entwicklern der originalen Schichtplaner5-Software.

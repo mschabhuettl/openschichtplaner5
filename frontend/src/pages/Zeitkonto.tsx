@@ -305,7 +305,7 @@ export default function Zeitkonto() {
   void MonthBars; // suppress unused warning
 
   return (
-    <div className="p-6 h-full flex flex-col">
+    <div className="p-2 sm:p-4 lg:p-6 h-full flex flex-col">
       {/* Header */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <h1 className="text-xl font-bold text-gray-800">⏱️ Zeitkonto</h1>
@@ -375,7 +375,7 @@ export default function Zeitkonto() {
 
       {/* Table */}
       <div className="flex-1 overflow-auto bg-white rounded-lg shadow border border-gray-200">
-        <table className="border-collapse text-sm w-full">
+        <table className="border-collapse text-sm w-full min-w-[700px]">
           <thead className="sticky top-0 z-10">
             <tr className="bg-slate-100">
               <th

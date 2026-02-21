@@ -321,7 +321,7 @@ export default function Kontobuchungen() {
   const yearOptions = Array.from({ length: 5 }, (_, i) => now.getFullYear() - 2 + i);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-2 sm:p-4 lg:p-6 max-w-5xl mx-auto">
       <ToastContainer toasts={toasts} onRemove={removeToast} />
 
       <BookingModal

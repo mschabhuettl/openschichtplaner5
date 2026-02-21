@@ -379,11 +379,15 @@ export interface EmployeeStats {
   employee_id: number;
   employee_name: string;
   employee_short: string;
+  group_name: string;
+  group_id: number | null;
   target_hours: number;
   actual_hours: number;
+  shifts_count: number;
   absence_days: number;
   overtime_hours: number;
   vacation_used: number;
+  sick_days: number;
 }
 
 export interface MonthSummary {

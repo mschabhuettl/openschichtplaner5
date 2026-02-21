@@ -179,7 +179,7 @@ export default function Perioden() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-2 sm:p-4 lg:p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
@@ -228,8 +228,8 @@ export default function Perioden() {
           </button>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
+          <table className="w-full text-sm min-w-[520px]">
             <thead className="bg-slate-700 text-white">
               <tr>
                 <th className="px-4 py-3 text-left text-xs uppercase tracking-wide font-semibold">Bezeichnung</th>

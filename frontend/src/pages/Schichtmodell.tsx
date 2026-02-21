@@ -733,7 +733,7 @@ export default function Schichtmodell() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-2 sm:p-4 lg:p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
@@ -895,7 +895,7 @@ export default function Schichtmodell() {
 
       {/* ─── Tab: Mitarbeiter-Zuweisungen ─────────────────── */}
       {activeTab === 'mitarbeiter' && (
-        <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
+        <div className="bg-white rounded-lg shadow overflow-x-auto mb-6">
           <div className="px-4 py-3 border-b">
             <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">👥 Mitarbeiter-Zuweisungen</h2>
           </div>

@@ -131,7 +131,7 @@ export default function Export() {
   const labelCls = 'text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1';
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-2 sm:p-4 lg:p-6 max-w-3xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800">Export</h1>
         <p className="text-sm text-slate-500 mt-1">

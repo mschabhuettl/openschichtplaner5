@@ -110,7 +110,7 @@ export default function LeaveTypes() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-2 sm:p-4 lg:p-6">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold text-gray-800">🏖️ Abwesenheitsarten ({leaveTypes.length})</h1>
         <button
@@ -125,7 +125,7 @@ export default function LeaveTypes() {
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
               <tr>

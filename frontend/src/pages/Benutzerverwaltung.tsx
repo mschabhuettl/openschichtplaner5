@@ -717,7 +717,7 @@ export default function Benutzerverwaltung() {
   // ── Render ───────────────────────────────────────────────────
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-2 sm:p-4 lg:p-6 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -765,8 +765,8 @@ export default function Benutzerverwaltung() {
           Fehler beim Laden: {error}
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow overflow-hidden border border-slate-200">
-          <table className="w-full text-sm">
+        <div className="bg-white rounded-xl shadow overflow-x-auto border border-slate-200">
+          <table className="w-full text-sm min-w-[480px]">
             <thead>
               <tr className="bg-slate-800 text-white text-xs uppercase tracking-wide">
                 <th className="text-left px-4 py-3">Benutzername</th>

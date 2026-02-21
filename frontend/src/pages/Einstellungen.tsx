@@ -116,7 +116,7 @@ export default function Einstellungen() {
   const previewTxt = bgrToHex(anoacrtxt);
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-2 sm:p-4 lg:p-6 max-w-3xl mx-auto">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-xl font-bold text-gray-800">⚙️ Einstellungen</h1>

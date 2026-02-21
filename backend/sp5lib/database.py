@@ -1036,6 +1036,20 @@ class SP5Database:
         shifts_map = {s['ID']: s for s in self.get_shifts(include_hidden=True)}
         lt_map = {lt['ID']: lt for lt in self.get_leave_types(include_hidden=True)}
 
+        # Build employee→primary group mapping
+        groups_all = self.get_groups()
+        emp_group: Dict[int, str] = {}
+        emp_group_id: Dict[int, int] = {}
+        for grp in groups_all:
+            try:
+                members = self.get_group_members(grp['ID'])
+                for mid in members:
+                    if mid not in emp_group:
+                        emp_group[mid] = grp.get('NAME', '')
+                        emp_group_id[mid] = grp['ID']
+            except Exception:
+                pass
+
         prefix = f"{year:04d}-{month:02d}"
         num_days = calendar.monthrange(year, month)[1]
 
@@ -1047,8 +1061,10 @@ class SP5Database:
 
         # Collect schedule data for the month
         shift_hours: Dict[int, float] = {}  # employee_id -> sum of shift hours
+        shifts_count: Dict[int, int] = {}   # employee_id -> number of shift entries
         absence_days: Dict[int, int] = {}   # employee_id -> count of absences
         vacation_used: Dict[int, int] = {}  # employee_id -> count of vacation days
+        sick_days: Dict[int, int] = {}      # employee_id -> count of sick days
 
         for r in self._read('MASHI'):
             d = r.get('DATE', '')
@@ -1062,6 +1078,7 @@ class SP5Database:
                         # Use DURATION0 as default shift duration (hours)
                         hrs = float(s.get('DURATION0', 0) or 0)
                     shift_hours[eid] = shift_hours.get(eid, 0.0) + hrs
+                    shifts_count[eid] = shifts_count.get(eid, 0) + 1
 
         for r in self._read('SPSHI'):
             d = r.get('DATE', '')
@@ -1070,6 +1087,7 @@ class SP5Database:
                 if eid:
                     hrs = float(r.get('DURATION', 0) or 0)
                     shift_hours[eid] = shift_hours.get(eid, 0.0) + hrs
+                    shifts_count[eid] = shifts_count.get(eid, 0) + 1
 
         for r in self._read('ABSEN'):
             d = r.get('DATE', '')
@@ -1077,12 +1095,17 @@ class SP5Database:
                 eid = r.get('EMPLOYEEID')
                 if eid:
                     absence_days[eid] = absence_days.get(eid, 0) + 1
-                    # Check if this is vacation-type (ENTITLED=1 or CHARGETYP=1)
                     ltid = r.get('LEAVETYPID')
                     if ltid and ltid in lt_map:
                         lt = lt_map[ltid]
+                        # Vacation: ENTITLED=1 or CHARGETYP=1
                         if lt.get('ENTITLED') or lt.get('CHARGETYP') == 1:
                             vacation_used[eid] = vacation_used.get(eid, 0) + 1
+                        # Sick: detect by name keyword
+                        lt_name = (lt.get('NAME', '') or '').lower()
+                        lt_short = (lt.get('SHORTNAME', '') or '').lower()
+                        if any(kw in lt_name or kw in lt_short for kw in ['krank', 'sick', 'ku']):
+                            sick_days[eid] = sick_days.get(eid, 0) + 1
 
         result = []
         for emp in employees:
@@ -1094,17 +1117,22 @@ class SP5Database:
             actual = shift_hours.get(eid, 0.0)
             abs_days = absence_days.get(eid, 0)
             vac = vacation_used.get(eid, 0)
+            sick = sick_days.get(eid, 0)
             overtime = actual - target
 
             result.append({
                 'employee_id': eid,
                 'employee_name': f"{emp.get('NAME', '')}, {emp.get('FIRSTNAME', '')}".strip(', '),
                 'employee_short': emp.get('SHORTNAME', ''),
+                'group_name': emp_group.get(eid, ''),
+                'group_id': emp_group_id.get(eid, None),
                 'target_hours': round(target, 2),
                 'actual_hours': round(actual, 2),
+                'shifts_count': shifts_count.get(eid, 0),
                 'absence_days': abs_days,
                 'overtime_hours': round(overtime, 2),
                 'vacation_used': vac,
+                'sick_days': sick,
             })
 
         return result
@@ -1349,9 +1377,20 @@ class SP5Database:
 
     # ── Write: add schedule entry ─────────────────────────────
     def add_schedule_entry(self, employee_id: int, date_str: str, shift_id: int) -> Dict:
-        """Write a new schedule entry to MASHI."""
+        """Write a new schedule entry to MASHI.
+
+        Raises ValueError if an entry for this employee+date already exists in MASHI.
+        Callers that want upsert semantics should call delete_schedule_entry first.
+        """
         filepath = self._table('MASHI')
         fields = get_table_fields(filepath)
+        # Guard against duplicate entries (same employee + same date)
+        duplicates = find_all_records(filepath, fields, EMPLOYEEID=employee_id, DATE=date_str)
+        if duplicates:
+            raise ValueError(
+                f"Schedule entry for employee {employee_id} on {date_str} already exists. "
+                "Delete it first or use the bulk/update endpoint."
+            )
         # Get max existing ID
         existing = read_dbf(filepath)
         max_id = max((r.get('ID', 0) or 0 for r in existing), default=0)
@@ -1383,9 +1422,19 @@ class SP5Database:
 
     # ── Write: add absence ────────────────────────────────────
     def add_absence(self, employee_id: int, date_str: str, leave_type_id: int) -> Dict:
-        """Write a new absence entry to ABSEN."""
+        """Write a new absence entry to ABSEN.
+
+        Raises ValueError if an absence for this employee+date already exists
+        (regardless of leave type — one absence per day per employee).
+        """
         filepath = self._table('ABSEN')
         fields = get_table_fields(filepath)
+        # Guard against duplicate absences for the same employee on the same date
+        duplicates = find_all_records(filepath, fields, EMPLOYEEID=employee_id, DATE=date_str)
+        if duplicates:
+            raise ValueError(
+                f"Absence for employee {employee_id} on {date_str} already exists."
+            )
         existing = read_dbf(filepath)
         max_id = max((r.get('ID', 0) or 0 for r in existing), default=0)
         new_id = max_id + 1
@@ -1464,8 +1513,8 @@ class SP5Database:
             'ID': new_id,
             'EMPLOYEEID': employee_id,
             'DATE': date,
-            'TEXT1': text[:255] if text else '',
-            'TEXT2': text2[:255] if text2 else '',
+            'TEXT1': text[:252] if text else '',
+            'TEXT2': text2[:252] if text2 else '',
             'RESERVED': '',
         }
         append_record(filepath, fields, record)

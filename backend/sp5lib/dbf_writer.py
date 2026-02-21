@@ -185,6 +185,12 @@ def append_record(filepath: str, fields: List[Dict], record: Dict) -> int:
     row = bytes(row[:record_size])
 
     with _exclusive_open(filepath) as f:
+        # Re-read the record count inside the lock to avoid TOCTOU race:
+        # two concurrent appends might both read num_records=N before either
+        # acquires the lock, causing both to write new_count=N+1 instead of N+2.
+        f.seek(4)
+        num_records = struct.unpack('<I', f.read(4))[0]
+
         # Find write position: just before the EOF marker (0x1A) if present
         f.seek(0, 2)                     # seek to end
         file_end = f.tell()
@@ -268,23 +274,25 @@ def update_record(
 
     byte_offset = header_size + record_index * record_size
 
-    # Read the existing record bytes first
-    with open(filepath, 'rb') as f:
+    # Read AND write under the same exclusive lock to prevent TOCTOU race.
+    with _exclusive_open(filepath) as f:
         f.seek(byte_offset)
         raw = bytearray(f.read(record_size))
 
-    if raw[0] == 0x2A:
-        raise ValueError(f"Record {record_index} is already deleted")
+        if not raw:
+            raise ValueError(f"Record {record_index} could not be read (empty read)")
 
-    # Overwrite only the requested fields
-    offset = 1  # skip delete-flag byte
-    for field in fields:
-        if field['name'] in data:
-            encoded = _encode_field(data[field['name']], field)
-            raw[offset : offset + field['len']] = encoded
-        offset += field['len']
+        if raw[0] == 0x2A:
+            raise ValueError(f"Record {record_index} is already deleted")
 
-    with _exclusive_open(filepath) as f:
+        # Overwrite only the requested fields
+        offset = 1  # skip delete-flag byte
+        for field in fields:
+            if field['name'] in data:
+                encoded = _encode_field(data[field['name']], field)
+                raw[offset : offset + field['len']] = encoded
+            offset += field['len']
+
         f.seek(byte_offset)
         f.write(bytes(raw))
         _stamp_header(f)

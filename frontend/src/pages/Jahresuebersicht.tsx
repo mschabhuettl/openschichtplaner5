@@ -199,8 +199,8 @@ function SingleEmployeeView({
       </div>
 
       {/* Month-by-month table */}
-      <div className="overflow-auto">
-        <table className="border-collapse text-sm w-full">
+      <div className="overflow-x-auto">
+        <table className="border-collapse text-sm w-full min-w-[640px]">
           <thead>
             <tr className="bg-slate-100">
               <th className="px-3 py-2 text-left border border-gray-200">Monat</th>
@@ -307,8 +307,8 @@ function AllEmployeesView({
   );
 
   return (
-    <div className="overflow-auto">
-      <table className="border-collapse text-xs">
+    <div className="overflow-x-auto">
+      <table className="border-collapse text-xs min-w-[900px]">
         <thead>
           <tr className="bg-slate-700 text-white">
             <th className="sticky left-0 z-10 bg-slate-700 px-3 py-2 text-left min-w-[160px] border-r border-slate-600">
@@ -416,7 +416,7 @@ export default function Jahresuebersicht() {
   };
 
   return (
-    <div className="p-4 sm:p-6 h-full flex flex-col">
+    <div className="p-2 sm:p-4 lg:p-6 h-full flex flex-col">
       {/* Print styles */}
       <style>{`
         @media print {
@@ -431,7 +431,7 @@ export default function Jahresuebersicht() {
         }
       `}</style>
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4 flex-wrap">
+      <div className="flex items-center gap-2 sm:gap-3 mb-4 flex-wrap">
         <h1 className="text-xl font-bold text-gray-800">📆 Jahresübersicht</h1>
 
         {/* Year navigation */}

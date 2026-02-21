@@ -26,6 +26,7 @@ import Perioden from './pages/Perioden';
 import Einstellungen from './pages/Einstellungen';
 import Kontobuchungen from './pages/Kontobuchungen';
 import Einschraenkungen from './pages/Einschraenkungen';
+import Personaltabelle from './pages/Personaltabelle';
 
 type Page =
   | 'dashboard'
@@ -54,6 +55,7 @@ type Page =
   | 'perioden'
   | 'kontobuchungen'
   | 'einschraenkungen'
+  | 'personaltabelle'
   | 'einstellungen';
 
 const navItems: { id: Page; label: string; icon: string; group?: string }[] = [
@@ -62,6 +64,7 @@ const navItems: { id: Page; label: string; icon: string; group?: string }[] = [
   { id: 'schedule', label: 'Dienstplan', icon: '📅', group: 'Planung' },
   { id: 'einsatzplan', label: 'Einsatzplan', icon: '📋', group: 'Planung' },
   { id: 'jahresuebersicht', label: 'Jahresübersicht', icon: '📆', group: 'Planung' },
+  { id: 'personaltabelle', label: 'Personaltabelle', icon: '👤', group: 'Planung' },
   { id: 'statistiken', label: 'Statistiken', icon: '📈', group: 'Planung' },
   { id: 'urlaub', label: 'Urlaubsverwaltung', icon: '🏖️', group: 'Planung' },
   { id: 'schichtmodell', label: 'Schichtmodelle', icon: '🔄', group: 'Planung' },
@@ -105,6 +108,7 @@ export default function App() {
       case 'schedule': return <Schedule />;
       case 'einsatzplan': return <Einsatzplan />;
       case 'jahresuebersicht': return <Jahresuebersicht />;
+      case 'personaltabelle': return <Personaltabelle />;
       case 'statistiken': return <Statistiken />;
       case 'urlaub': return <Urlaub />;
       case 'schichtmodell': return <Schichtmodell />;

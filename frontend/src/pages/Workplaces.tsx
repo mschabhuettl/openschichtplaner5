@@ -170,7 +170,7 @@ export default function Workplaces() {
   const assignedIds = new Set(wpEmployees.map(e => e.ID));
 
   return (
-    <div className="p-6 flex gap-6">
+    <div className="p-2 sm:p-4 lg:p-6 flex flex-col md:flex-row gap-4 md:gap-6">
       {/* Left: Workplaces list */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-4">
@@ -187,7 +187,7 @@ export default function Workplaces() {
             <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
                 <tr>

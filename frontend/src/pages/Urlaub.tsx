@@ -616,7 +616,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
           <div className="text-xs mt-1">Klicken Sie auf "Urlaubssperre anlegen" um eine neue anzulegen.</div>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
           <table className="text-sm w-full">
             <thead>
               <tr className="bg-slate-700 text-white text-xs">
@@ -765,7 +765,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
         <table className="text-sm w-full">
           <thead>
             <tr className="bg-slate-700 text-white text-xs">
@@ -917,15 +917,15 @@ export default function Urlaub() {
   return (
     <div className="p-4 sm:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div>
           <h1 className="text-xl font-bold text-gray-800">🏖️ Urlaubsverwaltung</h1>
           <p className="text-sm text-gray-500 mt-0.5">Ansprüche, Abwesenheiten und Sperrzeiten</p>
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={() => setYear(y => y - 1)} className="px-2 py-1 rounded border hover:bg-gray-50 text-sm">‹</button>
+          <button onClick={() => setYear(y => y - 1)} className="px-2 py-1.5 min-w-[32px] rounded border hover:bg-gray-50 text-sm">‹</button>
           <span className="px-3 py-1 font-bold text-gray-800 text-sm">{year}</span>
-          <button onClick={() => setYear(y => y + 1)} className="px-2 py-1 rounded border hover:bg-gray-50 text-sm">›</button>
+          <button onClick={() => setYear(y => y + 1)} className="px-2 py-1.5 min-w-[32px] rounded border hover:bg-gray-50 text-sm">›</button>
         </div>
       </div>
 
@@ -934,15 +934,15 @@ export default function Urlaub() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-4 border-b">
+      <div className="flex gap-0.5 sm:gap-1 mb-4 border-b overflow-x-auto">
         {tabs.map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors flex items-center gap-1.5 ${
+            className={`px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-t-lg transition-colors flex items-center gap-1 whitespace-nowrap ${
               activeTab === tab.id
                 ? 'bg-white border border-b-white text-blue-600 -mb-px'
                 : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
             }`}>
-            <span>{tab.icon}</span> {tab.label}
+            <span>{tab.icon}</span> <span className="hidden sm:inline">{tab.label}</span>
           </button>
         ))}
       </div>

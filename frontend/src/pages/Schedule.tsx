@@ -2158,7 +2158,7 @@ export default function Schedule() {
 
   // ── Render ──────────────────────────────────────────────────
   return (
-    <div className="p-4 h-full flex flex-col" onClick={() => { setContextMenu(null); setNotePopup(null); setBulkContextMenu(null); }}>
+    <div className="p-2 sm:p-4 h-full flex flex-col" onClick={() => { setContextMenu(null); setNotePopup(null); setBulkContextMenu(null); }}>
       {/* Print styles – injected into <head> at runtime */}
       <style>{`
         @media print {
@@ -2300,16 +2300,16 @@ export default function Schedule() {
       )}
 
       {/* ── Header ── */}
-      <div className="flex items-center gap-3 mb-3 flex-wrap">
-        <h1 className="text-xl font-bold text-gray-800">📅 Dienstplan</h1>
+      <div className="flex items-center gap-2 mb-3 flex-wrap">
+        <h1 className="text-lg sm:text-xl font-bold text-gray-800">📅 Dienstplan</h1>
 
         {/* Month navigation */}
-        <div className="flex items-center gap-2">
-          <button onClick={prevMonth} className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm">‹</button>
-          <span className="font-semibold text-gray-700 min-w-[140px] text-center">
+        <div className="flex items-center gap-1.5">
+          <button onClick={prevMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm min-h-[32px] min-w-[32px]">‹</button>
+          <span className="font-semibold text-gray-700 min-w-[120px] sm:min-w-[140px] text-center text-sm">
             {MONTH_NAMES[month]} {year}
           </span>
-          <button onClick={nextMonth} className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm">›</button>
+          <button onClick={nextMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm min-h-[32px] min-w-[32px]">›</button>
         </div>
 
         {/* Multi-group selector */}
@@ -2324,93 +2324,94 @@ export default function Schedule() {
           total={employees.length}
         />
 
-        {/* Undo/Redo buttons */}
-        <div className="no-print flex items-center gap-1 ml-auto">
-          <button
-            onClick={handleUndo}
-            disabled={undoStack.length === 0}
-            className="px-2.5 py-1.5 bg-white border rounded shadow-sm text-sm flex items-center gap-1 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-            title={`Rückgängig (Ctrl+Z) — ${undoStack.length} Einträge`}
-          >
-            ↩ Undo
-          </button>
-          <button
-            onClick={handleRedo}
-            disabled={redoStack.length === 0}
-            className="px-2.5 py-1.5 bg-white border rounded shadow-sm text-sm flex items-center gap-1 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-            title={`Wiederholen (Ctrl+Y) — ${redoStack.length} Einträge`}
-          >
-            ↪ Redo
-          </button>
-        </div>
-
-        {/* Auto-Plan button */}
-        <button
-          onClick={() => setShowAutoPlan(true)}
-          className="no-print px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded shadow-sm flex items-center gap-1.5"
-          title="Dienstplan aus Schichtmodellen befüllen"
-        >
-          🔄 Auto-Plan
-        </button>
-
-        {/* Print button */}
-        <button
-          onClick={() => {
-            const groupLabel =
-              selectedGroupIds.length === 0
-                ? 'Alle Gruppen'
-                : selectedGroupIds
-                    .map(id => groups.find(g => g.ID === id)?.NAME ?? `Gruppe ${id}`)
-                    .join(', ');
-            const html = buildScheduleHTML(
-              displayEmployees, days, entryMap, holidays,
-              year, month, MONTH_NAMES[month], groupLabel,
-            );
-            openPrintWindow(html);
-          }}
-          className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1.5"
-          title="Dienstplan drucken"
-        >
-          🖨️ Drucken
-        </button>
-
-        {/* Export dropdown */}
-        <div className="relative no-print" ref={exportRef}>
-          <button
-            onClick={() => setShowExportMenu(m => !m)}
-            className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded shadow-sm flex items-center gap-1.5"
-          >
-            ⬇ Export
-          </button>
-          {showExportMenu && (
-            <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50 min-w-[160px] py-1">
-              <button
-                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                onClick={() => {
-                  exportCSV(displayEmployees, days, entryMap, year, month);
-                  setShowExportMenu(false);
-                }}
-              >
-                📄 CSV exportieren
-              </button>
-              <button
-                className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                onClick={() => {
-                  exportHTML(displayEmployees, days, entryMap, holidays, year, month, MONTH_NAMES[month]);
-                  setShowExportMenu(false);
-                }}
-              >
-                🖨 HTML / Drucken
-              </button>
-            </div>
-          )}
-        </div>
-
         {(loading || saving) && (
           <span className="text-sm text-blue-500 animate-pulse">
             {saving ? 'Speichere...' : 'Lade...'}
           </span>
         )}
+
+        {/* Action buttons - right aligned, wrap on mobile */}
+        <div className="no-print flex items-center gap-1 ml-auto flex-wrap">
+          {/* Undo/Redo */}
+          <button
+            onClick={handleUndo}
+            disabled={undoStack.length === 0}
+            className="px-2 py-1.5 bg-white border rounded shadow-sm text-xs sm:text-sm flex items-center gap-1 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed min-h-[32px]"
+            title={`Rückgängig (Ctrl+Z) — ${undoStack.length} Einträge`}
+          >
+            ↩ <span className="hidden sm:inline">Undo</span>
+          </button>
+          <button
+            onClick={handleRedo}
+            disabled={redoStack.length === 0}
+            className="px-2 py-1.5 bg-white border rounded shadow-sm text-xs sm:text-sm flex items-center gap-1 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed min-h-[32px]"
+            title={`Wiederholen (Ctrl+Y) — ${redoStack.length} Einträge`}
+          >
+            ↪ <span className="hidden sm:inline">Redo</span>
+          </button>
+
+          {/* Auto-Plan button */}
+          <button
+            onClick={() => setShowAutoPlan(true)}
+            className="px-2 sm:px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            title="Dienstplan aus Schichtmodellen befüllen"
+          >
+            🔄 <span className="hidden sm:inline">Auto-Plan</span>
+          </button>
+
+          {/* Print button */}
+          <button
+            onClick={() => {
+              const groupLabel =
+                selectedGroupIds.length === 0
+                  ? 'Alle Gruppen'
+                  : selectedGroupIds
+                      .map(id => groups.find(g => g.ID === id)?.NAME ?? `Gruppe ${id}`)
+                      .join(', ');
+              const html = buildScheduleHTML(
+                displayEmployees, days, entryMap, holidays,
+                year, month, MONTH_NAMES[month], groupLabel,
+              );
+              openPrintWindow(html);
+            }}
+            className="px-2 sm:px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            title="Dienstplan drucken"
+          >
+            🖨️ <span className="hidden sm:inline">Drucken</span>
+          </button>
+
+          {/* Export dropdown */}
+          <div className="relative" ref={exportRef}>
+            <button
+              onClick={() => setShowExportMenu(m => !m)}
+              className="px-2 sm:px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            >
+              ⬇ <span className="hidden sm:inline">Export</span>
+            </button>
+            {showExportMenu && (
+              <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50 min-w-[160px] py-1">
+                <button
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                  onClick={() => {
+                    exportCSV(displayEmployees, days, entryMap, year, month);
+                    setShowExportMenu(false);
+                  }}
+                >
+                  📄 CSV exportieren
+                </button>
+                <button
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                  onClick={() => {
+                    exportHTML(displayEmployees, days, entryMap, holidays, year, month, MONTH_NAMES[month]);
+                    setShowExportMenu(false);
+                  }}
+                >
+                  🖨 HTML / Drucken
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* ── Filter Toolbar ── */}
@@ -2547,7 +2548,8 @@ export default function Schedule() {
 
       {/* ── Bulk Action Toolbar ── */}
       {selection && (
-        <div className="flex items-center gap-3 mb-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg shadow-sm text-xs flex-wrap no-print">
+        <div className="overflow-x-auto mb-2 no-print">
+        <div className="flex items-center gap-3 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg shadow-sm text-xs flex-wrap min-w-[480px]">
           <span className="text-blue-700 font-semibold flex-shrink-0">
             ✅ {selectionInfo.cells} Zellen ausgewählt ({selectionInfo.employees} MA × {selectionInfo.days} Tage)
           </span>
@@ -2593,6 +2595,7 @@ export default function Schedule() {
           >
             ✕ Auswahl aufheben
           </button>
+        </div>
         </div>
       )}
 
@@ -2954,11 +2957,11 @@ export default function Schedule() {
         <span className="text-xs text-gray-500">Legende:</span>
         <span className="text-xs px-2 py-0.5 bg-slate-200 rounded">Wochenende</span>
         <span className="text-xs px-2 py-0.5 bg-red-100 rounded">Feiertag</span>
-        <span className="text-xs px-2 py-0.5 text-green-600 bg-green-50 rounded">■ ≥80% eingeteilt</span>
+        <span className="text-xs px-2 py-0.5 text-green-600 bg-green-50 rounded">■ ≥80%</span>
         <span className="text-xs px-2 py-0.5 text-amber-600 bg-amber-50 rounded">■ 50–79%</span>
         <span className="text-xs px-2 py-0.5 text-red-600 bg-red-50 rounded">■ &lt;50%</span>
-        <span className="text-xs text-gray-400 ml-2">
-          Hover → Tooltip · Drag & Drop (Alt=Kopieren) · Klick+Pfeiltasten → Navigation · Del → Löschen · Enter → Schicht · Ctrl+Z/Y → Undo/Redo · Shift+Klick → Mehrfachauswahl
+        <span className="hidden sm:inline text-xs text-gray-400 ml-2">
+          Hover → Tooltip · Drag &amp; Drop (Alt=Kopieren) · Pfeiltasten → Navigation · Del → Löschen · Enter → Schicht · Ctrl+Z/Y → Undo/Redo
         </span>
       </div>
 

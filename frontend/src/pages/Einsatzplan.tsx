@@ -1023,7 +1023,7 @@ export default function Einsatzplan() {
 
   return (
     <div
-      className="p-6 h-full flex flex-col"
+      className="p-2 sm:p-4 lg:p-6 h-full flex flex-col"
       onClick={() => { setNotePopup(null); setContextMenu(null); }}
     >
       {/* Print styles */}

@@ -194,7 +194,7 @@ export default function Groups() {
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
           {topLevel.length === 0 && <div className="text-center py-8 text-gray-400">Keine Gruppen</div>}
           {topLevel.map(g => renderGroup(g))}
         </div>

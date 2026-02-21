@@ -338,7 +338,7 @@ function ImportSection({ title, icon, endpoint, templateKey, description }: Impo
 
 export default function Import() {
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-2 sm:p-4 lg:p-6 max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
           <span>⬆️</span> Daten-Import

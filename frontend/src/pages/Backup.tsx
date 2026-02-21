@@ -309,7 +309,7 @@ function CompactSection() {
 
 export default function Backup() {
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-2 sm:p-4 lg:p-6 max-w-3xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
           <span>💾</span> Backup &amp; Restore

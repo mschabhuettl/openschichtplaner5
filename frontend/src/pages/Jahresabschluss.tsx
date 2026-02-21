@@ -106,7 +106,7 @@ export default function Jahresabschluss() {
   const fmtNum = (n: number) => n.toFixed(n % 1 === 0 ? 0 : 1);
 
   return (
-    <div className="p-6">
+    <div className="p-2 sm:p-4 lg:p-6">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-xl font-bold text-gray-800">📅 Jahresabschluss</h1>

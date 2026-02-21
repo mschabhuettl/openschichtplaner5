@@ -706,6 +706,8 @@ def create_period(body: PeriodCreate):
         datetime.strptime(body.end, '%Y-%m-%d')
     except ValueError:
         raise HTTPException(status_code=400, detail="Ungültiges Datumsformat, erwartet YYYY-MM-DD")
+    if body.end < body.start:
+        raise HTTPException(status_code=400, detail="end muss >= start sein")
     try:
         result = get_db().create_period({
             'group_id': body.group_id,
@@ -739,6 +741,12 @@ class StaffingRequirementSet(BaseModel):
 
 @app.post("/api/staffing-requirements")
 def set_staffing_requirement(body: StaffingRequirementSet):
+    if not (0 <= body.weekday <= 6):
+        raise HTTPException(status_code=400, detail="weekday muss zwischen 0 (Mo) und 6 (So) liegen")
+    if body.min < 0:
+        raise HTTPException(status_code=400, detail="min darf nicht negativ sein")
+    if body.max < body.min:
+        raise HTTPException(status_code=400, detail="max muss >= min sein")
     try:
         result = get_db().set_staffing_requirement(
             shift_id=body.shift_id,
@@ -769,6 +777,8 @@ def create_schedule_entry(body: ScheduleEntryCreate):
     try:
         result = get_db().add_schedule_entry(body.employee_id, body.date, body.shift_id)
         return {"ok": True, "record": result}
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -856,6 +866,8 @@ def create_absence(body: AbsenceCreate):
     try:
         result = get_db().add_absence(body.employee_id, body.date, body.leave_type_id)
         return {"ok": True, "record": result}
+    except ValueError as e:
+        raise HTTPException(status_code=409, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -947,6 +959,16 @@ class EmployeeUpdate(BaseModel):
 
 @app.post("/api/employees")
 def create_employee(body: EmployeeCreate):
+    if not body.NAME or not body.NAME.strip():
+        raise HTTPException(status_code=400, detail="NAME darf nicht leer sein")
+    # Validate optional date fields
+    for field_name, val in [('BIRTHDAY', body.BIRTHDAY), ('EMPSTART', body.EMPSTART), ('EMPEND', body.EMPEND)]:
+        if val:
+            try:
+                from datetime import datetime as _dtt
+                _dtt.strptime(val, '%Y-%m-%d')
+            except ValueError:
+                raise HTTPException(status_code=400, detail=f"{field_name} muss im Format YYYY-MM-DD sein")
     try:
         result = get_db().create_employee(body.model_dump())
         return {"ok": True, "record": result}
@@ -1010,6 +1032,8 @@ class GroupMemberBody(BaseModel):
 
 @app.post("/api/groups")
 def create_group(body: GroupCreate):
+    if not body.NAME or not body.NAME.strip():
+        raise HTTPException(status_code=400, detail="NAME darf nicht leer sein")
     try:
         result = get_db().create_group(body.model_dump())
         return {"ok": True, "record": result}
@@ -1081,6 +1105,8 @@ class ShiftUpdate(BaseModel):
 
 @app.post("/api/shifts")
 def create_shift(body: ShiftCreate):
+    if not body.NAME or not body.NAME.strip():
+        raise HTTPException(status_code=400, detail="NAME darf nicht leer sein")
     try:
         result = get_db().create_shift(body.model_dump())
         return {"ok": True, "record": result}
@@ -1136,6 +1162,8 @@ class LeaveTypeUpdate(BaseModel):
 
 @app.post("/api/leave-types")
 def create_leave_type(body: LeaveTypeCreate):
+    if not body.NAME or not body.NAME.strip():
+        raise HTTPException(status_code=400, detail="NAME darf nicht leer sein")
     try:
         result = get_db().create_leave_type(body.model_dump())
         return {"ok": True, "record": result}
@@ -1180,6 +1208,13 @@ class HolidayUpdate(BaseModel):
 
 @app.post("/api/holidays")
 def create_holiday(body: HolidayCreate):
+    if not body.NAME or not body.NAME.strip():
+        raise HTTPException(status_code=400, detail="NAME darf nicht leer sein")
+    try:
+        from datetime import datetime as _dtt
+        _dtt.strptime(body.DATE, '%Y-%m-%d')
+    except ValueError:
+        raise HTTPException(status_code=400, detail="DATE muss im Format YYYY-MM-DD sein")
     try:
         result = get_db().create_holiday(body.model_dump())
         return {"ok": True, "record": result}
@@ -1231,6 +1266,8 @@ class WorkplaceUpdate(BaseModel):
 
 @app.post("/api/workplaces")
 def create_workplace(body: WorkplaceCreate):
+    if not body.NAME or not body.NAME.strip():
+        raise HTTPException(status_code=400, detail="NAME darf nicht leer sein")
     try:
         result = get_db().create_workplace(body.model_dump())
         return {"ok": True, "record": result}
@@ -1320,6 +1357,14 @@ def get_extracharges(include_hidden: bool = False):
 
 @app.post("/api/extracharges")
 def create_extracharge(body: ExtraChargeCreate):
+    if not body.NAME or not body.NAME.strip():
+        raise HTTPException(status_code=400, detail="NAME darf nicht leer sein")
+    if len(body.VALIDDAYS) != 7 or not all(c in '01' for c in body.VALIDDAYS):
+        raise HTTPException(status_code=400, detail="VALIDDAYS muss genau 7 Zeichen lang sein und nur '0' oder '1' enthalten (z.B. '1111100')")
+    if body.START < 0 or body.START > 1440:
+        raise HTTPException(status_code=400, detail="START muss zwischen 0 und 1440 Minuten liegen")
+    if body.END < 0 or body.END > 1440:
+        raise HTTPException(status_code=400, detail="END muss zwischen 0 und 1440 Minuten liegen")
     try:
         result = get_db().create_extracharge(body.model_dump())
         return {"ok": True, "record": result}
@@ -2030,12 +2075,15 @@ class RestrictionCreate(BaseModel):
 @app.post("/api/restrictions")
 def set_restriction(body: RestrictionCreate):
     """Add a shift restriction for an employee."""
+    weekday = body.weekday or 0
+    if not (0 <= weekday <= 6):
+        raise HTTPException(status_code=400, detail="weekday muss zwischen 0 (Mo) und 6 (So) liegen (0 = alle Wochentage)")
     try:
         result = get_db().set_restriction(
             employee_id=body.employee_id,
             shift_id=body.shift_id,
             reason=body.reason or '',
-            weekday=body.weekday or 0,
+            weekday=weekday,
         )
         return {"ok": True, "record": result}
     except Exception as e:
@@ -2450,19 +2498,26 @@ async def backup_restore(file: UploadFile = File(...)):
     if not dbf_files:
         raise HTTPException(status_code=400, detail="ZIP enthält keine .DBF Dateien")
 
+    safe_db_path = os.path.abspath(DB_PATH)
     restored: list[str] = []
     with zf:
         for name in names_in_zip:
             ext = os.path.splitext(name)[1].upper()
-            if ext in allowed_ext:
-                basename = os.path.basename(name)
-                if not basename:
-                    continue
-                dest = os.path.join(DB_PATH, basename)
-                data = zf.read(name)
-                with open(dest, 'wb') as fout:
-                    fout.write(data)
-                restored.append(basename)
+            if ext not in allowed_ext:
+                continue
+            basename = os.path.basename(name)
+            if not basename:
+                continue
+            # Extra safety: ensure the resolved destination is inside DB_PATH
+            dest = os.path.normpath(os.path.join(safe_db_path, basename))
+            if not dest.startswith(safe_db_path + os.sep) and dest != safe_db_path:
+                # Should never happen since basename has no path separators, but
+                # guard against exotic os.path.join edge cases on all platforms.
+                continue
+            data = zf.read(name)
+            with open(dest, 'wb') as fout:
+                fout.write(data)
+            restored.append(basename)
 
     return {"restored": len(restored), "files": restored}
 
@@ -2817,9 +2872,11 @@ def compact_database():
     """
     Compact all .DBF files in SP5_DB_PATH by rewriting them without deleted records.
     Deleted records have 0x2A ('*') as the first byte of their data row.
+    Each file is exclusively locked during the operation to prevent concurrent corruption.
     Returns a summary of files processed and records removed.
     """
     import struct as _struct
+    import fcntl as _fcntl
     from datetime import date as _date
 
     db_path = os.environ.get('SP5_DB_PATH', '')
@@ -2833,59 +2890,69 @@ def compact_database():
     for fname in sorted(dbf_files):
         fpath = os.path.join(db_path, fname)
         try:
-            with open(fpath, 'rb') as f:
-                raw = f.read()
+            # Open for read+write and hold an exclusive lock for the entire
+            # read-modify-write cycle to prevent concurrent write corruption.
+            with open(fpath, 'r+b') as f:
+                _fcntl.flock(f.fileno(), _fcntl.LOCK_EX)
+                try:
+                    raw = f.read()
 
-            if len(raw) < 32:
-                continue  # skip tiny/corrupt files
+                    if len(raw) < 32:
+                        results.append({'file': fname, 'skipped': 'too small / corrupt'})
+                        continue
 
-            # Parse DBF header
-            num_records = _struct.unpack_from('<I', raw, 4)[0]
-            header_size = _struct.unpack_from('<H', raw, 8)[0]
-            record_size = _struct.unpack_from('<H', raw, 10)[0]
+                    # Parse DBF header
+                    num_records = _struct.unpack_from('<I', raw, 4)[0]
+                    header_size = _struct.unpack_from('<H', raw, 8)[0]
+                    record_size = _struct.unpack_from('<H', raw, 10)[0]
 
-            if record_size == 0:
-                continue
+                    if record_size == 0:
+                        results.append({'file': fname, 'skipped': 'record_size=0'})
+                        continue
 
-            # Separate header bytes from record area
-            header_bytes = bytearray(raw[:header_size])
-            records_area = raw[header_size:]
+                    # Separate header bytes from record area
+                    header_bytes = bytearray(raw[:header_size])
+                    records_area = raw[header_size:]
 
-            # Remove trailing EOF marker for processing
-            if records_area and records_area[-1] == 0x1A:
-                records_area = records_area[:-1]
+                    # Remove trailing EOF marker for processing
+                    if records_area and records_area[-1] == 0x1A:
+                        records_area = records_area[:-1]
 
-            # Split into individual records and filter out deleted ones
-            active_records = []
-            deleted_count = 0
-            for i in range(num_records):
-                start = i * record_size
-                end = start + record_size
-                if end > len(records_area):
-                    break
-                rec = records_area[start:end]
-                if rec[0:1] == b'\x2a':  # deleted marker
-                    deleted_count += 1
-                else:
-                    active_records.append(rec)
+                    # Split into individual records and filter out deleted ones
+                    active_records = []
+                    deleted_count = 0
+                    for i in range(num_records):
+                        start = i * record_size
+                        end = start + record_size
+                        if end > len(records_area):
+                            break
+                        rec = records_area[start:end]
+                        if rec[0:1] == b'\x2a':  # deleted marker
+                            deleted_count += 1
+                        else:
+                            active_records.append(rec)
 
-            if deleted_count == 0:
-                results.append({'file': fname, 'removed': 0, 'active': len(active_records)})
-                continue
+                    if deleted_count == 0:
+                        results.append({'file': fname, 'removed': 0, 'active': len(active_records)})
+                        continue
 
-            # Update header: new record count + today's date
-            today = _date.today()
-            header_bytes[1] = today.year % 100
-            header_bytes[2] = today.month
-            header_bytes[3] = today.day
-            _struct.pack_into('<I', header_bytes, 4, len(active_records))
+                    # Update header: new record count + today's date
+                    today = _date.today()
+                    header_bytes[1] = today.year % 100
+                    header_bytes[2] = today.month
+                    header_bytes[3] = today.day
+                    _struct.pack_into('<I', header_bytes, 4, len(active_records))
 
-            # Write compacted file
-            with open(fpath, 'wb') as f:
-                f.write(bytes(header_bytes))
-                for rec in active_records:
-                    f.write(rec)
-                f.write(b'\x1a')  # EOF marker
+                    # Write compacted file (truncate then rewrite)
+                    f.seek(0)
+                    f.truncate()
+                    f.write(bytes(header_bytes))
+                    for rec in active_records:
+                        f.write(rec)
+                    f.write(b'\x1a')  # EOF marker
+                    f.flush()
+                finally:
+                    _fcntl.flock(f.fileno(), _fcntl.LOCK_UN)
 
             total_removed += deleted_count
             results.append({'file': fname, 'removed': deleted_count, 'active': len(active_records)})

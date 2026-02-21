@@ -244,15 +244,18 @@ def test_delete_record_marks_deleted():
         results = find_all_records(path, fields)
         assert results == [], f"Expected no results, got {results}"
 
-        # Header count still says 1 record (deleted records are not removed)
-        _, header_size, record_size = __import__(
-            'sp5lib.dbf_writer', fromlist=['_read_header_info']
-        )._read_header_info.__module__  # just a type hint
-
+        # Header count still says 1 (soft-delete does not decrement count)
         with open(path, 'rb') as f:
-            hdr = f.read(8)
+            hdr = f.read(12)
         count = struct.unpack_from('<I', hdr, 4)[0]
-        assert count == 1  # still 1 in header (soft delete)
+        assert count == 1, f"Expected header count=1, got {count}"
+
+        # Verify the delete flag byte (0x2A) is set at record offset
+        header_size_bytes = struct.unpack_from('<H', hdr, 8)[0]
+        with open(path, 'rb') as f:
+            f.seek(header_size_bytes)
+            flag = f.read(1)
+        assert flag == b'\x2a', f"Expected delete flag 0x2A, got {flag!r}"
     finally:
         os.unlink(path)
 

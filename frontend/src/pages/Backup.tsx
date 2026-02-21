@@ -2,6 +2,8 @@ import { useState, useRef } from 'react';
 import type { ChangeEvent } from 'react';
 import { api } from '../api/client';
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 // ── Backup Section ────────────────────────────────────────────────────────
 
 function BackupSection() {
@@ -189,6 +191,120 @@ function RestoreSection() {
   );
 }
 
+// ── Compact Section ───────────────────────────────────────────────────────────
+
+interface CompactDetail {
+  file: string;
+  removed?: number;
+  active?: number;
+  error?: string;
+}
+
+interface CompactResult {
+  ok: boolean;
+  files_processed: number;
+  total_records_removed: number;
+  details: CompactDetail[];
+}
+
+function CompactSection() {
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<CompactResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleCompact = async () => {
+    if (!confirm('Datenbank komprimieren?\n\nGelöschte Datensätze werden dauerhaft entfernt. Erstelle vorher ein Backup!')) return;
+    setLoading(true);
+    setResult(null);
+    setError(null);
+    try {
+      const res = await fetch(`${API}/api/admin/compact`, { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+      setResult(data);
+    } catch (err: any) {
+      setError(err.message || 'Unbekannter Fehler');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <h2 className="text-base font-bold text-slate-700 flex items-center gap-2 mb-1">
+        <span className="text-xl">🗜️</span>
+        Datenbank komprimieren
+      </h2>
+      <p className="text-sm text-gray-500 mb-4">
+        Entfernt dauerhaft als gelöscht markierte Datensätze aus allen .DBF-Dateien und gibt Speicherplatz frei.
+        Nach dem Komprimieren sind gelöschte Einträge nicht mehr wiederherstellbar.
+      </p>
+
+      <div className="mb-4 flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+        <span className="text-lg leading-none mt-0.5">⚠️</span>
+        <span>
+          <strong>Achtung:</strong> Diese Aktion ist nicht umkehrbar. Erstelle zuerst ein Backup!
+        </span>
+      </div>
+
+      <button
+        onClick={handleCompact}
+        disabled={loading}
+        className={`inline-flex items-center gap-2 px-5 py-3 rounded-lg font-semibold text-sm transition-colors shadow-sm ${
+          loading
+            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            : 'bg-orange-600 text-white hover:bg-orange-700 active:bg-orange-800'
+        }`}
+      >
+        {loading ? (
+          <><span className="animate-spin">⏳</span> Komprimiere...</>
+        ) : (
+          <><span>🗜️</span> Datenbank komprimieren</>
+        )}
+      </button>
+
+      {error && (
+        <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+          ❌ Fehler: {error}
+        </div>
+      )}
+
+      {result && (
+        <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4 text-sm">
+          <div className="flex items-center gap-2 font-semibold text-green-800 mb-2">
+            <span>✅</span>
+            {result.files_processed} Dateien verarbeitet · {result.total_records_removed} gelöschte Datensätze entfernt
+          </div>
+          {result.details.filter(d => d.removed && d.removed > 0).length > 0 && (
+            <div className="mt-2">
+              <div className="text-xs font-semibold text-green-700 mb-1">Komprimierte Dateien:</div>
+              <ul className="text-xs text-green-700 space-y-0.5 max-h-40 overflow-y-auto">
+                {result.details.filter(d => d.removed && d.removed > 0).map(d => (
+                  <li key={d.file} className="flex items-center gap-2">
+                    <span className="text-green-500">•</span>
+                    <span className="font-mono">{d.file}</span>
+                    <span className="text-green-600">– {d.removed} entfernt, {d.active} aktiv</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {result.details.filter(d => d.error).length > 0 && (
+            <div className="mt-2">
+              <div className="text-xs font-semibold text-red-700 mb-1">Fehler:</div>
+              <ul className="text-xs text-red-700 space-y-0.5">
+                {result.details.filter(d => d.error).map(d => (
+                  <li key={d.file}>{d.file}: {d.error}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────
 
 export default function Backup() {
@@ -206,6 +322,7 @@ export default function Backup() {
       <div className="space-y-6">
         <BackupSection />
         <RestoreSection />
+        <CompactSection />
       </div>
     </div>
   );

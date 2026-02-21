@@ -25,6 +25,7 @@ import Backup from './pages/Backup';
 import Perioden from './pages/Perioden';
 import Einstellungen from './pages/Einstellungen';
 import Kontobuchungen from './pages/Kontobuchungen';
+import Einschraenkungen from './pages/Einschraenkungen';
 
 type Page =
   | 'dashboard'
@@ -52,6 +53,7 @@ type Page =
   | 'backup'
   | 'perioden'
   | 'kontobuchungen'
+  | 'einschraenkungen'
   | 'einstellungen';
 
 const navItems: { id: Page; label: string; icon: string; group?: string }[] = [
@@ -80,6 +82,7 @@ const navItems: { id: Page; label: string; icon: string; group?: string }[] = [
   { id: 'holidays', label: 'Feiertage', icon: '🎉', group: 'Stammdaten' },
   { id: 'workplaces', label: 'Arbeitsplätze', icon: '🏭', group: 'Stammdaten' },
   { id: 'extracharges', label: 'Zeitzuschläge', icon: '⏱️', group: 'Stammdaten' },
+  { id: 'einschraenkungen', label: 'Schichteinschränkungen', icon: '🚫', group: 'Stammdaten' },
   // Administration
   { id: 'benutzerverwaltung', label: 'Benutzerverwaltung', icon: '👤', group: 'Administration' },
   { id: 'backup', label: 'Backup & Restore', icon: '💾', group: 'Administration' },
@@ -120,6 +123,7 @@ export default function App() {
       case 'holidays': return <Holidays />;
       case 'workplaces': return <Workplaces />;
       case 'extracharges': return <Extracharges />;
+      case 'einschraenkungen': return <Einschraenkungen />;
       case 'benutzerverwaltung': return <Benutzerverwaltung />;
       case 'backup': return <Backup />;
       case 'perioden': return <Perioden />;

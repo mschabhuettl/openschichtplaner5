@@ -34,7 +34,7 @@ interface HolidayBan {
   reason: string;
 }
 
-type UrlaubTab = 'abwesenheiten' | 'ansprueche' | 'sperren';
+type UrlaubTab = 'antraege' | 'abwesenheiten' | 'ansprueche' | 'sperren';
 
 const MONTHS = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -669,11 +669,207 @@ function SperrenTab({ groups }: SperrenTabProps) {
   );
 }
 
+// ─── Tab 4: Anträge (Genehmigung / Ablehnung) ────────────────
+type AbsenceStatus = 'pending' | 'approved' | 'rejected';
+
+interface AntraegeTabProps {
+  year: number;
+  employees: Employee[];
+  leaveTypes: LeaveType[];
+  absences: Absence[];
+  loading: boolean;
+}
+
+function AntraegeTab({ year, employees, leaveTypes, absences, loading }: AntraegeTabProps) {
+  const [statusMap, setStatusMap] = useState<Record<string, AbsenceStatus>>({});
+  const [statusLoading, setStatusLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [filterStatus, setFilterStatus] = useState<AbsenceStatus | ''>('pending');
+  const [search, setSearch] = useState('');
+
+  // Load status from backend
+  const loadStatus = useCallback(async () => {
+    setStatusLoading(true);
+    try {
+      const res = await fetch(`${API}/api/absences/status`);
+      if (res.ok) setStatusMap(await res.json());
+    } catch { /* ignore */ } finally {
+      setStatusLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadStatus(); }, [loadStatus]);
+
+  const getStatus = (id: number): AbsenceStatus =>
+    (statusMap[String(id)] as AbsenceStatus) ?? 'pending';
+
+  const updateStatus = async (id: number, status: AbsenceStatus) => {
+    setUpdatingId(id);
+    try {
+      const res = await fetch(`${API}/api/absences/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) {
+        setStatusMap(prev => ({ ...prev, [String(id)]: status }));
+      }
+    } catch { /* ignore */ } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const getEmp = (id: number) => employees.find(e => e.ID === id);
+  const getLT = (id: number) => leaveTypes.find(lt => lt.ID === id);
+
+  // Filter absences by year, search, and status filter
+  const filtered = absences.filter(a => {
+    if (!a.DATE?.startsWith(String(year))) return false;
+    const emp = getEmp(a.EMPLOYEE_ID);
+    const empName = emp ? `${emp.NAME} ${emp.FIRSTNAME}` : '';
+    if (search && !empName.toLowerCase().includes(search.toLowerCase())) return false;
+    if (filterStatus !== '' && getStatus(a.ID) !== filterStatus) return false;
+    return true;
+  }).sort((a, b) => b.DATE.localeCompare(a.DATE));
+
+  const statusBadge = (status: AbsenceStatus) => {
+    if (status === 'approved') return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">✅ Genehmigt</span>;
+    if (status === 'rejected') return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">❌ Abgelehnt</span>;
+    return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">⏳ Beantragt</span>;
+  };
+
+  const pendingCount = absences.filter(a => a.DATE?.startsWith(String(year)) && getStatus(a.ID) === 'pending').length;
+
+  return (
+    <div>
+      {/* Summary + Filters */}
+      <div className="flex items-center gap-3 mb-4 flex-wrap">
+        <select
+          value={filterStatus}
+          onChange={e => setFilterStatus(e.target.value as AbsenceStatus | '')}
+          className="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Alle Status</option>
+          <option value="pending">⏳ Beantragt ({pendingCount})</option>
+          <option value="approved">✅ Genehmigt</option>
+          <option value="rejected">❌ Abgelehnt</option>
+        </select>
+        <input
+          type="text"
+          placeholder="Mitarbeiter suchen..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="px-3 py-1.5 border rounded shadow-sm text-sm w-44"
+        />
+        <span className="text-xs text-gray-400">{filtered.length} Einträge</span>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <table className="text-sm w-full">
+          <thead>
+            <tr className="bg-slate-700 text-white text-xs">
+              <th className="px-4 py-3 text-left">Mitarbeiter</th>
+              <th className="px-4 py-3 text-left">Datum</th>
+              <th className="px-4 py-3 text-left">Abwesenheitsart</th>
+              <th className="px-4 py-3 text-center">Status</th>
+              <th className="px-4 py-3 text-center">Aktion</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(loading || statusLoading) && (
+              <tr><td colSpan={5} className="text-center py-10 text-gray-400">⟳ Lade...</td></tr>
+            )}
+            {!loading && !statusLoading && filtered.length === 0 && (
+              <tr><td colSpan={5} className="text-center py-8 text-gray-400">Keine Einträge gefunden</td></tr>
+            )}
+            {!loading && !statusLoading && filtered.map((ab, i) => {
+              const emp = getEmp(ab.EMPLOYEE_ID);
+              const lt = getLT(ab.LEAVE_TYPE_ID);
+              const status = getStatus(ab.ID);
+              const isUpdating = updatingId === ab.ID;
+              return (
+                <tr key={ab.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
+                  <td className="px-4 py-2.5">
+                    <div className="font-semibold text-gray-800">
+                      {emp ? `${emp.NAME}, ${emp.FIRSTNAME}` : `MA #${ab.EMPLOYEE_ID}`}
+                    </div>
+                    <div className="text-xs text-gray-400">{emp?.NUMBER}</div>
+                  </td>
+                  <td className="px-4 py-2.5 text-gray-700">
+                    {new Date(ab.DATE).toLocaleDateString('de-AT')}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    {lt ? (
+                      <span
+                        className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold"
+                        style={{ backgroundColor: lt.COLORBK_HEX, color: lt.COLORBK_LIGHT ? '#374151' : '#fff' }}
+                      >
+                        {lt.SHORTNAME} – {lt.NAME}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">Art #{ab.LEAVE_TYPE_ID}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2.5 text-center">
+                    {statusBadge(status)}
+                  </td>
+                  <td className="px-4 py-2.5 text-center">
+                    {status === 'pending' ? (
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => updateStatus(ab.ID, 'approved')}
+                          disabled={isUpdating}
+                          className="px-2.5 py-1 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-60"
+                          title="Genehmigen"
+                        >
+                          {isUpdating ? '⟳' : '✅ Genehmigen'}
+                        </button>
+                        <button
+                          onClick={() => updateStatus(ab.ID, 'rejected')}
+                          disabled={isUpdating}
+                          className="px-2.5 py-1 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
+                          title="Ablehnen"
+                        >
+                          {isUpdating ? '⟳' : '❌ Ablehnen'}
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => updateStatus(ab.ID, 'pending')}
+                        disabled={isUpdating}
+                        className="px-2 py-1 text-xs text-gray-500 hover:text-gray-700 border rounded hover:bg-gray-50 disabled:opacity-60"
+                        title="Zurücksetzen"
+                      >
+                        {isUpdating ? '⟳' : '↺ Zurücksetzen'}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Info */}
+      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700 flex items-start gap-2">
+        <span className="text-base flex-shrink-0">ℹ️</span>
+        <span>
+          Der Genehmigungsstatus wird lokal im System gespeichert und hat keinen Einfluss auf die Abwesenheitseinträge in der Datenbank.
+          Abwesenheiten mit Status "Beantragt" sind noch zu bearbeiten.
+        </span>
+      </div>
+    </div>
+  );
+}
+
+
 // ─── Main Page ─────────────────────────────────────────────
 export default function Urlaub() {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
-  const [activeTab, setActiveTab] = useState<UrlaubTab>('abwesenheiten');
+  const [activeTab, setActiveTab] = useState<UrlaubTab>('antraege');
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -712,6 +908,7 @@ export default function Urlaub() {
   useEffect(() => { loadAbsences(); }, [loadAbsences]);
 
   const tabs: { id: UrlaubTab; label: string; icon: string }[] = [
+    { id: 'antraege', label: 'Anträge', icon: '✅' },
     { id: 'abwesenheiten', label: 'Abwesenheiten', icon: '📋' },
     { id: 'ansprueche', label: 'Urlaubsansprüche', icon: '📊' },
     { id: 'sperren', label: 'Urlaubssperren', icon: '🚫' },
@@ -751,6 +948,10 @@ export default function Urlaub() {
       </div>
 
       {/* Tab content */}
+      {activeTab === 'antraege' && (
+        <AntraegeTab year={year} employees={employees} leaveTypes={leaveTypes}
+          absences={absences} loading={loading} />
+      )}
       {activeTab === 'abwesenheiten' && (
         <AbwesenheitenTab year={year} employees={employees} leaveTypes={leaveTypes}
           absences={absences} setAbsences={setAbsences} loading={loading} />

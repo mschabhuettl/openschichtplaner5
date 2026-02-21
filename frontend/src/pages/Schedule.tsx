@@ -1290,6 +1290,7 @@ export default function Schedule() {
   const [filterShiftId, setFilterShiftId] = useState<number | ''>('');
   const [filterLeaveId, setFilterLeaveId] = useState<number | ''>('');
   const [employeeSearch, setEmployeeSearch] = useState('');
+  const [showTerminated, setShowTerminated] = useState(false);
 
   // UI state
   const [activePicker, setActivePicker] = useState<{ empId: number; day: number } | null>(null);
@@ -1505,9 +1506,20 @@ export default function Schedule() {
       `${emp.NAME} ${emp.FIRSTNAME}`.toLowerCase().includes(searchLower) ||
       `${emp.FIRSTNAME} ${emp.NAME}`.toLowerCase().includes(searchLower);
 
+    // First day of displayed month — employees who left before this are "terminated"
+    const monthStart = new Date(year, month - 1, 1);
+    const isActive = (emp: Employee): boolean => {
+      if (showTerminated) return true; // show all
+      if (!emp.EMPEND) return true;    // no end date → active
+      try {
+        const endDate = new Date(emp.EMPEND);
+        return endDate >= monthStart;   // still here during this month
+      } catch { return true; }
+    };
+
     if (selectedGroupIds.length === 0) {
       // All employees (no group separator)
-      return employees.filter(matchesSearch).map(e => ({ type: 'employee' as const, employee: e }));
+      return employees.filter(e => matchesSearch(e) && isActive(e)).map(e => ({ type: 'employee' as const, employee: e }));
     }
 
     // Multiple groups: show with separators
@@ -1516,13 +1528,13 @@ export default function Schedule() {
       const group = groups.find(g => g.ID === gid);
       rows.push({ type: 'group-header', groupId: gid, groupName: group?.NAME ?? `Gruppe ${gid}` });
       const members = groupMembersMap.get(gid) ?? new Set<number>();
-      const groupEmps = employees.filter(e => members.has(e.ID) && matchesSearch(e));
+      const groupEmps = employees.filter(e => members.has(e.ID) && matchesSearch(e) && isActive(e));
       for (const e of groupEmps) {
         rows.push({ type: 'employee', employee: e });
       }
     }
     return rows;
-  }, [selectedGroupIds, employees, groups, groupMembersMap, employeeSearch]);
+  }, [selectedGroupIds, employees, groups, groupMembersMap, employeeSearch, showTerminated, year, month]);
 
   // Employees only (for export and counters)
   const displayEmployees = useMemo(
@@ -2442,6 +2454,19 @@ export default function Schedule() {
           />
         </div>
 
+        {/* Terminated employee toggle */}
+        <div className="flex items-center gap-1.5 ml-auto">
+          <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-gray-500">
+            <input
+              type="checkbox"
+              checked={showTerminated}
+              onChange={e => setShowTerminated(e.target.checked)}
+              className="rounded"
+            />
+            Ausgeschiedene anzeigen
+          </label>
+        </div>
+
         {/* Reset filters */}
         {(filterShiftId !== '' || filterLeaveId !== '' || employeeSearch !== '') && (
           <button
@@ -2666,7 +2691,28 @@ export default function Schedule() {
                 <tr key={emp.ID} className={empRowStyle ? undefined : rowBg} style={empRowStyle}>
                   <td className="sticky left-0 z-10 bg-inherit px-3 py-1 border-r border-gray-200 border-b border-b-gray-100 font-medium whitespace-nowrap"
                       style={empNameStyle}>
-                    {emp.BOLD === 1 ? <strong>{emp.NAME}, {emp.FIRSTNAME}</strong> : <>{emp.NAME}, {emp.FIRSTNAME}</>}
+                    {(() => {
+                      // Birthday indicator: 🎂 if employee's birthday is in the current display month
+                      const hasBirthdayThisMonth = emp.BIRTHDAY
+                        ? (() => { try { return new Date(emp.BIRTHDAY!).getMonth() + 1 === month; } catch { return false; } })()
+                        : false;
+                      const birthdayDate = hasBirthdayThisMonth && emp.BIRTHDAY
+                        ? new Date(emp.BIRTHDAY).toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit' })
+                        : '';
+                      return (
+                        <>
+                          {emp.BOLD === 1
+                            ? <strong>{emp.NAME}, {emp.FIRSTNAME}</strong>
+                            : <>{emp.NAME}, {emp.FIRSTNAME}</>}
+                          {hasBirthdayThisMonth && (
+                            <span
+                              className="ml-1 text-sm cursor-default"
+                              title={`🎂 Geburtstag: ${birthdayDate}`}
+                            >🎂</span>
+                          )}
+                        </>
+                      );
+                    })()}
                   </td>
                   {days.map(day => {
                     const entry = entryMap.get(`${emp.ID}-${day}`);

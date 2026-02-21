@@ -2765,6 +2765,142 @@ def delete_group_access(access_id: int):
     return {"ok": True, "deleted": access_id}
 
 
+# ── Absence Status (approval workflow) ───────────────────────────────────────
+
+import json as _json
+
+_STATUS_FILE = os.path.join(os.path.dirname(__file__), '..', 'absence_status.json')
+
+def _load_absence_status() -> dict:
+    try:
+        if os.path.exists(_STATUS_FILE):
+            with open(_STATUS_FILE, 'r', encoding='utf-8') as f:
+                return _json.load(f)
+    except Exception:
+        pass
+    return {}
+
+def _save_absence_status(data: dict) -> None:
+    try:
+        with open(_STATUS_FILE, 'w', encoding='utf-8') as f:
+            _json.dump(data, f, indent=2)
+    except Exception:
+        pass
+
+
+@app.get("/api/absences/status")
+def get_all_absence_statuses():
+    """Return the status dict for all absences (id → status)."""
+    return _load_absence_status()
+
+
+class AbsenceStatusPatch(BaseModel):
+    status: str  # 'pending' | 'approved' | 'rejected'
+
+
+@app.patch("/api/absences/{absence_id}/status")
+def patch_absence_status(absence_id: int, body: AbsenceStatusPatch):
+    """Update approval status for an absence record."""
+    allowed = {'pending', 'approved', 'rejected'}
+    if body.status not in allowed:
+        raise HTTPException(status_code=400, detail=f"status must be one of {allowed}")
+    data = _load_absence_status()
+    data[str(absence_id)] = body.status
+    _save_absence_status(data)
+    return {"ok": True, "id": absence_id, "status": body.status}
+
+
+# ── Admin: Compact database ───────────────────────────────────────────────────
+
+@app.post("/api/admin/compact")
+def compact_database():
+    """
+    Compact all .DBF files in SP5_DB_PATH by rewriting them without deleted records.
+    Deleted records have 0x2A ('*') as the first byte of their data row.
+    Returns a summary of files processed and records removed.
+    """
+    import struct as _struct
+    from datetime import date as _date
+
+    db_path = os.environ.get('SP5_DB_PATH', '')
+    if not db_path or not os.path.isdir(db_path):
+        raise HTTPException(status_code=500, detail=f"SP5_DB_PATH not set or not a directory: {db_path!r}")
+
+    dbf_files = [f for f in os.listdir(db_path) if f.upper().endswith('.DBF')]
+    results = []
+    total_removed = 0
+
+    for fname in sorted(dbf_files):
+        fpath = os.path.join(db_path, fname)
+        try:
+            with open(fpath, 'rb') as f:
+                raw = f.read()
+
+            if len(raw) < 32:
+                continue  # skip tiny/corrupt files
+
+            # Parse DBF header
+            num_records = _struct.unpack_from('<I', raw, 4)[0]
+            header_size = _struct.unpack_from('<H', raw, 8)[0]
+            record_size = _struct.unpack_from('<H', raw, 10)[0]
+
+            if record_size == 0:
+                continue
+
+            # Separate header bytes from record area
+            header_bytes = bytearray(raw[:header_size])
+            records_area = raw[header_size:]
+
+            # Remove trailing EOF marker for processing
+            if records_area and records_area[-1] == 0x1A:
+                records_area = records_area[:-1]
+
+            # Split into individual records and filter out deleted ones
+            active_records = []
+            deleted_count = 0
+            for i in range(num_records):
+                start = i * record_size
+                end = start + record_size
+                if end > len(records_area):
+                    break
+                rec = records_area[start:end]
+                if rec[0:1] == b'\x2a':  # deleted marker
+                    deleted_count += 1
+                else:
+                    active_records.append(rec)
+
+            if deleted_count == 0:
+                results.append({'file': fname, 'removed': 0, 'active': len(active_records)})
+                continue
+
+            # Update header: new record count + today's date
+            today = _date.today()
+            header_bytes[1] = today.year % 100
+            header_bytes[2] = today.month
+            header_bytes[3] = today.day
+            _struct.pack_into('<I', header_bytes, 4, len(active_records))
+
+            # Write compacted file
+            with open(fpath, 'wb') as f:
+                f.write(bytes(header_bytes))
+                for rec in active_records:
+                    f.write(rec)
+                f.write(b'\x1a')  # EOF marker
+
+            total_removed += deleted_count
+            results.append({'file': fname, 'removed': deleted_count, 'active': len(active_records)})
+
+        except Exception as e:
+            results.append({'file': fname, 'error': str(e)})
+
+    return {
+        'ok': True,
+        'files_processed': len(results),
+        'total_records_removed': total_removed,
+        'details': results,
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

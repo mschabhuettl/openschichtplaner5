@@ -140,7 +140,7 @@ export default function App() {
     <>
       <div className="p-4 border-b border-slate-700 flex items-center justify-between">
         <div>
-          <div className="text-lg font-bold text-white">🦞 OpenSP5</div>
+          <div className="text-lg font-bold text-white">🧸 OpenSP5</div>
           <div className="text-xs text-slate-400 mt-0.5">Dienstplanung</div>
         </div>
         {/* Close button — only visible on mobile */}

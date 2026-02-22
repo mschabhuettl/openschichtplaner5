@@ -8,31 +8,59 @@ from datetime import date
 from typing import List, Dict, Any, Optional
 
 
+def _is_utf16_le(raw: bytes) -> bool:
+    """
+    Heuristic: detect if raw bytes are UTF-16 LE encoded text.
+    In UTF-16 LE ASCII text, bytes at odd positions (1, 3, 5, ...) are 0x00.
+    Plain ASCII/binary data fields have non-zero bytes at odd positions.
+    """
+    if len(raw) < 4:
+        # Very short field — check if first byte is 0 (empty UTF-16 LE)
+        return len(raw) >= 2 and raw[1] == 0x00
+    # Sample up to 8 bytes for detection
+    sample_len = min(8, len(raw))
+    sample = raw[:sample_len]
+    odd_bytes = sample[1::2]
+    null_count = sum(1 for b in odd_bytes if b == 0x00)
+    # More than half of odd-position bytes are 0x00 → likely UTF-16 LE
+    return null_count > len(odd_bytes) // 2
+
+
 def _decode_string(raw: bytes) -> str:
     """
-    Decode a UTF-16 LE string field from Schichtplaner5.
-    The field is padded with 0x20 bytes after the UTF-16 null terminator.
-    Strategy: find the UTF-16 null terminator (0x00 0x00) and stop there.
+    Decode a string field from Schichtplaner5 .DBF files.
+    
+    SP5 uses two different encodings for Character fields:
+    - Text fields (NAME, SHORTNAME, etc.): UTF-16 LE, padded with 0x20
+    - Data fields (WORKDAYS, STARTEND*, etc.): plain ASCII, padded with 0x20
+    
+    We detect UTF-16 LE by checking if odd-indexed bytes are 0x00.
     """
     if not raw:
         return ''
-    # Find UTF-16 null terminator (pair of 0x00 bytes at even offset)
-    end = len(raw)
-    for i in range(0, len(raw) - 1, 2):
-        if raw[i] == 0x00 and raw[i + 1] == 0x00:
-            end = i
-            break
-    chunk = raw[:end]
-    if not chunk:
-        return ''
-    try:
-        return chunk.decode('utf-16-le').strip()
-    except Exception:
-        # Fallback: might be plain ASCII
-        try:
-            return raw.split(b'\x00')[0].decode('ascii', errors='replace').strip()
-        except Exception:
+
+    if _is_utf16_le(raw):
+        # UTF-16 LE encoded text: find null terminator (0x00 0x00 at even offset)
+        end = len(raw)
+        for i in range(0, len(raw) - 1, 2):
+            if raw[i] == 0x00 and raw[i + 1] == 0x00:
+                end = i
+                break
+        chunk = raw[:end]
+        if not chunk:
             return ''
+        try:
+            return chunk.decode('utf-16-le').strip()
+        except Exception:
+            pass
+
+    # Plain ASCII / binary data field (WORKDAYS, STARTEND*, etc.)
+    # Strip trailing spaces/nulls and decode as ASCII
+    stripped = raw.rstrip(b'\x00\x20')
+    try:
+        return stripped.decode('ascii', errors='replace').strip()
+    except Exception:
+        return raw.split(b'\x00')[0].decode('latin-1', errors='replace').strip()
 
 
 def _parse_date(raw: str) -> Optional[str]:

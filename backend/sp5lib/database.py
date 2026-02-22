@@ -36,9 +36,24 @@ class SP5Database:
         for r in rows:
             if not include_hidden and r.get('HIDE'):
                 continue
-            # Parse WORKDAYS: "1 1 1 1 1 0 0 0" → list of bools
+            # Parse WORKDAYS: stored as ASCII "1 1 1 1 1 0 0 0" but DBF reader
+            # decodes all char fields as UTF-16 LE, so '1'(0x31)+space(0x20) → U+2031,
+            # '0'(0x30)+space(0x20) → U+2030. Map these back correctly.
             wd = r.get('WORKDAYS', '')
-            r['WORKDAYS_LIST'] = [x == '1' for x in wd.split()] if wd else []
+            if wd:
+                if '\u2031' in wd or '\u2030' in wd:
+                    # UTF-16 LE misread of ASCII: U+2031=working, U+2030=rest
+                    r['WORKDAYS_LIST'] = [c == '\u2031' for c in wd]
+                else:
+                    # Fallback: plain space-separated "1 1 1 1 1 0 0 0"
+                    r['WORKDAYS_LIST'] = [x == '1' for x in wd.split()]
+            else:
+                r['WORKDAYS_LIST'] = []
+            # Auto-generate SHORTNAME if empty
+            if not r.get('SHORTNAME'):
+                name_part = r.get('NAME', '')[:3].upper()
+                first_part = r.get('FIRSTNAME', '')[:2].upper() if r.get('FIRSTNAME') else ''
+                r['SHORTNAME'] = (first_part + name_part)[:5]
             # Convert color fields to hex
             self._color_fields(r)
             result.append(r)

@@ -1,0 +1,242 @@
+[
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule/bulk"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:21:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  }
+]

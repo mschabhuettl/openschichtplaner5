@@ -252,9 +252,30 @@ export default function Employees() {
     }
   };
 
-  const filtered = employees.filter(e =>
-    `${e.NAME} ${e.FIRSTNAME} ${e.SHORTNAME} ${e.NUMBER}`.toLowerCase().includes(search.toLowerCase())
-  );
+  type EmpSortKey = 'number' | 'name' | 'firstname' | 'shortname';
+  type EmpSortDir = 'asc' | 'desc';
+  const [empSortKey, setEmpSortKey] = useState<EmpSortKey>('number');
+  const [empSortDir, setEmpSortDir] = useState<EmpSortDir>('asc');
+
+  const handleEmpSort = (key: EmpSortKey) => {
+    if (empSortKey === key) setEmpSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setEmpSortKey(key); setEmpSortDir('asc'); }
+  };
+  const sortIcon = (key: EmpSortKey) => empSortKey === key ? (empSortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕';
+
+  const filtered = employees
+    .filter(e => `${e.NAME} ${e.FIRSTNAME} ${e.SHORTNAME} ${e.NUMBER}`.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => {
+      let av = '', bv = '';
+      switch (empSortKey) {
+        case 'number':    av = String(Number(a.NUMBER) || 0).padStart(6, '0'); bv = String(Number(b.NUMBER) || 0).padStart(6, '0'); break;
+        case 'name':      av = a.NAME || ''; bv = b.NAME || ''; break;
+        case 'firstname': av = a.FIRSTNAME || ''; bv = b.FIRSTNAME || ''; break;
+        case 'shortname': av = a.SHORTNAME || ''; bv = b.SHORTNAME || ''; break;
+      }
+      const cmp = av.localeCompare(bv, 'de');
+      return empSortDir === 'asc' ? cmp : -cmp;
+    });
 
   const loadRestrictions = (empId: number) => {
     api.getRestrictions(empId)
@@ -441,10 +462,10 @@ export default function Employees() {
             <table className="w-full text-sm">
               <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
                 <tr>
-                  <th className="px-4 py-2 text-left">Nr.</th>
-                  <th className="px-4 py-2 text-left">Name</th>
-                  <th className="px-4 py-2 text-left">Vorname</th>
-                  <th className="px-4 py-2 text-left">Kürzel</th>
+                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('number')}>Nr.{sortIcon('number')}</th>
+                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('name')}>Name{sortIcon('name')}</th>
+                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('firstname')}>Vorname{sortIcon('firstname')}</th>
+                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('shortname')}>Kürzel{sortIcon('shortname')}</th>
                   <th className="px-4 py-2 text-right">Std/Tag</th>
                   <th className="px-4 py-2 text-center">Arbeitstage</th>
                   <th className="px-4 py-2 text-center">Eintritt</th>

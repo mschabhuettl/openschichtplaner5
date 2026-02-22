@@ -57,6 +57,20 @@ export default function Groups() {
   const [saving, setSaving] = useState(false);
   const { toasts, showToast, removeToast } = useToast();
   const [error, setError] = useState<string | null>(null);
+  const [groupSearch, setGroupSearch] = useState('');
+  const [groupSort, setGroupSort] = useState<'default' | 'name-asc' | 'name-desc' | 'short-asc'>('default');
+
+  const sortGroups = (list: Group[]): Group[] => {
+    if (groupSort === 'default') return list;
+    return [...list].sort((a, b) => {
+      switch (groupSort) {
+        case 'name-asc':  return (a.NAME || '').localeCompare(b.NAME || '', 'de');
+        case 'name-desc': return (b.NAME || '').localeCompare(a.NAME || '', 'de');
+        case 'short-asc': return (a.SHORTNAME || '').localeCompare(b.SHORTNAME || '', 'de');
+        default: return 0;
+      }
+    });
+  };
 
   const load = () => {
     setLoading(true);
@@ -68,8 +82,16 @@ export default function Groups() {
 
   useEffect(() => { load(); }, []);
 
-  const topLevel = groups.filter(g => !g.SUPERID || !groups.find(p => p.ID === g.SUPERID));
-  const childrenOf = (id: number) => groups.filter(g => g.SUPERID === id);
+  const searchLower = groupSearch.toLowerCase();
+  const matchesGroupSearch = (g: Group): boolean => {
+    if (!searchLower) return true;
+    return (g.NAME || '').toLowerCase().includes(searchLower) ||
+           (g.SHORTNAME || '').toLowerCase().includes(searchLower);
+  };
+  const topLevel = sortGroups(
+    groups.filter(g => (!g.SUPERID || !groups.find(p => p.ID === g.SUPERID)) && matchesGroupSearch(g))
+  );
+  const childrenOf = (id: number) => sortGroups(groups.filter(g => g.SUPERID === id && matchesGroupSearch(g)));
 
   const openCreate = () => {
     setEditId(null);
@@ -180,14 +202,34 @@ export default function Groups() {
 
   return (
     <div className="p-4 sm:p-6">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h1 className="text-xl font-bold text-gray-800">🏢 Gruppen ({groups.length})</h1>
-        <button
-          onClick={openCreate}
-          className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
-        >
-          + Neu
-        </button>
+        <div className="flex gap-2 flex-wrap items-center">
+          <input
+            type="text"
+            placeholder="🔍 Suchen..."
+            value={groupSearch}
+            onChange={e => setGroupSearch(e.target.value)}
+            className="px-3 py-1.5 border rounded shadow-sm text-sm w-44"
+          />
+          <select
+            value={groupSort}
+            onChange={e => setGroupSort(e.target.value as typeof groupSort)}
+            className="px-3 py-1.5 border rounded shadow-sm text-sm bg-white"
+            title="Sortierung"
+          >
+            <option value="default">Reihenfolge ↕</option>
+            <option value="name-asc">Name A → Z ↑</option>
+            <option value="name-desc">Name Z → A ↓</option>
+            <option value="short-asc">Kürzel A → Z ↑</option>
+          </select>
+          <button
+            onClick={openCreate}
+            className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
+          >
+            + Neu
+          </button>
+        </div>
       </div>
       {loading ? (
         <div className="flex justify-center py-12">

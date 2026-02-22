@@ -2,6 +2,7 @@
 High-level database access for Schichtplaner5 .DBF files.
 """
 import os
+import json
 import calendar
 from datetime import datetime
 from typing import List, Dict, Any, Optional
@@ -3405,3 +3406,98 @@ class SP5Database:
             return 0
         delete_record(filepath, fields, raw_idx)
         return 1
+
+    # ── Changelog ─────────────────────────────────────────────
+
+    def _changelog_path(self) -> str:
+        """Path to changelog.json file next to the database directory."""
+        data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
+        os.makedirs(data_dir, exist_ok=True)
+        return os.path.join(data_dir, 'changelog.json')
+
+    def get_changelog(self, limit: int = 100, user: Optional[str] = None,
+                      date_from: Optional[str] = None, date_to: Optional[str] = None) -> List[Dict]:
+        """Read changelog entries from backend/data/changelog.json."""
+        path = self._changelog_path()
+        if not os.path.exists(path):
+            return []
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                entries: List[Dict] = json.load(f)
+        except Exception:
+            return []
+        # Filter
+        if user:
+            entries = [e for e in entries if e.get('user', '').lower() == user.lower()]
+        if date_from:
+            entries = [e for e in entries if e.get('timestamp', '') >= date_from]
+        if date_to:
+            entries = [e for e in entries if e.get('timestamp', '') <= date_to + 'T23:59:59']
+        # Sort newest first, apply limit
+        entries = sorted(entries, key=lambda e: e.get('timestamp', ''), reverse=True)
+        return entries[:limit]
+
+    def log_action(self, user: str, action: str, entity: str, entity_id: int,
+                   details: str = '') -> Dict:
+        """Append a log entry to backend/data/changelog.json. Keeps max 1000 entries."""
+        import datetime as _dt
+        path = self._changelog_path()
+        if os.path.exists(path):
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    entries: List[Dict] = json.load(f)
+            except Exception:
+                entries = []
+        else:
+            entries = []
+        entry = {
+            'timestamp': _dt.datetime.now().isoformat(timespec='seconds'),
+            'user': user,
+            'action': action,          # CREATE / UPDATE / DELETE
+            'entity': entity,          # employee / shift / group / schedule / absence / ...
+            'entity_id': entity_id,
+            'details': details,
+        }
+        entries.append(entry)
+        # Keep newest 1000
+        if len(entries) > 1000:
+            entries = entries[-1000:]
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(entries, f, ensure_ascii=False, indent=2)
+        return entry
+
+    # ── Overtime Summary ──────────────────────────────────────
+
+    def get_overtime_summary(self, year: int, group_id: Optional[int] = None) -> List[Dict]:
+        """Calculate overtime (Überstunden) per employee for a given year.
+
+        Returns:
+            List of dicts with keys:
+              employee_id, name, shortname, soll, ist, delta
+            where delta = ist - soll (positive = Plusstunden, negative = Minusstunden).
+        """
+        employees = self.get_employees(include_hidden=False)
+        if group_id is not None:
+            member_ids = set(self.get_group_members(group_id))
+            employees = [e for e in employees if e['ID'] in member_ids]
+
+        result = []
+        for emp in employees:
+            balance = self.calculate_time_balance(emp['ID'], year)
+            if not balance:
+                continue
+            soll = balance.get('total_target_hours', 0.0)
+            ist = balance.get('total_actual_hours', 0.0)
+            delta = round(ist - soll, 2)
+            result.append({
+                'employee_id': emp['ID'],
+                'name': f"{emp.get('NAME', '')} {emp.get('FIRSTNAME', '')}".strip(),
+                'shortname': emp.get('SHORTNAME', ''),
+                'number': emp.get('NUMBER', ''),
+                'soll': round(soll, 2),
+                'ist': round(ist, 2),
+                'delta': delta,
+                'saldo': round(balance.get('total_saldo', delta), 2),
+            })
+        result.sort(key=lambda x: x.get('name', ''))
+        return result

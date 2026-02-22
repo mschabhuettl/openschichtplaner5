@@ -27,6 +27,8 @@ import Einstellungen from './pages/Einstellungen';
 import Kontobuchungen from './pages/Kontobuchungen';
 import Einschraenkungen from './pages/Einschraenkungen';
 import Personaltabelle from './pages/Personaltabelle';
+import Protokoll from './pages/Protokoll';
+import Ueberstunden from './pages/Ueberstunden';
 
 type Page =
   | 'dashboard'
@@ -56,7 +58,9 @@ type Page =
   | 'kontobuchungen'
   | 'einschraenkungen'
   | 'personaltabelle'
-  | 'einstellungen';
+  | 'einstellungen'
+  | 'protokoll'
+  | 'ueberstunden';
 
 const navItems: { id: Page; label: string; icon: string; group?: string }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
@@ -71,6 +75,7 @@ const navItems: { id: Page; label: string; icon: string; group?: string }[] = [
   { id: 'personalbedarf', label: 'Personalbedarf', icon: '👥', group: 'Planung' },
   { id: 'jahresabschluss', label: 'Jahresabschluss', icon: '📅', group: 'Planung' },
   { id: 'zeitkonto', label: 'Zeitkonto', icon: '⏱️', group: 'Planung' },
+  { id: 'ueberstunden', label: 'Überstunden', icon: '⏰', group: 'Planung' },
   { id: 'kontobuchungen', label: 'Kontobuchungen', icon: '💰', group: 'Planung' },
   { id: 'notizen', label: 'Notizen', icon: '📝', group: 'Planung' },
   // Reports
@@ -91,6 +96,7 @@ const navItems: { id: Page; label: string; icon: string; group?: string }[] = [
   { id: 'backup', label: 'Backup & Restore', icon: '💾', group: 'Administration' },
   { id: 'perioden', label: 'Abrechnungszeiträume', icon: '📅', group: 'Administration' },
   { id: 'einstellungen', label: 'Einstellungen', icon: '⚙️', group: 'Administration' },
+  { id: 'protokoll', label: 'Protokoll', icon: '📋', group: 'Administration' },
 ];
 
 export default function App() {
@@ -132,6 +138,8 @@ export default function App() {
       case 'backup': return <Backup />;
       case 'perioden': return <Perioden />;
       case 'einstellungen': return <Einstellungen />;
+      case 'protokoll': return <Protokoll />;
+      case 'ueberstunden': return <Ueberstunden />;
     }
   };
 

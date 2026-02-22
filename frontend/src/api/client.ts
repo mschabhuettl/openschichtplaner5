@@ -419,6 +419,37 @@ export interface WeekSchedule {
   }[];
 }
 
+// ─── Changelog Types ──────────────────────────────────────
+export interface ChangelogEntry {
+  timestamp: string;
+  user: string;
+  action: string;      // CREATE | UPDATE | DELETE
+  entity: string;      // employee | shift | group | schedule | ...
+  entity_id: number;
+  details: string;
+}
+
+// ─── Overtime Summary Types ────────────────────────────────
+export interface OvertimeRow {
+  employee_id: number;
+  name: string;
+  shortname: string;
+  number: string;
+  soll: number;
+  ist: number;
+  delta: number;
+  saldo: number;
+}
+
+export interface OvertimeSummary {
+  total_soll: number;
+  total_ist: number;
+  total_delta: number;
+  plus_count: number;
+  minus_count: number;
+  employee_count: number;
+}
+
 // ─── API ───────────────────────────────────────────────────
 export const api = {
   getStats: () => fetchJSON<Stats>('/api/stats'),
@@ -792,5 +823,33 @@ export const api = {
       throw new Error(detail.detail || res.statusText);
     }
     return res.json();
+  },
+
+  // ─── Changelog / Aktivitätsprotokoll ──────────────────────
+  getChangelog: (params: {
+    limit?: number;
+    user?: string;
+    date_from?: string;
+    date_to?: string;
+  } = {}) => {
+    const qs = new URLSearchParams();
+    if (params.limit) qs.set('limit', String(params.limit));
+    if (params.user) qs.set('user', params.user);
+    if (params.date_from) qs.set('date_from', params.date_from);
+    if (params.date_to) qs.set('date_to', params.date_to);
+    const q = qs.toString();
+    return fetchJSON<ChangelogEntry[]>(`/api/changelog${q ? '?' + q : ''}`);
+  },
+
+  logAction: (data: { user: string; action: string; entity: string; entity_id: number; details?: string }) =>
+    postJSON<ChangelogEntry>('/api/changelog', data),
+
+  // ─── Überstunden Summary ───────────────────────────────────
+  getOvertimeSummary: (year: number, groupId?: number) => {
+    const qs = new URLSearchParams({ year: String(year) });
+    if (groupId != null) qs.set('group_id', String(groupId));
+    return fetchJSON<{ year: number; group_id: number | null; employees: OvertimeRow[]; summary: OvertimeSummary }>(
+      `/api/overtime-summary?${qs.toString()}`
+    );
   },
 };

@@ -3373,6 +3373,136 @@ def compact_database():
     }
 
 
+# ── Changelog / Aktivitätsprotokoll ─────────────────────────
+
+@app.get("/api/changelog")
+def get_changelog(
+    limit: int = Query(100, description="Max entries to return"),
+    user: Optional[str] = Query(None, description="Filter by user"),
+    date_from: Optional[str] = Query(None, description="ISO date YYYY-MM-DD"),
+    date_to: Optional[str] = Query(None, description="ISO date YYYY-MM-DD"),
+):
+    """Return activity log entries from changelog.json."""
+    return get_db().get_changelog(limit=limit, user=user, date_from=date_from, date_to=date_to)
+
+
+class ChangelogEntry(BaseModel):
+    user: str
+    action: str        # CREATE / UPDATE / DELETE
+    entity: str        # employee / shift / schedule / ...
+    entity_id: int
+    details: Optional[str] = ""
+
+
+@app.post("/api/changelog")
+def log_action(body: ChangelogEntry):
+    """Manually write an entry to the changelog."""
+    entry = get_db().log_action(
+        user=body.user,
+        action=body.action,
+        entity=body.entity,
+        entity_id=body.entity_id,
+        details=body.details or "",
+    )
+    return entry
+
+
+# ── Middleware: auto-log mutating requests ────────────────────
+
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as StarletteRequest
+import re as _re
+
+
+class ChangelogMiddleware(BaseHTTPMiddleware):
+    """Automatically log CREATE/UPDATE/DELETE actions from the API."""
+
+    _ENTITY_MAP = {
+        'employees': 'employee',
+        'groups': 'group',
+        'shifts': 'shift',
+        'leave-types': 'leave_type',
+        'holidays': 'holiday',
+        'workplaces': 'workplace',
+        'schedule': 'schedule',
+        'absences': 'absence',
+        'users': 'user',
+        'extracharges': 'extracharge',
+    }
+
+    async def dispatch(self, request: StarletteRequest, call_next):
+        response = await call_next(request)
+        method = request.method
+        if method not in ('POST', 'PUT', 'PATCH', 'DELETE'):
+            return response
+        # Only log 2xx responses
+        if response.status_code >= 300:
+            return response
+        # Skip changelog and internal endpoints
+        path = request.url.path
+        if 'changelog' in path or 'backup' in path or 'compact' in path:
+            return response
+
+        # Determine entity from URL path
+        parts = [p for p in path.strip('/').split('/') if p]
+        entity = 'unknown'
+        entity_id = 0
+        if len(parts) >= 2:
+            segment = parts[1]  # api/<segment>
+            entity = self._ENTITY_MAP.get(segment, segment.replace('-', '_'))
+        if len(parts) >= 3:
+            try:
+                entity_id = int(parts[2])
+            except ValueError:
+                entity_id = 0
+
+        action_map = {'POST': 'CREATE', 'PUT': 'UPDATE', 'PATCH': 'UPDATE', 'DELETE': 'DELETE'}
+        action = action_map.get(method, method)
+        try:
+            get_db().log_action(
+                user='api',
+                action=action,
+                entity=entity,
+                entity_id=entity_id,
+                details=f"{method} {path}",
+            )
+        except Exception:
+            pass  # Never break the response
+        return response
+
+
+app.add_middleware(ChangelogMiddleware)
+
+
+# ── Überstunden-Zusammenfassung ───────────────────────────────
+
+@app.get("/api/overtime-summary")
+def get_overtime_summary(
+    year: int = Query(..., description="Year (YYYY)"),
+    group_id: Optional[int] = Query(None, description="Filter by group"),
+):
+    """Return overtime summary (Überstunden) per employee for a given year."""
+    rows = get_db().get_overtime_summary(year=year, group_id=group_id)
+    total_soll = sum(r['soll'] for r in rows)
+    total_ist = sum(r['ist'] for r in rows)
+    total_delta = round(total_ist - total_soll, 2)
+    plus_count = sum(1 for r in rows if r['delta'] >= 0)
+    minus_count = sum(1 for r in rows if r['delta'] < 0)
+    return {
+        'year': year,
+        'group_id': group_id,
+        'employees': rows,
+        'summary': {
+            'total_soll': round(total_soll, 2),
+            'total_ist': round(total_ist, 2),
+            'total_delta': total_delta,
+            'plus_count': plus_count,
+            'minus_count': minus_count,
+            'employee_count': len(rows),
+        },
+    }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -1291,6 +1291,8 @@ export default function Schedule() {
   const [filterLeaveId, setFilterLeaveId] = useState<number | ''>('');
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [showTerminated, setShowTerminated] = useState(false);
+  const [employeeSort, setEmployeeSort] = useState<'position' | 'name-asc' | 'name-desc' | 'number-asc' | 'number-desc' | 'group'>('position');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // UI state
   const [activePicker, setActivePicker] = useState<{ empId: number; day: number } | null>(null);
@@ -1499,12 +1501,28 @@ export default function Schedule() {
     groupName?: string;
   }
 
+  const sortEmployees = (list: Employee[]): Employee[] => {
+    if (employeeSort === 'position') return list;
+    return [...list].sort((a, b) => {
+      switch (employeeSort) {
+        case 'name-asc':    return `${a.NAME} ${a.FIRSTNAME}`.localeCompare(`${b.NAME} ${b.FIRSTNAME}`, 'de');
+        case 'name-desc':   return `${b.NAME} ${b.FIRSTNAME}`.localeCompare(`${a.NAME} ${a.FIRSTNAME}`, 'de');
+        case 'number-asc':  return (Number(a.NUMBER) || 0) - (Number(b.NUMBER) || 0);
+        case 'number-desc': return (Number(b.NUMBER) || 0) - (Number(a.NUMBER) || 0);
+        case 'group':       return `${a.NAME} ${a.FIRSTNAME}`.localeCompare(`${b.NAME} ${b.FIRSTNAME}`, 'de');
+        default:            return 0;
+      }
+    });
+  };
+
   const displayRows: DisplayRow[] = useMemo(() => {
     const searchLower = employeeSearch.toLowerCase();
     const matchesSearch = (emp: Employee) =>
       !searchLower ||
       `${emp.NAME} ${emp.FIRSTNAME}`.toLowerCase().includes(searchLower) ||
-      `${emp.FIRSTNAME} ${emp.NAME}`.toLowerCase().includes(searchLower);
+      `${emp.FIRSTNAME} ${emp.NAME}`.toLowerCase().includes(searchLower) ||
+      (emp.SHORTNAME || '').toLowerCase().includes(searchLower) ||
+      (emp.NUMBER || '').toLowerCase().includes(searchLower);
 
     // First day of displayed month — employees who left before this are "terminated"
     const monthStart = new Date(year, month - 1, 1);
@@ -1519,7 +1537,8 @@ export default function Schedule() {
 
     if (selectedGroupIds.length === 0) {
       // All employees (no group separator)
-      return employees.filter(e => matchesSearch(e) && isActive(e)).map(e => ({ type: 'employee' as const, employee: e }));
+      const filtered = employees.filter(e => matchesSearch(e) && isActive(e));
+      return sortEmployees(filtered).map(e => ({ type: 'employee' as const, employee: e }));
     }
 
     // Multiple groups: show with separators
@@ -1529,12 +1548,13 @@ export default function Schedule() {
       rows.push({ type: 'group-header', groupId: gid, groupName: group?.NAME ?? `Gruppe ${gid}` });
       const members = groupMembersMap.get(gid) ?? new Set<number>();
       const groupEmps = employees.filter(e => members.has(e.ID) && matchesSearch(e) && isActive(e));
-      for (const e of groupEmps) {
+      for (const e of sortEmployees(groupEmps)) {
         rows.push({ type: 'employee', employee: e });
       }
     }
     return rows;
-  }, [selectedGroupIds, employees, groups, groupMembersMap, employeeSearch, showTerminated, year, month]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedGroupIds, employees, groups, groupMembersMap, employeeSearch, showTerminated, year, month, employeeSort]);
 
   // Employees only (for export and counters)
   const displayEmployees = useMemo(
@@ -2088,6 +2108,17 @@ export default function Schedule() {
   // ── Keyboard handler (ref pattern avoids stale closures) ────
   const kbHandlerRef = useRef<(e: KeyboardEvent) => void>(() => {});
   kbHandlerRef.current = (e: KeyboardEvent) => {
+    // Ctrl+F → focus employee search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+      // Only intercept if not already in an input
+      const tag = (document.activeElement as HTMLElement)?.tagName;
+      if (tag !== 'INPUT' && tag !== 'TEXTAREA') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        searchInputRef.current?.select();
+        return;
+      }
+    }
     // Ctrl+Z / Cmd+Z → Undo
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
       e.preventDefault();
@@ -2447,12 +2478,33 @@ export default function Schedule() {
         <div className="flex items-center gap-1.5">
           <label className="text-xs text-gray-500 whitespace-nowrap">Mitarbeiter:</label>
           <input
+            ref={searchInputRef}
             type="text"
             value={employeeSearch}
             onChange={e => setEmployeeSearch(e.target.value)}
-            placeholder="Name suchen..."
-            className="text-xs px-2 py-1 border rounded bg-white w-36"
+            placeholder="🔍 Suchen... (Strg+F)"
+            className="text-xs px-2 py-1 border rounded bg-white w-44"
+            onKeyDown={e => { if (e.key === 'Escape') { setEmployeeSearch(''); e.currentTarget.blur(); } }}
           />
+          {employeeSearch && (
+            <button className="text-xs text-gray-400 hover:text-gray-600" onClick={() => setEmployeeSearch('')} title="Suche löschen">×</button>
+          )}
+        </div>
+        {/* Employee sort */}
+        <div className="flex items-center gap-1.5">
+          <label className="text-xs text-gray-500 whitespace-nowrap">Sortierung:</label>
+          <select
+            value={employeeSort}
+            onChange={e => setEmployeeSort(e.target.value as typeof employeeSort)}
+            className="text-xs px-2 py-1 border rounded bg-white"
+            title="Mitarbeiterliste sortieren"
+          >
+            <option value="position">Reihenfolge ↕</option>
+            <option value="name-asc">Name A → Z</option>
+            <option value="name-desc">Name Z → A</option>
+            <option value="number-asc">Nummer ↑</option>
+            <option value="number-desc">Nummer ↓</option>
+          </select>
         </div>
 
         {/* Terminated employee toggle */}

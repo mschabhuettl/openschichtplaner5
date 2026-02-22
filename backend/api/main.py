@@ -2057,6 +2057,52 @@ def delete_booking(booking_id: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ── Carry Forward (Saldo-Übertrag) ────────────────────────────
+
+@app.get("/api/bookings/carry-forward")
+def get_carry_forward(employee_id: int = Query(...), year: int = Query(...)):
+    try:
+        return get_db().get_carry_forward(employee_id=employee_id, year=year)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class CarryForwardSet(BaseModel):
+    employee_id: int
+    year: int
+    hours: float
+
+
+@app.post("/api/bookings/carry-forward")
+def set_carry_forward(body: CarryForwardSet):
+    try:
+        result = get_db().set_carry_forward(
+            employee_id=body.employee_id,
+            year=body.year,
+            hours=body.hours,
+        )
+        return {"ok": True, "record": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class AnnualStatementBody(BaseModel):
+    employee_id: int
+    year: int
+
+
+@app.post("/api/bookings/annual-statement")
+def annual_statement(body: AnnualStatementBody):
+    try:
+        result = get_db().calculate_annual_statement(
+            employee_id=body.employee_id,
+            year=body.year,
+        )
+        return {"ok": True, "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # ── Restrictions ──────────────────────────────────────────────
 
 @app.get("/api/restrictions")

@@ -59,15 +59,133 @@ function SaldoBar({ value, max }: { value: number; max: number }) {
   );
 }
 
+// ── Annual Statement Result Modal ──────────────────────────
+interface AnnualStatementResult {
+  employee_id: number;
+  year: number;
+  saldo: number;
+  carry_in: number;
+  total_saldo: number;
+  should_carry: boolean;
+  next_year: number;
+}
+
+function AnnualStatementModal({
+  result,
+  onApply,
+  onClose,
+}: {
+  result: AnnualStatementResult;
+  onApply: () => void;
+  onClose: () => void;
+}) {
+  const [applying, setApplying] = useState(false);
+  const [applied, setApplied] = useState(false);
+  const [applyError, setApplyError] = useState<string | null>(null);
+
+  const handleApply = async () => {
+    setApplying(true);
+    setApplyError(null);
+    try {
+      await api.setCarryForward({
+        employee_id: result.employee_id,
+        year: result.next_year,
+        hours: result.saldo,
+      });
+      setApplied(true);
+      onApply();
+    } catch (e) {
+      setApplyError(e instanceof Error ? e.message : 'Fehler beim Übertragen');
+    } finally {
+      setApplying(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+        <h2 className="text-lg font-bold text-gray-800 mb-4">📊 Jahresabschluss {result.year}</h2>
+        <div className="space-y-3 mb-5">
+          {result.carry_in !== 0 && (
+            <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
+              <span className="text-sm text-gray-600">Übertrag aus Vorjahr</span>
+              <span className={`font-semibold text-sm ${result.carry_in >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {result.carry_in >= 0 ? '+' : ''}{result.carry_in.toFixed(1)}h
+              </span>
+            </div>
+          )}
+          <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+            <span className="text-sm text-gray-600">Jahressaldo gesamt</span>
+            <span className={`font-semibold ${result.total_saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {result.total_saldo >= 0 ? '+' : ''}{result.total_saldo.toFixed(1)}h
+            </span>
+          </div>
+          <div className="flex justify-between items-center p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <span className="text-sm font-semibold text-gray-700">Übertrag für {result.next_year}</span>
+            <span className={`text-lg font-bold ${result.saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              {result.saldo >= 0 ? '+' : ''}{result.saldo.toFixed(1)}h
+            </span>
+          </div>
+        </div>
+        {applyError && <div className="mb-3 p-2 bg-red-50 text-red-700 rounded text-sm">{applyError}</div>}
+        {applied ? (
+          <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 mb-3">
+            ✓ Übertrag von {result.saldo.toFixed(1)}h wurde für {result.next_year} eingetragen.
+          </div>
+        ) : null}
+        <div className="flex gap-2 justify-end">
+          <button onClick={onClose} className="px-4 py-2 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200">
+            Schließen
+          </button>
+          {!applied && result.should_carry && (
+            <button
+              onClick={handleApply}
+              disabled={applying}
+              className="px-4 py-2 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 disabled:opacity-50"
+            >
+              {applying ? 'Übertrage...' : `→ Als Übertrag für ${result.next_year} buchen`}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Monthly detail panel ────────────────────────────────────
 function DetailPanel({
   detail,
+  year,
   onClose,
 }: {
   detail: ZeitkontoDetail;
+  year: number;
   onClose: () => void;
 }) {
   const maxVal = Math.max(...detail.months.map(m => Math.abs(m.difference)), 1);
+  const [carryForward, setCarryForward] = useState<number | null>(null);
+  const [annualResult, setAnnualResult] = useState<AnnualStatementResult | null>(null);
+  const [runningAnnual, setRunningAnnual] = useState(false);
+  const [annualError, setAnnualError] = useState<string | null>(null);
+
+  useEffect(() => {
+    api.getCarryForward(detail.employee_id, year)
+      .then(r => setCarryForward(r.hours))
+      .catch(() => setCarryForward(null));
+  }, [detail.employee_id, year]);
+
+  const handleJahresabschluss = async () => {
+    setRunningAnnual(true);
+    setAnnualError(null);
+    try {
+      const res = await api.calculateAnnualStatement({ employee_id: detail.employee_id, year });
+      setAnnualResult(res.result);
+    } catch (e) {
+      setAnnualError(e instanceof Error ? e.message : 'Fehler beim Berechnen');
+    } finally {
+      setRunningAnnual(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -83,13 +201,38 @@ function DetailPanel({
             </h2>
             <p className="text-sm text-gray-500">Zeitkonto {detail.year}</p>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-700 text-xl font-bold px-2"
-          >
-            ✕
-          </button>
+          <div className="flex items-center gap-2">
+            {carryForward !== null && carryForward !== 0 && (
+              <span className={`text-sm px-2 py-0.5 rounded font-semibold ${carryForward >= 0 ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
+                Übertrag: {carryForward >= 0 ? '+' : ''}{carryForward.toFixed(1)}h
+              </span>
+            )}
+            <button
+              onClick={handleJahresabschluss}
+              disabled={runningAnnual}
+              className="px-3 py-1.5 bg-green-600 text-white rounded text-sm font-semibold hover:bg-green-700 disabled:opacity-50"
+              title={`Jahresabschluss ${year} berechnen`}
+            >
+              {runningAnnual ? '⟳' : '📊'} Jahresabschluss
+            </button>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-700 text-xl font-bold px-2"
+            >
+              ✕
+            </button>
+          </div>
         </div>
+        {annualError && (
+          <div className="px-5 py-2 bg-red-50 border-b border-red-200 text-sm text-red-700">⚠️ {annualError}</div>
+        )}
+        {annualResult && (
+          <AnnualStatementModal
+            result={annualResult}
+            onApply={() => { /* result logged */ }}
+            onClose={() => setAnnualResult(null)}
+          />
+        )}
 
         {/* Summary row */}
         <div className="grid grid-cols-4 gap-3 p-4 border-b border-gray-100 bg-gray-50">
@@ -101,12 +244,21 @@ function DetailPanel({
             <div className="text-lg font-bold text-blue-700">{detail.total_actual_hours.toFixed(0)}h</div>
             <div className="text-xs text-gray-400">Ist</div>
           </div>
-          <div className="text-center">
-            <div className={`text-lg font-bold ${detail.total_difference >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-              {detail.total_difference >= 0 ? '+' : ''}{detail.total_difference.toFixed(1)}h
+          {carryForward !== null && carryForward !== 0 ? (
+            <div className="text-center">
+              <div className={`text-lg font-bold ${carryForward >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
+                {carryForward >= 0 ? '+' : ''}{carryForward.toFixed(1)}h
+              </div>
+              <div className="text-xs text-blue-400">Übertrag (inkl.)</div>
             </div>
-            <div className="text-xs text-gray-400">Differenz</div>
-          </div>
+          ) : (
+            <div className="text-center">
+              <div className={`text-lg font-bold ${detail.total_difference >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                {detail.total_difference >= 0 ? '+' : ''}{detail.total_difference.toFixed(1)}h
+              </div>
+              <div className="text-xs text-gray-400">Differenz</div>
+            </div>
+          )}
           <div className="text-center">
             <div className={`text-lg font-bold ${detail.total_saldo >= 0 ? 'text-green-700' : 'text-red-700'}`}>
               {detail.total_saldo >= 0 ? '+' : ''}{detail.total_saldo.toFixed(1)}h
@@ -198,7 +350,7 @@ function DetailPanel({
         </div>
 
         <div className="px-5 py-3 border-t border-gray-200 text-xs text-gray-400 flex justify-between items-center">
-          <span>Differenz = Ist − Soll | Kum. Saldo = laufender Jahressaldo inkl. Anpassungen</span>
+          <span>Differenz = Ist − Soll | Kum. Saldo = laufender Jahressaldo inkl. Anpassungen + Übertrag</span>
           <button
             onClick={onClose}
             className="px-3 py-1 bg-slate-200 rounded hover:bg-slate-300 text-gray-700 text-sm"
@@ -484,6 +636,7 @@ export default function Zeitkonto() {
       {selectedDetail && (
         <DetailPanel
           detail={selectedDetail}
+          year={year}
           onClose={() => setSelectedDetail(null)}
         />
       )}

@@ -82,7 +82,7 @@ const navItems: { id: Page; label: string; icon: string; group?: string }[] = [
   { id: 'groups', label: 'Gruppen', icon: '🏢', group: 'Stammdaten' },
   { id: 'shifts', label: 'Schichtarten', icon: '🕐', group: 'Stammdaten' },
   { id: 'leave-types', label: 'Abwesenheitsarten', icon: '📋', group: 'Stammdaten' },
-  { id: 'holidays', label: 'Feiertage', icon: '🎉', group: 'Stammdaten' },
+  { id: 'holidays', label: 'Feiertage', icon: '📅', group: 'Stammdaten' },
   { id: 'workplaces', label: 'Arbeitsplätze', icon: '🏭', group: 'Stammdaten' },
   { id: 'extracharges', label: 'Zeitzuschläge', icon: '⏱️', group: 'Stammdaten' },
   { id: 'einschraenkungen', label: 'Schichteinschränkungen', icon: '🚫', group: 'Stammdaten' },

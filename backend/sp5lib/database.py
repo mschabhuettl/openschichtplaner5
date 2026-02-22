@@ -130,7 +130,24 @@ class SP5Database:
     def get_holidays(self, year: Optional[int] = None) -> List[Dict]:
         rows = self._read('HOLID')
         if year is not None:
-            rows = [r for r in rows if r.get('DATE', '').startswith(str(year))]
+            result = []
+            year_str = str(year)
+            for r in rows:
+                interval = r.get('INTERVAL', 0)
+                date = r.get('DATE', '')
+                if interval == 1:
+                    # Recurring: show every year, replace year in date
+                    if date and len(date) >= 10:
+                        adjusted_date = year_str + date[4:]
+                    else:
+                        adjusted_date = date
+                    row_copy = dict(r)
+                    row_copy['DATE'] = adjusted_date
+                    result.append(row_copy)
+                elif date.startswith(year_str):
+                    result.append(r)
+            result.sort(key=lambda x: x.get('DATE', ''))
+            return result
         rows.sort(key=lambda x: x.get('DATE', ''))
         return rows
 
@@ -2601,6 +2618,82 @@ class SP5Database:
             return 0
         delete_record(filepath, fields, raw_idx)
         return 1
+
+    # ── Carry Forward (Saldo-Übertrag) ────────────────────────
+    def get_carry_forward(self, employee_id: int, year: int) -> Dict:
+        """Read carry-forward booking (TYPE=2) for employee+year from 5BOOK.DBF."""
+        year_str = str(year)
+        for r in self._read('BOOK'):
+            if r.get('EMPLOYEEID') != employee_id:
+                continue
+            if r.get('TYPE') != 2:
+                continue
+            d = r.get('DATE', '')
+            if d and d.startswith(year_str):
+                return {
+                    'employee_id': employee_id,
+                    'year': year,
+                    'hours': float(r.get('VALUE', 0) or 0),
+                    'booking_id': r.get('ID'),
+                }
+        return {'employee_id': employee_id, 'year': year, 'hours': 0.0, 'booking_id': None}
+
+    def set_carry_forward(self, employee_id: int, year: int, hours: float) -> Dict:
+        """Set carry-forward for employee+year. Replaces any existing TYPE=2 entry for that year."""
+        filepath = self._table('BOOK')
+        fields = get_table_fields(filepath)
+        year_str = str(year)
+        # Find and delete existing TYPE=2 entries for this employee+year using raw index
+        existing = read_dbf(filepath)
+        for r in existing:
+            if r.get('EMPLOYEEID') == employee_id and r.get('TYPE') == 2:
+                d = r.get('DATE', '')
+                if d and d.startswith(year_str):
+                    rec_id = r.get('ID')
+                    if rec_id is not None:
+                        raw_idx, _ = self._find_record('BOOK', rec_id)
+                        if raw_idx is not None:
+                            delete_record(filepath, fields, raw_idx)
+        # Append new carry-forward
+        existing2 = read_dbf(filepath)
+        max_id = max((r.get('ID', 0) or 0 for r in existing2), default=0)
+        new_id = max_id + 1
+        date_str = f"{year}-01-01"
+        record = {
+            'ID': new_id,
+            'EMPLOYEEID': employee_id,
+            'DATE': date_str,
+            'TYPE': 2,
+            'VALUE': hours,
+            'NOTE': f'Jahresübertrag {year}',
+            'RESERVED': '',
+        }
+        append_record(filepath, fields, record)
+        return {'employee_id': employee_id, 'year': year, 'hours': hours, 'booking_id': new_id}
+
+    def calculate_annual_statement(self, employee_id: int, year: int) -> Dict:
+        """
+        Calculate annual saldo and return carry-forward for next year.
+        saldo = actual_hours - target_hours + booking_adjustments (excl. TYPE=2)
+        """
+        balance = self.calculate_time_balance(employee_id, year)
+        if not balance:
+            return {'saldo': 0.0, 'should_carry': False, 'employee_id': employee_id, 'year': year}
+        # Exclude existing carry-forward (TYPE=2) from calculation
+        cf = self.get_carry_forward(employee_id, year)
+        carry_in = cf['hours']
+        total_saldo = balance.get('total_saldo', 0.0)
+        # Remove carry_in from saldo (it was already counted as booking_adjustment)
+        net_saldo = round(total_saldo - carry_in, 2)
+        return {
+            'employee_id': employee_id,
+            'year': year,
+            'saldo': net_saldo,
+            'carry_in': carry_in,
+            'total_saldo': total_saldo,
+            'should_carry': net_saldo != 0.0,
+            'next_year': year + 1,
+        }
 
     def calculate_time_balance(self, employee_id: int, year: int) -> Dict:
         """

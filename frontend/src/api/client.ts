@@ -738,6 +738,18 @@ export const api = {
   deleteGroupAccess: (id: number) =>
     deleteReq<{ ok: boolean; deleted: number }>(`/api/group-access/${id}`),
 
+  // ─── Carry Forward (Saldo-Übertrag) ──────────────────────
+  getCarryForward: (employeeId: number, year: number) =>
+    fetchJSON<{ employee_id: number; year: number; hours: number; booking_id: number | null }>(
+      `/api/bookings/carry-forward?employee_id=${employeeId}&year=${year}`
+    ),
+  setCarryForward: (data: { employee_id: number; year: number; hours: number }) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/bookings/carry-forward', data),
+  calculateAnnualStatement: (data: { employee_id: number; year: number }) =>
+    postJSON<{ ok: boolean; result: { employee_id: number; year: number; saldo: number; carry_in: number; total_saldo: number; should_carry: boolean; next_year: number } }>(
+      '/api/bookings/annual-statement', data
+    ),
+
   // ─── Backup / Restore ─────────────────────────────────────
   getBackupUrl: (): string => `${BASE_URL}/api/backup/download`,
 

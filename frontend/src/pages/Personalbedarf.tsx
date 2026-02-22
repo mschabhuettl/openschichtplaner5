@@ -11,9 +11,10 @@ const WEEKDAY_SHORT = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 interface RequirementCellProps {
   req: ShiftRequirement | null;
   onEdit: () => void;
+  actual?: number; // actual staffing count for this weekday/shift (if known)
 }
 
-function RequirementCell({ req, onEdit }: RequirementCellProps) {
+function RequirementCell({ req, onEdit, actual }: RequirementCellProps) {
   if (!req) {
     return (
       <td className="border border-gray-200 px-2 py-2 text-center">
@@ -22,24 +23,35 @@ function RequirementCell({ req, onEdit }: RequirementCellProps) {
           className="text-xs text-gray-300 hover:text-blue-400 transition-colors w-full"
           title="Bedarf festlegen"
         >
-          <span className="block font-mono">–/–</span>
+          <span className="block font-mono">–</span>
         </button>
       </td>
     );
   }
   const { min, max } = req;
+  const isOverMax = actual !== undefined && max > 0 && actual > max;
+
   return (
-    <td className="border border-gray-200 px-2 py-2 text-center">
+    <td className={`border border-gray-200 px-2 py-2 text-center ${isOverMax ? 'bg-red-50' : ''}`}>
       <button
         onClick={onEdit}
         className="w-full rounded hover:bg-blue-50 transition-colors px-1 py-0.5"
-        title="Bearbeiten"
+        title={isOverMax ? `Ist-Besetzung (${actual}) überschreitet Maximum (${max})` : 'Bearbeiten'}
       >
         <span className="block text-xs font-mono">
-          <span className="text-green-700 font-bold">{min}</span>
-          <span className="text-gray-400">/</span>
-          <span className="text-blue-700 font-bold">{max}</span>
+          {max > 0 ? (
+            <>
+              <span className="text-green-700 font-bold">{min}</span>
+              <span className="text-gray-400">–</span>
+              <span className={`font-bold ${isOverMax ? 'text-red-600' : 'text-blue-700'}`}>{max}</span>
+            </>
+          ) : (
+            <span className="text-green-700 font-bold">{min}</span>
+          )}
         </span>
+        {isOverMax && (
+          <span className="block text-xs font-bold text-red-600 mt-0.5">⚠ Ist: {actual}</span>
+        )}
       </button>
     </td>
   );
@@ -359,9 +371,13 @@ function WeeklyTab({
         </div>
         <div className="flex items-center gap-1">
           <span className="font-mono text-green-700 font-bold">2</span>
-          <span className="text-gray-400">/</span>
+          <span className="text-gray-400">–</span>
           <span className="font-mono text-blue-700 font-bold">4</span>
-          <span>= min/max Mitarbeiter</span>
+          <span>= min–max Mitarbeiter (max=0: nur min)</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="inline-block w-3 h-3 rounded bg-red-50 border border-red-200" />
+          <span>Ist-Besetzung über Maximum</span>
         </div>
       </div>
 

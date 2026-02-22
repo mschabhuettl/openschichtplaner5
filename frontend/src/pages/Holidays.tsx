@@ -18,6 +18,55 @@ const EMPTY_FORM: HolidayForm = {
   INTERVAL: 0,
 };
 
+// ── Gauss Easter Algorithm ─────────────────────────────────
+function calculateEaster(year: number): Date {
+  const a = year % 19;
+  const b = Math.floor(year / 100);
+  const c = year % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const month = Math.floor((h + l - 7 * m + 114) / 31);
+  const day = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(year, month - 1, day);
+}
+
+function addDays(date: Date, days: number): Date {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+function toISODate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+// ── Austrian Holidays ─────────────────────────────────────
+function getAustrianHolidays(year: number): { date: string; name: string; interval: number }[] {
+  const easter = calculateEaster(year);
+  return [
+    { date: `${year}-01-01`, name: 'Neujahr', interval: 1 },
+    { date: `${year}-01-06`, name: 'Heilige Drei Könige', interval: 1 },
+    { date: toISODate(addDays(easter, 1)), name: 'Ostermontag', interval: 0 },
+    { date: `${year}-05-01`, name: 'Staatsfeiertag', interval: 1 },
+    { date: toISODate(addDays(easter, 39)), name: 'Christi Himmelfahrt', interval: 0 },
+    { date: toISODate(addDays(easter, 50)), name: 'Pfingstmontag', interval: 0 },
+    { date: toISODate(addDays(easter, 60)), name: 'Fronleichnam', interval: 0 },
+    { date: `${year}-08-15`, name: 'Mariä Himmelfahrt', interval: 1 },
+    { date: `${year}-10-26`, name: 'Nationalfeiertag', interval: 1 },
+    { date: `${year}-11-01`, name: 'Allerheiligen', interval: 1 },
+    { date: `${year}-12-08`, name: 'Mariä Empfängnis', interval: 1 },
+    { date: `${year}-12-25`, name: 'Christtag', interval: 1 },
+    { date: `${year}-12-26`, name: 'Stefanitag', interval: 1 },
+  ];
+}
+
 export default function Holidays() {
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const currentYear = new Date().getFullYear();
@@ -27,6 +76,7 @@ export default function Holidays() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<HolidayForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
   const { toasts, showToast, removeToast } = useToast();
   const [error, setError] = useState<string | null>(null);
 
@@ -87,18 +137,39 @@ export default function Holidays() {
     if (!confirm(`Feiertag "${h.NAME}" wirklich löschen?`)) return;
     try {
       await api.deleteHoliday(h.ID);
-      showToast("Feiertag gelöscht", "success");
+      showToast('Feiertag gelöscht', 'success');
       load();
     } catch (e: unknown) {
       showToast(e instanceof Error ? e.message : 'Fehler beim Löschen', 'error');
     }
   };
 
+  const handleImportAustria = async () => {
+    if (!confirm(`Österreichische Feiertage für ${year} importieren? Bereits vorhandene Feiertage werden nicht doppelt angelegt.`)) return;
+    setImporting(true);
+    try {
+      const atHolidays = getAustrianHolidays(year);
+      const existingDates = new Set(holidays.map(h => h.DATE));
+      const toImport = atHolidays.filter(h => !existingDates.has(h.date));
+      let imported = 0;
+      for (const h of toImport) {
+        await api.createHoliday({ DATE: h.date, NAME: h.name, INTERVAL: h.interval });
+        imported++;
+      }
+      showToast(`${imported} Feiertage importiert (${atHolidays.length - imported} bereits vorhanden)`, 'success');
+      load();
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : 'Fehler beim Importieren', 'error');
+    } finally {
+      setImporting(false);
+    }
+  };
+
   return (
     <div className="p-2 sm:p-4 lg:p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-gray-800">🎉 Feiertage</h1>
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <div className="flex items-center gap-4 flex-wrap">
+          <h1 className="text-xl font-bold text-gray-800">📅 Feiertage</h1>
           <select
             value={year}
             onChange={e => setYear(Number(e.target.value))}
@@ -110,12 +181,22 @@ export default function Holidays() {
           </select>
           <span className="text-sm text-gray-500">{holidays.length} Feiertage</span>
         </div>
-        <button
-          onClick={openCreate}
-          className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
-        >
-          + Neu
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleImportAustria}
+            disabled={importing}
+            className="px-3 py-1.5 bg-red-600 text-white rounded text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-50"
+            title="Österreichische Feiertage für das gewählte Jahr importieren"
+          >
+            {importing ? '⟳ Importiere...' : '🇦🇹 Österreich importieren'}
+          </button>
+          <button
+            onClick={openCreate}
+            className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
+          >
+            + Neu
+          </button>
+        </div>
       </div>
       {loading ? (
         <div className="flex justify-center py-12">
@@ -129,6 +210,7 @@ export default function Holidays() {
                 <th className="px-4 py-2 text-left">Datum</th>
                 <th className="px-4 py-2 text-left">Wochentag</th>
                 <th className="px-4 py-2 text-left">Name</th>
+                <th className="px-4 py-2 text-center">Typ</th>
                 <th className="px-4 py-2 text-center">Aktionen</th>
               </tr>
             </thead>
@@ -139,6 +221,13 @@ export default function Holidays() {
                   <td className="px-4 py-2 text-gray-500">{getWeekday(h.DATE)}</td>
                   <td className="px-4 py-2 font-semibold">{h.NAME}</td>
                   <td className="px-4 py-2 text-center">
+                    {h.INTERVAL === 1 ? (
+                      <span className="inline-block px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs font-semibold">Jährlich</span>
+                    ) : (
+                      <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs">Einmalig</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-2 text-center">
                     <div className="flex gap-1 justify-center">
                       <button onClick={() => openEdit(h)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>
                       <button onClick={() => handleDelete(h)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Löschen</button>
@@ -147,7 +236,7 @@ export default function Holidays() {
                 </tr>
               ))}
               {holidays.length === 0 && (
-                <tr><td colSpan={4} className="text-center py-8 text-gray-400">Keine Feiertage für {year}</td></tr>
+                <tr><td colSpan={5} className="text-center py-8 text-gray-400">Keine Feiertage für {year}</td></tr>
               )}
             </tbody>
           </table>
@@ -182,14 +271,14 @@ export default function Holidays() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Wiederkehrend</label>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Typ</label>
                 <select
                   value={form.INTERVAL}
                   onChange={e => setForm(f => ({ ...f, INTERVAL: parseInt(e.target.value) || 0 }))}
                   className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value={0}>Einmalig</option>
-                  <option value={1}>Jährlich</option>
+                  <option value={0}>Einmalig (festes Jahr)</option>
+                  <option value={1}>Jährlich wiederkehrend</option>
                 </select>
               </div>
             </div>

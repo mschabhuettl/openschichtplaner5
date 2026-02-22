@@ -7,6 +7,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import Optional, List
 from sp5lib.database import SP5Database
@@ -38,9 +40,21 @@ def get_db() -> SP5Database:
 
 # ── Routes ─────────────────────────────────────────────────────
 
-@app.get("/")
+@app.get("/api")
 def root():
     return {"service": "OpenSchichtplaner5 API", "version": "0.1.0", "backend": "dbf", "db_path": DB_PATH}
+
+
+@app.get("/")
+async def frontend_root():
+    """Serve the React frontend."""
+    _dist = os.path.normpath(
+        os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'dist')
+    )
+    index = os.path.join(_dist, 'index.html')
+    if os.path.exists(index):
+        return FileResponse(index)
+    return {"service": "OpenSchichtplaner5 API", "version": "0.1.0"}
 
 
 @app.get("/api/stats")
@@ -3501,6 +3515,22 @@ def get_overtime_summary(
             'employee_count': len(rows),
         },
     }
+
+
+# ── Frontend static files (muss NACH allen /api-Routen stehen!) ──
+_FRONTEND_DIST = os.path.normpath(
+    os.path.join(os.path.dirname(__file__), '..', '..', 'frontend', 'dist')
+)
+
+if os.path.isdir(_FRONTEND_DIST):
+    # Alle Assets (JS, CSS, PNG …) direkt servieren
+    app.mount("/assets", StaticFiles(directory=os.path.join(_FRONTEND_DIST, "assets")), name="assets")
+
+    # Alle anderen Routen → index.html (SPA-Fallback für React Router)
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def spa_fallback(full_path: str):
+        index = os.path.join(_FRONTEND_DIST, "index.html")
+        return FileResponse(index)
 
 
 if __name__ == "__main__":

@@ -1,33 +1,35 @@
 #!/bin/bash
-# OpenSchichtplaner5 - Start script
+# OpenSchichtplaner5 — Startscript
+# Startet Backend + Frontend auf http://localhost:8000
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-export SP5_DB_PATH="${SP5_DB_PATH:-$SCRIPT_DIR/../sp5_db/Daten}"
+set -e
 
-echo "🦞 OpenSchichtplaner5"
-echo "DB: $SP5_DB_PATH"
-echo ""
+REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
+BACKEND_DIR="$REPO_DIR/backend"
+FRONTEND_DIR="$REPO_DIR/frontend"
+DB_PATH="${SP5_DB_PATH:-$REPO_DIR/../sp5_db/Daten}"
 
-# Start backend
-echo "Starting API backend on :8000..."
-cd "$SCRIPT_DIR/backend"
-~/.local/bin/python3 -m uvicorn api.main:app --host 0.0.0.0 --port 8000 &
-BACKEND_PID=$!
+echo "🧸 OpenSchichtplaner5"
+echo "========================"
 
-sleep 2
+# 1. Frontend bauen (falls dist/ fehlt oder veraltet)
+if [ ! -f "$FRONTEND_DIR/dist/index.html" ]; then
+  echo "📦 Frontend wird gebaut..."
+  cd "$FRONTEND_DIR"
+  npm install --silent
+  npm run build --silent
+  echo "✓ Frontend gebaut"
+fi
 
-# Start frontend
-echo "Starting frontend on :5173..."
-cd "$SCRIPT_DIR/frontend"
-npm run dev -- --host &
-FRONTEND_PID=$!
+# 2. Backend starten
+echo "🚀 Starte Backend auf http://localhost:8000 ..."
+cd "$BACKEND_DIR"
 
-echo ""
-echo "✅ Running!"
-echo "   API:      http://localhost:8000"
-echo "   Frontend: http://localhost:5173"
-echo ""
-echo "Press Ctrl+C to stop"
+SP5_DB_PATH="$DB_PATH" \
+  python3 -m uvicorn api.main:app \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --reload
 
-trap "kill $BACKEND_PID $FRONTEND_PID 2>/dev/null" EXIT
-wait
+# Browser öffnen (optional, auskommentiert)
+# sleep 2 && xdg-open http://localhost:8000 2>/dev/null || open http://localhost:8000 2>/dev/null || true

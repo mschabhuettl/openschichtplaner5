@@ -238,5 +238,6237 @@
     "entity": "absence",
     "entity_id": 0,
     "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:01",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:02",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:03",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:04",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:05",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:06",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:07",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:08",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:09",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "absence",
+    "entity_id": 0,
+    "details": "POST /api/absences"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:10",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:11",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:11",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:11",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:11",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:11",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:11",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:11",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:11",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:11",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:11",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:11",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:11",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:11",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
+  },
+  {
+    "timestamp": "2026-02-22T04:49:11",
+    "user": "api",
+    "action": "CREATE",
+    "entity": "schedule",
+    "entity_id": 0,
+    "details": "POST /api/schedule"
   }
 ]

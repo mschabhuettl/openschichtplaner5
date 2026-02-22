@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { api } from '../api/client';
 import type { Restriction } from '../api/client';
 import type { Employee, ShiftType } from '../types';
@@ -204,6 +204,11 @@ export default function Employees() {
   const [restrSaving, setRestrSaving] = useState(false);
   const [restrError, setRestrError] = useState<string | null>(null);
 
+  // ── Photo state ─────────────────────────────────────────────
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
   const load = () => {
     setLoading(true);
     api.getEmployees().then(data => {
@@ -218,6 +223,34 @@ export default function Employees() {
   useEffect(() => {
     api.getShifts().then(setShifts).catch(() => {});
   }, []);
+
+  // Reset photo when modal opens/closes
+  useEffect(() => {
+    if (showModal && editId !== null) {
+      // Try to load photo (will fail with 404 if none — that's fine)
+      const url = api.getEmployeePhotoUrl(editId);
+      setPhotoUrl(url + '?t=' + Date.now());
+    } else {
+      setPhotoUrl(null);
+    }
+  }, [showModal, editId]);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || editId === null) return;
+    setPhotoUploading(true);
+    try {
+      await api.uploadEmployeePhoto(editId, file);
+      const url = api.getEmployeePhotoUrl(editId);
+      setPhotoUrl(url + '?t=' + Date.now());
+      showToast('Foto hochgeladen ✓', 'success');
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Upload fehlgeschlagen', 'error');
+    } finally {
+      setPhotoUploading(false);
+      if (photoInputRef.current) photoInputRef.current.value = '';
+    }
+  };
 
   const filtered = employees.filter(e =>
     `${e.NAME} ${e.FIRSTNAME} ${e.SHORTNAME} ${e.NUMBER}`.toLowerCase().includes(search.toLowerCase())
@@ -533,6 +566,57 @@ export default function Employees() {
             {/* Tab: Grunddaten */}
             {activeTab === 'basic' && (
               <div>
+                {/* Photo Avatar (only when editing) */}
+                {editId !== null && (
+                  <div className="flex items-center gap-4 mb-4">
+                    <div
+                      className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-100 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => photoInputRef.current?.click()}
+                      title="Foto hochladen"
+                    >
+                      {photoUrl ? (
+                        <img
+                          src={photoUrl}
+                          alt="Mitarbeiter Foto"
+                          className="w-full h-full object-cover"
+                          onError={() => setPhotoUrl(null)}
+                        />
+                      ) : (
+                        <span className="text-xl font-bold text-gray-400">
+                          {(form.NAME.charAt(0) || '?').toUpperCase()}{(form.FIRSTNAME.charAt(0) || '').toUpperCase()}
+                        </span>
+                      )}
+                      {photoUploading && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        </div>
+                      )}
+                      <div className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-0.5">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                        </svg>
+                      </div>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      <p className="font-semibold text-gray-700">Foto</p>
+                      <p>JPG, PNG oder GIF</p>
+                      <button
+                        type="button"
+                        onClick={() => photoInputRef.current?.click()}
+                        className="mt-1 text-blue-600 hover:underline"
+                      >
+                        {photoUrl ? 'Foto ändern' : 'Foto hochladen'}
+                      </button>
+                    </div>
+                    <input
+                      ref={photoInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/gif"
+                      className="hidden"
+                      onChange={handlePhotoUpload}
+                    />
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Nachname *</label>

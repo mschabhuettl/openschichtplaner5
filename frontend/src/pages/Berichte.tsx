@@ -397,6 +397,130 @@ ${rows}
   printHtml(html, `Stunden-Auswertung ${monthStr} ${year}`);
 }
 
+// ── Report: Urlaubsantrag ─────────────────────────────────────
+
+function countWorkdays(from: Date, to: Date): number {
+  let count = 0;
+  const cur = new Date(from);
+  while (cur <= to) {
+    const d = cur.getDay();
+    if (d !== 0 && d !== 6) count++;
+    cur.setDate(cur.getDate() + 1);
+  }
+  return count;
+}
+
+async function reportUrlaubsantrag(
+  employeeId: number,
+  fromDate: string,
+  toDate: string,
+  employees: Employee[],
+) {
+  if (!employeeId || !fromDate || !toDate) {
+    alert('Bitte Mitarbeiter und Zeitraum auswählen.');
+    return;
+  }
+  const emp = employees.find(e => e.ID === employeeId);
+  if (!emp) { alert('Mitarbeiter nicht gefunden.'); return; }
+
+  const from = new Date(fromDate);
+  const to = new Date(toDate);
+  if (from > to) { alert('Von-Datum muss vor Bis-Datum liegen.'); return; }
+
+  const workdays = countWorkdays(from, to);
+  const year = from.getFullYear();
+
+  // Load entitlements and used absences
+  const [entitlements, absences] = await Promise.all([
+    api.getLeaveEntitlements({ year, employee_id: employeeId }),
+    api.getAbsences({ year, employee_id: employeeId }),
+  ]);
+
+  // Find total entitlement for year (vacation leave types)
+  const leaveTypes = await api.getLeaveTypes();
+  const vacationLtIds = new Set(leaveTypes.filter(lt => lt.ENTITLED).map(lt => lt.ID));
+  const entTotal = entitlements
+    .filter(e => e.year === year && vacationLtIds.has(e.leave_type_id))
+    .reduce((sum, e) => sum + e.entitlement, 0);
+  const used = absences.filter(a => vacationLtIds.has(a.leave_type_id ?? 0)).length;
+  const remaining = entTotal - used - workdays;
+
+  const now = new Date().toLocaleDateString('de-AT');
+  const fromStr = from.toLocaleDateString('de-AT');
+  const toStr = to.toLocaleDateString('de-AT');
+
+  const html = `
+<div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif;font-size:13px;padding:16px;">
+  <div style="text-align:center;border-top:3px double #333;padding-top:8px;margin-bottom:8px;">
+    <div style="font-size:18px;font-weight:bold;letter-spacing:2px;margin-bottom:4px;">URLAUBSANTRAG</div>
+  </div>
+  <div style="border-top:3px double #333;margin-bottom:16px;"></div>
+
+  <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
+    <tr>
+      <td style="padding:4px 8px;font-weight:bold;width:40%">Mitarbeiter:</td>
+      <td style="padding:4px 8px">${emp.NAME}, ${emp.FIRSTNAME}</td>
+    </tr>
+    <tr>
+      <td style="padding:4px 8px;font-weight:bold">Personalnummer:</td>
+      <td style="padding:4px 8px">${emp.NUMBER || '—'}</td>
+    </tr>
+  </table>
+
+  <div style="border-top:1px solid #aaa;margin:12px 0;"></div>
+
+  <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
+    <tr>
+      <td style="padding:4px 8px;font-weight:bold;width:40%">Urlaubszeitraum:</td>
+      <td style="padding:4px 8px">${fromStr} bis ${toStr}</td>
+    </tr>
+    <tr>
+      <td style="padding:4px 8px;font-weight:bold">Anzahl Tage:</td>
+      <td style="padding:4px 8px"><strong>${workdays} Arbeitstage</strong></td>
+    </tr>
+  </table>
+
+  <div style="border-top:1px solid #aaa;margin:12px 0;"></div>
+
+  <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+    <tr>
+      <td style="padding:4px 8px;font-weight:bold;width:40%">Urlaubsanspruch ${year}:</td>
+      <td style="padding:4px 8px">${entTotal} Tage</td>
+    </tr>
+    <tr>
+      <td style="padding:4px 8px;font-weight:bold">Bereits verbraucht:</td>
+      <td style="padding:4px 8px">${used} Tage</td>
+    </tr>
+    <tr>
+      <td style="padding:4px 8px;font-weight:bold">Nach diesem Urlaub verbleibend:</td>
+      <td style="padding:4px 8px;font-weight:bold;color:${remaining < 0 ? '#dc2626' : '#16a34a'}">${remaining} Tage</td>
+    </tr>
+  </table>
+
+  <div style="border-top:1px solid #aaa;margin:12px 0;"></div>
+
+  <table style="width:100%;border-collapse:collapse;margin-top:24px;">
+    <tr>
+      <td style="padding:8px;width:50%;vertical-align:bottom;">
+        <div>Datum: ___________________</div>
+        <div style="margin-top:24px;">Unterschrift Mitarbeiter:</div>
+        <div style="border-bottom:1px solid #333;margin-top:24px;"></div>
+      </td>
+      <td style="padding:8px;width:50%;vertical-align:bottom;">
+        <div>Genehmigt am: _______________</div>
+        <div style="margin-top:24px;">Unterschrift Vorgesetzter:</div>
+        <div style="border-bottom:1px solid #333;margin-top:24px;"></div>
+      </td>
+    </tr>
+  </table>
+
+  <div style="border-top:3px double #333;margin-top:20px;"></div>
+  <div style="text-align:center;font-size:10px;color:#888;margin-top:4px">Erstellt am ${now}</div>
+</div>`;
+
+  printHtml(html, `Urlaubsantrag – ${emp.NAME} ${emp.FIRSTNAME}`);
+}
+
 // ── Main Component ────────────────────────────────────────────
 
 export default function Berichte() {
@@ -407,6 +531,11 @@ export default function Berichte() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [shifts, setShifts] = useState<ShiftType[]>([]);
+
+  // Urlaubsantrag parameters
+  const [urlaubEmpId, setUrlaubEmpId] = useState<number | null>(null);
+  const [urlaubFrom, setUrlaubFrom] = useState('');
+  const [urlaubTo, setUrlaubTo] = useState('');
   const [loading, setLoading] = useState(false);
   const { toasts, showToast, removeToast } = useToast();
 
@@ -488,6 +617,13 @@ export default function Berichte() {
       action: () => run(() => reportStundenAuswertung(year, month, groupId, employees, groups)),
       color: 'teal',
     },
+    {
+      icon: '📝',
+      title: 'Urlaubsantrag',
+      description: 'Druckbarer Urlaubsantrag mit Unterschriftsfeldern, Urlaubsanspruch und Resturlaub.',
+      action: () => run(() => reportUrlaubsantrag(urlaubEmpId ?? 0, urlaubFrom, urlaubTo, employees)),
+      color: 'amber',
+    },
   ];
 
   const colorMap: Record<string, string> = {
@@ -498,6 +634,7 @@ export default function Berichte() {
     orange: 'bg-orange-50 border-orange-200 hover:border-orange-400',
     red: 'bg-red-50 border-red-200 hover:border-red-400',
     teal: 'bg-teal-50 border-teal-200 hover:border-teal-400',
+    amber: 'bg-amber-50 border-amber-200 hover:border-amber-400',
   };
 
   return (
@@ -534,6 +671,46 @@ export default function Berichte() {
           </select>
         </div>
       </div>
+
+      {/* Urlaubsantrag Parameters */}
+      {!loading && (
+        <div className="bg-white rounded-lg shadow p-4 mb-4 border-l-4 border-amber-400">
+          <div className="font-semibold text-gray-700 mb-2 text-sm">📝 Urlaubsantrag – Parameter</div>
+          <div className="flex flex-wrap gap-3 items-end">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Mitarbeiter</label>
+              <select
+                value={urlaubEmpId ?? ''}
+                onChange={e => setUrlaubEmpId(e.target.value ? parseInt(e.target.value) : null)}
+                className="px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-white min-w-[180px]"
+              >
+                <option value="">— bitte wählen —</option>
+                {employees.map(e => (
+                  <option key={e.ID} value={e.ID}>{e.NAME} {e.FIRSTNAME}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Von</label>
+              <input
+                type="date"
+                value={urlaubFrom}
+                onChange={e => setUrlaubFrom(e.target.value)}
+                className="px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Bis</label>
+              <input
+                type="date"
+                value={urlaubTo}
+                onChange={e => setUrlaubTo(e.target.value)}
+                className="px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Report cards */}
       {loading ? (

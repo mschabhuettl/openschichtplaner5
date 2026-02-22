@@ -750,6 +750,27 @@ export const api = {
       '/api/bookings/annual-statement', data
     ),
 
+  // ─── Employee Photo ────────────────────────────────────────
+  getEmployeePhotoUrl: (id: number): string => `${BASE_URL}/api/employees/${id}/photo`,
+
+  uploadEmployeePhoto: async (id: number, file: File): Promise<{ ok: boolean; photo_url: string }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch(`${BASE_URL}/api/employees/${id}/photo`, {
+      method: 'POST',
+      body: formData,
+    });
+    if (!res.ok) {
+      const detail = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(detail.detail || res.statusText);
+    }
+    return res.json();
+  },
+
+  // ─── Change Password ───────────────────────────────────────
+  changePassword: (userId: number, newPassword: string) =>
+    postJSON<{ ok: boolean }>(`/api/users/${userId}/change-password`, { new_password: newPassword }),
+
   // ─── Backup / Restore ─────────────────────────────────────
   getBackupUrl: (): string => `${BASE_URL}/api/backup/download`,
 

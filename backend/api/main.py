@@ -372,6 +372,25 @@ def delete_user(user_id: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+class ChangePasswordBody(BaseModel):
+    new_password: str
+
+
+@app.post("/api/users/{user_id}/change-password")
+def change_user_password(user_id: int, body: ChangePasswordBody):
+    if not body.new_password or len(body.new_password.strip()) < 1:
+        raise HTTPException(status_code=400, detail="Passwort darf nicht leer sein")
+    try:
+        ok = get_db().change_password(user_id, body.new_password)
+        if not ok:
+            raise HTTPException(status_code=404, detail="Benutzer nicht gefunden")
+        return {"ok": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/api/auth/login")
 def login(body: LoginBody):
     """Simple login: verify username+password against 5USER.DBF."""
@@ -997,6 +1016,23 @@ def delete_employee(emp_id: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ── Employee Photo Upload ─────────────────────────────────────
+
+_PHOTOS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'uploads', 'photos')
+
+
+@app.get("/api/employees/{emp_id}/photo")
+async def get_employee_photo(emp_id: int):
+    from fastapi.responses import FileResponse as _FileResponse
+    import pathlib
+    photos_dir = pathlib.Path(_PHOTOS_DIR)
+    for ext in ('.jpg', '.jpeg', '.png', '.gif'):
+        p = photos_dir / f"{emp_id}{ext}"
+        if p.exists():
+            return _FileResponse(str(p))
+    raise HTTPException(status_code=404, detail="Kein Foto vorhanden")
+
+
 # ── Write: Groups ─────────────────────────────────────────────
 
 class GroupCreate(BaseModel):
@@ -1089,6 +1125,21 @@ class ShiftCreate(BaseModel):
     COLORTEXT: int = 0
     COLORBAR: int = 0
     DURATION0: float = 0.0
+    DURATION1: Optional[float] = None
+    DURATION2: Optional[float] = None
+    DURATION3: Optional[float] = None
+    DURATION4: Optional[float] = None
+    DURATION5: Optional[float] = None
+    DURATION6: Optional[float] = None
+    DURATION7: Optional[float] = None
+    STARTEND0: Optional[str] = None
+    STARTEND1: Optional[str] = None
+    STARTEND2: Optional[str] = None
+    STARTEND3: Optional[str] = None
+    STARTEND4: Optional[str] = None
+    STARTEND5: Optional[str] = None
+    STARTEND6: Optional[str] = None
+    STARTEND7: Optional[str] = None
     HIDE: bool = False
 
 
@@ -1099,6 +1150,21 @@ class ShiftUpdate(BaseModel):
     COLORTEXT: Optional[int] = None
     COLORBAR: Optional[int] = None
     DURATION0: Optional[float] = None
+    DURATION1: Optional[float] = None
+    DURATION2: Optional[float] = None
+    DURATION3: Optional[float] = None
+    DURATION4: Optional[float] = None
+    DURATION5: Optional[float] = None
+    DURATION6: Optional[float] = None
+    DURATION7: Optional[float] = None
+    STARTEND0: Optional[str] = None
+    STARTEND1: Optional[str] = None
+    STARTEND2: Optional[str] = None
+    STARTEND3: Optional[str] = None
+    STARTEND4: Optional[str] = None
+    STARTEND5: Optional[str] = None
+    STARTEND6: Optional[str] = None
+    STARTEND7: Optional[str] = None
     POSITION: Optional[int] = None
     HIDE: Optional[bool] = None
 
@@ -2280,6 +2346,49 @@ def get_overtime_records(
 # ── Import endpoints ─────────────────────────────────────────
 
 from fastapi import UploadFile, File
+
+
+@app.post("/api/employees/{emp_id}/photo")
+async def upload_employee_photo(emp_id: int, file: UploadFile = File(...)):
+    """Upload a photo for an employee (JPG/PNG/GIF)."""
+    import pathlib
+    photos_dir = pathlib.Path(_PHOTOS_DIR)
+    photos_dir.mkdir(parents=True, exist_ok=True)
+
+    db = get_db()
+    emp = db.get_employee(emp_id)
+    if not emp:
+        raise HTTPException(status_code=404, detail=f"Mitarbeiter {emp_id} nicht gefunden")
+
+    ct = (file.content_type or '').lower()
+    allowed = ('image/jpeg', 'image/png', 'image/gif')
+    if ct not in allowed:
+        raise HTTPException(status_code=400, detail="Nur JPG, PNG oder GIF erlaubt")
+
+    ext = '.jpg'
+    if ct == 'image/png':
+        ext = '.png'
+    elif ct == 'image/gif':
+        ext = '.gif'
+
+    # Remove old photos for this employee
+    for old in photos_dir.glob(f"{emp_id}.*"):
+        try:
+            old.unlink()
+        except OSError:
+            pass
+
+    dest = photos_dir / f"{emp_id}{ext}"
+    content = await file.read()
+    dest.write_bytes(content)
+
+    rel_path = f"uploads/photos/{emp_id}{ext}"
+    try:
+        db.update_employee(emp_id, {'PHOTO': rel_path})
+    except Exception:
+        pass  # best effort
+
+    return {"ok": True, "photo_url": f"/api/employees/{emp_id}/photo", "path": rel_path}
 
 
 def _decode_csv(content: bytes) -> str:

@@ -1670,12 +1670,24 @@ class SP5Database:
             'NOTE1', 'NOTE2', 'NOTE3', 'NOTE4',
             'ARBITR1', 'ARBITR2', 'ARBITR3',
             'CFGLABEL', 'CBKLABEL', 'CBKSCHED',
+            'PHOTO',
         )
         for key in all_updatable:
             if key in data and data[key] is not None and key in field_names:
                 update_data[key] = data[key]
         update_record(filepath, fields, raw_idx, update_data)
         return {'id': emp_id, **update_data}
+
+    def change_password(self, user_id: int, new_password_plain: str) -> bool:
+        """Change a user's password. Returns True if successful, False if user not found."""
+        filepath = self._table('USER')
+        fields = get_table_fields(filepath)
+        raw_idx, _ = self._find_record('USER', user_id)
+        if raw_idx is None:
+            return False
+        digest = self._hash_password(new_password_plain)
+        update_record(filepath, fields, raw_idx, {'DIGEST': digest})
+        return True
 
     def delete_employee(self, emp_id: int) -> int:
         filepath = self._table('EMPL')
@@ -1764,6 +1776,7 @@ class SP5Database:
     def create_shift(self, data: dict) -> dict:
         filepath = self._table('SHIFT')
         fields = get_table_fields(filepath)
+        field_names = {f['name'] for f in fields}
         new_id = self._next_id('SHIFT')
         rows = self._read('SHIFT')
         max_pos = max((r.get('POSITION', 0) or 0 for r in rows), default=0) + 1
@@ -1779,19 +1792,39 @@ class SP5Database:
             'HIDE': 1 if data.get('HIDE') else 0,
             'RESERVED': '',
         }
+        # Add per-weekday duration/startend fields if present in schema
+        for i in range(1, 8):
+            dk = f'DURATION{i}'
+            sk = f'STARTEND{i}'
+            if dk in field_names and dk in data and data[dk] is not None:
+                record[dk] = data[dk]
+            if sk in field_names and sk in data and data[sk] is not None:
+                record[sk] = data[sk]
+        if 'STARTEND0' in field_names and 'STARTEND0' in data and data['STARTEND0'] is not None:
+            record['STARTEND0'] = data['STARTEND0']
         append_record(filepath, fields, record)
         return {**record, 'id': new_id}
 
     def update_shift(self, shift_id: int, data: dict) -> dict:
         filepath = self._table('SHIFT')
         fields = get_table_fields(filepath)
+        field_names = {f['name'] for f in fields}
         raw_idx, _ = self._find_record('SHIFT', shift_id)
         if raw_idx is None:
             raise ValueError(f"Shift {shift_id} not found")
         update_data = {}
-        for key in ('NAME', 'SHORTNAME', 'POSITION', 'COLORTEXT', 'COLORBAR', 'COLORBK', 'DURATION0', 'HIDE'):
+        base_keys = ('NAME', 'SHORTNAME', 'POSITION', 'COLORTEXT', 'COLORBAR', 'COLORBK', 'DURATION0', 'HIDE')
+        for key in base_keys:
             if key in data:
                 update_data[key] = data[key]
+        # Per-weekday duration/startend fields
+        for i in range(8):
+            dk = f'DURATION{i}'
+            sk = f'STARTEND{i}'
+            if dk in data and dk in field_names:
+                update_data[dk] = data[dk]
+            if sk in data and sk in field_names:
+                update_data[sk] = data[sk]
         update_record(filepath, fields, raw_idx, update_data)
         return {'id': shift_id, **update_data}
 

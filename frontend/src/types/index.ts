@@ -42,6 +42,8 @@ export interface Employee {
   CBKLABEL_HEX?: string;
   CBKSCHED?: number;
   CBKSCHED_HEX?: string;
+  // Photo
+  PHOTO?: string;
 }
 
 export interface Group {
@@ -77,6 +79,23 @@ export interface ShiftType {
   HIDE: boolean;
   TIMES_BY_WEEKDAY: Record<string, { start: string; end: string } | null>;
   DURATION0: number;
+  // Per-weekday durations (1=Mo, 2=Di, 3=Mi, 4=Do, 5=Fr, 6=Sa, 7=So)
+  DURATION1?: number;
+  DURATION2?: number;
+  DURATION3?: number;
+  DURATION4?: number;
+  DURATION5?: number;
+  DURATION6?: number;
+  DURATION7?: number;
+  // Per-weekday start/end times (0=default, 1-7 weekdays)
+  STARTEND0?: string;
+  STARTEND1?: string;
+  STARTEND2?: string;
+  STARTEND3?: string;
+  STARTEND4?: string;
+  STARTEND5?: string;
+  STARTEND6?: string;
+  STARTEND7?: string;
 }
 
 export interface LeaveType {

@@ -12,12 +12,38 @@ function hexToBGR(hex: string): number {
   return (b << 16) | (g << 8) | r;
 }
 
+// Parse "HH:MM-HH:MM" startend string → {start, end}
+function parseStartend(s?: string | null): { start: string; end: string } {
+  if (!s || !s.includes('-')) return { start: '', end: '' };
+  const parts = s.split('-');
+  return { start: parts[0] || '', end: parts[1] || '' };
+}
+
+// Format {start, end} → "HH:MM-HH:MM"
+function formatStartend(start: string, end: string): string {
+  if (!start && !end) return '';
+  return `${start}-${end}`;
+}
+
+const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+
+interface WeekdayTime {
+  start: string;
+  end: string;
+  duration: number;
+}
+
+const EMPTY_WEEKDAY_TIME: WeekdayTime = { start: '', end: '', duration: 0 };
+
 interface ShiftForm {
   NAME: string;
   SHORTNAME: string;
-  colorHex: string;   // display as #RRGGBB
+  colorHex: string;
   DURATION0: number;
+  STARTEND0: string;  // "HH:MM-HH:MM"
   HIDE: boolean;
+  useIndividual: boolean;  // toggle for per-weekday times
+  weekdays: WeekdayTime[];  // index 0=Mo..6=So (maps to DURATION1..7, STARTEND1..7)
 }
 
 const EMPTY_FORM: ShiftForm = {
@@ -25,7 +51,10 @@ const EMPTY_FORM: ShiftForm = {
   SHORTNAME: '',
   colorHex: '#FFFFFF',
   DURATION0: 8,
+  STARTEND0: '',
   HIDE: false,
+  useIndividual: false,
+  weekdays: Array(7).fill(null).map(() => ({ ...EMPTY_WEEKDAY_TIME })),
 };
 
 export default function Shifts() {
@@ -57,12 +86,30 @@ export default function Shifts() {
 
   const openEdit = (s: ShiftType) => {
     setEditId(s.ID);
+    // Build weekday times from DURATION1-7 and STARTEND1-7
+    const weekdays: WeekdayTime[] = Array(7).fill(null).map((_, i) => {
+      const dKey = `DURATION${i + 1}` as keyof ShiftType;
+      const sKey = `STARTEND${i + 1}` as keyof ShiftType;
+      const dur = s[dKey] as number | undefined;
+      const se = s[sKey] as string | undefined;
+      const parsed = parseStartend(se);
+      return {
+        start: parsed.start,
+        end: parsed.end,
+        duration: dur ?? 0,
+      };
+    });
+    // Detect if any weekday-specific data is set
+    const hasIndividual = weekdays.some(w => w.duration > 0 || w.start || w.end);
     setForm({
       NAME: s.NAME || '',
       SHORTNAME: s.SHORTNAME || '',
       colorHex: s.COLORBK_HEX || '#FFFFFF',
       DURATION0: s.DURATION0 || 0,
+      STARTEND0: s.STARTEND0 || '',
       HIDE: s.HIDE || false,
+      useIndividual: hasIndividual,
+      weekdays,
     });
     setError(null);
     setShowModal(true);
@@ -71,19 +118,36 @@ export default function Shifts() {
   const handleSave = async () => {
     setSaving(true);
     setError(null);
-    const payload = {
+
+    const payload: Record<string, unknown> = {
       NAME: form.NAME,
       SHORTNAME: form.SHORTNAME,
       COLORBK: hexToBGR(form.colorHex),
       DURATION0: form.DURATION0,
+      STARTEND0: form.STARTEND0 || null,
       HIDE: form.HIDE,
     };
+
+    if (form.useIndividual) {
+      form.weekdays.forEach((wd, i) => {
+        payload[`DURATION${i + 1}`] = wd.duration || null;
+        const se = formatStartend(wd.start, wd.end);
+        payload[`STARTEND${i + 1}`] = se || null;
+      });
+    } else {
+      // Clear all per-weekday fields
+      for (let i = 1; i <= 7; i++) {
+        payload[`DURATION${i}`] = null;
+        payload[`STARTEND${i}`] = null;
+      }
+    }
+
     try {
       if (editId !== null) {
-        await api.updateShift(editId, payload);
+        await api.updateShift(editId, payload as Partial<ShiftType>);
         showToast('Schichtart aktualisiert ✓', 'success');
       } else {
-        await api.createShift(payload);
+        await api.createShift(payload as Partial<ShiftType>);
         showToast('Schichtart erstellt ✓', 'success');
       }
       setShowModal(false);
@@ -106,6 +170,13 @@ export default function Shifts() {
       showToast(e instanceof Error ? e.message : 'Fehler beim Löschen', 'error');
     }
   };
+
+  // Check if shift has individual weekday times
+  const hasIndividualTimes = (s: ShiftType) =>
+    [1,2,3,4,5,6,7].some(i => {
+      const d = s[`DURATION${i}` as keyof ShiftType] as number | undefined;
+      return d != null && d > 0;
+    });
 
   return (
     <div className="p-4 sm:p-6">
@@ -145,6 +216,7 @@ export default function Shifts() {
                   const weekdayTime = times['0'] || times['1'] || null;
                   const satTime = times['5'] || null;
                   const sunTime = times['6'] || null;
+                  const indiv = hasIndividualTimes(s);
                   return (
                     <tr key={s.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}>
                       <td className="px-4 py-2">
@@ -158,13 +230,15 @@ export default function Shifts() {
                       <td className="px-4 py-2 font-semibold">{s.NAME}</td>
                       <td className="px-4 py-2 text-gray-500">{s.SHORTNAME}</td>
                       <td className="px-4 py-2 text-center text-gray-600 font-mono text-xs">
-                        {weekdayTime ? `${weekdayTime.start}–${weekdayTime.end}` : '—'}
+                        {indiv
+                          ? <span className="text-purple-600 font-semibold">Individuell</span>
+                          : weekdayTime ? `${weekdayTime.start}–${weekdayTime.end}` : '—'}
                       </td>
                       <td className="px-4 py-2 text-center text-gray-500 font-mono text-xs">
-                        {satTime ? `${satTime.start}–${satTime.end}` : '—'}
+                        {indiv ? '' : satTime ? `${satTime.start}–${satTime.end}` : '—'}
                       </td>
                       <td className="px-4 py-2 text-center text-gray-500 font-mono text-xs">
-                        {sunTime ? `${sunTime.start}–${sunTime.end}` : '—'}
+                        {indiv ? '' : sunTime ? `${sunTime.start}–${sunTime.end}` : '—'}
                       </td>
                       <td className="px-4 py-2 text-right text-gray-600">
                         {s.DURATION0 ? `${s.DURATION0}h` : '—'}
@@ -192,11 +266,11 @@ export default function Shifts() {
               const weekdayTime = times['0'] || times['1'] || null;
               const satTime = times['5'] || null;
               const sunTime = times['6'] || null;
+              const indiv = hasIndividualTimes(s);
               return (
                 <div key={s.ID} className="bg-white rounded-lg shadow p-4 border border-gray-100">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      {/* Large color swatch */}
                       <div
                         className="w-14 h-12 rounded-lg border border-gray-200 flex items-center justify-center text-sm font-bold shadow-sm flex-shrink-0"
                         style={{ backgroundColor: s.COLORBK_HEX, color: s.COLORBK_LIGHT ? '#333' : '#fff' }}
@@ -207,9 +281,12 @@ export default function Shifts() {
                         <div className="font-bold text-gray-900 truncate">{s.NAME}</div>
                         <div className="text-xs text-gray-500 mt-0.5">
                           {s.DURATION0 ? `${s.DURATION0}h` : '—'}
-                          {weekdayTime && <span className="ml-2 font-mono">{weekdayTime.start}–{weekdayTime.end}</span>}
+                          {indiv
+                            ? <span className="ml-2 text-purple-600 font-semibold">Individuelle Zeiten</span>
+                            : weekdayTime && <span className="ml-2 font-mono">{weekdayTime.start}–{weekdayTime.end}</span>
+                          }
                         </div>
-                        {(satTime || sunTime) && (
+                        {!indiv && (satTime || sunTime) && (
                           <div className="text-xs text-gray-400 font-mono">
                             {satTime && <span>Sa: {satTime.start}–{satTime.end}</span>}
                             {satTime && sunTime && ' · '}
@@ -243,8 +320,8 @@ export default function Shifts() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-bold text-gray-800 mb-4">
               {editId !== null ? 'Schichtart bearbeiten' : 'Neue Schichtart'}
             </h2>
@@ -285,16 +362,137 @@ export default function Shifts() {
                   </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Dauer (Stunden)</label>
-                <input
-                  type="number"
-                  step="0.5"
-                  value={form.DURATION0}
-                  onChange={e => setForm(f => ({ ...f, DURATION0: parseFloat(e.target.value) || 0 }))}
-                  className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+
+              {/* Time mode toggle */}
+              <div className="border rounded-lg p-3 bg-gray-50">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-gray-700">⏱️ Schichtzeiten</span>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-xs text-gray-600">{form.useIndividual ? 'Individuelle Zeiten pro Wochentag' : 'Gleiche Zeiten alle Tage'}</span>
+                    <div
+                      onClick={() => setForm(f => ({ ...f, useIndividual: !f.useIndividual }))}
+                      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer ${form.useIndividual ? 'bg-blue-600' : 'bg-gray-300'}`}
+                    >
+                      <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${form.useIndividual ? 'translate-x-5' : 'translate-x-1'}`} />
+                    </div>
+                  </label>
+                </div>
+
+                {!form.useIndividual ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Startzeit</label>
+                      <input
+                        type="time"
+                        value={parseStartend(form.STARTEND0).start}
+                        onChange={e => {
+                          const end = parseStartend(form.STARTEND0).end;
+                          setForm(f => ({ ...f, STARTEND0: formatStartend(e.target.value, end) }));
+                        }}
+                        className="w-full px-2 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Dauer (h)</label>
+                      <input
+                        type="number"
+                        step="0.5"
+                        min="0"
+                        value={form.DURATION0}
+                        onChange={e => setForm(f => ({ ...f, DURATION0: parseFloat(e.target.value) || 0 }))}
+                        className="w-full px-2 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="mb-2">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs text-gray-600 mb-1">Standard Startzeit</label>
+                          <input
+                            type="time"
+                            value={parseStartend(form.STARTEND0).start}
+                            onChange={e => {
+                              const end = parseStartend(form.STARTEND0).end;
+                              setForm(f => ({ ...f, STARTEND0: formatStartend(e.target.value, end) }));
+                            }}
+                            className="w-full px-2 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 mb-1">Standard Dauer (h)</label>
+                          <input
+                            type="number"
+                            step="0.5"
+                            min="0"
+                            value={form.DURATION0}
+                            onChange={e => setForm(f => ({ ...f, DURATION0: parseFloat(e.target.value) || 0 }))}
+                            className="w-full px-2 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <table className="w-full text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="text-left px-2 py-1 text-gray-600">Tag</th>
+                          <th className="text-left px-2 py-1 text-gray-600">Startzeit</th>
+                          <th className="text-left px-2 py-1 text-gray-600">Endzeit</th>
+                          <th className="text-left px-2 py-1 text-gray-600">Dauer (h)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {WEEKDAYS.map((day, i) => (
+                          <tr key={day} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                            <td className="px-2 py-1 font-semibold text-gray-700">{day}</td>
+                            <td className="px-1 py-0.5">
+                              <input
+                                type="time"
+                                value={form.weekdays[i].start}
+                                onChange={e => {
+                                  const wds = [...form.weekdays];
+                                  wds[i] = { ...wds[i], start: e.target.value };
+                                  setForm(f => ({ ...f, weekdays: wds }));
+                                }}
+                                className="w-full px-1 py-1 border rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-400"
+                              />
+                            </td>
+                            <td className="px-1 py-0.5">
+                              <input
+                                type="time"
+                                value={form.weekdays[i].end}
+                                onChange={e => {
+                                  const wds = [...form.weekdays];
+                                  wds[i] = { ...wds[i], end: e.target.value };
+                                  setForm(f => ({ ...f, weekdays: wds }));
+                                }}
+                                className="w-full px-1 py-1 border rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-400"
+                              />
+                            </td>
+                            <td className="px-1 py-0.5">
+                              <input
+                                type="number"
+                                step="0.5"
+                                min="0"
+                                value={form.weekdays[i].duration || ''}
+                                placeholder="—"
+                                onChange={e => {
+                                  const wds = [...form.weekdays];
+                                  wds[i] = { ...wds[i], duration: parseFloat(e.target.value) || 0 };
+                                  setForm(f => ({ ...f, weekdays: wds }));
+                                }}
+                                className="w-full px-1 py-1 border rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-400"
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
+
               <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                 <input
                   type="checkbox"

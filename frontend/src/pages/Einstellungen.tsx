@@ -71,6 +71,7 @@ export default function Einstellungen() {
   const [anoacrbk, setAnoacrbk] = useState(16777215);
   const [anoabold, setAnoabold] = useState(false);
   const [backupfr, setBackupfr] = useState(0);
+  const [anonymEnabled, setAnonymEnabled] = useState(true);
 
   useEffect(() => {
     api.getSettings()
@@ -83,6 +84,7 @@ export default function Einstellungen() {
         setAnoacrbk(s.ANOACRBK ?? 16777215);
         setAnoabold(!!s.ANOABOLD);
         setBackupfr(s.BACKUPFR ?? 0);
+        setAnonymEnabled(!!(s.ANOANAME && s.ANOANAME.trim()));
       })
       .catch(e => setError(String(e)))
       .finally(() => setLoading(false));
@@ -94,8 +96,8 @@ export default function Einstellungen() {
     setSuccess(null);
     try {
       await api.updateSettings({
-        ANOANAME: anoaname,
-        ANOASHORT: anoashort,
+        ANOANAME: anonymEnabled ? anoaname : '',
+        ANOASHORT: anonymEnabled ? anoashort : '',
         ANOACRTXT: anoacrtxt,
         ANOACRBAR: anoacrbar,
         ANOACRBK: anoacrbk,
@@ -144,16 +146,31 @@ export default function Einstellungen() {
       {!loading && settings && (
         <div className="space-y-6">
 
-          {/* Section: Anonymisierung */}
+          {/* Section: Datenschutz / Anonymisierung */}
           <div className="bg-white rounded-xl shadow p-6">
             <h2 className="text-base font-bold text-gray-800 mb-1">
-              🔒 Anonymisierung von Abwesenheiten
+              🔒 Datenschutz: Anonyme Abwesenheiten
             </h2>
             <p className="text-sm text-gray-500 mb-4">
-              Wenn Abwesenheiten anonymisiert angezeigt werden, erscheint statt des echten
-              Abwesenheitsgrunds (z.B. "Krankheit") der hier konfigurierte anonyme Name.
+              Wenn aktiviert, werden Abwesenheiten anderer Mitarbeiter anonymisiert angezeigt.
+              Statt des echten Abwesenheitsgrunds (z.B. "Krankheit") erscheint der unten
+              konfigurierte anonyme Name.
             </p>
 
+            {/* Toggle */}
+            <label className="flex items-center gap-3 mb-5 cursor-pointer group">
+              <div
+                onClick={() => setAnonymEnabled(v => !v)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${anonymEnabled ? 'bg-blue-600' : 'bg-gray-300'}`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${anonymEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+              </div>
+              <span className="text-sm font-medium text-gray-700">
+                Abwesenheiten anderer Mitarbeiter anonym anzeigen
+              </span>
+            </label>
+
+            {anonymEnabled && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Name */}
               <div>
@@ -227,8 +244,10 @@ export default function Einstellungen() {
                 </label>
               </div>
             </div>
+            )} {/* end anonymEnabled */}
 
             {/* Preview */}
+            {anonymEnabled && (
             <div className="mt-5 pt-4 border-t border-gray-100">
               <p className="text-xs text-gray-500 mb-2 font-medium uppercase tracking-wide">Vorschau</p>
               <div className="flex items-center gap-3">
@@ -257,6 +276,7 @@ export default function Einstellungen() {
                 <span className="text-xs text-gray-400">← So erscheint eine anonyme Abwesenheit</span>
               </div>
             </div>
+            )} {/* end anonymEnabled preview */}
           </div>
 
           {/* Section: Allgemein */}

@@ -29,6 +29,25 @@ class SP5Database:
                 record[key + '_LIGHT'] = is_light_color(record[key])
         return record
 
+    # ── Helpers ────────────────────────────────────────────────
+    def _count_working_days(self, year: int, month: int, workdays_list: list = None) -> int:
+        """Count working days in a month, using WORKDAYS_LIST when available.
+        
+        workdays_list: list of 7+ bools [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
+        Falls back to Mon-Fri (weekday < 5) if not provided or too short.
+        """
+        num_days = calendar.monthrange(year, month)[1]
+        if workdays_list and len(workdays_list) >= 7:
+            return sum(
+                1 for d in range(1, num_days + 1)
+                if workdays_list[datetime(year, month, d).weekday()]
+            )
+        # Default: Mon-Fri
+        return sum(
+            1 for d in range(1, num_days + 1)
+            if datetime(year, month, d).weekday() < 5
+        )
+
     # ── Employees ──────────────────────────────────────────────
     def get_employees(self, include_hidden: bool = False) -> List[Dict]:
         rows = self._read('EMPL')
@@ -36,24 +55,22 @@ class SP5Database:
         for r in rows:
             if not include_hidden and r.get('HIDE'):
                 continue
-            # Parse WORKDAYS: stored as ASCII "1 1 1 1 1 0 0 0" but DBF reader
-            # decodes all char fields as UTF-16 LE, so '1'(0x31)+space(0x20) → U+2031,
-            # '0'(0x30)+space(0x20) → U+2030. Map these back correctly.
+            # Parse WORKDAYS: stored as plain ASCII "1 1 1 1 1 0 0 0"
+            # (dbf_reader now correctly decodes ASCII vs UTF-16 LE fields)
             wd = r.get('WORKDAYS', '')
             if wd:
-                if '\u2031' in wd or '\u2030' in wd:
-                    # UTF-16 LE misread of ASCII: U+2031=working, U+2030=rest
-                    r['WORKDAYS_LIST'] = [c == '\u2031' for c in wd]
-                else:
-                    # Fallback: plain space-separated "1 1 1 1 1 0 0 0"
-                    r['WORKDAYS_LIST'] = [x == '1' for x in wd.split()]
+                r['WORKDAYS_LIST'] = [x == '1' for x in wd.split()]
             else:
                 r['WORKDAYS_LIST'] = []
-            # Auto-generate SHORTNAME if empty
+            # Auto-generate SHORTNAME if empty:
+            # "Mueller Hans" → "MUE" (first 3 chars of surname, uppercase)
             if not r.get('SHORTNAME'):
-                name_part = r.get('NAME', '')[:3].upper()
-                first_part = r.get('FIRSTNAME', '')[:2].upper() if r.get('FIRSTNAME') else ''
-                r['SHORTNAME'] = (first_part + name_part)[:5]
+                surname = r.get('NAME', '')
+                if surname:
+                    r['SHORTNAME'] = surname[:3].upper()
+                else:
+                    firstname = r.get('FIRSTNAME', '')
+                    r['SHORTNAME'] = firstname[:3].upper() if firstname else '???'
             # Convert color fields to hex
             self._color_fields(r)
             result.append(r)
@@ -1231,12 +1248,9 @@ class SP5Database:
         # Fill target hours per month
         emp = self.get_employee(employee_id)
         if emp:
+            workdays_list = emp.get('WORKDAYS_LIST', [])
             for m in range(1, 13):
-                num_days = calendar.monthrange(year, m)[1]
-                working_days = sum(
-                    1 for d in range(1, num_days + 1)
-                    if datetime(year, m, d).weekday() < 5
-                )
+                working_days = self._count_working_days(year, m, workdays_list)
                 target = float(emp.get('HRSMONTH') or 0)
                 if target == 0:
                     target = float(emp.get('HRSDAY') or 0) * working_days
@@ -2756,14 +2770,11 @@ class SP5Database:
 
         shifts_map = {s['ID']: s for s in self.get_shifts(include_hidden=True)}
         year_str = f"{year:04d}"
+        workdays_list = emp.get('WORKDAYS_LIST', [])
 
         monthly: Dict[int, Dict] = {}
         for m in range(1, 13):
-            num_days = calendar.monthrange(year, m)[1]
-            working_days = sum(
-                1 for d in range(1, num_days + 1)
-                if datetime(year, m, d).weekday() < 5
-            )
+            working_days = self._count_working_days(year, m, workdays_list)
             target = float(emp.get('HRSMONTH') or 0)
             if target == 0:
                 target = float(emp.get('HRSDAY') or 0) * working_days

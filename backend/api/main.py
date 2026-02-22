@@ -3536,3 +3536,213 @@ if os.path.isdir(_FRONTEND_DIST):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+
+
+# ── Dashboard: Today ──────────────────────────────────────────
+
+@app.get("/api/dashboard/today")
+def get_dashboard_today():
+    """Return employees on duty today and today's absences with employee names."""
+    from datetime import date
+    db = get_db()
+    today_str = date.today().isoformat()
+    entries = db.get_schedule_day(today_str)
+
+    on_duty = []
+    absences = []
+
+    for e in entries:
+        kind = e.get('kind')
+        if kind in ('shift', 'special_shift'):
+            on_duty.append({
+                'employee_id': e['employee_id'],
+                'employee_name': e['employee_name'],
+                'employee_short': e['employee_short'],
+                'shift_name': e['shift_name'] or e.get('display_name', ''),
+                'shift_short': e['shift_short'] or e.get('display_name', ''),
+                'color_bk': e['color_bk'],
+                'color_text': e['color_text'],
+                'workplace_name': e.get('workplace_name', ''),
+                'startend': e.get('spshi_startend', ''),
+            })
+        elif kind == 'absence':
+            absences.append({
+                'employee_id': e['employee_id'],
+                'employee_name': e['employee_name'],
+                'employee_short': e['employee_short'],
+                'leave_name': e['leave_name'],
+                'color_bk': e['color_bk'],
+                'color_text': e['color_text'],
+            })
+
+    return {
+        'date': today_str,
+        'on_duty': on_duty,
+        'absences': absences,
+        'on_duty_count': len(on_duty),
+        'absences_count': len(absences),
+    }
+
+
+# ── Dashboard: Upcoming ───────────────────────────────────────
+
+@app.get("/api/dashboard/upcoming")
+def get_dashboard_upcoming():
+    """Return next 3 upcoming holidays and birthdays this week."""
+    from datetime import date, timedelta
+    db = get_db()
+    today = date.today()
+    today_str = today.isoformat()
+
+    # Next 3 holidays
+    all_holidays = db.get_holidays()
+    upcoming_holidays = []
+    for h in all_holidays:
+        h_date = h.get('DATE', '')
+        if h_date >= today_str:
+            upcoming_holidays.append({
+                'date': h_date,
+                'name': h.get('NAME', ''),
+                'recurring': bool(h.get('INTERVAL', 0)),
+            })
+    upcoming_holidays.sort(key=lambda x: x['date'])
+    upcoming_holidays = upcoming_holidays[:3]
+
+    # Also try to expand recurring holidays for current year if no future ones
+    if not upcoming_holidays:
+        all_holidays_raw = db.get_holidays()
+        recurring = [h for h in all_holidays_raw if h.get('INTERVAL') == 1]
+        if recurring:
+            for h in recurring:
+                date_str = h.get('DATE', '')
+                if len(date_str) >= 10:
+                    try:
+                        adjusted = str(today.year) + date_str[4:]
+                        if adjusted < today_str:
+                            adjusted = str(today.year + 1) + date_str[4:]
+                        upcoming_holidays.append({
+                            'date': adjusted,
+                            'name': h.get('NAME', ''),
+                            'recurring': True,
+                        })
+                    except Exception:
+                        pass
+            upcoming_holidays.sort(key=lambda x: x['date'])
+            upcoming_holidays = upcoming_holidays[:3]
+
+    # Birthdays this week (Mon–Sun of current week)
+    weekday = today.weekday()  # 0=Mon
+    week_start = today - timedelta(days=weekday)
+    week_end = week_start + timedelta(days=6)
+
+    employees = db.get_employees(include_hidden=False)
+    birthdays_this_week = []
+    for emp in employees:
+        bday_raw = emp.get('BIRTHDAY', '')
+        if not bday_raw or len(bday_raw) < 10:
+            continue
+        try:
+            bday_month = int(bday_raw[5:7])
+            bday_day = int(bday_raw[8:10])
+            # Check if birthday falls in current week
+            bday_this_year = date(today.year, bday_month, bday_day)
+            if week_start <= bday_this_year <= week_end:
+                name = emp.get('NAME', '')
+                firstname = emp.get('FIRSTNAME', '')
+                full_name = f"{name}, {firstname}".strip(', ')
+                days_until = (bday_this_year - today).days
+                birthdays_this_week.append({
+                    'employee_id': emp['ID'],
+                    'name': full_name,
+                    'short': emp.get('SHORTNAME', ''),
+                    'date': bday_raw[:10],
+                    'display_date': f"{bday_day:02d}.{bday_month:02d}.",
+                    'days_until': days_until,
+                })
+        except (ValueError, IndexError):
+            continue
+    birthdays_this_week.sort(key=lambda x: x['days_until'])
+
+    return {
+        'holidays': upcoming_holidays,
+        'birthdays_this_week': birthdays_this_week,
+        'week_start': week_start.isoformat(),
+        'week_end': week_end.isoformat(),
+    }
+
+
+# ── Dashboard: Stats ──────────────────────────────────────────
+
+@app.get("/api/dashboard/stats")
+def get_dashboard_stats():
+    """Return key statistics: total employees, active shifts this month, vacation days used."""
+    from datetime import date
+    import calendar as _cal
+    db = get_db()
+    today = date.today()
+
+    # Total employees
+    employees = db.get_employees(include_hidden=False)
+    total_employees = len(employees)
+
+    # Active shifts (distinct shifts used in MASHI for current month)
+    year_str = f"{today.year:04d}-{today.month:02d}"
+    shifts_used_ids = set()
+    shifts_this_month = 0
+    for r in db._read('MASHI'):
+        if r.get('DATE', '').startswith(year_str):
+            shifts_this_month += 1
+            sid = r.get('SHIFTID')
+            if sid:
+                shifts_used_ids.add(sid)
+
+    # Vacation days used this year (leave type ENTITLED=1)
+    lt_map = {lt['ID']: lt for lt in db.get_leave_types(include_hidden=True)}
+    vacation_ids = {lt_id for lt_id, lt in lt_map.items() if lt.get('ENTITLED')}
+
+    year_prefix = str(today.year)
+    vacation_days_used = sum(
+        1 for r in db._read('ABSEN')
+        if r.get('DATE', '').startswith(year_prefix)
+        and r.get('LEAVETYPID') in vacation_ids
+    )
+
+    # Coverage bars: per day of current month
+    num_days = _cal.monthrange(today.year, today.month)[1]
+    # Count employees scheduled per day
+    day_counts: dict = {d: 0 for d in range(1, num_days + 1)}
+    for r in db._read('MASHI'):
+        d = r.get('DATE', '')
+        if d.startswith(year_str):
+            try:
+                day_num = int(d[8:10])
+                day_counts[day_num] = day_counts.get(day_num, 0) + 1
+            except (ValueError, IndexError):
+                pass
+
+    coverage_by_day = []
+    for day_num in range(1, num_days + 1):
+        try:
+            from datetime import datetime as _dt
+            wd = _dt(today.year, today.month, day_num).weekday()
+            is_weekend = wd >= 5
+            is_today = day_num == today.day
+            coverage_by_day.append({
+                'day': day_num,
+                'count': day_counts.get(day_num, 0),
+                'is_weekend': is_weekend,
+                'is_today': is_today,
+                'weekday': wd,
+            })
+        except ValueError:
+            pass
+
+    return {
+        'total_employees': total_employees,
+        'shifts_this_month': shifts_this_month,
+        'active_shift_types': len(shifts_used_ids),
+        'vacation_days_used': vacation_days_used,
+        'coverage_by_day': coverage_by_day,
+        'month': today.month,
+        'year': today.year,
+    }

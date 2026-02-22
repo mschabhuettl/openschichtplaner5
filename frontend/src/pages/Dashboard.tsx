@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
-import type { DashboardSummary } from '../api/client';
+import type {
+  DashboardSummary,
+  DashboardToday,
+  DashboardUpcoming,
+  DashboardStats,
+} from '../api/client';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -14,6 +19,11 @@ function formatDateDE(iso: string): string {
   return d.toLocaleDateString('de-AT', { weekday: 'short', day: '2-digit', month: '2-digit' });
 }
 
+function formatHolidayDate(iso: string): string {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('de-AT', { weekday: 'long', day: '2-digit', month: 'long' });
+}
+
 function formatHoursSign(h: number): string {
   const sign = h < 0 ? '−' : '+';
   return `${sign}${Math.abs(h).toFixed(1)} h`;
@@ -23,6 +33,13 @@ function isCurrentMonth(year: number, month: number): boolean {
   const now = new Date();
   return now.getFullYear() === year && now.getMonth() + 1 === month;
 }
+
+const MONTH_NAMES_DE = [
+  '', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
+];
+
+const WEEKDAY_SHORT = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
 // ── Loading skeleton ──────────────────────────────────────────────────────────
 
@@ -60,16 +77,17 @@ interface KpiCardProps {
   label: string;
   value: string | number;
   sub?: string;
-  accent?: 'blue' | 'green' | 'orange' | 'red' | 'purple' | 'gray';
+  accent?: 'blue' | 'green' | 'orange' | 'red' | 'purple' | 'gray' | 'teal';
 }
 
-const accentMap: Record<string, { bg: string; text: string; bar: string }> = {
-  blue:   { bg: 'bg-blue-50',   text: 'text-blue-600',   bar: 'bg-blue-500' },
-  green:  { bg: 'bg-green-50',  text: 'text-green-600',  bar: 'bg-green-500' },
-  orange: { bg: 'bg-orange-50', text: 'text-orange-600', bar: 'bg-orange-500' },
-  red:    { bg: 'bg-red-50',    text: 'text-red-600',    bar: 'bg-red-500' },
-  purple: { bg: 'bg-purple-50', text: 'text-purple-600', bar: 'bg-purple-500' },
-  gray:   { bg: 'bg-gray-50',   text: 'text-gray-600',   bar: 'bg-gray-400' },
+const accentMap: Record<string, { bg: string; text: string }> = {
+  blue:   { bg: 'bg-blue-50',   text: 'text-blue-600' },
+  green:  { bg: 'bg-green-50',  text: 'text-green-600' },
+  orange: { bg: 'bg-orange-50', text: 'text-orange-600' },
+  red:    { bg: 'bg-red-50',    text: 'text-red-600' },
+  purple: { bg: 'bg-purple-50', text: 'text-purple-600' },
+  gray:   { bg: 'bg-gray-50',   text: 'text-gray-600' },
+  teal:   { bg: 'bg-teal-50',   text: 'text-teal-600' },
 };
 
 function KpiCard({ icon, label, value, sub, accent = 'blue' }: KpiCardProps) {
@@ -86,23 +104,6 @@ function KpiCard({ icon, label, value, sub, accent = 'blue' }: KpiCardProps) {
   );
 }
 
-// ── Coverage bar ──────────────────────────────────────────────────────────────
-
-function CoverageBar({ pct }: { pct: number }) {
-  const color =
-    pct >= 80 ? 'bg-green-500' :
-    pct >= 50 ? 'bg-yellow-400' :
-    'bg-red-500';
-  return (
-    <div className="w-full bg-gray-100 rounded-full h-1.5">
-      <div
-        className={`${color} h-1.5 rounded-full transition-all duration-700`}
-        style={{ width: `${Math.min(pct, 100)}%` }}
-      />
-    </div>
-  );
-}
-
 // ── Widget wrapper ────────────────────────────────────────────────────────────
 
 function Widget({
@@ -110,17 +111,24 @@ function Widget({
   icon,
   children,
   className = '',
+  badge,
 }: {
   title: string;
   icon: string;
   children: React.ReactNode;
   className?: string;
+  badge?: string | number;
 }) {
   return (
     <div className={`bg-white rounded-xl shadow p-5 flex flex-col gap-3 ${className}`}>
       <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
         <span className="text-lg">{icon}</span>
-        <h2 className="font-semibold text-gray-700 text-sm">{title}</h2>
+        <h2 className="font-semibold text-gray-700 text-sm flex-1">{title}</h2>
+        {badge !== undefined && (
+          <span className="text-xs font-bold bg-gray-100 text-gray-600 rounded-full px-2 py-0.5">
+            {badge}
+          </span>
+        )}
       </div>
       {children}
     </div>
@@ -133,31 +141,275 @@ function Empty({ text }: { text: string }) {
   return <p className="text-sm text-gray-400 italic text-center py-2">{text}</p>;
 }
 
-// ── Today's Shifts widget ─────────────────────────────────────────────────────
+// ── "Heute im Dienst" Widget ──────────────────────────────────────────────────
 
-function TodayShifts({ data }: { data: DashboardSummary['shifts_today'] }) {
-  if (data.count === 0) {
-    return <Empty text="Keine Schichten für heute geplant." />;
-  }
+function TodayOnDutyWidget({ todayData }: { todayData: DashboardToday | null }) {
+  if (!todayData) return <WidgetSkeleton />;
+  const { on_duty } = todayData;
+
   return (
-    <div className="flex flex-wrap gap-2">
-      {data.by_shift.map((s) => (
-        <div
-          key={s.name}
-          className="flex items-center gap-2 rounded-lg px-3 py-2 shadow-sm border border-gray-100"
-          style={{ background: s.color + '22' }}
-        >
-          <span
-            className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-            style={{ background: s.color }}
-          />
-          <span className="font-bold text-sm" style={{ color: s.color }}>
-            {s.name}
-          </span>
-          <span className="text-gray-500 text-xs font-medium">×{s.count}</span>
-        </div>
-      ))}
-    </div>
+    <Widget title="Heute im Dienst" icon="👷" badge={on_duty.length}>
+      {on_duty.length === 0 ? (
+        <Empty text="Heute sind keine Mitarbeiter eingeplant." />
+      ) : (
+        <ul className="space-y-1.5 max-h-56 overflow-y-auto">
+          {on_duty.map((emp) => (
+            <li
+              key={emp.employee_id}
+              className="flex items-center gap-2 text-sm rounded-lg px-2 py-1.5"
+              style={{ background: emp.color_bk + '18' }}
+            >
+              <span
+                className="inline-flex items-center justify-center rounded px-1.5 py-0.5 text-xs font-bold min-w-[2.5rem] shrink-0"
+                style={{ background: emp.color_bk, color: emp.color_text }}
+              >
+                {emp.shift_short || '–'}
+              </span>
+              <span className="flex-1 font-medium text-gray-700 truncate">
+                {emp.employee_name}
+              </span>
+              {emp.workplace_name && (
+                <span className="text-xs text-gray-400 shrink-0 hidden sm:block truncate max-w-[80px]">
+                  {emp.workplace_name}
+                </span>
+              )}
+              <span className="text-xs text-gray-400 shrink-0 font-mono">
+                {emp.employee_short}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Widget>
+  );
+}
+
+// ── "Abwesenheiten heute" Widget ──────────────────────────────────────────────
+
+function TodayAbsencesWidget({ todayData }: { todayData: DashboardToday | null }) {
+  if (!todayData) return <WidgetSkeleton />;
+  const { absences } = todayData;
+
+  return (
+    <Widget title="Abwesenheiten heute" icon="🏥" badge={absences.length}>
+      {absences.length === 0 ? (
+        <Empty text="Keine Abwesenheiten für heute. ✅" />
+      ) : (
+        <ul className="space-y-1.5 max-h-56 overflow-y-auto">
+          {absences.map((emp) => (
+            <li
+              key={emp.employee_id}
+              className="flex items-center gap-2 text-sm rounded-lg px-2 py-1.5 bg-orange-50"
+            >
+              <span
+                className="inline-flex items-center justify-center rounded px-1.5 py-0.5 text-xs font-bold min-w-[3rem] shrink-0"
+                style={{ background: emp.color_bk, color: emp.color_text || '#fff' }}
+              >
+                {emp.leave_name.substring(0, 5) || '—'}
+              </span>
+              <span className="flex-1 font-medium text-gray-700 truncate">
+                {emp.employee_name}
+              </span>
+              <span className="text-xs text-gray-400 shrink-0 font-mono">
+                {emp.employee_short}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Widget>
+  );
+}
+
+// ── "Nächste Feiertage" Widget ────────────────────────────────────────────────
+
+function UpcomingHolidaysWidget({ upcomingData }: { upcomingData: DashboardUpcoming | null }) {
+  if (!upcomingData) return <WidgetSkeleton />;
+  const { holidays } = upcomingData;
+
+  return (
+    <Widget title="Nächste Feiertage" icon="🎉">
+      {holidays.length === 0 ? (
+        <Empty text="Keine Feiertage in der Datenbank hinterlegt." />
+      ) : (
+        <ul className="space-y-2.5">
+          {holidays.map((h, i) => {
+            const today = new Date().toISOString().split('T')[0];
+            const diffDays = Math.round(
+              (new Date(h.date + 'T00:00:00').getTime() - new Date(today + 'T00:00:00').getTime())
+              / 86400000
+            );
+            return (
+              <li key={i} className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-indigo-50 flex flex-col items-center justify-center text-xs font-bold text-indigo-600">
+                  <span className="text-base leading-none">
+                    {new Date(h.date + 'T00:00:00').getDate()}
+                  </span>
+                  <span className="text-[9px] leading-none text-indigo-400">
+                    {MONTH_NAMES_DE[new Date(h.date + 'T00:00:00').getMonth() + 1]?.substring(0, 3) ?? ''}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-sm text-gray-800 truncate">{h.name}</div>
+                  <div className="text-xs text-gray-400">{formatHolidayDate(h.date)}</div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                    diffDays === 0
+                      ? 'bg-green-100 text-green-700'
+                      : diffDays <= 7
+                      ? 'bg-orange-100 text-orange-700'
+                      : 'bg-gray-100 text-gray-500'
+                  }`}>
+                    {diffDays === 0 ? 'Heute' : diffDays === 1 ? 'Morgen' : `in ${diffDays}d`}
+                  </span>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </Widget>
+  );
+}
+
+// ── "Geburtstage diese Woche" Widget ──────────────────────────────────────────
+
+function BirthdaysThisWeekWidget({ upcomingData }: { upcomingData: DashboardUpcoming | null }) {
+  if (!upcomingData) return <WidgetSkeleton />;
+  const { birthdays_this_week } = upcomingData;
+
+  return (
+    <Widget title="Geburtstage diese Woche" icon="🎂" badge={birthdays_this_week.length}>
+      {birthdays_this_week.length === 0 ? (
+        <Empty text="Keine Geburtstage diese Woche." />
+      ) : (
+        <ul className="space-y-2">
+          {birthdays_this_week.map((b) => (
+            <li key={b.employee_id} className="flex items-center gap-2 text-sm">
+              <span className="text-xl">
+                {b.days_until === 0 ? '🎂' : '🎁'}
+              </span>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium text-gray-700 truncate">{b.name}</div>
+                <div className="text-xs text-gray-400">{b.display_date}</div>
+              </div>
+              {b.days_until === 0 ? (
+                <span className="text-xs font-bold text-pink-600 bg-pink-50 px-2 py-0.5 rounded-full shrink-0">
+                  Heute! 🎉
+                </span>
+              ) : b.days_until < 0 ? (
+                <span className="text-xs text-gray-400 shrink-0">
+                  {Math.abs(b.days_until)}d her
+                </span>
+              ) : (
+                <span className="text-xs text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full shrink-0">
+                  in {b.days_until}d
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </Widget>
+  );
+}
+
+// ── CSS Bar Chart: Monatliche Abdeckung ───────────────────────────────────────
+
+function MonthCoverageChart({ statsData }: { statsData: DashboardStats | null }) {
+  if (!statsData) return <WidgetSkeleton />;
+  const { coverage_by_day, month, year } = statsData;
+
+  const maxCount = Math.max(...coverage_by_day.map((d) => d.count), 1);
+
+  return (
+    <Widget
+      title={`Dienstplan-Abdeckung — ${MONTH_NAMES_DE[month]} ${year}`}
+      icon="📊"
+      className="col-span-1 md:col-span-2"
+    >
+      <div className="flex items-end gap-0.5 h-28 w-full">
+        {coverage_by_day.map((d) => {
+          const pct = maxCount > 0 ? (d.count / maxCount) * 100 : 0;
+          const barColor = d.is_today
+            ? '#6366f1'   // indigo for today
+            : d.is_weekend
+            ? '#e5e7eb'   // gray for weekends
+            : d.count === 0
+            ? '#fca5a5'   // light red for no coverage
+            : pct >= 75
+            ? '#4ade80'   // green for good coverage
+            : pct >= 40
+            ? '#fbbf24'   // yellow for ok
+            : '#f97316';  // orange for low
+
+          return (
+            <div
+              key={d.day}
+              className="flex-1 flex flex-col items-center gap-0.5 group relative"
+              title={`${d.day}. ${MONTH_NAMES_DE[month]}: ${d.count} Schichten${d.is_weekend ? ' (WE)' : ''}`}
+            >
+              {/* Bar */}
+              <div className="w-full flex items-end" style={{ height: '96px' }}>
+                <div
+                  className="w-full rounded-t transition-all duration-500"
+                  style={{
+                    height: d.count === 0 ? '4px' : `${Math.max((pct / 100) * 96, 4)}px`,
+                    background: barColor,
+                    opacity: d.is_weekend && !d.is_today ? 0.6 : 1,
+                  }}
+                />
+              </div>
+              {/* Day label */}
+              <span
+                className={`text-[8px] font-medium select-none ${
+                  d.is_today
+                    ? 'text-indigo-600 font-black'
+                    : d.is_weekend
+                    ? 'text-gray-400'
+                    : 'text-gray-500'
+                }`}
+              >
+                {d.day}
+              </span>
+
+              {/* Tooltip */}
+              <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] rounded px-1.5 py-0.5 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
+                {WEEKDAY_SHORT[d.weekday]} {d.day}. | {d.count}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {/* Legend */}
+      <div className="flex items-center gap-4 text-xs text-gray-400 pt-1 flex-wrap">
+        <span className="flex items-center gap-1">
+          <span className="w-3 h-3 rounded-sm bg-[#4ade80] inline-block" />
+          Gut belegt
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-3 h-3 rounded-sm bg-[#fbbf24] inline-block" />
+          Mittel
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-3 h-3 rounded-sm bg-[#f97316] inline-block" />
+          Niedrig
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-3 h-3 rounded-sm bg-[#fca5a5] inline-block" />
+          Leer
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-3 h-3 rounded-sm bg-[#6366f1] inline-block" />
+          Heute
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-3 h-3 rounded-sm bg-[#e5e7eb] inline-block" />
+          Wochenende
+        </span>
+      </div>
+    </Widget>
   );
 }
 
@@ -225,30 +477,6 @@ function ZeitkontoAlerts({ alerts }: { alerts: DashboardSummary['zeitkonto_alert
           + {alerts.length - 5} weitere Mitarbeiter
         </p>
       )}
-    </ul>
-  );
-}
-
-// ── Upcoming Birthdays widget ─────────────────────────────────────────────────
-
-function UpcomingBirthdays({ birthdays }: { birthdays: DashboardSummary['upcoming_birthdays'] }) {
-  if (birthdays.length === 0) {
-    return <Empty text="Keine Geburtstage in den nächsten 14 Tagen." />;
-  }
-  return (
-    <ul className="space-y-1.5">
-      {birthdays.map((b, i) => (
-        <li key={i} className="flex items-center gap-2 text-sm">
-          <span>{b.days_until === 0 ? '🎂' : '🎁'}</span>
-          <span className="font-medium text-gray-700 flex-1 truncate">{b.name}</span>
-          <span className="text-xs text-gray-400 shrink-0">{b.date}</span>
-          {b.days_until === 0 ? (
-            <span className="text-xs font-bold text-pink-500 shrink-0">Heute!</span>
-          ) : (
-            <span className="text-xs text-gray-400 shrink-0">in {b.days_until}d</span>
-          )}
-        </li>
-      ))}
     </ul>
   );
 }
@@ -324,23 +552,36 @@ export default function Dashboard() {
   const { year: todayYear, month: todayMonth } = todayYearMonth();
   const [year, setYear] = useState(todayYear);
   const [month, setMonth] = useState(todayMonth);
-  const [data, setData] = useState<DashboardSummary | null>(null);
+  const [summaryData, setSummaryData] = useState<DashboardSummary | null>(null);
+  const [todayData, setTodayData] = useState<DashboardToday | null>(null);
+  const [upcomingData, setUpcomingData] = useState<DashboardUpcoming | null>(null);
+  const [statsData, setStatsData] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = useCallback(() => {
+  const fetchAll = useCallback(() => {
     setLoading(true);
     setError(null);
-    api
-      .getDashboardSummary(year, month)
-      .then(setData)
+
+    const summaryP = api.getDashboardSummary(year, month);
+    const todayP = api.getDashboardToday();
+    const upcomingP = api.getDashboardUpcoming();
+    const statsP = api.getDashboardStats();
+
+    Promise.all([summaryP, todayP, upcomingP, statsP])
+      .then(([summary, today, upcoming, stats]) => {
+        setSummaryData(summary);
+        setTodayData(today);
+        setUpcomingData(upcoming);
+        setStatsData(stats);
+      })
       .catch((err) => setError(String(err)))
       .finally(() => setLoading(false));
   }, [year, month]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchAll();
+  }, [fetchAll]);
 
   function prevMonth() {
     if (month === 1) {
@@ -361,9 +602,7 @@ export default function Dashboard() {
   }
 
   const isCurrentMon = isCurrentMonth(year, month);
-
-  // Coverage color
-  const cov = data?.shifts_this_month.coverage_pct ?? 0;
+  const cov = summaryData?.shifts_this_month.coverage_pct ?? 0;
   const covAccent: KpiCardProps['accent'] =
     cov >= 80 ? 'green' : cov >= 50 ? 'orange' : 'red';
 
@@ -385,7 +624,7 @@ export default function Dashboard() {
         <MonthNav
           year={year}
           month={month}
-          label={data?.month_label ?? ''}
+          label={summaryData?.month_label ?? ''}
           onPrev={prevMonth}
           onNext={nextMonth}
           disableNext={isCurrentMon}
@@ -397,7 +636,7 @@ export default function Dashboard() {
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
           ⚠️ Fehler beim Laden der Dashboard-Daten: {error}
           <button
-            onClick={fetchData}
+            onClick={fetchAll}
             className="ml-3 underline hover:no-underline"
           >
             Nochmals versuchen
@@ -409,115 +648,169 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {loading ? (
           Array.from({ length: 4 }).map((_, i) => <KpiSkeleton key={i} />)
-        ) : data ? (
+        ) : (
           <>
             <KpiCard
               icon="👥"
               label="Mitarbeiter"
-              value={data.employees.total}
-              sub={`${data.groups} Gruppen`}
+              value={statsData?.total_employees ?? summaryData?.employees.total ?? '—'}
+              sub={`${summaryData?.groups ?? 0} Gruppen`}
               accent="blue"
             />
             <KpiCard
               icon="🕐"
               label={isCurrentMon ? 'Schichten heute' : 'Schichten geplant'}
-              value={isCurrentMon ? data.shifts_today.count : data.shifts_this_month.scheduled}
+              value={
+                isCurrentMon
+                  ? todayData?.on_duty_count ?? summaryData?.shifts_today.count ?? '—'
+                  : statsData?.shifts_this_month ?? summaryData?.shifts_this_month.scheduled ?? '—'
+              }
               sub={
                 isCurrentMon
-                  ? data.shifts_today.count === 0
-                    ? 'Noch nichts geplant'
-                    : `${data.shifts_today.by_shift.length} Schichtart(en)`
-                  : `im ${data.month_label}`
+                  ? todayData
+                    ? todayData.on_duty_count === 0
+                      ? 'Heute noch nichts geplant'
+                      : `${todayData.absences_count} Abwesenheiten`
+                    : 'Lädt…'
+                  : `im ${summaryData?.month_label ?? ''}`
               }
               accent="purple"
             />
             <KpiCard
               icon="🏖️"
-              label="Abwesenheiten"
-              value={data.absences_this_month.total}
-              sub={`im ${data.month_label}`}
-              accent={data.absences_this_month.total > 0 ? 'orange' : 'gray'}
+              label="Urlaubstage verbraucht"
+              value={statsData?.vacation_days_used ?? '—'}
+              sub={`in ${year}`}
+              accent={statsData && statsData.vacation_days_used > 0 ? 'orange' : 'gray'}
             />
             <KpiCard
               icon="📈"
               label="Auslastung"
-              value={data.shifts_this_month.scheduled > 0 ? `${cov} %` : '—'}
+              value={
+                summaryData && summaryData.shifts_this_month.scheduled > 0
+                  ? `${cov} %`
+                  : '—'
+              }
               sub={
-                data.shifts_this_month.scheduled > 0
+                summaryData && summaryData.shifts_this_month.scheduled > 0
                   ? cov >= 80 ? 'Gut besetzt ✅' : cov >= 50 ? 'Teilweise besetzt' : 'Unterbesetzt ⚠️'
                   : 'Keine Schichtdaten'
               }
-              accent={data.shifts_this_month.scheduled > 0 ? covAccent : 'gray'}
+              accent={
+                summaryData && summaryData.shifts_this_month.scheduled > 0
+                  ? covAccent
+                  : 'gray'
+              }
             />
           </>
-        ) : null}
+        )}
       </div>
 
-      {/* Main grid */}
-      {loading ? (
+      {/* Chart: Monatliche Abdeckung (full width) */}
+      {isCurrentMon && (
+        loading
+          ? <WidgetSkeleton />
+          : <MonthCoverageChart statsData={statsData} />
+      )}
+
+      {/* Today's grid: "Heute im Dienst" + "Abwesenheiten heute" */}
+      {isCurrentMon && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {Array.from({ length: 4 }).map((_, i) => <WidgetSkeleton key={i} />)}
+          <TodayOnDutyWidget todayData={todayData} />
+          <TodayAbsencesWidget todayData={todayData} />
         </div>
-      ) : data ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      )}
 
-          {/* Today's shifts */}
-          {isCurrentMon && (
-            <Widget title="Heutige Schichten" icon="👷">
-              <TodayShifts data={data.shifts_today} />
-              {data.shifts_today.count > 0 && (
-                <p className="text-xs text-gray-400 text-right">
-                  {data.shifts_today.count} Mitarbeiter im Dienst
-                </p>
-              )}
-            </Widget>
-          )}
+      {/* Upcoming & Birthdays */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <UpcomingHolidaysWidget upcomingData={upcomingData} />
+        <BirthdaysThisWeekWidget upcomingData={upcomingData} />
+      </div>
 
-          {/* Absences by type */}
-          <Widget title={`Abwesenheiten ${data.month_label}`} icon="📋">
-            <AbsencesByType data={data.absences_this_month} />
-          </Widget>
+      {/* Absences + Staffing warnings + Zeitkonto */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {/* Absences by type */}
+        <Widget
+          title={`Abwesenheiten ${summaryData?.month_label ?? ''}`}
+          icon="📋"
+          badge={summaryData?.absences_this_month.total}
+        >
+          {loading ? (
+            <WidgetSkeleton />
+          ) : summaryData ? (
+            <AbsencesByType data={summaryData.absences_this_month} />
+          ) : null}
+        </Widget>
 
-          {/* Staffing warnings */}
-          <Widget
-            title={isCurrentMon ? 'Staffing-Warnungen (nächste 7 Tage)' : 'Staffing-Anforderungen'}
-            icon="⚠️"
-          >
-            <StaffingWarnings warnings={data.staffing_warnings} />
-          </Widget>
+        {/* Staffing warnings */}
+        <Widget
+          title={
+            isCurrentMon
+              ? 'Staffing-Warnungen (nächste 7 Tage)'
+              : 'Staffing-Anforderungen'
+          }
+          icon="⚠️"
+          badge={summaryData?.staffing_warnings.length ?? 0}
+        >
+          {loading ? (
+            <WidgetSkeleton />
+          ) : summaryData ? (
+            <StaffingWarnings warnings={summaryData.staffing_warnings} />
+          ) : null}
+        </Widget>
 
-          {/* Zeitkonto alerts */}
-          <Widget title={`Zeitkonto-Defizit (${data.month_label})`} icon="⏱️">
-            <ZeitkontoAlerts alerts={data.zeitkonto_alerts} />
-          </Widget>
+        {/* Zeitkonto alerts */}
+        <Widget
+          title={`Zeitkonto-Defizit (${summaryData?.month_label ?? ''})`}
+          icon="⏱️"
+          badge={summaryData?.zeitkonto_alerts.length ?? 0}
+        >
+          {loading ? (
+            <WidgetSkeleton />
+          ) : summaryData ? (
+            <ZeitkontoAlerts alerts={summaryData.zeitkonto_alerts} />
+          ) : null}
+        </Widget>
 
-          {/* Upcoming birthdays */}
-          {(data.upcoming_birthdays.length > 0 || isCurrentMon) && (
-            <Widget title="Geburtstage (nächste 14 Tage)" icon="🎂">
-              <UpcomingBirthdays birthdays={data.upcoming_birthdays} />
-            </Widget>
-          )}
-
-          {/* Month coverage bar */}
-          <Widget title={`Monatsbelegung ${data.month_label}`} icon="📅">
+        {/* Quick stats box */}
+        <Widget title="Monatsüberblick" icon="📅">
+          {loading || !summaryData || !statsData ? (
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          ) : (
             <div className="flex flex-col gap-3">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Schichten geplant</span>
                 <span className="font-bold text-gray-700">
-                  {data.shifts_this_month.scheduled > 0
-                    ? data.shifts_this_month.scheduled
+                  {summaryData.shifts_this_month.scheduled > 0
+                    ? summaryData.shifts_this_month.scheduled
                     : '—'}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Aktive Schichtarten</span>
+                <span className="font-bold text-gray-700">
+                  {statsData.active_shift_types}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Abwesenheiten</span>
                 <span className="font-bold text-gray-700">
-                  {data.absences_this_month.total > 0
-                    ? data.absences_this_month.total
+                  {summaryData.absences_this_month.total > 0
+                    ? summaryData.absences_this_month.total
                     : '—'}
                 </span>
               </div>
-              {data.shifts_this_month.scheduled > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Urlaubstage {year}</span>
+                <span className="font-bold text-gray-700">
+                  {statsData.vacation_days_used}
+                </span>
+              </div>
+              {summaryData.shifts_this_month.scheduled > 0 && (
                 <>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-500">Auslastung</span>
@@ -533,17 +826,20 @@ export default function Dashboard() {
                       {cov} %
                     </span>
                   </div>
-                  <CoverageBar pct={cov} />
+                  <div className="w-full bg-gray-100 rounded-full h-1.5">
+                    <div
+                      className={`h-1.5 rounded-full transition-all duration-700 ${
+                        cov >= 80 ? 'bg-green-500' : cov >= 50 ? 'bg-yellow-400' : 'bg-red-500'
+                      }`}
+                      style={{ width: `${Math.min(cov, 100)}%` }}
+                    />
+                  </div>
                 </>
               )}
-              {data.shifts_this_month.scheduled === 0 && (
-                <Empty text="Noch keine Schichtdaten für diesen Monat." />
-              )}
             </div>
-          </Widget>
-
-        </div>
-      ) : null}
+          )}
+        </Widget>
+      </div>
     </div>
   );
 }

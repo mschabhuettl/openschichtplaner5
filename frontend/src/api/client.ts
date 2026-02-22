@@ -9,6 +9,78 @@ export interface WorkplaceEmployee {
   NUMBER: string;
 }
 
+// ─── Dashboard Today Types ─────────────────────────────────
+export interface DashboardTodayEmployee {
+  employee_id: number;
+  employee_name: string;
+  employee_short: string;
+  shift_name: string;
+  shift_short: string;
+  color_bk: string;
+  color_text: string;
+  workplace_name: string;
+  startend: string;
+}
+
+export interface DashboardTodayAbsence {
+  employee_id: number;
+  employee_name: string;
+  employee_short: string;
+  leave_name: string;
+  color_bk: string;
+  color_text: string;
+}
+
+export interface DashboardToday {
+  date: string;
+  on_duty: DashboardTodayEmployee[];
+  absences: DashboardTodayAbsence[];
+  on_duty_count: number;
+  absences_count: number;
+}
+
+// ─── Dashboard Upcoming Types ──────────────────────────────
+export interface UpcomingHoliday {
+  date: string;
+  name: string;
+  recurring: boolean;
+}
+
+export interface BirthdayThisWeek {
+  employee_id: number;
+  name: string;
+  short: string;
+  date: string;
+  display_date: string;
+  days_until: number;
+}
+
+export interface DashboardUpcoming {
+  holidays: UpcomingHoliday[];
+  birthdays_this_week: BirthdayThisWeek[];
+  week_start: string;
+  week_end: string;
+}
+
+// ─── Dashboard Stats Types ─────────────────────────────────
+export interface DayCoverage {
+  day: number;
+  count: number;
+  is_weekend: boolean;
+  is_today: boolean;
+  weekday: number;
+}
+
+export interface DashboardStats {
+  total_employees: number;
+  shifts_this_month: number;
+  active_shift_types: number;
+  vacation_days_used: number;
+  coverage_by_day: DayCoverage[];
+  month: number;
+  year: number;
+}
+
 // ─── Dashboard Summary Types ───────────────────────────────
 export interface DashboardSummary {
   employees: { total: number; active: number };
@@ -852,4 +924,13 @@ export const api = {
       `/api/overtime-summary?${qs.toString()}`
     );
   },
+
+  // ─── Dashboard: Today ──────────────────────────────────────
+  getDashboardToday: () => fetchJSON<DashboardToday>('/api/dashboard/today'),
+
+  // ─── Dashboard: Upcoming ───────────────────────────────────
+  getDashboardUpcoming: () => fetchJSON<DashboardUpcoming>('/api/dashboard/upcoming'),
+
+  // ─── Dashboard: Stats ──────────────────────────────────────
+  getDashboardStats: () => fetchJSON<DashboardStats>('/api/dashboard/stats'),
 };

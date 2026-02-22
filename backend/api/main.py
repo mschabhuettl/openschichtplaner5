@@ -2601,6 +2601,256 @@ async def import_holidays(file: UploadFile = File(...)):
     return {"imported": imported, "errors": errors, "skipped": skipped}
 
 
+@app.post("/api/import/bookings-actual")
+async def import_bookings_actual(file: UploadFile = File(...)):
+    """Import actual-hour bookings (TYPE=0) from CSV.
+    Required: Personalnummer,Datum,Stunden. Optional: Notiz."""
+    content = await file.read()
+    text = _decode_csv(content)
+    reader = csv.DictReader(io.StringIO(text))
+
+    imported = 0
+    skipped = 0
+    errors = []
+    db = get_db()
+
+    emp_by_number = {(str(e.get('NUMBER', '')) or '').strip(): e for e in db.get_employees(include_hidden=False)}
+
+    for i, row in enumerate(reader, start=2):
+        row = {k.strip().upper(): v.strip() for k, v in row.items() if k}
+        nummer = row.get('PERSONALNUMMER') or row.get('NUMBER') or ''
+        date_raw = row.get('DATUM') or row.get('DATE') or ''
+        stunden_raw = row.get('STUNDEN') or row.get('HOURS') or ''
+        notiz = row.get('NOTIZ') or row.get('NOTE') or ''
+
+        if not nummer or not date_raw or not stunden_raw:
+            errors.append(f"Zeile {i}: Pflichtfelder fehlen (Personalnummer,Datum,Stunden) — übersprungen")
+            skipped += 1
+            continue
+
+        emp = emp_by_number.get(nummer)
+        if not emp:
+            errors.append(f"Zeile {i}: Personalnummer '{nummer}' nicht gefunden — übersprungen")
+            skipped += 1
+            continue
+
+        try:
+            from datetime import datetime as _dt
+            _dt.strptime(date_raw, '%Y-%m-%d')
+            stunden = float(stunden_raw.replace(',', '.'))
+            db.create_booking(emp['ID'], date_raw, 0, stunden, notiz)
+            imported += 1
+        except Exception as e:
+            errors.append(f"Zeile {i}: {e}")
+            skipped += 1
+
+    return {"imported": imported, "skipped": skipped, "errors": errors}
+
+
+@app.post("/api/import/bookings-nominal")
+async def import_bookings_nominal(file: UploadFile = File(...)):
+    """Import nominal-hour bookings (TYPE=1) from CSV.
+    Required: Personalnummer,Datum,Stunden. Optional: Notiz."""
+    content = await file.read()
+    text = _decode_csv(content)
+    reader = csv.DictReader(io.StringIO(text))
+
+    imported = 0
+    skipped = 0
+    errors = []
+    db = get_db()
+
+    emp_by_number = {(str(e.get('NUMBER', '')) or '').strip(): e for e in db.get_employees(include_hidden=False)}
+
+    for i, row in enumerate(reader, start=2):
+        row = {k.strip().upper(): v.strip() for k, v in row.items() if k}
+        nummer = row.get('PERSONALNUMMER') or row.get('NUMBER') or ''
+        date_raw = row.get('DATUM') or row.get('DATE') or ''
+        stunden_raw = row.get('STUNDEN') or row.get('HOURS') or ''
+        notiz = row.get('NOTIZ') or row.get('NOTE') or ''
+
+        if not nummer or not date_raw or not stunden_raw:
+            errors.append(f"Zeile {i}: Pflichtfelder fehlen (Personalnummer,Datum,Stunden) — übersprungen")
+            skipped += 1
+            continue
+
+        emp = emp_by_number.get(nummer)
+        if not emp:
+            errors.append(f"Zeile {i}: Personalnummer '{nummer}' nicht gefunden — übersprungen")
+            skipped += 1
+            continue
+
+        try:
+            from datetime import datetime as _dt
+            _dt.strptime(date_raw, '%Y-%m-%d')
+            stunden = float(stunden_raw.replace(',', '.'))
+            db.create_booking(emp['ID'], date_raw, 1, stunden, notiz)
+            imported += 1
+        except Exception as e:
+            errors.append(f"Zeile {i}: {e}")
+            skipped += 1
+
+    return {"imported": imported, "skipped": skipped, "errors": errors}
+
+
+@app.post("/api/import/entitlements")
+async def import_entitlements(file: UploadFile = File(...)):
+    """Import leave entitlements from CSV.
+    Required: Personalnummer,Jahr,Abwesenheitsart-Kürzel,Tage."""
+    content = await file.read()
+    text = _decode_csv(content)
+    reader = csv.DictReader(io.StringIO(text))
+
+    imported = 0
+    skipped = 0
+    errors = []
+    db = get_db()
+
+    emp_by_number = {(str(e.get('NUMBER', '')) or '').strip(): e for e in db.get_employees(include_hidden=False)}
+    lt_by_short = {lt['SHORTNAME'].strip().upper(): lt for lt in db.get_leave_types(include_hidden=False)}
+
+    for i, row in enumerate(reader, start=2):
+        row = {k.strip().upper(): v.strip() for k, v in row.items() if k}
+        nummer = row.get('PERSONALNUMMER') or row.get('NUMBER') or ''
+        year_raw = row.get('JAHR') or row.get('YEAR') or ''
+        kuerzel = (row.get('ABWESENHEITSART') or row.get('KÜRZEL') or row.get('KURZEL') or row.get('SHORTNAME') or '').upper()
+        tage_raw = row.get('TAGE') or row.get('DAYS') or ''
+
+        if not nummer or not year_raw or not kuerzel or not tage_raw:
+            errors.append(f"Zeile {i}: Pflichtfelder fehlen (Personalnummer,Jahr,Abwesenheitsart-Kürzel,Tage) — übersprungen")
+            skipped += 1
+            continue
+
+        emp = emp_by_number.get(nummer)
+        if not emp:
+            errors.append(f"Zeile {i}: Personalnummer '{nummer}' nicht gefunden — übersprungen")
+            skipped += 1
+            continue
+
+        lt = lt_by_short.get(kuerzel)
+        if not lt:
+            errors.append(f"Zeile {i}: Abwesenheitsart-Kürzel '{kuerzel}' nicht gefunden — übersprungen")
+            skipped += 1
+            continue
+
+        try:
+            year = int(year_raw)
+            tage = float(tage_raw.replace(',', '.'))
+            db.set_leave_entitlement(emp['ID'], year, tage, leave_type_id=lt['ID'])
+            imported += 1
+        except Exception as e:
+            errors.append(f"Zeile {i}: {e}")
+            skipped += 1
+
+    return {"imported": imported, "skipped": skipped, "errors": errors}
+
+
+@app.post("/api/import/absences-csv")
+async def import_absences_csv(file: UploadFile = File(...)):
+    """Import absences from CSV using Personalnummer and Abwesenheitsart-Kürzel.
+    Required: Personalnummer,Datum,Abwesenheitsart-Kürzel."""
+    content = await file.read()
+    text = _decode_csv(content)
+    reader = csv.DictReader(io.StringIO(text))
+
+    imported = 0
+    skipped = 0
+    errors = []
+    db = get_db()
+
+    emp_by_number = {(str(e.get('NUMBER', '')) or '').strip(): e for e in db.get_employees(include_hidden=False)}
+    lt_by_short = {lt['SHORTNAME'].strip().upper(): lt for lt in db.get_leave_types(include_hidden=False)}
+
+    for i, row in enumerate(reader, start=2):
+        row = {k.strip().upper(): v.strip() for k, v in row.items() if k}
+        nummer = row.get('PERSONALNUMMER') or row.get('NUMBER') or ''
+        date_raw = row.get('DATUM') or row.get('DATE') or ''
+        kuerzel = (row.get('ABWESENHEITSART') or row.get('KÜRZEL') or row.get('KURZEL') or row.get('SHORTNAME') or '').upper()
+
+        if not nummer or not date_raw or not kuerzel:
+            errors.append(f"Zeile {i}: Pflichtfelder fehlen (Personalnummer,Datum,Abwesenheitsart-Kürzel) — übersprungen")
+            skipped += 1
+            continue
+
+        emp = emp_by_number.get(nummer)
+        if not emp:
+            errors.append(f"Zeile {i}: Personalnummer '{nummer}' nicht gefunden — übersprungen")
+            skipped += 1
+            continue
+
+        lt = lt_by_short.get(kuerzel)
+        if not lt:
+            errors.append(f"Zeile {i}: Abwesenheitsart-Kürzel '{kuerzel}' nicht gefunden — übersprungen")
+            skipped += 1
+            continue
+
+        try:
+            from datetime import datetime as _dt
+            _dt.strptime(date_raw, '%Y-%m-%d')
+            db.add_absence(emp['ID'], date_raw, lt['ID'])
+            imported += 1
+        except Exception as e:
+            errors.append(f"Zeile {i}: {e}")
+            skipped += 1
+
+    return {"imported": imported, "skipped": skipped, "errors": errors}
+
+
+@app.post("/api/import/groups")
+async def import_groups(file: UploadFile = File(...)):
+    """Import groups from CSV.
+    Required: Name. Optional: Kürzel, Übergeordnete-Gruppe-Name."""
+    content = await file.read()
+    text = _decode_csv(content)
+    reader = csv.DictReader(io.StringIO(text))
+
+    imported = 0
+    skipped = 0
+    errors = []
+    db = get_db()
+
+    existing_groups = db.get_groups(include_hidden=True)
+    group_by_name = {g['NAME'].strip().upper(): g for g in existing_groups}
+
+    for i, row in enumerate(reader, start=2):
+        row = {k.strip().upper(): v.strip() for k, v in row.items() if k}
+        name = row.get('NAME') or row.get('BEZEICHNUNG') or ''
+        kuerzel = row.get('KÜRZEL') or row.get('KURZEL') or row.get('SHORTNAME') or ''
+        parent_name = (row.get('ÜBERGEORDNETE-GRUPPE-NAME') or row.get('UEBERGEORDNETE-GRUPPE-NAME') or
+                       row.get('PARENT') or row.get('SUPERGRUPPE') or '').strip().upper()
+
+        if not name:
+            errors.append(f"Zeile {i}: NAME fehlt — übersprungen")
+            skipped += 1
+            continue
+
+        parent_id = None
+        if parent_name:
+            parent_grp = group_by_name.get(parent_name)
+            if not parent_grp:
+                errors.append(f"Zeile {i}: Übergeordnete Gruppe '{parent_name}' nicht gefunden — übersprungen")
+                skipped += 1
+                continue
+            parent_id = parent_grp['ID']
+
+        try:
+            data = {
+                'NAME': name,
+                'SHORTNAME': kuerzel,
+                'SUPERID': parent_id or 0,
+                'HIDE': False,
+            }
+            db.create_group(data)
+            # Refresh for subsequent lookups
+            group_by_name[name.upper()] = {'NAME': name, 'ID': -1}
+            imported += 1
+        except Exception as e:
+            errors.append(f"Zeile {i} ({name}): {e}")
+            skipped += 1
+
+    return {"imported": imported, "skipped": skipped, "errors": errors}
+
+
 # ── Backup / Restore endpoints ───────────────────────────────
 
 import zipfile

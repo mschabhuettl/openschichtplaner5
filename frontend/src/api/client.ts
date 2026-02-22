@@ -771,6 +771,12 @@ export const api = {
   changePassword: (userId: number, newPassword: string) =>
     postJSON<{ ok: boolean }>(`/api/users/${userId}/change-password`, { new_password: newPassword }),
 
+  // ─── Holiday Bans ─────────────────────────────────────────
+  getHolidayBans: (groupId?: number) =>
+    fetchJSON<{ id: number; group_id: number; group_name: string; start_date: string; end_date: string; restrict: number; reason: string }[]>(
+      `/api/holiday-bans${groupId != null ? `?group_id=${groupId}` : ''}`
+    ),
+
   // ─── Backup / Restore ─────────────────────────────────────
   getBackupUrl: (): string => `${BASE_URL}/api/backup/download`,
 

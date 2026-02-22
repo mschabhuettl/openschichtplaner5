@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Schedule from './pages/Schedule';
 import Employees from './pages/Employees';
@@ -30,118 +31,61 @@ import Personaltabelle from './pages/Personaltabelle';
 import Protokoll from './pages/Protokoll';
 import Ueberstunden from './pages/Ueberstunden';
 
-type Page =
-  | 'dashboard'
-  | 'schedule'
-  | 'einsatzplan'
-  | 'jahresuebersicht'
-  | 'statistiken'
-  | 'urlaub'
-  | 'schichtmodell'
-  | 'personalbedarf'
-  | 'employees'
-  | 'groups'
-  | 'shifts'
-  | 'leave-types'
-  | 'holidays'
-  | 'workplaces'
-  | 'extracharges'
-  | 'jahresabschluss'
-  | 'zeitkonto'
-  | 'notizen'
-  | 'export'
-  | 'import'
-  | 'berichte'
-  | 'benutzerverwaltung'
-  | 'backup'
-  | 'perioden'
-  | 'kontobuchungen'
-  | 'einschraenkungen'
-  | 'personaltabelle'
-  | 'einstellungen'
-  | 'protokoll'
-  | 'ueberstunden';
-
-const navItems: { id: Page; label: string; icon: string; group?: string }[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+const navItems: { id: string; label: string; icon: string; group?: string; path: string }[] = [
+  { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/' },
   // Planning views
-  { id: 'schedule', label: 'Dienstplan', icon: '📅', group: 'Planung' },
-  { id: 'einsatzplan', label: 'Einsatzplan', icon: '📋', group: 'Planung' },
-  { id: 'jahresuebersicht', label: 'Jahresübersicht', icon: '📆', group: 'Planung' },
-  { id: 'personaltabelle', label: 'Personaltabelle', icon: '👤', group: 'Planung' },
-  { id: 'statistiken', label: 'Statistiken', icon: '📈', group: 'Planung' },
-  { id: 'urlaub', label: 'Urlaubsverwaltung', icon: '🏖️', group: 'Planung' },
-  { id: 'schichtmodell', label: 'Schichtmodelle', icon: '🔄', group: 'Planung' },
-  { id: 'personalbedarf', label: 'Personalbedarf', icon: '👥', group: 'Planung' },
-  { id: 'jahresabschluss', label: 'Jahresabschluss', icon: '📅', group: 'Planung' },
-  { id: 'zeitkonto', label: 'Zeitkonto', icon: '⏱️', group: 'Planung' },
-  { id: 'ueberstunden', label: 'Überstunden', icon: '⏰', group: 'Planung' },
-  { id: 'kontobuchungen', label: 'Kontobuchungen', icon: '💰', group: 'Planung' },
-  { id: 'notizen', label: 'Notizen', icon: '📝', group: 'Planung' },
+  { id: 'schedule', label: 'Dienstplan', icon: '📅', group: 'Planung', path: '/schedule' },
+  { id: 'einsatzplan', label: 'Einsatzplan', icon: '📋', group: 'Planung', path: '/einsatzplan' },
+  { id: 'jahresuebersicht', label: 'Jahresübersicht', icon: '📆', group: 'Planung', path: '/jahresuebersicht' },
+  { id: 'personaltabelle', label: 'Personaltabelle', icon: '👤', group: 'Planung', path: '/personaltabelle' },
+  { id: 'statistiken', label: 'Statistiken', icon: '📈', group: 'Planung', path: '/statistiken' },
+  { id: 'urlaub', label: 'Urlaubsverwaltung', icon: '🏖️', group: 'Planung', path: '/urlaub' },
+  { id: 'schichtmodell', label: 'Schichtmodelle', icon: '🔄', group: 'Planung', path: '/schichtmodell' },
+  { id: 'personalbedarf', label: 'Personalbedarf', icon: '👥', group: 'Planung', path: '/personalbedarf' },
+  { id: 'jahresabschluss', label: 'Jahresabschluss', icon: '📅', group: 'Planung', path: '/jahresabschluss' },
+  { id: 'zeitkonto', label: 'Zeitkonto', icon: '⏱️', group: 'Planung', path: '/zeitkonto' },
+  { id: 'ueberstunden', label: 'Überstunden', icon: '⏰', group: 'Planung', path: '/ueberstunden' },
+  { id: 'kontobuchungen', label: 'Kontobuchungen', icon: '💰', group: 'Planung', path: '/kontobuchungen' },
+  { id: 'notizen', label: 'Notizen', icon: '📝', group: 'Planung', path: '/notizen' },
   // Reports
-  { id: 'berichte', label: 'Berichte', icon: '📊', group: 'Berichte' },
-  { id: 'export', label: 'Export', icon: '⬇️', group: 'Berichte' },
-  { id: 'import', label: 'Import', icon: '⬆️', group: 'Berichte' },
+  { id: 'berichte', label: 'Berichte', icon: '📊', group: 'Berichte', path: '/berichte' },
+  { id: 'export', label: 'Export', icon: '⬇️', group: 'Berichte', path: '/export' },
+  { id: 'import', label: 'Import', icon: '⬆️', group: 'Berichte', path: '/import' },
   // Settings / data
-  { id: 'employees', label: 'Mitarbeiter', icon: '👥', group: 'Stammdaten' },
-  { id: 'groups', label: 'Gruppen', icon: '🏢', group: 'Stammdaten' },
-  { id: 'shifts', label: 'Schichtarten', icon: '🕐', group: 'Stammdaten' },
-  { id: 'leave-types', label: 'Abwesenheitsarten', icon: '📋', group: 'Stammdaten' },
-  { id: 'holidays', label: 'Feiertage', icon: '📅', group: 'Stammdaten' },
-  { id: 'workplaces', label: 'Arbeitsplätze', icon: '🏭', group: 'Stammdaten' },
-  { id: 'extracharges', label: 'Zeitzuschläge', icon: '⏱️', group: 'Stammdaten' },
-  { id: 'einschraenkungen', label: 'Schichteinschränkungen', icon: '🚫', group: 'Stammdaten' },
+  { id: 'employees', label: 'Mitarbeiter', icon: '👥', group: 'Stammdaten', path: '/employees' },
+  { id: 'groups', label: 'Gruppen', icon: '🏢', group: 'Stammdaten', path: '/groups' },
+  { id: 'shifts', label: 'Schichtarten', icon: '🕐', group: 'Stammdaten', path: '/shifts' },
+  { id: 'leave-types', label: 'Abwesenheitsarten', icon: '📋', group: 'Stammdaten', path: '/leave-types' },
+  { id: 'holidays', label: 'Feiertage', icon: '📅', group: 'Stammdaten', path: '/holidays' },
+  { id: 'workplaces', label: 'Arbeitsplätze', icon: '🏭', group: 'Stammdaten', path: '/workplaces' },
+  { id: 'extracharges', label: 'Zeitzuschläge', icon: '⏱️', group: 'Stammdaten', path: '/extracharges' },
+  { id: 'einschraenkungen', label: 'Schichteinschränkungen', icon: '🚫', group: 'Stammdaten', path: '/einschraenkungen' },
   // Administration
-  { id: 'benutzerverwaltung', label: 'Benutzerverwaltung', icon: '👤', group: 'Administration' },
-  { id: 'backup', label: 'Backup & Restore', icon: '💾', group: 'Administration' },
-  { id: 'perioden', label: 'Abrechnungszeiträume', icon: '📅', group: 'Administration' },
-  { id: 'einstellungen', label: 'Einstellungen', icon: '⚙️', group: 'Administration' },
-  { id: 'protokoll', label: 'Protokoll', icon: '📋', group: 'Administration' },
+  { id: 'benutzerverwaltung', label: 'Benutzerverwaltung', icon: '👤', group: 'Administration', path: '/benutzerverwaltung' },
+  { id: 'backup', label: 'Backup & Restore', icon: '💾', group: 'Administration', path: '/backup' },
+  { id: 'perioden', label: 'Abrechnungszeiträume', icon: '📅', group: 'Administration', path: '/perioden' },
+  { id: 'einstellungen', label: 'Einstellungen', icon: '⚙️', group: 'Administration', path: '/einstellungen' },
+  { id: 'protokoll', label: 'Protokoll', icon: '📋', group: 'Administration', path: '/protokoll' },
 ];
 
-export default function App() {
-  const [page, setPage] = useState<Page>('schedule');
+function AppInner() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const navigate = (p: Page) => {
-    setPage(p);
-    setSidebarOpen(false); // close drawer on mobile after selection
+  const goTo = (path: string) => {
+    navigate(path);
+    setSidebarOpen(false);
   };
 
-  const renderPage = () => {
-    switch (page) {
-      case 'dashboard': return <Dashboard />;
-      case 'schedule': return <Schedule />;
-      case 'einsatzplan': return <Einsatzplan />;
-      case 'jahresuebersicht': return <Jahresuebersicht />;
-      case 'personaltabelle': return <Personaltabelle />;
-      case 'statistiken': return <Statistiken />;
-      case 'urlaub': return <Urlaub />;
-      case 'schichtmodell': return <Schichtmodell />;
-      case 'personalbedarf': return <Personalbedarf />;
-      case 'jahresabschluss': return <Jahresabschluss />;
-      case 'zeitkonto': return <Zeitkonto />;
-      case 'kontobuchungen': return <Kontobuchungen />;
-      case 'notizen': return <Notizen />;
-      case 'berichte': return <Berichte />;
-      case 'export': return <Export />;
-      case 'import': return <Import />;
-      case 'employees': return <Employees />;
-      case 'groups': return <Groups />;
-      case 'shifts': return <Shifts />;
-      case 'leave-types': return <LeaveTypes />;
-      case 'holidays': return <Holidays />;
-      case 'workplaces': return <Workplaces />;
-      case 'extracharges': return <Extracharges />;
-      case 'einschraenkungen': return <Einschraenkungen />;
-      case 'benutzerverwaltung': return <Benutzerverwaltung />;
-      case 'backup': return <Backup />;
-      case 'perioden': return <Perioden />;
-      case 'einstellungen': return <Einstellungen />;
-      case 'protokoll': return <Protokoll />;
-      case 'ueberstunden': return <Ueberstunden />;
+  const isActive = (item: typeof navItems[0]) => {
+    if (item.id === 'dashboard') {
+      return location.pathname === '/';
     }
+    return location.pathname === item.path;
   };
+
+  const currentItem = navItems.find(i => isActive(i));
 
   // Group nav items
   const grouped: { group: string; items: typeof navItems }[] = [
@@ -180,9 +124,9 @@ export default function App() {
               {items.map(item => (
                 <button
                   key={item.id}
-                  onClick={() => navigate(item.id)}
+                  onClick={() => goTo(item.path)}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
-                    page === item.id
+                    isActive(item)
                       ? 'bg-slate-600 text-white font-semibold'
                       : 'text-slate-300 hover:bg-slate-700 hover:text-white'
                   }`}
@@ -234,14 +178,53 @@ export default function App() {
             ☰
           </button>
           <span className="font-semibold text-sm">
-            {navItems.find(i => i.id === page)?.icon} {navItems.find(i => i.id === page)?.label}
+            {currentItem?.icon} {currentItem?.label}
           </span>
         </header>
 
         <main className="flex-1 overflow-auto">
-          {renderPage()}
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/schedule" element={<Schedule />} />
+            <Route path="/einsatzplan" element={<Einsatzplan />} />
+            <Route path="/jahresuebersicht" element={<Jahresuebersicht />} />
+            <Route path="/personaltabelle" element={<Personaltabelle />} />
+            <Route path="/statistiken" element={<Statistiken />} />
+            <Route path="/urlaub" element={<Urlaub />} />
+            <Route path="/schichtmodell" element={<Schichtmodell />} />
+            <Route path="/personalbedarf" element={<Personalbedarf />} />
+            <Route path="/jahresabschluss" element={<Jahresabschluss />} />
+            <Route path="/zeitkonto" element={<Zeitkonto />} />
+            <Route path="/ueberstunden" element={<Ueberstunden />} />
+            <Route path="/kontobuchungen" element={<Kontobuchungen />} />
+            <Route path="/notizen" element={<Notizen />} />
+            <Route path="/berichte" element={<Berichte />} />
+            <Route path="/export" element={<Export />} />
+            <Route path="/import" element={<Import />} />
+            <Route path="/employees" element={<Employees />} />
+            <Route path="/groups" element={<Groups />} />
+            <Route path="/shifts" element={<Shifts />} />
+            <Route path="/leave-types" element={<LeaveTypes />} />
+            <Route path="/holidays" element={<Holidays />} />
+            <Route path="/workplaces" element={<Workplaces />} />
+            <Route path="/extracharges" element={<Extracharges />} />
+            <Route path="/einschraenkungen" element={<Einschraenkungen />} />
+            <Route path="/benutzerverwaltung" element={<Benutzerverwaltung />} />
+            <Route path="/backup" element={<Backup />} />
+            <Route path="/perioden" element={<Perioden />} />
+            <Route path="/einstellungen" element={<Einstellungen />} />
+            <Route path="/protokoll" element={<Protokoll />} />
+          </Routes>
         </main>
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppInner />
+    </BrowserRouter>
   );
 }

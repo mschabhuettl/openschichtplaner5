@@ -1,35 +1,49 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
-import Schedule from './pages/Schedule';
-import Employees from './pages/Employees';
-import Groups from './pages/Groups';
-import Shifts from './pages/Shifts';
-import LeaveTypes from './pages/LeaveTypes';
-import Holidays from './pages/Holidays';
-import Workplaces from './pages/Workplaces';
-import Extracharges from './pages/Extracharges';
-import Einsatzplan from './pages/Einsatzplan';
-import Jahresuebersicht from './pages/Jahresuebersicht';
-import Statistiken from './pages/Statistiken';
-import Schichtmodell from './pages/Schichtmodell';
-import Urlaub from './pages/Urlaub';
-import Personalbedarf from './pages/Personalbedarf';
-import Jahresabschluss from './pages/Jahresabschluss';
-import Zeitkonto from './pages/Zeitkonto';
-import Export from './pages/Export';
-import Import from './pages/Import';
-import Berichte from './pages/Berichte';
-import Benutzerverwaltung from './pages/Benutzerverwaltung';
-import Notizen from './pages/Notizen';
-import Backup from './pages/Backup';
-import Perioden from './pages/Perioden';
-import Einstellungen from './pages/Einstellungen';
-import Kontobuchungen from './pages/Kontobuchungen';
-import Einschraenkungen from './pages/Einschraenkungen';
-import Personaltabelle from './pages/Personaltabelle';
-import Protokoll from './pages/Protokoll';
-import Ueberstunden from './pages/Ueberstunden';
+
+// Lazy-loaded pages — each page group is a separate chunk
+const Dashboard         = lazy(() => import('./pages/Dashboard'));
+const Schedule          = lazy(() => import('./pages/Schedule'));
+const Einsatzplan       = lazy(() => import('./pages/Einsatzplan'));
+const Jahresuebersicht  = lazy(() => import('./pages/Jahresuebersicht'));
+const Personaltabelle   = lazy(() => import('./pages/Personaltabelle'));
+const Statistiken       = lazy(() => import('./pages/Statistiken'));
+const Urlaub            = lazy(() => import('./pages/Urlaub'));
+const Schichtmodell     = lazy(() => import('./pages/Schichtmodell'));
+const Personalbedarf    = lazy(() => import('./pages/Personalbedarf'));
+const Jahresabschluss   = lazy(() => import('./pages/Jahresabschluss'));
+const Zeitkonto         = lazy(() => import('./pages/Zeitkonto'));
+const Ueberstunden      = lazy(() => import('./pages/Ueberstunden'));
+const Kontobuchungen    = lazy(() => import('./pages/Kontobuchungen'));
+const Notizen           = lazy(() => import('./pages/Notizen'));
+const Berichte          = lazy(() => import('./pages/Berichte'));
+const Export            = lazy(() => import('./pages/Export'));
+const Import            = lazy(() => import('./pages/Import'));
+const Employees         = lazy(() => import('./pages/Employees'));
+const Groups            = lazy(() => import('./pages/Groups'));
+const Shifts            = lazy(() => import('./pages/Shifts'));
+const LeaveTypes        = lazy(() => import('./pages/LeaveTypes'));
+const Holidays          = lazy(() => import('./pages/Holidays'));
+const Workplaces        = lazy(() => import('./pages/Workplaces'));
+const Extracharges      = lazy(() => import('./pages/Extracharges'));
+const Einschraenkungen  = lazy(() => import('./pages/Einschraenkungen'));
+const Benutzerverwaltung = lazy(() => import('./pages/Benutzerverwaltung'));
+const Backup            = lazy(() => import('./pages/Backup'));
+const Perioden          = lazy(() => import('./pages/Perioden'));
+const Einstellungen     = lazy(() => import('./pages/Einstellungen'));
+const Protokoll         = lazy(() => import('./pages/Protokoll'));
+
+/** Simple loading indicator shown while a lazy chunk is fetching */
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-full min-h-[200px] text-slate-400">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+        <span className="text-sm">Lädt…</span>
+      </div>
+    </div>
+  );
+}
 
 const navItems: { id: string; label: string; icon: string; group?: string; path: string }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/' },
@@ -183,38 +197,41 @@ function AppInner() {
         </header>
 
         <main className="flex-1 overflow-auto">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/schedule" element={<Schedule />} />
-            <Route path="/einsatzplan" element={<Einsatzplan />} />
-            <Route path="/jahresuebersicht" element={<Jahresuebersicht />} />
-            <Route path="/personaltabelle" element={<Personaltabelle />} />
-            <Route path="/statistiken" element={<Statistiken />} />
-            <Route path="/urlaub" element={<Urlaub />} />
-            <Route path="/schichtmodell" element={<Schichtmodell />} />
-            <Route path="/personalbedarf" element={<Personalbedarf />} />
-            <Route path="/jahresabschluss" element={<Jahresabschluss />} />
-            <Route path="/zeitkonto" element={<Zeitkonto />} />
-            <Route path="/ueberstunden" element={<Ueberstunden />} />
-            <Route path="/kontobuchungen" element={<Kontobuchungen />} />
-            <Route path="/notizen" element={<Notizen />} />
-            <Route path="/berichte" element={<Berichte />} />
-            <Route path="/export" element={<Export />} />
-            <Route path="/import" element={<Import />} />
-            <Route path="/employees" element={<Employees />} />
-            <Route path="/groups" element={<Groups />} />
-            <Route path="/shifts" element={<Shifts />} />
-            <Route path="/leave-types" element={<LeaveTypes />} />
-            <Route path="/holidays" element={<Holidays />} />
-            <Route path="/workplaces" element={<Workplaces />} />
-            <Route path="/extracharges" element={<Extracharges />} />
-            <Route path="/einschraenkungen" element={<Einschraenkungen />} />
-            <Route path="/benutzerverwaltung" element={<Benutzerverwaltung />} />
-            <Route path="/backup" element={<Backup />} />
-            <Route path="/perioden" element={<Perioden />} />
-            <Route path="/einstellungen" element={<Einstellungen />} />
-            <Route path="/protokoll" element={<Protokoll />} />
-          </Routes>
+          {/* Suspense boundary: shows spinner while a lazy chunk loads */}
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/schedule" element={<Schedule />} />
+              <Route path="/einsatzplan" element={<Einsatzplan />} />
+              <Route path="/jahresuebersicht" element={<Jahresuebersicht />} />
+              <Route path="/personaltabelle" element={<Personaltabelle />} />
+              <Route path="/statistiken" element={<Statistiken />} />
+              <Route path="/urlaub" element={<Urlaub />} />
+              <Route path="/schichtmodell" element={<Schichtmodell />} />
+              <Route path="/personalbedarf" element={<Personalbedarf />} />
+              <Route path="/jahresabschluss" element={<Jahresabschluss />} />
+              <Route path="/zeitkonto" element={<Zeitkonto />} />
+              <Route path="/ueberstunden" element={<Ueberstunden />} />
+              <Route path="/kontobuchungen" element={<Kontobuchungen />} />
+              <Route path="/notizen" element={<Notizen />} />
+              <Route path="/berichte" element={<Berichte />} />
+              <Route path="/export" element={<Export />} />
+              <Route path="/import" element={<Import />} />
+              <Route path="/employees" element={<Employees />} />
+              <Route path="/groups" element={<Groups />} />
+              <Route path="/shifts" element={<Shifts />} />
+              <Route path="/leave-types" element={<LeaveTypes />} />
+              <Route path="/holidays" element={<Holidays />} />
+              <Route path="/workplaces" element={<Workplaces />} />
+              <Route path="/extracharges" element={<Extracharges />} />
+              <Route path="/einschraenkungen" element={<Einschraenkungen />} />
+              <Route path="/benutzerverwaltung" element={<Benutzerverwaltung />} />
+              <Route path="/backup" element={<Backup />} />
+              <Route path="/perioden" element={<Perioden />} />
+              <Route path="/einstellungen" element={<Einstellungen />} />
+              <Route path="/protokoll" element={<Protokoll />} />
+            </Routes>
+          </Suspense>
         </main>
       </div>
     </div>

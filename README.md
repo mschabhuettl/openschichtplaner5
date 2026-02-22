@@ -30,15 +30,23 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 <table>
   <tr>
     <td><img src="docs/screenshots/dashboard.png" alt="Dashboard" width="480"/><br/><sub><b>Dashboard</b></sub></td>
-    <td><img src="docs/screenshots/dienstplan.png" alt="Dienstplan" width="480"/><br/><sub><b>Dienstplan (Monatsansicht)</b></sub></td>
+    <td><img src="docs/screenshots/dienstplan.png" alt="Dienstplan" width="480"/><br/><sub><b>Dienstplan mit Suche & Sortierung</b></sub></td>
   </tr>
   <tr>
     <td><img src="docs/screenshots/statistiken.png" alt="Statistiken" width="480"/><br/><sub><b>Statistiken</b></sub></td>
     <td><img src="docs/screenshots/jahresuebersicht.png" alt="Jahresübersicht" width="480"/><br/><sub><b>Jahresübersicht</b></sub></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/mitarbeiter.png" alt="Mitarbeiter" width="480"/><br/><sub><b>Mitarbeiterverwaltung</b></sub></td>
-    <td><img src="docs/screenshots/urlaub.png" alt="Urlaubsverwaltung" width="480"/><br/><sub><b>Urlaubsverwaltung</b></sub></td>
+    <td><img src="docs/screenshots/zeitkonto.png" alt="Zeitkonto" width="480"/><br/><sub><b>Zeitkonto mit Monatsdetails</b></sub></td>
+    <td><img src="docs/screenshots/ueberstunden.png" alt="Überstunden" width="480"/><br/><sub><b>Überstunden-Übersicht</b></sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/mitarbeiter.png" alt="Mitarbeiter" width="480"/><br/><sub><b>Mitarbeiterverwaltung mit Sortierung</b></sub></td>
+    <td><img src="docs/screenshots/urlaubsverwaltung.png" alt="Urlaubsverwaltung" width="480"/><br/><sub><b>Urlaubsverwaltung</b></sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/berichte.png" alt="Berichte" width="480"/><br/><sub><b>Berichte & Reports</b></sub></td>
+    <td><img src="docs/screenshots/protokoll.png" alt="Protokoll" width="480"/><br/><sub><b>Aktivitätsprotokoll</b></sub></td>
   </tr>
 </table>
 
@@ -46,30 +54,58 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 
 ## Features
 
-### Planung
-- ✅ **Dienstplan** — Monatsansicht, Schichten & Abwesenheiten per Rechtsklick eintragen
-- ✅ **Einsatzplan** — Tages- und Wochenansicht
+### 📅 Planung
+- ✅ **Dienstplan** — Monatsansicht, Schichten & Abwesenheiten per Rechtsklick; Echtzeit-Suche (Ctrl+F) + Sortierung nach Name/Nummer
+- ✅ **Einsatzplan** — Tages- und Wochenansicht mit Abweichungen
 - ✅ **Jahresübersicht** — 12 Monate pro Mitarbeiter auf einen Blick
-- ✅ **Statistiken** — Soll/Ist-Vergleich, Überstunden, Fehlzeiten
-- ✅ **Urlaubsverwaltung** — Anspruch, Saldo, Sperrtage, Jahresabschluss
-- ✅ **Zeitkonto & Kontobuchungen** — Arbeitszeitguthaben verwalten
-- ✅ **Schichtmodelle** — Wiederkehrende Schichtmuster definieren und zuordnen
-- ✅ **Personalbedarf** — Mindestbesetzung pro Schicht und Tag festlegen
+- ✅ **Personaltabelle** — Kompakte tabellarische Planansicht
+- ✅ **Statistiken** — Soll/Ist-Vergleich, Fehlzeiten pro Gruppe/Monat
+- ✅ **Urlaubsverwaltung** — Anspruch, Saldo, Sperrtage, Genehmigungs-Workflow, PDF-Druck
+- ✅ **Schichtmodelle** — Wiederkehrende Schichtmuster (Wochen-/Tagesrhythmus) definieren & zuordnen
+- ✅ **Personalbedarf** — Mindest- und Maximalbesetzung pro Schicht/Tag; datumsspezifische Sonderbedarfe
+- ✅ **Jahresabschluss** — Automatische Übertrag-Berechnung und -Buchung
+- ✅ **Zeitkonto** — Soll/Ist/Saldo-Übersicht mit Monatsdetail-Modal und Jahresabschluss
+- ✅ **Überstunden** *(neu)* — Dedizierte Überstunden-Seite: Soll/Ist/Differenz-Tabelle mit Balken-Visualisierung, Jahr- und Gruppenfilter
+- ✅ **Kontobuchungen** — Manuelle Buchungen auf Zeitkonten
+- ✅ **Notizen** — Tages- und mitarbeiterbezogene Notizen
 
-### Stammdaten
-- ✅ **Mitarbeiter** — Vollständige Stammdatenverwaltung mit CRUD
-- ✅ **Gruppen / Abteilungen** — Mitarbeiter in Teams organisieren
-- ✅ **Schichtarten** — Zeiten, Farben, Kürzel definieren
+### 👥 Stammdaten
+- ✅ **Mitarbeiter** — Vollständige Stammdatenverwaltung (Stamm-, Kontakt-, Kalkulationsdaten), Foto-Upload, Schichteinschränkungen; klickbare Sortier-Spaltenköpfe
+- ✅ **Gruppen** — Hierarchische Abteilungsstruktur mit Suchfeld + Sortierung *(neu)*
+- ✅ **Schichtarten** — Zeiten, Farben, Kürzel, wochentags-spezifische Schichtzeiten *(erweitert)*
 - ✅ **Abwesenheitsarten** — Urlaub, Krank, Fortbildung, Sonderurlaub …
-- ✅ **Feiertage** — Jahresbezogene Feiertagsverwaltung
-- ✅ **Arbeitsstätten & Zulagen** — Standorte und Lohnzuschläge
+- ✅ **Feiertage** — Jahresbezogene Feiertagsverwaltung mit Import *(erweitert)*
+- ✅ **Arbeitsstätten** — Standorte & Mitarbeiterzuordnung
+- ✅ **Zeitzuschläge** — Lohnzuschläge inkl. wochentags-spezifischer Konfiguration
+- ✅ **Schichteinschränkungen** — Verbotene Schichten pro Mitarbeiter
 
-### Daten & System
-- ✅ **CSV-Export** — Dienstplan, Statistiken, Mitarbeiter, Abwesenheiten
-- ✅ **HTML-Export** — Druckfertiger Dienstplan
-- ✅ **Import** — Massenimport via CSV
-- ✅ **Backup & Restore** — ZIP-Backup aller DBF-Dateien
-- ✅ **Benutzerverwaltung** — Rollen, Zugriffsrechte, Gruppeneinschränkungen
+### 📊 Berichte & Export (20+ Berichtstypen)
+- ✅ **Dienstplan-Bericht** — Monats-/Jahresbericht (CSV, HTML)
+- ✅ **Mitarbeiterliste** — Vollständige Stammdaten (CSV, Druckansicht)
+- ✅ **Abwesenheitsbericht** — Gesamt, pro Typ, pro Mitarbeiter, Timeline
+- ✅ **Urlaubsbericht** — Saldo, Entitlement, Gruppenübersicht
+- ✅ **Schichtbericht** — Schichtenverteilung, pro Mitarbeiter, pro Gruppe
+- ✅ **Zeitkonto-Bericht** — Saldo-Übersicht, Monatsdetail, Jahresabschluss-Vorschau
+- ✅ **Überstunden-Bericht** *(neu)* — Soll/Ist/Delta pro Mitarbeiter
+- ✅ **Personalbedarf-Bericht** — Soll/Ist Besetzung pro Tag
+
+### ⬆️ Import (7 Importtypen)
+- ✅ **Mitarbeiter-Import** (CSV)
+- ✅ **Schichtarten-Import** (CSV)
+- ✅ **Abwesenheiten-Import** (CSV)
+- ✅ **Feiertage-Import** (CSV)
+- ✅ **Ist-Stunden-Import** (CSV)
+- ✅ **Soll-Stunden-Import** (CSV)
+- ✅ **Urlaubsanspruch-Import** (CSV)
+- ✅ **Gruppen-Import** (CSV)
+
+### 🔧 System & Administration
+- ✅ **Aktivitätsprotokoll** *(neu)* — Vollständige Änderungshistorie aller API-Aktionen (Erstellt/Geändert/Gelöscht) mit Filtern nach Datum, Benutzer, Aktion, Objekt
+- ✅ **Benutzerverwaltung** — Rollen, Passwort-Änderung, gruppen- und mitarbeiterbezogene Zugriffsrechte
+- ✅ **Backup & Restore** — ZIP-Backup aller DBF-Dateien inkl. Wiederherstellung
+- ✅ **Abrechnungszeiträume** — Perioden definieren und verwalten
+- ✅ **Einstellungen** — Systemkonfiguration (USETT)
+- ✅ **DB-Komprimierung** — Gelöschte Datensätze aus DBF-Dateien entfernen
 - ✅ **Mobile-freundlich** — Responsive Design mit Hamburger-Menü
 
 ---
@@ -122,9 +158,9 @@ npm run dev
 nohup sh -c 'SP5_DB_PATH=/pfad/zu/Daten uvicorn api.main:app --host 0.0.0.0 --port 8000' \
   > /tmp/sp5-backend.log 2>&1 &
 
-# Frontend (Entwicklung)
-nohup npm --prefix frontend run dev -- --host 0.0.0.0 --port 5173 \
-  > /tmp/sp5-frontend.log 2>&1 &
+# Frontend (Produktion)
+cd frontend && npm run build
+nohup npx serve dist -p 5173 > /tmp/sp5-frontend.log 2>&1 &
 ```
 
 ---
@@ -135,18 +171,21 @@ nohup npm --prefix frontend run dev -- --host 0.0.0.0 --port 5173 \
 openschichtplaner5/
 ├── backend/
 │   ├── api/
-│   │   └── main.py          # FastAPI REST API
+│   │   └── main.py          # FastAPI REST API (80+ Endpunkte)
+│   ├── data/
+│   │   └── changelog.json   # Aktivitätsprotokoll
 │   └── sp5lib/
 │       ├── dbf_reader.py    # DBF/FoxPro Reader (UTF-16 LE)
 │       ├── dbf_writer.py    # DBF Writer (append/update/delete)
-│       ├── database.py      # High-level DB access
+│       ├── database.py      # High-level DB access (40+ Methoden)
 │       └── color_utils.py   # BGR→RGB Farbkonvertierung
 ├── frontend/
 │   └── src/
-│       ├── App.tsx           # Navigation & Layout
+│       ├── App.tsx           # Navigation & Layout (31 Seiten)
+│       ├── api/client.ts     # Typisierter API-Client
 │       └── pages/            # Alle Seitenkomponenten
 └── docs/
-    └── screenshots/          # App-Screenshots
+    └── screenshots/          # App-Screenshots (30 Seiten)
 ```
 
 ---
@@ -165,7 +204,38 @@ openschichtplaner5/
 
 ## Dokumentation
 
-📖 **[GitHub Wiki](https://github.com/mschabhuettl/openschichtplaner5/wiki)** — vollständige Dokumentation (29 Seiten) orientiert am Original-Schichtplaner5-Handbuch
+📖 **[GitHub Wiki](https://github.com/mschabhuettl/openschichtplaner5/wiki)** — vollständige Dokumentation orientiert am Original-Schichtplaner5-Handbuch
+
+---
+
+## CHANGELOG
+
+### [Unreleased] — 2026-02-22
+#### Neu
+- **Suche & Sortierung im Dienstplan** (Block 2.6): Ctrl+F-Shortcut, Kürzel/Nummer-Suche, Sortier-Dropdown (Name A-Z/Z-A, Nummer ↑↓)
+- **Sortierbare Spaltenköpfe** in Mitarbeiter- und Gruppen-Seite mit ↑↓-Pfeilicons
+- **Aktivitätsprotokoll** (Block 3.4): Automatische Protokollierung aller API-Mutationen (POST/PUT/DELETE), Filter nach Aktion/Objekt/Benutzer/Datum, Farbkodierung
+- **Überstunden-Seite** (Block 3.5): Soll/Ist/Delta-Übersicht mit Balken-Visualisierung, Jahr- und Gruppenfilter, Summenzeile
+
+### 2026-02-22 (d213eb4)
+#### Neu
+- 14 neue Report-Typen (Schichtbericht, Zeitkonto-Bericht, Personalbedarf, Abwesenheits-Timeline, …)
+- 6 neue Import-Typen (Ist-Stunden, Soll-Stunden, Urlaubsanspruch, Abwesenheiten, Gruppen, Feiertage)
+- Berichte-Seite komplett überarbeitet
+
+### 2026-02-21 (2f36238)
+#### Neu
+- Wochentags-spezifische Schichtzeiten (Montag bis Sonntag unterschiedlich)
+- Foto-Upload für Mitarbeiter
+- Urlaubsantrag-Druckansicht
+- Passwort-Ändern in Benutzerverwaltung
+- Anonyme/verdeckte Abwesenheiten
+
+### 2026-02-20 (bf18a0f)
+#### Neu
+- Feiertage-Import (CSV)
+- Maximalbedarf (MAX) in Personalbedarf-Planung
+- Saldo-Übertrag (Jahresabschluss → nächstes Jahr buchen)
 
 ---
 

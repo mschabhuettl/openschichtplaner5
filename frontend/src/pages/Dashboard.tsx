@@ -351,8 +351,8 @@ function MonthHeatmapWidget({ statsData }: { statsData: DashboardStats | null })
     <Widget
       title={`Besetzungs-Heatmap — ${MONTH_NAMES_DE[month]} ${year}`}
       icon="🗓️"
-      className="col-span-1 md:col-span-2"
     >
+      <div className="max-w-xs mx-auto">
       {/* Weekday headers */}
       <div className="grid grid-cols-7 gap-1 mb-1">
         {weekdays.map((d) => (
@@ -394,6 +394,7 @@ function MonthHeatmapWidget({ statsData }: { statsData: DashboardStats | null })
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-[#f97316] inline-block" />Niedrig</span>
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-[#fee2e2] inline-block" />Leer</span>
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-[#6366f1] inline-block" />Heute</span>
+      </div>
       </div>
     </Widget>
   );

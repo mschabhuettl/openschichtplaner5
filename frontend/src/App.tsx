@@ -50,6 +50,7 @@ const Schichtwuensche    = lazy(() => import('./pages/Schichtwuensche'));
 const Jahresrueckblick   = lazy(() => import('./pages/Jahresrueckblick'));
 const Druckvorschau      = lazy(() => import('./pages/Druckvorschau'));
 const Wochenansicht      = lazy(() => import('./pages/Wochenansicht'));
+const RotationsAnalyse   = lazy(() => import('./pages/RotationsAnalyse'));
 const Login             = lazy(() => import('./pages/Login'));
 
 /** Simple loading indicator shown while a lazy chunk is fetching */
@@ -102,6 +103,7 @@ const navItems: NavItem[] = [
   { id: 'mitarbeiter-vergleich', label: 'MA-Vergleich', icon: '⚖️', group: 'Berichte', path: '/mitarbeiter-vergleich' },
   { id: 'mitarbeiter-profil', label: 'MA-Profil', icon: '🪪', group: 'Berichte', path: '/mitarbeiter' },
   { id: 'fairness', label: 'Fairness-Score', icon: '📐', group: 'Berichte', path: '/fairness' },
+  { id: 'rotations-analyse', label: 'Rotations-Analyse', icon: '🔄', group: 'Berichte', path: '/rotations-analyse' },
   { id: 'berichte', label: 'Berichte', icon: '📊', group: 'Berichte', path: '/berichte' },
   { id: 'export', label: 'Export', icon: '⬇️', group: 'Berichte', path: '/export', roles: ['Admin', 'Planer'] },
   { id: 'import', label: 'Import', icon: '⬆️', group: 'Berichte', path: '/import', roles: ['Admin'] },
@@ -404,6 +406,7 @@ function AppInner() {
               <Route path="/protokoll" element={<Protokoll />} />
               <Route path="/druckvorschau" element={<Druckvorschau />} />
               <Route path="/wochenansicht" element={<Wochenansicht />} />
+              <Route path="/rotations-analyse" element={<RotationsAnalyse />} />
             </Routes>
           </Suspense>
         </main>

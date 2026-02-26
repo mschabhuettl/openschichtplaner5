@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — 2026-02-26 (feature-22)
+
+### Hinzugefügt / Added
+
+#### 🔄 Schicht-Rotations-Analyse (`/rotations-analyse`)
+- **Neue Analyse-Seite** mit Shannon-Entropy-basiertem Rotations-Score (0–100) pro Mitarbeiter
+- **Rotations-Score**: 100 = perfekte Gleichverteilung aller Schichten; 0 = immer dieselbe Schicht
+- **4 KPI-Kacheln**: Analysierte MAs, Ø Score, Monoton (<40), Gut rotiert (≥70)
+- **Zwei Ansichtsmodi**: Tabellen-Ansicht (detaillierte Matrix) & Balken-Ansicht (gestapelte Schicht-Balken pro MA)
+- **Tabellen-Ansicht**: Schicht-Mini-Balken pro Zelle mit Farbkodierung aus Schichtdefinitionen
+- **Balken-Ansicht**: Gestapelte Proportions-Balken mit Legende — sofortiger visueller Vergleich
+- **Detail-Panel**: Klick auf MA zeigt vollständige Schichtverteilung mit horizontalen Balken + Handlungsempfehlung
+- **Zeitraum-Filter**: 3 / 6 / 12 Monate wählbar
+- **Sortieroptionen**: nach Monotonie (schlechteste zuerst), Dominanz-Anteil oder Name
+- **Farbgebung** aus den Schichtdefinitionen der Datenbank (konsistent mit Dienstplan)
+- **Handlungsempfehlungen**: Warnung bei Score <40 (Burnout-Risiko), Bestätigung bei Score ≥70
+
+---
+
 ## [Unreleased] — 2026-02-26 (feature-19)
 
 ### Hinzugefügt / Added

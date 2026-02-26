@@ -81,7 +81,6 @@ const navItems: NavItem[] = [
   { id: 'jahresuebersicht', label: 'Jahresübersicht', icon: '📆', group: 'Planung', path: '/jahresuebersicht' },
   { id: 'personaltabelle', label: 'Personaltabelle', icon: '👤', group: 'Planung', path: '/personaltabelle', roles: ['Admin', 'Planer'] },
   { id: 'statistiken', label: 'Statistiken', icon: '📈', group: 'Planung', path: '/statistiken' },
-  { id: 'jahresrueckblick', label: 'Jahresrückblick', icon: '🏆', group: 'Planung', path: '/jahresrueckblick' },
   { id: 'geburtstagkalender', label: 'Geburtstags-Kalender', icon: '🎂', group: 'Planung', path: '/geburtstagkalender' },
   { id: 'teamkalender', label: 'Team-Kalender', icon: '🗓️', group: 'Planung', path: '/teamkalender' },
   { id: 'schichtwuensche', label: 'Schichtwünsche', icon: '💬', group: 'Planung', path: '/schichtwuensche' },
@@ -89,6 +88,7 @@ const navItems: NavItem[] = [
   { id: 'urlaubs-timeline', label: 'Urlaubs-Timeline', icon: '📊', group: 'Planung', path: '/urlaubs-timeline' },
   { id: 'schichtmodell', label: 'Schichtmodelle', icon: '🔄', group: 'Planung', path: '/schichtmodell', roles: ['Admin', 'Planer'] },
   { id: 'personalbedarf', label: 'Personalbedarf', icon: '👥', group: 'Planung', path: '/personalbedarf', roles: ['Admin', 'Planer'] },
+  { id: 'jahresrueckblick', label: 'Jahresrückblick', icon: '🗓️', group: 'Planung', path: '/jahresrueckblick' },
   { id: 'jahresabschluss', label: 'Jahresabschluss', icon: '📅', group: 'Planung', path: '/jahresabschluss', roles: ['Admin', 'Planer'] },
   { id: 'zeitkonto', label: 'Zeitkonto', icon: '⏱️', group: 'Planung', path: '/zeitkonto' },
   { id: 'ueberstunden', label: 'Überstunden', icon: '⏰', group: 'Planung', path: '/ueberstunden', roles: ['Admin', 'Planer'] },
@@ -368,6 +368,7 @@ function AppInner() {
               <Route path="/urlaub" element={<Urlaub />} />
               <Route path="/schichtmodell" element={<Schichtmodell />} />
               <Route path="/personalbedarf" element={<Personalbedarf />} />
+              <Route path="/jahresrueckblick" element={<Jahresrueckblick />} />
               <Route path="/jahresabschluss" element={<Jahresabschluss />} />
               <Route path="/zeitkonto" element={<Zeitkonto />} />
               <Route path="/ueberstunden" element={<Ueberstunden />} />
@@ -393,7 +394,6 @@ function AppInner() {
               <Route path="/perioden" element={<Perioden />} />
               <Route path="/einstellungen" element={<Einstellungen />} />
               <Route path="/protokoll" element={<Protokoll />} />
-              <Route path="/jahresrueckblick" element={<Jahresrueckblick />} />
             </Routes>
           </Suspense>
         </main>

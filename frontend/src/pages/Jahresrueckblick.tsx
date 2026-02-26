@@ -1,16 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { api } from '../api/client';
+import type { Group } from '../types';
 
-const MONTH_NAMES = [
-  'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez',
-];
+const MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
+                           'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+const MONTH_NAMES = ['Januar','Februar','März','April','Mai','Juni',
+                     'Juli','August','September','Oktober','November','Dezember'];
 
-const MONTH_NAMES_FULL = [
-  'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
-];
-
-interface MonthSummary {
+// ── Types ──────────────────────────────────────────────────────
+interface MonthData {
   month: number;
   actual_hours: number;
   target_hours: number;
@@ -22,7 +20,7 @@ interface MonthSummary {
   overtime: number;
 }
 
-interface EmployeeYear {
+interface EmployeeYearData {
   employee_id: number;
   name: string;
   group: string;
@@ -36,93 +34,75 @@ interface EmployeeYear {
   overtime: number;
 }
 
-interface YearTotals {
-  actual_hours: number;
-  target_hours: number;
-  absence_days: number;
-  vacation_days: number;
-  sick_days: number;
-  shifts_count: number;
-  overtime: number;
-}
-
 interface YearSummary {
   year: number;
-  monthly: MonthSummary[];
-  employees: EmployeeYear[];
-  totals: YearTotals;
+  monthly: MonthData[];
+  employees: EmployeeYearData[];
+  totals: {
+    actual_hours: number;
+    target_hours: number;
+    absence_days: number;
+    vacation_days: number;
+    sick_days: number;
+    shifts_count: number;
+    overtime: number;
+  };
 }
 
-interface Group {
-  ID: number;
-  NAME: string;
-}
-
-const BASE_URL = import.meta.env.VITE_API_URL ?? '';
-
-// ── Mini sparkline SVG ─────────────────────────────────────────
-function Sparkline({ values, color = '#3b82f6', height = 32, width = 96 }: {
-  values: number[];
+// ── SVG Bar Chart ──────────────────────────────────────────────
+function BarChart({
+  data,
+  color = '#3b82f6',
+  negColor = '#ef4444',
+  height = 100,
+  showValues = false,
+  formatVal,
+}: {
+  data: { label: string; value: number }[];
   color?: string;
+  negColor?: string;
   height?: number;
-  width?: number;
+  showValues?: boolean;
+  formatVal?: (v: number) => string;
 }) {
-  const max = Math.max(...values, 1);
-  const pts = values.map((v, i) => {
-    const x = (i / (values.length - 1)) * width;
-    const y = height - (v / max) * height * 0.9 - 2;
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  });
-  return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      <polyline
-        points={pts.join(' ')}
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {values.map((v, i) => {
-        const x = (i / (values.length - 1)) * width;
-        const y = height - (v / max) * height * 0.9 - 2;
-        return <circle key={i} cx={x} cy={y} r="2" fill={color} />;
-      })}
-    </svg>
-  );
-}
-
-// ── Bar chart (12 months) ──────────────────────────────────────
-function MonthBarChart({ monthly, metric, color }: {
-  monthly: MonthSummary[];
-  metric: 'actual_hours' | 'absence_days' | 'vacation_days' | 'sick_days';
-  color: string;
-}) {
-  const values = monthly.map(m => m[metric] as number);
-  const max = Math.max(...values, 1);
-  const chartH = 120;
-  const barW = 18;
-  const gap = 6;
-  const totalW = 12 * (barW + gap) - gap;
+  const max = Math.max(...data.map(d => Math.abs(d.value)), 1);
+  const w = 100 / data.length;
 
   return (
-    <svg width={totalW} height={chartH + 20} viewBox={`0 0 ${totalW} ${chartH + 20}`} className="overflow-visible">
-      {monthly.map((m, i) => {
-        const val = m[metric] as number;
-        const barH = max > 0 ? (val / max) * chartH : 0;
-        const x = i * (barW + gap);
-        const y = chartH - barH;
+    <svg viewBox={`0 0 100 ${height}`} className="w-full" preserveAspectRatio="none">
+      {data.map((d, i) => {
+        const barH = (Math.abs(d.value) / max) * (height - 20);
+        const isNeg = d.value < 0;
+        const x = i * w + w * 0.1;
+        const bw = w * 0.8;
+        const y = height - 16 - barH;
         return (
           <g key={i}>
-            <rect x={x} y={y} width={barW} height={barH} fill={color} rx="3" opacity="0.85" />
-            <text x={x + barW / 2} y={chartH + 14} textAnchor="middle" fontSize="9" fill="currentColor" opacity="0.6">
-              {MONTH_NAMES[i]}
-            </text>
-            {val > 0 && barH > 14 && (
-              <text x={x + barW / 2} y={y + 12} textAnchor="middle" fontSize="8" fill="white" fontWeight="600">
-                {val % 1 === 0 ? val : val.toFixed(0)}
+            <rect
+              x={x} y={y} width={bw} height={barH}
+              fill={isNeg ? negColor : color}
+              rx="1"
+              opacity="0.85"
+            />
+            {showValues && barH > 8 && (
+              <text
+                x={x + bw / 2} y={y + barH - 3}
+                textAnchor="middle"
+                fontSize="4"
+                fill="white"
+                fontWeight="bold"
+              >
+                {formatVal ? formatVal(d.value) : d.value}
               </text>
             )}
+            <text
+              x={x + bw / 2} y={height - 3}
+              textAnchor="middle"
+              fontSize="4.5"
+              fill="#94a3b8"
+            >
+              {d.label}
+            </text>
           </g>
         );
       })}
@@ -130,448 +110,645 @@ function MonthBarChart({ monthly, metric, color }: {
   );
 }
 
-// ── Heatmap: employees × months ────────────────────────────────
-function EmployeeHeatmap({ employees, maxShow = 15 }: { employees: EmployeeYear[]; maxShow?: number }) {
-  const shown = employees.slice(0, maxShow);
-  const allVals = shown.flatMap(e => e.monthly_hours);
-  const maxVal = Math.max(...allVals, 1);
-
-  function heatColor(v: number): string {
-    if (v === 0) return '#f1f5f9';
-    const ratio = v / maxVal;
-    if (ratio < 0.25) return '#bfdbfe';
-    if (ratio < 0.5) return '#60a5fa';
-    if (ratio < 0.75) return '#3b82f6';
-    return '#1d4ed8';
-  }
-
-  const cellW = 30;
-  const cellH = 22;
-  const labelW = 130;
-  const svgW = labelW + 12 * cellW + 4;
-  const svgH = (shown.length + 1) * cellH + 4;
+// ── Sparkline ──────────────────────────────────────────────────
+function Sparkline({ values, color = '#3b82f6' }: { values: number[]; color?: string }) {
+  if (values.length < 2) return null;
+  const max = Math.max(...values, 1);
+  const min = Math.min(...values, 0);
+  const range = max - min || 1;
+  const w = 100 / (values.length - 1);
+  const points = values.map((v, i) => {
+    const x = i * w;
+    const y = 30 - ((v - min) / range) * 28;
+    return `${x},${y}`;
+  }).join(' ');
 
   return (
-    <div className="overflow-x-auto">
-      <svg width={svgW} height={svgH} viewBox={`0 0 ${svgW} ${svgH}`}>
-        {/* Month headers */}
-        {MONTH_NAMES.map((mn, i) => (
-          <text key={i} x={labelW + i * cellW + cellW / 2} y={14} textAnchor="middle" fontSize="9" fill="currentColor" opacity="0.6" fontWeight="600">
-            {mn}
-          </text>
-        ))}
-        {/* Employee rows */}
-        {shown.map((emp, row) => (
-          <g key={emp.employee_id}>
-            <text
-              x={labelW - 4}
-              y={cellH * (row + 1) + cellH / 2 + 4}
-              textAnchor="end"
-              fontSize="10"
-              fill="currentColor"
-              opacity="0.8"
-            >
-              {emp.name.length > 18 ? emp.name.slice(0, 17) + '…' : emp.name}
-            </text>
-            {emp.monthly_hours.map((val, col) => (
-              <g key={col}>
-                <rect
-                  x={labelW + col * cellW + 1}
-                  y={cellH * (row + 1) + 1}
-                  width={cellW - 2}
-                  height={cellH - 2}
-                  fill={heatColor(val)}
-                  rx="2"
-                >
-                  <title>{`${emp.name} — ${MONTH_NAMES_FULL[col]}: ${val}h`}</title>
-                </rect>
-                {val > 0 && (
-                  <text
-                    x={labelW + col * cellW + cellW / 2}
-                    y={cellH * (row + 1) + cellH / 2 + 4}
-                    textAnchor="middle"
-                    fontSize="8"
-                    fill={val / maxVal > 0.4 ? 'white' : '#1e40af'}
-                    fontWeight="500"
-                  >
-                    {val.toFixed(0)}
-                  </text>
-                )}
-              </g>
-            ))}
-          </g>
-        ))}
-      </svg>
-    </div>
+    <svg viewBox="0 0 100 30" className="w-full h-8" preserveAspectRatio="none">
+      <polyline points={points} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      {values.map((v, i) => (
+        <circle key={i} cx={i * w} cy={30 - ((v - min) / range) * 28} r="2" fill={color} />
+      ))}
+    </svg>
   );
 }
 
-// ── Stat card ──────────────────────────────────────────────────
-function StatCard({ icon, label, value, sub, color }: {
-  icon: string;
-  label: string;
-  value: string | number;
-  sub?: string;
-  color: string;
+// ── KPI Card ──────────────────────────────────────────────────
+function KpiCard({
+  icon, label, value, sub, color = 'blue', trend,
+}: {
+  icon: string; label: string; value: string; sub?: string;
+  color?: 'blue' | 'green' | 'red' | 'amber' | 'purple' | 'slate';
+  trend?: number[];
 }) {
+  const colors = {
+    blue:   'from-blue-500/10 to-blue-500/5 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300',
+    green:  'from-green-500/10 to-green-500/5 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300',
+    red:    'from-red-500/10 to-red-500/5 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300',
+    amber:  'from-amber-500/10 to-amber-500/5 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300',
+    purple: 'from-purple-500/10 to-purple-500/5 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300',
+    slate:  'from-slate-500/10 to-slate-500/5 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300',
+  };
+  const trendColors = {
+    blue: '#3b82f6', green: '#22c55e', red: '#ef4444',
+    amber: '#f59e0b', purple: '#a855f7', slate: '#64748b',
+  };
   return (
-    <div className={`rounded-xl p-4 border ${color} flex flex-col gap-1`}>
-      <div className="text-2xl">{icon}</div>
-      <div className="text-xs font-medium opacity-60 uppercase tracking-wide">{label}</div>
-      <div className="text-2xl font-bold">{value}</div>
+    <div className={`bg-gradient-to-br ${colors[color]} border rounded-xl p-4 flex flex-col gap-1`}>
+      <div className="flex items-center gap-2 text-sm font-medium opacity-80">
+        <span>{icon}</span>
+        <span>{label}</span>
+      </div>
+      <div className="text-2xl font-bold mt-1">{value}</div>
       {sub && <div className="text-xs opacity-60">{sub}</div>}
+      {trend && trend.length > 1 && (
+        <div className="mt-2">
+          <Sparkline values={trend} color={trendColors[color]} />
+        </div>
+      )}
     </div>
   );
 }
 
-// ── Main Component ─────────────────────────────────────────────
+// ── Best/Worst Month finder ────────────────────────────────────
+function findPeak(monthly: MonthData[], key: keyof MonthData) {
+  let maxIdx = 0, minIdx = 0;
+  for (let i = 1; i < monthly.length; i++) {
+    if ((monthly[i][key] as number) > (monthly[maxIdx][key] as number)) maxIdx = i;
+    if ((monthly[i][key] as number) < (monthly[minIdx][key] as number)) minIdx = i;
+  }
+  return { maxIdx, minIdx };
+}
+
+// ── Main Page ─────────────────────────────────────────────────
 export default function Jahresrueckblick() {
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
-  const [groupId, setGroupId] = useState<number | null>(null);
   const [groups, setGroups] = useState<Group[]>([]);
+  const [groupId, setGroupId] = useState<number | null>(null);
   const [data, setData] = useState<YearSummary | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'overview' | 'heatmap' | 'ranking'>('overview');
+  const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'monthly' | 'employees'>('overview');
+  const [sortKey, setSortKey] = useState<keyof EmployeeYearData>('actual_hours');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [empSearch, setEmpSearch] = useState('');
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/groups`)
-      .then(r => r.json())
-      .then(setGroups)
-      .catch(() => {});
+    api.getGroups().then(setGroups).catch(() => {});
   }, []);
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     setLoading(true);
-    setError('');
-    const params = new URLSearchParams({ year: String(year) });
-    if (groupId) params.set('group_id', String(groupId));
-    fetch(`${BASE_URL}/api/statistics/year-summary?${params}`)
-      .then(r => r.json())
-      .then(d => { setData(d); setLoading(false); })
-      .catch(() => { setError('Fehler beim Laden der Daten'); setLoading(false); });
+    setError(null);
+    try {
+      const url = `/api/statistics/year-summary?year=${year}${groupId ? `&group_id=${groupId}` : ''}`;
+      const res = await fetch((import.meta.env.VITE_API_URL || '') + url);
+      if (!res.ok) throw new Error('Fehler beim Laden');
+      const d = await res.json() as YearSummary;
+      setData(d);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Unbekannter Fehler');
+    } finally {
+      setLoading(false);
+    }
   }, [year, groupId]);
 
-  const years = Array.from({ length: 6 }, (_, i) => currentYear - 2 + i);
+  useEffect(() => { load(); }, [load]);
 
-  const totals = data?.totals;
+  // ── Derived stats ──────────────────────────────────────────
   const monthly = data?.monthly ?? [];
-  const employees = data?.employees ?? [];
+  const totals = data?.totals;
+  const employees = (data?.employees ?? [])
+    .filter(e => !empSearch || e.name.toLowerCase().includes(empSearch.toLowerCase()))
+    .sort((a, b) => {
+      const av = a[sortKey] as number, bv = b[sortKey] as number;
+      return sortDir === 'desc' ? bv - av : av - bv;
+    });
 
-  // For ranking
-  const topHours = [...employees].sort((a, b) => b.actual_hours - a.actual_hours).slice(0, 10);
-  const topOvertime = [...employees].sort((a, b) => b.overtime - a.overtime).slice(0, 5);
-  const topVacation = [...employees].sort((a, b) => b.vacation_days - a.vacation_days).slice(0, 5);
-  const topSick = [...employees].sort((a, b) => b.sick_days - a.sick_days).slice(0, 5);
+  const hoursPerMonth = monthly.map(m => m.actual_hours);
+  const shiftsPerMonth = monthly.map(m => m.shifts_count);
 
-  // Best/worst month for hours
-  const sortedByHours = [...monthly].sort((a, b) => b.actual_hours - a.actual_hours);
-  const bestMonth = sortedByHours[0];
-  const worstMonth = sortedByHours[sortedByHours.length - 1];
+  const peakHours = findPeak(monthly, 'actual_hours');
+  const peakShifts = findPeak(monthly, 'shifts_count');
+
+  const utilizationPct = totals && totals.target_hours > 0
+    ? Math.round((totals.actual_hours / totals.target_hours) * 100)
+    : 0;
+
+  const avgHoursPerEmployee = data && data.employees.length > 0
+    ? Math.round(totals!.actual_hours / data.employees.length)
+    : 0;
+
+  const topEmp = data?.employees[0];
+  const bottomEmp = data?.employees.length
+    ? [...data.employees].sort((a, b) => a.actual_hours - b.actual_hours)[0]
+    : null;
+
+  function sortBy(key: keyof EmployeeYearData) {
+    if (sortKey === key) setSortDir(d => d === 'desc' ? 'asc' : 'desc');
+    else { setSortKey(key); setSortDir('desc'); }
+  }
+
+  function SortIcon({ k }: { k: keyof EmployeeYearData }) {
+    if (sortKey !== k) return <span className="ml-1 opacity-20">↕</span>;
+    return <span className="ml-1">{sortDir === 'desc' ? '↓' : '↑'}</span>;
+  }
 
   return (
-    <div className="p-4 space-y-4 max-w-6xl mx-auto">
+    <div className="p-4 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">🏆 Jahresrückblick {year}</h1>
-          <p className="text-sm opacity-60 mt-0.5">Statistiken & Trends für das gesamte Jahr</p>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            🗓️ Jahresrückblick {year}
+          </h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            Jahresstatistik auf einen Blick — Trends, Highlights & MA-Übersicht
+          </p>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          <select
-            value={year}
-            onChange={e => setYear(Number(e.target.value))}
-            className="border rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-800"
-          >
-            {years.map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Year selector */}
+          <div className="flex items-center gap-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1">
+            <button
+              onClick={() => setYear(y => y - 1)}
+              className="w-7 h-7 flex items-center justify-center rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold"
+            >‹</button>
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-200 w-12 text-center">{year}</span>
+            <button
+              onClick={() => setYear(y => y + 1)}
+              disabled={year >= currentYear}
+              className="w-7 h-7 flex items-center justify-center rounded hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 font-bold disabled:opacity-30"
+            >›</button>
+          </div>
+          {/* Group filter */}
           <select
             value={groupId ?? ''}
             onChange={e => setGroupId(e.target.value ? Number(e.target.value) : null)}
-            className="border rounded-lg px-3 py-1.5 text-sm bg-white dark:bg-gray-800"
+            className="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
           >
             <option value="">Alle Gruppen</option>
-            {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+            {groups.map(g => (
+              <option key={g.ID} value={g.ID}>{g.NAME || `Gruppe ${g.ID}`}</option>
+            ))}
           </select>
+          <button
+            onClick={load}
+            className="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+          >
+            🔄 Laden
+          </button>
         </div>
       </div>
 
-      {loading && (
-        <div className="text-center py-16 opacity-50">⏳ Daten werden geladen…</div>
-      )}
+      {/* Error */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">{error}</div>
+        <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-xl border border-red-200 dark:border-red-800">
+          ⚠️ {error}
+        </div>
       )}
 
-      {data && !loading && (
+      {/* Loading */}
+      {loading && (
+        <div className="text-center py-16 text-slate-500 dark:text-slate-400">
+          <div className="text-4xl mb-3 animate-spin">⏳</div>
+          <p>Lade Jahresstatistik…</p>
+        </div>
+      )}
+
+      {!loading && data && (
         <>
-          {/* Summary Cards */}
-          {totals && (
-            <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
-              <StatCard icon="⏱️" label="Ist-Stunden" value={`${totals.actual_hours.toLocaleString('de')}h`} sub="gesamt" color="bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-900/20 dark:border-blue-700 dark:text-blue-100" />
-              <StatCard icon="🎯" label="Soll-Stunden" value={`${totals.target_hours.toLocaleString('de')}h`} sub="geplant" color="bg-slate-50 border-slate-200 text-slate-900 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100" />
-              <StatCard
-                icon={totals.overtime >= 0 ? '📈' : '📉'}
-                label="Überstunden"
-                value={`${totals.overtime >= 0 ? '+' : ''}${totals.overtime.toLocaleString('de')}h`}
-                sub={totals.overtime >= 0 ? 'Mehrarbeit' : 'Minusstunden'}
-                color={totals.overtime >= 0
-                  ? 'bg-green-50 border-green-200 text-green-900 dark:bg-green-900/20 dark:border-green-700 dark:text-green-100'
-                  : 'bg-orange-50 border-orange-200 text-orange-900 dark:bg-orange-900/20 dark:border-orange-700 dark:text-orange-100'}
-              />
-              <StatCard icon="🏖️" label="Urlaubstage" value={totals.vacation_days} sub="genommen" color="bg-teal-50 border-teal-200 text-teal-900 dark:bg-teal-900/20 dark:border-teal-700 dark:text-teal-100" />
-              <StatCard icon="🤒" label="Kranktage" value={totals.sick_days} sub="gesamt" color="bg-red-50 border-red-200 text-red-900 dark:bg-red-900/20 dark:border-red-700 dark:text-red-100" />
-              <StatCard icon="📋" label="Abwesenheiten" value={totals.absence_days} sub="Tage gesamt" color="bg-purple-50 border-purple-200 text-purple-900 dark:bg-purple-900/20 dark:border-purple-700 dark:text-purple-100" />
-              <StatCard icon="👥" label="Mitarbeiter" value={employees.length} sub={`Gruppe: ${groupId ? groups.find(g => g.ID === groupId)?.NAME ?? '?' : 'Alle'}`} color="bg-indigo-50 border-indigo-200 text-indigo-900 dark:bg-indigo-900/20 dark:border-indigo-700 dark:text-indigo-100" />
-            </div>
-          )}
-
-          {/* Best / Worst month highlight */}
-          {monthly.some(m => m.actual_hours > 0) && bestMonth && worstMonth && bestMonth !== worstMonth && (
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-xl p-3 flex gap-3 items-center">
-                <span className="text-3xl">🌟</span>
-                <div>
-                  <div className="text-xs font-medium text-green-700 dark:text-green-300 uppercase tracking-wide">Stärkster Monat</div>
-                  <div className="font-bold text-green-900 dark:text-green-100">{MONTH_NAMES_FULL[bestMonth.month - 1]}</div>
-                  <div className="text-sm text-green-700 dark:text-green-300">{bestMonth.actual_hours}h geleistet</div>
-                </div>
-              </div>
-              <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded-xl p-3 flex gap-3 items-center">
-                <span className="text-3xl">📉</span>
-                <div>
-                  <div className="text-xs font-medium text-orange-700 dark:text-orange-300 uppercase tracking-wide">Schwächster Monat</div>
-                  <div className="font-bold text-orange-900 dark:text-orange-100">{MONTH_NAMES_FULL[worstMonth.month - 1]}</div>
-                  <div className="text-sm text-orange-700 dark:text-orange-300">{worstMonth.actual_hours}h geleistet</div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Tab navigation */}
-          <div className="flex gap-1 border-b">
-            {(['overview', 'heatmap', 'ranking'] as const).map(tab => (
+          {/* Tab Navigation */}
+          <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl w-fit">
+            {(['overview', 'monthly', 'employees'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+                className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${
                   activeTab === tab
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent opacity-60 hover:opacity-100'
+                    ? 'bg-white dark:bg-slate-700 shadow text-slate-800 dark:text-slate-100'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                 }`}
               >
-                {tab === 'overview' && '📊 Monatsverlauf'}
-                {tab === 'heatmap' && '🔥 Heatmap'}
-                {tab === 'ranking' && '🏆 Ranking'}
+                {tab === 'overview' ? '📊 Übersicht' : tab === 'monthly' ? '📅 Monatstrend' : '👥 Mitarbeiter'}
               </button>
             ))}
           </div>
 
-          {/* Tab: Overview */}
+          {/* ── TAB: Overview ─────────────────────────────────── */}
           {activeTab === 'overview' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Hours bar chart */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border p-4 space-y-3">
-                <div className="font-semibold text-sm">⏱️ Geleistete Stunden pro Monat</div>
-                <MonthBarChart monthly={monthly} metric="actual_hours" color="#3b82f6" />
+            <div className="space-y-6">
+              {/* KPI Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <KpiCard
+                  icon="⏱️" label="Ist-Stunden" color="blue"
+                  value={`${(totals?.actual_hours ?? 0).toLocaleString('de-AT')}h`}
+                  sub={`Soll: ${(totals?.target_hours ?? 0).toLocaleString('de-AT')}h`}
+                  trend={hoursPerMonth}
+                />
+                <KpiCard
+                  icon="📈" label="Auslastung" color={utilizationPct >= 95 ? 'green' : utilizationPct >= 80 ? 'amber' : 'red'}
+                  value={`${utilizationPct}%`}
+                  sub="Ist / Soll"
+                />
+                <KpiCard
+                  icon="🔀" label="Schichten" color="purple"
+                  value={(totals?.shifts_count ?? 0).toLocaleString('de-AT')}
+                  sub="gesamt"
+                  trend={shiftsPerMonth}
+                />
+                <KpiCard
+                  icon="🏖️" label="Urlaub" color="green"
+                  value={(totals?.vacation_days ?? 0).toLocaleString('de-AT')}
+                  sub="Tage"
+                  trend={monthly.map(m => m.vacation_days)}
+                />
+                <KpiCard
+                  icon="🤒" label="Krankenstand" color="red"
+                  value={(totals?.sick_days ?? 0).toLocaleString('de-AT')}
+                  sub="Tage"
+                  trend={monthly.map(m => m.sick_days)}
+                />
+                <KpiCard
+                  icon="👥" label="Ø Stunden/MA" color="slate"
+                  value={`${avgHoursPerEmployee}h`}
+                  sub={`${data.employees.length} Mitarbeiter`}
+                />
               </div>
 
-              {/* Vacation bar chart */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border p-4 space-y-3">
-                <div className="font-semibold text-sm">🏖️ Urlaubstage pro Monat</div>
-                <MonthBarChart monthly={monthly} metric="vacation_days" color="#0d9488" />
-              </div>
-
-              {/* Sick days bar chart */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border p-4 space-y-3">
-                <div className="font-semibold text-sm">🤒 Kranktage pro Monat</div>
-                <MonthBarChart monthly={monthly} metric="sick_days" color="#ef4444" />
-              </div>
-
-              {/* Absence bar chart */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border p-4 space-y-3">
-                <div className="font-semibold text-sm">📋 Abwesenheitstage pro Monat</div>
-                <MonthBarChart monthly={monthly} metric="absence_days" color="#8b5cf6" />
-              </div>
-
-              {/* Monthly table */}
-              <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-xl border overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-slate-50 dark:bg-slate-700/50 text-xs font-semibold uppercase tracking-wide">
-                      <th className="px-3 py-2 text-left">Monat</th>
-                      <th className="px-3 py-2 text-right">Ist-h</th>
-                      <th className="px-3 py-2 text-right">Soll-h</th>
-                      <th className="px-3 py-2 text-right">ÜSt</th>
-                      <th className="px-3 py-2 text-right">Urlaub</th>
-                      <th className="px-3 py-2 text-right">Krank</th>
-                      <th className="px-3 py-2 text-right">Trend</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {monthly.map((m, i) => {
-                      const ot = m.overtime;
-                      return (
-                        <tr key={m.month} className={`border-t hover:bg-slate-50 dark:hover:bg-slate-700/30 ${i % 2 === 0 ? '' : 'bg-slate-50/40 dark:bg-slate-800/40'}`}>
-                          <td className="px-3 py-2 font-medium">{MONTH_NAMES_FULL[m.month - 1]}</td>
-                          <td className="px-3 py-2 text-right tabular-nums">{m.actual_hours}h</td>
-                          <td className="px-3 py-2 text-right tabular-nums opacity-60">{m.target_hours}h</td>
-                          <td className={`px-3 py-2 text-right tabular-nums font-medium ${ot > 0 ? 'text-green-600' : ot < 0 ? 'text-orange-500' : 'opacity-40'}`}>
-                            {ot > 0 ? '+' : ''}{ot}h
-                          </td>
-                          <td className="px-3 py-2 text-right tabular-nums text-teal-600">{m.vacation_days || '—'}</td>
-                          <td className="px-3 py-2 text-right tabular-nums text-red-500">{m.sick_days || '—'}</td>
-                          <td className="px-3 py-2">
-                            {i > 0 && (
-                              <span className="text-xs">
-                                {m.actual_hours > monthly[i - 1].actual_hours ? '↑' : m.actual_hours < monthly[i - 1].actual_hours ? '↓' : '→'}
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Tab: Heatmap */}
-          {activeTab === 'heatmap' && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border p-4 space-y-3">
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="font-semibold text-sm">🔥 Stunden-Heatmap: Mitarbeiter × Monat</div>
-                <div className="flex items-center gap-1 text-xs opacity-60">
-                  <span className="inline-block w-4 h-3 rounded" style={{ background: '#f1f5f9' }}></span> 0
-                  <span className="inline-block w-4 h-3 rounded ml-1" style={{ background: '#bfdbfe' }}></span> wenig
-                  <span className="inline-block w-4 h-3 rounded ml-1" style={{ background: '#60a5fa' }}></span> mittel
-                  <span className="inline-block w-4 h-3 rounded ml-1" style={{ background: '#1d4ed8' }}></span> viel
-                </div>
-              </div>
-              {employees.length > 0
-                ? <EmployeeHeatmap employees={employees} maxShow={20} />
-                : <div className="text-sm opacity-50 py-4 text-center">Keine Daten für {year}</div>
-              }
-            </div>
-          )}
-
-          {/* Tab: Ranking */}
-          {activeTab === 'ranking' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Top 10 by hours */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border p-4 space-y-2 md:col-span-2">
-                <div className="font-semibold text-sm mb-2">⏱️ Top 10 — Meiste Stunden im Jahr</div>
-                <div className="space-y-1.5">
-                  {topHours.map((emp, i) => {
-                    const pct = topHours[0].actual_hours > 0 ? (emp.actual_hours / topHours[0].actual_hours) * 100 : 0;
-                    return (
-                      <div key={emp.employee_id} className="flex items-center gap-2">
-                        <div className="w-6 text-right text-xs font-bold opacity-50">{i + 1}.</div>
-                        <div className="w-36 text-sm truncate">{emp.name}</div>
-                        <div className="text-xs opacity-50 w-20 truncate">{emp.group}</div>
-                        <div className="flex-1 bg-slate-100 dark:bg-slate-700 rounded-full h-4 overflow-hidden">
-                          <div
-                            className="h-full bg-blue-500 rounded-full flex items-center justify-end pr-1"
-                            style={{ width: `${pct}%` }}
-                          >
-                            {pct > 20 && <span className="text-white text-[9px] font-bold">{emp.actual_hours}h</span>}
-                          </div>
-                        </div>
-                        {pct <= 20 && <div className="text-xs font-semibold w-12 text-right">{emp.actual_hours}h</div>}
-                        <Sparkline values={emp.monthly_hours} color="#3b82f6" width={72} height={24} />
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Top overtime */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border p-4">
-                <div className="font-semibold text-sm mb-3">📈 Meiste Überstunden</div>
-                <div className="space-y-2">
-                  {topOvertime.map((emp, i) => (
-                    <div key={emp.employee_id} className="flex items-center gap-2 text-sm">
-                      <span className="text-xs font-bold opacity-40 w-4">{i + 1}.</span>
-                      <span className="flex-1 truncate">{emp.name}</span>
-                      <span className={`font-semibold tabular-nums ${emp.overtime > 0 ? 'text-green-600' : 'text-orange-500'}`}>
-                        {emp.overtime > 0 ? '+' : ''}{emp.overtime}h
+              {/* Charts row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Hours chart */}
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">
+                    ⏱️ Ist-Stunden pro Monat
+                  </h3>
+                  <BarChart
+                    data={monthly.map((m, i) => ({ label: MONTH_NAMES_SHORT[i], value: m.actual_hours }))}
+                    color="#3b82f6"
+                    height={120}
+                    showValues
+                    formatVal={v => v > 0 ? `${Math.round(v)}` : '0'}
+                  />
+                  <div className="flex justify-between text-xs text-slate-400 mt-2">
+                    {monthly.map((m, i) => (
+                      <div
+                        key={i}
+                        className={`text-center w-8 text-xs rounded px-0.5 ${
+                          i === peakHours.maxIdx ? 'text-blue-600 dark:text-blue-400 font-bold' :
+                          i === peakHours.minIdx && m.actual_hours > 0 ? 'text-red-500 dark:text-red-400' : ''
+                        }`}
+                        title={`${MONTH_NAMES[i]}: ${m.actual_hours}h`}
+                      />
+                    ))}
+                  </div>
+                  {monthly[peakHours.maxIdx]?.actual_hours > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                      <span className="px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                        🏆 Spitze: {MONTH_NAMES[peakHours.maxIdx]} ({monthly[peakHours.maxIdx].actual_hours}h)
                       </span>
                     </div>
-                  ))}
+                  )}
+                </div>
+
+                {/* Absence chart */}
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-4">
+                    📋 Abwesenheiten pro Monat
+                  </h3>
+                  <BarChart
+                    data={monthly.map((m, i) => ({ label: MONTH_NAMES_SHORT[i], value: m.vacation_days + m.sick_days }))}
+                    color="#f59e0b"
+                    height={120}
+                    showValues
+                    formatVal={v => v > 0 ? String(v) : '0'}
+                  />
+                  <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                    <span className="px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+                      🏖️ Urlaub: {totals?.vacation_days ?? 0} Tage
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+                      🤒 Krank: {totals?.sick_days ?? 0} Tage
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Most vacation */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border p-4">
-                <div className="font-semibold text-sm mb-3">🏖️ Meiste Urlaubstage</div>
-                <div className="space-y-2">
-                  {topVacation.map((emp, i) => (
-                    <div key={emp.employee_id} className="flex items-center gap-2 text-sm">
-                      <span className="text-xs font-bold opacity-40 w-4">{i + 1}.</span>
-                      <span className="flex-1 truncate">{emp.name}</span>
-                      <span className="font-semibold tabular-nums text-teal-600">{emp.vacation_days} Tage</span>
+              {/* Highlights */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {topEmp && topEmp.actual_hours > 0 && (
+                  <div className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/10 border border-amber-200 dark:border-amber-800 rounded-xl p-5">
+                    <h3 className="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-3">🏆 Top-Mitarbeiter</h3>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-lg font-bold text-slate-800 dark:text-slate-100">{topEmp.name}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">{topEmp.group}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{topEmp.actual_hours}h</div>
+                        <div className="text-xs text-slate-500">{topEmp.shifts_count} Schichten</div>
+                      </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Most sick days */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border p-4">
-                <div className="font-semibold text-sm mb-3">🤒 Meiste Kranktage</div>
-                <div className="space-y-2">
-                  {topSick.map((emp, i) => (
-                    <div key={emp.employee_id} className="flex items-center gap-2 text-sm">
-                      <span className="text-xs font-bold opacity-40 w-4">{i + 1}.</span>
-                      <span className="flex-1 truncate">{emp.name}</span>
-                      <span className="font-semibold tabular-nums text-red-500">{emp.sick_days} Tage</span>
+                    <div className="mt-3">
+                      <Sparkline values={topEmp.monthly_hours} color="#f59e0b" />
                     </div>
-                  ))}
+                  </div>
+                )}
+
+                {/* Monthly shift distribution */}
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+                  <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200 mb-3">📊 Schichten pro Monat</h3>
+                  <BarChart
+                    data={monthly.map((m, i) => ({ label: MONTH_NAMES_SHORT[i], value: m.shifts_count }))}
+                    color="#8b5cf6"
+                    height={100}
+                    showValues
+                    formatVal={v => v > 0 ? String(v) : ''}
+                  />
+                  {monthly[peakShifts.maxIdx]?.shifts_count > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                      <span className="px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+                        🏆 Aktivster Monat: {MONTH_NAMES[peakShifts.maxIdx]} ({monthly[peakShifts.maxIdx].shifts_count} Schichten)
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* All employees overview table */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border overflow-x-auto md:col-span-2">
-                <div className="px-4 py-3 font-semibold text-sm border-b">👥 Alle Mitarbeiter — Jahresübersicht</div>
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="bg-slate-50 dark:bg-slate-700/50 font-semibold uppercase tracking-wide text-[10px]">
-                      <th className="px-3 py-2 text-left">Name</th>
-                      <th className="px-3 py-2 text-left">Gruppe</th>
-                      <th className="px-3 py-2 text-right">Ist-h</th>
-                      <th className="px-3 py-2 text-right">Soll-h</th>
-                      <th className="px-3 py-2 text-right">ÜSt</th>
-                      <th className="px-3 py-2 text-right">Urlaub</th>
-                      <th className="px-3 py-2 text-right">Krank</th>
-                      <th className="px-3 py-2 text-right">Schichten</th>
-                      <th className="px-3 py-2 text-center">Trend</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {employees.map((emp, i) => {
-                      const ot = emp.overtime;
-                      return (
-                        <tr key={emp.employee_id} className={`border-t hover:bg-slate-50 dark:hover:bg-slate-700/30 ${i % 2 === 0 ? '' : 'bg-slate-50/40 dark:bg-slate-800/40'}`}>
-                          <td className="px-3 py-1.5 font-medium">{emp.name}</td>
-                          <td className="px-3 py-1.5 opacity-60">{emp.group}</td>
-                          <td className="px-3 py-1.5 text-right tabular-nums">{emp.actual_hours}h</td>
-                          <td className="px-3 py-1.5 text-right tabular-nums opacity-60">{emp.target_hours}h</td>
-                          <td className={`px-3 py-1.5 text-right tabular-nums font-medium ${ot > 0 ? 'text-green-600' : ot < 0 ? 'text-orange-500' : 'opacity-40'}`}>
-                            {ot > 0 ? '+' : ''}{ot}h
-                          </td>
-                          <td className="px-3 py-1.5 text-right tabular-nums text-teal-600">{emp.vacation_days || '—'}</td>
-                          <td className="px-3 py-1.5 text-right tabular-nums text-red-500">{emp.sick_days || '—'}</td>
-                          <td className="px-3 py-1.5 text-right tabular-nums">{emp.shifts_count || '—'}</td>
-                          <td className="px-3 py-1.5">
-                            <Sparkline values={emp.monthly_hours} color="#6366f1" width={60} height={20} />
+              {/* No data state */}
+              {totals?.shifts_count === 0 && totals?.actual_hours === 0 && (
+                <div className="text-center py-12 text-slate-400 dark:text-slate-500">
+                  <div className="text-5xl mb-4">📭</div>
+                  <p className="text-lg font-medium">Keine Schichtdaten für {year} vorhanden</p>
+                  <p className="text-sm mt-1">Wähle ein anderes Jahr oder eine andere Gruppe</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── TAB: Monthly Trend ────────────────────────────── */}
+          {activeTab === 'monthly' && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {monthly.map((m, i) => {
+                  const isActive = m.shifts_count > 0 || m.actual_hours > 0 || m.absence_days > 0;
+                  const utilPct = m.target_hours > 0
+                    ? Math.round((m.actual_hours / m.target_hours) * 100) : 0;
+                  return (
+                    <div
+                      key={m.month}
+                      className={`rounded-xl border p-4 ${
+                        isActive
+                          ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+                          : 'bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800 opacity-60'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-semibold text-slate-700 dark:text-slate-200">
+                          {MONTH_NAMES[i]}
+                        </h3>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          utilPct >= 95 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+                          utilPct >= 80 ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300' :
+                          'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                        }`}>
+                          {utilPct}%
+                        </span>
+                      </div>
+
+                      {/* Progress bar */}
+                      {m.target_hours > 0 && (
+                        <div className="mb-3">
+                          <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${
+                                utilPct >= 95 ? 'bg-green-500' : utilPct >= 80 ? 'bg-amber-500' : 'bg-blue-400'
+                              }`}
+                              style={{ width: `${Math.min(utilPct, 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <div className="text-xs text-slate-400">Ist-Stunden</div>
+                          <div className="font-semibold text-blue-600 dark:text-blue-400">{m.actual_hours}h</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-slate-400">Schichten</div>
+                          <div className="font-semibold text-purple-600 dark:text-purple-400">{m.shifts_count}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-slate-400">Urlaub</div>
+                          <div className="font-semibold text-green-600 dark:text-green-400">{m.vacation_days} T</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-slate-400">Krank</div>
+                          <div className="font-semibold text-red-500 dark:text-red-400">{m.sick_days} T</div>
+                        </div>
+                      </div>
+
+                      {m.overtime !== 0 && (
+                        <div className={`mt-2 text-xs font-medium ${m.overtime > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
+                          {m.overtime > 0 ? '▲' : '▼'} Überstunden: {m.overtime > 0 ? '+' : ''}{m.overtime}h
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Year totals summary */}
+              {totals && (
+                <div className="bg-gradient-to-r from-slate-800 to-slate-700 dark:from-slate-700 dark:to-slate-600 text-white rounded-xl p-5">
+                  <h3 className="font-semibold mb-3 text-slate-200">📊 Jahressumme {year}</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {[
+                      { label: 'Ist-Stunden', value: `${totals.actual_hours}h`, icon: '⏱️' },
+                      { label: 'Schichten', value: totals.shifts_count.toString(), icon: '🔀' },
+                      { label: 'Urlaub', value: `${totals.vacation_days} Tage`, icon: '🏖️' },
+                      { label: 'Krankenstand', value: `${totals.sick_days} Tage`, icon: '🤒' },
+                    ].map(item => (
+                      <div key={item.label} className="text-center">
+                        <div className="text-2xl">{item.icon}</div>
+                        <div className="text-xl font-bold mt-1">{item.value}</div>
+                        <div className="text-xs text-slate-400">{item.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── TAB: Employees ───────────────────────────────── */}
+          {activeTab === 'employees' && (
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <input
+                  type="text"
+                  placeholder="🔍 Mitarbeiter suchen…"
+                  value={empSearch}
+                  onChange={e => setEmpSearch(e.target.value)}
+                  className="flex-1 min-w-[200px] max-w-xs text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                />
+                <span className="text-sm text-slate-500 dark:text-slate-400">
+                  {employees.length} Mitarbeiter
+                </span>
+              </div>
+
+              {/* Table */}
+              <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 text-xs">
+                        <th className="text-left px-4 py-3 font-medium">Mitarbeiter</th>
+                        <th
+                          className="text-right px-3 py-3 font-medium cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 whitespace-nowrap"
+                          onClick={() => sortBy('actual_hours')}
+                        >
+                          Ist-h <SortIcon k="actual_hours" />
+                        </th>
+                        <th
+                          className="text-right px-3 py-3 font-medium cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 whitespace-nowrap"
+                          onClick={() => sortBy('target_hours')}
+                        >
+                          Soll-h <SortIcon k="target_hours" />
+                        </th>
+                        <th
+                          className="text-right px-3 py-3 font-medium cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 whitespace-nowrap"
+                          onClick={() => sortBy('overtime')}
+                        >
+                          ÜS <SortIcon k="overtime" />
+                        </th>
+                        <th
+                          className="text-right px-3 py-3 font-medium cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 whitespace-nowrap"
+                          onClick={() => sortBy('shifts_count')}
+                        >
+                          Schichten <SortIcon k="shifts_count" />
+                        </th>
+                        <th
+                          className="text-right px-3 py-3 font-medium cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 whitespace-nowrap"
+                          onClick={() => sortBy('vacation_days')}
+                        >
+                          Urlaub <SortIcon k="vacation_days" />
+                        </th>
+                        <th
+                          className="text-right px-3 py-3 font-medium cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 whitespace-nowrap"
+                          onClick={() => sortBy('sick_days')}
+                        >
+                          Krank <SortIcon k="sick_days" />
+                        </th>
+                        <th className="px-3 py-3 font-medium text-center">Verlauf</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {employees.map((emp, i) => {
+                        const ot = emp.overtime;
+                        const maxMonthly = Math.max(...emp.monthly_hours, 1);
+                        return (
+                          <tr
+                            key={emp.employee_id}
+                            className={`border-t border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/30 ${
+                              i === 0 && sortKey === 'actual_hours' && sortDir === 'desc' ? 'bg-amber-50/50 dark:bg-amber-900/10' : ''
+                            }`}
+                          >
+                            <td className="px-4 py-2.5">
+                              <div className="font-medium text-slate-800 dark:text-slate-100">{emp.name}</div>
+                              <div className="text-xs text-slate-400">{emp.group}</div>
+                            </td>
+                            <td className="px-3 py-2.5 text-right font-semibold text-blue-600 dark:text-blue-400">
+                              {emp.actual_hours}h
+                            </td>
+                            <td className="px-3 py-2.5 text-right text-slate-500 dark:text-slate-400">
+                              {emp.target_hours}h
+                            </td>
+                            <td className={`px-3 py-2.5 text-right font-medium ${
+                              ot > 0 ? 'text-green-600 dark:text-green-400' :
+                              ot < 0 ? 'text-red-500 dark:text-red-400' :
+                              'text-slate-400'
+                            }`}>
+                              {ot > 0 ? '+' : ''}{ot}h
+                            </td>
+                            <td className="px-3 py-2.5 text-right text-purple-600 dark:text-purple-400 font-medium">
+                              {emp.shifts_count}
+                            </td>
+                            <td className="px-3 py-2.5 text-right text-green-600 dark:text-green-400">
+                              {emp.vacation_days > 0 ? `${emp.vacation_days}T` : '—'}
+                            </td>
+                            <td className="px-3 py-2.5 text-right text-red-500 dark:text-red-400">
+                              {emp.sick_days > 0 ? `${emp.sick_days}T` : '—'}
+                            </td>
+                            <td className="px-3 py-2.5 w-24">
+                              {/* Mini sparkline */}
+                              <svg viewBox="0 0 48 16" className="w-16 h-4">
+                                {emp.monthly_hours.map((h, mi) => {
+                                  const bh = maxMonthly > 0 ? (h / maxMonthly) * 14 : 0;
+                                  return (
+                                    <rect
+                                      key={mi}
+                                      x={mi * 4}
+                                      y={14 - bh}
+                                      width="3"
+                                      height={bh}
+                                      fill={h > 0 ? '#3b82f6' : '#e2e8f0'}
+                                      rx="0.5"
+                                    />
+                                  );
+                                })}
+                              </svg>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                      {employees.length === 0 && (
+                        <tr>
+                          <td colSpan={8} className="px-4 py-8 text-center text-slate-400">
+                            Keine Mitarbeiter gefunden
                           </td>
                         </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                      )}
+                    </tbody>
+                    {employees.length > 0 && totals && (
+                      <tfoot>
+                        <tr className="bg-slate-50 dark:bg-slate-700/50 border-t-2 border-slate-200 dark:border-slate-600 font-semibold text-sm">
+                          <td className="px-4 py-2.5 text-slate-600 dark:text-slate-300">
+                            Gesamt ({data.employees.length} MA)
+                          </td>
+                          <td className="px-3 py-2.5 text-right text-blue-700 dark:text-blue-300">
+                            {totals.actual_hours}h
+                          </td>
+                          <td className="px-3 py-2.5 text-right text-slate-500">
+                            {totals.target_hours}h
+                          </td>
+                          <td className={`px-3 py-2.5 text-right ${totals.overtime > 0 ? 'text-green-600' : totals.overtime < 0 ? 'text-red-500' : 'text-slate-400'}`}>
+                            {totals.overtime > 0 ? '+' : ''}{totals.overtime}h
+                          </td>
+                          <td className="px-3 py-2.5 text-right text-purple-600 dark:text-purple-400">
+                            {totals.shifts_count}
+                          </td>
+                          <td className="px-3 py-2.5 text-right text-green-600 dark:text-green-400">
+                            {totals.vacation_days > 0 ? `${totals.vacation_days}T` : '—'}
+                          </td>
+                          <td className="px-3 py-2.5 text-right text-red-500">
+                            {totals.sick_days > 0 ? `${totals.sick_days}T` : '—'}
+                          </td>
+                          <td />
+                        </tr>
+                      </tfoot>
+                    )}
+                  </table>
+                </div>
               </div>
+
+              {/* Bottom performers note (only if we have data) */}
+              {bottomEmp && bottomEmp.actual_hours === 0 && data.employees.filter(e => e.actual_hours > 0).length < data.employees.length && (
+                <div className="text-xs text-slate-400 dark:text-slate-500 text-center">
+                  💡 Mitarbeiter ohne Ist-Stunden werden ganz unten angezeigt. Möglicherweise fehlen Schichtdaten.
+                </div>
+              )}
             </div>
           )}
         </>

@@ -1197,6 +1197,9 @@ export const api = {
   getSicknessStatistics: (year: number) =>
     fetchJSON<SicknessStatistics>(`/api/statistics/sickness?year=${year}`),
 
+  getYearSummary: (year: number, groupId?: number | null) =>
+    fetchJSON<unknown>(`/api/statistics/year-summary?year=${year}${groupId ? `&group_id=${groupId}` : ''}`),
+
   // ─── Schedule Templates (Schicht-Vorlagen) ─────────────────
   getScheduleTemplates: () =>
     fetchJSON<ScheduleTemplate[]>('/api/schedule/templates'),

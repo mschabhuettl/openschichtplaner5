@@ -31,6 +31,7 @@ const Groups            = lazy(() => import('./pages/Groups'));
 const Fairness          = lazy(() => import('./pages/Fairness'));
 const MitarbeiterVergleich = lazy(() => import('./pages/MitarbeiterVergleich'));
 const Teamkalender         = lazy(() => import('./pages/Teamkalender'));
+const UrlaubsTimeline      = lazy(() => import('./pages/UrlaubsTimeline'));
 const Shifts            = lazy(() => import('./pages/Shifts'));
 const LeaveTypes        = lazy(() => import('./pages/LeaveTypes'));
 const Holidays          = lazy(() => import('./pages/Holidays'));
@@ -44,6 +45,7 @@ const Einstellungen     = lazy(() => import('./pages/Einstellungen'));
 const Protokoll         = lazy(() => import('./pages/Protokoll'));
 const Konflikte         = lazy(() => import('./pages/Konflikte'));
 const Geburtstagkalender = lazy(() => import('./pages/Geburtstagkalender'));
+const Schichtwuensche    = lazy(() => import('./pages/Schichtwuensche'));
 const Login             = lazy(() => import('./pages/Login'));
 
 /** Simple loading indicator shown while a lazy chunk is fetching */
@@ -80,7 +82,9 @@ const navItems: NavItem[] = [
   { id: 'statistiken', label: 'Statistiken', icon: '📈', group: 'Planung', path: '/statistiken' },
   { id: 'geburtstagkalender', label: 'Geburtstags-Kalender', icon: '🎂', group: 'Planung', path: '/geburtstagkalender' },
   { id: 'teamkalender', label: 'Team-Kalender', icon: '🗓️', group: 'Planung', path: '/teamkalender' },
+  { id: 'schichtwuensche', label: 'Schichtwünsche', icon: '💬', group: 'Planung', path: '/schichtwuensche' },
   { id: 'urlaub', label: 'Urlaubsverwaltung', icon: '🏖️', group: 'Planung', path: '/urlaub', roles: ['Admin', 'Planer'] },
+  { id: 'urlaubs-timeline', label: 'Urlaubs-Timeline', icon: '📊', group: 'Planung', path: '/urlaubs-timeline' },
   { id: 'schichtmodell', label: 'Schichtmodelle', icon: '🔄', group: 'Planung', path: '/schichtmodell', roles: ['Admin', 'Planer'] },
   { id: 'personalbedarf', label: 'Personalbedarf', icon: '👥', group: 'Planung', path: '/personalbedarf', roles: ['Admin', 'Planer'] },
   { id: 'jahresabschluss', label: 'Jahresabschluss', icon: '📅', group: 'Planung', path: '/jahresabschluss', roles: ['Admin', 'Planer'] },
@@ -353,6 +357,7 @@ function AppInner() {
               <Route path="/" element={<Dashboard />} />
               <Route path="/konflikte" element={<Konflikte />} />
               <Route path="/geburtstagkalender" element={<Geburtstagkalender />} />
+              <Route path="/schichtwuensche" element={<Schichtwuensche />} />
               <Route path="/schedule" element={<Schedule />} />
               <Route path="/einsatzplan" element={<Einsatzplan />} />
               <Route path="/jahresuebersicht" element={<Jahresuebersicht />} />
@@ -368,6 +373,7 @@ function AppInner() {
               <Route path="/notizen" element={<Notizen />} />
               <Route path="/mitarbeiter-vergleich" element={<MitarbeiterVergleich />} />
               <Route path="/teamkalender" element={<Teamkalender />} />
+              <Route path="/urlaubs-timeline" element={<UrlaubsTimeline />} />
               <Route path="/fairness" element={<Fairness />} />
               <Route path="/berichte" element={<Berichte />} />
               <Route path="/export" element={<Export />} />

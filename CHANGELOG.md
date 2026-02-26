@@ -7,9 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased] — 2026-02-26 (updated)
+## [Unreleased] — 2026-02-26 (feature-15)
 
 ### Hinzugefügt / Added
+
+#### 💬 Schichtwünsche & Sperrtage (`/schichtwuensche`)
+- **Neue Seite** für Mitarbeiter-Wünsche und Sperrtage — Kalender- und Listenansicht
+- Monatliche Kalenderansicht mit grünen (Wunsch) und roten (Sperrtag) Badges pro Tag
+- Mitarbeiter-Filter, Ein-Klick-Hinzufügen durch Klick auf einen Tag
+- Backend-API: `GET/POST/DELETE /api/wishes` mit JSON-Persistenz
+- Schicht-Wunsch kann für beliebige Mitarbeiter und Tage eingetragen werden
+
+#### 📊 Urlaubs-Timeline — Standalone-Seite (`/urlaubs-timeline`)
+- **Eigenständige Gantt-Timeline-Seite** — Jahresüberblick aller Abwesenheiten als horizontale Farbbalken
+- Jahr-Selektor, Filter nach Abwesenheitsart und Gruppe
+- **Überschneidungs-Heatmap** — zeigt automatisch Perioden mit vielen gleichzeitigen Abwesenheiten
+- Hover-Tooltip mit Mitarbeiter, Abwesenheitsart, Datumsspanne und Dauer
+- Zusammenfassungskacheln: Gesamttage, MA mit Abwesenheit, Max. gleichzeitig, Ø Tage pro MA
+- Top-5 Abwesenheiten-Ranking mit Fortschrittsbalken
 
 #### 🏖️ Urlaubsverwaltung — Jahres-Timeline (Gantt-View)
 - **Neuer Tab „Jahres-Timeline"** in der Urlaubsverwaltung — Gantt-Chart-Ansicht aller Mitarbeiter-Abwesenheiten im Jahresüberblick

@@ -1372,6 +1372,9 @@ export default function Schedule() {
   // Notes: "empId-dateStr" → Note[]
   const [notesMap, setNotesMap] = useState<Map<string, Note[]>>(new Map());
 
+  // Wishes: "empId-dateStr" → wish_type
+  const [wishMap, setWishMap] = useState<Map<string, 'WUNSCH' | 'SPERRUNG'>>(new Map());
+
   // Conflicts
   const [conflicts, setConflicts] = useState<ConflictEntry[]>([]);
   const [showConflictModal, setShowConflictModal] = useState(false);
@@ -1556,6 +1559,21 @@ export default function Schedule() {
 
   useEffect(() => {
     loadNotesForMonth();
+  }, [year, month]);
+
+  // Load wishes for the month
+  useEffect(() => {
+    api.getWishes({ year, month }).then(ws => {
+      const m = new Map<string, 'WUNSCH' | 'SPERRUNG'>();
+      for (const w of ws) {
+        const key = `${w.employee_id}-${w.date}`;
+        // SPERRUNG takes priority if both exist
+        if (!m.has(key) || w.wish_type === 'SPERRUNG') {
+          m.set(key, w.wish_type as 'WUNSCH' | 'SPERRUNG');
+        }
+      }
+      setWishMap(m);
+    }).catch(() => setWishMap(new Map()));
   }, [year, month]);
 
   // Load cycle assignments when Auto-Plan modal opens
@@ -4050,6 +4068,9 @@ export default function Schedule() {
                       ? cellNotes.map(n => [n.text1, n.text2].filter(Boolean).join(' ')).join('\n')
                       : '';
 
+                    // Wish indicator for this cell
+                    const wishType = wishMap.get(`${emp.ID}-${dateStr}`);
+
                     // Conflict detection for this cell
                     const cellConflicts = conflictMap.get(`${emp.ID}_${dateStr}`) ?? [];
                     const hasConflict = cellConflicts.length > 0;
@@ -4153,6 +4174,15 @@ export default function Schedule() {
                                 💬
                               </button>
                             )}
+                            {/* Wish / Sperrtag indicator */}
+                            {wishType && (
+                              <span
+                                className="absolute bottom-0 left-0 text-[7px] leading-none z-10 cursor-help"
+                                title={wishType === 'WUNSCH' ? 'Schicht-Wunsch eingetragen' : 'Sperrtag eingetragen'}
+                              >
+                                {wishType === 'WUNSCH' ? '🟢' : '🔴'}
+                              </span>
+                            )}
                             {/* Delete button on hover */}
                             <button
                               onClick={() => handleDeleteEntry(emp.ID, day)}
@@ -4186,6 +4216,15 @@ export default function Schedule() {
                               >
                                 💬
                               </button>
+                            )}
+                            {/* Wish / Sperrtag indicator for empty cells */}
+                            {wishType && (
+                              <span
+                                className="absolute bottom-0 left-0 text-[7px] leading-none z-10 cursor-help"
+                                title={wishType === 'WUNSCH' ? 'Schicht-Wunsch eingetragen' : 'Sperrtag eingetragen'}
+                              >
+                                {wishType === 'WUNSCH' ? '🟢' : '🔴'}
+                              </span>
                             )}
                             <button
                               onClick={() => setActivePicker(p =>

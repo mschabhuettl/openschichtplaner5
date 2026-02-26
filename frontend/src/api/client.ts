@@ -704,6 +704,16 @@ export interface TemplateApplyResult {
   template_name: string;
 }
 
+export interface Wish {
+  id: number;
+  employee_id: number;
+  date: string;
+  wish_type: 'WUNSCH' | 'SPERRUNG';
+  shift_id: number | null;
+  note: string;
+  created_at: string;
+}
+
 // ─── API ───────────────────────────────────────────────────
 export const api = {
   getStats: () => fetchJSON<Stats>('/api/stats'),
@@ -1224,4 +1234,24 @@ export const api = {
       '/api/schedule/swap',
       body,
     ),
+
+  // ─── Schicht-Wünsche & Sperrtage ─────────────────────────
+  getWishes: (params: { employee_id?: number; year?: number; month?: number } = {}) => {
+    const q = new URLSearchParams();
+    if (params.employee_id != null) q.set('employee_id', String(params.employee_id));
+    if (params.year != null) q.set('year', String(params.year));
+    if (params.month != null) q.set('month', String(params.month));
+    return fetchJSON<Wish[]>(`/api/wishes?${q}`);
+  },
+
+  createWish: (body: {
+    employee_id: number;
+    date: string;
+    wish_type: 'WUNSCH' | 'SPERRUNG';
+    shift_id?: number | null;
+    note?: string;
+  }) => postJSON<Wish>('/api/wishes', body),
+
+  deleteWish: (wishId: number) =>
+    deleteReq<{ deleted: number }>(`/api/wishes/${wishId}`),
 };

@@ -1173,4 +1173,16 @@ export const api = {
 
   applyScheduleTemplate: (templateId: number, body: TemplateApplyRequest) =>
     postJSON<TemplateApplyResult>(`/api/schedule/templates/${templateId}/apply`, body),
+
+  // ─── Week Copy (Woche kopieren) ────────────────────────────
+  copyWeek: (body: {
+    source_employee_id: number;
+    dates: string[];
+    target_employee_ids: number[];
+    skip_existing: boolean;
+  }) =>
+    postJSON<{ ok: boolean; created: number; skipped: number; errors: string[]; message: string }>(
+      '/api/schedule/copy-week',
+      body,
+    ),
 };

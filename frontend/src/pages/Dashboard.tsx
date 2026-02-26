@@ -723,6 +723,175 @@ function MonthNav({
   );
 }
 
+// ── Morning Briefing ─────────────────────────────────────────────────────────
+
+const WEEKDAY_DE = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+const MONTH_DE = ['', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
+function getGreeting(): string {
+  const h = new Date().getHours();
+  if (h < 5)  return 'Gute Nacht';
+  if (h < 11) return 'Guten Morgen';
+  if (h < 14) return 'Guten Mittag';
+  if (h < 18) return 'Guten Nachmittag';
+  return 'Guten Abend';
+}
+
+interface MorningBriefingProps {
+  todayData: DashboardToday | null;
+  upcomingData: DashboardUpcoming | null;
+  summaryData: DashboardSummary | null;
+  loading: boolean;
+}
+
+function MorningBriefingWidget({ todayData, upcomingData, summaryData, loading }: MorningBriefingProps) {
+  const now = new Date();
+  const weekday = WEEKDAY_DE[now.getDay()];
+  const day = now.getDate();
+  const month = MONTH_DE[now.getMonth() + 1];
+  const year = now.getFullYear();
+
+  // Next holiday
+  const nextHoliday = upcomingData?.holidays?.[0];
+  let holidayInfo: string | null = null;
+  if (nextHoliday) {
+    const hDate = new Date(nextHoliday.date + 'T00:00:00');
+    const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diffMs = hDate.getTime() - todayMidnight.getTime();
+    const diffDays = Math.round(diffMs / 86400000);
+    if (diffDays === 0) holidayInfo = `🎉 Heute ist ${nextHoliday.name}!`;
+    else if (diffDays === 1) holidayInfo = `🗓️ Morgen: ${nextHoliday.name}`;
+    else if (diffDays <= 14) holidayInfo = `🗓️ ${nextHoliday.name} in ${diffDays} Tagen`;
+  }
+
+  // Birthdays today
+  const birthdaysToday = (upcomingData?.birthdays_this_week ?? []).filter(b => b.days_until === 0);
+
+  // Staffing warnings today
+  const todayStr = now.toISOString().slice(0, 10);
+  const todayWarnings = (summaryData?.staffing_warnings ?? []).filter(w => w.date === todayStr);
+
+  // Absence types breakdown
+  const absencesByType = (todayData?.absences ?? []).reduce<Record<string, number>>((acc, a) => {
+    const key = a.absence_type ?? 'Abwesend';
+    acc[key] = (acc[key] ?? 0) + 1;
+    return acc;
+  }, {});
+  const absenceSummary = Object.entries(absencesByType)
+    .map(([type, count]) => `${count}× ${type}`)
+    .join(', ');
+
+  if (loading) {
+    return (
+      <div className="bg-gradient-to-r from-slate-700 to-slate-800 rounded-xl shadow-lg p-5 animate-pulse">
+        <div className="h-5 bg-slate-600 rounded w-64 mb-3" />
+        <div className="h-3 bg-slate-600 rounded w-48 mb-2" />
+        <div className="h-3 bg-slate-600 rounded w-56" />
+      </div>
+    );
+  }
+
+  const onDutyCount = todayData?.on_duty_count ?? 0;
+  const absenceCount = todayData?.absences_count ?? 0;
+  const isHoliday = todayData?.is_holiday ?? false;
+
+  return (
+    <div className="bg-gradient-to-r from-slate-700 via-slate-800 to-slate-900 rounded-xl shadow-lg p-5 text-white relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-48 h-48 opacity-5 text-[10rem] leading-none select-none pointer-events-none">☀️</div>
+
+      {/* Header: greeting + date */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-0.5">{getGreeting()}</p>
+          <h2 className="text-xl font-bold text-white">
+            {weekday}, {day}. {month} {year}
+            {isHoliday && (
+              <span className="ml-2 text-sm font-normal bg-amber-400 text-amber-900 px-2 py-0.5 rounded-full">
+                🎉 Feiertag
+              </span>
+            )}
+          </h2>
+        </div>
+        <div className="text-right text-slate-400 text-xs hidden sm:block">
+          Tages-Briefing
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-slate-600 my-3" />
+
+      {/* Stats pills */}
+      <div className="flex flex-wrap gap-3">
+        {/* On duty */}
+        <div className="flex items-center gap-2 bg-slate-600/60 rounded-lg px-3 py-2 text-sm">
+          <span className="text-2xl leading-none">👷</span>
+          <div>
+            <div className="font-bold text-white text-base leading-tight">{onDutyCount}</div>
+            <div className="text-slate-300 text-xs">im Dienst</div>
+          </div>
+        </div>
+
+        {/* Absences */}
+        {absenceCount > 0 && (
+          <div className="flex items-center gap-2 bg-red-800/50 rounded-lg px-3 py-2 text-sm">
+            <span className="text-2xl leading-none">🏥</span>
+            <div>
+              <div className="font-bold text-white text-base leading-tight">{absenceCount}</div>
+              <div className="text-slate-300 text-xs">{absenceSummary || 'abwesend'}</div>
+            </div>
+          </div>
+        )}
+
+        {/* Staffing warnings */}
+        {todayWarnings.length > 0 && (
+          <div className="flex items-center gap-2 bg-orange-700/50 rounded-lg px-3 py-2 text-sm">
+            <span className="text-2xl leading-none">⚠️</span>
+            <div>
+              <div className="font-bold text-white text-base leading-tight">{todayWarnings.length}</div>
+              <div className="text-slate-300 text-xs">
+                {todayWarnings.length === 1 ? 'Stelle unterbesetzt' : 'Stellen unterbesetzt'}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Holiday countdown */}
+        {holidayInfo && !isHoliday && (
+          <div className="flex items-center gap-2 bg-teal-700/50 rounded-lg px-3 py-2 text-sm">
+            <span className="text-xl leading-none">📅</span>
+            <div className="text-slate-200 text-xs leading-snug max-w-[160px]">{holidayInfo}</div>
+          </div>
+        )}
+
+        {/* Birthdays */}
+        {birthdaysToday.length > 0 && (
+          <div className="flex items-center gap-2 bg-pink-700/50 rounded-lg px-3 py-2 text-sm">
+            <span className="text-2xl leading-none">🎂</span>
+            <div>
+              <div className="text-slate-200 text-xs leading-snug">
+                {birthdaysToday.map(b => b.name).join(', ')}
+              </div>
+              <div className="text-slate-400 text-xs">
+                {birthdaysToday.length === 1 ? 'hat heute Geburtstag' : 'haben heute Geburtstag'}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* All good */}
+        {absenceCount === 0 && todayWarnings.length === 0 && birthdaysToday.length === 0 && onDutyCount > 0 && (
+          <div className="flex items-center gap-2 bg-green-700/40 rounded-lg px-3 py-2 text-sm">
+            <span className="text-2xl leading-none">✅</span>
+            <div className="text-slate-200 text-xs">Alles im grünen Bereich</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
@@ -855,6 +1024,16 @@ export default function Dashboard() {
             Nochmals versuchen
           </button>
         </div>
+      )}
+
+      {/* Morning Briefing — only for current month */}
+      {isCurrentMon && (
+        <MorningBriefingWidget
+          todayData={todayData}
+          upcomingData={upcomingData}
+          summaryData={summaryData}
+          loading={loading}
+        />
       )}
 
       {/* KPI Row */}

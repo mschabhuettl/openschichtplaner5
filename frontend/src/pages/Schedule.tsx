@@ -1403,7 +1403,15 @@ export default function Schedule() {
   const [hoverTooltip, setHoverTooltip] = useState<HoverTooltipState | null>(null);
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Auto-Plan modal state
+  // Copy-Week modal state
+  const [showCopyWeek, setShowCopyWeek] = useState(false);
+  const [copyWeekSource, setCopyWeekSource] = useState<number | ''>('');
+  const [copyWeekTargets, setCopyWeekTargets] = useState<Set<number>>(new Set());
+  const [copyWeekSkip, setCopyWeekSkip] = useState(true);
+  const [copyWeekLoading, setCopyWeekLoading] = useState(false);
+  const [copyWeekMonday, setCopyWeekMonday] = useState<string>('');
+
+// Auto-Plan modal state
   const [showAutoPlan, setShowAutoPlan] = useState(false);
   const [autoPlanForce, setAutoPlanForce] = useState(false);
   const [autoPlanEmployeeId, setAutoPlanEmployeeId] = useState<number | 'all'>('all');
@@ -1465,6 +1473,13 @@ export default function Schedule() {
 
   useEffect(() => {
     loadSchedule();
+  }, [year, month]);
+
+  // Reload trigger for copy-week (dispatched after successful copy)
+  useEffect(() => {
+    const handler = () => loadSchedule();
+    window.addEventListener('sp5-reload-schedule', handler);
+    return () => window.removeEventListener('sp5-reload-schedule', handler);
   }, [year, month]);
 
   // Load staffing requirements when year/month changes
@@ -2690,6 +2705,208 @@ export default function Schedule() {
         </div>
       )}
 
+      {/* ── Woche kopieren Modal ───────────────────────────────── */}
+      {showCopyWeek && (() => {
+        const pad2 = (n: number) => String(n).padStart(2, '0');
+        // Build list of all Mondays in the current month
+        const mondays: string[] = [];
+        for (let d = 1; d <= daysInMonth; d++) {
+          const wd = new Date(year, month - 1, d).getDay();
+          if (wd === 1) mondays.push(`${year}-${pad2(month)}-${pad2(d)}`);
+        }
+        // Fall back: if no Monday in list yet, use first day
+        const effectiveMonday = copyWeekMonday && mondays.includes(copyWeekMonday)
+          ? copyWeekMonday
+          : (mondays[0] ?? `${year}-${pad2(month)}-01`);
+
+        const getWeekDates = (mondayStr: string): string[] => {
+          const [y, m, d] = mondayStr.split('-').map(Number);
+          return Array.from({ length: 7 }, (_, i) => {
+            const dt = new Date(y, m - 1, d + i);
+            return `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}`;
+          });
+        };
+        const weekDates = getWeekDates(effectiveMonday);
+        const weekLabel = `${weekDates[0]} – ${weekDates[6]}`;
+        const sourceEmp = employees.find(e => e.ID === copyWeekSource);
+        // Only look at entries within the current visible month
+        const sourceEntries = weekDates
+          .filter(d => {
+            const [wy, wm] = d.split('-').map(Number);
+            return wy === year && wm === month;
+          })
+          .map(d => entryMap.get(`${copyWeekSource}-${new Date(d).getDate()}`))
+          .filter(Boolean);
+
+        const closeCopyWeek = () => {
+          setShowCopyWeek(false);
+          setCopyWeekTargets(new Set());
+        };
+
+        const handleCopy = async () => {
+          if (!copyWeekSource || copyWeekTargets.size === 0) return;
+          setCopyWeekLoading(true);
+          try {
+            const result = await api.copyWeek({
+              source_employee_id: copyWeekSource as number,
+              dates: weekDates,
+              target_employee_ids: Array.from(copyWeekTargets),
+              skip_existing: copyWeekSkip,
+            });
+            showToast(result.message, result.errors.length > 0 ? 'warning' : 'success');
+            closeCopyWeek();
+            window.dispatchEvent(new CustomEvent('sp5-reload-schedule'));
+          } catch (err) {
+            showToast(err instanceof Error ? err.message : 'Fehler beim Kopieren', 'error');
+          } finally {
+            setCopyWeekLoading(false);
+          }
+        };
+
+        return (
+          <div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            onClick={e => { if (e.target === e.currentTarget) closeCopyWeek(); }}
+          >
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-lg font-bold text-gray-800">📋 Woche kopieren</h2>
+                <button onClick={closeCopyWeek} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+              </div>
+
+              {/* Source employee */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Quell-Mitarbeiter</label>
+                <select
+                  value={copyWeekSource}
+                  onChange={e => setCopyWeekSource(Number(e.target.value))}
+                  className="w-full text-sm px-3 py-2 border rounded-lg bg-white"
+                >
+                  <option value="">— auswählen —</option>
+                  {displayEmployees.map(emp => (
+                    <option key={emp.ID} value={emp.ID}>{emp.NAME}, {emp.FIRSTNAME}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Source week */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Quell-Woche</label>
+                <select
+                  value={effectiveMonday}
+                  onChange={e => setCopyWeekMonday(e.target.value)}
+                  className="w-full text-sm px-3 py-2 border rounded-lg bg-white"
+                >
+                  {mondays.map(mon => {
+                    const wkDates = getWeekDates(mon);
+                    return (
+                      <option key={mon} value={mon}>{wkDates[0]} – {wkDates[6]}</option>
+                    );
+                  })}
+                </select>
+              </div>
+
+              {/* Preview source shifts */}
+              {copyWeekSource !== '' && (
+                <div className="mb-4 bg-slate-50 rounded-lg p-3">
+                  <div className="text-xs font-semibold text-gray-500 mb-2">
+                    Schichten von {sourceEmp ? `${sourceEmp.NAME}, ${sourceEmp.FIRSTNAME}` : '?'} · {weekLabel}
+                  </div>
+                  <div className="flex gap-1">
+                    {weekDates.map(d => {
+                      const dt = new Date(d);
+                      const dayNum = dt.getDate();
+                      const inMonth = dt.getFullYear() === year && dt.getMonth() + 1 === month;
+                      const entry = inMonth ? entryMap.get(`${copyWeekSource}-${dayNum}`) : undefined;
+                      const wdIdx = dt.getDay() === 0 ? 6 : dt.getDay() - 1;
+                      const wd = ['Mo','Di','Mi','Do','Fr','Sa','So'][wdIdx];
+                      return (
+                        <div key={d} className="flex flex-col items-center flex-1">
+                          <span className="text-[10px] text-gray-400">{wd}</span>
+                          {entry ? (
+                            <span
+                              className="text-[11px] font-bold px-1 rounded w-full text-center"
+                              style={{ backgroundColor: entry.color_bk || '#e2e8f0', color: entry.color_text || '#1e293b' }}
+                            >{entry.display_name || '?'}</span>
+                          ) : (
+                            <span className="text-[11px] text-gray-300 w-full text-center">–</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {sourceEntries.length === 0 && (
+                    <div className="text-xs text-amber-600 mt-2">⚠️ Keine Schichten im sichtbaren Bereich dieser Woche</div>
+                  )}
+                </div>
+              )}
+
+              {/* Target employees */}
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-gray-700">Ziel-Mitarbeiter</label>
+                  <div className="flex gap-2 text-xs text-blue-600">
+                    <button
+                      className="hover:underline"
+                      onClick={() => setCopyWeekTargets(new Set(displayEmployees.filter(e => e.ID !== copyWeekSource).map(e => e.ID)))}
+                    >alle</button>
+                    <button className="hover:underline" onClick={() => setCopyWeekTargets(new Set())}>keine</button>
+                  </div>
+                </div>
+                <div className="border rounded-lg overflow-y-auto max-h-40 divide-y">
+                  {displayEmployees.filter(e => e.ID !== copyWeekSource).map(emp => (
+                    <label key={emp.ID} className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={copyWeekTargets.has(emp.ID)}
+                        onChange={ev => {
+                          const next = new Set(copyWeekTargets);
+                          if (ev.target.checked) next.add(emp.ID); else next.delete(emp.ID);
+                          setCopyWeekTargets(next);
+                        }}
+                        className="rounded"
+                      />
+                      <span className="text-sm">{emp.NAME}, {emp.FIRSTNAME}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Options */}
+              <div className="mb-5">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={copyWeekSkip}
+                    onChange={e => setCopyWeekSkip(e.target.checked)}
+                    className="rounded"
+                  />
+                  <span className="text-sm text-gray-700">Bestehende Einträge überspringen (nicht überschreiben)</span>
+                </label>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={closeCopyWeek}
+                  className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
+                  disabled={copyWeekLoading}
+                >
+                  Abbrechen
+                </button>
+                <button
+                  onClick={handleCopy}
+                  disabled={copyWeekLoading || !copyWeekSource || copyWeekTargets.size === 0}
+                  className="px-4 py-2 text-sm bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {copyWeekLoading ? '⏳ Kopiere…' : `📋 auf ${copyWeekTargets.size} MA übertragen`}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {notePopup && (
         <NoteDetailPopup
           state={notePopup}
@@ -2782,6 +2999,15 @@ export default function Schedule() {
             title={`Wiederholen (Ctrl+Y) — ${redoStack.length} Einträge`}
           >
             ↪ <span className="hidden sm:inline">Redo</span>
+          </button>
+
+          {/* Woche kopieren button */}
+          <button
+            onClick={() => { setCopyWeekSource(displayEmployees[0]?.ID ?? ''); setCopyWeekTargets(new Set()); setShowCopyWeek(true); }}
+            className="px-2 sm:px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            title="Schichtwoche eines Mitarbeiters auf andere übertragen"
+          >
+            📋 <span className="hidden sm:inline">Woche kopieren</span>
           </button>
 
           {/* Auto-Planen button */}

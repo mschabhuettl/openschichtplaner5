@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — 2026-02-26
+
+### Hinzugefügt / Added
+
+#### 📊 Dashboard
+- **Morning-Briefing Widget** 🌅 — Tageszeit-abhängige Begrüßung mit Dienststatus und Schnellüberblick
+- **Burnout-Radar Widget** 🔥 — Erkennt Überlastungsrisiken bei Mitarbeitern (lange Schichtserien, hohe Überstunden, Wochenend-/Nachthäufung); zeigt Risikostufe (hoch/mittel) mit Begründung
+- **Besetzungs-Heatmap** — Kalender-Heatmap im Dashboard mit Farbkodierung des Besetzungsgrades
+- **Staffing-Warnungen** — Unterbesetzungs-Warnungen für die nächsten 7 Tage
+- **Zeitkonto-Defizit Widget** — Mitarbeiter mit negativem Zeitkonto auf dem Dashboard
+
+#### 📅 Dienstplan
+- **A-Z Schnellfilter** — Alphabetische Buchstabenleiste zum schnellen Filtern von Mitarbeitern
+- **Mitarbeiter-Auslastungsbalken** — Fortschrittsbalken pro Mitarbeiter basierend auf Soll-/Ist-Stunden
+- **Schichtfarben-Legende** — Legende am unteren Rand mit Schichtarten und Besetzungsampel
+- **Schicht-Tausch Modal** — Zwei Mitarbeiter können Schichten direkt tauschen
+- **Woche-Kopieren Modal** — Gesamte Woche für einen Mitarbeiter auf eine andere Woche kopieren
+- **Schicht-Empfehlungen Modal** — KI-basierte Empfehlungen für freie Schichtslots
+
+#### 🎂 Neue Seiten
+- **Geburtstags-Kalender** (`/geburtstagkalender`) — Alle Mitarbeitergeburtstage nach Monat gruppiert, mit Kalender- und Listenansicht
+- **Fairness-Score** (`/fairness`) — Bewertet Gleichverteilung von Wochenend-, Nacht- und Feiertagsschichten; Mitarbeiter-Ranking mit Abweichungsanzeige
+
+#### 📆 Jahresübersicht
+- **Farbige Badges** — Schichtarten und Abwesenheiten als farbige Badges (F=orange, S=pink, N=blau, T=grau, Ur=hellblau, Kr=rot)
+
+---
+
 ## [1.0.0] — 2026-02-23
 
 ### 🎉 Erstes stabiles Release / First stable release

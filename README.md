@@ -57,9 +57,10 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 ## Features
 
 ### 📅 Planung
-- ✅ **Dienstplan** — Monatsansicht mit Wochenend-Hervorhebung 🟦, heutiger Tag blau markiert, Feiertage sichtbar, Tooltips auf Schichten; Schichten & Abwesenheiten per Rechtsklick; Echtzeit-Suche (Ctrl+F) + Sortierung nach Name/Nummer
+- ✅ **Dienstplan** — Monatsansicht mit Wochenend-Hervorhebung 🟦, heutiger Tag blau, Feiertage, Tooltips; A-Z Schnellfilter; Mitarbeiter-Auslastungsbalken; Schichtfarben-Legende; Schicht-Tausch Modal; Woche-Kopieren Modal; Schicht-Empfehlungen Modal
 - ✅ **Einsatzplan** — Tages- und Wochenansicht mit Abweichungen
-- ✅ **Jahresübersicht** — Einzelansicht als Standard (wie Original SP5), 12 Monate pro Mitarbeiter auf einen Blick
+- ✅ **Jahresübersicht** — Einzelansicht als Standard (wie Original SP5), 12 Monate auf einen Blick mit farbigen Schicht-Badges
+- ✅ **Geburtstags-Kalender** 🎂 — Alle Mitarbeitergeburtstage nach Monat gruppiert, Kalender- und Listenansicht
 - ✅ **Personaltabelle** — Kompakte tabellarische Planansicht
 - ✅ **Statistiken** — Soll/Ist-Vergleich, Fehlzeiten pro Gruppe/Monat
 - ✅ **Urlaubsverwaltung** — Anspruch, Saldo, Sperrtage, Genehmigungs-Workflow, PDF-Druck
@@ -73,10 +74,14 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 
 ### 📊 Dashboard
 - ✅ **Live-Charts** — Recharts-basierte Diagramme: Soll/Ist-Balken, Abwesenheits-Kreisdiagramm
-- ✅ **Widget: Geburtstage** — Wer hat diesen Monat Geburtstag?
+- ✅ **Morning-Briefing Widget** 🌅 — Tageszeit-abhängige Begrüßung mit Dienststatus und Schnellüberblick
+- ✅ **Burnout-Radar Widget** 🔥 — Erkennt Überlastungsrisiken (lange Serien, hohe Überstunden, Wochenend-Häufung)
+- ✅ **Widget: Geburtstage** — Wer hat diese Woche Geburtstag?
 - ✅ **Widget: Feiertage** — Nächste Feiertage im Überblick
 - ✅ **Widget: Abwesenheiten** — Wer ist heute/diese Woche abwesend?
 - ✅ **Widget: Heute im Dienst** — Welche Mitarbeiter arbeiten heute?
+- ✅ **Besetzungs-Heatmap** — Kalender-Heatmap mit Farbkodierung des Besetzungsgrades
+- ✅ **Staffing-Warnungen** — Unterbesetzungs-Warnungen für die nächsten 7 Tage
 
 ### 👥 Stammdaten
 - ✅ **Mitarbeiter** — Vollständige Stammdatenverwaltung (Stamm-, Kontakt-, Kalkulationsdaten), Foto-Upload, Schichteinschränkungen; klickbare Sortier-Spaltenköpfe; **SHORTNAME wird automatisch generiert** wenn leer
@@ -87,6 +92,9 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 - ✅ **Arbeitsstätten** — Standorte & Mitarbeiterzuordnung
 - ✅ **Zeitzuschläge** — Lohnzuschläge inkl. wochentags-spezifischer Konfiguration
 - ✅ **Schichteinschränkungen** — Verbotene Schichten pro Mitarbeiter
+
+### ⚖️ Fairness & Auswertung
+- ✅ **Fairness-Score** — Bewertet Gleichverteilung von Wochenend-, Nacht- und Feiertagsschichten mit Mitarbeiter-Ranking und Abweichungsanzeige
 
 ### 📄 Berichte & Export (20+ Berichtstypen)
 - ✅ **Dienstplan-Bericht** — Monats-/Jahresbericht (CSV, HTML)

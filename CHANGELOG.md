@@ -1,0 +1,120 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+---
+
+## [1.0.0] — 2026-02-23
+
+### 🎉 Erstes stabiles Release / First stable release
+
+OpenSchichtplaner5 ist ein moderner, browserbasierter Open-Source-Ersatz für die proprietäre Windows-Software Schichtplaner5.  
+Er liest und schreibt die originalen `.DBF`-Datenbankdateien direkt — keine Migration nötig.
+
+*OpenSchichtplaner5 is a modern, browser-based open-source replacement for the proprietary Windows software Schichtplaner5.  
+It reads and writes the original `.DBF` database files directly — no migration needed.*
+
+---
+
+### Hinzugefügt / Added
+
+#### 🗓️ Planung / Scheduling
+- **Dienstplan** — Monatsansicht mit Wochenend-Hervorhebung, heutiger Tag blau markiert, Feiertage sichtbar, Tooltips; Schichten & Abwesenheiten per Rechtsklick; Echtzeit-Suche (Ctrl+F) + Sortierung
+- **Dienstplan UX** — Wochenend-Markierung, Feiertags-Anzeige, Hover-Tooltips auf Schichten
+- **Keyboard Power-Mode** — Vollständige Tastatursteuerung des Dienstplans (Pfeiltasten + Kürzel)
+- **Schicht-Vorlagen** — Wochen-Templates speichern und auf beliebige Zeiträume anwenden
+- **Auto-Planer** — Schichtplan automatisch aus Schichtmodellen generieren
+- **Konflikte-Bereinigungstool** — Schicht-/Abwesenheitskonflikte direkt erkennen und löschen
+- **Einsatzplan** — Tages- und Wochenansicht mit Abweichungen
+- **Jahresübersicht** — Einzelansicht als Standard (wie Original SP5), 12 Monate pro Mitarbeiter auf einen Blick
+- **Personaltabelle** — Kompakte tabellarische Planansicht
+- **Abwesenheits-Kalender-View** — Kalender-Ansicht für alle Abwesenheiten
+
+#### 📊 Dashboard & Analysen / Dashboard & Analytics
+- **Dashboard** — Recharts-basierte Live-Charts: Soll/Ist-Balken, Abwesenheits-Kreisdiagramm
+- **Live-Dashboard Besetzungsampel** — Echtzeit-Ampel für Schichtbesetzung + Heute-Widget
+- **Widgets** — Geburtstage, Feiertage, Abwesenheiten heute/diese Woche, Heute-im-Dienst
+- **Globale Schnellsuche** — Spotlight-style Suche via Ctrl+K über alle Daten
+- **Warnings-Center** — Zentrales Benachrichtigungszentrum mit Badge-Counter
+
+#### 📈 Auswertungen / Reports & Statistics
+- **Statistiken** — Soll/Ist-Vergleich, Fehlzeiten pro Gruppe/Monat
+- **Krankenstand-Statistik** — Charts für Krankheits-Auswertungen
+- **Zeitkonto** — Soll/Ist/Saldo-Übersicht mit Monatsdetail-Modal und Jahresabschluss
+- **Überstunden** — Soll/Ist/Differenz-Tabelle mit Balken-Visualisierung, Jahr- und Gruppenfilter
+- **Mitarbeiter-Stundenauswertung** — Detaillierte Stunden-Reports mit CSV-Export
+- **14 Reports** — Umfangreiche Berichts-Bibliothek (Anwesenheit, Fehlzeiten, Schichtverteilung u.v.m.)
+- **Monatsabschluss-Report** — PDF + CSV Download für monatliche Abrechnungen
+- **Personalbedarf-Ampel** — Live Besetzungs-Feedback gegen definierte Mindest-/Maximalbesetzung
+
+#### 👥 Mitarbeiterverwaltung / Employee Management
+- **Mitarbeiterverwaltung** — Vollständige CRUD-Verwaltung mit Suche, Sortierung und Gruppenfilter
+- **Foto-Upload** — Mitarbeiterfotos hochladen und verwalten
+- **Urlaubsverwaltung** — Anspruch, Saldo, Sperrtage, Genehmigungs-Workflow, PDF-Druck
+- **Urlaubsantrag** — Mitarbeiter-seitige Urlaubsantrags-Funktion
+- **Aktivitätsprotokoll** — Vollständiges Audit-Log aller Aktionen
+- **Geburtstage** — Geburtstags-Widget und Übersicht
+- **Ausgeschiedene-Filter** — Ehemalige Mitarbeiter ausblenden/anzeigen
+
+#### 🔧 Einstellungen & System / Settings & System
+- **Schichtmodelle** — Wiederkehrende Schichtmuster definieren und Mitarbeitern zuordnen
+- **Personalbedarf** — Mindest- und Maximalbesetzung pro Schicht/Tag konfigurieren
+- **Feiertage** — Österreichische Feiertage automatisch + manuelle Einträge
+- **Einschränkungen** — Mitarbeiterbezogene Planungs-Einschränkungen
+- **Kontobuchungen** — Manuelle Buchungen auf Zeitkonten
+- **Notizen** — Tages- und mitarbeiterbezogene Notizen
+- **6 Import-Typen** — Datenimport für Mitarbeiter, Schichten, Abwesenheiten etc.
+- **DB-Komprimieren** — FoxPro-DBF-Datenbankwartung direkt aus der App
+
+#### 🔐 Authentifizierung / Authentication
+- **Auth-System** — Login mit Rollen (Admin / Planer / Leser) + Dev-Mode für lokale Nutzung
+- **Backend-Auth** — Session-Persistenz + granulare Benutzerrechte pro Rolle
+- **Passwort-Ändern** — Benutzer können ihr Passwort selbst ändern
+
+#### 🎨 UI / UX
+- **Dark Mode** — Vollständiger Dark Mode via CSS Custom Properties
+- **Mobile UX** — Vollständig responsive für Smartphones und Tablets
+- **Print-CSS** — Druckoptimiertes CSS für alle Seiten
+- **React Router** — Vollständiges URL-Routing (Deep Links funktionieren)
+- **Code-Splitting + Lazy Loading** — Optimierte Ladezeiten
+
+#### 🔌 Backend & API
+- **FastAPI Backend** — Modernes Python-Backend mit automatischer OpenAPI-Dokumentation
+- **DBF-Direktzugriff** — Liest und schreibt originale FoxPro-DBF-Dateien ohne Migration
+- **Single-Port-Deployment** — FastAPI serviert Frontend direkt, kein separater Proxy nötig
+- **TypeScript strict mode** — Vollständige Typsicherheit im Frontend, keine `any`-Typen
+- **GitHub Actions CI** — Automatisierte Tests bei jedem Push/PR
+
+#### 🧪 Tests / Testing
+- **Backend-Coverage > 80%** — Pytest-basierte Test-Suite mit Coverage-Reporting
+- **GitHub Actions** — CI/CD-Pipeline für automatisierte Tests
+
+---
+
+### Technischer Stack / Tech Stack
+
+| Layer | Technologie |
+|-------|------------|
+| Frontend | React 18 + TypeScript 5 + Vite |
+| Styling | Tailwind CSS 3 + CSS Custom Properties |
+| Charts | Recharts |
+| Routing | React Router v6 |
+| Backend | FastAPI (Python 3.8+) |
+| Datenbank | FoxPro DBF (originale SP5-Dateien) |
+| Auth | Session-basiert mit Rollen |
+| CI/CD | GitHub Actions |
+
+---
+
+### Bekannte Einschränkungen / Known Limitations
+
+- Die Anwendung ist optimiert für die österreichische Schichtplanung (AT-Feiertage, Gesetze)
+- DBF-Datenbankformat muss kompatibel mit dem Original Schichtplaner5 sein
+- Für den produktiven Einsatz wird ein lokaler Server oder ein gesichertes Netzwerk empfohlen
+
+---
+
+[1.0.0]: https://github.com/mschabhuettl/openschichtplaner5/releases/tag/v1.0.0

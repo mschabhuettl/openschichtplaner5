@@ -51,6 +51,7 @@ function buildScheduleHTML(
   month: number,
   monthName: string,
   groupLabel: string,
+  shifts: ShiftType[] = [],
 ): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   const WD_ABBR = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
@@ -76,7 +77,12 @@ function buildScheduleHTML(
   for (let i = 0; i < employees.length; i++) {
     const emp = employees[i];
     const rowBg = i % 2 === 0 ? '#fff' : '#f8fafc';
-    let cells = `<td style="${tdNameStyle}background:${rowBg}">${emp.NAME}, ${emp.FIRSTNAME}</td>`;
+    // Use employee's label color (CBKLABEL) if not white/default
+    const empLabelBg = (emp.CBKLABEL != null && emp.CBKLABEL !== 16777215 && emp.CBKLABEL !== 0 && emp.CBKLABEL_HEX)
+      ? emp.CBKLABEL_HEX : rowBg;
+    const empLabelColor = emp.CFGLABEL_HEX || '#000';
+    const empBold = emp.BOLD ? 'font-weight:700;' : '';
+    let cells = `<td style="${tdNameStyle}background:${empLabelBg};color:${empLabelColor};${empBold}">${emp.NAME}, ${emp.FIRSTNAME}</td>`;
     for (const day of days) {
       const dateStr = `${year}-${pad(month)}-${pad(day)}`;
       const wd = new Date(year, month - 1, day).getDay();
@@ -111,6 +117,7 @@ function buildScheduleHTML(
 <body>
 <h1>Dienstplan – ${monthName} ${year}</h1>
 <div class="subtitle">Gruppe: ${groupLabel} &nbsp;|&nbsp; ${employees.length} Mitarbeiter &nbsp;|&nbsp; Erstellt: ${new Date().toLocaleString('de-AT')}</div>
+${shifts.length > 0 ? `<div class="no-print" style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:5px;align-items:center"><strong style="font-size:11px">Legende:</strong>${shifts.filter(s => !s.HIDE).map(s => `<span style="background:${s.COLORBK_HEX || '#fff'};color:${s.COLORTEXT_HEX || '#000'};padding:2px 7px;border:1px solid #ccc;border-radius:3px;font-size:10px;font-weight:bold" title="${s.NAME}">${s.SHORTNAME}</span>`).join('')}</div>` : ''}
 <table>
   <thead><tr>${headerCells}</tr></thead>
   <tbody>${bodyRows}</tbody>
@@ -127,9 +134,10 @@ function exportHTML(
   year: number,
   month: number,
   monthName: string,
+  shifts: ShiftType[] = [],
 ) {
   const pad = (n: number) => String(n).padStart(2, '0');
-  const html = buildScheduleHTML(employees, days, entryMap, holidays, year, month, monthName, 'Alle Gruppen');
+  const html = buildScheduleHTML(employees, days, entryMap, holidays, year, month, monthName, 'Alle Gruppen', shifts);
   const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -2762,7 +2770,7 @@ export default function Schedule() {
                       .join(', ');
               const html = buildScheduleHTML(
                 displayEmployees, days, entryMap, holidays,
-                year, month, MONTH_NAMES[month], groupLabel,
+                year, month, MONTH_NAMES[month], groupLabel, shifts,
               );
               openPrintWindow(html);
             }}
@@ -2803,7 +2811,7 @@ export default function Schedule() {
                 <button
                   className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                   onClick={() => {
-                    exportHTML(displayEmployees, days, entryMap, holidays, year, month, MONTH_NAMES[month]);
+                    exportHTML(displayEmployees, days, entryMap, holidays, year, month, MONTH_NAMES[month], shifts);
                     setShowExportMenu(false);
                   }}
                 >

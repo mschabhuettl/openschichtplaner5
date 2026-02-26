@@ -1352,6 +1352,7 @@ export default function Schedule() {
 
   // Keyboard help overlay
   const [showKbHelp, setShowKbHelp] = useState(false);
+  const [showWorkloadBars, setShowWorkloadBars] = useState(false);
 
   // Filters
   const [filterShiftId, setFilterShiftId] = useState<number | ''>('');
@@ -1656,6 +1657,40 @@ export default function Schedule() {
     }
     return m;
   }, [entries]);
+
+  // Workload map: employeeId → { actual, target } hours for the visible month
+  const workloadMap = useMemo(() => {
+    const shiftsById = new Map(shifts.map(s => [s.ID, s]));
+    const m = new Map<number, { actual: number; target: number }>();
+    for (const emp of employees) {
+      // Count actual hours from entries
+      let actual = 0;
+      for (let d = 1; d <= daysInMonth; d++) {
+        const entry = entryMap.get(`${emp.ID}-${d}`);
+        if (!entry || !entry.shift_id) continue;
+        const sh = shiftsById.get(entry.shift_id);
+        if (!sh) continue;
+        // Use weekday-specific duration if available, else DURATION0
+        const wd = new Date(year, month - 1, d).getDay(); // 0=Sun
+        const wdKey = wd === 0 ? 7 : wd; // DB: 1=Mo..7=So
+        const dur = (sh as unknown as Record<string, unknown>)[`DURATION${wdKey}`] as number | undefined;
+        actual += typeof dur === 'number' && dur > 0 ? dur : (sh.DURATION0 || 0);
+      }
+      // Target: prefer HRSMONTH, else HRSDAY * working days in month
+      let target = emp.HRSMONTH || 0;
+      if (!target && emp.HRSDAY) {
+        let workDays = 0;
+        for (let d = 1; d <= daysInMonth; d++) {
+          const wd = new Date(year, month - 1, d).getDay();
+          const dbWd = wd === 0 ? 6 : wd - 1; // 0=Mon..6=Sun
+          if (emp.WORKDAYS_LIST && emp.WORKDAYS_LIST[dbWd]) workDays++;
+        }
+        target = emp.HRSDAY * workDays;
+      }
+      m.set(emp.ID, { actual: Math.round(actual * 10) / 10, target: Math.round(target * 10) / 10 });
+    }
+    return m;
+  }, [employees, entries, entryMap, shifts, year, month, daysInMonth]);
 
   // Coverage lookup: day → CoverageDay
   const coverageMap = useMemo(() => {
@@ -2884,6 +2919,19 @@ export default function Schedule() {
           </select>
         </div>
 
+        {/* Workload bars toggle */}
+        <div className="flex items-center gap-1.5">
+          <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-gray-500" title="Stunden-Auslastung pro Mitarbeiter anzeigen">
+            <input
+              type="checkbox"
+              checked={showWorkloadBars}
+              onChange={e => setShowWorkloadBars(e.target.checked)}
+              className="rounded"
+            />
+            📊 Auslastung
+          </label>
+        </div>
+
         {/* Terminated employee toggle */}
         <div className="flex items-center gap-1.5 ml-auto">
           <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-gray-500">
@@ -3308,6 +3356,13 @@ export default function Schedule() {
                       const birthdayDate = hasBirthdayThisMonth && emp.BIRTHDAY
                         ? new Date(emp.BIRTHDAY).toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit' })
                         : '';
+                      const wl = workloadMap.get(emp.ID);
+                      const wlPct = wl && wl.target > 0 ? Math.min(100, Math.round((wl.actual / wl.target) * 100)) : null;
+                      const wlColor = wlPct === null ? '#94a3b8'
+                        : wlPct >= 95 ? '#22c55e'
+                        : wlPct >= 70 ? '#f59e0b'
+                        : '#ef4444';
+                      const wlTitle = wl ? `${wl.actual}h / ${wl.target}h (${wlPct ?? '?'}%)` : '';
                       return (
                         <>
                           {emp.BOLD === 1
@@ -3318,6 +3373,21 @@ export default function Schedule() {
                               className="ml-1 text-sm cursor-default"
                               title={`🎂 Geburtstag: ${birthdayDate}`}
                             >🎂</span>
+                          )}
+                          {showWorkloadBars && wl && (
+                            <div className="mt-0.5" title={wlTitle}>
+                              <div className="flex items-center gap-1">
+                                <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden" style={{ minWidth: 48 }}>
+                                  <div
+                                    className="h-full rounded-full transition-all duration-300"
+                                    style={{ width: `${wlPct ?? 0}%`, backgroundColor: wlColor }}
+                                  />
+                                </div>
+                                <span className="text-[10px] font-mono tabular-nums" style={{ color: wlColor, minWidth: 32 }}>
+                                  {wl.actual}h
+                                </span>
+                              </div>
+                            </div>
                           )}
                         </>
                       );

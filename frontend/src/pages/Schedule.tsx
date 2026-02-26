@@ -3577,10 +3577,26 @@ export default function Schedule() {
         <span className="text-xs px-2 py-0.5 text-green-600 bg-green-50 rounded">■ ≥80%</span>
         <span className="text-xs px-2 py-0.5 text-amber-600 bg-amber-50 rounded">■ 50–79%</span>
         <span className="text-xs px-2 py-0.5 text-red-600 bg-red-50 rounded">■ &lt;50%</span>
-        <span className="hidden sm:inline text-xs text-gray-400 ml-2">
-          Hover → Tooltip · Drag &amp; Drop (Alt=Kopieren) · Pfeiltasten → Navigation · Del → Löschen · Enter → Schicht · Ctrl+Z/Y → Undo/Redo
-        </span>
       </div>
+      {/* ── Shift Color Legend ── */}
+      {shifts.filter(s => !s.HIDE).length > 0 && (
+        <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
+          <span className="text-xs text-gray-500">Schichten:</span>
+          {shifts.filter(s => !s.HIDE).map(s => (
+            <span
+              key={s.ID}
+              className="text-[11px] font-bold px-1.5 py-0.5 rounded border border-black/10"
+              style={{ backgroundColor: s.COLORBK_HEX || '#e5e7eb', color: s.COLORTEXT_HEX || '#111' }}
+              title={s.NAME}
+            >
+              {s.SHORTNAME}
+            </span>
+          ))}
+          <span className="hidden sm:inline text-xs text-gray-400 ml-2">
+            Hover → Tooltip · Drag &amp; Drop (Alt=Kopieren) · Pfeiltasten → Navigation · Del → Löschen · Enter → Schicht · Ctrl+Z/Y → Undo/Redo
+          </span>
+        </div>
+      )}
 
       <ToastContainer toasts={toasts} onRemove={removeToast} />
 

@@ -1439,6 +1439,14 @@ export default function Schedule() {
   const [copyWeekLoading, setCopyWeekLoading] = useState(false);
   const [copyWeekMonday, setCopyWeekMonday] = useState<string>('');
 
+  // Schicht-Tausch state
+  const [showSwap, setShowSwap] = useState(false);
+  const [swapEmp1, setSwapEmp1] = useState<number | ''>('');
+  const [swapEmp2, setSwapEmp2] = useState<number | ''>('');
+  const [swapDateFrom, setSwapDateFrom] = useState<string>('');
+  const [swapDateTo, setSwapDateTo] = useState<string>('');
+  const [swapLoading, setSwapLoading] = useState(false);
+
 // Auto-Plan modal state
   const [showAutoPlan, setShowAutoPlan] = useState(false);
   const [autoPlanForce, setAutoPlanForce] = useState(false);
@@ -2949,6 +2957,134 @@ export default function Schedule() {
         );
       })()}
 
+      {/* ── Schicht-Tausch Modal ───────────────────────────────── */}
+      {showSwap && (() => {
+        const closeSwap = () => setShowSwap(false);
+
+        const handleSwap = async () => {
+          if (!swapEmp1 || !swapEmp2 || !swapDateFrom || !swapDateTo) return;
+          if (swapEmp1 === swapEmp2) { showToast('Bitte zwei verschiedene Mitarbeiter wählen', 'error'); return; }
+
+          // Build date list
+          const dates: string[] = [];
+          const cur = new Date(swapDateFrom);
+          const end = new Date(swapDateTo);
+          while (cur <= end) {
+            dates.push(cur.toISOString().slice(0, 10));
+            cur.setDate(cur.getDate() + 1);
+          }
+          if (dates.length > 62) { showToast('Maximaler Zeitraum: 62 Tage', 'error'); return; }
+
+          setSwapLoading(true);
+          try {
+            const res = await api.swapShifts({ employee_id_1: swapEmp1 as number, employee_id_2: swapEmp2 as number, dates });
+            showToast(res.message || `${res.swapped_days} Tag(e) getauscht`, res.errors?.length ? 'warning' : 'success');
+            closeSwap();
+            window.dispatchEvent(new CustomEvent('sp5-reload-schedule'));
+          } catch (e: any) {
+            showToast(e.message || 'Fehler beim Tausch', 'error');
+          } finally {
+            setSwapLoading(false);
+          }
+        };
+
+        const emp1 = employees.find(e => e.ID === swapEmp1);
+        const emp2 = employees.find(e => e.ID === swapEmp2);
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={closeSwap}>
+            <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-bold text-gray-800">🔄 Schicht-Tausch</h2>
+                <button onClick={closeSwap} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+              </div>
+
+              <p className="text-sm text-gray-500 mb-4">
+                Alle Schichteinträge der zwei Mitarbeiter im gewählten Zeitraum werden gegenseitig getauscht.
+              </p>
+
+              {/* Employee selects */}
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Mitarbeiter A</label>
+                  <select
+                    className="w-full border rounded-lg p-2 text-sm focus:outline-blue-400"
+                    value={swapEmp1}
+                    onChange={e => setSwapEmp1(e.target.value ? Number(e.target.value) : '')}
+                  >
+                    <option value="">– wählen –</option>
+                    {employees.map(e => (
+                      <option key={e.ID} value={e.ID}>{e.SHORTNAME || e.FIRSTNAME} {e.NAME}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Mitarbeiter B</label>
+                  <select
+                    className="w-full border rounded-lg p-2 text-sm focus:outline-blue-400"
+                    value={swapEmp2}
+                    onChange={e => setSwapEmp2(e.target.value ? Number(e.target.value) : '')}
+                  >
+                    <option value="">– wählen –</option>
+                    {employees.map(e => (
+                      <option key={e.ID} value={e.ID}>{e.SHORTNAME || e.FIRSTNAME} {e.NAME}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Preview arrow */}
+              {emp1 && emp2 && (
+                <div className="flex items-center justify-center gap-3 mb-4 text-sm font-medium text-gray-700">
+                  <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full">{emp1.SHORTNAME || emp1.FIRSTNAME}</span>
+                  <span className="text-gray-400 text-lg">⇄</span>
+                  <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full">{emp2.SHORTNAME || emp2.FIRSTNAME}</span>
+                </div>
+              )}
+
+              {/* Date range */}
+              <div className="grid grid-cols-2 gap-3 mb-5">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Von</label>
+                  <input
+                    type="date"
+                    className="w-full border rounded-lg p-2 text-sm focus:outline-blue-400"
+                    value={swapDateFrom}
+                    onChange={e => setSwapDateFrom(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Bis</label>
+                  <input
+                    type="date"
+                    className="w-full border rounded-lg p-2 text-sm focus:outline-blue-400"
+                    value={swapDateTo}
+                    min={swapDateFrom}
+                    onChange={e => setSwapDateTo(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={closeSwap}
+                  className="flex-1 px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  onClick={handleSwap}
+                  disabled={swapLoading || !swapEmp1 || !swapEmp2 || !swapDateFrom || !swapDateTo || swapEmp1 === swapEmp2}
+                  className="flex-1 px-4 py-2 text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {swapLoading ? '⏳ Tausche…' : '🔄 Tauschen'}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {notePopup && (
         <NoteDetailPopup
           state={notePopup}
@@ -3050,6 +3186,26 @@ export default function Schedule() {
             title="Schichtwoche eines Mitarbeiters auf andere übertragen"
           >
             📋 <span className="hidden sm:inline">Woche kopieren</span>
+          </button>
+
+          {/* Schicht-Tausch button */}
+          <button
+            onClick={() => {
+              const today = new Date();
+              const y = today.getFullYear(), m = today.getMonth();
+              const firstDay = `${y}-${String(m + 1).padStart(2, '0')}-01`;
+              const lastDay = new Date(y, m + 1, 0);
+              const lastDayStr = `${y}-${String(m + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`;
+              setSwapEmp1(displayEmployees[0]?.ID ?? '');
+              setSwapEmp2(displayEmployees[1]?.ID ?? '');
+              setSwapDateFrom(firstDay);
+              setSwapDateTo(lastDayStr);
+              setShowSwap(true);
+            }}
+            className="px-2 sm:px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            title="Schichten zweier Mitarbeiter für einen Zeitraum tauschen"
+          >
+            🔄 <span className="hidden sm:inline">Tausch</span>
           </button>
 
           {/* Auto-Planen button */}

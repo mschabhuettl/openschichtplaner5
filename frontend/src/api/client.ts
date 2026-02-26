@@ -1186,4 +1186,14 @@ export const api = {
       '/api/schedule/copy-week',
       body,
     ),
+
+  swapShifts: (body: {
+    employee_id_1: number;
+    employee_id_2: number;
+    dates: string[];
+  }) =>
+    postJSON<{ ok: boolean; swapped_days: number; errors: string[]; message: string }>(
+      '/api/schedule/swap',
+      body,
+    ),
 };

@@ -52,6 +52,7 @@ const Druckvorschau      = lazy(() => import('./pages/Druckvorschau'));
 const Wochenansicht      = lazy(() => import('./pages/Wochenansicht'));
 const RotationsAnalyse   = lazy(() => import('./pages/RotationsAnalyse'));
 const KapazitaetsForecast = lazy(() => import('./pages/KapazitaetsForecast'));
+const QualitaetsBericht   = lazy(() => import('./pages/QualitaetsBericht'));
 const Login             = lazy(() => import('./pages/Login'));
 
 /** Simple loading indicator shown while a lazy chunk is fetching */
@@ -106,6 +107,7 @@ const navItems: NavItem[] = [
   { id: 'fairness', label: 'Fairness-Score', icon: '📐', group: 'Berichte', path: '/fairness' },
   { id: 'rotations-analyse', label: 'Rotations-Analyse', icon: '🔄', group: 'Berichte', path: '/rotations-analyse' },
   { id: 'kapazitaets-forecast', label: 'Kapazitäts-Forecast', icon: '📊', group: 'Berichte', path: '/kapazitaets-forecast' },
+  { id: 'qualitaets-bericht', label: 'Qualitätsbericht', icon: '📋', group: 'Berichte', path: '/qualitaets-bericht' },
   { id: 'berichte', label: 'Berichte', icon: '📊', group: 'Berichte', path: '/berichte' },
   { id: 'export', label: 'Export', icon: '⬇️', group: 'Berichte', path: '/export', roles: ['Admin', 'Planer'] },
   { id: 'import', label: 'Import', icon: '⬆️', group: 'Berichte', path: '/import', roles: ['Admin'] },
@@ -410,6 +412,7 @@ function AppInner() {
               <Route path="/wochenansicht" element={<Wochenansicht />} />
               <Route path="/rotations-analyse" element={<RotationsAnalyse />} />
               <Route path="/kapazitaets-forecast" element={<KapazitaetsForecast />} />
+              <Route path="/qualitaets-bericht" element={<QualitaetsBericht />} />
             </Routes>
           </Suspense>
         </main>

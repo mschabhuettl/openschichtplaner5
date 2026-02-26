@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — 2026-02-26 (feature-24)
+
+### Hinzugefügt / Added
+
+#### 📋 Qualitätsbericht (`/qualitaets-bericht`)
+- **Neuer Monatsabschluss-Check** — automatischer Qualitätsbericht für jeden Monat
+- **Gesamtscore 0–100** mit Schulnoten-System: A (≥90) / B (≥75) / C (≥60) / D (<60)
+- **4 Score-Ringe**: Gesamt, Besetzung (50%), Stunden (30%), Konflikte (20%)
+- **Befunde-Panel** mit farbkodierten Meldungen (OK ✅ / Info ℹ️ / Warnung ⚠️ / Kritisch 🔴)
+- **Stunden-Compliance-Tabelle**: Mitarbeiter mit >15% Überstunden oder starker Unterbeschäftigung
+- **Tages-Besetzungskalender**: Heatmap aller Monatstage mit Status (OK/Knapp/Kritisch/Ungeplant/Wochenende)
+- **KPI-Kacheln**: Soll-/Ist-Stunden, Mitarbeiter ohne/mit Abweichung
+- **Gruppen-kompatibler Score** — dynamische Mindestbesetzung (1/8 der Belegschaft)
+- **Neuer API-Endpunkt** `GET /api/quality-report?year=&month=` mit vollständigem Qualitätsbefund
+
+---
+
 ## [Unreleased] — 2026-02-26 (feature-23)
 
 ### Hinzugefügt / Added

@@ -39,6 +39,7 @@ export interface DashboardTodayAbsence {
   leave_name: string;
   color_bk: string;
   color_text: string;
+  absence_type?: string;
 }
 
 export interface WeekDayData {

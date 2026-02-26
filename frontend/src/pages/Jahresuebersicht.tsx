@@ -1,7 +1,21 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { MonthSummary } from '../api/client';
-import type { Employee, Group } from '../types';
+import type { Employee, Group, ShiftType, LeaveType } from '../types';
+
+// Map: SHORTNAME → { bk, text }
+type ShiftColorMap = Map<string, { bk: string; text: string }>;
+
+function buildShiftColorMap(shifts: ShiftType[], leaveTypes: LeaveType[]): ShiftColorMap {
+  const m = new Map<string, { bk: string; text: string }>();
+  for (const s of shifts) {
+    m.set(s.SHORTNAME, { bk: s.COLORBK_HEX || '#64748b', text: s.COLORTEXT_HEX || '#fff' });
+  }
+  for (const lt of leaveTypes) {
+    m.set(lt.SHORTNAME, { bk: lt.COLORBK_HEX || '#fbbf24', text: '#333' });
+  }
+  return m;
+}
 
 const MONTH_ABBR = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 // ── Print helper ───────────────────────────────────────────────
@@ -101,12 +115,24 @@ function openPrintWindowJ(html: string) {
 }
 
 
-function MonthCell({ summary }: { summary: MonthSummary }) {
+function ShiftBadge({ label, count, colorMap }: { label: string; count: number; colorMap: ShiftColorMap }) {
+  const col = colorMap.get(label);
+  const text = count > 1 ? `${label}×${count}` : label;
+  if (col) {
+    return (
+      <span
+        className="inline-block px-1 rounded font-bold leading-tight"
+        style={{ backgroundColor: col.bk, color: col.text, fontSize: '9px' }}
+      >{text}</span>
+    );
+  }
+  return <span className="font-mono text-gray-600" style={{ fontSize: '9px' }}>{text}</span>;
+}
+
+function MonthCell({ summary, colorMap }: { summary: MonthSummary; colorMap: ShiftColorMap }) {
   const topLabels = Object.entries(summary.label_counts)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([label, count]) => `${label}${count > 1 ? `×${count}` : ''}`)
-    .join(' ');
+    .slice(0, 5);
 
   const hasData = summary.shifts > 0 || summary.absences > 0;
   const overtime = summary.actual_hours - summary.target_hours;
@@ -115,8 +141,12 @@ function MonthCell({ summary }: { summary: MonthSummary }) {
     <td className={`border border-gray-200 p-1.5 align-top text-xs min-w-[90px] ${hasData ? '' : 'bg-gray-50'}`}>
       {hasData ? (
         <div className="space-y-0.5">
-          {topLabels && (
-            <div className="font-mono text-[10px] text-gray-700 leading-tight">{topLabels}</div>
+          {topLabels.length > 0 && (
+            <div className="flex flex-wrap gap-0.5 leading-tight">
+              {topLabels.map(([label, count]) => (
+                <ShiftBadge key={label} label={label} count={count} colorMap={colorMap} />
+              ))}
+            </div>
           )}
           <div className="flex gap-1 text-[10px]">
             {summary.shifts > 0 && (
@@ -141,9 +171,11 @@ function MonthCell({ summary }: { summary: MonthSummary }) {
 function SingleEmployeeView({
   employee,
   year,
+  colorMap,
 }: {
   employee: Employee;
   year: number;
+  colorMap: ShiftColorMap;
 }) {
   const [data, setData] = useState<MonthSummary[]>([]);
   const [loading, setLoading] = useState(false);
@@ -215,10 +247,7 @@ function SingleEmployeeView({
           <tbody>
             {data.map((m, i) => {
               const ot = m.actual_hours - m.target_hours;
-              const labels = Object.entries(m.label_counts)
-                .sort((a, b) => b[1] - a[1])
-                .map(([l, c]) => `${l}${c > 1 ? `×${c}` : ''}`)
-                .join('  ');
+              const labelEntries = Object.entries(m.label_counts).sort((a, b) => b[1] - a[1]);
               return (
                 <tr key={m.month} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                   <td className="px-3 py-1.5 border border-gray-200 font-medium">
@@ -239,8 +268,14 @@ function SingleEmployeeView({
                   <td className={`px-3 py-1.5 border border-gray-200 text-right font-semibold ${ot >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {ot >= 0 ? '+' : ''}{ot.toFixed(1)}h
                   </td>
-                  <td className="px-3 py-1.5 border border-gray-200 font-mono text-xs text-gray-600">
-                    {labels || '—'}
+                  <td className="px-3 py-1.5 border border-gray-200">
+                    {labelEntries.length > 0 ? (
+                      <div className="flex flex-wrap gap-1">
+                        {labelEntries.map(([l, c]) => (
+                          <ShiftBadge key={l} label={l} count={c} colorMap={colorMap} />
+                        ))}
+                      </div>
+                    ) : '—'}
                   </td>
                 </tr>
               );
@@ -256,10 +291,11 @@ function SingleEmployeeView({
                 {totalOvertime >= 0 ? '+' : ''}{totalOvertime.toFixed(1)}h
               </td>
               <td className="px-3 py-2 border border-gray-300">
-                {Array.from(allLabels.entries())
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([l, c]) => `${l}×${c}`)
-                  .join('  ')}
+                <div className="flex flex-wrap gap-1">
+                  {Array.from(allLabels.entries()).sort((a, b) => b[1] - a[1]).map(([l, c]) => (
+                    <ShiftBadge key={l} label={l} count={c} colorMap={colorMap} />
+                  ))}
+                </div>
               </td>
             </tr>
           </tbody>
@@ -274,10 +310,12 @@ function AllEmployeesView({
   employees,
   year,
   groupId,
+  colorMap,
 }: {
   employees: Employee[];
   year: number;
   groupId: number | undefined;
+  colorMap: ShiftColorMap;
 }) {
   const [dataMap, setDataMap] = useState<Map<number, MonthSummary[]>>(new Map());
   const [loading, setLoading] = useState(false);
@@ -338,7 +376,7 @@ function AllEmployeesView({
                   {emp.NAME}, {emp.FIRSTNAME}
                 </td>
                 {empData.length > 0 ? (
-                  empData.map(m => <MonthCell key={m.month} summary={m} />)
+                  empData.map(m => <MonthCell key={m.month} summary={m} colorMap={colorMap} />)
                 ) : (
                   Array.from({ length: 12 }, (_, i) => (
                     <td key={i} className="border border-gray-200 p-1.5 bg-gray-50 text-center text-gray-300 text-xs">—</td>
@@ -370,6 +408,7 @@ export default function Jahresuebersicht() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [groupMembers, setGroupMembers] = useState<Set<number>>(new Set());
+  const [colorMap, setColorMap] = useState<ShiftColorMap>(new Map());
 
   useEffect(() => {
     api.getEmployees().then(emps => {
@@ -379,6 +418,9 @@ export default function Jahresuebersicht() {
       }
     }).catch(() => {});
     api.getGroups().then(setGroups).catch(() => {});
+    Promise.all([api.getShifts(), api.getLeaveTypes()]).then(([shifts, leaveTypes]) => {
+      setColorMap(buildShiftColorMap(shifts, leaveTypes));
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -496,10 +538,10 @@ export default function Jahresuebersicht() {
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
               {selectedEmployee.NAME}, {selectedEmployee.FIRSTNAME} — {year}
             </h2>
-            <SingleEmployeeView employee={selectedEmployee} year={year} />
+            <SingleEmployeeView employee={selectedEmployee} year={year} colorMap={colorMap} />
           </div>
         ) : (
-          <AllEmployeesView employees={filteredEmployees} year={year} groupId={groupId} />
+          <AllEmployeesView employees={filteredEmployees} year={year} groupId={groupId} colorMap={colorMap} />
         )}
       </div>
     </div>

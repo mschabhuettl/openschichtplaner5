@@ -46,6 +46,7 @@ const Protokoll         = lazy(() => import('./pages/Protokoll'));
 const Konflikte         = lazy(() => import('./pages/Konflikte'));
 const Geburtstagkalender = lazy(() => import('./pages/Geburtstagkalender'));
 const Schichtwuensche    = lazy(() => import('./pages/Schichtwuensche'));
+const Jahresrueckblick   = lazy(() => import('./pages/Jahresrueckblick'));
 const Login             = lazy(() => import('./pages/Login'));
 
 /** Simple loading indicator shown while a lazy chunk is fetching */
@@ -80,6 +81,7 @@ const navItems: NavItem[] = [
   { id: 'jahresuebersicht', label: 'Jahresübersicht', icon: '📆', group: 'Planung', path: '/jahresuebersicht' },
   { id: 'personaltabelle', label: 'Personaltabelle', icon: '👤', group: 'Planung', path: '/personaltabelle', roles: ['Admin', 'Planer'] },
   { id: 'statistiken', label: 'Statistiken', icon: '📈', group: 'Planung', path: '/statistiken' },
+  { id: 'jahresrueckblick', label: 'Jahresrückblick', icon: '🏆', group: 'Planung', path: '/jahresrueckblick' },
   { id: 'geburtstagkalender', label: 'Geburtstags-Kalender', icon: '🎂', group: 'Planung', path: '/geburtstagkalender' },
   { id: 'teamkalender', label: 'Team-Kalender', icon: '🗓️', group: 'Planung', path: '/teamkalender' },
   { id: 'schichtwuensche', label: 'Schichtwünsche', icon: '💬', group: 'Planung', path: '/schichtwuensche' },
@@ -391,6 +393,7 @@ function AppInner() {
               <Route path="/perioden" element={<Perioden />} />
               <Route path="/einstellungen" element={<Einstellungen />} />
               <Route path="/protokoll" element={<Protokoll />} />
+              <Route path="/jahresrueckblick" element={<Jahresrueckblick />} />
             </Routes>
           </Suspense>
         </main>

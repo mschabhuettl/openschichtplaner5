@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — 2026-02-26 (feature-23)
+
+### Hinzugefügt / Added
+
+#### 📊 Kapazitäts-Forecast (`/kapazitaets-forecast`)
+- **Neue Planungsseite** für monatliche Kapazitätsvorschau — kombiniert Dienstplan, Abwesenheiten & Mindestbesetzung
+- **Monatskalender** mit farbkodierten Tages-Kacheln: Grün (gut besetzt), Gelb (knapp), Rot (kritisch), Grau (ungeplant)
+- **Urlaubskonflikt-Erkennung**: automatische ⚠️ Warnung wenn >30% der Belegschaft gleichzeitig abwesend
+- **4 KPI-Kacheln**: gut besetzte Tage, knappe Tage, kritische Tage, Urlaubskonflikte
+- **Ø Tagesbesetzung** als Fortschrittsbalken (Ist-Besetzung vs. Gesamtteam)
+- **Tag-Detail-Modal**: Klick auf Kalendertag zeigt exakte Besetzung, Abwesenheitsliste mit Abwesenheitstyp, Coverage-Balken
+- **Handlungsbedarf-Panel**: alle Problem-Tage auf einen Blick mit Klick-Navigation zum Detail
+- **Tagesbesetzungs-Balkenchart**: Top-20 geplante Tage als Mini-Balken zum Vergleich
+- **Gruppenfilter**: Forecast für einzelne Teams/Gruppen einschränkbar
+- **Neuer API-Endpunkt** `GET /api/capacity-forecast?year=&month=[&group_id=]` mit vollständiger Tages-Aggregation
+
+---
+
 ## [Unreleased] — 2026-02-26 (feature-22)
 
 ### Hinzugefügt / Added

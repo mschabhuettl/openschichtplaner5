@@ -100,6 +100,7 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 ### ⚖️ Fairness & Auswertung
 - ✅ **Mitarbeiter-Vergleich** ⚖️ — Zwei Mitarbeiter im Jahresüberblick nebeneinander: Statistik-Balkendiagramme, Schichtarten-Verteilung, Monatsansicht
 - ✅ **Fairness-Score** — Bewertet Gleichverteilung von Wochenend-, Nacht- und Feiertagsschichten mit Mitarbeiter-Ranking und Abweichungsanzeige
+- ✅ **Kapazitäts-Forecast** 📊 — Monatliche Kapazitätsvorschau: Besetzungskalender (grün/gelb/rot), Urlaubskonflikt-Erkennung (>30% Team abwesend), Handlungsbedarf-Panel, Tages-Detail-Modal
 
 ### 📄 Berichte & Export (20+ Berichtstypen)
 - ✅ **Dienstplan-Bericht** — Monats-/Jahresbericht (CSV, HTML)

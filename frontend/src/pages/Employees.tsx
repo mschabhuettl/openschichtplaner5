@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import type { Restriction } from '../api/client';
 import type { Employee, ShiftType } from '../types';
@@ -183,6 +184,7 @@ function listToWorkdays(list: boolean[]): string {
 }
 
 export default function Employees() {
+  const navigate = useNavigate();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -491,6 +493,7 @@ export default function Employees() {
                     <td className="px-4 py-2 text-center text-gray-500 text-xs">{emp.EMPSTART || '—'}</td>
                     <td className="px-4 py-2 text-center">
                       <div className="flex gap-1 justify-center">
+                        <button onClick={() => navigate(`/mitarbeiter/${emp.ID}`)} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs hover:bg-purple-200">🪪 Profil</button>
                         <button onClick={() => openEdit(emp)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>
                         <button onClick={() => handleDelete(emp)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Ausblenden</button>
                       </div>

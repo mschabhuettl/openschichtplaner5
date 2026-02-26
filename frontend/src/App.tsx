@@ -30,6 +30,7 @@ const Employees         = lazy(() => import('./pages/Employees'));
 const Groups            = lazy(() => import('./pages/Groups'));
 const Fairness          = lazy(() => import('./pages/Fairness'));
 const MitarbeiterVergleich = lazy(() => import('./pages/MitarbeiterVergleich'));
+const MitarbeiterProfil    = lazy(() => import('./pages/MitarbeiterProfil'));
 const Teamkalender         = lazy(() => import('./pages/Teamkalender'));
 const UrlaubsTimeline      = lazy(() => import('./pages/UrlaubsTimeline'));
 const Shifts            = lazy(() => import('./pages/Shifts'));
@@ -97,6 +98,7 @@ const navItems: NavItem[] = [
   { id: 'notizen', label: 'Notizen', icon: '📝', group: 'Planung', path: '/notizen', roles: ['Admin', 'Planer'] },
   // Reports
   { id: 'mitarbeiter-vergleich', label: 'MA-Vergleich', icon: '⚖️', group: 'Berichte', path: '/mitarbeiter-vergleich' },
+  { id: 'mitarbeiter-profil', label: 'MA-Profil', icon: '🪪', group: 'Berichte', path: '/mitarbeiter' },
   { id: 'fairness', label: 'Fairness-Score', icon: '📐', group: 'Berichte', path: '/fairness' },
   { id: 'berichte', label: 'Berichte', icon: '📊', group: 'Berichte', path: '/berichte' },
   { id: 'export', label: 'Export', icon: '⬇️', group: 'Berichte', path: '/export', roles: ['Admin', 'Planer'] },
@@ -377,6 +379,8 @@ function AppInner() {
               <Route path="/kontobuchungen" element={<Kontobuchungen />} />
               <Route path="/notizen" element={<Notizen />} />
               <Route path="/mitarbeiter-vergleich" element={<MitarbeiterVergleich />} />
+              <Route path="/mitarbeiter" element={<MitarbeiterProfil />} />
+              <Route path="/mitarbeiter/:id" element={<MitarbeiterProfil />} />
               <Route path="/teamkalender" element={<Teamkalender />} />
               <Route path="/urlaubs-timeline" element={<UrlaubsTimeline />} />
               <Route path="/fairness" element={<Fairness />} />

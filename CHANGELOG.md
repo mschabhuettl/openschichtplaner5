@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — 2026-02-26 (feature-19)
+
+### Hinzugefügt / Added
+
+#### 🪪 Mitarbeiter-Profil (`/mitarbeiter/:id`)
+- **Neue Seite** mit vollständiger Profil-Ansicht für jeden Mitarbeiter
+- **KPI-Kacheln**: Jahres-Schichtzahl, Ist-Stunden, Urlaubsverbrauch, Wochenend-Schichten auf einen Blick
+- **4 Tabs**: Übersicht | Jahres-Statistik | Nächste 7 Tage | Protokoll
+- **Übersicht-Tab**: Stammdaten (Geburtsdatum mit Altersanzeige, Dienstjahre, Arbeitstage etc.), Kontaktdaten, bevorstehende Abwesenheiten, Nächste-7-Tage-Vorschau
+- **Statistik-Tab**: Monatliche Stunden-Balken mit Soll/Ist-Vergleich, detaillierte Monatstabelle mit Diff, WE-/Nacht-Schichten und Urlaub
+- **7-Tage-Tab**: Schichten + Abwesenheiten der nächsten 7 Tage mit Heute-Markierung
+- **Protokoll-Tab**: Letzte 30 System-Einträge des Änderungs-Logs
+- **MA-Wechsler**: Dropdown direkt im Header zum schnellen Wechseln zwischen Profilen
+- **Profil-Button** in der Mitarbeiter-Liste (`/employees`) mit direktem Sprung zum Profil
+- Navigation via Back-Button (Browser-History)
+
+---
+
 ## [Unreleased] — 2026-02-26 (feature-18)
 
 ### Hinzugefügt / Added

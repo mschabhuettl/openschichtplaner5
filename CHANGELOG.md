@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — 2026-02-26 (feature-18)
+
+### Hinzugefügt / Added
+
+#### 🖨️ Druckvorschau (`/druckvorschau`)
+- **Neue Seite** für interaktive Druck-Vorbereitung des Dienstplans
+- Sidebar mit vollständiger Konfiguration: Monat/Jahr, Gruppe, Ausrichtung, Schriftgröße, Farbmodus
+- Druckraster: farbige Schicht-Badges, Feiertags- und Wochenend-Hervorhebung
+- **Farbmodi**: Farbe / Graustufen / Minimal (tintensparend)
+- **Nur-Werktage-Modus**: blendet Wochenend-Spalten aus
+- **Schicht-Zähler-Spalte**: zeigt Häufigkeit pro Schichtart und Mitarbeiter
+- Legende am Ende des Dokuments, Unterschriftszeile für Leitung
+- `@page`-Direktive für korrektes A4-Format beim Drucken (Portrait/Landscape)
+- Sidebar + Navigation werden beim Druck automatisch ausgeblendet
+
+---
+
 ## [Unreleased] — 2026-02-26 (feature-15)
 
 ### Hinzugefügt / Added

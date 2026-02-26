@@ -47,6 +47,7 @@ const Konflikte         = lazy(() => import('./pages/Konflikte'));
 const Geburtstagkalender = lazy(() => import('./pages/Geburtstagkalender'));
 const Schichtwuensche    = lazy(() => import('./pages/Schichtwuensche'));
 const Jahresrueckblick   = lazy(() => import('./pages/Jahresrueckblick'));
+const Druckvorschau      = lazy(() => import('./pages/Druckvorschau'));
 const Login             = lazy(() => import('./pages/Login'));
 
 /** Simple loading indicator shown while a lazy chunk is fetching */
@@ -115,6 +116,7 @@ const navItems: NavItem[] = [
   { id: 'perioden', label: 'Abrechnungszeiträume', icon: '📅', group: 'Administration', path: '/perioden', roles: ['Admin'] },
   { id: 'einstellungen', label: 'Einstellungen', icon: '⚙️', group: 'Administration', path: '/einstellungen', roles: ['Admin'] },
   { id: 'protokoll', label: 'Protokoll', icon: '📋', group: 'Administration', path: '/protokoll', roles: ['Admin'] },
+  { id: 'druckvorschau', label: 'Druckvorschau', icon: '🖨️', group: 'Administration', path: '/druckvorschau' },
 ];
 
 function AppInner() {
@@ -394,6 +396,7 @@ function AppInner() {
               <Route path="/perioden" element={<Perioden />} />
               <Route path="/einstellungen" element={<Einstellungen />} />
               <Route path="/protokoll" element={<Protokoll />} />
+              <Route path="/druckvorschau" element={<Druckvorschau />} />
             </Routes>
           </Suspense>
         </main>

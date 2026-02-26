@@ -212,3 +212,18 @@ It reads and writes the original `.DBF` database files directly — no migration
 ---
 
 [1.0.0]: https://github.com/mschabhuettl/openschichtplaner5/releases/tag/v1.0.0
+
+## [Unreleased] - 2026-02-26
+
+### Added
+- **Wochenansicht** (`/wochenansicht`): Kompakte Mo–So Wochenübersicht aller Mitarbeiter
+  - Vollständige 7-Tage-Tabelle mit farbigen Schicht-Badges
+  - Wochen-Navigation (Zurück / Heute / Vor) + Datepicker
+  - Gruppen-Filter und Mitarbeiter-Suche
+  - Kompakt-Modus (kleinere Zeilen)
+  - Highlight-Klick auf Mitarbeiter-Zeile
+  - Schichten-Zähler pro MA (S = Schichten, A = Abwesenheiten)
+  - Tages-Zusammenfassung (wieviele Mitarbeiter pro Tag im Dienst)
+  - Legende aller Schichtarten mit Farben
+  - Heute-Hervorhebung (blauer Spaltenkopf)
+  - Wochenende visuell abgesetzt

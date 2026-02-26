@@ -49,6 +49,7 @@ const Geburtstagkalender = lazy(() => import('./pages/Geburtstagkalender'));
 const Schichtwuensche    = lazy(() => import('./pages/Schichtwuensche'));
 const Jahresrueckblick   = lazy(() => import('./pages/Jahresrueckblick'));
 const Druckvorschau      = lazy(() => import('./pages/Druckvorschau'));
+const Wochenansicht      = lazy(() => import('./pages/Wochenansicht'));
 const Login             = lazy(() => import('./pages/Login'));
 
 /** Simple loading indicator shown while a lazy chunk is fetching */
@@ -78,6 +79,7 @@ const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/' },
   { id: 'konflikte', label: 'Konflikte', icon: '⚠️', path: '/konflikte', badge: true },
   // Planning views — Leser sees a subset
+  { id: 'wochenansicht', label: 'Wochenansicht', icon: '🗃️', group: 'Planung', path: '/wochenansicht' },
   { id: 'schedule', label: 'Dienstplan', icon: '📅', group: 'Planung', path: '/schedule' },
   { id: 'einsatzplan', label: 'Einsatzplan', icon: '📋', group: 'Planung', path: '/einsatzplan', roles: ['Admin', 'Planer'] },
   { id: 'jahresuebersicht', label: 'Jahresübersicht', icon: '📆', group: 'Planung', path: '/jahresuebersicht' },
@@ -401,6 +403,7 @@ function AppInner() {
               <Route path="/einstellungen" element={<Einstellungen />} />
               <Route path="/protokoll" element={<Protokoll />} />
               <Route path="/druckvorschau" element={<Druckvorschau />} />
+              <Route path="/wochenansicht" element={<Wochenansicht />} />
             </Routes>
           </Suspense>
         </main>

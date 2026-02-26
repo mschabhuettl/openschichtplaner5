@@ -1,0 +1,74 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+      },
+    },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React core — shared by everything
+          'vendor-react': ['react', 'react-dom'],
+          // Router
+          'vendor-router': ['react-router-dom'],
+          // Schedule is the largest single page — keep isolated
+          'pages-schedule': [
+            './src/pages/Schedule',
+          ],
+          // Einsatzplan + Jahresuebersicht are also complex
+          'pages-planning-views': [
+            './src/pages/Einsatzplan',
+            './src/pages/Jahresuebersicht',
+            './src/pages/Urlaub',
+            './src/pages/Schichtmodell',
+          ],
+          // Remaining planning utilities
+          'pages-planning-utils': [
+            './src/pages/Personaltabelle',
+            './src/pages/Statistiken',
+            './src/pages/Personalbedarf',
+            './src/pages/Jahresabschluss',
+            './src/pages/Zeitkonto',
+            './src/pages/Ueberstunden',
+            './src/pages/Kontobuchungen',
+            './src/pages/Notizen',
+          ],
+          // Reports & data exchange pages
+          'pages-reports': [
+            './src/pages/Berichte',
+            './src/pages/Export',
+            './src/pages/Import',
+          ],
+          // Master data pages
+          'pages-stammdaten': [
+            './src/pages/Employees',
+            './src/pages/Groups',
+            './src/pages/Shifts',
+            './src/pages/LeaveTypes',
+            './src/pages/Holidays',
+            './src/pages/Workplaces',
+            './src/pages/Extracharges',
+            './src/pages/Einschraenkungen',
+          ],
+          // Admin pages
+          'pages-admin': [
+            './src/pages/Benutzerverwaltung',
+            './src/pages/Backup',
+            './src/pages/Perioden',
+            './src/pages/Einstellungen',
+            './src/pages/Protokoll',
+          ],
+        },
+      },
+    },
+  },
+})

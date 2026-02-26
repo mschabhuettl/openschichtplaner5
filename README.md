@@ -94,6 +94,7 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 - ✅ **Schichteinschränkungen** — Verbotene Schichten pro Mitarbeiter
 
 ### ⚖️ Fairness & Auswertung
+- ✅ **Mitarbeiter-Vergleich** ⚖️ — Zwei Mitarbeiter im Jahresüberblick nebeneinander: Statistik-Balkendiagramme, Schichtarten-Verteilung, Monatsansicht
 - ✅ **Fairness-Score** — Bewertet Gleichverteilung von Wochenend-, Nacht- und Feiertagsschichten mit Mitarbeiter-Ranking und Abweichungsanzeige
 
 ### 📄 Berichte & Export (20+ Berichtstypen)

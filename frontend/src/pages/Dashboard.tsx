@@ -6,6 +6,7 @@ import type {
   DashboardUpcoming,
   DashboardStats,
   WeekDayData,
+  BurnoutRadarEntry,
 } from '../api/client';
 
 const AUTO_REFRESH_MS = 5 * 60 * 1000; // 5 minutes
@@ -590,6 +591,102 @@ function MonthCoverageChart({ statsData }: { statsData: DashboardStats | null })
   );
 }
 
+// ── Burnout-Radar Widget ──────────────────────────────────────────────────────
+
+function BurnoutRadarWidget({ year, month }: { year: number; month: number }) {
+  const [entries, setEntries] = useState<BurnoutRadarEntry[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    api.getBurnoutRadar({ year, month })
+      .then(data => { setEntries(data); setLoading(false); })
+      .catch(() => { setEntries([]); setLoading(false); });
+  }, [year, month]);
+
+  if (loading) return <WidgetSkeleton />;
+
+  const total = (entries?.length ?? 0);
+
+  return (
+    <Widget
+      title="🔥 Burnout-Radar"
+      icon=""
+      badge={total > 0 ? `${total} ⚠️` : undefined}
+    >
+      {total === 0 ? (
+        <div className="flex flex-col items-center justify-center py-4 gap-2">
+          <div className="text-2xl">✅</div>
+          <p className="text-sm text-green-600 font-medium">Alles im grünen Bereich!</p>
+          <p className="text-xs text-gray-400">Keine Überlastungsrisiken erkannt</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {entries?.map(e => (
+            <div
+              key={e.employee_id}
+              className={`rounded-lg p-2.5 border ${
+                e.risk_level === 'high'
+                  ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
+                  : 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-base flex-shrink-0">
+                    {e.risk_level === 'high' ? '🔴' : '🟡'}
+                  </span>
+                  <span className="font-semibold text-sm text-gray-800 dark:text-gray-100 truncate">
+                    {e.employee_name}
+                  </span>
+                </div>
+                <div className="flex gap-1 flex-shrink-0">
+                  {e.streak > 0 && (
+                    <span className="text-[10px] px-1.5 py-0.5 bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300 rounded-full font-mono font-bold whitespace-nowrap">
+                      🔁 {e.streak}d
+                    </span>
+                  )}
+                  {e.overtime_pct >= 20 && (
+                    <span className="text-[10px] px-1.5 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 rounded-full font-mono font-bold whitespace-nowrap">
+                      ⏱ +{e.overtime_pct.toFixed(0)}%
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="mt-1 ml-7">
+                {e.reasons.map((r, i) => (
+                  <span key={i} className="text-[11px] text-gray-500 dark:text-gray-400 mr-2">• {r}</span>
+                ))}
+              </div>
+              {e.target_hours > 0 && (
+                <div className="mt-1.5 ml-7">
+                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 relative">
+                    <div
+                      className={`h-1.5 rounded-full transition-all ${
+                        e.overtime_pct >= 30 ? 'bg-red-500' : e.overtime_pct >= 20 ? 'bg-amber-500' : 'bg-green-500'
+                      }`}
+                      style={{ width: `${Math.min(100, (e.actual_hours / (e.target_hours * 1.5)) * 100)}%` }}
+                    />
+                    <div
+                      className="absolute top-0 h-1.5 w-0.5 bg-gray-500 dark:bg-gray-300"
+                      style={{ left: `${Math.min(100, (e.target_hours / (e.target_hours * 1.5)) * 100)}%` }}
+                      title={`Soll: ${e.target_hours}h`}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
+                    <span>Ist: <span className="font-semibold text-gray-600 dark:text-gray-300">{e.actual_hours}h</span></span>
+                    <span>Soll: {e.target_hours}h</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </Widget>
+  );
+}
+
 // ── Staffing Warnings widget ──────────────────────────────────────────────────
 
 function StaffingWarnings({ warnings }: { warnings: DashboardSummary['staffing_warnings'] }) {
@@ -1132,6 +1229,9 @@ export default function Dashboard() {
         <UpcomingHolidaysWidget upcomingData={upcomingData} />
         <BirthdaysThisWeekWidget upcomingData={upcomingData} />
       </div>
+
+      {/* Burnout-Radar */}
+      <BurnoutRadarWidget year={year} month={month} />
 
       {/* Absences + Staffing warnings + Zeitkonto */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

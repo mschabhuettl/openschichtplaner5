@@ -551,6 +551,19 @@ export interface WeekSchedule {
 }
 
 // ─── Changelog Types ──────────────────────────────────────
+export interface BurnoutRadarEntry {
+  employee_id: number;
+  employee_name: string;
+  employee_short: string;
+  risk_level: 'high' | 'medium';
+  reasons: string[];
+  streak: number;
+  overtime_pct: number;
+  overtime_hours: number;
+  actual_hours: number;
+  target_hours: number;
+}
+
 export interface ChangelogEntry {
   timestamp: string;
   user: string;
@@ -1081,7 +1094,22 @@ export const api = {
     return res.json();
   },
 
-  // ─── Changelog / Aktivitätsprotokoll ──────────────────────
+  // ─── Burnout-Radar ─────────────────────────────────────────
+  getBurnoutRadar: (params: {
+    year: number;
+    month: number;
+    streak_threshold?: number;
+    overtime_threshold_pct?: number;
+    group_id?: number;
+  }) => {
+    const qs = new URLSearchParams({ year: String(params.year), month: String(params.month) });
+    if (params.streak_threshold != null) qs.set('streak_threshold', String(params.streak_threshold));
+    if (params.overtime_threshold_pct != null) qs.set('overtime_threshold_pct', String(params.overtime_threshold_pct));
+    if (params.group_id != null) qs.set('group_id', String(params.group_id));
+    return fetchJSON<BurnoutRadarEntry[]>(`/api/burnout-radar?${qs.toString()}`);
+  },
+
+// ─── Changelog / Aktivitätsprotokoll ──────────────────────
   getChangelog: (params: {
     limit?: number;
     user?: string;

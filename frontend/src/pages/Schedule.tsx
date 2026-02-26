@@ -1458,6 +1458,9 @@ export default function Schedule() {
   const [autoPlanStep, setAutoPlanStep] = useState<'config' | 'preview'>('config');
   const [autoPlanPreview, setAutoPlanPreview] = useState<Array<{ employee_id: number; employee_name: string; date: string; shift_id: number; shift_name: string; status: 'new' | 'skip' | 'overwrite' }>>([]);
 
+  // Schicht-Empfehlung state
+  const [showRecommendations, setShowRecommendations] = useState(false);
+
   // Close export menu on outside click
   useEffect(() => {
     if (!showExportMenu) return;
@@ -3109,6 +3112,177 @@ export default function Schedule() {
         />
       )}
 
+      {/* ── Schicht-Empfehlung Modal ── */}
+      {showRecommendations && (() => {
+        // Analyse: aktueller Monat, alle Tage
+        const daysInMonth = getDaysInMonth(year, month);
+        const allDays = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+        // Für jeden MA: Wie viele Schichten hat er diesen Monat?
+        const empShiftCount = new Map<number, number>();
+        const empLastShifts = new Map<number, number[]>(); // shift IDs used (for suggestion)
+        for (const emp of displayEmployees) {
+          let count = 0;
+          const shiftIds: number[] = [];
+          for (const day of allDays) {
+            const entry = entryMap.get(`${emp.ID}-${day}`);
+            if (entry?.kind === 'shift' && entry.shift_id) {
+              count++;
+              shiftIds.push(entry.shift_id);
+            }
+          }
+          empShiftCount.set(emp.ID, count);
+          empLastShifts.set(emp.ID, shiftIds);
+        }
+
+        // Durchschnitt berechnen
+        const counts = [...empShiftCount.values()];
+        const avg = counts.length > 0 ? counts.reduce((a, b) => a + b, 0) / counts.length : 0;
+
+        // Empfehle MAs die unter dem Durchschnitt liegen
+        const recommendations: Array<{
+          emp: Employee;
+          currentCount: number;
+          suggestedShift: ShiftType | null;
+          suggestedDays: number[];
+        }> = [];
+
+        const activeShiftsList = shifts.filter(s => !s.HIDE);
+
+        for (const emp of displayEmployees) {
+          const count = empShiftCount.get(emp.ID) ?? 0;
+          if (count >= Math.ceil(avg)) continue; // already at/above average
+
+          // Find most frequent shift for this employee
+          const shiftIds = empLastShifts.get(emp.ID) ?? [];
+          const freq = new Map<number, number>();
+          for (const id of shiftIds) freq.set(id, (freq.get(id) ?? 0) + 1);
+          let suggestedShift: ShiftType | null = null;
+          if (freq.size > 0) {
+            const bestId = [...freq.entries()].sort((a, b) => b[1] - a[1])[0][0];
+            suggestedShift = activeShiftsList.find(s => s.ID === bestId) ?? null;
+          }
+          if (!suggestedShift && activeShiftsList.length > 0) {
+            suggestedShift = activeShiftsList[0];
+          }
+
+          // Find free weekdays to suggest
+          const suggestedDays: number[] = [];
+          for (const day of allDays) {
+            if (suggestedDays.length >= 3) break;
+            const entry = entryMap.get(`${emp.ID}-${day}`);
+            if (!entry) {
+              const wd = getWeekday(year, month, day);
+              if (wd !== 0 && wd !== 6) suggestedDays.push(day);
+            }
+          }
+
+          recommendations.push({ emp, currentCount: count, suggestedShift, suggestedDays });
+        }
+
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+            onClick={() => setShowRecommendations(false)}
+          >
+            <div
+              className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="px-5 py-4 border-b flex items-center justify-between bg-gradient-to-r from-amber-50 to-orange-50 rounded-t-xl">
+                <div>
+                  <h2 className="text-base font-bold text-gray-800">💡 Schicht-Empfehlungen</h2>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Mitarbeiter unter Ø ({avg.toFixed(1)} Schichten) · {MONTH_NAMES[month]} {year}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowRecommendations(false)}
+                  className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+                >×</button>
+              </div>
+              <div className="overflow-y-auto flex-1 p-4">
+                {recommendations.length === 0 ? (
+                  <div className="text-center py-8 text-gray-400">
+                    <div className="text-4xl mb-2">🎉</div>
+                    <p className="font-medium text-gray-600">Alle gut ausgelastet!</p>
+                    <p className="text-sm mt-1">Kein Mitarbeiter liegt deutlich unter dem Durchschnitt.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {recommendations.map(({ emp, currentCount, suggestedShift, suggestedDays }) => (
+                      <div key={emp.ID} className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <div className="font-semibold text-gray-800 text-sm">
+                              {emp.FIRSTNAME} {emp.NAME}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-0.5">
+                              {currentCount} Schichten (Ø {avg.toFixed(1)}) · fehlen ~{Math.ceil(avg) - currentCount}
+                            </div>
+                            {suggestedShift && suggestedDays.length > 0 && (
+                              <div className="mt-2 flex items-center gap-2 flex-wrap">
+                                <span className="text-xs text-gray-600">Empfehle</span>
+                                <span
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold"
+                                  style={{ backgroundColor: suggestedShift.COLORBK_HEX, color: suggestedShift.COLORTEXT_HEX }}
+                                >
+                                  {suggestedShift.SHORTNAME}
+                                </span>
+                                <span className="text-xs text-gray-500">an freien Werktagen:</span>
+                                <div className="flex gap-1 flex-wrap">
+                                  {suggestedDays.map(day => (
+                                    <button
+                                      key={day}
+                                      onClick={async () => {
+                                        if (suggestedShift) {
+                                          await handleAddShift(emp.ID, day, suggestedShift.ID);
+                                          setShowRecommendations(false);
+                                        }
+                                      }}
+                                      className="px-2 py-0.5 bg-white border border-amber-300 rounded text-xs font-medium text-amber-700 hover:bg-amber-100 hover:border-amber-500 transition-colors"
+                                      title={`${suggestedShift.SHORTNAME} am ${day}.${month}.${year} zuweisen`}
+                                    >
+                                      {day}.
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <div
+                              className="text-xs font-bold px-2 py-1 rounded-full"
+                              style={{
+                                backgroundColor: currentCount < avg * 0.5 ? '#fef2f2' : '#fef9c3',
+                                color: currentCount < avg * 0.5 ? '#dc2626' : '#92400e',
+                              }}
+                            >
+                              {currentCount}×
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="px-5 py-3 border-t bg-gray-50 rounded-b-xl flex justify-between items-center">
+                <span className="text-xs text-gray-400">
+                  {recommendations.length} Mitarbeiter unter Durchschnitt
+                </span>
+                <button
+                  onClick={() => setShowRecommendations(false)}
+                  className="px-4 py-1.5 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+                >
+                  Schließen
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* ── Header ── */}
       <div className="flex items-center gap-2 mb-3 flex-wrap">
         <h1 className="text-lg sm:text-xl font-bold text-gray-800">📅 Dienstplan</h1>
@@ -3206,6 +3380,15 @@ export default function Schedule() {
             title="Schichten zweier Mitarbeiter für einen Zeitraum tauschen"
           >
             🔄 <span className="hidden sm:inline">Tausch</span>
+          </button>
+
+          {/* Schicht-Empfehlung button */}
+          <button
+            onClick={() => setShowRecommendations(true)}
+            className="px-2 sm:px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            title="Mitarbeiter mit wenig Schichten anzeigen und Empfehlungen erhalten"
+          >
+            💡 <span className="hidden sm:inline">Empfehlungen</span>
           </button>
 
           {/* Auto-Planen button */}

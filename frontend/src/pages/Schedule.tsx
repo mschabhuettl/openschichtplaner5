@@ -1235,6 +1235,8 @@ function HoverTooltip({
   dateStr,
   cellConflicts,
   shift,
+  monthCount,
+  colleaguesWithSameShift,
 }: {
   state: HoverTooltipState;
   emp: Employee | null;
@@ -1242,6 +1244,8 @@ function HoverTooltip({
   dateStr: string;
   cellConflicts: ConflictEntry[];
   shift?: ShiftType | null;
+  monthCount?: number;
+  colleaguesWithSameShift?: string[];
 }) {
   if (!entry && cellConflicts.length === 0) return null;
 
@@ -1295,6 +1299,29 @@ function HoverTooltip({
       )}
       {entry?.workplace_id != null && (
         <div className="text-gray-400 text-[10px] mb-0.5">📍 Arbeitsplatz #{entry.workplace_id}</div>
+      )}
+      {/* Schicht-Statistik */}
+      {entry?.kind === 'shift' && entry.shift_id != null && (
+        <div className="mt-1 pt-1 border-t border-gray-700 space-y-0.5">
+          {monthCount != null && monthCount > 0 && (
+            <div className="text-[10px] text-purple-300 flex items-center gap-1">
+              <span>📊</span>
+              <span>Diesen Monat: <strong>{monthCount}×</strong> diese Schicht</span>
+            </div>
+          )}
+          {colleaguesWithSameShift != null && colleaguesWithSameShift.length > 0 && (
+            <div className="text-[10px] text-cyan-300 flex items-start gap-1">
+              <span className="flex-shrink-0">👥</span>
+              <span>Heute auch: {colleaguesWithSameShift.slice(0, 4).join(', ')}{colleaguesWithSameShift.length > 4 ? ` +${colleaguesWithSameShift.length - 4}` : ''}</span>
+            </div>
+          )}
+          {colleaguesWithSameShift != null && colleaguesWithSameShift.length === 0 && (
+            <div className="text-[10px] text-gray-500 flex items-center gap-1">
+              <span>👤</span>
+              <span>Einzige mit dieser Schicht heute</span>
+            </div>
+          )}
+        </div>
       )}
       {cellConflicts.length > 0 && (
         <div className="mt-1 pt-1 border-t border-gray-700 space-y-0.5">
@@ -3951,6 +3978,29 @@ export default function Schedule() {
         const tooltipShift = tooltipEntry?.shift_id
           ? (shifts.find(s => s.ID === tooltipEntry.shift_id) ?? null)
           : null;
+
+        // ── Schicht-Statistik berechnen ──────────────────────
+        let monthCount: number | undefined;
+        let colleaguesWithSameShift: string[] | undefined;
+        if (tooltipEntry?.kind === 'shift' && tooltipEntry.shift_id != null) {
+          // Count: how many times this shift for this employee this month
+          monthCount = entries.filter(
+            e => e.employee_id === hoverTooltip.empId && e.shift_id === tooltipEntry.shift_id
+          ).length;
+          // Colleagues: other employees with same shift today
+          const todayStr = `${year}-${pad(month)}-${pad(hoverTooltip.day)}`;
+          colleaguesWithSameShift = entries
+            .filter(e =>
+              e.employee_id !== hoverTooltip.empId &&
+              e.shift_id === tooltipEntry.shift_id &&
+              e.date === todayStr
+            )
+            .map(e => {
+              const emp = employees.find(x => x.ID === e.employee_id);
+              return emp ? `${emp.NAME}, ${emp.FIRSTNAME}` : `MA ${e.employee_id}`;
+            });
+        }
+
         return (
           <HoverTooltip
             state={hoverTooltip}
@@ -3959,6 +4009,8 @@ export default function Schedule() {
             dateStr={`${year}-${pad(month)}-${pad(hoverTooltip.day)}`}
             cellConflicts={conflictMap.get(`${hoverTooltip.empId}_${year}-${pad(month)}-${pad(hoverTooltip.day)}`) ?? []}
             shift={tooltipShift}
+            monthCount={monthCount}
+            colleaguesWithSameShift={colleaguesWithSameShift}
           />
         );
       })()}

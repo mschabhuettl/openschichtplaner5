@@ -40,6 +40,7 @@ const Perioden          = lazy(() => import('./pages/Perioden'));
 const Einstellungen     = lazy(() => import('./pages/Einstellungen'));
 const Protokoll         = lazy(() => import('./pages/Protokoll'));
 const Konflikte         = lazy(() => import('./pages/Konflikte'));
+const Geburtstagkalender = lazy(() => import('./pages/Geburtstagkalender'));
 const Login             = lazy(() => import('./pages/Login'));
 
 /** Simple loading indicator shown while a lazy chunk is fetching */
@@ -74,6 +75,7 @@ const navItems: NavItem[] = [
   { id: 'jahresuebersicht', label: 'Jahresübersicht', icon: '📆', group: 'Planung', path: '/jahresuebersicht' },
   { id: 'personaltabelle', label: 'Personaltabelle', icon: '👤', group: 'Planung', path: '/personaltabelle', roles: ['Admin', 'Planer'] },
   { id: 'statistiken', label: 'Statistiken', icon: '📈', group: 'Planung', path: '/statistiken' },
+  { id: 'geburtstagkalender', label: 'Geburtstags-Kalender', icon: '🎂', group: 'Planung', path: '/geburtstagkalender' },
   { id: 'urlaub', label: 'Urlaubsverwaltung', icon: '🏖️', group: 'Planung', path: '/urlaub', roles: ['Admin', 'Planer'] },
   { id: 'schichtmodell', label: 'Schichtmodelle', icon: '🔄', group: 'Planung', path: '/schichtmodell', roles: ['Admin', 'Planer'] },
   { id: 'personalbedarf', label: 'Personalbedarf', icon: '👥', group: 'Planung', path: '/personalbedarf', roles: ['Admin', 'Planer'] },
@@ -344,6 +346,7 @@ function AppInner() {
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/konflikte" element={<Konflikte />} />
+              <Route path="/geburtstagkalender" element={<Geburtstagkalender />} />
               <Route path="/schedule" element={<Schedule />} />
               <Route path="/einsatzplan" element={<Einsatzplan />} />
               <Route path="/jahresuebersicht" element={<Jahresuebersicht />} />

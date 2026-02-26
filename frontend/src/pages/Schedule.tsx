@@ -1358,6 +1358,7 @@ export default function Schedule() {
   const [filterShiftId, setFilterShiftId] = useState<number | ''>('');
   const [filterLeaveId, setFilterLeaveId] = useState<number | ''>('');
   const [employeeSearch, setEmployeeSearch] = useState('');
+  const [filterLetter, setFilterLetter] = useState('');
   const [showTerminated, setShowTerminated] = useState(false);
   const [employeeSort, setEmployeeSort] = useState<'position' | 'name-asc' | 'name-desc' | 'number-asc' | 'number-desc' | 'group'>('position');
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -1749,12 +1750,16 @@ export default function Schedule() {
 
   const displayRows: DisplayRow[] = useMemo(() => {
     const searchLower = employeeSearch.toLowerCase();
-    const matchesSearch = (emp: Employee) =>
-      !searchLower ||
-      `${emp.NAME} ${emp.FIRSTNAME}`.toLowerCase().includes(searchLower) ||
-      `${emp.FIRSTNAME} ${emp.NAME}`.toLowerCase().includes(searchLower) ||
-      (emp.SHORTNAME || '').toLowerCase().includes(searchLower) ||
-      (emp.NUMBER || '').toLowerCase().includes(searchLower);
+    const matchesSearch = (emp: Employee) => {
+      if (filterLetter && (emp.NAME || '').toUpperCase().charAt(0) !== filterLetter) return false;
+      if (!searchLower) return true;
+      return (
+        `${emp.NAME} ${emp.FIRSTNAME}`.toLowerCase().includes(searchLower) ||
+        `${emp.FIRSTNAME} ${emp.NAME}`.toLowerCase().includes(searchLower) ||
+        (emp.SHORTNAME || '').toLowerCase().includes(searchLower) ||
+        (emp.NUMBER || '').toLowerCase().includes(searchLower)
+      );
+    };
 
     // First day of displayed month — employees who left before this are "terminated"
     const monthStart = new Date(year, month - 1, 1);
@@ -1786,13 +1791,23 @@ export default function Schedule() {
     }
     return rows;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedGroupIds, employees, groups, groupMembersMap, employeeSearch, showTerminated, year, month, employeeSort]);
+  }, [selectedGroupIds, employees, groups, groupMembersMap, employeeSearch, filterLetter, showTerminated, year, month, employeeSort]);
 
   // Employees only (for export and counters)
   const displayEmployees = useMemo(
     () => displayRows.filter(r => r.type === 'employee').map(r => r.employee!),
     [displayRows],
   );
+
+  // Available first letters from all (unfiltered) employees for alphabet bar
+  const availableLetters = useMemo(() => {
+    const letters = new Set<string>();
+    for (const emp of employees) {
+      const ch = (emp.NAME || '').toUpperCase().charAt(0);
+      if (ch >= 'A' && ch <= 'Z') letters.add(ch);
+    }
+    return letters;
+  }, [employees]);
 
   // Apply shift/leave filter: which employee rows to show
   const filteredDisplayRows = useMemo(() => {
@@ -3128,6 +3143,42 @@ export default function Schedule() {
             <button className="text-xs text-gray-400 hover:text-gray-600" onClick={() => setEmployeeSearch('')} title="Suche löschen">×</button>
           )}
         </div>
+
+        {/* Alphabet quick filter */}
+        <div className="flex items-center gap-1 flex-wrap">
+          {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ').map(letter => {
+            const available = availableLetters.has(letter);
+            const active = filterLetter === letter;
+            return (
+              <button
+                key={letter}
+                onClick={() => setFilterLetter(active ? '' : letter)}
+                disabled={!available}
+                title={available ? `Mitarbeiter mit ${letter}` : 'Kein Mitarbeiter'}
+                className={[
+                  'w-5 h-5 text-[10px] font-semibold rounded transition-all select-none',
+                  active
+                    ? 'bg-blue-600 text-white shadow-sm scale-110'
+                    : available
+                      ? 'bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 cursor-pointer'
+                      : 'bg-transparent text-gray-300 cursor-default',
+                ].join(' ')}
+              >
+                {letter}
+              </button>
+            );
+          })}
+          {filterLetter && (
+            <button
+              onClick={() => setFilterLetter('')}
+              className="ml-1 text-xs text-blue-500 hover:text-blue-700 font-medium"
+              title="Buchstabenfilter zurücksetzen"
+            >
+              ×
+            </button>
+          )}
+        </div>
+
         {/* Employee sort */}
         <div className="flex items-center gap-1.5">
           <label className="text-xs text-gray-500 whitespace-nowrap">Sortierung:</label>
@@ -3172,10 +3223,10 @@ export default function Schedule() {
         </div>
 
         {/* Reset filters */}
-        {(filterShiftId !== '' || filterLeaveId !== '' || employeeSearch !== '') && (
+        {(filterShiftId !== '' || filterLeaveId !== '' || employeeSearch !== '' || filterLetter !== '') && (
           <button
             className="text-xs px-2 py-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-            onClick={() => { setFilterShiftId(''); setFilterLeaveId(''); setEmployeeSearch(''); }}
+            onClick={() => { setFilterShiftId(''); setFilterLeaveId(''); setEmployeeSearch(''); setFilterLetter(''); }}
           >
             × Filter zurücksetzen
           </button>

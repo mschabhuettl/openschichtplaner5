@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { api } from '../api/client';
 import type { DayEntry, Note, ScheduleTemplate } from '../api/client';
 import type { Group, ShiftType, Workplace } from '../types';
+import { useToast } from '../hooks/useToast';
 
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 const WEEKDAY_ABBR = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
@@ -1048,6 +1049,7 @@ function TemplatesPanel({
 
 export default function Einsatzplan() {
   const today = new Date();
+  const { showToast } = useToast();
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
   const [selectedDate, setSelectedDate] = useState<Date>(today);
   const [groupId, setGroupId] = useState<number | undefined>(undefined);
@@ -1056,7 +1058,6 @@ export default function Einsatzplan() {
   const [shifts, setShifts] = useState<ShiftType[]>([]);
   const [workplaces, setWorkplaces] = useState<Workplace[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   // Employee search
   const [employeeSearch, setEmployeeSearch] = useState('');
@@ -1108,7 +1109,6 @@ export default function Einsatzplan() {
   }, []);
 
   const loadData = useCallback(() => {
-    setError(null);
     if (viewMode === 'day') {
       setLoading(true);
       const dateStr = toIsoDate(selectedDate);
@@ -1125,7 +1125,7 @@ export default function Einsatzplan() {
         }
         setDayNotesMap(nmap);
         setLoading(false);
-      }).catch(e => { setError(e.message); setLoading(false); });
+      }).catch(e => { showToast(e.message ?? 'Ladefehler', 'error'); setLoading(false); });
     } else {
       const monday = getMondayOfWeek(selectedDate);
       const weekDates = Array.from({ length: 7 }, (_, i) => toIsoDate(addDays(monday, i)));
@@ -1137,7 +1137,7 @@ export default function Einsatzplan() {
           setWeekEntries(map);
           setLoading(false);
         })
-        .catch(e => { setError(e.message); setLoading(false); });
+        .catch(e => { showToast(e.message ?? 'Ladefehler', 'error'); setLoading(false); });
     }
   }, [selectedDate, viewMode, groupId]);
 
@@ -1195,8 +1195,9 @@ export default function Einsatzplan() {
     try {
       await api.deleteEinsatzplanEntry(entry.spshi_id);
       loadData();
+      showToast('Eintrag gelöscht', 'success');
     } catch (e: unknown) {
-      alert('Fehler beim Löschen: ' + (e instanceof Error ? e.message : String(e)));
+      showToast('Fehler beim Löschen: ' + (e instanceof Error ? e.message : String(e)), 'error');
     }
   };
 
@@ -1223,6 +1224,7 @@ export default function Einsatzplan() {
       colortext: data.colortext,
     });
     loadData();
+    showToast('Sonderdienst gespeichert', 'success');
   };
 
   const handleSaveAbweichung = async (data: {
@@ -1242,6 +1244,7 @@ export default function Einsatzplan() {
       duration: data.duration,
     });
     loadData();
+    showToast('Abweichung gespeichert', 'success');
   };
 
   // ── Template handlers ────────────────────────────────────
@@ -1256,17 +1259,20 @@ export default function Einsatzplan() {
       group_id: groupId,
     });
     loadTemplates();
+    showToast(`Vorlage „${name}" gespeichert`, 'success');
   };
 
   const handleApplyTemplate = async (templateId: number, targetDate: string, force: boolean) => {
     const result = await api.applyScheduleTemplate(templateId, { target_date: targetDate, force });
     loadData();
+    showToast('Vorlage angewendet', 'success');
     return result;
   };
 
   const handleDeleteTemplate = async (id: number) => {
     await api.deleteScheduleTemplate(id);
     loadTemplates();
+    showToast('Vorlage gelöscht', 'success');
   };
 
   const prevDay = () => setSelectedDate(d => addDays(d, -1));
@@ -1429,7 +1435,6 @@ export default function Einsatzplan() {
         )}
 
         {loading && <span className="text-sm text-blue-500 animate-pulse">Lade...</span>}
-        {error && <span className="text-sm text-red-500">Fehler: {error}</span>}
 
         {/* Template buttons */}
         {viewMode === 'week' && (

@@ -1,25 +1,9 @@
-import { useState, useCallback } from 'react';
+// useToast is now backed by the global ToastContext (ToastProvider in App.tsx).
+// Import this hook anywhere — no local state needed, no per-page <ToastContainer>.
+export { useGlobalToast as useToast } from '../contexts/ToastContext';
 
 export interface Toast {
   id: string;
   message: string;
   type: 'success' | 'error' | 'info' | 'warning';
-}
-
-export function useToast() {
-  const [toasts, setToasts] = useState<Toast[]>([]);
-
-  const showToast = useCallback((message: string, type: Toast['type'] = 'success') => {
-    const id = Math.random().toString(36).slice(2);
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
-    }, 3000);
-  }, []);
-
-  const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  }, []);
-
-  return { toasts, showToast, removeToast };
 }

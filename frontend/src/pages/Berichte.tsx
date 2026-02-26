@@ -3,7 +3,6 @@ import { api } from '../api/client';
 import type { Restriction } from '../api/client';
 import type { Employee, Group, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
-import { ToastContainer } from '../components/Toast';
 
 const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -1193,7 +1192,7 @@ export default function Berichte() {
   const [urlaubFrom, setUrlaubFrom] = useState('');
   const [urlaubTo, setUrlaubTo] = useState('');
   const [loading, setLoading] = useState(false);
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
 
   useEffect(() => {
     setLoading(true);
@@ -1644,7 +1643,6 @@ export default function Berichte() {
         </div>
       )}
 
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

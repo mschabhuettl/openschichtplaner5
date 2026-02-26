@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { api } from '../api/client';
 import type { Employee, LeaveType, Group } from '../types';
+import { useToast } from '../hooks/useToast';
 
 // ─── Types ────────────────────────────────────────────────
 interface Absence {
@@ -1201,6 +1202,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
 // ─── Main Page ─────────────────────────────────────────────
 export default function Urlaub() {
   const currentYear = new Date().getFullYear();
+  const { showToast } = useToast();
   const [year, setYear] = useState(currentYear);
   const [activeTab, setActiveTab] = useState<UrlaubTab>('antraege');
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -1208,7 +1210,6 @@ export default function Urlaub() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [absences, setAbsences] = useState<Absence[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Load absences
   const loadAbsences = useCallback(async () => {
@@ -1227,14 +1228,13 @@ export default function Urlaub() {
 
   useEffect(() => {
     setLoading(true);
-    setError(null);
     Promise.all([api.getEmployees(), api.getLeaveTypes(), api.getGroups()])
       .then(([emps, lts, grps]) => {
         setEmployees(emps);
         setLeaveTypes(lts);
         setGroups(grps);
       })
-      .catch(e => setError(String(e)))
+      .catch(e => showToast(String(e), 'error'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -1268,10 +1268,6 @@ export default function Urlaub() {
           </button>
         </div>
       </div>
-
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">⚠️ {error}</div>
-      )}
 
       {/* Tabs */}
       <div className="flex gap-0.5 sm:gap-1 mb-4 border-b overflow-x-auto">

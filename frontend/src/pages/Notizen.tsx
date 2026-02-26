@@ -3,7 +3,6 @@ import { api } from '../api/client';
 import type { Note } from '../api/client';
 import type { Employee, Group } from '../types';
 import { useToast } from '../hooks/useToast';
-import { ToastContainer } from '../components/Toast';
 
 const WEEKDAY_ABBR = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const MONTH_NAMES = [
@@ -213,7 +212,7 @@ export default function Notizen() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editNote, setEditNote] = useState<Note | null>(null);
   const [modalDate, setModalDate] = useState<string>('');
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
 
   const monthPrefix = `${year}-${pad(month)}`;
 
@@ -579,7 +578,6 @@ export default function Notizen() {
         onClose={() => setModalOpen(false)}
       />
 
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

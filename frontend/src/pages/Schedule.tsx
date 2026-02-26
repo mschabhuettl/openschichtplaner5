@@ -4,7 +4,6 @@ import { api } from '../api/client';
 import type { ShiftRequirement, Note, ConflictEntry, CoverageDay } from '../api/client';
 import type { Employee, Group, ScheduleEntry, ShiftType, LeaveType } from '../types';
 import { useToast } from '../hooks/useToast';
-import { ToastContainer } from '../components/Toast';
 import { useTheme } from '../contexts/ThemeContext';
 
 // ── JS weekday → DB weekday (0=Mon..6=Sun) ────────────────────
@@ -1366,7 +1365,7 @@ export default function Schedule() {
   const [activePicker, setActivePicker] = useState<{ empId: number; day: number } | null>(null);
   const [saving, setSaving] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
   const { isDark } = useTheme();
   const exportRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
@@ -3598,7 +3597,6 @@ export default function Schedule() {
         </div>
       )}
 
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
 
       {/* ── Hover Tooltip ── */}
       {hoverTooltip && (() => {

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { Group } from '../types';
 import { useToast } from '../hooks/useToast';
-import { ToastContainer } from '../components/Toast';
 
 interface GroupForm {
   NAME: string;
@@ -55,7 +54,7 @@ export default function Groups() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<GroupForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [groupSearch, setGroupSearch] = useState('');
   const [groupSort, setGroupSort] = useState<'default' | 'name-asc' | 'name-desc' | 'short-asc'>('default');
@@ -334,7 +333,6 @@ export default function Groups() {
         </div>
       )}
 
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

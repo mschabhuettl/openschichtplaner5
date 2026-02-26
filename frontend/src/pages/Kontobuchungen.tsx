@@ -3,7 +3,6 @@ import { api } from '../api/client';
 import type { Booking } from '../api/client';
 import type { Employee } from '../types';
 import { useToast } from '../hooks/useToast';
-import { ToastContainer } from '../components/Toast';
 
 const MONTH_NAMES = [
   'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
@@ -262,7 +261,7 @@ export default function Kontobuchungen() {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Booking | null>(null);
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
 
   // Load employees once
   useEffect(() => {
@@ -322,7 +321,6 @@ export default function Kontobuchungen() {
 
   return (
     <div className="p-2 sm:p-4 lg:p-6 max-w-5xl mx-auto">
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
 
       <BookingModal
         open={showModal}

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { ExtraCharge } from '../types';
 import { useToast } from '../hooks/useToast';
-import { ToastContainer } from '../components/Toast';
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const WEEKDAY_FULL = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
@@ -74,7 +73,7 @@ export default function Extracharges() {
   const [form, setForm] = useState<ExtraChargeForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
 
   const load = () => {
     setLoading(true);
@@ -325,7 +324,6 @@ export default function Extracharges() {
         </div>
       )}
 
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

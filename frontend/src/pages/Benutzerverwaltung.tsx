@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
 import type { Employee, Group } from '../types';
 import { useToast } from '../hooks/useToast';
-import { ToastContainer } from '../components/Toast';
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? 'http://localhost:8000').replace(/\/$/, '');
 
@@ -284,7 +283,7 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
   const [loading, setLoading] = useState(true);
   const [showAddEmployeeModal, setShowAddEmployeeModal] = useState(false);
   const [showAddGroupModal, setShowAddGroupModal] = useState(false);
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
 
   const loadAccess = useCallback(async () => {
     setLoading(true);
@@ -549,7 +548,6 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
         />
       )}
 
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }
@@ -569,7 +567,7 @@ export default function Benutzerverwaltung() {
   const [form, setForm] = useState<UserForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
 
   // Delete confirm
   const [deleteTarget, setDeleteTarget] = useState<SP5User | null>(null);
@@ -1130,7 +1128,6 @@ export default function Benutzerverwaltung() {
         </div>
       )}
 
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

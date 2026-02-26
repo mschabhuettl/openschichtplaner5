@@ -3,7 +3,6 @@ import { api } from '../api/client';
 import type { WorkplaceEmployee } from '../api/client';
 import type { Workplace, Employee } from '../types';
 import { useToast } from '../hooks/useToast';
-import { ToastContainer } from '../components/Toast';
 
 function hexToBGR(hex: string): number {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -33,7 +32,7 @@ export default function Workplaces() {
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<WorkplaceForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
   const [error, setError] = useState<string | null>(null);
 
   // Detail / assignment panel
@@ -426,7 +425,6 @@ export default function Workplaces() {
         </div>
       )}
 
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

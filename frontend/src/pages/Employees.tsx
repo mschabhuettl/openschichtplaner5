@@ -3,7 +3,6 @@ import { api } from '../api/client';
 import type { Restriction } from '../api/client';
 import type { Employee, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
-import { ToastContainer } from '../components/Toast';
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
@@ -194,7 +193,7 @@ export default function Employees() {
   const [error, setError] = useState<string | null>(null);
   const [workdaysList, setWorkdaysList] = useState<boolean[]>([true, true, true, true, true, false, false]);
   const [activeTab, setActiveTab] = useState<'basic' | 'personal' | 'colors' | 'notes'>('basic');
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
 
   // ── Restrictions state ──────────────────────────────────────
   const [restrictions, setRestrictions] = useState<Restriction[]>([]);
@@ -921,7 +920,6 @@ export default function Employees() {
         </div>
       )}
 
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

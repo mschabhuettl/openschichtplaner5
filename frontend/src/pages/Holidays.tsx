@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { Holiday } from '../types';
 import { useToast } from '../hooks/useToast';
-import { ToastContainer } from '../components/Toast';
 
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
@@ -77,7 +76,7 @@ export default function Holidays() {
   const [form, setForm] = useState<HolidayForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [importing, setImporting] = useState(false);
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
   const [error, setError] = useState<string | null>(null);
 
   const load = () => {
@@ -304,7 +303,6 @@ export default function Holidays() {
         </div>
       )}
 
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

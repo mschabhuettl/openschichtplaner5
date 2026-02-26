@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
-import { ToastContainer } from '../components/Toast';
 
 // Convert HTML #RRGGBB to BGR integer (Windows color storage)
 function hexToBGR(hex: string): number {
@@ -65,7 +64,7 @@ export default function Shifts() {
   const [form, setForm] = useState<ShiftForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
 
   const load = () => {
     setLoading(true);
@@ -526,7 +525,6 @@ export default function Shifts() {
         </div>
       )}
 
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

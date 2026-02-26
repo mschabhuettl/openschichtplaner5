@@ -3,7 +3,6 @@ import { api } from '../api/client';
 import type { ShiftCycle, CycleAssignment, CycleDay } from '../api/client';
 import type { Employee, Group, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
-import { ToastContainer } from '../components/Toast';
 
 // ─── Types ─────────────────────────────────────────────────
 type CycleExceptionRecord = {
@@ -561,7 +560,7 @@ export default function Schichtmodell() {
   const [groupMembers, setGroupMembers] = useState<Record<number, number[]>>({});
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingCycle, setEditingCycle] = useState<ShiftCycle | null>(null);
-  const { toasts, showToast, removeToast } = useToast();
+  const { showToast } = useToast();
 
   // ─── Cycle Exceptions state ────────────────────────────────
   const [exceptions, setExceptions] = useState<CycleExceptionRecord[]>([]);
@@ -1103,7 +1102,6 @@ export default function Schichtmodell() {
         />
       )}
 
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

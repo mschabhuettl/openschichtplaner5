@@ -30,6 +30,7 @@ const Employees         = lazy(() => import('./pages/Employees'));
 const Groups            = lazy(() => import('./pages/Groups'));
 const Fairness          = lazy(() => import('./pages/Fairness'));
 const MitarbeiterVergleich = lazy(() => import('./pages/MitarbeiterVergleich'));
+const Teamkalender         = lazy(() => import('./pages/Teamkalender'));
 const Shifts            = lazy(() => import('./pages/Shifts'));
 const LeaveTypes        = lazy(() => import('./pages/LeaveTypes'));
 const Holidays          = lazy(() => import('./pages/Holidays'));
@@ -78,6 +79,7 @@ const navItems: NavItem[] = [
   { id: 'personaltabelle', label: 'Personaltabelle', icon: '👤', group: 'Planung', path: '/personaltabelle', roles: ['Admin', 'Planer'] },
   { id: 'statistiken', label: 'Statistiken', icon: '📈', group: 'Planung', path: '/statistiken' },
   { id: 'geburtstagkalender', label: 'Geburtstags-Kalender', icon: '🎂', group: 'Planung', path: '/geburtstagkalender' },
+  { id: 'teamkalender', label: 'Team-Kalender', icon: '🗓️', group: 'Planung', path: '/teamkalender' },
   { id: 'urlaub', label: 'Urlaubsverwaltung', icon: '🏖️', group: 'Planung', path: '/urlaub', roles: ['Admin', 'Planer'] },
   { id: 'schichtmodell', label: 'Schichtmodelle', icon: '🔄', group: 'Planung', path: '/schichtmodell', roles: ['Admin', 'Planer'] },
   { id: 'personalbedarf', label: 'Personalbedarf', icon: '👥', group: 'Planung', path: '/personalbedarf', roles: ['Admin', 'Planer'] },
@@ -365,6 +367,7 @@ function AppInner() {
               <Route path="/kontobuchungen" element={<Kontobuchungen />} />
               <Route path="/notizen" element={<Notizen />} />
               <Route path="/mitarbeiter-vergleich" element={<MitarbeiterVergleich />} />
+              <Route path="/teamkalender" element={<Teamkalender />} />
               <Route path="/fairness" element={<Fairness />} />
               <Route path="/berichte" element={<Berichte />} />
               <Route path="/export" element={<Export />} />

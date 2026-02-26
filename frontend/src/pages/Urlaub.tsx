@@ -35,7 +35,7 @@ interface HolidayBan {
   reason: string;
 }
 
-type UrlaubTab = 'antraege' | 'abwesenheiten' | 'ansprueche' | 'sperren';
+type UrlaubTab = 'antraege' | 'abwesenheiten' | 'ansprueche' | 'sperren' | 'timeline';
 
 const MONTHS = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
@@ -1199,6 +1199,233 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
 }
 
 
+// ─── Tab 5: Urlaub-Timeline (Gantt-View) ─────────────────────
+interface TimelineTabProps {
+  year: number;
+  employees: Employee[];
+  leaveTypes: LeaveType[];
+  absences: Absence[];
+  groups: Group[];
+  loading: boolean;
+}
+
+function TimelineTab({ year, employees, leaveTypes, absences, loading }: TimelineTabProps) {
+  const [filterLeaveType, setFilterLeaveType] = useState<number | null>(null);
+  const [search, setSearch] = useState('');
+  const [tooltip, setTooltip] = useState<{x: number; y: number; text: string} | null>(null);
+
+  const MONTH_DAYS = Array.from({length: 12}, (_, m) =>
+    new Date(year, m + 1, 0).getDate()
+  );
+  const MONTH_NAMES = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+
+  // Build a lookup: "employeeId_YYYY-MM-DD" → absence
+  const absMap = useMemo(() => {
+    const m = new Map<string, Absence>();
+    absences.forEach(a => {
+      const date = (a.DATE ?? (a as any).date ?? '');
+      const eid = a.EMPLOYEE_ID ?? (a as any).employee_id;
+      if (date && eid) m.set(`${eid}_${date}`, a);
+    });
+    return m;
+  }, [absences]);
+
+  // Count per employee
+  const countByEmployee = useMemo(() => {
+    const c = new Map<number, number>();
+    absences.forEach(a => {
+      const eid = a.EMPLOYEE_ID ?? (a as any).employee_id;
+      if (!eid || eid < 0) return;
+      if (filterLeaveType && (a.LEAVE_TYPE_ID ?? (a as any).leave_type_id) !== filterLeaveType) return;
+      c.set(eid, (c.get(eid) ?? 0) + 1);
+    });
+    return c;
+  }, [absences, filterLeaveType]);
+
+  const filteredEmployees = useMemo(() => employees.filter(e => {
+    if (search && !(`${e.FIRSTNAME} ${e.NAME}`).toLowerCase().includes(search.toLowerCase())) return false;
+    return true;
+  }), [employees, search]);
+
+  const getLT = (id: number) => leaveTypes.find(lt => lt.ID === id);
+
+  // Used leave types in current data
+  const usedLeaveTypeIds = useMemo(() => {
+    const ids = new Set<number>();
+    absences.forEach(a => {
+      const eid = a.EMPLOYEE_ID ?? (a as any).employee_id;
+      if (eid && eid > 0) ids.add(a.LEAVE_TYPE_ID ?? (a as any).leave_type_id);
+    });
+    return ids;
+  }, [absences]);
+
+  if (loading) return <div className="flex justify-center py-12"><div className="animate-spin text-3xl">⏳</div></div>;
+
+  return (
+    <div className="space-y-4">
+      {/* Controls */}
+      <div className="flex flex-wrap gap-2 items-center">
+        <input
+          type="text"
+          placeholder="🔍 Mitarbeiter suchen..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="px-3 py-1.5 text-sm border rounded-lg w-48"
+        />
+        <select
+          value={filterLeaveType ?? ''}
+          onChange={e => setFilterLeaveType(e.target.value ? Number(e.target.value) : null)}
+          className="px-3 py-1.5 text-sm border rounded-lg"
+        >
+          <option value="">Alle Abwesenheitsarten</option>
+          {leaveTypes.filter(lt => usedLeaveTypeIds.has(lt.ID)).map(lt => (
+            <option key={lt.ID} value={lt.ID}>{lt.NAME}</option>
+          ))}
+        </select>
+        <span className="text-xs text-gray-400 ml-auto">{filteredEmployees.length} Mitarbeiter</span>
+      </div>
+
+      {/* Legend */}
+      <div className="flex flex-wrap gap-2 text-xs">
+        {leaveTypes.filter(lt => usedLeaveTypeIds.has(lt.ID)).map(lt => (
+          <span key={lt.ID} className="flex items-center gap-1 px-2 py-0.5 rounded-full border"
+            style={{backgroundColor: lt.COLORBK_HEX ?? '#e5e7eb', color: lt.COLORBK_LIGHT ? '#333' : '#fff'}}>
+            <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{backgroundColor: lt.COLORBAR_HEX ?? lt.COLORBK_HEX ?? '#aaa'}}></span>
+            {lt.SHORTNAME} = {lt.NAME}
+          </span>
+        ))}
+      </div>
+
+      {/* Gantt Grid */}
+      <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+        <table className="text-xs w-full border-collapse" style={{minWidth: '900px'}}>
+          <thead>
+            <tr className="bg-gray-100 border-b">
+              <th className="sticky left-0 z-10 bg-gray-100 text-left px-3 py-2 font-semibold text-gray-700 min-w-[160px] border-r">
+                Mitarbeiter
+              </th>
+              {MONTH_NAMES.map((m, mi) => (
+                <th key={mi} colSpan={MONTH_DAYS[mi]}
+                  className="text-center font-semibold text-gray-600 py-1 border-r border-gray-300"
+                  style={{minWidth: `${MONTH_DAYS[mi] * 8}px`}}>
+                  {m}
+                </th>
+              ))}
+              <th className="text-center px-2 py-2 font-semibold text-gray-700 min-w-[40px]">∑</th>
+            </tr>
+            <tr className="bg-gray-50 border-b">
+              <th className="sticky left-0 z-10 bg-gray-50 border-r"></th>
+              {MONTH_NAMES.map((_, mi) =>
+                Array.from({length: MONTH_DAYS[mi]}, (__, d) => (
+                  <th key={`${mi}-${d}`}
+                    className={`text-center font-normal py-0.5 border-r border-gray-100 ${
+                      new Date(year, mi, d + 1).getDay() === 0 || new Date(year, mi, d + 1).getDay() === 6
+                        ? 'bg-gray-200 text-gray-400' : 'text-gray-300'
+                    }`}
+                    style={{width: '8px', fontSize: '7px', padding: '1px 0'}}>
+                    {d + 1 === 1 || d + 1 === 5 || d + 1 === 10 || d + 1 === 15 || d + 1 === 20 || d + 1 === 25 ? d + 1 : ''}
+                  </th>
+                ))
+              )}
+              <th className="border-r"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredEmployees.length === 0 ? (
+              <tr>
+                <td colSpan={366 + 2} className="text-center text-gray-400 py-8">
+                  Keine Mitarbeiter gefunden
+                </td>
+              </tr>
+            ) : (
+              filteredEmployees.map((emp, rowIdx) => {
+                const empCount = countByEmployee.get(emp.ID) ?? 0;
+                return (
+                  <tr key={emp.ID}
+                    className={`border-b transition-colors hover:bg-blue-50/30 ${rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
+                    <td className={`sticky left-0 z-10 px-3 py-1 border-r font-medium text-gray-800 whitespace-nowrap ${rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                      {emp.FIRSTNAME} {emp.NAME}
+                    </td>
+                    {MONTH_NAMES.map((_, mi) =>
+                      Array.from({length: MONTH_DAYS[mi]}, (__, d) => {
+                        const dayNum = d + 1;
+                        const dateStr = `${year}-${String(mi + 1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+                        const absence = absMap.get(`${emp.ID}_${dateStr}`);
+                        const isWeekend = new Date(year, mi, dayNum).getDay() === 0 || new Date(year, mi, dayNum).getDay() === 6;
+                        const lt = absence ? getLT(absence.LEAVE_TYPE_ID ?? (absence as any).leave_type_id) : null;
+                        const show = !filterLeaveType || !absence || (absence.LEAVE_TYPE_ID ?? (absence as any).leave_type_id) === filterLeaveType;
+
+                        return (
+                          <td key={`${mi}-${d}`}
+                            style={{
+                              width: '8px',
+                              minWidth: '8px',
+                              maxWidth: '8px',
+                              padding: 0,
+                              backgroundColor: absence && show && lt
+                                ? (lt.COLORBAR_HEX ?? lt.COLORBK_HEX ?? '#3b82f6')
+                                : isWeekend ? '#f3f4f6' : undefined,
+                            }}
+                            className={`border-r border-gray-100 ${absence && show ? 'cursor-pointer' : ''}`}
+                            onMouseEnter={absence && show && lt ? (e) => {
+                              setTooltip({
+                                x: e.clientX,
+                                y: e.clientY,
+                                text: `${emp.FIRSTNAME} ${emp.NAME}\n${new Date(dateStr).toLocaleDateString('de-AT')}\n${lt.NAME}`
+                              });
+                            } : undefined}
+                            onMouseLeave={() => setTooltip(null)}
+                          />
+                        );
+                      })
+                    )}
+                    <td className="text-center px-1 font-bold text-gray-600 border-l">
+                      {empCount > 0 ? <span className="text-blue-600">{empCount}</span> : <span className="text-gray-300">—</span>}
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Tooltip */}
+      {tooltip && (
+        <div
+          className="fixed z-50 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl pointer-events-none whitespace-pre"
+          style={{left: tooltip.x + 12, top: tooltip.y - 10}}
+        >
+          {tooltip.text}
+        </div>
+      )}
+
+      {/* Summary stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {leaveTypes.filter(lt => usedLeaveTypeIds.has(lt.ID)).map(lt => {
+          const count = absences.filter(a => {
+            const eid = a.EMPLOYEE_ID ?? (a as any).employee_id;
+            return eid && eid > 0 && (a.LEAVE_TYPE_ID ?? (a as any).leave_type_id) === lt.ID;
+          }).length;
+          return count > 0 ? (
+            <div key={lt.ID} className="bg-white rounded-xl border p-3 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
+                style={{backgroundColor: lt.COLORBK_HEX ?? '#e5e7eb', color: lt.COLORBK_LIGHT ? '#333' : '#fff',
+                  border: `2px solid ${lt.COLORBAR_HEX ?? '#aaa'}`}}>
+                {lt.SHORTNAME}
+              </div>
+              <div>
+                <div className="text-lg font-bold text-gray-800">{count}</div>
+                <div className="text-xs text-gray-500">{lt.NAME}</div>
+              </div>
+            </div>
+          ) : null;
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ─────────────────────────────────────────────
 export default function Urlaub() {
   const currentYear = new Date().getFullYear();
@@ -1245,6 +1472,7 @@ export default function Urlaub() {
     { id: 'abwesenheiten', label: 'Abwesenheiten', icon: '📋' },
     { id: 'ansprueche', label: 'Urlaubsansprüche', icon: '📊' },
     { id: 'sperren', label: 'Urlaubssperren', icon: '🚫' },
+    { id: 'timeline', label: 'Jahres-Timeline', icon: '📅' },
   ];
 
   return (
@@ -1297,6 +1525,10 @@ export default function Urlaub() {
       )}
       {activeTab === 'sperren' && (
         <SperrenTab groups={groups} />
+      )}
+      {activeTab === 'timeline' && (
+        <TimelineTab year={year} employees={employees} leaveTypes={leaveTypes}
+          absences={absences} groups={groups} loading={loading} />
       )}
     </div>
   );

@@ -7,9 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased] — 2026-02-26
+## [Unreleased] — 2026-02-26 (updated)
 
 ### Hinzugefügt / Added
+
+#### 🏖️ Urlaubsverwaltung — Jahres-Timeline (Gantt-View)
+- **Neuer Tab „Jahres-Timeline"** in der Urlaubsverwaltung — Gantt-Chart-Ansicht aller Mitarbeiter-Abwesenheiten im Jahresüberblick
+- Jeder Mitarbeiter als eigene Zeile, jeder Tag als Spalte (Jan–Dez), farbige Blöcke zeigen Abwesenheiten nach Abwesenheitsart
+- Farbkodierung gemäß Abwesenheitsart-Farben aus der Datenbank
+- Live-Tooltip beim Hover: Mitarbeiter, Datum, Abwesenheitsart
+- Suchfeld + Abwesenheitsart-Filter für schnelle Orientierung
+- Wochenend-Hervorhebung (grau unterlegt)
+- Tageszähler pro Mitarbeiter (∑-Spalte)
+- Zusammenfassungs-Kacheln für jede verwendete Abwesenheitsart
 
 #### ⚖️ Berichte
 - **Mitarbeiter-Vergleich** — Neue Seite zum direkten Vergleich zweier Mitarbeiter im Jahresüberblick: bidirektionale Statistik-Balkendiagramme (Schichten, Ist-Stunden, Wochenend-/Nachtschichten, Urlaub, Abwesenheiten), gespiegelte Schichtarten-Verteilung mit Farbkodierung, Soll/Ist-Auswertung mit Differenz, Monat-für-Monat-Vergleich mit Schicht-Badges; Filterung nach Gruppe und Jahr

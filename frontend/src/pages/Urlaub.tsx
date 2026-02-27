@@ -38,7 +38,7 @@ interface HolidayBan {
 type UrlaubTab = 'antraege' | 'abwesenheiten' | 'ansprueche' | 'sperren' | 'timeline';
 
 const MONTHS = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API = import.meta.env.VITE_API_URL ?? '';
 
 // ─── Shared: Detail Modal (Abwesenheiten) ─────────────────
 interface DetailModalProps {

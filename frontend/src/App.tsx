@@ -58,6 +58,7 @@ const SchichtKalibrator   = lazy(() => import('./pages/SchichtKalibrator'));
 const KompetenzMatrix     = lazy(() => import('./pages/KompetenzMatrix'));
 const NotfallPlan         = lazy(() => import('./pages/NotfallPlan'));
 const Leitwand            = lazy(() => import('./pages/Leitwand'));
+const Simulation          = lazy(() => import('./pages/Simulation'));
 const DienstBoard         = lazy(() => import('./pages/DienstBoard'));
 const Login             = lazy(() => import('./pages/Login'));
 
@@ -88,6 +89,7 @@ const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/' },
   { id: 'konflikte', label: 'Konflikte', icon: '⚠️', path: '/konflikte', badge: true },
   // Planning views — Leser sees a subset
+  { id: 'simulation', label: 'Simulation', icon: '🧪', group: 'Planung', path: '/simulation' },
   { id: 'notfall-plan', label: 'Notfall-Plan', icon: '🚨', group: 'Planung', path: '/notfall-plan' },
   { id: 'leitwand', label: 'Leitwand', icon: '📺', group: 'Planung', path: '/leitwand' },
   { id: 'dienst-board', label: 'Dienst-Board', icon: '🖥️', group: 'Planung', path: '/dienst-board' },
@@ -429,6 +431,7 @@ function AppInner() {
               <Route path="/qualitaets-bericht" element={<QualitaetsBericht />} />
               <Route path="/schicht-kalibrator" element={<SchichtKalibrator />} />
               <Route path="/kompetenz-matrix" element={<KompetenzMatrix />} />
+              <Route path="/simulation" element={<Simulation />} />
               <Route path="/notfall-plan" element={<NotfallPlan />} />
               <Route path="/leitwand" element={<Leitwand />} />
             </Routes>

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { Employee, ShiftType } from '../types';
 import { api } from '../api/client';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API = import.meta.env.VITE_API_URL ?? '';
 
 interface Restriction {
   id: number;

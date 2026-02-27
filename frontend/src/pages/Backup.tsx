@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import type { ChangeEvent } from 'react';
 import { api } from '../api/client';
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API = import.meta.env.VITE_API_URL ?? '';
 
 // ── Backup Section ────────────────────────────────────────────────────────
 

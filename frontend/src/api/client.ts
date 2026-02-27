@@ -394,56 +394,81 @@ function authHeaders(extra: Record<string, string> = {}): Record<string, string>
   return token ? { ...extra, 'X-Auth-Token': token } : extra;
 }
 
-function handleResponseError(res: Response): void {
+/** Extract the most informative error message from an API error response. */
+async function extractErrorMessage(res: Response): Promise<string> {
+  try {
+    const data = await res.clone().json();
+    if (data?.detail) return String(data.detail);
+    if (data?.message) return String(data.message);
+  } catch {
+    // response not JSON — fall through to statusText
+  }
+  return `Fehler ${res.status}: ${res.statusText || 'Unbekannter Fehler'}`;
+}
+
+async function handleResponseError(res: Response): Promise<void> {
   if (res.status === 401) {
     dispatchUnauthorized();
     throw new Error('Sitzung abgelaufen. Bitte erneut anmelden.');
   }
-  if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
+  if (!res.ok) {
+    const msg = await extractErrorMessage(res);
+    throw new Error(msg);
+  }
+}
+
+/** Wrap fetch calls to convert network errors into friendly messages. */
+async function safeFetch(input: string, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(input, init);
+  } catch (err) {
+    // TypeError: Failed to fetch — server unreachable or CORS
+    throw new Error('Server nicht erreichbar. Bitte Verbindung prüfen.');
+  }
 }
 
 async function fetchJSON<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, { headers: authHeaders() });
-  handleResponseError(res);
+  const res = await safeFetch(`${BASE_URL}${path}`, { headers: authHeaders() });
+  await handleResponseError(res);
   return res.json();
 }
 
 async function postJSON<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await safeFetch(`${BASE_URL}${path}`, {
     method: 'POST',
     headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body),
   });
-  handleResponseError(res);
+  await handleResponseError(res);
   return res.json();
 }
 
 async function putJSON<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await safeFetch(`${BASE_URL}${path}`, {
     method: 'PUT',
     headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body),
   });
-  handleResponseError(res);
+  await handleResponseError(res);
   return res.json();
 }
 
 async function deleteReq<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await safeFetch(`${BASE_URL}${path}`, {
     method: 'DELETE',
     headers: authHeaders(),
   });
-  handleResponseError(res);
+  await handleResponseError(res);
   return res.json();
 }
 
 async function patchJSON<T>(path: string, body: unknown): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await safeFetch(`${BASE_URL}${path}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(body),
   });
-  handleResponseError(res);
+  await handleResponseError(res);
   return res.json();
 }
 

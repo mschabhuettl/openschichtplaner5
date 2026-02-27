@@ -71,6 +71,17 @@ function scoreLabel(score: number): string {
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
+
 const _MONTHS = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 void _MONTHS;
 
@@ -109,7 +120,7 @@ export default function RotationsAnalyse() {
 
       const scheduleResults = await Promise.all(
         periods.map(p =>
-          fetch(`${BASE_URL}/api/schedule?year=${p.year}&month=${p.month}`)
+          fetch(`${BASE_URL}/api/schedule?year=${p.year}&month=${p.month}`, { headers: getAuthHeaders() })
             .then(r => r.json() as Promise<ScheduleEntry[]>)
         )
       );

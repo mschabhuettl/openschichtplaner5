@@ -6,9 +6,10 @@ const BASE_URL = (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_
 
 async function fetchRaw<T>(path: string): Promise<T> {
   const raw = localStorage.getItem('sp5_session');
-  const token = raw ? (JSON.parse(raw) as { token?: string }).token : null;
+  const session = raw ? (JSON.parse(raw) as { token?: string; devMode?: boolean }) : null;
+  const token = session?.devMode ? '__dev_mode__' : (session?.token ?? null);
   const headers: Record<string, string> = {};
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+  if (token) headers['X-Auth-Token'] = token;
   const res = await fetch(`${BASE_URL}${path}`, { headers });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();

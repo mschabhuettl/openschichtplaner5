@@ -19,6 +19,17 @@ type ActionState = 'idle' | 'loading' | 'done' | 'error';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
+
 const MONTHS = [
   'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
@@ -30,7 +41,7 @@ function formatDate(dateStr: string): string {
 }
 
 async function apiDelete(path: string): Promise<{ ok: boolean; deleted: number }> {
-  const res = await fetch(`${BASE_URL}${path}`, { method: 'DELETE' });
+  const res = await fetch(`${BASE_URL}${path}`, { method: 'DELETE', headers: getAuthHeaders() });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -91,7 +102,7 @@ export default function Konflikte() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${BASE_URL}/api/schedule/conflicts?year=${year}&month=${month}`);
+      const res = await fetch(`${BASE_URL}/api/schedule/conflicts?year=${year}&month=${month}`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: ConflictsResponse = await res.json();
       setConflicts(data.conflicts ?? []);
@@ -325,8 +336,19 @@ export default function Konflikte() {
 // ─── Export hook for conflict count (used in App.tsx badge) ─
 export async function fetchConflictCount(year: number, month: number): Promise<number> {
   const BASE = import.meta.env.VITE_API_URL ?? '';
+
+function getAuthHeaders(): Record<string, string> {
   try {
-    const res = await fetch(`${BASE}/api/schedule/conflicts?year=${year}&month=${month}`);
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
+  try {
+    const res = await fetch(`${BASE}/api/schedule/conflicts?year=${year}&month=${month}`, { headers: getAuthHeaders() });
     if (!res.ok) return 0;
     const data = await res.json();
     return (data.conflicts ?? []).length;

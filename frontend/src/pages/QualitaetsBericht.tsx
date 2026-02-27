@@ -2,6 +2,16 @@ import { useState, useEffect } from 'react';
 
 const BASE_URL = (import.meta as any).env?.VITE_API_URL ?? '';
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
 // ── Types ──────────────────────────────────────────────────────────────────
 interface CoverageDay {
   day: number;
@@ -145,7 +155,7 @@ export default function QualitaetsBericht() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${BASE_URL}/api/quality-report?year=${year}&month=${month}`);
+      const res = await fetch(`${BASE_URL}/api/quality-report?year=${year}&month=${month}`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setReport(data);

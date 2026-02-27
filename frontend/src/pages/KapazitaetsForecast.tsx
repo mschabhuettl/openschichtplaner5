@@ -43,6 +43,17 @@ interface Group {
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
+
 const MONTHS = [
   'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
@@ -365,7 +376,7 @@ export default function KapazitaetsForecast() {
 
   // Load groups
   useEffect(() => {
-    fetch(`${BASE_URL}/api/groups`)
+    fetch(`${BASE_URL}/api/groups`, { headers: getAuthHeaders() })
       .then(r => r.json())
       .then(d => setGroups(d))
       .catch(() => {});
@@ -378,7 +389,7 @@ export default function KapazitaetsForecast() {
     try {
       const params = new URLSearchParams({ year: String(year), month: String(month) });
       if (groupId) params.set('group_id', String(groupId));
-      const res = await fetch(`${BASE_URL}/api/capacity-forecast?${params}`);
+      const res = await fetch(`${BASE_URL}/api/capacity-forecast?${params}`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setForecast(data);

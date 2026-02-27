@@ -13,12 +13,12 @@ export default defineConfig({
     },
   },
   build: {
+    target: 'es2020',
+    minify: 'esbuild',
     rollupOptions: {
       output: {
         manualChunks: {
-          // React core — shared by everything
-          'vendor-react': ['react', 'react-dom'],
-          // Router
+          // Router (react-dom is included in index.js as entry-point dependency)
           'vendor-router': ['react-router-dom'],
           // Schedule is the largest single page — keep isolated
           'pages-schedule': [

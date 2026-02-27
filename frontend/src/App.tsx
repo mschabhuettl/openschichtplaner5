@@ -87,62 +87,75 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/' },
-  { id: 'konflikte', label: 'Konflikte', icon: '⚠️', path: '/konflikte', badge: true },
-  // Planning views — Leser sees a subset
-  { id: 'simulation', label: 'Simulation', icon: '🧪', group: 'Planung', path: '/simulation' },
-  { id: 'uebergabe', label: 'Übergabe', icon: '📋', group: 'Planung', path: '/uebergabe' },
-  { id: 'notfall-plan', label: 'Notfall-Plan', icon: '🚨', group: 'Planung', path: '/notfall-plan' },
-  { id: 'leitwand', label: 'Leitwand', icon: '📺', group: 'Planung', path: '/leitwand' },
-  { id: 'dienst-board', label: 'Dienst-Board', icon: '🖥️', group: 'Planung', path: '/dienst-board' },
-  { id: 'wochenansicht', label: 'Wochenansicht', icon: '🗃️', group: 'Planung', path: '/wochenansicht' },
-  { id: 'verfuegbarkeits-matrix', label: 'Verfügbarkeits-Matrix', icon: '🧩', group: 'Planung', path: '/verfuegbarkeits-matrix' },
-  { id: 'schedule', label: 'Dienstplan', icon: '📅', group: 'Planung', path: '/schedule' },
-  { id: 'einsatzplan', label: 'Einsatzplan', icon: '📋', group: 'Planung', path: '/einsatzplan', roles: ['Admin', 'Planer'] },
-  { id: 'jahresuebersicht', label: 'Jahresübersicht', icon: '📆', group: 'Planung', path: '/jahresuebersicht' },
-  { id: 'personaltabelle', label: 'Personaltabelle', icon: '👤', group: 'Planung', path: '/personaltabelle', roles: ['Admin', 'Planer'] },
-  { id: 'statistiken', label: 'Statistiken', icon: '📈', group: 'Planung', path: '/statistiken' },
-  { id: 'geburtstagkalender', label: 'Geburtstags-Kalender', icon: '🎂', group: 'Planung', path: '/geburtstagkalender' },
-  { id: 'teamkalender', label: 'Team-Kalender', icon: '🗓️', group: 'Planung', path: '/teamkalender' },
-  { id: 'schichtwuensche', label: 'Schichtwünsche', icon: '💬', group: 'Planung', path: '/schichtwuensche' },
-  { id: 'urlaub', label: 'Urlaubsverwaltung', icon: '🏖️', group: 'Planung', path: '/urlaub', roles: ['Admin', 'Planer'] },
-  { id: 'urlaubs-timeline', label: 'Urlaubs-Timeline', icon: '📊', group: 'Planung', path: '/urlaubs-timeline' },
-  { id: 'schichtmodell', label: 'Schichtmodelle', icon: '🔄', group: 'Planung', path: '/schichtmodell', roles: ['Admin', 'Planer'] },
-  { id: 'personalbedarf', label: 'Personalbedarf', icon: '👥', group: 'Planung', path: '/personalbedarf', roles: ['Admin', 'Planer'] },
-  { id: 'jahresrueckblick', label: 'Jahresrückblick', icon: '🗓️', group: 'Planung', path: '/jahresrueckblick' },
-  { id: 'jahresabschluss', label: 'Jahresabschluss', icon: '📅', group: 'Planung', path: '/jahresabschluss', roles: ['Admin', 'Planer'] },
-  { id: 'zeitkonto', label: 'Zeitkonto', icon: '⏱️', group: 'Planung', path: '/zeitkonto' },
-  { id: 'ueberstunden', label: 'Überstunden', icon: '⏰', group: 'Planung', path: '/ueberstunden', roles: ['Admin', 'Planer'] },
-  { id: 'kontobuchungen', label: 'Kontobuchungen', icon: '💰', group: 'Planung', path: '/kontobuchungen', roles: ['Admin', 'Planer'] },
-  { id: 'notizen', label: 'Notizen', icon: '📝', group: 'Planung', path: '/notizen', roles: ['Admin', 'Planer'] },
-  // Reports
-  { id: 'mitarbeiter-vergleich', label: 'MA-Vergleich', icon: '⚖️', group: 'Berichte', path: '/mitarbeiter-vergleich' },
-  { id: 'mitarbeiter-profil', label: 'MA-Profil', icon: '🪪', group: 'Berichte', path: '/mitarbeiter' },
-  { id: 'fairness', label: 'Fairness-Score', icon: '📐', group: 'Berichte', path: '/fairness' },
-  { id: 'rotations-analyse', label: 'Rotations-Analyse', icon: '🔄', group: 'Berichte', path: '/rotations-analyse' },
+  // ── Top-level ───────────────────────────────────────────────
+  { id: 'dashboard',  label: 'Dashboard', icon: '📊', path: '/' },
+  { id: 'konflikte',  label: 'Konflikte', icon: '⚠️', path: '/konflikte', badge: true },
+
+  // ── Planung — Kernplanung ────────────────────────────────────
+  { id: 'schedule',         label: 'Dienstplan',       icon: '📅', group: 'Planung', path: '/schedule' },
+  { id: 'einsatzplan',      label: 'Einsatzplan',      icon: '📋', group: 'Planung', path: '/einsatzplan',      roles: ['Admin', 'Planer'] },
+  { id: 'wochenansicht',    label: 'Wochenansicht',    icon: '🗃️', group: 'Planung', path: '/wochenansicht' },
+  { id: 'jahresuebersicht', label: 'Jahresübersicht',  icon: '📆', group: 'Planung', path: '/jahresuebersicht' },
+  { id: 'personaltabelle',  label: 'Personaltabelle',  icon: '👤', group: 'Planung', path: '/personaltabelle',  roles: ['Admin', 'Planer'] },
+  { id: 'schichtmodell',    label: 'Schichtmodelle',   icon: '🔄', group: 'Planung', path: '/schichtmodell',    roles: ['Admin', 'Planer'] },
+  { id: 'personalbedarf',   label: 'Personalbedarf',   icon: '👥', group: 'Planung', path: '/personalbedarf',   roles: ['Admin', 'Planer'] },
+
+  // ── Abwesenheiten ────────────────────────────────────────────
+  { id: 'urlaub',           label: 'Urlaubsverwaltung', icon: '🏖️', group: 'Abwesenheiten', path: '/urlaub',          roles: ['Admin', 'Planer'] },
+  { id: 'urlaubs-timeline', label: 'Urlaubs-Timeline',  icon: '📊', group: 'Abwesenheiten', path: '/urlaubs-timeline' },
+  { id: 'schichtwuensche',  label: 'Schichtwünsche',    icon: '💬', group: 'Abwesenheiten', path: '/schichtwuensche' },
+
+  // ── Zeitwirtschaft ───────────────────────────────────────────
+  { id: 'zeitkonto',      label: 'Zeitkonto',      icon: '⏱️', group: 'Zeitwirtschaft', path: '/zeitkonto' },
+  { id: 'ueberstunden',   label: 'Überstunden',    icon: '⏰', group: 'Zeitwirtschaft', path: '/ueberstunden',   roles: ['Admin', 'Planer'] },
+  { id: 'kontobuchungen', label: 'Kontobuchungen', icon: '💰', group: 'Zeitwirtschaft', path: '/kontobuchungen', roles: ['Admin', 'Planer'] },
+  { id: 'statistiken',    label: 'Statistiken',    icon: '📈', group: 'Zeitwirtschaft', path: '/statistiken' },
+
+  // ── Ansichten ────────────────────────────────────────────────
+  { id: 'leitwand',          label: 'Leitwand',              icon: '📺', group: 'Ansichten', path: '/leitwand' },
+  { id: 'dienst-board',      label: 'Dienst-Board',          icon: '🖥️', group: 'Ansichten', path: '/dienst-board' },
+  { id: 'teamkalender',      label: 'Team-Kalender',         icon: '🗓️', group: 'Ansichten', path: '/teamkalender' },
+  { id: 'geburtstagkalender',label: 'Geburtstags-Kalender',  icon: '🎂', group: 'Ansichten', path: '/geburtstagkalender' },
+
+  // ── Werkzeuge ────────────────────────────────────────────────
+  { id: 'notfall-plan',           label: 'Notfall-Plan',        icon: '🚨', group: 'Werkzeuge', path: '/notfall-plan' },
+  { id: 'uebergabe',              label: 'Übergabe',             icon: '🤝', group: 'Werkzeuge', path: '/uebergabe' },
+  { id: 'simulation',             label: 'Simulation',           icon: '🧪', group: 'Werkzeuge', path: '/simulation' },
+  { id: 'verfuegbarkeits-matrix', label: 'Verfügbarkeits-Matrix',icon: '🧩', group: 'Werkzeuge', path: '/verfuegbarkeits-matrix' },
+  { id: 'notizen',                label: 'Notizen',              icon: '📝', group: 'Werkzeuge', path: '/notizen', roles: ['Admin', 'Planer'] },
+  { id: 'jahresabschluss',        label: 'Jahresabschluss',      icon: '📅', group: 'Werkzeuge', path: '/jahresabschluss', roles: ['Admin', 'Planer'] },
+
+  // ── Berichte & Analysen ──────────────────────────────────────
+  { id: 'jahresrueckblick',   label: 'Jahresrückblick',    icon: '🗓️', group: 'Berichte', path: '/jahresrueckblick' },
+  { id: 'mitarbeiter-vergleich', label: 'MA-Vergleich',   icon: '⚖️', group: 'Berichte', path: '/mitarbeiter-vergleich' },
+  { id: 'mitarbeiter-profil', label: 'MA-Profil',          icon: '🪪', group: 'Berichte', path: '/mitarbeiter' },
+  { id: 'fairness',           label: 'Fairness-Score',     icon: '📐', group: 'Berichte', path: '/fairness' },
+  { id: 'rotations-analyse',  label: 'Rotations-Analyse',  icon: '🔄', group: 'Berichte', path: '/rotations-analyse' },
   { id: 'kapazitaets-forecast', label: 'Kapazitäts-Forecast', icon: '📊', group: 'Berichte', path: '/kapazitaets-forecast' },
-  { id: 'qualitaets-bericht', label: 'Qualitätsbericht', icon: '📋', group: 'Berichte', path: '/qualitaets-bericht' },
+  { id: 'qualitaets-bericht', label: 'Qualitätsbericht',   icon: '📋', group: 'Berichte', path: '/qualitaets-bericht' },
   { id: 'schicht-kalibrator', label: 'Schicht-Kalibrator', icon: '⚖️', group: 'Berichte', path: '/schicht-kalibrator' },
-  { id: 'kompetenz-matrix', label: 'Kompetenz-Matrix', icon: '🎓', group: 'Berichte', path: '/kompetenz-matrix' },
-  { id: 'berichte', label: 'Berichte', icon: '📊', group: 'Berichte', path: '/berichte' },
-  { id: 'export', label: 'Export', icon: '⬇️', group: 'Berichte', path: '/export', roles: ['Admin', 'Planer'] },
-  { id: 'import', label: 'Import', icon: '⬆️', group: 'Berichte', path: '/import', roles: ['Admin'] },
-  // Master data — Admin only in sidebar, Planer limited
-  { id: 'employees', label: 'Mitarbeiter', icon: '👥', group: 'Stammdaten', path: '/employees', roles: ['Admin', 'Planer'] },
-  { id: 'groups', label: 'Gruppen', icon: '🏢', group: 'Stammdaten', path: '/groups', roles: ['Admin', 'Planer'] },
-  { id: 'shifts', label: 'Schichtarten', icon: '🕐', group: 'Stammdaten', path: '/shifts', roles: ['Admin', 'Planer'] },
-  { id: 'leave-types', label: 'Abwesenheitsarten', icon: '📋', group: 'Stammdaten', path: '/leave-types', roles: ['Admin', 'Planer'] },
-  { id: 'holidays', label: 'Feiertage', icon: '📅', group: 'Stammdaten', path: '/holidays', roles: ['Admin', 'Planer'] },
-  { id: 'workplaces', label: 'Arbeitsplätze', icon: '🏭', group: 'Stammdaten', path: '/workplaces', roles: ['Admin', 'Planer'] },
-  { id: 'extracharges', label: 'Zeitzuschläge', icon: '⏱️', group: 'Stammdaten', path: '/extracharges', roles: ['Admin', 'Planer'] },
+  { id: 'kompetenz-matrix',   label: 'Kompetenz-Matrix',   icon: '🎓', group: 'Berichte', path: '/kompetenz-matrix' },
+  { id: 'berichte',           label: 'Monatsberichte',     icon: '📄', group: 'Berichte', path: '/berichte' },
+  { id: 'export',             label: 'Export',             icon: '⬇️', group: 'Berichte', path: '/export', roles: ['Admin', 'Planer'] },
+  { id: 'import',             label: 'Import',             icon: '⬆️', group: 'Berichte', path: '/import', roles: ['Admin'] },
+
+  // ── Stammdaten ───────────────────────────────────────────────
+  { id: 'employees',      label: 'Mitarbeiter',          icon: '👥', group: 'Stammdaten', path: '/employees',      roles: ['Admin', 'Planer'] },
+  { id: 'groups',         label: 'Gruppen',              icon: '🏢', group: 'Stammdaten', path: '/groups',         roles: ['Admin', 'Planer'] },
+  { id: 'shifts',         label: 'Schichtarten',         icon: '🕐', group: 'Stammdaten', path: '/shifts',         roles: ['Admin', 'Planer'] },
+  { id: 'leave-types',    label: 'Abwesenheitsarten',    icon: '📋', group: 'Stammdaten', path: '/leave-types',    roles: ['Admin', 'Planer'] },
+  { id: 'holidays',       label: 'Feiertage',            icon: '📅', group: 'Stammdaten', path: '/holidays',       roles: ['Admin', 'Planer'] },
+  { id: 'workplaces',     label: 'Arbeitsplätze',        icon: '🏭', group: 'Stammdaten', path: '/workplaces',     roles: ['Admin', 'Planer'] },
+  { id: 'extracharges',   label: 'Zeitzuschläge',        icon: '⏱️', group: 'Stammdaten', path: '/extracharges',   roles: ['Admin', 'Planer'] },
   { id: 'einschraenkungen', label: 'Schichteinschränkungen', icon: '🚫', group: 'Stammdaten', path: '/einschraenkungen', roles: ['Admin', 'Planer'] },
-  // Administration — Admin only
-  { id: 'benutzerverwaltung', label: 'Benutzerverwaltung', icon: '👤', group: 'Administration', path: '/benutzerverwaltung', roles: ['Admin'] },
-  { id: 'backup', label: 'Backup & Restore', icon: '💾', group: 'Administration', path: '/backup', roles: ['Admin'] },
-  { id: 'perioden', label: 'Abrechnungszeiträume', icon: '📅', group: 'Administration', path: '/perioden', roles: ['Admin'] },
-  { id: 'einstellungen', label: 'Einstellungen', icon: '⚙️', group: 'Administration', path: '/einstellungen', roles: ['Admin'] },
-  { id: 'protokoll', label: 'Protokoll', icon: '📋', group: 'Administration', path: '/protokoll', roles: ['Admin'] },
-  { id: 'druckvorschau', label: 'Druckvorschau', icon: '🖨️', group: 'Administration', path: '/druckvorschau' },
+
+  // ── Administration ───────────────────────────────────────────
+  { id: 'benutzerverwaltung', label: 'Benutzerverwaltung',   icon: '👤', group: 'Administration', path: '/benutzerverwaltung', roles: ['Admin'] },
+  { id: 'backup',             label: 'Backup & Restore',     icon: '💾', group: 'Administration', path: '/backup',             roles: ['Admin'] },
+  { id: 'perioden',           label: 'Abrechnungszeiträume', icon: '📅', group: 'Administration', path: '/perioden',           roles: ['Admin'] },
+  { id: 'einstellungen',      label: 'Einstellungen',        icon: '⚙️', group: 'Administration', path: '/einstellungen',      roles: ['Admin'] },
+  { id: 'protokoll',          label: 'Protokoll',            icon: '📋', group: 'Administration', path: '/protokoll',          roles: ['Admin'] },
+  { id: 'druckvorschau',      label: 'Druckvorschau',        icon: '🖨️', group: 'Administration', path: '/druckvorschau' },
 ];
 
 function AppInner() {
@@ -212,13 +225,43 @@ function AppInner() {
   });
 
   // Group nav items
-  const grouped: { group: string; items: NavItem[] }[] = [
-    { group: '', items: visibleItems.filter(i => !i.group) },
-    { group: 'Planung', items: visibleItems.filter(i => i.group === 'Planung') },
-    { group: 'Berichte', items: visibleItems.filter(i => i.group === 'Berichte') },
-    { group: 'Stammdaten', items: visibleItems.filter(i => i.group === 'Stammdaten') },
-    { group: 'Administration', items: visibleItems.filter(i => i.group === 'Administration') },
-  ];
+  const GROUP_ORDER = ['', 'Planung', 'Abwesenheiten', 'Zeitwirtschaft', 'Ansichten', 'Werkzeuge', 'Berichte', 'Stammdaten', 'Administration'];
+  const grouped: { group: string; items: NavItem[] }[] = GROUP_ORDER.map(g => ({
+    group: g,
+    items: visibleItems.filter(i => (i.group ?? '') === g),
+  }));
+
+  // Collapsible sidebar groups — persisted in localStorage
+  const COLLAPSED_KEY = 'sp5_sidebar_collapsed';
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => {
+    try {
+      const saved = localStorage.getItem(COLLAPSED_KEY);
+      return saved ? new Set(JSON.parse(saved) as string[]) : new Set<string>();
+    } catch { return new Set<string>(); }
+  });
+
+  const toggleGroup = (group: string) => {
+    setCollapsedGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(group)) next.delete(group); else next.add(group);
+      localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...next]));
+      return next;
+    });
+  };
+
+  // Auto-expand the group that contains the active item
+  const activeGroup = navItems.find(i => isActive(i))?.group ?? '';
+  useEffect(() => {
+    if (activeGroup) {
+      setCollapsedGroups(prev => {
+        if (!prev.has(activeGroup)) return prev;
+        const next = new Set(prev);
+        next.delete(activeGroup);
+        localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...next]));
+        return next;
+      });
+    }
+  }, [activeGroup]);
 
   const sidebarContent = (
     <>
@@ -258,25 +301,31 @@ function AppInner() {
         </div>
       </div>
       <nav className="flex-1 py-2 overflow-y-auto">
-        {grouped.map(({ group, items }) => (
-          items.length > 0 && (
+        {grouped.map(({ group, items }) => {
+          if (items.length === 0) return null;
+          const isCollapsed = group !== '' && collapsedGroups.has(group);
+          return (
             <div key={group || '_root'}>
               {group && (
-                <div className="px-4 pt-3 pb-1 text-[10px] uppercase tracking-widest text-slate-500 font-semibold">
-                  {group}
-                </div>
+                <button
+                  onClick={() => toggleGroup(group)}
+                  className="w-full flex items-center justify-between px-4 pt-3 pb-1 text-[10px] uppercase tracking-widest text-slate-500 font-semibold hover:text-slate-300 transition-colors"
+                >
+                  <span>{group}</span>
+                  <span className="text-[9px] opacity-60">{isCollapsed ? '▶' : '▼'}</span>
+                </button>
               )}
-              {items.map(item => (
+              {!isCollapsed && items.map(item => (
                 <button
                   key={item.id}
                   onClick={() => goTo(item.path)}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${
+                  className={`w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
                     isActive(item)
                       ? 'bg-slate-600 text-white font-semibold'
                       : 'text-slate-300 hover:bg-slate-700 hover:text-white'
                   }`}
                 >
-                  <span>{item.icon}</span>
+                  <span className="text-base leading-none">{item.icon}</span>
                   <span className="flex-1 text-left">{item.label}</span>
                   {item.badge && conflictCount > 0 && (
                     <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold">
@@ -286,8 +335,8 @@ function AppInner() {
                 </button>
               ))}
             </div>
-          )
-        ))}
+          );
+        })}
       </nav>
       {/* User info + logout */}
       <div className="p-3 border-t border-slate-700">

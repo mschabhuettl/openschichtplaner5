@@ -242,6 +242,14 @@ nohup npx serve dist -p 5173 > /tmp/sp5-frontend.log 2>&1 &
 
 Die Rollen werden sowohl im Backend (API-Ebene, HTTP 403) als auch im Frontend (Buttons ausgeblendet) durchgesetzt.
 
+### 🧪 Test-User für Demo
+
+| Benutzer | Passwort | Rolle |
+|----------|----------|-------|
+| `admin` | `Test1234` | Admin |
+| `planer` | `Test1234` | Planer |
+| `leser` | `Test1234` | Leser |
+
 ---
 
 ## Projektstruktur

@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — 2026-02-27 (security-hardening)
+
+### Security & Quality
+
+#### 🔒 Security Hardening
+- **Token Expiry (8h)** — Session-Token laufen nach 8 Stunden ab; automatische Abmeldung im Frontend
+- **Brute-Force Protection** — Login-Sperre nach 5 Fehlversuchen (15 Minuten Lockout) mit IP-Tracking
+- **CORS Hardening** — Explizite Allowlist statt Wildcard; konfigurierbar via `ALLOWED_ORIGINS` in `.env`
+- **RBAC vollständig** — Alle 80+ API-Endpunkte mit Rollen-Checks (Admin/Planer/Leser) abgesichert; HTTP 403 bei Verstoß
+- **Rate Limiting** — Login-Endpoint: 5 Requests/Minute; globales Limit: 200 Requests/Minute via slowapi
+
+#### 🧪 Test Suite
+- **pytest Test Suite (551 Tests)** — Vollständige Backend-Abdeckung: API, RBAC, Business Logic, Error Paths, Write Paths, Schedule, Auth
+- **Cache-Invalidierung** — Bugfix: `_read_cache` wird nach Schreiboperationen korrekt invalidiert
+- **Rate-Limiter Reset in Tests** — autouse-Fixture verhindert Cross-Test-Pollution durch Rate-Limiter
+- **HTTP Status Codes korrigiert** — Business-Validierungsfehler liefern 400 (statt 422) für konsistente API
+
+#### 🛡️ Frontend
+- **Error Boundaries** — React Error Boundaries auf allen Haupt-Routen; verhindert kompletten App-Crash bei Komponenten-Fehlern
+- **Token-Expiry-Handling** — Frontend erkennt 401-Responses und leitet automatisch zur Login-Seite weiter
+
+---
+
 ## [Unreleased] — 2026-02-27 (feature-36)
 
 ### Hinzugefügt / Added

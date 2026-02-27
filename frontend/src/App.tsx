@@ -233,7 +233,6 @@ function AppInner() {
 
   // Collapsible sidebar groups — persisted in localStorage
   const COLLAPSED_KEY = 'sp5_sidebar_collapsed';
-  const ALL_GROUPS = ['Planung', 'Abwesenheiten', 'Zeitwirtschaft', 'Ansichten', 'Werkzeuge', 'Berichte', 'Stammdaten', 'Administration'];
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem(COLLAPSED_KEY);

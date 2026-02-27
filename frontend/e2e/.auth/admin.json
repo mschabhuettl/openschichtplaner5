@@ -1,0 +1,18 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:5173",
+      "localStorage": [
+        {
+          "name": "sp5_theme",
+          "value": "light"
+        },
+        {
+          "name": "sp5_session",
+          "value": "{\"token\":\"528217d7820461e6994a1bbac177bf8248610676471ba7c3ab6a026b4bb3113f\",\"user\":{\"ID\":251,\"NAME\":\"Admin\",\"DESCRIP\":\"Datenbankverwalter\",\"ADMIN\":true,\"RIGHTS\":0,\"role\":\"Admin\",\"WDUTIES\":true,\"WABSENCES\":true,\"WOVERTIMES\":true,\"WNOTES\":true,\"WCYCLEASS\":true,\"WPAST\":true,\"WACCEMWND\":true,\"WACCGRWND\":true,\"BACKUP\":true,\"SHOWSTATS\":true,\"ACCADMWND\":true},\"devMode\":false}"
+        }
+      ]
+    }
+  ]
+}

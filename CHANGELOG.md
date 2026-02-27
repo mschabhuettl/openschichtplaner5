@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — 2026-02-27 (feature-35)
+
+### Hinzugefügt / Added
+
+#### 🧭 Onboarding-Wizard (`/onboarding`)
+- **Neues Feature: Onboarding-Wizard** — geführter 4-Schritte-Flow zum Anlegen neuer Mitarbeiter
+- **Schritt 1 – Persönliche Daten**: Nachname, Vorname, Kürzel (Auto-Generate), Personalnummer, Geschlecht, Funktion, E-Mail, Telefon, Geburtsdatum, Eintrittsdatum, Adresse
+- **Schritt 2 – Arbeitszeitmodell**: Schnellwahl-Presets (Vollzeit, Teilzeit, 3-Tage, Wochenenddienst), interaktive Arbeitstage-Auswahl (Mo–So), automatische Stunden-Berechnung (Tag/Woche/Monat)
+- **Schritt 3 – Gruppen**: Visuelle Gruppen-Karten mit Mitarbeiteranzahl, Mehrfach-Auswahl, nachträgliche Zuweisung möglich
+- **Schritt 4 – Zusammenfassung**: Übersichtliche Review aller Eingaben vor dem Speichern
+- **Erfolgsmeldung**: Nach Anlage direkt zum MA-Profil navigieren oder weiteren MA anlegen
+- **Auto-Kürzel**: Wird automatisch aus Vor-/Nachname generiert (editierbar)
+- **Sidebar-Eintrag** unter „Administration" (sichtbar für Admin + Planer)
+- **Screenshots**: `docs/screenshots/onboarding-step*.png`
+
+---
+
 ## [Unreleased] — 2026-02-27 (feature-34)
 
 ### Hinzugefügt / Added

@@ -57,6 +57,7 @@ const KapazitaetsForecast = lazy(() => import('./pages/KapazitaetsForecast'));
 const QualitaetsBericht   = lazy(() => import('./pages/QualitaetsBericht'));
 const SchichtKalibrator   = lazy(() => import('./pages/SchichtKalibrator'));
 const KompetenzMatrix     = lazy(() => import('./pages/KompetenzMatrix'));
+const OnboardingWizard    = lazy(() => import('./pages/OnboardingWizard'));
 const NotfallPlan         = lazy(() => import('./pages/NotfallPlan'));
 const Leitwand            = lazy(() => import('./pages/Leitwand'));
 const Simulation          = lazy(() => import('./pages/Simulation'));
@@ -152,6 +153,7 @@ const navItems: NavItem[] = [
   { id: 'einschraenkungen', label: 'Schichteinschränkungen', icon: '🚫', group: 'Stammdaten', path: '/einschraenkungen', roles: ['Admin', 'Planer'] },
 
   // ── Administration ───────────────────────────────────────────
+  { id: 'onboarding',         label: 'Onboarding-Wizard',    icon: '🧭', group: 'Administration', path: '/onboarding',         roles: ['Admin', 'Planer'] },
   { id: 'benutzerverwaltung', label: 'Benutzerverwaltung',   icon: '👤', group: 'Administration', path: '/benutzerverwaltung', roles: ['Admin'] },
   { id: 'backup',             label: 'Backup & Restore',     icon: '💾', group: 'Administration', path: '/backup',             roles: ['Admin'] },
   { id: 'perioden',           label: 'Abrechnungszeiträume', icon: '📅', group: 'Administration', path: '/perioden',           roles: ['Admin'] },
@@ -490,6 +492,7 @@ function AppInner() {
               <Route path="/notfall-plan" element={<NotfallPlan />} />
               <Route path="/leitwand" element={<Leitwand />} />
               <Route path="/uebergabe" element={<Uebergabe />} />
+              <Route path="/onboarding" element={<OnboardingWizard />} />
             </Routes>
           </Suspense>
         </main>

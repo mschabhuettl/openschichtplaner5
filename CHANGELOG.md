@@ -281,3 +281,19 @@ It reads and writes the original `.DBF` database files directly — no migration
   - Legende aller Schichtarten mit Farben
   - Heute-Hervorhebung (blauer Spaltenkopf)
   - Wochenende visuell abgesetzt
+
+## [Unreleased] - 2026-02-27
+
+### Added
+- **Leitwand** (`/leitwand`): Fullscreen TV-Modus / Ops-Dashboard für Bildschirme im Aufenthaltsraum oder Empfang
+  - Echtzeit-Uhr (HH:MM:SS) mit minütlichem Fortschritts-Ring
+  - KPI-Kacheln: Aktiv jetzt, Im Dienst heute, Abwesend, Schichttypen
+  - Mitarbeiter-Karten pro Schichtgruppe mit Farb-Band (Schichtfarbe)
+  - Aktiv-Badge (🟢 pulsierend) + Schicht-Fortschrittsbalken für laufende Schichten
+  - Restzeit-Anzeige ("noch 3h 20min")
+  - Abwesenheits-Sektion mit Urlaubsart
+  - Wochentag-Balken-Miniviews
+  - Ticker-Leiste mit Warnungen + Abwesenheiten (rotierend)
+  - Vollbild-Button (⛶) + manueller Refresh
+  - Automatische Aktualisierung alle 2 Minuten
+  - Dunkles UI optimiert für großformatige Displays

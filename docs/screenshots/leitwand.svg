@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="50%" style="stop-color:#1e293b"/>
+      <stop offset="100%" style="stop-color:#0f172a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  
+  <!-- Header area -->
+  <text x="40" y="55" font-family="monospace" font-size="11" fill="#64748b" letter-spacing="3">DIENSTÜBERSICHT</text>
+  <text x="40" y="85" font-family="sans-serif" font-size="22" fill="white" font-weight="600">Freitag, 27. Februar 2026</text>
+  
+  <!-- Clock -->
+  <text x="1240" y="85" font-family="monospace" font-size="60" fill="white" font-weight="700" text-anchor="end" letter-spacing="4">03:36:42</text>
+  
+  <!-- Stats bar -->
+  <!-- Active now -->
+  <rect x="40" y="140" width="280" height="64" rx="12" fill="#10b98115" stroke="#10b98133"/>
+  <text x="70" y="172" font-family="monospace" font-size="28" fill="#34d399" font-weight="700">8</text>
+  <text x="110" y="162" font-family="sans-serif" font-size="10" fill="#6ee7b7" font-weight="700" letter-spacing="2">AKTIV JETZT</text>
+  <text x="110" y="178" font-family="sans-serif" font-size="9" fill="#475569">Schicht läuft gerade</text>
+  
+  <!-- Im Dienst -->
+  <rect x="335" y="140" width="280" height="64" rx="12" fill="#3b82f615" stroke="#3b82f633"/>
+  <text x="365" y="172" font-family="monospace" font-size="28" fill="#60a5fa" font-weight="700">18</text>
+  <text x="405" y="162" font-family="sans-serif" font-size="10" fill="#93c5fd" font-weight="700" letter-spacing="2">IM DIENST HEUTE</text>
+  <text x="405" y="178" font-family="sans-serif" font-size="9" fill="#475569">Gesamt eingeteilt</text>
+  
+  <!-- Abwesend -->
+  <rect x="630" y="140" width="280" height="64" rx="12" fill="#f59e0b15" stroke="#f59e0b33"/>
+  <text x="660" y="172" font-family="monospace" font-size="28" fill="#fbbf24" font-weight="700">2</text>
+  <text x="700" y="162" font-family="sans-serif" font-size="10" fill="#fcd34d" font-weight="700" letter-spacing="2">ABWESEND</text>
+  <text x="700" y="178" font-family="sans-serif" font-size="9" fill="#475569">Urlaub / Krank</text>
+  
+  <!-- Schichttypen -->
+  <rect x="925" y="140" width="315" height="64" rx="12" fill="#a855f715" stroke="#a855f733"/>
+  <text x="955" y="172" font-family="monospace" font-size="28" fill="#c084fc" font-weight="700">3</text>
+  <text x="995" y="162" font-family="sans-serif" font-size="10" fill="#d8b4fe" font-weight="700" letter-spacing="2">SCHICHTTYPEN</text>
+  <text x="995" y="178" font-family="sans-serif" font-size="9" fill="#475569">Heute aktiv</text>
+  
+  <!-- Shift group: Tagschicht -->
+  <circle cx="52" cy="240" r="6" fill="#ffffff"/>
+  <text x="68" y="246" font-family="sans-serif" font-size="11" fill="#cbd5e1" font-weight="700" letter-spacing="3">TAGSCHICHT</text>
+  <text x="200" y="246" font-family="sans-serif" font-size="10" fill="#475569">08:00-16:00</text>
+  <line x1="280" y1="240" x2="700" y2="240" stroke="#1e293b" stroke-width="1"/>
+  <text x="1200" y="246" font-family="sans-serif" font-size="10" fill="#34d399" font-weight="700" text-anchor="end">● 8 aktiv</text>
+
+  <!-- Employee cards - Tagschicht row -->
+  <g>
+    <!-- Card 1 -->
+    <rect x="40" y="260" width="160" height="90" rx="12" fill="#ffffff0f" stroke="#34d39466" stroke-width="2"/>
+    <rect x="40" y="260" width="160" height="6" rx="6" fill="#ffffff"/>
+    <text x="56" y="292" font-family="sans-serif" font-size="12" fill="white" font-weight="700">Roland Buerger</text>
+    <text x="56" y="306" font-family="monospace" font-size="9" fill="#64748b">RBU</text>
+    <rect x="56" y="315" width="28" height="14" rx="7" fill="#ffffff" stroke="#ffffff44"/>
+    <text x="68" y="325" font-family="sans-serif" font-size="8" fill="#ff00ff" font-weight="700" text-anchor="middle">T</text>
+    <text x="94" y="325" font-family="sans-serif" font-size="9" fill="#64748b">08:00-16:00</text>
+    <!-- Progress bar -->
+    <rect x="56" y="336" width="128" height="4" rx="2" fill="#ffffff15"/>
+    <rect x="56" y="336" width="80" height="4" rx="2" fill="#ffffff88"/>
+    <text x="184" y="347" font-family="sans-serif" font-size="7" fill="#475569" text-anchor="end">ca. 8h</text>
+    <!-- Active badge -->
+    <rect x="128" y="272" width="60" height="14" rx="7" fill="#10b98122" stroke="#34d39466"/>
+    <circle cx="140" cy="279" r="2.5" fill="#34d399">
+      <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <text x="146" y="283" font-family="sans-serif" font-size="7" fill="#34d399" font-weight="700">aktiv</text>
+  </g>
+  
+  <!-- More cards simplified -->
+  <rect x="212" y="260" width="160" height="90" rx="12" fill="#ffffff0f" stroke="#34d39466" stroke-width="2"/>
+  <rect x="212" y="260" width="160" height="6" rx="6" fill="#ffffff"/>
+  <text x="228" y="292" font-family="sans-serif" font-size="12" fill="white" font-weight="700">Joseph Maier</text>
+  <text x="228" y="320" font-family="monospace" font-size="9" fill="#64748b">JMA · T · 08:00-16:00</text>
+  <rect x="228" y="333" width="128" height="4" rx="2" fill="#ffffff15"/>
+  <rect x="228" y="333" width="70" height="4" rx="2" fill="#ffffff88"/>
+
+  <rect x="384" y="260" width="160" height="90" rx="12" fill="#ffffff0f" stroke="#34d39466" stroke-width="2"/>
+  <rect x="384" y="260" width="160" height="6" rx="6" fill="#ffffff"/>
+  <text x="400" y="292" font-family="sans-serif" font-size="12" fill="white" font-weight="700">Andrea Kaspers</text>
+  <text x="400" y="320" font-family="monospace" font-size="9" fill="#64748b">AKA · T · 08:00-16:00</text>
+  <rect x="400" y="333" width="128" height="4" rx="2" fill="#ffffff15"/>
+  <rect x="400" y="333" width="90" height="4" rx="2" fill="#ffffff88"/>
+
+  <rect x="556" y="260" width="160" height="90" rx="12" fill="#ffffff0f" stroke="#1e293b" stroke-width="1" opacity="0.7"/>
+  <rect x="556" y="260" width="160" height="6" rx="6" fill="#ffffff"/>
+  <text x="572" y="292" font-family="sans-serif" font-size="12" fill="white" font-weight="700">Klaus Weber</text>
+  <text x="572" y="320" font-family="monospace" font-size="9" fill="#64748b">KWE · T · 08:00-16:00</text>
+
+  <rect x="728" y="260" width="160" height="90" rx="12" fill="#ffffff0f" stroke="#34d39466" stroke-width="2"/>
+  <rect x="728" y="260" width="160" height="6" rx="6" fill="#ffffff"/>
+  <text x="744" y="292" font-family="sans-serif" font-size="12" fill="white" font-weight="700">Maria Huber</text>
+  <text x="744" y="320" font-family="monospace" font-size="9" fill="#64748b">MHU · T · 08:00-16:00</text>
+  <rect x="744" y="333" width="128" height="4" rx="2" fill="#ffffff15"/>
+  <rect x="744" y="333" width="60" height="4" rx="2" fill="#ffffff88"/>
+
+  <!-- Spätschicht -->
+  <circle cx="52" cy="385" r="6" fill="#ff8000"/>
+  <text x="68" y="391" font-family="sans-serif" font-size="11" fill="#cbd5e1" font-weight="700" letter-spacing="3">SPÄTSCHICHT</text>
+  <text x="210" y="391" font-family="sans-serif" font-size="10" fill="#475569">14:00-22:00</text>
+  <line x1="295" y1="385" x2="700" y2="385" stroke="#1e293b" stroke-width="1"/>
+
+  <rect x="40" y="405" width="160" height="80" rx="12" fill="#ffffff0f" stroke="#1e293b" stroke-width="1" opacity="0.7"/>
+  <rect x="40" y="405" width="160" height="5" rx="4" fill="#ff8000"/>
+  <text x="56" y="432" font-family="sans-serif" font-size="12" fill="white" font-weight="700">Stefanie Peter</text>
+  <text x="56" y="460" font-family="monospace" font-size="9" fill="#64748b">SPE · S · 14:00-22:00</text>
+
+  <rect x="212" y="405" width="160" height="80" rx="12" fill="#ffffff0f" stroke="#1e293b" stroke-width="1" opacity="0.7"/>
+  <rect x="212" y="405" width="160" height="5" rx="4" fill="#ff8000"/>
+  <text x="228" y="432" font-family="sans-serif" font-size="12" fill="white" font-weight="700">Uwe Klausen</text>
+  <text x="228" y="460" font-family="monospace" font-size="9" fill="#64748b">UKL · S · 14:00-22:00</text>
+
+  <!-- Nachtschicht -->
+  <circle cx="52" cy="520" r="6" fill="#ff00ff"/>
+  <text x="68" y="526" font-family="sans-serif" font-size="11" fill="#cbd5e1" font-weight="700" letter-spacing="3">NACHTSCHICHT</text>
+  <text x="215" y="526" font-family="sans-serif" font-size="10" fill="#475569">22:00-06:00</text>
+  <line x1="305" y1="520" x2="700" y2="520" stroke="#1e293b" stroke-width="1"/>
+
+  <rect x="40" y="540" width="160" height="80" rx="12" fill="#ffffff0f" stroke="#1e293b" stroke-width="1" opacity="0.7"/>
+  <rect x="40" y="540" width="160" height="5" rx="4" fill="#ff00ff"/>
+  <text x="56" y="567" font-family="sans-serif" font-size="12" fill="white" font-weight="700">Karl Schön</text>
+  <text x="56" y="595" font-family="monospace" font-size="9" fill="#64748b">KSC · N · 22:00-06:00</text>
+
+  <rect x="212" y="540" width="160" height="80" rx="12" fill="#ffffff0f" stroke="#1e293b" stroke-width="1" opacity="0.7"/>
+  <rect x="212" y="540" width="160" height="5" rx="4" fill="#ff00ff"/>
+  <text x="228" y="567" font-family="sans-serif" font-size="12" fill="white" font-weight="700">Martin Holle</text>
+  <text x="228" y="595" font-family="monospace" font-size="9" fill="#64748b">MHO · N · 22:00-06:00</text>
+
+  <!-- Ticker bar -->
+  <rect x="0" y="680" width="1280" height="40" fill="#00000040"/>
+  <line x1="0" y1="680" x2="1280" y2="680" stroke="#1e293b" stroke-width="1"/>
+  <text x="40" y="705" font-family="monospace" font-size="9" fill="#334155" letter-spacing="3">TICKER</text>
+  <text x="120" y="705" font-family="sans-serif" font-size="11" fill="#475569">ℹ️ SP5 Leitwand · 18 Mitarbeiter im Dienst · Automatische Aktualisierung alle 2 Minuten</text>
+  <text x="1240" y="705" font-family="monospace" font-size="9" fill="#334155" text-anchor="end">↻ 2min</text>
+</svg>

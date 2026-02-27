@@ -237,9 +237,9 @@ function AppInner() {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => {
     try {
       const saved = localStorage.getItem(COLLAPSED_KEY);
-      // Default: all groups collapsed except Planung
-      return saved ? new Set(JSON.parse(saved) as string[]) : new Set(ALL_GROUPS.filter(g => g !== 'Planung'));
-    } catch { return new Set(ALL_GROUPS.filter(g => g !== 'Planung')); }
+      // Default: all groups open
+      return saved ? new Set(JSON.parse(saved) as string[]) : new Set<string>();
+    } catch { return new Set<string>(); }
   });
 
   const toggleGroup = (group: string) => {

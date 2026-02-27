@@ -44,6 +44,7 @@ const Backup            = lazy(() => import('./pages/Backup'));
 const Perioden          = lazy(() => import('./pages/Perioden'));
 const Einstellungen     = lazy(() => import('./pages/Einstellungen'));
 const Protokoll         = lazy(() => import('./pages/Protokoll'));
+const TauschBoerse      = lazy(() => import('./pages/TauschBoerse'));
 const Konflikte         = lazy(() => import('./pages/Konflikte'));
 const Geburtstagkalender = lazy(() => import('./pages/Geburtstagkalender'));
 const Schichtwuensche    = lazy(() => import('./pages/Schichtwuensche'));
@@ -104,6 +105,7 @@ const navItems: NavItem[] = [
   { id: 'urlaub',           label: 'Urlaubsverwaltung', icon: '🏖️', group: 'Abwesenheiten', path: '/urlaub',          roles: ['Admin', 'Planer'] },
   { id: 'urlaubs-timeline', label: 'Urlaubs-Timeline',  icon: '📊', group: 'Abwesenheiten', path: '/urlaubs-timeline' },
   { id: 'schichtwuensche',  label: 'Schichtwünsche',    icon: '💬', group: 'Abwesenheiten', path: '/schichtwuensche' },
+  { id: 'tauschboerse',   label: 'Tauschbörse',       icon: '🔄', group: 'Abwesenheiten', path: '/tauschboerse' },
 
   // ── Zeitwirtschaft ───────────────────────────────────────────
   { id: 'zeitkonto',      label: 'Zeitkonto',      icon: '⏱️', group: 'Zeitwirtschaft', path: '/zeitkonto' },
@@ -438,6 +440,7 @@ function AppInner() {
               <Route path="/konflikte" element={<Konflikte />} />
               <Route path="/geburtstagkalender" element={<Geburtstagkalender />} />
               <Route path="/schichtwuensche" element={<Schichtwuensche />} />
+              <Route path="/tauschboerse" element={<TauschBoerse />} />
               <Route path="/schedule" element={<Schedule />} />
               <Route path="/einsatzplan" element={<Einsatzplan />} />
               <Route path="/jahresuebersicht" element={<Jahresuebersicht />} />

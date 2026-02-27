@@ -74,6 +74,7 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 - ✅ **Urlaubsverwaltung** — Anspruch, Saldo, Sperrtage, Genehmigungs-Workflow, PDF-Druck; **Jahres-Timeline Tab** (Gantt-Ansicht)
 - ✅ **Urlaubs-Timeline** 📊 — Eigenständige Gantt-Jahresübersicht aller Abwesenheiten mit Überschneidungs-Heatmap, Gruppenfilter, Tooltip und Statistik-Kacheln
 - ✅ **Schichtwünsche & Sperrtage** 💬 — Mitarbeiterwünsche und gesperrte Tage in Kalender- und Listenansicht eintragen
+- ✅ **Schicht-Tauschbörse** 🔄 — Strukturierter Tausch-Workflow: Anfrage stellen, Planer genehmigt/lehnt ab, Tausch wird automatisch ausgeführt
 - ✅ **Schichtmodelle** — Wiederkehrende Schichtmuster (Wochen-/Tagesrhythmus) definieren & zuordnen
 - ✅ **Personalbedarf** — Mindest- und Maximalbesetzung pro Schicht/Tag; datumsspezifische Sonderbedarfe
 - ✅ **Jahresabschluss** — Automatische Übertrag-Berechnung und -Buchung

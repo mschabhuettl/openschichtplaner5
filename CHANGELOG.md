@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — 2026-02-27 (feature-34)
+
+### Hinzugefügt / Added
+
+#### 🔄 Schicht-Tauschbörse (`/tauschboerse`)
+- **Neues Feature: Schicht-Tauschbörse** — strukturierter Workflow für Schichttausch-Anfragen zwischen Mitarbeitern
+- **Anfrage stellen**: Antragsteller + Datum, Tauschpartner + Datum, Begründung auswählen
+- **Planergenehmigung**: Ausstehende Anfragen mit einem Klick genehmigen (= Tausch wird sofort ausgeführt) oder ablehnen
+- **Ablehnungsgrund**: Optionaler Freitext bei Ablehnung
+- **Status-Tracking**: 4 Status-Stufen — Ausstehend / Genehmigt / Abgelehnt / Storniert
+- **KPI-Kacheln**: Live-Übersicht Gesamt / Ausstehend / Genehmigt / Abgelehnt
+- **Filter-Tabs**: Nach Status filtern
+- **Schicht-Anzeige**: Aktuelle Schicht beider Beteiligten sichtbar (farbiger Badge)
+- **Backend**: REST-API `/api/swap-requests` (GET/POST/PATCH/DELETE), JSON-Persistenz
+- **Auto-Ausführung**: Bei Genehmigung wird `POST /api/schedule/swap` automatisch aufgerufen
+- **Sidebar-Eintrag** unter „Abwesenheiten"
+
+---
+
 ## [Unreleased] — 2026-02-27 (feature-33)
 
 ### Hinzugefügt / Added

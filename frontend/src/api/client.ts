@@ -424,6 +424,16 @@ async function deleteReq<T>(path: string): Promise<T> {
   return res.json();
 }
 
+async function patchJSON<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...authHeaders() },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
+  return res.json();
+}
+
 // ─── Einsatzplan (SPSHI) Types ─────────────────────────────
 export interface EinsatzplanEntryCreate {
   employee_id: number;
@@ -712,6 +722,27 @@ export interface Wish {
   shift_id: number | null;
   note: string;
   created_at: string;
+}
+
+export interface SwapRequest {
+  id: number;
+  requester_id: number;
+  requester_date: string;
+  partner_id: number;
+  partner_date: string;
+  note: string;
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+  created_at: string;
+  resolved_at: string | null;
+  resolved_by: string | null;
+  reject_reason: string;
+  // enriched server-side
+  requester_name?: string;
+  requester_short?: string;
+  partner_name?: string;
+  partner_short?: string;
+  requester_shift?: { id: number; name: string; color: string } | null;
+  partner_shift?: { id: number; name: string; color: string } | null;
 }
 
 // ─── API ───────────────────────────────────────────────────
@@ -1257,4 +1288,29 @@ export const api = {
 
   deleteWish: (wishId: number) =>
     deleteReq<{ deleted: number }>(`/api/wishes/${wishId}`),
+
+  // ─── Schicht-Tauschbörse ─────────────────────────────────
+  getSwapRequests: (params: { status?: string; employee_id?: number } = {}) => {
+    const q = new URLSearchParams();
+    if (params.status) q.set('status', params.status);
+    if (params.employee_id != null) q.set('employee_id', String(params.employee_id));
+    return fetchJSON<SwapRequest[]>(`/api/swap-requests?${q}`);
+  },
+
+  createSwapRequest: (body: {
+    requester_id: number;
+    requester_date: string;
+    partner_id: number;
+    partner_date: string;
+    note?: string;
+  }) => postJSON<SwapRequest>('/api/swap-requests', body),
+
+  resolveSwapRequest: (swapId: number, body: {
+    action: 'approve' | 'reject';
+    resolved_by?: string;
+    reject_reason?: string;
+  }) => patchJSON<SwapRequest>(`/api/swap-requests/${swapId}/resolve`, body),
+
+  deleteSwapRequest: (swapId: number) =>
+    deleteReq<{ ok: boolean }>(`/api/swap-requests/${swapId}`),
 };

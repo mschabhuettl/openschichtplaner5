@@ -1,0 +1,17 @@
+{
+  "name": "OpenSchichtplaner5",
+  "short_name": "OpenSP5",
+  "description": "Open-source Dienstplanung",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e293b",
+  "theme_color": "#1e293b",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

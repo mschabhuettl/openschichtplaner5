@@ -3530,8 +3530,8 @@ export default function Schedule() {
           )}
         </div>
 
-        {/* Alphabet quick filter */}
-        <div className="flex items-center gap-1 flex-wrap">
+        {/* Alphabet quick filter — hidden on mobile to save space */}
+        <div className="hidden sm:flex items-center gap-1 flex-wrap">
           {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ').map(letter => {
             const available = availableLetters.has(letter);
             const active = filterLetter === letter;

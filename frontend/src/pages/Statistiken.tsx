@@ -372,7 +372,7 @@ export default function Statistiken() {
       {/* Page header + tab switcher */}
       <div className="flex items-center gap-3 mb-3 flex-wrap">
         <h1 className="text-xl font-bold text-gray-800">📈 Statistiken</h1>
-        <div className="flex rounded-lg border overflow-hidden shadow-sm text-sm">
+        <div className="flex rounded-lg border overflow-x-auto shadow-sm text-sm min-w-0">
           <button
             className={`px-4 py-1.5 transition-colors ${activeTab === 'group' ? 'bg-slate-700 text-white' : 'bg-white hover:bg-gray-50 text-gray-700'}`}
             onClick={() => setActiveTab('group')}

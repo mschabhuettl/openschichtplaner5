@@ -470,3 +470,52 @@ a { transition: color 150ms ease; }
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* ── Print Styles ────────────────────────────────────────────── */
+
+@media print {
+  /* Hide sidebar, mobile header, and other UI chrome */
+  aside,
+  header,
+  .print\:hidden,
+  [class*="print:hidden"] {
+    display: none !important;
+  }
+
+  /* Full-width content area */
+  body, html {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Remove background colors from layout containers */
+  .bg-gray-100,
+  .bg-gray-50,
+  .bg-slate-800,
+  .bg-slate-900 {
+    background: white !important;
+  }
+
+  /* Main content takes full width */
+  main {
+    width: 100% !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Page breaks */
+  table { page-break-inside: avoid; }
+  tr { page-break-inside: avoid; }
+
+  /* Ensure links print as plain text */
+  a[href]:after {
+    content: none !important;
+  }
+
+  /* Remove shadows */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+}

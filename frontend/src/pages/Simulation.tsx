@@ -5,6 +5,15 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 const BASE = import.meta.env.VITE_API_URL ?? '';
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
 
 interface Employee {
   ID: number;
@@ -87,7 +96,7 @@ export default function Simulation() {
   const [empSearch, setEmpSearch] = useState('');
 
   useEffect(() => {
-    fetch(BASE + '/api/employees').then(r => r.json()).then((data: Employee[]) => setEmployees(data)).catch(() => {});
+    fetch(BASE + '/api/employees', { headers: getAuthHeaders() }).then(r => r.json()).then((data: Employee[]) => setEmployees(data)).catch(() => {});
   }, []);
 
   const daysInMonth = new Date(year, month, 0).getDate();
@@ -129,7 +138,7 @@ export default function Simulation() {
     try {
       const data = await fetch(BASE + '/api/simulation', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ year, month, absences, scenario_name: scenarioName }),
       });
       const json = await data.json();

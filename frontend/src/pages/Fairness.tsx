@@ -2,6 +2,16 @@ import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
 import type { Group } from '../types';
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
 // ── Types ──────────────────────────────────────────────────────
 interface FairnessEmployee {
   employee_id: number;
@@ -88,7 +98,8 @@ export default function Fairness() {
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/fairness?year=${year}${groupId ? `&group_id=${groupId}` : ''}`
+        `/api/fairness?year=${year}${groupId ? `&group_id=${groupId}` : ''}`,
+        { headers: getAuthHeaders() }
       );
       const json = await res.json();
       setData(json);

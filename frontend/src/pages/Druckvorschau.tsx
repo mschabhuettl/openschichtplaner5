@@ -3,6 +3,15 @@ import type { Employee, Group, ScheduleEntry, ShiftType } from '../types';
 
 // ── Constants ─────────────────────────────────────────────
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
 const MONTHS = [
   'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
@@ -11,9 +20,8 @@ const WD_ABBR = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 
 // ── API helpers ───────────────────────────────────────────
 async function apiFetch<T>(path: string): Promise<T> {
-  const token = localStorage.getItem('auth_token');
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: token ? { 'X-Auth-Token': token } : {},
+    headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();

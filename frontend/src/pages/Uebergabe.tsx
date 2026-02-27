@@ -6,6 +6,15 @@
 import { useEffect, useState } from 'react';
 
 const API = import.meta.env.VITE_API_URL ?? '';
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
 
 interface Shift {
   id: number;
@@ -59,7 +68,7 @@ export default function Uebergabe() {
 
   // Load shifts
   useEffect(() => {
-    fetch(`${API}/api/shifts`).then(r => r.json()).then(setShifts).catch(() => {});
+    fetch(`${API}/api/shifts`, { headers: getAuthHeaders() }).then(r => r.json()).then(setShifts).catch(() => {});
   }, []);
 
   // Load notes
@@ -69,7 +78,7 @@ export default function Uebergabe() {
     if (filterDate) params.set('date', filterDate);
     if (filterShift) params.set('shift_id', filterShift);
     params.set('limit', '100');
-    fetch(`${API}/api/handover?${params}`)
+    fetch(`${API}/api/handover?${params}`, { headers: getAuthHeaders() })
       .then(r => r.json())
       .then(data => { setNotes(data); setLoading(false); })
       .catch(() => setLoading(false));
@@ -94,7 +103,7 @@ export default function Uebergabe() {
     };
     await fetch(`${API}/api/handover`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(payload),
     });
     setSaving(false);
@@ -106,14 +115,14 @@ export default function Uebergabe() {
   const toggleResolved = async (note: HandoverNote) => {
     await fetch(`${API}/api/handover/${note.id}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify({ resolved: !note.resolved }),
     });
     loadNotes();
   };
 
   const deleteNote = async (id: string) => {
-    await fetch(`${API}/api/handover/${id}`, { method: 'DELETE' });
+    await fetch(`${API}/api/handover/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
     loadNotes();
   };
 

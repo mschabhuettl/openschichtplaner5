@@ -4,6 +4,15 @@ import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 
 const API = import.meta.env.VITE_API_URL ?? '';
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
 
 interface Restriction {
   id: number;
@@ -40,7 +49,7 @@ export default function Einschraenkungen() {
       const [emps, sh] = await Promise.all([api.getEmployees(), api.getShifts()]);
       setEmployees(emps);
       setShifts(sh);
-      const res = await fetch(`${API}/api/restrictions`);
+      const res = await fetch(`${API}/api/restrictions`, { headers: getAuthHeaders() });
       if (res.ok) {
         setRestrictions(await res.json());
       } else {
@@ -71,7 +80,7 @@ export default function Einschraenkungen() {
     try {
       const res = await fetch(`${API}/api/restrictions`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({
           employee_id: formEmpId,
           shift_id: formShiftId,
@@ -97,6 +106,7 @@ export default function Einschraenkungen() {
     try {
       const res = await fetch(`${API}/api/restrictions/${empId}/${shiftId}?weekday=${weekday}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
       });
       if (res.ok) await loadAll();
       else setError(`Fehler: HTTP ${res.status}`);

@@ -1,6 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const API = import.meta.env.VITE_API_URL ?? '';
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
 
 interface DayEntry {
   employee_id: number;
@@ -144,7 +153,7 @@ export default function DienstBoard() {
     setLoading(true);
     try {
       const url = `${API}/api/schedule/day?date=${date}${groupId ? `&group_id=${groupId}` : ''}`;
-      const res = await fetch(url);
+      const res = await fetch(url, { headers: getAuthHeaders() });
       const data = await res.json();
       setEntries(data);
       setLastRefresh(new Date());
@@ -154,8 +163,8 @@ export default function DienstBoard() {
   }, [date, groupId]);
 
   useEffect(() => {
-    fetch(`${API}/api/shifts`).then(r => r.json()).then(setShifts);
-    fetch(`${API}/api/groups`).then(r => r.json()).then(setGroups);
+    fetch(`${API}/api/shifts`, { headers: getAuthHeaders() }).then(r => r.json()).then(setShifts);
+    fetch(`${API}/api/groups`, { headers: getAuthHeaders() }).then(r => r.json()).then(setGroups);
   }, []);
 
   useEffect(() => { load(); }, [load]);

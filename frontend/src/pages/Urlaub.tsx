@@ -40,6 +40,15 @@ type UrlaubTab = 'antraege' | 'abwesenheiten' | 'ansprueche' | 'sperren' | 'time
 
 const MONTHS = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 const API = import.meta.env.VITE_API_URL ?? '';
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
 
 // ─── Shared: Detail Modal (Abwesenheiten) ─────────────────
 interface DetailModalProps {
@@ -653,7 +662,7 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
     setLoading(true);
     try {
       if (groupId !== null) {
-        const res = await fetch(`${API}/api/leave-balance/group?year=${year}&group_id=${groupId}`);
+        const res = await fetch(`${API}/api/leave-balance/group?year=${year}&group_id=${groupId}`, { headers: getAuthHeaders() });
         if (res.ok) { setBalances(await res.json()); return; }
       }
       // Load all employees individually
@@ -661,7 +670,7 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
       const empsToLoad = employees;
       await Promise.all(empsToLoad.map(async emp => {
         try {
-          const res = await fetch(`${API}/api/leave-balance?year=${year}&employee_id=${emp.ID}`);
+          const res = await fetch(`${API}/api/leave-balance?year=${year}&employee_id=${emp.ID}`, { headers: getAuthHeaders() });
           if (res.ok) {
             const b = await res.json() as LeaveBalance;
             b.employee_name = `${emp.NAME}, ${emp.FIRSTNAME}`;
@@ -685,7 +694,7 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
       const balance = balances.find(b => b.employee_id === empId);
       await fetch(`${API}/api/leave-entitlements`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({
           employee_id: empId,
           year,
@@ -834,7 +843,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
       const url = groupId !== null
         ? `${API}/api/holiday-bans?group_id=${groupId}`
         : `${API}/api/holiday-bans`;
-      const res = await fetch(url);
+      const res = await fetch(url, { headers: getAuthHeaders() });
       if (res.ok) setBans(await res.json());
     } catch (e) {
       setError(String(e));
@@ -853,7 +862,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
     try {
       const res = await fetch(`${API}/api/holiday-bans`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ ...form, group_id: Number(form.group_id) }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -871,7 +880,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
     if (!confirm('Urlaubssperre wirklich löschen?')) return;
     setDeleting(id);
     try {
-      const res = await fetch(`${API}/api/holiday-bans/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API}/api/holiday-bans/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
       if (res.ok) await load();
     } finally {
       setDeleting(null);
@@ -1034,7 +1043,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
   const loadStatus = useCallback(async () => {
     setStatusLoading(true);
     try {
-      const res = await fetch(`${API}/api/absences/status`);
+      const res = await fetch(`${API}/api/absences/status`, { headers: getAuthHeaders() });
       if (res.ok) setStatusMap(await res.json());
     } catch { /* ignore */ } finally {
       setStatusLoading(false);
@@ -1051,7 +1060,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
     try {
       const res = await fetch(`${API}/api/absences/${id}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ status }),
       });
       if (res.ok) {
@@ -1450,11 +1459,11 @@ export default function Urlaub() {
   // Load absences
   const loadAbsences = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/api/absences?year=${year}`);
+      const res = await fetch(`${API}/api/absences?year=${year}`, { headers: getAuthHeaders() });
       if (res.ok) { setAbsences(await res.json()); return; }
     } catch { /* try without year filter */ }
     try {
-      const res = await fetch(`${API}/api/absences`);
+      const res = await fetch(`${API}/api/absences`, { headers: getAuthHeaders() });
       if (res.ok) {
         const all = await res.json() as Absence[];
         setAbsences(all.filter(a => a.DATE?.startsWith(String(year))));

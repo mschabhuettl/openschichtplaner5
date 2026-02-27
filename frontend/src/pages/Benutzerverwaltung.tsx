@@ -5,6 +5,15 @@ import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
@@ -602,7 +611,7 @@ export default function Benutzerverwaltung() {
     setError(null);
     try {
       const [usersData, empsData, grpsData] = await Promise.all([
-        fetch(`${API_BASE}/api/users`).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<SP5User[]>; }),
+        fetch(`${API_BASE}/api/users`, { headers: getAuthHeaders() }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<SP5User[]>; }),
         api.getEmployees(),
         api.getGroups(),
       ]);
@@ -673,7 +682,7 @@ export default function Benutzerverwaltung() {
 
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(payload),
       });
 
@@ -699,7 +708,7 @@ export default function Benutzerverwaltung() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const res = await fetch(`${API_BASE}/api/users/${deleteTarget.ID}`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE}/api/users/${deleteTarget.ID}`, { method: 'DELETE', headers: getAuthHeaders() });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.detail ?? `HTTP ${res.status}`);

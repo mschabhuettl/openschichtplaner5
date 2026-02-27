@@ -2,6 +2,16 @@ import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
 import type { Group } from '../types';
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
 const MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
                            'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 const MONTH_NAMES = ['Januar','Februar','März','April','Mai','Juni',
@@ -203,7 +213,7 @@ export default function Jahresrueckblick() {
     setError(null);
     try {
       const url = `/api/statistics/year-summary?year=${year}${groupId ? `&group_id=${groupId}` : ''}`;
-      const res = await fetch((import.meta.env.VITE_API_URL || '') + url);
+      const res = await fetch((import.meta.env.VITE_API_URL || '') + url, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error('Fehler beim Laden');
       const d = await res.json() as YearSummary;
       setData(d);

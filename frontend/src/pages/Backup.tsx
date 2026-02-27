@@ -3,6 +3,15 @@ import type { ChangeEvent } from 'react';
 import { api } from '../api/client';
 
 const API = import.meta.env.VITE_API_URL ?? '';
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
 
 // ── Backup Section ────────────────────────────────────────────────────────
 
@@ -218,7 +227,7 @@ function CompactSection() {
     setResult(null);
     setError(null);
     try {
-      const res = await fetch(`${API}/api/admin/compact`, { method: 'POST' });
+      const res = await fetch(`${API}/api/admin/compact`, { method: 'POST', headers: getAuthHeaders() });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
       setResult(data);

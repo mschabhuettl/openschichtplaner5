@@ -2,6 +2,15 @@ import { useState, useRef } from 'react';
 import type { DragEvent, ChangeEvent } from 'react';
 
 const API = import.meta.env.VITE_API_URL ?? '';
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
 
 // ── CSV parsing ────────────────────────────────────────────────────────────
 
@@ -343,7 +352,7 @@ export default function Import() {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const res = await fetch(`${API}${selected.endpoint}`, { method: 'POST', body: formData });
+      const res = await fetch(`${API}${selected.endpoint}`, { method: 'POST', body: formData, headers: getAuthHeaders() });
       if (!res.ok) {
         const detail = await res.json().catch(() => ({ detail: res.statusText }));
         throw new Error(detail.detail || res.statusText);

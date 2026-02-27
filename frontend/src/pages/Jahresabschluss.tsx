@@ -3,6 +3,15 @@ import { api } from '../api/client';
 import type { Group } from '../types';
 
 const API = import.meta.env.VITE_API_URL ?? '';
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
 
 interface EmployeeCloseDetail {
   employee_id: number;
@@ -63,7 +72,7 @@ export default function Jahresabschluss() {
         max_carry_forward_days: String(maxCarryDays),
       });
       if (groupId !== null) params.set('group_id', String(groupId));
-      const res = await fetch(`${API}/api/annual-close/preview?${params}`);
+      const res = await fetch(`${API}/api/annual-close/preview?${params}`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
       setPreview(await res.json());
     } catch (e) {
@@ -82,7 +91,7 @@ export default function Jahresabschluss() {
       if (groupId !== null) body.group_id = groupId;
       const res = await fetch(`${API}/api/annual-close`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);

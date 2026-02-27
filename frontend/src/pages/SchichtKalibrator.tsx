@@ -2,6 +2,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '../hooks/useToast';
 
 const API = import.meta.env.VITE_API_URL ?? '';
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
 
 interface Employee {
   ID: number;
@@ -242,8 +251,8 @@ export default function SchichtKalibrator() {
     setLoading(true);
     try {
       const [empRes, grpRes] = await Promise.all([
-        fetch(`${API}/api/employees`),
-        fetch(`${API}/api/groups`),
+        fetch(`${API}/api/employees`, { headers: getAuthHeaders() }),
+        fetch(`${API}/api/groups`, { headers: getAuthHeaders() }),
       ]);
       const emps: Employee[] = await empRes.json();
       const grps: Group[] = await grpRes.json();
@@ -262,7 +271,7 @@ export default function SchichtKalibrator() {
     if (groups.length === 0) return;
     Promise.all(
       groups.map(g =>
-        fetch(`${API}/api/groups/${g.ID}/members`)
+        fetch(`${API}/api/groups/${g.ID}/members`, { headers: getAuthHeaders() })
           .then(r => r.json())
           .then((members: { employee_id: number }[]) => ({ gid: g.ID, eids: members.map((m: { employee_id: number }) => m.employee_id) }))
           .catch(() => ({ gid: g.ID, eids: [] }))
@@ -277,7 +286,7 @@ export default function SchichtKalibrator() {
   const saveEmployee = async (id: number, data: { HRSDAY: number; HRSWEEK: number; HRSMONTH: number }) => {
     const res = await fetch(`${API}/api/employees/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error('Speichern fehlgeschlagen');

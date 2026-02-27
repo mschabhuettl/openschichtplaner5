@@ -2,6 +2,16 @@ import { useState, useEffect, useCallback } from 'react';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 interface Skill {
@@ -374,7 +384,7 @@ export default function KompetenzMatrix() {
     if (!modal || !modal.skill || modal.employeeId === undefined) return;
     await fetch(`${API}/api/skills/assignments`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify({
         employee_id: modal.employeeId,
         skill_id: modal.skill.id,
@@ -389,7 +399,7 @@ export default function KompetenzMatrix() {
 
   const handleDeleteAssignment = async () => {
     if (!modal?.existingAssignment) return;
-    await fetch(`${API}/api/skills/assignments/${modal.existingAssignment.id}`, { method: 'DELETE' });
+    await fetch(`${API}/api/skills/assignments/${modal.existingAssignment.id}`, { method: 'DELETE', headers: getAuthHeaders() });
     setModal(null);
     load();
   };
@@ -398,13 +408,13 @@ export default function KompetenzMatrix() {
     if (skillModal?.skill) {
       await fetch(`${API}/api/skills/${skillModal.skill.id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(data),
       });
     } else {
       await fetch(`${API}/api/skills`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(data),
       });
     }
@@ -414,7 +424,7 @@ export default function KompetenzMatrix() {
 
   const handleDeleteSkill = async () => {
     if (!skillModal?.skill) return;
-    await fetch(`${API}/api/skills/${skillModal.skill.id}`, { method: 'DELETE' });
+    await fetch(`${API}/api/skills/${skillModal.skill.id}`, { method: 'DELETE', headers: getAuthHeaders() });
     setSkillModal(null);
     load();
   };

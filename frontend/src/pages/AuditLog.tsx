@@ -2,6 +2,16 @@ import { useState, useEffect, useCallback } from 'react';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ChangelogEntry {
   timestamp: string;
@@ -88,7 +98,7 @@ export default function AuditLog() {
       if (filterUser) params.set('user', filterUser);
       if (dateFrom) params.set('date_from', dateFrom);
       if (dateTo) params.set('date_to', dateTo);
-      const res = await fetch(`${API}/api/changelog?${params}`);
+      const res = await fetch(`${API}/api/changelog?${params}`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error(await res.text());
       const data: ChangelogEntry[] = await res.json();
       setEntries(data);

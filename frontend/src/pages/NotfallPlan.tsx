@@ -7,6 +7,16 @@ import { useToast } from '../hooks/useToast';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
 interface Employee {
   ID: number;
   NAME: string;
@@ -194,7 +204,7 @@ export default function NotfallPlan() {
     try {
       const resp = await fetch(`${API}/api/schedule`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ employee_id: empId, date, shift_id: selectedShift }),
       });
       if (resp.ok) {
@@ -203,7 +213,7 @@ export default function NotfallPlan() {
         showToast(`✅ ${emp?.FIRSTNAME} ${emp?.NAME} → ${shift?.NAME} am ${date}`, 'success');
         setAssigned(prev => new Set([...prev, empId]));
         // Refresh day entries
-        const updated = await fetch(`${API}/api/schedule/day?date=${date}`).then(r => r.json());
+        const updated = await fetch(`${API}/api/schedule/day?date=${date}`, { headers: getAuthHeaders() }).then(r => r.json());
         setDayEntries(updated);
       } else {
         const err = await resp.json();
@@ -221,10 +231,10 @@ export default function NotfallPlan() {
     const emp = employees.find(e => e.ID === sickEmployee);
     if (!window.confirm(`${emp?.FIRSTNAME} ${emp?.NAME} für ${date} aus dem Dienstplan entfernen?`)) return;
     try {
-      const resp = await fetch(`${API}/api/schedule/${sickEmployee}/${date}`, { method: 'DELETE' });
+      const resp = await fetch(`${API}/api/schedule/${sickEmployee}/${date}`, { method: 'DELETE', headers: getAuthHeaders() });
       if (resp.ok) {
         showToast(`Eintrag von ${emp?.FIRSTNAME} ${emp?.NAME} entfernt`, 'success');
-        const updated = await fetch(`${API}/api/schedule/day?date=${date}`).then(r => r.json());
+        const updated = await fetch(`${API}/api/schedule/day?date=${date}`, { headers: getAuthHeaders() }).then(r => r.json());
         setDayEntries(updated);
       } else {
         showToast('Fehler beim Entfernen', 'error');

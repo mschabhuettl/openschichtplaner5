@@ -1,6 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
 // ─── Warning types ────────────────────────────────────────────
 export interface Warning {
   id: number;
@@ -93,7 +103,7 @@ export default function WarningsCenter() {
       const now = new Date();
       const year = now.getFullYear();
       const month = now.getMonth() + 1;
-      const res = await fetch(`${BASE}/api/warnings?year=${year}&month=${month}`);
+      const res = await fetch(`${BASE}/api/warnings?year=${year}&month=${month}`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error('Laden fehlgeschlagen');
       const data: WarningsResponse = await res.json();
       setWarnings(data.warnings ?? []);

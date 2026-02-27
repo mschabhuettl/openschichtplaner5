@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo, memo, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePermissions } from '../hooks/usePermissions';
 import { api } from '../api/client';
 import type { ShiftRequirement, Note, ConflictEntry, CoverageDay } from '../api/client';
 import type { Employee, Group, ScheduleEntry, ShiftType, LeaveType } from '../types';
@@ -1341,6 +1342,7 @@ function HoverTooltip({
 export default function Schedule() {
   const now = new Date();
   const navigate = useNavigate();
+  const { canEditSchedule } = usePermissions();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
 
@@ -4226,6 +4228,7 @@ export default function Schedule() {
                                 {wishType === 'WUNSCH' ? '🟢' : '🔴'}
                               </span>
                             )}
+                            {canEditSchedule && (
                             <button
                               onClick={() => setActivePicker(p =>
                                 p?.empId === emp.ID && p?.day === day ? null : { empId: emp.ID, day }
@@ -4236,11 +4239,12 @@ export default function Schedule() {
                             >
                               <span className="text-[10px] font-bold">+</span>
                             </button>
+                            )}
                           </div>
                         )}
 
-                        {/* Shift picker popup */}
-                        {isPickerOpen && (
+                        {/* Shift picker popup — only for users who can edit */}
+                        {isPickerOpen && canEditSchedule && (
                           <ShiftPicker
                             shifts={shifts}
                             leaveTypes={leaveTypes}

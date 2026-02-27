@@ -1,3 +1,4 @@
+import { usePermissions } from '../hooks/usePermissions';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { api } from '../api/client';
 import type { DayEntry, Note, ScheduleTemplate } from '../api/client';
@@ -1048,6 +1049,7 @@ function TemplatesPanel({
 }
 
 export default function Einsatzplan() {
+  const { canEditSchedule: canEdit } = usePermissions();
   const today = new Date();
   const { showToast } = useToast();
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
@@ -1173,13 +1175,14 @@ export default function Einsatzplan() {
   const handleOpenContextMenu = useCallback((e: React.MouseEvent, entry: DayEntry, date?: string) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!canEdit) return; // Leser: no context menu
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
       entry,
       date: date ?? toIsoDate(selectedDate),
     });
-  }, [selectedDate]);
+  }, [selectedDate, canEdit]);
 
   const handleSonderdienste = (entry: DayEntry) => {
     setSonderdiensteModal({ entry, date: contextMenu?.date ?? toIsoDate(selectedDate) });

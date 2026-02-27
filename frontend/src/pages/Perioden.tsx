@@ -1,3 +1,4 @@
+import { usePermissions } from '../hooks/usePermissions';
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { Period } from '../api/client';
@@ -113,6 +114,7 @@ function CreateModal({ groups, onSave, onClose }: CreateModalProps) {
 
 // ─── Main Page ─────────────────────────────────────────────
 export default function Perioden() {
+  const { canEditSchedule: canEdit } = usePermissions();
   const [periods, setPeriods] = useState<Period[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
@@ -204,12 +206,14 @@ export default function Perioden() {
           >
             🖨️ <span className="hidden sm:inline">Drucken</span>
           </button>
+          {canEdit && (
           <button
             onClick={() => setShowCreate(true)}
             className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
           >
             + Neu
           </button>
+          )}
         </div>
       </div>
 
@@ -227,12 +231,14 @@ export default function Perioden() {
         <div className="text-center py-20 bg-white rounded-lg shadow text-gray-400">
           <div className="text-4xl mb-3">📭</div>
           <div className="text-sm">Keine Abrechnungszeiträume vorhanden.</div>
+          {canEdit && (
           <button
             onClick={() => setShowCreate(true)}
             className="mt-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
           >
             Ersten Zeitraum erstellen
           </button>
+          )}
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-x-auto">
@@ -258,6 +264,7 @@ export default function Perioden() {
                   <td className="px-4 py-3 text-gray-600 font-mono text-xs">{formatDate(p.start)}</td>
                   <td className="px-4 py-3 text-gray-600 font-mono text-xs">{formatDate(p.end)}</td>
                   <td className="px-4 py-3 text-center">
+                    {canEdit && (
                     <button
                       onClick={() => handleDelete(p.id)}
                       disabled={deleting === p.id}
@@ -265,6 +272,7 @@ export default function Perioden() {
                     >
                       {deleting === p.id ? '…' : '🗑 Löschen'}
                     </button>
+                    )}
                   </td>
                 </tr>
               ))}

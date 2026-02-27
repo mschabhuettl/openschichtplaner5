@@ -3,6 +3,7 @@ import { api } from '../api/client';
 import type { Note } from '../api/client';
 import type { Employee, Group } from '../types';
 import { useToast } from '../hooks/useToast';
+import { usePermissions } from '../hooks/usePermissions';
 
 const WEEKDAY_ABBR = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const MONTH_NAMES = [
@@ -159,9 +160,10 @@ interface NoteCardProps {
   employeeName: string;
   onEdit: (note: Note) => void;
   onDelete: (note: Note) => void;
+  canEdit?: boolean;
 }
 
-function NoteCard({ note, employeeName, onEdit, onDelete }: NoteCardProps) {
+function NoteCard({ note, employeeName, onEdit, onDelete, canEdit = true }: NoteCardProps) {
   return (
     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 group relative">
       <div className="flex items-start justify-between gap-2">
@@ -174,6 +176,7 @@ function NoteCard({ note, employeeName, onEdit, onDelete }: NoteCardProps) {
             <div className="text-xs text-slate-500 mt-1 break-words">{note.text2}</div>
           )}
         </div>
+        {canEdit && (
         <div className="flex gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={() => onEdit(note)}
@@ -190,6 +193,7 @@ function NoteCard({ note, employeeName, onEdit, onDelete }: NoteCardProps) {
             🗑️
           </button>
         </div>
+        )}
       </div>
     </div>
   );
@@ -197,6 +201,7 @@ function NoteCard({ note, employeeName, onEdit, onDelete }: NoteCardProps) {
 
 export default function Notizen() {
   const today = new Date();
+  const { canEditSchedule: canEdit } = usePermissions();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
   const [notes, setNotes] = useState<Note[]>([]);
@@ -370,13 +375,15 @@ export default function Notizen() {
                 ))}
             </select>
 
-            {/* New note button */}
+            {/* New note button — hidden for Leser */}
+            {canEdit && (
             <button
               onClick={() => openCreate(selectedDay || todayStr)}
               className="flex items-center gap-2 px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 font-medium"
             >
               <span>＋</span> Neue Notiz
             </button>
+            )}
             {/* Print button */}
             <button
               onClick={() => window.print()}
@@ -522,6 +529,7 @@ export default function Notizen() {
                         employeeName={empName}
                         onEdit={openEdit}
                         onDelete={handleDelete}
+                        canEdit={canEdit}
                       />
                     );
                   })

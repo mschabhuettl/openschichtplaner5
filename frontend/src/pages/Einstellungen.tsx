@@ -334,6 +334,46 @@ export default function Einstellungen() {
               {saving ? '⟳ Speichern…' : '💾 Einstellungen speichern'}
             </button>
           </div>
+
+          {/* ── Rollenübersicht ────────────────────────────────── */}
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <h2 className="text-base font-semibold text-slate-800 mb-4">🔐 Benutzerrollen &amp; Berechtigungen</h2>
+          <p className="text-xs text-slate-500 mb-4">Übersicht der Rollen und ihrer Zugriffsrechte (nicht editierbar).</p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs border-collapse">
+              <thead>
+                <tr className="bg-slate-700 text-white">
+                  <th className="px-3 py-2 text-left font-semibold">Bereich</th>
+                  <th className="px-3 py-2 text-center font-semibold">Admin</th>
+                  <th className="px-3 py-2 text-center font-semibold">Planer</th>
+                  <th className="px-3 py-2 text-center font-semibold">Leser</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { area: 'Dienstplan anzeigen',          admin: true,  planer: true,  leser: true  },
+                  { area: 'Dienstplan bearbeiten',         admin: true,  planer: true,  leser: false },
+                  { area: 'Abwesenheiten eintragen',       admin: true,  planer: true,  leser: false },
+                  { area: 'Mitarbeiterstammdaten anzeigen',admin: true,  planer: true,  leser: true  },
+                  { area: 'Mitarbeiterstammdaten editieren',admin: true, planer: false, leser: false },
+                  { area: 'Schichten / Gruppen / Arbeitsorte', admin: true, planer: false, leser: true },
+                  { area: 'Benutzer verwalten',            admin: true,  planer: false, leser: false },
+                  { area: 'Einstellungen ändern',          admin: true,  planer: false, leser: false },
+                  { area: 'Backup herunterladen',          admin: true,  planer: false, leser: false },
+                  { area: 'Statistiken & Berichte',        admin: true,  planer: true,  leser: true  },
+                  { area: 'Audit-Log einsehen',            admin: true,  planer: false, leser: false },
+                ].map((row, i) => (
+                  <tr key={row.area} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                    <td className="px-3 py-2 text-slate-700 font-medium">{row.area}</td>
+                    <td className="px-3 py-2 text-center">{row.admin  ? '✅' : '—'}</td>
+                    <td className="px-3 py-2 text-center">{row.planer ? '✅' : '—'}</td>
+                    <td className="px-3 py-2 text-center">{row.leser  ? '✅' : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
         </div>
       )}
     </div>

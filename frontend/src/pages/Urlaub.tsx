@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { api } from '../api/client';
 import type { Employee, LeaveType, Group } from '../types';
 import { useToast } from '../hooks/useToast';
+import { usePermissions } from '../hooks/usePermissions';
 
 // ─── Types ────────────────────────────────────────────────
 interface Absence {
@@ -639,6 +640,7 @@ interface AnsprüecheTabProps {
   groups: Group[];
 }
 function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
+  const { canEditAbsences } = usePermissions();
   const [groupId, setGroupId] = useState<number | null>(null);
   const [balances, setBalances] = useState<LeaveBalance[]>([]);
   const [loading, setLoading] = useState(false);
@@ -760,13 +762,15 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
                         className="text-green-600 hover:text-green-800 text-xs font-bold">✓</button>
                       <button onClick={() => setEditingId(null)} className="text-gray-400 hover:text-gray-600 text-xs">✕</button>
                     </div>
-                  ) : (
+                  ) : canEditAbsences ? (
                     <button
                       onClick={() => { setEditingId(b.employee_id); setEditValue(String(b.entitlement)); }}
                       className="font-bold text-blue-600 hover:underline hover:text-blue-800 cursor-pointer px-2 py-0.5 rounded hover:bg-blue-50"
                       title="Klicken zum Bearbeiten">
                       {b.entitlement}
                     </button>
+                  ) : (
+                    <span className="font-bold text-gray-700">{b.entitlement}</span>
                   )}
                 </td>
                 <td className="px-3 py-2 text-center text-gray-600">{b.carry_forward}</td>
@@ -814,6 +818,7 @@ interface SperrenTabProps {
   groups: Group[];
 }
 function SperrenTab({ groups }: SperrenTabProps) {
+  const { canEditAbsences } = usePermissions();
   const [groupId, setGroupId] = useState<number | null>(null);
   const [bans, setBans] = useState<HolidayBan[]>([]);
   const [loading, setLoading] = useState(false);
@@ -889,10 +894,12 @@ function SperrenTab({ groups }: SperrenTabProps) {
           <option value="">Alle Gruppen</option>
           {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
         </select>
+        {canEditAbsences && (
         <button onClick={() => setShowForm(!showForm)}
           className="px-4 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center gap-1.5">
           ＋ Urlaubssperre anlegen
         </button>
+        )}
       </div>
 
       {error && (
@@ -980,10 +987,12 @@ function SperrenTab({ groups }: SperrenTabProps) {
                     <td className="px-4 py-3 text-gray-600">{ban.reason || <span className="text-gray-300 italic">Kein Grund angegeben</span>}</td>
                     <td className="px-4 py-3 text-center text-gray-600 font-semibold">{days}</td>
                     <td className="px-4 py-3 text-center">
+                      {canEditAbsences && (
                       <button onClick={() => deleteBan(ban.id)} disabled={deleting === ban.id}
                         className="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50">
                         {deleting === ban.id ? '⟳' : '🗑️'}
                       </button>
+                      )}
                     </td>
                   </tr>
                 );

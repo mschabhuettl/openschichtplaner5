@@ -9,6 +9,8 @@ RUN cd frontend && npm run build
 # Stage 2: Production image
 FROM python:3.11-slim
 WORKDIR /app
+# Install curl for Docker HEALTHCHECK
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 COPY backend/requirements.txt ./backend/
 RUN pip install --no-cache-dir -r backend/requirements.txt
 COPY backend/ ./backend/

@@ -5,9 +5,9 @@ httpx>=0.24.0
 starlette>=0.27.0
 anyio>=3.7.0
 python-multipart>=0.0.7
-python-dotenv
-ruff
+python-dotenv>=1.0.0
+ruff>=0.1.0
 slowapi>=0.1.9
+fpdf2>=2.7.0
 pytest>=7.4.0
 pytest-cov>=4.1.0
-httpx>=0.24.0

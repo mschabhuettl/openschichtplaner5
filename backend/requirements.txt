@@ -7,3 +7,4 @@ anyio>=3.7.0
 python-multipart>=0.0.7
 python-dotenv
 ruff
+slowapi>=0.1.9

@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — 2026-02-27 (feature-33)
+
+### Hinzugefügt / Added
+
+#### 📋 Übergabe-Protokoll (`/uebergabe`)
+- **Neues Feature: Digitales Schicht-Übergabe-System** — ausgehende Schicht schreibt strukturierte Notizen für die eingehende Schicht
+- **Prioritäts-Stufen**: Normal 📝, Wichtig ⚠️, Kritisch 🚨 — farblich hervorgehoben
+- **Schnell-Tags**: Maschine, Personal, Sicherheit, Qualität, Übergabe, Wartung, Kunde
+- **Filter**: Nach Datum, Schicht und Status filtern
+- **Erledigt-Markierung**: Notizen als erledigt abhaken, Wiedereröffnen möglich
+- **Autor-Zuordnung**: Schichtleiter kann seinen Namen eintragen
+- **Backend-Endpoints**: `GET/POST /api/handover`, `PATCH/DELETE /api/handover/{id}`
+
+---
+
 ## [Unreleased] — 2026-02-27 (feature-32)
 
 ### Hinzugefügt / Added

@@ -59,6 +59,7 @@ const KompetenzMatrix     = lazy(() => import('./pages/KompetenzMatrix'));
 const NotfallPlan         = lazy(() => import('./pages/NotfallPlan'));
 const Leitwand            = lazy(() => import('./pages/Leitwand'));
 const Simulation          = lazy(() => import('./pages/Simulation'));
+const Uebergabe           = lazy(() => import('./pages/Uebergabe'));
 const DienstBoard         = lazy(() => import('./pages/DienstBoard'));
 const Login             = lazy(() => import('./pages/Login'));
 
@@ -90,6 +91,7 @@ const navItems: NavItem[] = [
   { id: 'konflikte', label: 'Konflikte', icon: '⚠️', path: '/konflikte', badge: true },
   // Planning views — Leser sees a subset
   { id: 'simulation', label: 'Simulation', icon: '🧪', group: 'Planung', path: '/simulation' },
+  { id: 'uebergabe', label: 'Übergabe', icon: '📋', group: 'Planung', path: '/uebergabe' },
   { id: 'notfall-plan', label: 'Notfall-Plan', icon: '🚨', group: 'Planung', path: '/notfall-plan' },
   { id: 'leitwand', label: 'Leitwand', icon: '📺', group: 'Planung', path: '/leitwand' },
   { id: 'dienst-board', label: 'Dienst-Board', icon: '🖥️', group: 'Planung', path: '/dienst-board' },
@@ -434,6 +436,7 @@ function AppInner() {
               <Route path="/simulation" element={<Simulation />} />
               <Route path="/notfall-plan" element={<NotfallPlan />} />
               <Route path="/leitwand" element={<Leitwand />} />
+              <Route path="/uebergabe" element={<Uebergabe />} />
             </Routes>
           </Suspense>
         </main>

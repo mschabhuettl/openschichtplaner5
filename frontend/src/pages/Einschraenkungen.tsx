@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Employee, ShiftType } from '../types';
 import { api } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -15,6 +16,7 @@ interface Restriction {
 const WEEKDAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
 export default function Einschraenkungen() {
+  const { canAdmin } = useAuth();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [shifts, setShifts] = useState<ShiftType[]>([]);
   const [restrictions, setRestrictions] = useState<Restriction[]>([]);
@@ -136,12 +138,12 @@ export default function Einschraenkungen() {
           >
             🖨️ <span className="hidden sm:inline">Drucken</span>
           </button>
-          <button
+          {canAdmin && <button
             onClick={() => setShowForm(!showForm)}
             className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center gap-2 shadow-sm"
           >
             ＋ Einschränkung anlegen
-          </button>
+          </button>}
         </div>
       </div>
 
@@ -297,14 +299,14 @@ export default function Einschraenkungen() {
                                 )}
                               </div>
                             </div>
-                            <button
+                            {canAdmin && <button
                               onClick={() => handleDelete(r.employee_id, r.shift_id, r.weekday)}
                               disabled={deleting === key}
                               className="ml-auto text-red-400 hover:text-red-600 text-sm px-2 py-1 rounded hover:bg-red-50 flex-shrink-0"
                               title="Einschränkung löschen"
                             >
                               {deleting === key ? '⟳' : '🗑️'}
-                            </button>
+                            </button>}
                           </div>
                         );
                       })}

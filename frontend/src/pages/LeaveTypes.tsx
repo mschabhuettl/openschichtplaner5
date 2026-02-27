@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { LeaveType } from '../types';
 import { useToast } from '../hooks/useToast';
+import { useAuth } from '../contexts/AuthContext';
 
 function hexToBGR(hex: string): number {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -29,6 +30,7 @@ const EMPTY_FORM: LeaveTypeForm = {
 };
 
 export default function LeaveTypes() {
+  const { canAdmin } = useAuth();
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -120,12 +122,12 @@ export default function LeaveTypes() {
           >
             🖨️ <span className="hidden sm:inline">Drucken</span>
           </button>
-          <button
+          {canAdmin && <button
             onClick={openCreate}
             className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
           >
             + Neu
-          </button>
+          </button>}
         </div>
       </div>
       {loading ? (
@@ -169,8 +171,8 @@ export default function LeaveTypes() {
                   </td>
                   <td className="px-4 py-2 text-center">
                     <div className="flex gap-1 justify-center">
-                      <button onClick={() => openEdit(lt)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>
-                      <button onClick={() => handleDelete(lt)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Ausblenden</button>
+                      {canAdmin && <button onClick={() => openEdit(lt)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>}
+                      {canAdmin && <button onClick={() => handleDelete(lt)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Ausblenden</button>}
                     </div>
                   </td>
                 </tr>

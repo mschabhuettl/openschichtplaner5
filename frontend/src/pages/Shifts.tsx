@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
+import { useAuth } from '../contexts/AuthContext';
 
 // Convert HTML #RRGGBB to BGR integer (Windows color storage)
 function hexToBGR(hex: string): number {
@@ -57,6 +58,7 @@ const EMPTY_FORM: ShiftForm = {
 };
 
 export default function Shifts() {
+  const { canAdmin } = useAuth();
   const [shifts, setShifts] = useState<ShiftType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -189,12 +191,12 @@ export default function Shifts() {
           >
             🖨️ <span className="hidden sm:inline">Drucken</span>
           </button>
-          <button
+          {canAdmin && <button
             onClick={openCreate}
             className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
           >
             + Neu
-          </button>
+          </button>}
         </div>
       </div>
       {loading ? (
@@ -253,8 +255,8 @@ export default function Shifts() {
                       </td>
                       <td className="px-4 py-2 text-center">
                         <div className="flex gap-1 justify-center">
-                          <button onClick={() => openEdit(s)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>
-                          <button onClick={() => handleDelete(s)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Ausblenden</button>
+                          {canAdmin && <button onClick={() => openEdit(s)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>}
+                          {canAdmin && <button onClick={() => handleDelete(s)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Ausblenden</button>}
                         </div>
                       </td>
                     </tr>

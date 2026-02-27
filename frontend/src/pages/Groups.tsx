@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { Group } from '../types';
 import { useToast } from '../hooks/useToast';
+import { useAuth } from '../contexts/AuthContext';
 
 interface GroupForm {
   NAME: string;
@@ -48,6 +49,7 @@ function bgrToHex(bgr: number | undefined): string {
 }
 
 export default function Groups() {
+  const { canAdmin } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -173,7 +175,7 @@ export default function Groups() {
           <span className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full flex-shrink-0">
             {g.member_count ?? 0} MA
           </span>
-          <div className="flex gap-1 flex-shrink-0">
+          {canAdmin && <div className="flex gap-1 flex-shrink-0">
             <button
               onClick={() => openEdit(g)}
               className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 hidden sm:block"
@@ -192,7 +194,7 @@ export default function Groups() {
               className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-base leading-none sm:hidden"
               title="Ausblenden"
             >🗑️</button>
-          </div>
+          </div>}
         </div>
         {children.map(c => renderGroup(c, depth + 1))}
       </div>
@@ -222,12 +224,12 @@ export default function Groups() {
             <option value="name-desc">Name Z → A ↓</option>
             <option value="short-asc">Kürzel A → Z ↑</option>
           </select>
-          <button
+          {canAdmin && <button
             onClick={openCreate}
             className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
           >
             + Neu
-          </button>
+          </button>}
           <button
             onClick={() => window.print()}
             className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"

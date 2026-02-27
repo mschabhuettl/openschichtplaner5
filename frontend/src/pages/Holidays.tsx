@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { Holiday } from '../types';
 import { useToast } from '../hooks/useToast';
+import { useAuth } from '../contexts/AuthContext';
 
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
@@ -67,6 +68,7 @@ function getAustrianHolidays(year: number): { date: string; name: string; interv
 }
 
 export default function Holidays() {
+  const { canAdmin } = useAuth();
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const currentYear = new Date().getFullYear();
   const [year, setYear] = useState(currentYear);
@@ -196,12 +198,12 @@ export default function Holidays() {
           >
             {importing ? '⟳ Importiere...' : '🇦🇹 Österreich importieren'}
           </button>
-          <button
+          {canAdmin && <button
             onClick={openCreate}
             className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
           >
             + Neu
-          </button>
+          </button>}
         </div>
       </div>
       {loading ? (
@@ -235,8 +237,8 @@ export default function Holidays() {
                   </td>
                   <td className="px-4 py-2 text-center">
                     <div className="flex gap-1 justify-center">
-                      <button onClick={() => openEdit(h)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>
-                      <button onClick={() => handleDelete(h)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Löschen</button>
+                      {canAdmin && <button onClick={() => openEdit(h)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>}
+                      {canAdmin && <button onClick={() => handleDelete(h)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Löschen</button>}
                     </div>
                   </td>
                 </tr>

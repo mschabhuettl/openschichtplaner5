@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import type { Restriction } from '../api/client';
 import type { Employee, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
+import { useAuth } from '../contexts/AuthContext';
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
@@ -184,6 +185,7 @@ function listToWorkdays(list: boolean[]): string {
 }
 
 export default function Employees() {
+  const { canAdmin } = useAuth();
   const navigate = useNavigate();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [search, setSearch] = useState('');
@@ -444,12 +446,12 @@ export default function Employees() {
           >
             🖨️ Drucken
           </button>
-          <button
+          {canAdmin && <button
             onClick={openCreate}
             className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
           >
             + Neu
-          </button>
+          </button>}
         </div>
       </div>
       {loading ? (
@@ -494,8 +496,8 @@ export default function Employees() {
                     <td className="px-4 py-2 text-center">
                       <div className="flex gap-1 justify-center">
                         <button onClick={() => navigate(`/mitarbeiter/${emp.ID}`)} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs hover:bg-purple-200">🪪 Profil</button>
-                        <button onClick={() => openEdit(emp)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>
-                        <button onClick={() => handleDelete(emp)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Ausblenden</button>
+                        {canAdmin && <button onClick={() => openEdit(emp)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>}
+                        {canAdmin && <button onClick={() => handleDelete(emp)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Ausblenden</button>}
                       </div>
                     </td>
                   </tr>

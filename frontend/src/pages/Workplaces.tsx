@@ -3,6 +3,7 @@ import { api } from '../api/client';
 import type { WorkplaceEmployee } from '../api/client';
 import type { Workplace, Employee } from '../types';
 import { useToast } from '../hooks/useToast';
+import { useAuth } from '../contexts/AuthContext';
 
 function hexToBGR(hex: string): number {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -26,6 +27,7 @@ const EMPTY_FORM: WorkplaceForm = {
 };
 
 export default function Workplaces() {
+  const { canAdmin } = useAuth();
   const [workplaces, setWorkplaces] = useState<Workplace[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -182,12 +184,12 @@ export default function Workplaces() {
             >
               🖨️ <span className="hidden sm:inline">Drucken</span>
             </button>
-            <button
+            {canAdmin && <button
               onClick={openCreate}
               className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
             >
               + Neu
-            </button>
+            </button>}
           </div>
         </div>
         {loading ? (

@@ -194,6 +194,30 @@ npm run dev
 
 Öffne dann [`http://localhost:5173`](http://localhost:5173) im Browser.
 
+### 🐳 Quick Start mit Docker
+
+```bash
+git clone https://github.com/your-org/openschichtplaner5.git
+cd openschichtplaner5
+
+# .env anpassen (SP5_DB_PATH zeigt auf vorhandene DBF-Dateien)
+cp backend/.env.example backend/.env
+# nano backend/.env  ← SP5_DB_PATH setzen!
+
+docker-compose up
+```
+
+Öffne dann [`http://localhost:8000`](http://localhost:8000) im Browser.
+
+### Konfiguration (.env)
+
+```env
+# backend/.env
+SP5_DB_PATH=/pfad/zu/sp5_db/Daten    # Pflicht: Pfad zu den DBF-Dateien
+ALLOWED_ORIGINS=http://localhost:5173  # CORS Origins (kommagetrennt)
+DEBUG=false
+```
+
 ### Hintergrundbetrieb (Linux)
 
 ```bash
@@ -205,6 +229,18 @@ nohup sh -c 'SP5_DB_PATH=/pfad/zu/Daten uvicorn api.main:app --host 0.0.0.0 --po
 cd frontend && npm run build
 nohup npx serve dist -p 5173 > /tmp/sp5-frontend.log 2>&1 &
 ```
+
+---
+
+## Benutzerrollen
+
+| Rolle | Rechte |
+|-------|--------|
+| **Admin** | Vollzugriff: alle Stammdaten, Benutzerverwaltung, Backup, Import, Einstellungen |
+| **Planer** | Dienstplanung (Schedule, Abwesenheiten, Notizen, Übergaben, Wünsche) + Leserechte auf alle Stammdaten |
+| **Leser** | Nur Lesezugriff — alle Schreiboperationen sind gesperrt (403) |
+
+Die Rollen werden sowohl im Backend (API-Ebene, HTTP 403) als auch im Frontend (Buttons ausgeblendet) durchgesetzt.
 
 ---
 

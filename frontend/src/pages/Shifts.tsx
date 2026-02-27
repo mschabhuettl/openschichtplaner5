@@ -117,6 +117,15 @@ export default function Shifts() {
   };
 
   const handleSave = async () => {
+    // Pflichtfeld-Validierung
+    if (!form.NAME.trim()) {
+      setError('Bezeichnung ist ein Pflichtfeld.');
+      return;
+    }
+    if (!form.SHORTNAME.trim()) {
+      setError('Kürzel ist ein Pflichtfeld.');
+      return;
+    }
     setSaving(true);
     setError(null);
 
@@ -342,18 +351,20 @@ export default function Shifts() {
                 <input
                   type="text"
                   value={form.NAME}
-                  onChange={e => setForm(f => ({ ...f, NAME: e.target.value }))}
-                  className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={e => { setForm(f => ({ ...f, NAME: e.target.value })); if (error?.includes('Bezeichnung')) setError(null); }}
+                  className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 ${!form.NAME.trim() && error?.includes('Bezeichnung') ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-500'}`}
                 />
+                {!form.NAME.trim() && error?.includes('Bezeichnung') && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Kürzel</label>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Kürzel *</label>
                 <input
                   type="text"
                   value={form.SHORTNAME}
-                  onChange={e => setForm(f => ({ ...f, SHORTNAME: e.target.value }))}
-                  className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={e => { setForm(f => ({ ...f, SHORTNAME: e.target.value })); if (error?.includes('Kürzel')) setError(null); }}
+                  className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 ${!form.SHORTNAME.trim() && error?.includes('Kürzel') ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-500'}`}
                 />
+                {!form.SHORTNAME.trim() && error?.includes('Kürzel') && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1">Farbe</label>

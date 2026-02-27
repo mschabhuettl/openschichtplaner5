@@ -127,6 +127,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Auto-logout when API returns 401
+  useEffect(() => {
+    const handler = () => {
+      localStorage.removeItem(SESSION_KEY);
+      setToken(null);
+      setUser(null);
+      setIsDevMode(false);
+    };
+    window.addEventListener('sp5:unauthorized', handler);
+    return () => window.removeEventListener('sp5:unauthorized', handler);
+  }, []);
+
   const login = async (username: string, password: string): Promise<void> => {
     const BASE = import.meta.env.VITE_API_URL ?? '';
     const res = await fetch(`${BASE}/api/auth/login`, {

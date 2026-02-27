@@ -7,6 +7,7 @@ import { ToastContainer } from './components/Toast';
 import { useToast } from './hooks/useToast';
 import SpotlightSearch from './components/SpotlightSearch';
 import WarningsCenter from './components/WarningsCenter';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Lazy-loaded pages — each page group is a separate chunk
 const Dashboard         = lazy(() => import('./pages/Dashboard'));
@@ -66,6 +67,7 @@ const Simulation          = lazy(() => import('./pages/Simulation'));
 const Uebergabe           = lazy(() => import('./pages/Uebergabe'));
 const DienstBoard         = lazy(() => import('./pages/DienstBoard'));
 const Login             = lazy(() => import('./pages/Login'));
+const NotFound          = lazy(() => import('./pages/NotFound'));
 
 /** Simple loading indicator shown while a lazy chunk is fetching */
 function PageLoader() {
@@ -499,6 +501,7 @@ function AppInner() {
               <Route path="/schichtbriefing" element={<SchichtBriefing />} />
               <Route path="/onboarding" element={<OnboardingWizard />} />
               <Route path="/auditlog" element={<AuditLog />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
         </main>
@@ -541,15 +544,17 @@ function GlobalToastContainer() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <ToastProvider>
-        <BrowserRouter>
-          <AuthProvider>
-            <AuthGate />
-          </AuthProvider>
-        </BrowserRouter>
-        <GlobalToastContainer />
-      </ToastProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <ToastProvider>
+          <BrowserRouter>
+            <AuthProvider>
+              <AuthGate />
+            </AuthProvider>
+          </BrowserRouter>
+          <GlobalToastContainer />
+        </ToastProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

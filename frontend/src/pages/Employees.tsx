@@ -347,6 +347,15 @@ export default function Employees() {
   };
 
   const handleSave = async () => {
+    // Pflichtfeld-Validierung
+    if (!form.NAME.trim()) {
+      setError('Nachname ist ein Pflichtfeld.');
+      return;
+    }
+    if (!form.SHORTNAME.trim()) {
+      setError('Kürzel ist ein Pflichtfeld.');
+      return;
+    }
     setSaving(true);
     setError(null);
     const { CFGLABEL_HEX, CBKLABEL_HEX, CBKSCHED_HEX, ...rest } = form;
@@ -645,8 +654,9 @@ export default function Employees() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Nachname *</label>
-                    <input type="text" value={form.NAME} onChange={e => setForm(f => ({ ...f, NAME: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <input type="text" value={form.NAME} onChange={e => { setForm(f => ({ ...f, NAME: e.target.value })); if (error?.includes('Nachname')) setError(null); }}
+                      className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 ${!form.NAME.trim() && error?.includes('Nachname') ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-500'}`} />
+                    {!form.NAME.trim() && error?.includes('Nachname') && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Vorname</label>
@@ -654,8 +664,8 @@ export default function Employees() {
                       className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Kürzel</label>
-                    <input type="text" value={form.SHORTNAME} onChange={e => setForm(f => ({ ...f, SHORTNAME: e.target.value }))}
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">Kürzel *</label>
+                    <input type="text" value={form.SHORTNAME} onChange={e => { setForm(f => ({ ...f, SHORTNAME: e.target.value })); if (error?.includes('Kürzel')) setError(null); }}
                       placeholder={
                         (() => {
                           const fn = (form.FIRSTNAME || '').trim();
@@ -666,7 +676,8 @@ export default function Employees() {
                           return 'z.B. HMU';
                         })()
                       }
-                      className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 ${!form.SHORTNAME.trim() && error?.includes('Kürzel') ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-500'}`} />
+                    {!form.SHORTNAME.trim() && error?.includes('Kürzel') && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Personalnr.</label>

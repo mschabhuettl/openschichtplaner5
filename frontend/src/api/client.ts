@@ -371,6 +371,11 @@ export interface Period {
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
+/** Fired when any API call returns 401 — AuthContext listens and logs the user out. */
+function dispatchUnauthorized() {
+  window.dispatchEvent(new CustomEvent('sp5:unauthorized'));
+}
+
 /** Read auth token from localStorage (set by AuthContext). */
 function getAuthToken(): string | null {
   try {
@@ -389,9 +394,17 @@ function authHeaders(extra: Record<string, string> = {}): Record<string, string>
   return token ? { ...extra, 'X-Auth-Token': token } : extra;
 }
 
-async function fetchJSON<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`);
+function handleResponseError(res: Response): void {
+  if (res.status === 401) {
+    dispatchUnauthorized();
+    throw new Error('Sitzung abgelaufen. Bitte erneut anmelden.');
+  }
   if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
+}
+
+async function fetchJSON<T>(path: string): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, { headers: authHeaders() });
+  handleResponseError(res);
   return res.json();
 }
 
@@ -401,7 +414,7 @@ async function postJSON<T>(path: string, body: unknown): Promise<T> {
     headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
+  handleResponseError(res);
   return res.json();
 }
 
@@ -411,7 +424,7 @@ async function putJSON<T>(path: string, body: unknown): Promise<T> {
     headers: authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
+  handleResponseError(res);
   return res.json();
 }
 
@@ -420,7 +433,7 @@ async function deleteReq<T>(path: string): Promise<T> {
     method: 'DELETE',
     headers: authHeaders(),
   });
-  if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
+  handleResponseError(res);
   return res.json();
 }
 
@@ -430,7 +443,7 @@ async function patchJSON<T>(path: string, body: unknown): Promise<T> {
     headers: { 'Content-Type': 'application/json', ...authHeaders() },
     body: JSON.stringify(body),
   });
-  if (!res.ok) throw new Error(`API error: ${res.status} ${res.statusText}`);
+  handleResponseError(res);
   return res.json();
 }
 

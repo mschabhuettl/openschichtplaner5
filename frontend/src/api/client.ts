@@ -382,7 +382,7 @@ function getAuthToken(): string | null {
     const raw = localStorage.getItem('sp5_session');
     if (!raw) return null;
     const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
-    return session.devMode ? null : (session.token ?? null);
+    return session.devMode ? '__dev_mode__' : (session.token ?? null);
   } catch {
     return null;
   }

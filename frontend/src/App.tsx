@@ -51,8 +51,13 @@ const Jahresrueckblick   = lazy(() => import('./pages/Jahresrueckblick'));
 const Druckvorschau      = lazy(() => import('./pages/Druckvorschau'));
 const Wochenansicht      = lazy(() => import('./pages/Wochenansicht'));
 const RotationsAnalyse   = lazy(() => import('./pages/RotationsAnalyse'));
+const VerfügbarkeitsMatrix = lazy(() => import('./pages/VerfügbarkeitsMatrix'));
 const KapazitaetsForecast = lazy(() => import('./pages/KapazitaetsForecast'));
 const QualitaetsBericht   = lazy(() => import('./pages/QualitaetsBericht'));
+const SchichtKalibrator   = lazy(() => import('./pages/SchichtKalibrator'));
+const KompetenzMatrix     = lazy(() => import('./pages/KompetenzMatrix'));
+const NotfallPlan         = lazy(() => import('./pages/NotfallPlan'));
+const DienstBoard         = lazy(() => import('./pages/DienstBoard'));
 const Login             = lazy(() => import('./pages/Login'));
 
 /** Simple loading indicator shown while a lazy chunk is fetching */
@@ -82,7 +87,10 @@ const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/' },
   { id: 'konflikte', label: 'Konflikte', icon: '⚠️', path: '/konflikte', badge: true },
   // Planning views — Leser sees a subset
+  { id: 'notfall-plan', label: 'Notfall-Plan', icon: '🚨', group: 'Planung', path: '/notfall-plan' },
+  { id: 'dienst-board', label: 'Dienst-Board', icon: '🖥️', group: 'Planung', path: '/dienst-board' },
   { id: 'wochenansicht', label: 'Wochenansicht', icon: '🗃️', group: 'Planung', path: '/wochenansicht' },
+  { id: 'verfuegbarkeits-matrix', label: 'Verfügbarkeits-Matrix', icon: '🧩', group: 'Planung', path: '/verfuegbarkeits-matrix' },
   { id: 'schedule', label: 'Dienstplan', icon: '📅', group: 'Planung', path: '/schedule' },
   { id: 'einsatzplan', label: 'Einsatzplan', icon: '📋', group: 'Planung', path: '/einsatzplan', roles: ['Admin', 'Planer'] },
   { id: 'jahresuebersicht', label: 'Jahresübersicht', icon: '📆', group: 'Planung', path: '/jahresuebersicht' },
@@ -108,6 +116,8 @@ const navItems: NavItem[] = [
   { id: 'rotations-analyse', label: 'Rotations-Analyse', icon: '🔄', group: 'Berichte', path: '/rotations-analyse' },
   { id: 'kapazitaets-forecast', label: 'Kapazitäts-Forecast', icon: '📊', group: 'Berichte', path: '/kapazitaets-forecast' },
   { id: 'qualitaets-bericht', label: 'Qualitätsbericht', icon: '📋', group: 'Berichte', path: '/qualitaets-bericht' },
+  { id: 'schicht-kalibrator', label: 'Schicht-Kalibrator', icon: '⚖️', group: 'Berichte', path: '/schicht-kalibrator' },
+  { id: 'kompetenz-matrix', label: 'Kompetenz-Matrix', icon: '🎓', group: 'Berichte', path: '/kompetenz-matrix' },
   { id: 'berichte', label: 'Berichte', icon: '📊', group: 'Berichte', path: '/berichte' },
   { id: 'export', label: 'Export', icon: '⬇️', group: 'Berichte', path: '/export', roles: ['Admin', 'Planer'] },
   { id: 'import', label: 'Import', icon: '⬆️', group: 'Berichte', path: '/import', roles: ['Admin'] },
@@ -409,10 +419,15 @@ function AppInner() {
               <Route path="/einstellungen" element={<Einstellungen />} />
               <Route path="/protokoll" element={<Protokoll />} />
               <Route path="/druckvorschau" element={<Druckvorschau />} />
+              <Route path="/dienst-board" element={<DienstBoard />} />
               <Route path="/wochenansicht" element={<Wochenansicht />} />
+              <Route path="/verfuegbarkeits-matrix" element={<VerfügbarkeitsMatrix />} />
               <Route path="/rotations-analyse" element={<RotationsAnalyse />} />
               <Route path="/kapazitaets-forecast" element={<KapazitaetsForecast />} />
               <Route path="/qualitaets-bericht" element={<QualitaetsBericht />} />
+              <Route path="/schicht-kalibrator" element={<SchichtKalibrator />} />
+              <Route path="/kompetenz-matrix" element={<KompetenzMatrix />} />
+              <Route path="/notfall-plan" element={<NotfallPlan />} />
             </Routes>
           </Suspense>
         </main>

@@ -16,6 +16,11 @@ type CycleExceptionRecord = {
 // ─── Weekday Labels ────────────────────────────────────────
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
+function formatDateDE(iso: string): string {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
 // ─── Cycle Preview Component ──────────────────────────────
 function CycleWeekGrid({ schedule }: { schedule: CycleDay[][] }) {
   return (
@@ -721,7 +726,7 @@ export default function Schichtmodell() {
   };
 
   const handleDeleteException = async (exc: CycleExceptionRecord) => {
-    if (!confirm(`Ausnahme für ${getEmployeeName(exc.employee_id)} am ${exc.date} wirklich löschen?`)) return;
+    if (!confirm(`Ausnahme für ${getEmployeeName(exc.employee_id)} am ${formatDateDE(exc.date)} wirklich löschen?`)) return;
     try {
       await api.deleteCycleException(exc.id);
       setExceptions(prev => prev.filter(e => e.id !== exc.id));
@@ -1024,7 +1029,7 @@ export default function Schichtmodell() {
                         <div className="text-xs text-gray-400">MA #{exc.employee_id}</div>
                       </td>
                       <td className="px-4 py-2.5 text-center">
-                        <span className="font-mono text-sm text-gray-700">{exc.date}</span>
+                        <span className="font-mono text-sm text-gray-700">{formatDateDE(exc.date)}</span>
                       </td>
                       <td className="px-4 py-2.5 text-center">
                         {exc.type === 0 ? (

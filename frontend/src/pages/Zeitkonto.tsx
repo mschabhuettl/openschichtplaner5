@@ -16,6 +16,11 @@ const MONTH_NAMES_FULL = [
 type SortKey = 'name' | 'target' | 'actual' | 'diff' | 'saldo';
 type SortDir = 'asc' | 'desc';
 
+/** Format hours with German decimal comma: 167.5 → "167,5" */
+function fmtH(h: number, decimals = 1): string {
+  return h.toLocaleString('de-AT', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
 function SaldoBadge({ value, size = 'md' }: { value: number; size?: 'sm' | 'md' }) {
   const pos = value >= 0;
   const cls = pos
@@ -24,7 +29,7 @@ function SaldoBadge({ value, size = 'md' }: { value: number; size?: 'sm' | 'md' 
   const textCls = size === 'sm' ? 'text-xs px-1.5 py-0.5' : 'text-sm px-2 py-0.5';
   return (
     <span className={`rounded font-semibold whitespace-nowrap ${cls} ${textCls}`}>
-      {pos ? '+' : ''}{value.toFixed(1)}h
+      {pos ? '+' : ''}{fmtH(value)}h
     </span>
   );
 }
@@ -110,27 +115,27 @@ function AnnualStatementModal({
             <div className="flex justify-between items-center p-2 bg-blue-50 rounded">
               <span className="text-sm text-gray-600">Übertrag aus Vorjahr</span>
               <span className={`font-semibold text-sm ${result.carry_in >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {result.carry_in >= 0 ? '+' : ''}{result.carry_in.toFixed(1)}h
+                {result.carry_in >= 0 ? '+' : ''}{fmtH(result.carry_in)}h
               </span>
             </div>
           )}
           <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
             <span className="text-sm text-gray-600">Jahressaldo gesamt</span>
             <span className={`font-semibold ${result.total_saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {result.total_saldo >= 0 ? '+' : ''}{result.total_saldo.toFixed(1)}h
+              {result.total_saldo >= 0 ? '+' : ''}{fmtH(result.total_saldo)}h
             </span>
           </div>
           <div className="flex justify-between items-center p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <span className="text-sm font-semibold text-gray-700">Übertrag für {result.next_year}</span>
             <span className={`text-lg font-bold ${result.saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {result.saldo >= 0 ? '+' : ''}{result.saldo.toFixed(1)}h
+              {result.saldo >= 0 ? '+' : ''}{fmtH(result.saldo)}h
             </span>
           </div>
         </div>
         {applyError && <div className="mb-3 p-2 bg-red-50 text-red-700 rounded text-sm">{applyError}</div>}
         {applied ? (
           <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 mb-3">
-            ✓ Übertrag von {result.saldo.toFixed(1)}h wurde für {result.next_year} eingetragen.
+            ✓ Übertrag von {fmtH(result.saldo)}h wurde für {result.next_year} eingetragen.
           </div>
         ) : null}
         <div className="flex gap-2 justify-end">
@@ -204,7 +209,7 @@ function DetailPanel({
           <div className="flex items-center gap-2">
             {carryForward !== null && carryForward !== 0 && (
               <span className={`text-sm px-2 py-0.5 rounded font-semibold ${carryForward >= 0 ? 'bg-blue-100 text-blue-700' : 'bg-orange-100 text-orange-700'}`}>
-                Übertrag: {carryForward >= 0 ? '+' : ''}{carryForward.toFixed(1)}h
+                Übertrag: {carryForward >= 0 ? '+' : ''}{fmtH(carryForward)}h
               </span>
             )}
             <button
@@ -237,31 +242,31 @@ function DetailPanel({
         {/* Summary row */}
         <div className="grid grid-cols-4 gap-3 p-4 border-b border-gray-100 bg-gray-50">
           <div className="text-center">
-            <div className="text-lg font-bold text-gray-600">{detail.total_target_hours.toFixed(0)}h</div>
+            <div className="text-lg font-bold text-gray-600">{fmtH(detail.total_target_hours, 0)}h</div>
             <div className="text-xs text-gray-400">Soll</div>
           </div>
           <div className="text-center">
-            <div className="text-lg font-bold text-blue-700">{detail.total_actual_hours.toFixed(0)}h</div>
+            <div className="text-lg font-bold text-blue-700">{fmtH(detail.total_actual_hours, 0)}h</div>
             <div className="text-xs text-gray-400">Ist</div>
           </div>
           {carryForward !== null && carryForward !== 0 ? (
             <div className="text-center">
               <div className={`text-lg font-bold ${carryForward >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
-                {carryForward >= 0 ? '+' : ''}{carryForward.toFixed(1)}h
+                {carryForward >= 0 ? '+' : ''}{fmtH(carryForward)}h
               </div>
               <div className="text-xs text-blue-400">Übertrag (inkl.)</div>
             </div>
           ) : (
             <div className="text-center">
               <div className={`text-lg font-bold ${detail.total_difference >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                {detail.total_difference >= 0 ? '+' : ''}{detail.total_difference.toFixed(1)}h
+                {detail.total_difference >= 0 ? '+' : ''}{fmtH(detail.total_difference)}h
               </div>
               <div className="text-xs text-gray-400">Differenz</div>
             </div>
           )}
           <div className="text-center">
             <div className={`text-lg font-bold ${detail.total_saldo >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-              {detail.total_saldo >= 0 ? '+' : ''}{detail.total_saldo.toFixed(1)}h
+              {detail.total_saldo >= 0 ? '+' : ''}{fmtH(detail.total_saldo)}h
             </div>
             <div className="text-xs text-gray-400">Jahressaldo</div>
           </div>
@@ -291,10 +296,10 @@ function DetailPanel({
                     {MONTH_NAMES_FULL[mo.month]}
                   </td>
                   <td className="px-3 py-2 border border-gray-100 text-right text-gray-500">
-                    {mo.target_hours.toFixed(1)}h
+                    {fmtH(mo.target_hours)}h
                   </td>
                   <td className="px-3 py-2 border border-gray-100 text-right font-semibold text-gray-700">
-                    {mo.actual_hours.toFixed(1)}h
+                    {fmtH(mo.actual_hours)}h
                   </td>
                   <td className="px-3 py-2 border border-gray-100 text-right">
                     {mo.absence_days > 0 ? (
@@ -311,7 +316,7 @@ function DetailPanel({
                   <td className="px-3 py-2 border border-gray-100 text-right">
                     {mo.adjustment !== 0 ? (
                       <span className={`text-xs font-semibold ${mo.adjustment >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {mo.adjustment >= 0 ? '+' : ''}{mo.adjustment.toFixed(1)}h
+                        {mo.adjustment >= 0 ? '+' : ''}{fmtH(mo.adjustment)}h
                       </span>
                     ) : (
                       <span className="text-gray-300">—</span>
@@ -326,8 +331,8 @@ function DetailPanel({
             <tfoot>
               <tr className="bg-slate-100 font-bold border-t-2 border-gray-300">
                 <td className="px-3 py-2 border border-gray-200">Gesamt</td>
-                <td className="px-3 py-2 border border-gray-200 text-right">{detail.total_target_hours.toFixed(1)}h</td>
-                <td className="px-3 py-2 border border-gray-200 text-right">{detail.total_actual_hours.toFixed(1)}h</td>
+                <td className="px-3 py-2 border border-gray-200 text-right">{fmtH(detail.total_target_hours)}h</td>
+                <td className="px-3 py-2 border border-gray-200 text-right">{fmtH(detail.total_actual_hours)}h</td>
                 <td className="px-3 py-2 border border-gray-200" />
                 <td className="px-3 py-2 border border-gray-200">
                   <SaldoBar value={detail.total_difference} max={Math.max(Math.abs(detail.total_difference), 1)} />
@@ -335,7 +340,7 @@ function DetailPanel({
                 <td className="px-3 py-2 border border-gray-200 text-right">
                   {detail.total_adjustment !== 0 ? (
                     <span className={`text-sm font-bold ${detail.total_adjustment >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {detail.total_adjustment >= 0 ? '+' : ''}{detail.total_adjustment.toFixed(1)}h
+                      {detail.total_adjustment >= 0 ? '+' : ''}{fmtH(detail.total_adjustment)}h
                     </span>
                   ) : (
                     <span className="text-gray-300">—</span>
@@ -508,16 +513,16 @@ export default function Zeitkonto() {
       {summary && (
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
           <div className="bg-white rounded-lg border p-3 shadow-sm text-center">
-            <div className="text-xl font-bold text-gray-600">{summary.total_target_hours.toFixed(0)}h</div>
+            <div className="text-xl font-bold text-gray-600">{fmtH(summary.total_target_hours, 0)}h</div>
             <div className="text-xs text-gray-400">Gesamt Soll</div>
           </div>
           <div className="bg-white rounded-lg border p-3 shadow-sm text-center">
-            <div className="text-xl font-bold text-blue-700">{summary.total_actual_hours.toFixed(0)}h</div>
+            <div className="text-xl font-bold text-blue-700">{fmtH(summary.total_actual_hours, 0)}h</div>
             <div className="text-xs text-gray-400">Gesamt Ist</div>
           </div>
           <div className={`rounded-lg border p-3 shadow-sm text-center ${summary.total_saldo >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
             <div className={`text-xl font-bold ${summary.total_saldo >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-              {summary.total_saldo >= 0 ? '+' : ''}{summary.total_saldo.toFixed(0)}h
+              {summary.total_saldo >= 0 ? '+' : ''}{fmtH(summary.total_saldo, 0)}h
             </div>
             <div className={`text-xs ${summary.total_saldo >= 0 ? 'text-green-600' : 'text-red-600'}`}>Gesamtsaldo</div>
           </div>
@@ -567,14 +572,14 @@ export default function Zeitkonto() {
                   {r.employee_name}
                 </td>
                 <td className="px-3 py-2 border border-gray-100 text-right text-gray-500">
-                  {r.total_target_hours.toFixed(1)}h
+                  {fmtH(r.total_target_hours)}h
                 </td>
                 <td className="px-3 py-2 border border-gray-100 text-right font-semibold text-gray-700">
-                  {r.total_actual_hours.toFixed(1)}h
+                  {fmtH(r.total_actual_hours)}h
                 </td>
                 <td className="px-3 py-2 border border-gray-100 text-right">
                   <span className={`font-semibold text-sm ${r.total_difference >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {r.total_difference >= 0 ? '+' : ''}{r.total_difference.toFixed(1)}h
+                    {r.total_difference >= 0 ? '+' : ''}{fmtH(r.total_difference)}h
                   </span>
                 </td>
                 <td className="px-3 py-2 border border-gray-100">
@@ -620,15 +625,15 @@ export default function Zeitkonto() {
                   Gesamt ({sorted.length} MA)
                 </td>
                 <td className="px-3 py-2 border border-gray-200 text-right">
-                  {summary.total_target_hours.toFixed(1)}h
+                  {fmtH(summary.total_target_hours)}h
                 </td>
                 <td className="px-3 py-2 border border-gray-200 text-right">
-                  {summary.total_actual_hours.toFixed(1)}h
+                  {fmtH(summary.total_actual_hours)}h
                 </td>
                 <td className="px-3 py-2 border border-gray-200 text-right">
                   <span className={`font-bold text-sm ${(summary.total_actual_hours - summary.total_target_hours) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {(summary.total_actual_hours - summary.total_target_hours) >= 0 ? '+' : ''}
-                    {(summary.total_actual_hours - summary.total_target_hours).toFixed(1)}h
+                    {fmtH((summary.total_actual_hours - summary.total_target_hours))}h
                   </span>
                 </td>
                 <td className="px-3 py-2 border border-gray-200">

@@ -94,7 +94,7 @@ export default function WarningsCenter() {
       const year = now.getFullYear();
       const month = now.getMonth() + 1;
       const res = await fetch(`${BASE}/api/warnings?year=${year}&month=${month}`);
-      if (!res.ok) throw new Error('fetch failed');
+      if (!res.ok) throw new Error('Laden fehlgeschlagen');
       const data: WarningsResponse = await res.json();
       setWarnings(data.warnings ?? []);
     } catch {

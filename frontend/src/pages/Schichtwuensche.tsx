@@ -21,6 +21,11 @@ const MONTH_NAMES = [
 ];
 const WD_ABBR = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 
+function formatDateDE(iso: string): string {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
 function pad(n: number) { return String(n).padStart(2,'0'); }
 
 function daysInMonth(year: number, month: number) {
@@ -371,7 +376,7 @@ export default function Schichtwuensche() {
                     return (
                       <tr key={w.id} className={`border-t ${isDark ? 'border-gray-700' : 'border-gray-100'} ${i % 2 === 0 ? '' : (isDark ? 'bg-gray-750' : 'bg-gray-50/50')}`}>
                         <td className="px-4 py-2">
-                          <span className="font-medium">{w.date}</span>
+                          <span className="font-medium">{formatDateDE(w.date)}</span>
                           <span className={`ml-1 text-xs opacity-60`}>{WD_ABBR[jsWd]}</span>
                         </td>
                         <td className="px-4 py-2">

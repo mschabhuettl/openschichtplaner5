@@ -43,6 +43,22 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run backend tests
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio httpx
+          python -m pytest tests/ -v --ignore=tests/test_business_logic.py -q
+        env:
+          SP5_DB_PATH: /tmp/test_db
+          SP5_REAL_DB: /tmp/test_db
+
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3

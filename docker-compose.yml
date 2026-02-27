@@ -1,10 +1,60 @@
 services:
+
+  # ----------------------------------------------------------------------------
+  # sp5 — Hauptanwendung (Backend + eingebettetes Frontend)
+  # ----------------------------------------------------------------------------
   sp5:
     build: .
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data
+      # Persistenter Named-Volume für Datenbankdaten
+      - sp5_data:/app/sp5_db
+      # Logs auf dem Host einsehbar (optional: auskommentieren)
+      - ./logs:/app/logs
     env_file:
-      - backend/.env
+      - backend/.env.docker
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  # ----------------------------------------------------------------------------
+  # sp5-dev — Entwicklungsmodus mit Hot-Reload (nur mit --profile dev starten)
+  # Verwendung: docker compose --profile dev up
+  # ----------------------------------------------------------------------------
+  sp5-dev:
+    build: .
+    profiles: ["dev"]
+    ports:
+      - "8000:8000"
+      - "5173:5173"
+    volumes:
+      - sp5_data:/app/sp5_db
+      - ./logs:/app/logs
+      # Quellcode live einbinden für Hot-Reload
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+    env_file:
+      - backend/.env.docker
+    environment:
+      # Debug-Modus im Dev-Profil überschreiben
+      DEBUG: "true"
+      LOG_LEVEL: "DEBUG"
+    restart: "no"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+# ------------------------------------------------------------------------------
+# Volumes
+# ------------------------------------------------------------------------------
+volumes:
+  sp5_data:
+    driver: local

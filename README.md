@@ -184,6 +184,11 @@ pip install -r requirements.txt
 SP5_DB_PATH=/pfad/zu/sp5/Daten uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
+> ⚠️ **Multi-Worker Hinweis:** Die Session-Verwaltung nutzt einen In-Memory-Store.
+> Bei mehreren Uvicorn-Workers (`--workers N`) werden Tokens nicht zwischen Workers geteilt,
+> was zu zufälligen 401-Fehlern führt. **Verwende `--workers 1`** oder ersetze den Store
+> durch eine Redis-Lösung für Multi-Worker-Deployments.
+
 ### Frontend starten
 
 ```bash

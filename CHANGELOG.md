@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — 2026-02-27 (feature-36)
+
+### Hinzugefügt / Added
+
+#### 🔍 Audit-Log (`/auditlog`)
+- **Neues Feature: Audit-Log / Change-History UI** — vollständige Änderungshistorie mit Statistik-Kacheln, Filter und Tabelle
+- Zeigt alle Änderungen: CREATE / UPDATE / DELETE mit Zeitstempel, Benutzer, Objekt-Typ und Details
+- Live-Filterung nach Aktion, Objekt-Typ, Benutzer und Datumsbereich
+- Volltext-Suche über alle Felder
+- Auto-Refresh alle 10 Sekunden (optional)
+- Farbcodierte Aktions-Badges (grün/orange/rot), relative Zeitanzeige
+- Nutzt bestehendes Backend `/api/changelog`
+
+---
+
 ## [Unreleased] — 2026-02-27 (feature-35)
 
 ### Hinzugefügt / Added

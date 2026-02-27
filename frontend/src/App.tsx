@@ -58,6 +58,8 @@ const QualitaetsBericht   = lazy(() => import('./pages/QualitaetsBericht'));
 const SchichtKalibrator   = lazy(() => import('./pages/SchichtKalibrator'));
 const KompetenzMatrix     = lazy(() => import('./pages/KompetenzMatrix'));
 const OnboardingWizard    = lazy(() => import('./pages/OnboardingWizard'));
+const SchichtBriefing     = lazy(() => import('./pages/SchichtBriefing'));
+const AuditLog            = lazy(() => import('./pages/AuditLog'));
 const NotfallPlan         = lazy(() => import('./pages/NotfallPlan'));
 const Leitwand            = lazy(() => import('./pages/Leitwand'));
 const Simulation          = lazy(() => import('./pages/Simulation'));
@@ -153,11 +155,13 @@ const navItems: NavItem[] = [
   { id: 'einschraenkungen', label: 'Schichteinschränkungen', icon: '🚫', group: 'Stammdaten', path: '/einschraenkungen', roles: ['Admin', 'Planer'] },
 
   // ── Administration ───────────────────────────────────────────
+  { id: 'schichtbriefing',    label: 'Schicht-Briefing',     icon: '📋', group: 'Planung',         path: '/schichtbriefing' },
   { id: 'onboarding',         label: 'Onboarding-Wizard',    icon: '🧭', group: 'Administration', path: '/onboarding',         roles: ['Admin', 'Planer'] },
   { id: 'benutzerverwaltung', label: 'Benutzerverwaltung',   icon: '👤', group: 'Administration', path: '/benutzerverwaltung', roles: ['Admin'] },
   { id: 'backup',             label: 'Backup & Restore',     icon: '💾', group: 'Administration', path: '/backup',             roles: ['Admin'] },
   { id: 'perioden',           label: 'Abrechnungszeiträume', icon: '📅', group: 'Administration', path: '/perioden',           roles: ['Admin'] },
   { id: 'einstellungen',      label: 'Einstellungen',        icon: '⚙️', group: 'Administration', path: '/einstellungen',      roles: ['Admin'] },
+  { id: 'auditlog',           label: 'Audit-Log',            icon: '🔍', group: 'Administration', path: '/auditlog',           roles: ['Admin', 'Planer'] },
   { id: 'protokoll',          label: 'Protokoll',            icon: '📋', group: 'Administration', path: '/protokoll',          roles: ['Admin'] },
   { id: 'druckvorschau',      label: 'Druckvorschau',        icon: '🖨️', group: 'Administration', path: '/druckvorschau' },
 ];
@@ -492,7 +496,9 @@ function AppInner() {
               <Route path="/notfall-plan" element={<NotfallPlan />} />
               <Route path="/leitwand" element={<Leitwand />} />
               <Route path="/uebergabe" element={<Uebergabe />} />
+              <Route path="/schichtbriefing" element={<SchichtBriefing />} />
               <Route path="/onboarding" element={<OnboardingWizard />} />
+              <Route path="/auditlog" element={<AuditLog />} />
             </Routes>
           </Suspense>
         </main>

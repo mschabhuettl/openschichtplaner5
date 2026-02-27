@@ -603,7 +603,11 @@ export default function Zeitkonto() {
             {sorted.length === 0 && (
               <tr>
                 <td colSpan={6} className="text-center py-10 text-gray-400">
-                  {loading ? 'Lade Zeitkonto…' : 'Keine Daten gefunden'}
+                  {loading ? (
+                    <div className="flex items-center justify-center gap-2"><div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" /> Lade Zeitkonto…</div>
+                  ) : (
+                    <div><div className="text-3xl mb-2">⏱️</div><div className="font-medium">Keine Daten gefunden</div><div className="text-xs mt-1">Wähle einen Zeitraum und klicke auf Laden.</div></div>
+                  )}
                 </td>
               </tr>
             )}

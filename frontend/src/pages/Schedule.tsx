@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, type CSSProperties } from 'react';
+import { useState, useEffect, useRef, useMemo, memo, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import type { ShiftRequirement, Note, ConflictEntry, CoverageDay } from '../api/client';
@@ -1018,21 +1018,21 @@ function AuslastungsBereich({
 }
 
 // ── Employee Count Badge ──────────────────────────────────────
-function EmployeeCountBadge({ visible, total }: { visible: number; total: number }) {
+const EmployeeCountBadge = memo(function EmployeeCountBadge({ visible, total }: { visible: number; total: number }) {
   const filtered = visible < total;
   return (
     <span className={`text-sm font-medium ${filtered ? 'text-blue-600' : 'text-gray-500'}`}>
       {filtered ? (
         <>
           <span className="font-bold">{visible}</span>
-          <span className="text-gray-400"> / {total} Mitarbeiter</span>
+          <span className="text-gray-400"> / {total} Mitarbeitende</span>
         </>
       ) : (
         <>{total} Mitarbeiter</>
       )}
     </span>
   );
-}
+});
 
 // ── Shift Filter Dropdown (colored badges) ────────────────────
 function ShiftFilterDropdown({
@@ -3320,7 +3320,7 @@ export default function Schedule() {
             <button
               onClick={prevWeek}
               className="px-3 py-2 bg-indigo-50 border border-indigo-200 rounded shadow-sm hover:bg-indigo-100 text-sm min-h-[44px] min-w-[44px] text-indigo-700"
-              title="Vorherige Woche"
+              title="Vorherige Woche" aria-label="Vorherige Woche"
             >‹</button>
             <span className="font-medium text-indigo-700 text-sm min-w-[140px] text-center bg-indigo-50 border border-indigo-200 rounded px-2 py-1.5">
               📅 {mobileWeekData.label}
@@ -3328,7 +3328,7 @@ export default function Schedule() {
             <button
               onClick={nextWeek}
               className="px-3 py-2 bg-indigo-50 border border-indigo-200 rounded shadow-sm hover:bg-indigo-100 text-sm min-h-[44px] min-w-[44px] text-indigo-700"
-              title="Nächste Woche"
+              title="Nächste Woche" aria-label="Nächste Woche"
             >›</button>
           </div>
         )}

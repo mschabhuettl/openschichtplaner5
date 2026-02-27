@@ -525,7 +525,7 @@ export default function Jahresuebersicht() {
           onClick={handlePrint}
           disabled={printLoading}
           className="no-print ml-auto px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:opacity-60 text-white text-sm rounded shadow-sm flex items-center gap-1.5"
-          title="Jahresübersicht in neuem Fenster drucken"
+          title="Jahresübersicht in neuem Fenster drucken" aria-label="Jahresübersicht in neuem Fenster drucken"
         >
           {printLoading ? '⏳ Lade...' : '🖨️ Drucken'}
         </button>

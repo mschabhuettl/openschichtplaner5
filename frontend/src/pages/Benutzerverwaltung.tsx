@@ -354,7 +354,7 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
         <button
           onClick={onClose}
           className="text-slate-400 hover:text-slate-600 text-xl leading-none px-2"
-          title="Schließen"
+          title="Schließen" aria-label="Schließen"
         >
           ✕
         </button>
@@ -563,6 +563,13 @@ export default function Benutzerverwaltung() {
 
   // Modal state
   const [showModal, setShowModal] = useState(false);
+
+  // Escape key closes modal
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowModal(false); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<UserForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);

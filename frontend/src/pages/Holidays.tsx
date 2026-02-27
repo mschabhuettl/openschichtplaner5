@@ -74,6 +74,13 @@ export default function Holidays() {
   const [year, setYear] = useState(currentYear);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+
+  // Escape key closes modal
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowModal(false); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<HolidayForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
@@ -194,7 +201,7 @@ export default function Holidays() {
             onClick={handleImportAustria}
             disabled={importing}
             className="px-3 py-1.5 bg-red-600 text-white rounded text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-50"
-            title="Österreichische Feiertage für das gewählte Jahr importieren"
+            title="Österreichische Feiertage für das gewählte Jahr importieren" aria-label="Österreichische Feiertage für das gewählte Jahr importieren"
           >
             {importing ? '⟳ Importiere...' : '🇦🇹 Österreich importieren'}
           </button>

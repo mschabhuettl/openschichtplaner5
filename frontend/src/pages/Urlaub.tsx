@@ -366,7 +366,7 @@ function AbwesenheitenKalender({ employees, leaveTypes, absences, loading }: Abw
 
       {/* Calendar */}
       {loading ? (
-        <div className="text-center py-20 text-gray-400 text-lg">⟳ Lade Kalender...</div>
+        <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" /></div>
       ) : (
         <div className="bg-white rounded-xl shadow border overflow-hidden">
           {/* Day headers */}

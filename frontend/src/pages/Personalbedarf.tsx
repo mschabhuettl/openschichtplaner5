@@ -21,7 +21,7 @@ function RequirementCell({ req, onEdit, actual }: RequirementCellProps) {
         <button
           onClick={onEdit}
           className="text-xs text-gray-300 hover:text-blue-400 transition-colors w-full"
-          title="Bedarf festlegen"
+          title="Bedarf festlegen" aria-label="Bedarf festlegen"
         >
           <span className="block font-mono">–</span>
         </button>

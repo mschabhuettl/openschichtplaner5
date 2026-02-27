@@ -34,6 +34,13 @@ export default function LeaveTypes() {
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+
+  // Escape key closes modal
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowModal(false); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<LeaveTypeForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);

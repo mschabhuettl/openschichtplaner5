@@ -298,6 +298,17 @@ export default function Leitwand() {
   const secondsToNextMinute = 60 - now.getSeconds();
   const progressToNextMinute = ((60 - secondsToNextMinute) / 60) * 100;
 
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 text-white/60">
+          <div className="w-12 h-12 border-4 border-white/20 border-t-white/80 rounded-full animate-spin" />
+          <span className="text-sm tracking-widest uppercase">Leitwand lädt…</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col select-none overflow-hidden">
 
@@ -339,7 +350,7 @@ export default function Leitwand() {
             <button
               onClick={load}
               className="text-white/30 hover:text-white/70 transition-colors text-xs"
-              title="Jetzt aktualisieren"
+              title="Jetzt aktualisieren" aria-label="Jetzt aktualisieren"
             >
               🔄
             </button>

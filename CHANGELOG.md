@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — 2026-02-27 (feature-32)
+
+### Hinzugefügt / Added
+
+#### 🧪 Schichtplan-Simulation (`/simulation`)
+- **Neues Feature: „Was wäre wenn?"** — Szenarien für MA-Ausfälle testen
+- **Szenario-Konfiguration**: Name vergeben, Monat/Jahr wählen, MA auswählen
+- **Ausfall-Modi**: Ganzer Monat oder einzelne Tage pro Mitarbeiter auswählen
+- **Simulation-Ergebnis**: Tagesweise Besetzung vor/nach dem Ausfall
+- **Kalender-Ansicht**: Farbkodierte Monatsübersicht (🟢 OK / 🟡 Reduziert / 🔴 Kritisch)
+- **KPI-Kacheln**: Kritische Tage, Reduzierte Tage, Verlorene Schichten, Normale Tage
+- **Mitarbeiter-Auswirkung**: Anteil betroffener Schichten pro MA mit Fortschrittsbalken
+- **Problematische Tage**: Auflistung aller Tage mit Besetzungsmangel
+- **Tages-Detailansicht**: Modal mit fehlenden MA + anwesenden Kollegen als Einspringer-Kandidaten
+- **Backend-Endpoint**: `POST /api/simulation` mit flexibler Absenz-Konfiguration
+
+---
+
 ## [Unreleased] — 2026-02-26 (feature-24)
 
 ### Hinzugefügt / Added

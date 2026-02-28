@@ -1736,13 +1736,15 @@ export default function Schedule() {
 // Auto-Plan modal state
   const [showAutoPlan, setShowAutoPlan] = useState(false);
   const [autoPlanForce, setAutoPlanForce] = useState(false);
+  const [autoPlanRespectRestrictions, setAutoPlanRespectRestrictions] = useState(true);
   const [autoPlanEmployeeId, setAutoPlanEmployeeId] = useState<number | 'all'>('all');
   const [autoPlanLoading, setAutoPlanLoading] = useState(false);
   const [autoPlanAssignments, setAutoPlanAssignments] = useState<Array<{ employee_id: number; cycle_id: number; start: string }>>([]);
   const [autoPlanYear, setAutoPlanYear] = useState<number>(year);
   const [autoPlanMonth, setAutoPlanMonth] = useState<number>(month);
-  const [autoPlanStep, setAutoPlanStep] = useState<'config' | 'preview'>('config');
-  const [autoPlanPreview, setAutoPlanPreview] = useState<Array<{ employee_id: number; employee_name: string; date: string; shift_id: number; shift_name: string; status: 'new' | 'skip' | 'overwrite' }>>([]);
+  const [autoPlanStep, setAutoPlanStep] = useState<'config' | 'preview' | 'report'>('config');
+  const [autoPlanPreview, setAutoPlanPreview] = useState<Array<{ employee_id: number; employee_name: string; date: string; shift_id: number; shift_name: string; status: 'new' | 'skip' | 'overwrite' | 'restricted' }>>([]);
+  const [autoPlanReport, setAutoPlanReport] = useState<{ employees?: Array<{ employee_id: number; name: string; total: number; weekend: number; night: number }>; skipped_restriction?: number; gini?: number; fairness_label?: string; std_total?: number } | null>(null);
 
   // Schicht-Empfehlung state
   const [showRecommendations, setShowRecommendations] = useState(false);
@@ -1881,20 +1883,23 @@ export default function Schedule() {
   const closeAutoPlan = () => {
     setShowAutoPlan(false);
     setAutoPlanForce(false);
+    setAutoPlanRespectRestrictions(true);
     setAutoPlanEmployeeId('all');
     setAutoPlanStep('config');
     setAutoPlanPreview([]);
+    setAutoPlanReport(null);
   };
 
   // Preview Auto-Plan (dry_run)
   const handleAutoPlanPreview = async () => {
     setAutoPlanLoading(true);
     try {
-      const params: { year: number; month: number; employee_ids?: number[]; force?: boolean; dry_run: boolean } = {
+      const params: { year: number; month: number; employee_ids?: number[]; force?: boolean; dry_run: boolean; respect_restrictions?: boolean } = {
         year: autoPlanYear,
         month: autoPlanMonth,
         force: autoPlanForce,
         dry_run: true,
+        respect_restrictions: autoPlanRespectRestrictions,
       };
       if (autoPlanEmployeeId !== 'all') {
         params.employee_ids = [autoPlanEmployeeId as number];
@@ -1913,19 +1918,25 @@ export default function Schedule() {
   const handleAutoPlan = async () => {
     setAutoPlanLoading(true);
     try {
-      const params: { year: number; month: number; employee_ids?: number[]; force?: boolean } = {
+      const params: { year: number; month: number; employee_ids?: number[]; force?: boolean; respect_restrictions?: boolean } = {
         year: autoPlanYear,
         month: autoPlanMonth,
         force: autoPlanForce,
+        respect_restrictions: autoPlanRespectRestrictions,
       };
       if (autoPlanEmployeeId !== 'all') {
         params.employee_ids = [autoPlanEmployeeId as number];
       }
       const result = await api.generateSchedule(params);
       showToast(result.message, result.errors.length > 0 ? 'info' : 'success');
-      closeAutoPlan();
+      setAutoPlanReport(result.report || null);
       if (autoPlanYear === year && autoPlanMonth === month) {
         loadSchedule();
+      }
+      if (result.report && (result.report.employees?.length ?? 0) > 0) {
+        setAutoPlanStep('report');
+      } else {
+        closeAutoPlan();
       }
     } catch (e: unknown) {
       showToast('Fehler: ' + (e instanceof Error ? e.message : String(e)), 'error');
@@ -2913,12 +2924,12 @@ export default function Schedule() {
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-gray-800">🤖 Auto-Planen</h2>
-              {autoPlanStep === 'preview' && (
+              {(autoPlanStep === 'preview' || autoPlanStep === 'report') && (
                 <button
-                  onClick={() => setAutoPlanStep('config')}
+                  onClick={() => autoPlanStep === 'report' ? closeAutoPlan() : setAutoPlanStep('config')}
                   className="text-sm text-blue-600 hover:underline"
                 >
-                  ← Zurück
+                  {autoPlanStep === 'report' ? '✕ Schließen' : '← Zurück'}
                 </button>
               )}
             </div>
@@ -2974,7 +2985,7 @@ export default function Schedule() {
                 </div>
 
                 {/* Force-Checkbox */}
-                <div className="mb-5">
+                <div className="mb-3">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
@@ -2993,6 +3004,24 @@ export default function Schedule() {
                       Tage mit bestehenden Einträgen werden übersprungen (empfohlen).
                     </p>
                   )}
+                </div>
+
+                {/* Restrictions-Checkbox */}
+                <div className="mb-5">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={autoPlanRespectRestrictions}
+                      onChange={e => setAutoPlanRespectRestrictions(e.target.checked)}
+                      className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-gray-700">🔒 Schicht-Sperren beachten</span>
+                  </label>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {autoPlanRespectRestrictions
+                      ? 'Schichten, für die ein MA eine Sperre hat, werden übersprungen (empfohlen).'
+                      : 'Sperren werden ignoriert — Schichten werden trotz Einschränkungen eingetragen.'}
+                  </p>
                 </div>
 
                 {autoPlanAssignments.length === 0 && (
@@ -3033,6 +3062,7 @@ export default function Schedule() {
                   const newEntries = autoPlanPreview.filter(p => p.status === 'new');
                   const skipEntries = autoPlanPreview.filter(p => p.status === 'skip');
                   const overwriteEntries = autoPlanPreview.filter(p => p.status === 'overwrite');
+                  const restrictedEntries = autoPlanPreview.filter(p => p.status === 'restricted');
                   // Group new entries by employee for display
                   const byEmp = new Map<string, typeof autoPlanPreview>();
                   for (const p of [...newEntries, ...overwriteEntries]) {
@@ -3047,15 +3077,21 @@ export default function Schedule() {
                       </p>
 
                       {/* Stats row */}
-                      <div className="flex gap-3 mb-4">
-                        <div className="flex-1 bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                      <div className="flex gap-2 mb-4 flex-wrap">
+                        <div className="flex-1 min-w-[80px] bg-green-50 border border-green-200 rounded-lg p-3 text-center">
                           <div className="text-2xl font-bold text-green-700">{newEntries.length + overwriteEntries.length}</div>
-                          <div className="text-xs text-green-600 mt-0.5">werden erstellt{overwriteEntries.length > 0 ? ` (${overwriteEntries.length} überschrieben)` : ''}</div>
+                          <div className="text-xs text-green-600 mt-0.5">werden erstellt{overwriteEntries.length > 0 ? ` (${overwriteEntries.length} überschr.)` : ''}</div>
                         </div>
                         {skipEntries.length > 0 && (
-                          <div className="flex-1 bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                          <div className="flex-1 min-w-[80px] bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
                             <div className="text-2xl font-bold text-gray-500">{skipEntries.length}</div>
-                            <div className="text-xs text-gray-500 mt-0.5">bestehende werden übersprungen</div>
+                            <div className="text-xs text-gray-500 mt-0.5">bestehende übersprungen</div>
+                          </div>
+                        )}
+                        {restrictedEntries.length > 0 && (
+                          <div className="flex-1 min-w-[80px] bg-orange-50 border border-orange-200 rounded-lg p-3 text-center">
+                            <div className="text-2xl font-bold text-orange-600">{restrictedEntries.length}</div>
+                            <div className="text-xs text-orange-500 mt-0.5">wegen Sperre übersprungen</div>
                           </div>
                         )}
                       </div>
@@ -3108,7 +3144,7 @@ export default function Schedule() {
                   </button>
                   <button
                     onClick={handleAutoPlan}
-                    disabled={autoPlanLoading || autoPlanPreview.filter(p => p.status !== 'skip').length === 0}
+                    disabled={autoPlanLoading || autoPlanPreview.filter(p => p.status === 'new' || p.status === 'overwrite').length === 0}
                     className="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium disabled:opacity-50 flex items-center gap-2"
                   >
                     {autoPlanLoading ? (
@@ -3116,6 +3152,78 @@ export default function Schedule() {
                     ) : (
                       <>✅ Jetzt generieren</>
                     )}
+                  </button>
+                </div>
+              </>
+            )}
+
+            {autoPlanStep === 'report' && autoPlanReport && (
+              <>
+                <p className="text-sm text-gray-600 mb-3">
+                  ✅ Schichtplan generiert — Optimierungs-Bericht für <span className="font-semibold">{MONTH_NAMES[autoPlanMonth]} {autoPlanYear}</span>:
+                </p>
+
+                {/* Fairness badge */}
+                {autoPlanReport.gini !== undefined && (
+                  <div className={`mb-4 p-3 rounded-lg border text-sm font-medium flex items-center gap-2 ${
+                    autoPlanReport.fairness_label === 'sehr gut' ? 'bg-green-50 border-green-200 text-green-700' :
+                    autoPlanReport.fairness_label === 'gut' ? 'bg-blue-50 border-blue-200 text-blue-700' :
+                    autoPlanReport.fairness_label === 'mittel' ? 'bg-yellow-50 border-yellow-200 text-yellow-700' :
+                    'bg-red-50 border-red-200 text-red-700'
+                  }`}>
+                    <span className="text-lg">
+                      {autoPlanReport.fairness_label === 'sehr gut' ? '🟢' :
+                       autoPlanReport.fairness_label === 'gut' ? '🔵' :
+                       autoPlanReport.fairness_label === 'mittel' ? '🟡' : '🔴'}
+                    </span>
+                    <div>
+                      <div>Fairness: <strong>{autoPlanReport.fairness_label}</strong> (Gini = {autoPlanReport.gini?.toFixed(4)})</div>
+                      {autoPlanReport.std_total !== undefined && (
+                        <div className="text-xs font-normal mt-0.5">Standardabweichung Schichten: ±{autoPlanReport.std_total}</div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Restrictions info */}
+                {(autoPlanReport.skipped_restriction ?? 0) > 0 && (
+                  <div className="mb-4 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-600">
+                    🔒 {autoPlanReport.skipped_restriction} Schicht-Einträge wegen Sperren übersprungen
+                  </div>
+                )}
+
+                {/* Per-employee table */}
+                {(autoPlanReport.employees?.length ?? 0) > 0 && (
+                  <div className="border border-gray-200 rounded-lg overflow-hidden mb-4 max-h-52 overflow-y-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="bg-gray-50 border-b border-gray-200">
+                          <th className="text-left px-3 py-2 font-medium text-gray-600">Mitarbeiter</th>
+                          <th className="text-center px-2 py-2 font-medium text-gray-600" title="Gesamt">Σ</th>
+                          <th className="text-center px-2 py-2 font-medium text-gray-600" title="Wochenend-Schichten">WE</th>
+                          <th className="text-center px-2 py-2 font-medium text-gray-600" title="Nacht-Schichten">Nacht</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {autoPlanReport.employees!.map(emp => (
+                          <tr key={emp.employee_id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                            <td className="px-3 py-1.5 text-gray-700">{emp.name}</td>
+                            <td className="px-2 py-1.5 text-center font-medium text-gray-800">{emp.total}</td>
+                            <td className="px-2 py-1.5 text-center text-gray-600">{emp.weekend}</td>
+                            <td className="px-2 py-1.5 text-center text-gray-600">{emp.night}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                <div className="flex justify-end">
+                  <button
+                    onClick={closeAutoPlan}
+                    className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+                  >
+                    Fertig
                   </button>
                 </div>
               </>

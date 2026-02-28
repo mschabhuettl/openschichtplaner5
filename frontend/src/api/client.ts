@@ -931,12 +931,21 @@ export const api = {
     employee_ids?: number[];
     force?: boolean;
     dry_run?: boolean;
+    respect_restrictions?: boolean;
   }) =>
     postJSON<{
       created: number;
       skipped: number;
+      skipped_restriction: number;
       errors: string[];
-      preview: Array<{ employee_id: number; employee_name: string; date: string; shift_id: number; shift_name: string; status: 'new' | 'skip' | 'overwrite' }>;
+      preview: Array<{ employee_id: number; employee_name: string; date: string; shift_id: number; shift_name: string; status: 'new' | 'skip' | 'overwrite' | 'restricted' }>;
+      report: {
+        employees?: Array<{ employee_id: number; name: string; total: number; weekend: number; night: number }>;
+        skipped_restriction?: number;
+        gini?: number;
+        fairness_label?: string;
+        std_total?: number;
+      };
       message: string;
     }>(
       '/api/schedule/generate',

@@ -333,6 +333,109 @@ function GroupMultiSelect({
   );
 }
 
+// ── EmployeeMultiSelect ───────────────────────────────────────
+function EmployeeMultiSelect({
+  employees,
+  selectedIds,
+  onChange,
+}: {
+  employees: Employee[];
+  selectedIds: number[];
+  onChange: (ids: number[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const label =
+    selectedIds.length === 0
+      ? 'Alle MA'
+      : selectedIds.length === 1
+      ? (() => { const e = employees.find(e => e.ID === selectedIds[0]); return e ? `${e.NAME}, ${e.FIRSTNAME}` : '1 MA'; })()
+      : `${selectedIds.length} MA`;
+
+  const filtered = employees.filter(e =>
+    !search || `${e.NAME} ${e.FIRSTNAME} ${e.SHORTNAME}`.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className={`px-2 py-1 border rounded text-xs flex items-center gap-1.5 min-w-[100px] ${
+          selectedIds.length > 0 ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white text-gray-600'
+        }`}
+      >
+        <span className="flex-1 text-left truncate">👤 {label}</span>
+        <span className="text-gray-400 text-[10px] flex-shrink-0">▾</span>
+      </button>
+      {open && (
+        <div className="absolute top-full mt-1 left-0 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl w-56 py-1">
+          <div className="px-2 py-1 border-b">
+            <input
+              type="text"
+              placeholder="Suchen..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full text-xs px-2 py-1 border rounded"
+              autoFocus
+              onClick={e => e.stopPropagation()}
+            />
+          </div>
+          <div className="overflow-y-auto max-h-52">
+            <button
+              className="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              onClick={() => { onChange([]); setSearch(''); setOpen(false); }}
+            >
+              <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center text-[9px] flex-shrink-0 ${selectedIds.length === 0 ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300'}`}>
+                {selectedIds.length === 0 ? '✓' : ''}
+              </span>
+              Alle Mitarbeiter
+            </button>
+            <div className="border-t my-0.5" />
+            {filtered.map(emp => {
+              const isSelected = selectedIds.includes(emp.ID);
+              return (
+                <button
+                  key={emp.ID}
+                  className="w-full px-3 py-1 text-left text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                  onClick={() => {
+                    if (isSelected) onChange(selectedIds.filter(id => id !== emp.ID));
+                    else onChange([...selectedIds, emp.ID]);
+                  }}
+                >
+                  <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center text-[9px] flex-shrink-0 ${isSelected ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300'}`}>
+                    {isSelected ? '✓' : ''}
+                  </span>
+                  <span className="truncate">{emp.NAME}, {emp.FIRSTNAME}</span>
+                  {emp.SHORTNAME && <span className="text-gray-400 flex-shrink-0">[{emp.SHORTNAME}]</span>}
+                </button>
+              );
+            })}
+            {filtered.length === 0 && <div className="px-3 py-2 text-xs text-gray-400">Kein Treffer</div>}
+          </div>
+          {selectedIds.length > 0 && (
+            <div className="border-t px-2 py-1">
+              <button onClick={() => onChange([])} className="text-xs text-red-500 hover:text-red-700">
+                × Auswahl aufheben
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Note context menu ─────────────────────────────────────────
 interface ContextMenuState {
   x: number;
@@ -1663,8 +1766,10 @@ export default function Schedule() {
   const [filterLeaveId, setFilterLeaveId] = useState<number | ''>('');
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [filterLetter, setFilterLetter] = useState('');
+  const [filterEmployeeIds, setFilterEmployeeIds] = useState<number[]>([]);
   const [showTerminated, setShowTerminated] = useState(false);
   const [employeeSort, setEmployeeSort] = useState<'position' | 'name-asc' | 'name-desc' | 'number-asc' | 'number-desc' | 'group'>('position');
+  const [showFilterPanel, setShowFilterPanel] = useState(true);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // UI state
@@ -2108,6 +2213,7 @@ export default function Schedule() {
     const searchLower = employeeSearch.toLowerCase();
     const matchesSearch = (emp: Employee) => {
       if (filterLetter && (emp.NAME || '').toUpperCase().charAt(0) !== filterLetter) return false;
+      if (filterEmployeeIds.length > 0 && !filterEmployeeIds.includes(emp.ID)) return false;
       if (!searchLower) return true;
       return (
         `${emp.NAME} ${emp.FIRSTNAME}`.toLowerCase().includes(searchLower) ||
@@ -2147,7 +2253,7 @@ export default function Schedule() {
     }
     return rows;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedGroupIds, employees, groups, groupMembersMap, employeeSearch, filterLetter, showTerminated, year, month, employeeSort]);
+  }, [selectedGroupIds, employees, groups, groupMembersMap, employeeSearch, filterLetter, filterEmployeeIds, showTerminated, year, month, employeeSort]);
 
   // Employees only (for export and counters)
   const displayEmployees = useMemo(
@@ -4037,140 +4143,175 @@ export default function Schedule() {
         </div>
       </div>
 
-      {/* ── Filter Toolbar ── */}
-      <div className="flex items-center gap-3 mb-3 flex-wrap bg-white border border-gray-200 rounded-lg px-3 py-2 shadow-sm">
-        <span className="text-xs font-semibold text-gray-500 flex-shrink-0">🔍 Filter:</span>
+      {/* ── Filter Panel ── */}
+      {(() => {
+        const activeFilterCount = [
+          filterShiftId !== '',
+          filterLeaveId !== '',
+          employeeSearch !== '',
+          filterLetter !== '',
+          filterEmployeeIds.length > 0,
+        ].filter(Boolean).length;
 
-        {/* Shift filter */}
-        <div className="flex items-center gap-1.5">
-          <label className="text-xs text-gray-500 whitespace-nowrap">Schicht:</label>
-          <ShiftFilterDropdown
-            shifts={shifts}
-            value={filterShiftId}
-            onChange={setFilterShiftId}
-          />
-        </div>
-
-        {/* Leave filter */}
-        <div className="flex items-center gap-1.5">
-          <label className="text-xs text-gray-500 whitespace-nowrap">Abwesenheit:</label>
-          <select
-            value={filterLeaveId}
-            onChange={e => setFilterLeaveId(e.target.value ? Number(e.target.value) : '')}
-            className="text-xs px-2 py-1 border rounded bg-white"
-          >
-            <option value="">Alle</option>
-            {leaveTypes.map(lt => (
-              <option key={lt.ID} value={lt.ID}>{lt.SHORTNAME} – {lt.NAME}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Employee search */}
-        <div className="flex items-center gap-1.5">
-          <label className="text-xs text-gray-500 whitespace-nowrap">Mitarbeiter:</label>
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={employeeSearch}
-            onChange={e => setEmployeeSearch(e.target.value)}
-            placeholder="🔍 Suchen... (Strg+F)"
-            className="text-xs px-2 py-1 border rounded bg-white w-44"
-            onKeyDown={e => { if (e.key === 'Escape') { setEmployeeSearch(''); e.currentTarget.blur(); } }}
-          />
-          {employeeSearch && (
-            <button className="text-xs text-gray-400 hover:text-gray-600" onClick={() => setEmployeeSearch('')} title="Suche löschen">×</button>
-          )}
-        </div>
-
-        {/* Alphabet quick filter — hidden on mobile to save space */}
-        <div className="hidden sm:flex items-center gap-1 flex-wrap">
-          {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ').map(letter => {
-            const available = availableLetters.has(letter);
-            const active = filterLetter === letter;
-            return (
-              <button
-                key={letter}
-                onClick={() => setFilterLetter(active ? '' : letter)}
-                disabled={!available}
-                title={available ? `Mitarbeiter mit ${letter}` : 'Kein Mitarbeiter'}
-                className={[
-                  'w-5 h-5 text-[10px] font-semibold rounded transition-all select-none',
-                  active
-                    ? 'bg-blue-600 text-white shadow-sm scale-110'
-                    : available
-                      ? 'bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 cursor-pointer'
-                      : 'bg-transparent text-gray-300 cursor-default',
-                ].join(' ')}
-              >
-                {letter}
-              </button>
-            );
-          })}
-          {filterLetter && (
-            <button
-              onClick={() => setFilterLetter('')}
-              className="ml-1 text-xs text-blue-500 hover:text-blue-700 font-medium"
-              title="Buchstabenfilter zurücksetzen"
+        return (
+          <div className="mb-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+            {/* Filter header / toggle */}
+            <div
+              className="flex items-center gap-2 px-3 py-2 cursor-pointer select-none"
+              onClick={() => setShowFilterPanel(p => !p)}
             >
-              ×
-            </button>
-          )}
-        </div>
+              <span className="text-xs font-semibold text-gray-500">🔍 Filter</span>
+              {activeFilterCount > 0 && (
+                <span className="px-1.5 py-0.5 text-[10px] font-bold bg-blue-500 text-white rounded-full">{activeFilterCount}</span>
+              )}
+              <span className="text-gray-400 text-xs ml-1">{showFilterPanel ? '▲' : '▼'}</span>
+              {activeFilterCount > 0 && (
+                <button
+                  className="ml-auto text-xs px-2 py-0.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
+                  onClick={e => { e.stopPropagation(); setFilterShiftId(''); setFilterLeaveId(''); setEmployeeSearch(''); setFilterLetter(''); setFilterEmployeeIds([]); }}
+                >
+                  × Zurücksetzen
+                </button>
+              )}
+            </div>
 
-        {/* Employee sort */}
-        <div className="flex items-center gap-1.5">
-          <label className="text-xs text-gray-500 whitespace-nowrap">Sortierung:</label>
-          <select
-            value={employeeSort}
-            onChange={e => setEmployeeSort(e.target.value as typeof employeeSort)}
-            className="text-xs px-2 py-1 border rounded bg-white"
-            title="Mitarbeiterliste sortieren"
-          >
-            <option value="position">Reihenfolge ↕</option>
-            <option value="name-asc">Name A → Z</option>
-            <option value="name-desc">Name Z → A</option>
-            <option value="number-asc">Nummer ↑</option>
-            <option value="number-desc">Nummer ↓</option>
-          </select>
-        </div>
+            {/* Collapsible filter controls */}
+            {showFilterPanel && (
+              <div className="flex items-center gap-3 px-3 pb-2 flex-wrap border-t border-gray-100 pt-2">
+                {/* Shift filter */}
+                <div className="flex items-center gap-1.5">
+                  <label className="text-xs text-gray-500 whitespace-nowrap">Schicht:</label>
+                  <ShiftFilterDropdown
+                    shifts={shifts}
+                    value={filterShiftId}
+                    onChange={setFilterShiftId}
+                  />
+                </div>
 
-        {/* Workload bars toggle */}
-        <div className="flex items-center gap-1.5">
-          <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-gray-500" title="Stunden-Auslastung pro Mitarbeiter anzeigen">
-            <input
-              type="checkbox"
-              checked={showWorkloadBars}
-              onChange={e => setShowWorkloadBars(e.target.checked)}
-              className="rounded"
-            />
-            📊 Auslastung
-          </label>
-        </div>
+                {/* Leave filter */}
+                <div className="flex items-center gap-1.5">
+                  <label className="text-xs text-gray-500 whitespace-nowrap">Abw.-Art:</label>
+                  <select
+                    value={filterLeaveId}
+                    onChange={e => setFilterLeaveId(e.target.value ? Number(e.target.value) : '')}
+                    className="text-xs px-2 py-1 border rounded bg-white"
+                  >
+                    <option value="">Alle</option>
+                    {leaveTypes.map(lt => (
+                      <option key={lt.ID} value={lt.ID}>{lt.SHORTNAME} – {lt.NAME}</option>
+                    ))}
+                  </select>
+                </div>
 
-        {/* Terminated employee toggle */}
-        <div className="flex items-center gap-1.5 ml-auto">
-          <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-gray-500">
-            <input
-              type="checkbox"
-              checked={showTerminated}
-              onChange={e => setShowTerminated(e.target.checked)}
-              className="rounded"
-            />
-            Ausgeschiedene anzeigen
-          </label>
-        </div>
+                {/* Employee text search */}
+                <div className="flex items-center gap-1.5">
+                  <label className="text-xs text-gray-500 whitespace-nowrap">Suche:</label>
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={employeeSearch}
+                    onChange={e => setEmployeeSearch(e.target.value)}
+                    placeholder="🔍 Suchen... (Strg+F)"
+                    className="text-xs px-2 py-1 border rounded bg-white w-36"
+                    onKeyDown={e => { if (e.key === 'Escape') { setEmployeeSearch(''); e.currentTarget.blur(); } }}
+                  />
+                  {employeeSearch && (
+                    <button className="text-xs text-gray-400 hover:text-gray-600" onClick={() => setEmployeeSearch('')} title="Suche löschen">×</button>
+                  )}
+                </div>
 
-        {/* Reset filters */}
-        {(filterShiftId !== '' || filterLeaveId !== '' || employeeSearch !== '' || filterLetter !== '') && (
-          <button
-            className="text-xs px-2 py-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-            onClick={() => { setFilterShiftId(''); setFilterLeaveId(''); setEmployeeSearch(''); setFilterLetter(''); }}
-          >
-            × Filter zurücksetzen
-          </button>
-        )}
-      </div>
+                {/* Employee multi-select */}
+                <div className="flex items-center gap-1.5">
+                  <label className="text-xs text-gray-500 whitespace-nowrap">MA auswählen:</label>
+                  <EmployeeMultiSelect
+                    employees={employees.filter(e => !e.HIDE)}
+                    selectedIds={filterEmployeeIds}
+                    onChange={setFilterEmployeeIds}
+                  />
+                </div>
+
+                {/* Alphabet quick filter — hidden on mobile to save space */}
+                <div className="hidden sm:flex items-center gap-1 flex-wrap">
+                  {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ').map(letter => {
+                    const available = availableLetters.has(letter);
+                    const active = filterLetter === letter;
+                    return (
+                      <button
+                        key={letter}
+                        onClick={() => setFilterLetter(active ? '' : letter)}
+                        disabled={!available}
+                        title={available ? `Mitarbeiter mit ${letter}` : 'Kein Mitarbeiter'}
+                        className={[
+                          'w-5 h-5 text-[10px] font-semibold rounded transition-all select-none',
+                          active
+                            ? 'bg-blue-600 text-white shadow-sm scale-110'
+                            : available
+                              ? 'bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-700 cursor-pointer'
+                              : 'bg-transparent text-gray-300 cursor-default',
+                        ].join(' ')}
+                      >
+                        {letter}
+                      </button>
+                    );
+                  })}
+                  {filterLetter && (
+                    <button
+                      onClick={() => setFilterLetter('')}
+                      className="ml-1 text-xs text-blue-500 hover:text-blue-700 font-medium"
+                      title="Buchstabenfilter zurücksetzen"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+
+                {/* Employee sort */}
+                <div className="flex items-center gap-1.5">
+                  <label className="text-xs text-gray-500 whitespace-nowrap">Sortierung:</label>
+                  <select
+                    value={employeeSort}
+                    onChange={e => setEmployeeSort(e.target.value as typeof employeeSort)}
+                    className="text-xs px-2 py-1 border rounded bg-white"
+                    title="Mitarbeiterliste sortieren"
+                  >
+                    <option value="position">Reihenfolge ↕</option>
+                    <option value="name-asc">Name A → Z</option>
+                    <option value="name-desc">Name Z → A</option>
+                    <option value="number-asc">Nummer ↑</option>
+                    <option value="number-desc">Nummer ↓</option>
+                  </select>
+                </div>
+
+                {/* Workload bars toggle */}
+                <div className="flex items-center gap-1.5">
+                  <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-gray-500" title="Stunden-Auslastung pro Mitarbeiter anzeigen">
+                    <input
+                      type="checkbox"
+                      checked={showWorkloadBars}
+                      onChange={e => setShowWorkloadBars(e.target.checked)}
+                      className="rounded"
+                    />
+                    📊 Auslastung
+                  </label>
+                </div>
+
+                {/* Terminated employee toggle */}
+                <div className="flex items-center gap-1.5 ml-auto">
+                  <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-gray-500">
+                    <input
+                      type="checkbox"
+                      checked={showTerminated}
+                      onChange={e => setShowTerminated(e.target.checked)}
+                      className="rounded"
+                    />
+                    Ausgeschiedene anzeigen
+                  </label>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* ── Conflict Banner ── */}
       {conflicts.length > 0 && (

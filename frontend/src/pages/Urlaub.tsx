@@ -543,9 +543,34 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
   const [detailTarget, setDetailTarget] = useState<{ employee: Employee; month: number } | null>(null);
   const [viewMode, setViewMode] = useState<'liste' | 'kalender'>('kalender');
 
-  const filteredEmployees = employees.filter(e =>
-    `${e.NAME} ${e.FIRSTNAME} ${e.NUMBER}`.toLowerCase().includes(search.toLowerCase())
-  );
+  // Advanced filters
+  const [filterVon, setFilterVon] = useState('');
+  const [filterBis, setFilterBis] = useState('');
+  const [filterLeaveTypeIds, setFilterLeaveTypeIds] = useState<number[]>([]);
+  const [showAdvFilters, setShowAdvFilters] = useState(false);
+
+  const toggleLeaveType = (id: number) => {
+    setFilterLeaveTypeIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const hasAdvFilters = filterVon !== '' || filterBis !== '' || filterLeaveTypeIds.length > 0;
+
+  const filteredEmployees = employees.filter(e => {
+    if (!`${e.NAME} ${e.FIRSTNAME} ${e.NUMBER}`.toLowerCase().includes(search.toLowerCase())) return false;
+    // If leave type filter is active: only show employees who have at least one matching absence in that year
+    if (filterLeaveTypeIds.length > 0) {
+      const hasMatch = absences.some(a => {
+        if (a.EMPLOYEE_ID !== e.ID) return false;
+        if (!filterLeaveTypeIds.includes(a.LEAVE_TYPE_ID)) return false;
+        if (!a.DATE.startsWith(String(year))) return false;
+        if (filterVon && a.DATE < filterVon) return false;
+        if (filterBis && a.DATE > filterBis) return false;
+        return true;
+      });
+      if (!hasMatch) return false;
+    }
+    return true;
+  });
 
   const getMonthCount = (empId: number, month: number) =>
     absences.filter(a => {
@@ -595,10 +620,20 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
           </button>
         </div>
         <div className="flex items-center gap-2">
-          {viewMode === 'liste' && (
-            <input type="text" placeholder="Suchen..." value={search} onChange={e => setSearch(e.target.value)}
-              className="px-3 py-1.5 border rounded shadow-sm text-sm w-32" />
-          )}
+          {/* Mitarbeiter-Suche (immer sichtbar) */}
+          <input type="text" placeholder="🔍 Mitarbeiter..." value={search} onChange={e => setSearch(e.target.value)}
+            className="px-3 py-1.5 border rounded shadow-sm text-sm w-36" />
+          {/* Advanced filter toggle */}
+          <button
+            onClick={() => setShowAdvFilters(v => !v)}
+            className={`px-3 py-1.5 text-sm rounded-lg border flex items-center gap-1.5 transition-colors ${
+              hasAdvFilters ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+            title="Erweiterte Filter"
+          >
+            ⚙️ Filter {hasAdvFilters && <span className="px-1.5 py-0.5 text-[10px] font-bold bg-blue-500 text-white rounded-full">{[filterVon, filterBis, filterLeaveTypeIds.length > 0 ? 1 : 0].filter(Boolean).length}</span>}
+            <span className="text-xs">{showAdvFilters ? '▲' : '▼'}</span>
+          </button>
           <button onClick={() => setShowNewModal(true)}
             className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 flex items-center gap-1.5">
             ＋ <span className="hidden sm:inline">Abwesenheit</span>
@@ -606,10 +641,63 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
         </div>
       </div>
 
+      {/* Advanced filter panel */}
+      {showAdvFilters && (
+        <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex flex-wrap gap-4 items-start">
+            {/* Zeitraum */}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-gray-600">📅 Zeitraum</label>
+              <div className="flex items-center gap-1.5">
+                <input type="date" value={filterVon} onChange={e => setFilterVon(e.target.value)}
+                  className="text-xs px-2 py-1 border rounded bg-white" placeholder="Von" />
+                <span className="text-xs text-gray-400">–</span>
+                <input type="date" value={filterBis} onChange={e => setFilterBis(e.target.value)}
+                  className="text-xs px-2 py-1 border rounded bg-white" placeholder="Bis" />
+                {(filterVon || filterBis) && (
+                  <button onClick={() => { setFilterVon(''); setFilterBis(''); }}
+                    className="text-xs text-red-400 hover:text-red-600">×</button>
+                )}
+              </div>
+            </div>
+
+            {/* Abwesenheitstyp */}
+            <div className="flex flex-col gap-1">
+              <label className="text-xs font-semibold text-gray-600">🏷️ Abwesenheitsart</label>
+              <div className="flex flex-wrap gap-1.5">
+                {leaveTypes.map(lt => (
+                  <label key={lt.ID} className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs cursor-pointer border transition-all ${
+                    filterLeaveTypeIds.includes(lt.ID) ? 'ring-2 ring-blue-500 opacity-100' : 'opacity-70 hover:opacity-100'
+                  }`} style={{ backgroundColor: lt.COLORBK_HEX, color: lt.COLORBK_LIGHT ? '#374151' : '#fff', borderColor: lt.COLORBAR_HEX }}>
+                    <input type="checkbox" className="sr-only" checked={filterLeaveTypeIds.includes(lt.ID)} onChange={() => toggleLeaveType(lt.ID)} />
+                    {lt.SHORTNAME} – {lt.NAME}
+                  </label>
+                ))}
+                {filterLeaveTypeIds.length > 0 && (
+                  <button onClick={() => setFilterLeaveTypeIds([])} className="text-xs text-red-400 hover:text-red-600 px-1">× Alle</button>
+                )}
+              </div>
+            </div>
+
+            {/* Reset all */}
+            {hasAdvFilters && (
+              <div className="flex items-end ml-auto">
+                <button
+                  onClick={() => { setFilterVon(''); setFilterBis(''); setFilterLeaveTypeIds([]); }}
+                  className="text-xs px-3 py-1.5 bg-white border border-red-300 text-red-600 rounded hover:bg-red-50"
+                >
+                  × Alle Filter zurücksetzen
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Kalender-View */}
       {viewMode === 'kalender' && (
         <AbwesenheitenKalender
-          employees={employees}
+          employees={filteredEmployees}
           leaveTypes={leaveTypes}
           absences={absences}
           loading={loading}

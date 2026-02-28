@@ -139,8 +139,8 @@ export default function HealthDashboard() {
             {health?.cache && typeof health.cache === 'object'
               ? (health.cache as Record<string, unknown>).entries !== undefined
                 ? String((health.cache as Record<string, unknown>).entries)
-                : JSON.stringify(health.cache).slice(0, 30)
-              : '-'}
+                : Object.keys(health.cache as Record<string, unknown>).length
+              : 0}
           </div>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">

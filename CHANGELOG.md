@@ -57,6 +57,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — 2026-02-28 (qa-pass-2)
+
+### 🐛 Fixes
+- **HealthDashboard Cache-Einträge** — Zeigt jetzt korrekte Anzahl (0) statt rohem `{}` JSON-Objekt
+
+---
+
+## [Unreleased] — 2026-02-28 (settings-monitoring-ui)
+
+### ➕ Hinzugefügt / Added
+
+#### ⚙️ Konfigurations-Management & App-Settings (68229d6)
+- **Settings-Page `/einstellungen`** — Vollständige Einstellungsseite für Arbeitszeiten, Überstunden-Schwellenwerte, Anzeigeoptionen und Benachrichtigungen
+- **Persistente Einstellungen** — Settings werden im Backend gespeichert und beim App-Start geladen
+- **API `GET/PUT /api/settings`** — Settings-Endpunkt für Lesen und Aktualisieren
+
+#### 📊 Error Monitoring & Structured JSON Logging (aa08496)
+- **Frontend Error Boundary** — Globales Fehler-Capturing mit Stack-Trace und automatischem API-Report
+- **Structured JSON Logging** — Backend-Logs im JSON-Format für einfache Auswertung und Log-Aggregation
+- **Admin API `GET /api/admin/frontend-errors`** — Einsicht in alle gemeldeten Frontend-Fehler
+- **Health-Dashboard** erweitert: zeigt Frontend-Fehler-Count und Backend-Fehler-Log
+
+#### 🎨 UX Improvements Round 3 (87ce73d)
+- **Extracharges-Page** — Zuschläge und Prämien-Verwaltung mit CRUD-Operationen
+- **Jahresuebersicht verbessert** — Jahres-Kalender mit Feiertagen und Schicht-Übersicht
+- **MeinProfil verfeinert** — Persönliche Profil-Ansicht mit Schicht-Historie und Saldo
+
+#### 🧩 UI-Komponenten-Bibliothek (e0d8c5b)
+- **StatCard** — Wiederverwendbare Statistik-Karte mit Trend-Indikator
+- **Badge** — Status-Badges für Schichten, Rollen und Zustände
+- **PageHeader** — Einheitlicher Seitenheader mit Titel, Untertitel und Aktions-Bereich
+- **DataTable** — Sortierbare Datentabelle mit Pagination
+
+---
+
 ## [Unreleased] — 2026-02-28 (full-feature-day)
 
 ### 🧹 Final Polish & Konsistenz-Check

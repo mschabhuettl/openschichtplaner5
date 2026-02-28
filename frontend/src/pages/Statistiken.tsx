@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useToast } from '../hooks/useToast';
 import { api } from '../api/client';
 import type { EmployeeStats, ExtraChargeSummary, EmployeeYearStats, SicknessStatistics, ShiftStatisticsData } from '../api/client';
 import type { Employee, Group } from '../types';
@@ -233,6 +234,7 @@ function OvertimeBar({ value, max }: { value: number; max: number }) {
 
 export default function Statistiken() {
   const t = useT();
+  const { showToast } = useToast();
   const now = new Date();
 
   // ── Tabs ────────────────────────────────────────────────
@@ -522,7 +524,7 @@ export default function Statistiken() {
             {/* CSV Export */}
             {empStats && (
               <button
-                onClick={() => exportEmployeeCSV(empStats)}
+                onClick={() => { exportEmployeeCSV(empStats); showToast('CSV exportiert ✓', 'success'); }}
                 className="ml-auto px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded shadow-sm flex items-center gap-1.5"
                 title="Persönliche Stundenübersicht als CSV exportieren"
               >
@@ -897,7 +899,7 @@ export default function Statistiken() {
             {/* CSV Export */}
             {sickData && (
               <button
-                onClick={() => exportSicknessCSV(sickData)}
+                onClick={() => { exportSicknessCSV(sickData); showToast('CSV exportiert ✓', 'success'); }}
                 className="ml-auto px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded shadow-sm flex items-center gap-1.5"
                 title="Krankenstand-Auswertung als CSV exportieren"
               >
@@ -1150,7 +1152,7 @@ export default function Statistiken() {
             </select>
             {!compareLoading && compareData.length > 0 && (
               <button
-                onClick={() => exportCompareCSV(compareData)}
+                onClick={() => { exportCompareCSV(compareData); showToast('CSV exportiert ✓', 'success'); }}
                 className="ml-auto px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-sm font-medium shadow-sm"
               >
                 ⬇ CSV Export

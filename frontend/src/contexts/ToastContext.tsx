@@ -15,9 +15,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const showToast = useCallback((message: string, type: Toast['type'] = 'success') => {
     const id = Math.random().toString(36).slice(2);
     setToasts(prev => [...prev, { id, message, type }]);
+    // Errors and warnings stay visible longer than success/info
+    const duration = type === 'error' ? 5500 : type === 'warning' ? 4500 : type === 'info' ? 4000 : 3000;
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
-    }, 3500);
+    }, duration);
   }, []);
 
   const removeToast = useCallback((id: string) => {

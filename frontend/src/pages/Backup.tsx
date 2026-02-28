@@ -3,6 +3,7 @@ import type { ChangeEvent } from 'react';
 import { api } from '../api/client';
 import type { BackupEntry } from '../api/client';
 import { useConfirm } from '../hooks/useConfirm';
+import { useToast } from '../hooks/useToast';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 
 const API = import.meta.env.VITE_API_URL ?? '';
@@ -44,6 +45,7 @@ function BackupHistorySection({ onRestoreFromServer, refreshKey }: BackupHistory
   const [error, setError] = useState<string | null>(null);
   const [deletingFile, setDeletingFile] = useState<string | null>(null);
   const { confirm: confirmDialog, dialogProps } = useConfirm();
+  const { showToast } = useToast();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -74,6 +76,10 @@ function BackupHistorySection({ onRestoreFromServer, refreshKey }: BackupHistory
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(a.href);
+        showToast(`Backup heruntergeladen ✓`, 'success');
+      })
+      .catch(err => {
+        showToast(err instanceof Error ? err.message : 'Download fehlgeschlagen', 'error');
       });
   };
 
@@ -84,7 +90,7 @@ function BackupHistorySection({ onRestoreFromServer, refreshKey }: BackupHistory
       await api.deleteBackup(filename);
       await load();
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Fehler beim Löschen');
+      showToast(err instanceof Error ? err.message : 'Fehler beim Löschen', 'error');
     } finally {
       setDeletingFile(null);
     }
@@ -188,6 +194,7 @@ function BackupSection({ onBackupCreated }: BackupSectionProps) {
     localStorage.getItem('sp5_last_backup')
   );
   const [loading, setLoading] = useState(false);
+  const { showToast } = useToast();
 
   const handleDownload = async () => {
     setLoading(true);
@@ -211,8 +218,9 @@ function BackupSection({ onBackupCreated }: BackupSectionProps) {
       localStorage.setItem('sp5_last_backup', ts);
       setLastDownload(ts);
       onBackupCreated();
+      showToast('Backup erstellt & heruntergeladen ✓', 'success');
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Backup fehlgeschlagen');
+      showToast(err instanceof Error ? err.message : 'Backup fehlgeschlagen', 'error');
     } finally {
       setLoading(false);
     }

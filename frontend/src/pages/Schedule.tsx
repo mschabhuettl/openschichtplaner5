@@ -1441,6 +1441,14 @@ export default function Schedule() {
   const [hoverTooltip, setHoverTooltip] = useState<HoverTooltipState | null>(null);
   const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ── Mitarbeiter-Hervorhebung ───────────────────────────────
+  const [highlightedEmpId, setHighlightedEmpId] = useState<number | null>(null);
+
+  // ── Vormonat kopieren ──────────────────────────────────────
+  const [showCopyPrevMonth, setShowCopyPrevMonth] = useState(false);
+  const [copyPrevMonthLoading, setCopyPrevMonthLoading] = useState(false);
+  const [copyPrevMonthSkip, setCopyPrevMonthSkip] = useState(true);
+
   // Copy-Week modal state
   const [showCopyWeek, setShowCopyWeek] = useState(false);
   const [copyWeekSource, setCopyWeekSource] = useState<number | ''>('');
@@ -2342,6 +2350,42 @@ export default function Schedule() {
     showToast('↪ Wiederholt', 'info');
   };
 
+  // ── Vormonat kopieren ──────────────────────────────────────
+  const handleCopyPrevMonth = async () => {
+    const prevYear = month === 1 ? year - 1 : year;
+    const prevMonth = month === 1 ? 12 : month - 1;
+    const daysInPrevMonth = new Date(prevYear, prevMonth, 0).getDate();
+    const daysInCurMonth = new Date(year, month, 0).getDate();
+    setCopyPrevMonthLoading(true);
+    try {
+      const prevEntries = await api.getSchedule(prevYear, prevMonth);
+      // Map by same day-of-month: day 1..N of prev month → day 1..N of cur month (up to min of both)
+      const maxDays = Math.min(daysInPrevMonth, daysInCurMonth);
+      const toAssign: Array<{ employee_id: number; date: string; shift_id: number | null }> = [];
+      for (const e of prevEntries) {
+        if (e.kind !== 'shift' || !e.shift_id) continue;
+        const prevDay = new Date(e.date).getDate();
+        if (prevDay > maxDays) continue;
+        // Skip if target already has an entry (if skip=true)
+        if (copyPrevMonthSkip && entryMap.has(`${e.employee_id}-${prevDay}`)) continue;
+        const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(prevDay).padStart(2,'0')}`;
+        toAssign.push({ employee_id: e.employee_id, date: dateStr, shift_id: e.shift_id });
+      }
+      if (toAssign.length === 0) {
+        showToast('Keine Schichten zu kopieren (alles bereits belegt?)', 'info');
+      } else {
+        await api.bulkSchedule(toAssign, !copyPrevMonthSkip);
+        await loadSchedule();
+        showToast(`✅ ${toAssign.length} Schichten aus dem Vormonat übernommen`, 'success');
+      }
+    } catch {
+      showToast('Fehler beim Kopieren des Vormonats', 'error');
+    } finally {
+      setCopyPrevMonthLoading(false);
+      setShowCopyPrevMonth(false);
+    }
+  };
+
   // ── HTML5 Drag & Drop handlers ──────────────────────────────
   const handleDragStart = (e: React.DragEvent, empId: number, day: number) => {
     e.dataTransfer.effectAllowed = 'copyMove';
@@ -2782,6 +2826,48 @@ export default function Schedule() {
           </div>
         </div>
       )}
+
+      {/* ── Vormonat kopieren Modal ────────────────────────────── */}
+      {showCopyPrevMonth && (() => {
+        const prevYear = month === 1 ? year - 1 : year;
+        const prevMonth = month === 1 ? 12 : month - 1;
+        const prevMonthName = MONTH_NAMES[prevMonth];
+        return (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40" onClick={() => setShowCopyPrevMonth(false)}>
+            <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4" onClick={e => e.stopPropagation()}>
+              <h3 className="text-lg font-bold mb-2">📅 Vormonat kopieren</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Alle Schichten aus <strong>{prevMonthName} {prevYear}</strong> werden taggleich in{' '}
+                <strong>{MONTH_NAMES[month]} {year}</strong> übernommen.
+              </p>
+              <label className="flex items-center gap-2 text-sm mb-4 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={copyPrevMonthSkip}
+                  onChange={e => setCopyPrevMonthSkip(e.target.checked)}
+                  className="rounded"
+                />
+                Bereits belegte Zellen überspringen
+              </label>
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => setShowCopyPrevMonth(false)}
+                  className="px-4 py-2 text-sm rounded border hover:bg-gray-50"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  onClick={handleCopyPrevMonth}
+                  disabled={copyPrevMonthLoading}
+                  className="px-4 py-2 text-sm rounded bg-teal-600 hover:bg-teal-700 text-white disabled:opacity-50"
+                >
+                  {copyPrevMonthLoading ? '⏳ Wird kopiert…' : '✅ Übernehmen'}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* ── Woche kopieren Modal ───────────────────────────────── */}
       {showCopyWeek && (() => {
@@ -3376,6 +3462,15 @@ export default function Schedule() {
             title={`Wiederholen (Ctrl+Y) — ${redoStack.length} Einträge`}
           >
             ↪ <span className="hidden sm:inline">Redo</span>
+          </button>
+
+          {/* Vormonat kopieren button */}
+          <button
+            onClick={() => setShowCopyPrevMonth(true)}
+            className="px-2 sm:px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            title="Schichten des Vormonats als Vorlage übernehmen"
+          >
+            📅 <span className="hidden sm:inline">Vormonat</span>
           </button>
 
           {/* Woche kopieren button */}
@@ -4014,8 +4109,14 @@ export default function Schedule() {
                 : undefined;
               return (
                 <tr key={emp.ID} className={empRowStyle ? undefined : rowBg} style={empRowStyle}>
-                  <td className="sticky left-0 z-10 bg-inherit px-3 py-1 border-r border-gray-200 border-b border-b-gray-100 font-medium whitespace-nowrap"
-                      style={empNameStyle}>
+                  <td
+                    className="sticky left-0 z-10 bg-inherit px-3 py-1 border-r border-gray-200 border-b border-b-gray-100 font-medium whitespace-nowrap cursor-pointer select-none"
+                    style={highlightedEmpId === emp.ID
+                      ? { ...(empNameStyle || {}), outline: '2px solid #0ea5e9', outlineOffset: '-2px', backgroundColor: empNameStyle?.backgroundColor ?? '#e0f2fe' }
+                      : empNameStyle}
+                    title="Klicken zum Hervorheben aller Schichten dieses Mitarbeiters"
+                    onClick={() => setHighlightedEmpId(id => id === emp.ID ? null : emp.ID)}
+                  >
                     {(() => {
                       // Birthday indicator: 🎂 if employee's birthday is in the current display month
                       const hasBirthdayThisMonth = emp.BIRTHDAY
@@ -4095,6 +4196,8 @@ export default function Schedule() {
                     const isDndSrc = dndSource?.empId === emp.ID && dndSource?.day === day;
                     const isDndTgt = dndTarget?.empId === emp.ID && dndTarget?.day === day;
                     const isToday = day === todayDay;
+                    const isEmpHighlighted = highlightedEmpId !== null && highlightedEmpId === emp.ID;
+                    const isOtherEmpDimmed = highlightedEmpId !== null && highlightedEmpId !== emp.ID;
                     return (
                       <td
                         key={day}
@@ -4120,11 +4223,13 @@ export default function Schedule() {
                             ? '2px solid #1d4ed8'
                             : isSelected
                             ? '2px solid #2563eb'
+                            : isEmpHighlighted && entry
+                            ? '2px solid #0ea5e9'
                             : isToday && !hasConflict && !isFilterMatch
                             ? '2px solid #93c5fd'
                             : (hasConflict ? '2px solid #ef4444' : isFilterMatch ? '2px solid #3b82f6' : undefined),
                           outlineOffset: '-2px',
-                          opacity: isDndSrc ? 0.5 : 1,
+                          opacity: isDndSrc ? 0.5 : isOtherEmpDimmed ? 0.35 : 1,
                           cursor: entry ? 'grab' : 'default',
                         }}
                         onMouseDown={e => handleCellMouseDown(e, emp.ID, day)}

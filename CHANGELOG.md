@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.17] — 2026-02-28
+
+### Fixed
+
+- `fix(security)`: CORS whitelist, kein wildcard Origin mehr
+- `fix(tests)`: DeprecationWarnings, parametrize, Docstrings, 914 Tests / 0 Warnings
+- `fix`: Security Audit 7 — alle Checks grün
+
+---
+
+## [0.3.16] — 2026-02-28
+
+### Fixed
+
+- `fix(security)`: CORS wildcard Origin entfernt, Whitelist eingeführt
+- `fix(tests)`: DeprecationWarnings behoben, Request-Import korrigiert, Docstrings ergänzt
+
+---
+
 ## [0.3.15] — 2026-02-28
 
 ### Fixed / Verbessert

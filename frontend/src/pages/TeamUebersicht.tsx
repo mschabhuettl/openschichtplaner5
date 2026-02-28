@@ -189,7 +189,7 @@ function EmployeeCard({ card, onClick }: { card: EmpCard; onClick: () => void })
 
   return (
     <div
-      className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all cursor-pointer p-4 flex flex-col gap-3 group"
+      className="team-card bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all cursor-pointer p-4 flex flex-col gap-3 group"
       onClick={onClick}
     >
       {/* Top row: avatar + name + absence dot */}
@@ -479,6 +479,18 @@ export default function TeamUebersicht() {
 
   return (
     <div className="flex flex-col h-full bg-gray-50 dark:bg-gray-900 min-h-0">
+      {/* Print-specific styles */}
+      <style>{`
+        @media print {
+          @page { size: portrait; margin: 12mm 10mm; }
+          .team-no-print { display: none !important; }
+          .team-card-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; overflow: visible !important; height: auto !important; }
+          .team-card { break-inside: avoid; page-break-inside: avoid; box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+          .flex-col.h-full { height: auto !important; overflow: visible !important; }
+          .overflow-y-auto { overflow: visible !important; height: auto !important; }
+          * { transition: none !important; animation: none !important; }
+        }
+      `}</style>
       {/* Header */}
       <div className="flex-shrink-0 px-6 pt-6 pb-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-5">
@@ -488,7 +500,7 @@ export default function TeamUebersicht() {
               {stats.total} Mitarbeiter · {stats.onDuty} heute im Dienst · {stats.absent} abwesend
             </p>
           </div>
-          <div className="flex gap-2 sm:ml-auto">
+          <div className="flex gap-2 sm:ml-auto team-no-print">
             {/* View toggle */}
             <div className="flex rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
               <button
@@ -504,6 +516,11 @@ export default function TeamUebersicht() {
                 🏢 Organigramm
               </button>
             </div>
+            <button
+              onClick={() => window.print()}
+              className="px-3 py-2 text-sm font-medium rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              title="Drucken"
+            >🖨️</button>
           </div>
         </div>
 
@@ -526,7 +543,7 @@ export default function TeamUebersicht() {
         </div>
 
         {/* Filter bar */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 team-no-print">
           <input
             type="search"
             placeholder="Mitarbeiter suchen…"
@@ -568,7 +585,7 @@ export default function TeamUebersicht() {
               Keine Mitarbeiter gefunden.
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 team-card-grid">
               {filteredCards.map(card => (
                 <EmployeeCard key={card.emp.ID} card={card} onClick={() => handleCardClick(card)} />
               ))}

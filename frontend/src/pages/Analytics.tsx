@@ -68,7 +68,7 @@ function BarChart({ title, icon, values, labels, anomalies, unit, color, anomaly
   const anomalyCount = anomalies.filter(Boolean).length;
 
   return (
-    <div style={{
+    <div className="analytics-chart-card" style={{
       background: 'white',
       border: '1px solid #e2e8f0',
       borderRadius: 12,
@@ -224,7 +224,7 @@ function MultiLineChart({ title, icon, labels, series, description }: MultiLineC
   const [hoveredPoint, setHoveredPoint] = useState<{ si: number; pi: number } | null>(null);
 
   return (
-    <div style={{
+    <div className="analytics-chart-card" style={{
       background: 'white',
       border: '1px solid #e2e8f0',
       borderRadius: 12,
@@ -403,7 +403,7 @@ function DonutChart({ title, icon, segments, description }: DonutChartProps) {
   const hoveredSeg = hovered !== null ? segs[hovered] : null;
 
   return (
-    <div style={{
+    <div className="analytics-chart-card" style={{
       background: 'white',
       border: '1px solid #e2e8f0',
       borderRadius: 12,
@@ -637,6 +637,27 @@ export default function Analytics() {
 
   return (
     <div style={{ padding: '16px 16px', maxWidth: 1100, margin: '0 auto' }}>
+      {/* Print-specific styles */}
+      <style>{`
+        @media print {
+          @page { size: portrait; margin: 12mm 10mm; }
+          .analytics-no-print { display: none !important; }
+          .analytics-print-title { display: block !important; }
+          /* Hide SVG tooltips/overlays */
+          .analytics-tooltip { display: none !important; }
+          /* Ensure charts fit on page */
+          svg { max-width: 100% !important; height: auto !important; break-inside: avoid; }
+          /* KPI cards: wrap nicely */
+          .analytics-kpi-row { flex-wrap: wrap !important; }
+          /* Chart cards: avoid page break inside */
+          .analytics-chart-card { break-inside: avoid; page-break-inside: avoid; margin-bottom: 12px !important; box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+          /* Data table: show clearly */
+          .analytics-data-table table { font-size: 10px !important; }
+          /* Remove interactive hover styles */
+          * { transition: none !important; animation: none !important; }
+        }
+        .analytics-print-title { display: none; }
+      `}</style>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div>
@@ -647,7 +668,7 @@ export default function Analytics() {
             Trend-Analysen über 12 Monate — Anomalie-Erkennung via 2σ-Regel
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }} className="analytics-no-print">
           <button
             onClick={() => setYear(y => y - 1)}
             style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: 14 }}
@@ -658,7 +679,14 @@ export default function Analytics() {
             disabled={year >= currentYear}
             style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #e2e8f0', background: year >= currentYear ? '#f8fafc' : 'white', cursor: year >= currentYear ? 'default' : 'pointer', fontSize: 14 }}
           >→</button>
+          <button
+            onClick={() => window.print()}
+            style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: 14, marginLeft: 8 }}
+            title="Drucken"
+          >🖨️</button>
         </div>
+        {/* Print-only year display */}
+        <div className="analytics-print-title" style={{ fontSize: 14, color: '#64748b' }}>Jahr: {year}</div>
       </div>
 
       {data && (

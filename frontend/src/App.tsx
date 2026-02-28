@@ -74,9 +74,13 @@ const NotFound          = lazy(() => import('./pages/NotFound'));
 /** Simple loading indicator shown while a lazy chunk is fetching */
 function PageLoader() {
   return (
-    <div className="flex items-center justify-center h-full min-h-[200px] text-slate-400">
+    <div
+      role="status"
+      aria-label="Seite wird geladen"
+      className="flex items-center justify-center h-full min-h-[200px] text-slate-400"
+    >
       <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+        <div aria-hidden="true" className="w-8 h-8 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
         <span className="text-sm">Lädt…</span>
       </div>
     </div>
@@ -374,7 +378,7 @@ function AppInner() {
           </button>
         </div>
       </div>
-      <nav className="flex-1 py-2 overflow-y-auto">
+      <nav aria-label="Hauptnavigation" className="flex-1 py-2 overflow-y-auto">
         {grouped.map(({ group, items }) => {
           if (items.length === 0) return null;
           const isCollapsed = group !== '' && collapsedGroups.has(group);
@@ -383,16 +387,18 @@ function AppInner() {
               {group && (
                 <button
                   onClick={() => toggleGroup(group)}
+                  aria-expanded={!isCollapsed}
                   className="w-full flex items-center justify-between px-4 pt-3 pb-1 text-[10px] uppercase tracking-widest text-slate-500 font-semibold hover:text-slate-300 transition-colors"
                 >
                   <span>{group}</span>
-                  <span className="text-[9px] opacity-60">{isCollapsed ? '▶' : '▼'}</span>
+                  <span aria-hidden="true" className="text-[9px] opacity-60">{isCollapsed ? '▶' : '▼'}</span>
                 </button>
               )}
               {!isCollapsed && items.map(item => (
                 <button
                   key={item.id}
                   onClick={() => goTo(item.path)}
+                  aria-current={isActive(item) ? 'page' : undefined}
                   className={`w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
                     isActive(item)
                       ? 'bg-slate-600 text-white font-semibold'
@@ -448,6 +454,15 @@ function AppInner() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100">
+      {/* Skip link for keyboard navigation */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[99999]
+                   focus:px-4 focus:py-2 focus:bg-white focus:text-slate-900 focus:rounded-lg
+                   focus:shadow-lg focus:text-sm focus:font-medium focus:ring-2 focus:ring-blue-500"
+      >
+        Zum Hauptinhalt springen
+      </a>
 
       {/* Global Spotlight Search Modal */}
       <SpotlightSearch open={spotlightOpen} onClose={() => setSpotlightOpen(false)} />
@@ -464,7 +479,7 @@ function AppInner() {
       )}
 
       {/* Sidebar — desktop: always visible | mobile: slide-in drawer */}
-      <aside className={`
+      <aside aria-label="Seitenmenü" className={`
         fixed inset-y-0 left-0 z-30 w-56 bg-slate-800 text-white flex flex-col shadow-xl
         transform transition-transform duration-200 ease-in-out
         md:relative md:translate-x-0 md:flex-shrink-0
@@ -506,7 +521,7 @@ function AppInner() {
           </button>
         </header>
 
-        <main className="flex-1 overflow-auto">
+        <main id="main-content" className="flex-1 overflow-auto">
           {/* Suspense boundary: shows spinner while a lazy chunk loads */}
           <Suspense fallback={<PageLoader />}>
             <Routes>

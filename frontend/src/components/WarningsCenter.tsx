@@ -313,10 +313,12 @@ export default function WarningsCenter() {
       <button
         onClick={() => setOpen(prev => !prev)}
         title="Benachrichtigungen & Warnungen"
-        aria-label={`${totalUnread} ungelesene Benachrichtigungen`}
+        aria-label={totalUnread > 0 ? `Benachrichtigungen öffnen, ${totalUnread} ungelesen` : 'Benachrichtigungen öffnen'}
+        aria-expanded={open}
+        aria-haspopup="true"
         className="relative text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors"
       >
-        <span className="text-base leading-none">🔔</span>
+        <span aria-hidden="true" className="text-base leading-none">🔔</span>
         {totalUnread > 0 && (
           <span
             className="absolute -top-1 -right-1 inline-flex items-center justify-center
@@ -331,6 +333,8 @@ export default function WarningsCenter() {
       {/* Dropdown */}
       {open && (
         <div
+          role="dialog"
+          aria-label="Benachrichtigungen"
           className="absolute left-0 top-full mt-2 z-50 w-96 max-h-[80vh] overflow-hidden
                      bg-white dark:bg-slate-800 rounded-xl shadow-2xl border
                      border-slate-200 dark:border-slate-700 flex flex-col"
@@ -375,8 +379,12 @@ export default function WarningsCenter() {
           </div>
 
           {/* Tabs */}
-          <div className="flex border-b border-slate-200 dark:border-slate-700 px-2 pt-1">
+          <div role="tablist" aria-label="Benachrichtigungs-Tabs" className="flex border-b border-slate-200 dark:border-slate-700 px-2 pt-1">
             <button
+              role="tab"
+              aria-selected={activeTab === 'warnings'}
+              aria-controls="tab-panel-warnings"
+              id="tab-warnings"
               onClick={() => switchTab('warnings')}
               className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t transition-colors ${
                 activeTab === 'warnings'
@@ -384,15 +392,19 @@ export default function WarningsCenter() {
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
-              ⚠️ Warnungen
+              <span aria-hidden="true">⚠️</span> Warnungen
               {unreadWarnings > 0 && activeTab !== 'warnings' && (
-                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full
+                <span aria-label={`${unreadWarnings} ungelesen`} className="inline-flex items-center justify-center w-4 h-4 rounded-full
                                  bg-red-500 text-white text-[9px] font-bold">
                   {unreadWarnings > 9 ? '9+' : unreadWarnings}
                 </span>
               )}
             </button>
             <button
+              role="tab"
+              aria-selected={activeTab === 'activity'}
+              aria-controls="tab-panel-activity"
+              id="tab-activity"
               onClick={() => switchTab('activity')}
               className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t transition-colors ${
                 activeTab === 'activity'
@@ -400,9 +412,9 @@ export default function WarningsCenter() {
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
-              📋 Aktivitäten
+              <span aria-hidden="true">📋</span> Aktivitäten
               {unreadActivity > 0 && activeTab !== 'activity' && (
-                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full
+                <span aria-label={`${unreadActivity} neu`} className="inline-flex items-center justify-center w-4 h-4 rounded-full
                                  bg-blue-500 text-white text-[9px] font-bold">
                   {unreadActivity > 9 ? '9+' : unreadActivity}
                 </span>
@@ -411,7 +423,12 @@ export default function WarningsCenter() {
           </div>
 
           {/* Content */}
-          <div className="overflow-y-auto flex-1">
+          <div
+            role="tabpanel"
+            id={activeTab === 'warnings' ? 'tab-panel-warnings' : 'tab-panel-activity'}
+            aria-labelledby={activeTab === 'warnings' ? 'tab-warnings' : 'tab-activity'}
+            className="overflow-y-auto flex-1"
+          >
 
             {/* ── Warnings Tab ── */}
             {activeTab === 'warnings' && (

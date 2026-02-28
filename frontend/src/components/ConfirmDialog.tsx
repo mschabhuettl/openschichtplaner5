@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -22,6 +22,7 @@ export function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   const confirmRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   // Focus confirm button when opened
   useEffect(() => {
@@ -30,15 +31,37 @@ export function ConfirmDialog({
     }
   }, [open]);
 
-  // Escape key closes dialog
+  // Focus trap + Escape key
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      onCancel();
+      return;
+    }
+    if (e.key === 'Tab' && dialogRef.current) {
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+  }, [onCancel]);
+
   useEffect(() => {
     if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [open, onCancel]);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open, handleKeyDown]);
 
   if (!open) return null;
 
@@ -48,6 +71,7 @@ export function ConfirmDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-title"
+      aria-describedby="confirm-message"
     >
       {/* Backdrop */}
       <div
@@ -56,7 +80,7 @@ export function ConfirmDialog({
       />
 
       {/* Dialog */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-md w-full mx-4 animate-in fade-in zoom-in-95 duration-150">
+      <div ref={dialogRef} className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-md w-full mx-4 animate-in fade-in zoom-in-95 duration-150">
         {/* Close button */}
         <button
           onClick={onCancel}
@@ -85,7 +109,7 @@ export function ConfirmDialog({
         </div>
 
         {/* Message */}
-        <p className="text-sm text-gray-600 dark:text-gray-300 mb-5 leading-relaxed">
+        <p id="confirm-message" className="text-sm text-gray-600 dark:text-gray-300 mb-5 leading-relaxed">
           {message}
         </p>
 

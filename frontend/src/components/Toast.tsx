@@ -23,10 +23,18 @@ export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none">
+    <div
+      className="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"
+      role="region"
+      aria-label="Benachrichtigungen"
+      aria-live="polite"
+      aria-atomic="false"
+    >
       {toasts.map(toast => (
         <div
           key={toast.id}
+          role={toast.type === 'error' ? 'alert' : 'status'}
+          aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
           className={`
             flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg border text-sm font-medium
             pointer-events-auto cursor-pointer
@@ -37,12 +45,12 @@ export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
           onClick={() => onRemove(toast.id)}
           title="Klicken zum Schließen"
         >
-          <span className="text-base flex-shrink-0">{typeIcons[toast.type]}</span>
+          <span className="text-base flex-shrink-0" aria-hidden="true">{typeIcons[toast.type]}</span>
           <span className="flex-1">{toast.message}</span>
           <button
             onClick={e => { e.stopPropagation(); onRemove(toast.id); }}
             className="ml-1 opacity-70 hover:opacity-100 text-lg leading-none"
-            aria-label="Schließen"
+            aria-label="Benachrichtigung schließen"
           >
             ×
           </button>

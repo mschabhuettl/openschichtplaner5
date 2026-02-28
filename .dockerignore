@@ -1,9 +1,67 @@
+# Version control
+.git
+.gitignore
+.github
+
+# Dependencies (rebuilt in container)
 node_modules
 frontend/node_modules
+**/node_modules
+
+# Python cache
 **/__pycache__
 **/*.pyc
-.git
+**/*.pyo
+**/*.pyd
+.Python
+.pytest_cache
+.mypy_cache
+.ruff_cache
+htmlcov
+.coverage
+coverage.xml
+*.cover
+
+# Build artifacts
+frontend/dist
+frontend/.vite
+dist
+build
+*.egg-info
+
+# Dev/test files
+tests
+test
+**/*_test.py
+**/test_*.py
+
+# Docs
+docs
+*.md
+!README.md
+
+# Logs
 *.log
+logs
+
+# Environment files (use env_file in docker-compose)
 .env
+*.env
 backend/.env
 frontend/.env
+!backend/.env.example
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker itself
+Dockerfile*
+docker-compose*.yml
+.dockerignore

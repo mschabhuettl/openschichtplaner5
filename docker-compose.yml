@@ -15,6 +15,18 @@ services:
     env_file:
       - backend/.env.docker
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+        reservations:
+          memory: 128M
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
       interval: 30s
@@ -45,6 +57,13 @@ services:
       DEBUG: "true"
       LOG_LEVEL: "DEBUG"
     restart: "no"
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "2.0"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
       interval: 30s

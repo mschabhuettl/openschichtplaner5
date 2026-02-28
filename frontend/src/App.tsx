@@ -244,6 +244,9 @@ function AppInner() {
         e: '/einsatzplan',      // Einsatzplan
         w: '/schichtwuensche',  // Wünsche
         n: '/notizen',          // Notizen
+        a: '/analytics',        // Analytics
+        q: '/kompetenz-matrix', // Kompetenz-Matrix (Q for Qualifikation)
+        t: '/tauschboerse',     // Tauschbörse
       };
       const dest = goMap[e.key];
       if (dest) {

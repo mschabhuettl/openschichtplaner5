@@ -9,10 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] — 2026-02-28 (full-feature-day)
 
-### 🧹 QA & Cleanup
-- **TestRBACDel-Eintrag entfernt** — Testdatensatz aus der Mitarbeiterliste bereinigt
+### 🧹 Final Polish & Konsistenz-Check
+- **Keyboard Shortcuts erweitert** — `g a` (Analytics), `g q` (Kompetenz-Matrix), `g t` (Tauschbörse) hinzugefügt; Shortcut-Modal aktualisiert
+- **TauschBörse Datenfehler behoben** — Swap-Requests mit ungültigen Employee-IDs korrigiert; Backend-Fallback zeigt jetzt "Gelöschter MA (ID X)" statt "?"
+- **Screenshots aller 12 Hauptseiten** — Playwright-Screenshots in docs/screenshots/ für Dokumentation
 - **604 Backend-Tests bestehen** — Vollständige Test-Suite grün nach allen heutigen Feature-Implementierungen
-- **Frontend-Build erfolgreich** — Production-Build kompiliert ohne Fehler (2.92s)
+- **Frontend-Build erfolgreich** — Production-Build kompiliert ohne Fehler (2.91s)
 
 ### Hinzugefügt / Added
 

@@ -27,6 +27,9 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { keys: ['g', 'e'], description: 'Einsatzplan' },
       { keys: ['g', 'w'], description: 'Schichtwünsche' },
       { keys: ['g', 'n'], description: 'Notizen' },
+      { keys: ['g', 'a'], description: 'Analytics & Trends' },
+      { keys: ['g', 'q'], description: 'Kompetenz-Matrix' },
+      { keys: ['g', 't'], description: 'Tauschbörse' },
     ],
   },
   {

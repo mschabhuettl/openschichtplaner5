@@ -9,6 +9,7 @@ import SpotlightSearch from './components/SpotlightSearch';
 import WarningsCenter from './components/WarningsCenter';
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { api } from './api/client';
 
 // Lazy-loaded pages — each page group is a separate chunk
 const Dashboard         = lazy(() => import('./pages/Dashboard'));
@@ -254,9 +255,7 @@ function AppInner() {
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
-    const BASE = import.meta.env.VITE_API_URL ?? '';
-    fetch(`${BASE}/api/schedule/conflicts?year=${year}&month=${month}`)
-      .then(r => r.ok ? r.json() : { conflicts: [] })
+    api.getConflicts({ year, month })
       .then(data => setConflictCount((data.conflicts ?? []).length))
       .catch(() => setConflictCount(0));
   }, []);

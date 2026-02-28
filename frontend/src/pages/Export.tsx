@@ -2,6 +2,17 @@ import { useState, useEffect } from 'react';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
+
 interface Group {
   ID: number;
   NAME: string;
@@ -90,7 +101,7 @@ export default function Export() {
   const [absFormat, setAbsFormat] = useState<'csv' | 'html'>('csv');
 
   useEffect(() => {
-    fetch(`${API}/api/groups`)
+    fetch(`${API}/api/groups`, { headers: getAuthHeaders() })
       .then((r) => r.json())
       .then(setGroups)
       .catch(() => {});

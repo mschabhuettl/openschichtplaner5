@@ -2,6 +2,17 @@ import { useState, useEffect, useCallback } from 'react';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Employee {
   ID: number;
@@ -131,7 +142,7 @@ export default function SchichtBriefing() {
 
   // Load employees once
   useEffect(() => {
-    fetch(`${API}/api/employees`)
+    fetch(`${API}/api/employees`, { headers: getAuthHeaders() })
       .then(r => r.json())
       .then(setEmployees)
       .catch(() => {});
@@ -144,8 +155,8 @@ export default function SchichtBriefing() {
     const month = d.getMonth() + 1;
     setLoading(true);
     Promise.all([
-      fetch(`${API}/api/schedule?year=${year}&month=${month}`).then(r => r.json()),
-      fetch(`${API}/api/absences?date_from=${date}&date_to=${date}`).then(r => r.json()),
+      fetch(`${API}/api/schedule?year=${year}&month=${month}`, { headers: getAuthHeaders() }).then(r => r.json()),
+      fetch(`${API}/api/absences?date_from=${date}&date_to=${date}`, { headers: getAuthHeaders() }).then(r => r.json()),
     ]).then(([sched, abs]) => {
       const dayEntries: ScheduleEntry[] = (sched as ScheduleEntry[]).filter(e => e.date === date);
       setSchedule(dayEntries);

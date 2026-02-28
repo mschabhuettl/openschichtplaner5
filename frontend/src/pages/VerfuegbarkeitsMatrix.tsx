@@ -2,6 +2,17 @@ import { useState, useEffect, useCallback } from 'react';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
+
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const WEEKDAY_LONG = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
 
@@ -297,7 +308,7 @@ export default function VerfuegbarkeitsMatrix() {
   const [sortBy, setSortBy] = useState<'name' | 'pattern' | 'workdays'>('name');
 
   useEffect(() => {
-    fetch(`${API}/api/groups`).then(r => r.json()).then(setGroups).catch(() => {});
+    fetch(`${API}/api/groups`, { headers: getAuthHeaders() }).then(r => r.json()).then(setGroups).catch(() => {});
   }, []);
 
   const load = useCallback(() => {
@@ -305,7 +316,7 @@ export default function VerfuegbarkeitsMatrix() {
     setError(null);
     const params = new URLSearchParams({ year: String(year), months: String(months) });
     if (selectedGroup) params.set('group_id', String(selectedGroup));
-    fetch(`${API}/api/availability-matrix?${params}`)
+    fetch(`${API}/api/availability-matrix?${params}`, { headers: getAuthHeaders() })
       .then(r => r.json())
       .then(setData)
       .catch(e => setError(e.message))

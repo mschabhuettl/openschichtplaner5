@@ -2,6 +2,17 @@ import { useState, useEffect, useCallback } from 'react';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
+
 interface OnDutyEntry {
   employee_id: number;
   employee_name: string;
@@ -240,8 +251,8 @@ export default function Leitwand() {
 
   const load = useCallback(() => {
     Promise.all([
-      fetch(`${API}/api/dashboard/today`).then(r => r.json()),
-      fetch(`${API}/api/warnings`).then(r => r.json()).catch(() => []),
+      fetch(`${API}/api/dashboard/today`, { headers: getAuthHeaders() }).then(r => r.json()),
+      fetch(`${API}/api/warnings`, { headers: getAuthHeaders() }).then(r => r.json()).catch(() => []),
     ]).then(([today, warns]) => {
       setData(today);
       setWarnings(Array.isArray(warns) ? warns.slice(0, 5) : []);

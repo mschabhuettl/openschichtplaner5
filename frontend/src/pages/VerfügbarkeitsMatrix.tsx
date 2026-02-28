@@ -1,6 +1,17 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 const API = import.meta.env.VITE_API_URL ?? '';
 
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
+
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Employee {
   ID: number;
@@ -219,9 +230,9 @@ export default function VerfügbarkeitsMatrix() {
   // Load static data
   useEffect(() => {
     Promise.all([
-      fetch(`${API}/api/groups`).then(r => r.json()),
-      fetch(`${API}/api/employees`).then(r => r.json()),
-      fetch(`${API}/api/group-assignments`).then(r => r.json()),
+      fetch(`${API}/api/groups`, { headers: getAuthHeaders() }).then(r => r.json()),
+      fetch(`${API}/api/employees`, { headers: getAuthHeaders() }).then(r => r.json()),
+      fetch(`${API}/api/group-assignments`, { headers: getAuthHeaders() }).then(r => r.json()),
     ]).then(([grps, emps, ga]) => {
       setGroups(grps.filter((g: Group) => g.ID !== 1));
       setAllEmployees(emps.filter((e: Employee) => !e.HIDE));
@@ -233,8 +244,8 @@ export default function VerfügbarkeitsMatrix() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      fetch(`${API}/api/schedule?year=${year}&month=${month}`).then(r => r.json()),
-      fetch(`${API}/api/holidays?year=${year}`).then(r => r.json()),
+      fetch(`${API}/api/schedule?year=${year}&month=${month}`, { headers: getAuthHeaders() }).then(r => r.json()),
+      fetch(`${API}/api/holidays?year=${year}`, { headers: getAuthHeaders() }).then(r => r.json()),
     ]).then(([sched, hols]) => {
       setScheduleEntries(sched);
       setHolidays(hols.filter((h: Holiday) => {

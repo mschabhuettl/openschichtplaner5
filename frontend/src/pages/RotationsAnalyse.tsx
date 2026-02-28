@@ -102,8 +102,8 @@ export default function RotationsAnalyse() {
     setError(null);
     try {
       const [empRes, shiftRes] = await Promise.all([
-        fetch(`${BASE_URL}/api/employees`),
-        fetch(`${BASE_URL}/api/shifts`),
+        fetch(`${BASE_URL}/api/employees`, { headers: getAuthHeaders() }),
+        fetch(`${BASE_URL}/api/shifts`, { headers: getAuthHeaders() }),
       ]);
       const emps: Employee[] = await empRes.json();
       const shifts: ShiftDef[] = await shiftRes.json();

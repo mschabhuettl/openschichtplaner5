@@ -220,6 +220,7 @@ export default function Employees() {
   const [form, setForm] = useState<EmployeeForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [touched, setTouched] = useState<{ NAME: boolean; SHORTNAME: boolean }>({ NAME: false, SHORTNAME: false });
   const [workdaysList, setWorkdaysList] = useState<boolean[]>([true, true, true, true, true, false, false]);
   const [activeTab, setActiveTab] = useState<'basic' | 'personal' | 'colors' | 'notes' | 'groups'>('basic');
 
@@ -396,6 +397,7 @@ export default function Employees() {
     setForm(EMPTY_FORM);
     setWorkdaysList([true, true, true, true, true, false, false]);
     setError(null);
+    setTouched({ NAME: false, SHORTNAME: false });
     setRestrictions([]);
     setNewRestrShiftId('');
     setNewRestrReason('');
@@ -445,6 +447,7 @@ export default function Employees() {
       CBKSCHED_HEX: bgrToHex(emp.CBKSCHED),
     });
     setError(null);
+    setTouched({ NAME: false, SHORTNAME: false });
     setNewRestrShiftId('');
     setNewRestrReason('');
     setRestrError(null);
@@ -833,9 +836,11 @@ export default function Employees() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Nachname *</label>
-                    <input type="text" value={form.NAME} onChange={e => { setForm(f => ({ ...f, NAME: e.target.value })); if (error?.includes('Nachname')) setError(null); }}
-                      className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 ${!form.NAME.trim() && error?.includes('Nachname') ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-500'}`} />
-                    {!form.NAME.trim() && error?.includes('Nachname') && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
+                    <input type="text" value={form.NAME}
+                      onChange={e => { setForm(f => ({ ...f, NAME: e.target.value })); if (error?.includes('Nachname')) setError(null); }}
+                      onBlur={() => setTouched(t => ({ ...t, NAME: true }))}
+                      className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 ${!form.NAME.trim() && (touched.NAME || error?.includes('Nachname')) ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-500'}`} />
+                    {!form.NAME.trim() && (touched.NAME || error?.includes('Nachname')) && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Vorname</label>
@@ -844,7 +849,9 @@ export default function Employees() {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Kürzel *</label>
-                    <input type="text" value={form.SHORTNAME} onChange={e => { setForm(f => ({ ...f, SHORTNAME: e.target.value })); if (error?.includes('Kürzel')) setError(null); }}
+                    <input type="text" value={form.SHORTNAME}
+                      onChange={e => { setForm(f => ({ ...f, SHORTNAME: e.target.value })); if (error?.includes('Kürzel')) setError(null); }}
+                      onBlur={() => setTouched(t => ({ ...t, SHORTNAME: true }))}
                       placeholder={
                         (() => {
                           const fn = (form.FIRSTNAME || '').trim();
@@ -855,8 +862,8 @@ export default function Employees() {
                           return 'z.B. HMU';
                         })()
                       }
-                      className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 ${!form.SHORTNAME.trim() && error?.includes('Kürzel') ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-500'}`} />
-                    {!form.SHORTNAME.trim() && error?.includes('Kürzel') && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
+                      className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 ${!form.SHORTNAME.trim() && (touched.SHORTNAME || error?.includes('Kürzel')) ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-500'}`} />
+                    {!form.SHORTNAME.trim() && (touched.SHORTNAME || error?.includes('Kürzel')) && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Personalnr.</label>

@@ -69,6 +69,14 @@ export default function Schichtwuensche() {
   const [newNote,     setNewNote]     = useState('');
   const [saving,      setSaving]      = useState(false);
 
+  // Escape key closes add dialog
+  useEffect(() => {
+    if (!adding) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setAdding(false); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [adding]);
+
   // ── load data ──────────────────────────────────────────────
   useEffect(() => {
     api.getEmployees().then(r => setEmployees(r.filter(e => !e.HIDE)));
@@ -515,7 +523,7 @@ export default function Schichtwuensche() {
             </div>
 
             <div className="flex gap-2 mt-5">
-              <button onClick={handleAdd} disabled={saving} className={`flex-1 ${btnPrimary}`}>
+              <button onClick={handleAdd} disabled={saving || !newDate || newEmp === ''} className={`flex-1 ${btnPrimary}`}>
                 {saving ? 'Speichere…' : 'Speichern'}
               </button>
               <button

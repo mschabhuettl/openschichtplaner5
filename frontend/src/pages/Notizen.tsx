@@ -66,6 +66,7 @@ function NoteModal({ open, initialDate, initialNote, employees, onSave, onClose 
   const [category, setCategory] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [textTouched, setTextTouched] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -75,8 +76,17 @@ function NoteModal({ open, initialDate, initialNote, employees, onSave, onClose 
       setEmpId(initialNote?.employee_id ?? 0);
       setCategory(initialNote?.category || '');
       setError(null);
+      setTextTouched(false);
     }
   }, [open, initialNote, initialDate]);
+
+  // Escape key closes modal
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -155,14 +165,16 @@ function NoteModal({ open, initialDate, initialNote, employees, onSave, onClose 
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Notiz</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Notiz *</label>
             <textarea
               value={text}
-              onChange={e => setText(e.target.value)}
+              onChange={e => { setText(e.target.value); if (error?.includes('leer')) setError(null); }}
+              onBlur={() => setTextTouched(true)}
               rows={3}
               placeholder="Notiztext eingeben..."
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 resize-none ${!text.trim() && textTouched ? 'border-red-400 focus:ring-red-400' : 'border-slate-300 focus:ring-blue-500'}`}
             />
+            {!text.trim() && textTouched && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
           </div>
 
           <div>
@@ -186,9 +198,10 @@ function NoteModal({ open, initialDate, initialNote, employees, onSave, onClose 
           </button>
           <button
             onClick={handleSave}
-            disabled={saving}
-            className="px-5 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium"
+            disabled={saving || !text.trim()}
+            className="px-5 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 font-medium flex items-center gap-2"
           >
+            {saving && <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
             {saving ? 'Speichern...' : 'Speichern'}
           </button>
         </div>

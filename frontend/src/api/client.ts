@@ -1061,6 +1061,14 @@ export const api = {
   removeGroupMember: (groupId: number, empId: number) =>
     deleteReq<{ ok: boolean; removed: number }>(`/api/groups/${groupId}/members/${empId}`),
 
+  // ─── Bulk Employee Operations ─────────────────────────────
+  bulkEmployeeAction: (data: { employee_ids: number[]; action: string; group_id?: number }) =>
+    postJSON<{ ok: boolean; affected: number; errors: unknown[] }>('/api/employees/bulk', data),
+
+  // ─── Bulk Absence ─────────────────────────────────────────
+  bulkCreateAbsence: (data: { date: string; leave_type_id: number; employee_ids?: number[] }) =>
+    postJSON<{ ok: boolean; created: number; skipped: number; errors: unknown[] }>('/api/absences/bulk', data),
+
   // ─── CRUD: Shifts ─────────────────────────────────────────
   createShift: (data: Partial<ShiftType>) =>
     postJSON<{ ok: boolean; record: unknown }>('/api/shifts', data),

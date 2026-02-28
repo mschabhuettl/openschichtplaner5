@@ -5,6 +5,7 @@ import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import type { LeaveType } from '../types';
 
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
@@ -90,6 +91,42 @@ export default function Holidays() {
   const { showToast } = useToast();
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [error, setError] = useState<string | null>(null);
+
+  // ── Bulk absence state ───────────────────────────────────────
+  const [showBulkAbsModal, setShowBulkAbsModal] = useState(false);
+  const [bulkAbsHoliday, setBulkAbsHoliday] = useState<Holiday | null>(null);
+  const [bulkAbsLeaveTypeId, setBulkAbsLeaveTypeId] = useState<number | ''>('');
+  const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
+  const [bulkAbsWorking, setBulkAbsWorking] = useState(false);
+
+  useEffect(() => {
+    api.getLeaveTypes().then(lt => setLeaveTypes(lt.filter((l: LeaveType) => !l.HIDE))).catch(() => {});
+  }, []);
+
+  const openBulkAbsModal = (h: Holiday) => {
+    setBulkAbsHoliday(h);
+    setBulkAbsLeaveTypeId('');
+    setShowBulkAbsModal(true);
+  };
+
+  const handleBulkAbsence = async () => {
+    if (!bulkAbsHoliday || bulkAbsLeaveTypeId === '') return;
+    const confirmed = await confirmDialog({
+      message: `Feiertag "${bulkAbsHoliday.NAME}" (${bulkAbsHoliday.DATE}) als Abwesenheit für ALLE aktiven Mitarbeiter eintragen?`,
+      danger: false,
+    });
+    if (!confirmed) return;
+    setBulkAbsWorking(true);
+    try {
+      const res = await api.bulkCreateAbsence({ date: bulkAbsHoliday.DATE, leave_type_id: Number(bulkAbsLeaveTypeId) });
+      showToast(`${res.created} Abwesenheiten eingetragen${res.skipped > 0 ? `, ${res.skipped} bereits vorhanden` : ''} ✓`, 'success');
+      setShowBulkAbsModal(false);
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : 'Fehler', 'error');
+    } finally {
+      setBulkAbsWorking(false);
+    }
+  };
 
   const load = () => {
     setLoading(true);
@@ -246,7 +283,8 @@ export default function Holidays() {
                     )}
                   </td>
                   <td className="px-4 py-2 text-center">
-                    <div className="flex gap-1 justify-center">
+                    <div className="flex gap-1 justify-center flex-wrap">
+                      {canAdmin && <button onClick={() => openBulkAbsModal(h)} className="px-2 py-1 bg-teal-100 text-teal-700 rounded text-xs hover:bg-teal-200" title="Als Abwesenheit für alle MA eintragen">👥 Bulk</button>}
                       {canAdmin && <button onClick={() => openEdit(h)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>}
                       {canAdmin && <button onClick={() => handleDelete(h)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Löschen</button>}
                     </div>
@@ -316,6 +354,35 @@ export default function Holidays() {
       )}
 
       <ConfirmDialog {...confirmDialogProps} />
+
+      {/* ── Bulk Absence Modal ────────────────────────────────── */}
+      {showBulkAbsModal && bulkAbsHoliday && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowBulkAbsModal(false)}>
+          <div onClick={e => e.stopPropagation()} className="bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6">
+            <h2 className="text-lg font-bold text-gray-800 mb-1">Feiertag für alle eintragen</h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Trägt <strong>{bulkAbsHoliday.NAME}</strong> ({bulkAbsHoliday.DATE}) als Abwesenheit für alle aktiven Mitarbeiter ein.
+            </p>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Abwesenheitstyp</label>
+            <select
+              value={bulkAbsLeaveTypeId}
+              onChange={e => setBulkAbsLeaveTypeId(e.target.value === '' ? '' : Number(e.target.value))}
+              className="w-full px-3 py-2 border rounded text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            >
+              <option value="">— Typ auswählen —</option>
+              {leaveTypes.map(lt => <option key={lt.ID} value={lt.ID}>{lt.NAME}{lt.SHORTNAME ? ` (${lt.SHORTNAME})` : ''}</option>)}
+            </select>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setShowBulkAbsModal(false)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm">Abbrechen</button>
+              <button
+                onClick={handleBulkAbsence}
+                disabled={bulkAbsLeaveTypeId === '' || bulkAbsWorking}
+                className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 disabled:opacity-50 text-sm font-semibold"
+              >{bulkAbsWorking ? 'Wird eingetragen...' : 'Für alle eintragen'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

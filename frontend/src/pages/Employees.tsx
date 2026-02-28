@@ -229,6 +229,67 @@ export default function Employees() {
   const { showToast } = useToast();
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
+  // ── Bulk selection state ─────────────────────────────────────
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [bulkGroupId, setBulkGroupId] = useState<number | ''>('');
+  const [bulkWorking, setBulkWorking] = useState(false);
+  const [showBulkGroupModal, setShowBulkGroupModal] = useState(false);
+
+  const toggleSelect = (id: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map(e => e.ID)));
+    }
+  };
+
+  const handleBulkHide = async (hide: boolean) => {
+    if (selectedIds.size === 0) return;
+    const label = hide ? 'ausblenden' : 'einblenden';
+    const confirmed = await confirmDialog({
+      message: `${selectedIds.size} Mitarbeiter wirklich ${label}?`,
+      danger: hide,
+    });
+    if (!confirmed) return;
+    setBulkWorking(true);
+    try {
+      const res = await api.bulkEmployeeAction({ employee_ids: Array.from(selectedIds), action: hide ? 'hide' : 'show' });
+      showToast(`${res.affected} Mitarbeiter ${label} ✓`, 'success');
+      setSelectedIds(new Set());
+      load();
+      api.getGroupAssignments().then(setGroupAssignments).catch(() => {});
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : 'Fehler', 'error');
+    } finally {
+      setBulkWorking(false);
+    }
+  };
+
+  const handleBulkAssignGroup = async () => {
+    if (selectedIds.size === 0 || bulkGroupId === '') return;
+    setBulkWorking(true);
+    try {
+      const res = await api.bulkEmployeeAction({ employee_ids: Array.from(selectedIds), action: 'assign_group', group_id: Number(bulkGroupId) });
+      showToast(`${res.affected} Mitarbeiter Gruppe zugewiesen ✓`, 'success');
+      setSelectedIds(new Set());
+      setShowBulkGroupModal(false);
+      setBulkGroupId('');
+      api.getGroupAssignments().then(setGroupAssignments).catch(() => {});
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : 'Fehler', 'error');
+    } finally {
+      setBulkWorking(false);
+    }
+  };
+
   // ── Restrictions state ──────────────────────────────────────
   const [restrictions, setRestrictions] = useState<Restriction[]>([]);
   const [shifts, setShifts] = useState<ShiftType[]>([]);
@@ -537,6 +598,32 @@ export default function Employees() {
           </button>}
         </div>
       </div>
+      {/* ── Bulk Action Bar ────────────────────────────────────── */}
+      {canAdmin && selectedIds.size > 0 && (
+        <div className="mb-3 flex flex-wrap items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
+          <span className="text-sm font-semibold text-blue-700">{selectedIds.size} ausgewählt</span>
+          <button
+            onClick={() => setShowBulkGroupModal(true)}
+            disabled={bulkWorking}
+            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
+          >👥 Gruppe zuweisen</button>
+          <button
+            onClick={() => handleBulkHide(false)}
+            disabled={bulkWorking}
+            className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50"
+          >✅ Einblenden</button>
+          <button
+            onClick={() => handleBulkHide(true)}
+            disabled={bulkWorking}
+            className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 disabled:opacity-50"
+          >🚫 Ausblenden</button>
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300 ml-auto"
+          >× Auswahl aufheben</button>
+        </div>
+      )}
+
       {loading ? (
         <div className="flex justify-center py-12">
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -548,6 +635,16 @@ export default function Employees() {
             <table className="w-full text-sm">
               <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
                 <tr>
+                  {canAdmin && <th className="px-3 py-2 w-8">
+                    <input
+                      type="checkbox"
+                      checked={filtered.length > 0 && selectedIds.size === filtered.length}
+                      ref={el => { if (el) el.indeterminate = selectedIds.size > 0 && selectedIds.size < filtered.length; }}
+                      onChange={toggleSelectAll}
+                      className="cursor-pointer"
+                      title="Alle auswählen"
+                    />
+                  </th>}
                   <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('number')}>Nr.{sortIcon('number')}</th>
                   <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('name')}>Name{sortIcon('name')}</th>
                   <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('firstname')}>Vorname{sortIcon('firstname')}</th>
@@ -560,7 +657,15 @@ export default function Employees() {
               </thead>
               <tbody>
                 {filtered.map((emp, i) => (
-                  <tr key={emp.ID} className={`border-b ${i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'} hover:bg-blue-50 transition-colors`}>
+                  <tr key={emp.ID} className={`border-b ${selectedIds.has(emp.ID) ? 'bg-blue-50 dark:bg-blue-900/20' : i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'} hover:bg-blue-50 transition-colors`}>
+                    {canAdmin && <td className="px-3 py-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(emp.ID)}
+                        onChange={() => toggleSelect(emp.ID)}
+                        className="cursor-pointer"
+                      />
+                    </td>}
                     <td className="px-4 py-2 text-gray-500">{emp.NUMBER}</td>
                     <td className="px-4 py-2 font-semibold">{emp.NAME}</td>
                     <td className="px-4 py-2">{emp.FIRSTNAME}</td>
@@ -586,7 +691,7 @@ export default function Employees() {
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={8} className="text-center py-8 text-gray-400">Keine Mitarbeiter gefunden</td></tr>
+                  <tr><td colSpan={canAdmin ? 9 : 8} className="text-center py-8 text-gray-400">Keine Mitarbeiter gefunden</td></tr>
                 )}
               </tbody>
             </table>
@@ -1063,6 +1168,33 @@ export default function Employees() {
       )}
 
       <ConfirmDialog {...confirmDialogProps} />
+
+      {/* ── Bulk Group Assign Modal ────────────────────────────── */}
+      {showBulkGroupModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowBulkGroupModal(false)}>
+          <div onClick={e => e.stopPropagation()} className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6">
+            <h2 className="text-lg font-bold text-gray-800 dark:text-white mb-1">Gruppe zuweisen</h2>
+            <p className="text-sm text-gray-500 mb-4">{selectedIds.size} Mitarbeiter werden der gewählten Gruppe hinzugefügt.</p>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Zielgruppe</label>
+            <select
+              value={bulkGroupId}
+              onChange={e => setBulkGroupId(e.target.value === '' ? '' : Number(e.target.value))}
+              className="w-full px-3 py-2 border rounded text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">— Gruppe auswählen —</option>
+              {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}{g.SHORTNAME ? ` (${g.SHORTNAME})` : ''}</option>)}
+            </select>
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setShowBulkGroupModal(false)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm">Abbrechen</button>
+              <button
+                onClick={handleBulkAssignGroup}
+                disabled={bulkGroupId === '' || bulkWorking}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-sm font-semibold"
+              >{bulkWorking ? 'Wird gespeichert...' : 'Zuweisen'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -416,11 +416,11 @@ export default function Jahresuebersicht() {
       if (emps.length > 0 && !selectedEmployeeId) {
         setSelectedEmployeeId(emps[0].ID);
       }
-    }).catch(() => {});
-    api.getGroups().then(setGroups).catch(() => {});
+    }).catch(e => console.warn('[Jahresübersicht] Mitarbeiter laden fehlgeschlagen:', e));
+    api.getGroups().then(setGroups).catch(e => console.warn('[Jahresübersicht] Gruppen laden fehlgeschlagen:', e));
     Promise.all([api.getShifts(), api.getLeaveTypes()]).then(([shifts, leaveTypes]) => {
       setColorMap(buildShiftColorMap(shifts, leaveTypes));
-    }).catch(() => {});
+    }).catch(e => console.warn('[Jahresübersicht] Schichtfarben laden fehlgeschlagen:', e));
   }, []);
 
   useEffect(() => {

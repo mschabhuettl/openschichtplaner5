@@ -86,6 +86,7 @@ export default function Fairness() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [data, setData] = useState<FairnessResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'name' | 'total' | 'weekend' | 'night' | 'holiday'>('name');
   const [sortAsc, setSortAsc] = useState(true);
 
@@ -96,15 +97,17 @@ export default function Fairness() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await fetch(
         `/api/fairness?year=${year}${groupId ? `&group_id=${groupId}` : ''}`,
         { headers: getAuthHeaders() }
       );
+      if (!res.ok) throw new Error(`Fehler ${res.status}: ${res.statusText}`);
       const json = await res.json();
       setData(json);
-    } catch {
-      // ignore
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : 'Daten konnten nicht geladen werden.');
     } finally {
       setLoading(false);
     }
@@ -240,8 +243,22 @@ export default function Fairness() {
         </div>
       )}
 
+      {/* Error state */}
+      {loadError && !loading && (
+        <div className="flex flex-col items-center justify-center py-10 gap-3">
+          <span className="text-3xl">⚠️</span>
+          <p className="text-sm font-medium text-red-700">{loadError}</p>
+          <button
+            onClick={load}
+            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded-lg font-medium transition-colors"
+          >
+            🔄 Erneut versuchen
+          </button>
+        </div>
+      )}
+
       {/* Employee table */}
-      {loading ? (
+      {!loadError && loading ? (
         <div className="flex items-center justify-center h-32 text-gray-400 gap-2">
           <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
@@ -249,12 +266,12 @@ export default function Fairness() {
           </svg>
           Lade Daten…
         </div>
-      ) : employees.length === 0 ? (
+      ) : !loadError && employees.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-32 text-gray-400 gap-1">
           <span className="text-3xl">📭</span>
           <span>Keine Schichtdaten für {year} gefunden.</span>
         </div>
-      ) : (
+      ) : !loadError ? (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
             <span className="text-sm font-semibold text-gray-700">👥 Mitarbeiter-Übersicht</span>
@@ -315,7 +332,7 @@ export default function Fairness() {
             <span className="ml-auto">Abweichung: % über/unter Durchschnitt</span>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* How is the score calculated? */}
       <details className="bg-gray-50 rounded-xl border border-gray-200 p-4 text-sm text-gray-600">

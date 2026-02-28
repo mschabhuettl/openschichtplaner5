@@ -428,12 +428,18 @@ async function handleResponseError(res: Response): Promise<void> {
   }
 }
 
-/** Wrap fetch calls to convert network errors into friendly messages. */
-async function safeFetch(input: string, init?: RequestInit): Promise<Response> {
+/** Wrap fetch calls with auto-retry (2 attempts, exponential backoff) on network errors.
+ *  Only network-level errors are retried; HTTP 4xx/5xx are NOT retried. */
+async function safeFetch(input: string, init?: RequestInit, _attempt = 0): Promise<Response> {
   try {
     return await fetch(input, init);
   } catch (err) {
     // TypeError: Failed to fetch — server unreachable or CORS
+    if (_attempt < 2) {
+      // Exponential backoff: 500ms, 1500ms
+      await new Promise(r => setTimeout(r, 500 * (2 ** _attempt)));
+      return safeFetch(input, init, _attempt + 1);
+    }
     throw new Error('Server nicht erreichbar. Bitte Verbindung prüfen.');
   }
 }

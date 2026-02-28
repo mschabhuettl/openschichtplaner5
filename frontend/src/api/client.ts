@@ -387,6 +387,39 @@ function dispatchUnauthorized() {
   window.dispatchEvent(new CustomEvent('sp5:unauthorized'));
 }
 
+// ─── In-memory response cache (stammdaten, 60 s TTL) ──────────
+interface CacheEntry<T> { data: T; expires: number }
+const _apiCache = new Map<string, CacheEntry<unknown>>();
+const CACHE_TTL_MS = 60_000;
+
+/** Paths that are safe to cache (rarely changing master data). */
+const CACHEABLE_PATHS = new Set([
+  '/api/employees',
+  '/api/groups',
+  '/api/shifts',
+  '/api/leave-types',
+  '/api/workplaces',
+  '/api/holidays',
+]);
+
+function isCacheable(path: string): boolean {
+  // Also cache holidays with year query param
+  if (path.startsWith('/api/holidays')) return true;
+  return CACHEABLE_PATHS.has(path);
+}
+
+/** Invalidate all cached stammdaten (call after mutations). */
+export function invalidateStammdatenCache(): void {
+  for (const key of _apiCache.keys()) {
+    if (isCacheable(key)) _apiCache.delete(key);
+  }
+}
+
+/** Invalidate a specific cached path. */
+export function invalidateCachePath(path: string): void {
+  _apiCache.delete(path);
+}
+
 /** Read auth token from localStorage (set by AuthContext). */
 function getAuthToken(): string | null {
   try {
@@ -445,12 +478,35 @@ async function safeFetch(input: string, init?: RequestInit, _attempt = 0): Promi
 }
 
 async function fetchJSON<T>(path: string): Promise<T> {
+  // Serve from cache if available and fresh
+  if (isCacheable(path)) {
+    const cached = _apiCache.get(path) as CacheEntry<T> | undefined;
+    if (cached && cached.expires > Date.now()) {
+      return cached.data;
+    }
+  }
   const res = await safeFetch(`${BASE_URL}${path}`, { headers: authHeaders() });
   await handleResponseError(res);
-  return res.json();
+  const data = await res.json() as T;
+  if (isCacheable(path)) {
+    _apiCache.set(path, { data, expires: Date.now() + CACHE_TTL_MS });
+  }
+  return data;
+}
+
+/** Clear cache entries whose path starts with the given prefix. */
+function evictCachePrefix(path: string): void {
+  // Extract base path without query string
+  const base = path.split('?')[0];
+  for (const key of _apiCache.keys()) {
+    if (key === base || key.startsWith(base + '?') || key.startsWith(base + '/')) {
+      _apiCache.delete(key);
+    }
+  }
 }
 
 async function postJSON<T>(path: string, body: unknown): Promise<T> {
+  evictCachePrefix(path);
   const res = await safeFetch(`${BASE_URL}${path}`, {
     method: 'POST',
     headers: authHeaders({ 'Content-Type': 'application/json' }),
@@ -461,6 +517,7 @@ async function postJSON<T>(path: string, body: unknown): Promise<T> {
 }
 
 async function putJSON<T>(path: string, body: unknown): Promise<T> {
+  evictCachePrefix(path);
   const res = await safeFetch(`${BASE_URL}${path}`, {
     method: 'PUT',
     headers: authHeaders({ 'Content-Type': 'application/json' }),
@@ -471,6 +528,7 @@ async function putJSON<T>(path: string, body: unknown): Promise<T> {
 }
 
 async function deleteReq<T>(path: string): Promise<T> {
+  evictCachePrefix(path);
   const res = await safeFetch(`${BASE_URL}${path}`, {
     method: 'DELETE',
     headers: authHeaders(),
@@ -480,6 +538,7 @@ async function deleteReq<T>(path: string): Promise<T> {
 }
 
 async function patchJSON<T>(path: string, body: unknown): Promise<T> {
+  evictCachePrefix(path);
   const res = await safeFetch(`${BASE_URL}${path}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...authHeaders() },

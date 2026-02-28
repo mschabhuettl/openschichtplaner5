@@ -8,6 +8,18 @@ import { useAuth } from '../contexts/AuthContext';
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
+/** Format an ISO date string (YYYY-MM-DD) to German short format (DD.MM.YYYY). */
+function fmtDate(iso: string | null | undefined): string {
+  if (!iso) return '—';
+  try {
+    const [y, m, d] = iso.split('-');
+    if (!y || !m || !d) return iso;
+    return `${d}.${m}.${y}`;
+  } catch {
+    return iso;
+  }
+}
+
 // ── Print helper ───────────────────────────────────────────────
 function printEmployeeList(employees: Employee[]) {
   const now = new Date().toLocaleString('de-AT');
@@ -34,7 +46,7 @@ function printEmployeeList(employees: Employee[]) {
       <td style="${tdRStyle}background:${bg};color:#374151">${emp.HRSDAY?.toFixed(1) ?? '—'}h</td>
       <td style="${tdRStyle}background:${bg};color:#374151">${emp.HRSWEEK?.toFixed(1) ?? '—'}h</td>
       <td style="${tdCStyle}background:${bg}">${workdays}</td>
-      <td style="${tdCStyle}background:${bg};color:#6b7280;font-size:11px">${emp.EMPSTART || '—'}</td>
+      <td style="${tdCStyle}background:${bg};color:#6b7280;font-size:11px">${fmtDate(emp.EMPSTART)}</td>
     </tr>`;
   }
 
@@ -554,7 +566,7 @@ export default function Employees() {
                         ))}
                       </div>
                     </td>
-                    <td className="px-4 py-2 text-center text-gray-500 text-xs">{emp.EMPSTART || '—'}</td>
+                    <td className="px-4 py-2 text-center text-gray-500 text-xs">{fmtDate(emp.EMPSTART)}</td>
                     <td className="px-4 py-2 text-center">
                       <div className="flex gap-1 justify-center">
                         <button onClick={() => navigate(`/mitarbeiter/${emp.ID}`)} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs hover:bg-purple-200">🪪 Profil</button>
@@ -607,7 +619,7 @@ export default function Employees() {
                 <div className="mt-2 flex items-center gap-3 text-sm text-gray-600 flex-wrap">
                   <span>{emp.HRSDAY?.toFixed(1)}h/Tag</span>
                   {emp.HRSWEEK ? <span>{emp.HRSWEEK?.toFixed(1)}h/Woche</span> : null}
-                  {emp.EMPSTART && <span className="text-xs text-gray-400">Eintritt: {emp.EMPSTART}</span>}
+                  {emp.EMPSTART && <span className="text-xs text-gray-400">Eintritt: {fmtDate(emp.EMPSTART)}</span>}
                 </div>
                 <div className="mt-2 flex gap-0.5 flex-wrap">
                   {(emp.WORKDAYS_LIST || []).slice(0, 7).map((active, idx) => (

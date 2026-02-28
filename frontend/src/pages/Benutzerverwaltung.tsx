@@ -3,6 +3,8 @@ import { api } from '../api/client';
 import type { Employee, Group } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 function getAuthHeaders(): Record<string, string> {
@@ -294,6 +296,7 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
   const [showAddEmployeeModal, setShowAddEmployeeModal] = useState(false);
   const [showAddGroupModal, setShowAddGroupModal] = useState(false);
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
   const loadAccess = useCallback(async () => {
     setLoading(true);
@@ -325,7 +328,7 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
   };
 
   const handleDeleteEmployeeAccess = async (record: EmployeeAccessRecord) => {
-    if (!confirm(`Mitarbeiter-Zugriff für "${getEmployeeName(record.employee_id)}" entfernen?`)) return;
+    if (!await confirmDialog({ message: `Mitarbeiter-Zugriff für "${getEmployeeName(record.employee_id)}" entfernen?`, danger: true })) return;
     try {
       await api.deleteEmployeeAccess(record.id);
       setEmployeeAccess(prev => prev.filter(a => a.id !== record.id));
@@ -336,7 +339,7 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
   };
 
   const handleDeleteGroupAccess = async (record: GroupAccessRecord) => {
-    if (!confirm(`Gruppen-Zugriff für "${getGroupName(record.group_id)}" entfernen?`)) return;
+    if (!await confirmDialog({ message: `Gruppen-Zugriff für "${getGroupName(record.group_id)}" entfernen?`, danger: true })) return;
     try {
       await api.deleteGroupAccess(record.id);
       setGroupAccess(prev => prev.filter(a => a.id !== record.id));
@@ -558,6 +561,7 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
         />
       )}
 
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }
@@ -586,6 +590,7 @@ export default function Benutzerverwaltung() {
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const { showToast } = useToast();
+  const { dialogProps: confirmDialogProps } = useConfirm();
 
   // Delete confirm
   const [deleteTarget, setDeleteTarget] = useState<SP5User | null>(null);
@@ -1156,6 +1161,7 @@ export default function Benutzerverwaltung() {
         </div>
       )}
 
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

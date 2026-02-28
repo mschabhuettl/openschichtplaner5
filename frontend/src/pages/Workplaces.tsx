@@ -4,6 +4,8 @@ import type { WorkplaceEmployee } from '../api/client';
 import type { Workplace, Employee } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 function hexToBGR(hex: string): number {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -42,6 +44,7 @@ export default function Workplaces() {
   const [form, setForm] = useState<WorkplaceForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [error, setError] = useState<string | null>(null);
 
   // Detail / assignment panel
@@ -113,7 +116,7 @@ export default function Workplaces() {
   };
 
   const handleDelete = async (w: Workplace) => {
-    if (!confirm(`Arbeitsplatz "${w.NAME}" wirklich ausblenden?`)) return;
+    if (!await confirmDialog({ message: `Arbeitsplatz "${w.NAME}" wirklich ausblenden?`, danger: true })) return;
     try {
       await api.deleteWorkplace(w.ID);
       showToast("Arbeitsplatz ausgeblendet", "success");
@@ -434,6 +437,7 @@ export default function Workplaces() {
         </div>
       )}
 
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

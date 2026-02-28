@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import type { Employee, ShiftType } from '../types';
 import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 function getAuthHeaders(): Record<string, string> {
@@ -26,6 +28,7 @@ const WEEKDAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
 export default function Einschraenkungen() {
   const { canAdmin } = useAuth();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [shifts, setShifts] = useState<ShiftType[]>([]);
   const [restrictions, setRestrictions] = useState<Restriction[]>([]);
@@ -101,7 +104,7 @@ export default function Einschraenkungen() {
 
   const handleDelete = async (empId: number, shiftId: number, weekday: number) => {
     const key = `${empId}-${shiftId}-${weekday}`;
-    if (!confirm('Einschränkung wirklich löschen?')) return;
+    if (!await confirmDialog({ message: 'Einschränkung wirklich löschen?', danger: true })) return;
     setDeleting(key);
     try {
       const res = await fetch(`${API}/api/restrictions/${empId}/${shiftId}?weekday=${weekday}`, {
@@ -342,6 +345,7 @@ export default function Einschraenkungen() {
           Ein Wochentag von 0 bedeutet die Einschränkung gilt für alle Tage.
         </span>
       </div>
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

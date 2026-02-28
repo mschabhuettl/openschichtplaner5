@@ -3,6 +3,8 @@ import { api } from '../api/client';
 import type { Holiday } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
@@ -86,6 +88,7 @@ export default function Holidays() {
   const [saving, setSaving] = useState(false);
   const [importing, setImporting] = useState(false);
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [error, setError] = useState<string | null>(null);
 
   const load = () => {
@@ -142,7 +145,7 @@ export default function Holidays() {
   };
 
   const handleDelete = async (h: Holiday) => {
-    if (!confirm(`Feiertag "${h.NAME}" wirklich löschen?`)) return;
+    if (!await confirmDialog({ message: `Feiertag "${h.NAME}" wirklich löschen?`, danger: true })) return;
     try {
       await api.deleteHoliday(h.ID);
       showToast('Feiertag gelöscht', 'success');
@@ -153,7 +156,7 @@ export default function Holidays() {
   };
 
   const handleImportAustria = async () => {
-    if (!confirm(`Österreichische Feiertage für ${year} importieren? Bereits vorhandene Feiertage werden nicht doppelt angelegt.`)) return;
+    if (!await confirmDialog({ message: `Österreichische Feiertage für ${year} importieren? Bereits vorhandene Feiertage werden nicht doppelt angelegt.`, danger: true })) return;
     setImporting(true);
     try {
       const atHolidays = getAustrianHolidays(year);
@@ -312,6 +315,7 @@ export default function Holidays() {
         </div>
       )}
 
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

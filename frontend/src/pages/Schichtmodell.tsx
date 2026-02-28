@@ -3,6 +3,8 @@ import { api } from '../api/client';
 import type { ShiftCycle, CycleAssignment, CycleDay } from '../api/client';
 import type { Employee, Group, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 // ─── Types ─────────────────────────────────────────────────
 type CycleExceptionRecord = {
@@ -566,6 +568,7 @@ export default function Schichtmodell() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingCycle, setEditingCycle] = useState<ShiftCycle | null>(null);
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
   // ─── Cycle Exceptions state ────────────────────────────────
   const [exceptions, setExceptions] = useState<CycleExceptionRecord[]>([]);
@@ -674,7 +677,7 @@ export default function Schichtmodell() {
   };
 
   const handleRemove = async (emp: Employee) => {
-    if (!confirm(`Zyklus-Zuweisung für ${emp.FIRSTNAME} ${emp.NAME} wirklich entfernen?`)) return;
+    if (!await confirmDialog({ message: `Zyklus-Zuweisung für ${emp.FIRSTNAME} ${emp.NAME} wirklich entfernen?`, danger: true })) return;
     try {
       await api.removeCycleAssignment(emp.ID);
       setAssignments(prev => prev.filter(a => a.employee_id !== emp.ID));
@@ -726,7 +729,7 @@ export default function Schichtmodell() {
   };
 
   const handleDeleteException = async (exc: CycleExceptionRecord) => {
-    if (!confirm(`Ausnahme für ${getEmployeeName(exc.employee_id)} am ${formatDateDE(exc.date)} wirklich löschen?`)) return;
+    if (!await confirmDialog({ message: `Ausnahme für ${getEmployeeName(exc.employee_id)} am ${formatDateDE(exc.date)} wirklich löschen?`, danger: true })) return;
     try {
       await api.deleteCycleException(exc.id);
       setExceptions(prev => prev.filter(e => e.id !== exc.id));
@@ -1107,6 +1110,7 @@ export default function Schichtmodell() {
         />
       )}
 
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

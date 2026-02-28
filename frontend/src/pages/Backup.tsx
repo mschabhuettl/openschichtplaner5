@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import type { ChangeEvent } from 'react';
 import { api } from '../api/client';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 function getAuthHeaders(): Record<string, string> {
@@ -217,12 +219,13 @@ interface CompactResult {
 }
 
 function CompactSection() {
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<CompactResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleCompact = async () => {
-    if (!confirm('Datenbank komprimieren?\n\nGelöschte Datensätze werden dauerhaft entfernt. Erstelle vorher ein Backup!')) return;
+    if (!await confirmDialog({ message: 'Datenbank komprimieren?\n\nGelöschte Datensätze werden dauerhaft entfernt. Erstelle vorher ein Backup!', danger: true })) return;
     setLoading(true);
     setResult(null);
     setError(null);
@@ -310,6 +313,7 @@ function CompactSection() {
           )}
         </div>
       )}
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

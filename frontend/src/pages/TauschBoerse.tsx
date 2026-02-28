@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
 import type { SwapRequest } from '../api/client';
 import type { Employee, ShiftType } from '../types';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 // ─── Status helpers ────────────────────────────────────────
 const STATUS_LABEL: Record<string, string> = {
@@ -255,6 +257,7 @@ function RejectDialog({
 
 // ─── Main Page ─────────────────────────────────────────────
 export default function TauschBoerse() {
+    const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [requests, setRequests] = useState<SwapRequest[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [_shifts, setShifts] = useState<ShiftType[]>([]);
@@ -302,7 +305,7 @@ export default function TauschBoerse() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Anfrage löschen?')) return;
+    if (!await confirmDialog({ message: 'Anfrage löschen?', danger: true })) return;
     try {
       await api.deleteSwapRequest(id);
       flash('🗑️ Anfrage gelöscht');
@@ -514,6 +517,7 @@ export default function TauschBoerse() {
           onRejected={() => { setRejectId(null); load(); flash('❌ Anfrage abgelehnt'); }}
         />
       )}
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

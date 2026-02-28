@@ -5,6 +5,8 @@ import type { Restriction } from '../api/client';
 import type { Employee, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
@@ -221,6 +223,7 @@ export default function Employees() {
   const [workdaysList, setWorkdaysList] = useState<boolean[]>([true, true, true, true, true, false, false]);
   const [activeTab, setActiveTab] = useState<'basic' | 'personal' | 'colors' | 'notes'>('basic');
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
   // ── Restrictions state ──────────────────────────────────────
   const [restrictions, setRestrictions] = useState<Restriction[]>([]);
@@ -422,7 +425,7 @@ export default function Employees() {
   };
 
   const handleDelete = async (emp: Employee) => {
-    if (!confirm(`Mitarbeiter "${emp.NAME} ${emp.FIRSTNAME}" wirklich ausblenden?`)) return;
+    if (!await confirmDialog({ message: `Mitarbeiter "${emp.NAME} ${emp.FIRSTNAME}" wirklich ausblenden?`, danger: true })) return;
     try {
       await api.deleteEmployee(emp.ID);
       showToast('Mitarbeiter ausgeblendet', 'success');
@@ -1001,6 +1004,7 @@ export default function Employees() {
         </div>
       )}
 
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

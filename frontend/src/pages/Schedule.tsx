@@ -6,6 +6,8 @@ import type { ShiftRequirement, Note, ConflictEntry, CoverageDay } from '../api/
 import type { Employee, Group, ScheduleEntry, ShiftType, LeaveType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useTheme } from '../contexts/ThemeContext';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 // ── JS weekday → DB weekday (0=Mon..6=Sun) ────────────────────
 function jsWdToDbWd(jsWd: number): number {
@@ -687,6 +689,7 @@ function NoteDetailPopup({
   onEdited: (noteId: number, newText: string) => Promise<void>;
   onAdd: (empId: number, dateStr: string, text: string) => Promise<void>;
 }) {
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editText, setEditText] = useState('');
   const [addMode, setAddMode] = useState(false);
@@ -717,7 +720,7 @@ function NoteDetailPopup({
   };
 
   const handleDelete = async (noteId: number) => {
-    if (!confirm('Notiz löschen?')) return;
+    if (!await confirmDialog({ message: 'Notiz löschen?', danger: true })) return;
     setBusy(true);
     await onDeleted(noteId);
     setBusy(false);
@@ -835,6 +838,7 @@ function NoteDetailPopup({
           + Weitere Notiz hinzufügen
         </button>
       )}
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }
@@ -1400,6 +1404,7 @@ export default function Schedule() {
   const [saving, setSaving] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const { isDark } = useTheme();
   const exportRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
@@ -2199,7 +2204,7 @@ export default function Schedule() {
   const handleBulkDelete = async () => {
     const cells = getSelectedCells();
     if (cells.length === 0) return;
-    if (!confirm(`${cells.length} Einträge löschen?`)) return;
+    if (!await confirmDialog({ message: `${cells.length} Einträge löschen?`, danger: true })) return;
     const beforeCells = cells.map(({ empId, day }) => ({
       empId, day, before: entryMap.get(`${empId}-${day}`) ?? null,
     }));
@@ -4396,6 +4401,7 @@ export default function Schedule() {
           />
         );
       })()}
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

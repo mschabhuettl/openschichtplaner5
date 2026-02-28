@@ -3,6 +3,8 @@ import { api } from '../api/client';
 import type { LeaveType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 function hexToBGR(hex: string): number {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -45,6 +47,7 @@ export default function LeaveTypes() {
   const [form, setForm] = useState<LeaveTypeForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [error, setError] = useState<string | null>(null);
 
   const load = () => {
@@ -107,7 +110,7 @@ export default function LeaveTypes() {
   };
 
   const handleDelete = async (lt: LeaveType) => {
-    if (!confirm(`Abwesenheitsart "${lt.NAME}" wirklich ausblenden?`)) return;
+    if (!await confirmDialog({ message: `Abwesenheitsart "${lt.NAME}" wirklich ausblenden?`, danger: true })) return;
     try {
       await api.deleteLeaveType(lt.ID);
       showToast("Abwesenheitsart ausgeblendet", "success");
@@ -280,6 +283,7 @@ export default function LeaveTypes() {
         </div>
       )}
 
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

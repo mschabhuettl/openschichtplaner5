@@ -3,6 +3,8 @@ import { api } from '../api/client';
 import type { Group } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 interface GroupForm {
   NAME: string;
@@ -64,6 +66,7 @@ export default function Groups() {
   const [form, setForm] = useState<GroupForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [error, setError] = useState<string | null>(null);
   const [groupSearch, setGroupSearch] = useState('');
   const [groupSort, setGroupSort] = useState<'default' | 'name-asc' | 'name-desc' | 'short-asc'>('default');
@@ -154,7 +157,7 @@ export default function Groups() {
   };
 
   const handleDelete = async (g: Group) => {
-    if (!confirm(`Gruppe "${g.NAME}" wirklich ausblenden?`)) return;
+    if (!await confirmDialog({ title: 'Gruppe ausblenden', message: `Gruppe "${g.NAME}" wirklich ausblenden?`, confirmLabel: 'Ausblenden', danger: true })) return;
     try {
       await api.deleteGroup(g.ID);
       showToast("Gruppe ausgeblendet", "success");
@@ -342,6 +345,7 @@ export default function Groups() {
         </div>
       )}
 
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

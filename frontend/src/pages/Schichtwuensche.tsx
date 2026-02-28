@@ -12,6 +12,8 @@ import type { Wish } from '../api/client';
 import type { Employee, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useTheme } from '../contexts/ThemeContext';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 // ── helpers ──────────────────────────────────────────────────
 
@@ -42,6 +44,7 @@ export default function Schichtwuensche() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
   const today = new Date();
   const [year,  setYear]  = useState(today.getFullYear());
@@ -140,7 +143,7 @@ export default function Schichtwuensche() {
   }
 
   async function handleDelete(id: number) {
-    if (!confirm('Eintrag löschen?')) return;
+    if (!await confirmDialog({ message: 'Eintrag löschen?', danger: true })) return;
     try {
       await api.deleteWish(id);
       setWishes(prev => prev.filter(w => w.id !== id));
@@ -523,6 +526,7 @@ export default function Schichtwuensche() {
           </div>
         </div>
       )}
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

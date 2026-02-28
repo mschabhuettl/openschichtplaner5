@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { ShiftRequirement, StaffingRequirements, SpecialStaffingReq } from '../api/client';
 import type { ShiftType, Group } from '../types';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 // ─── Constants ─────────────────────────────────────────────
 const WEEKDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
@@ -493,6 +495,7 @@ function WeeklyTab({
 
 // ─── Tab: Datumsspezifisch ─────────────────────────────────
 function DateSpecificTab({ shifts, groups }: { shifts: ShiftType[]; groups: Group[] }) {
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const today = new Date().toISOString().slice(0, 10);
   const [filterDate, setFilterDate] = useState<string>('');
   const [filterGroup, setFilterGroup] = useState<number | null>(null);
@@ -538,7 +541,7 @@ function DateSpecificTab({ shifts, groups }: { shifts: ShiftType[]; groups: Grou
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Eintrag löschen?')) return;
+    if (!await confirmDialog({ message: 'Eintrag löschen?', danger: true })) return;
     setDeleting(id);
     try {
       await api.deleteSpecialStaffing(id);
@@ -720,6 +723,7 @@ function DateSpecificTab({ shifts, groups }: { shifts: ShiftType[]; groups: Grou
           defaultGroupId={filterGroup ?? undefined}
         />
       )}
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

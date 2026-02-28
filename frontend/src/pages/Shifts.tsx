@@ -3,6 +3,8 @@ import { api } from '../api/client';
 import type { ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 // Convert HTML #RRGGBB to BGR integer (Windows color storage)
 function hexToBGR(hex: string): number {
@@ -74,6 +76,7 @@ export default function Shifts() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
   const load = () => {
     setLoading(true);
@@ -178,7 +181,7 @@ export default function Shifts() {
   };
 
   const handleDelete = async (s: ShiftType) => {
-    if (!confirm(`Schichtart "${s.NAME}" wirklich ausblenden?`)) return;
+    if (!await confirmDialog({ message: `Schichtart "${s.NAME}" wirklich ausblenden?`, danger: true })) return;
     try {
       await api.deleteShift(s.ID);
       showToast('Schichtart ausgeblendet', 'success');
@@ -545,6 +548,7 @@ export default function Shifts() {
         </div>
       )}
 
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

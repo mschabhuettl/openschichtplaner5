@@ -4,6 +4,8 @@ import { api } from '../api/client';
 import type { DayEntry, Note, ScheduleTemplate } from '../api/client';
 import type { Group, ShiftType, Workplace } from '../types';
 import { useToast } from '../hooks/useToast';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 const WEEKDAY_ABBR = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
@@ -395,6 +397,7 @@ function EinsatzplanNotePopup({
   onEdited: (id: number, text: string) => Promise<void>;
   onDeleted: (id: number) => Promise<void>;
 }) {
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editText, setEditText] = useState('');
   const [busy, setBusy] = useState(false);
@@ -460,8 +463,8 @@ function EinsatzplanNotePopup({
                 <button
                   className="px-2 py-0.5 bg-red-50 text-red-600 rounded hover:bg-red-100 text-[11px]"
                   disabled={busy}
-                  onClick={() => {
-                    if (!confirm('Notiz löschen?')) return;
+                  onClick={async () => {
+                    if (!await confirmDialog({ message: 'Notiz löschen?', danger: true })) return;
                     setBusy(true);
                     onDeleted(note.id).then(() => { setBusy(false); onClose(); });
                   }}
@@ -471,6 +474,7 @@ function EinsatzplanNotePopup({
           )}
         </div>
       ))}
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }
@@ -1052,6 +1056,7 @@ export default function Einsatzplan() {
   const { canEditSchedule: canEdit } = usePermissions();
   const today = new Date();
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
   const [selectedDate, setSelectedDate] = useState<Date>(today);
   const [groupId, setGroupId] = useState<number | undefined>(undefined);
@@ -1194,7 +1199,7 @@ export default function Einsatzplan() {
 
   const handleDeleteSpshi = async (entry: DayEntry) => {
     if (!entry.spshi_id) return;
-    if (!confirm(`Sonderdienst-Eintrag für ${entry.employee_name} löschen?`)) return;
+    if (!await confirmDialog({ message: `Sonderdienst-Eintrag für ${entry.employee_name} löschen?`, danger: true })) return;
     try {
       await api.deleteEinsatzplanEntry(entry.spshi_id);
       loadData();
@@ -1579,6 +1584,7 @@ export default function Einsatzplan() {
           />
         )}
       </div>
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

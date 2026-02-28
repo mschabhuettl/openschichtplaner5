@@ -3,6 +3,8 @@ import { api } from '../api/client';
 import type { ExtraCharge } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const WEEKDAY_FULL = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
@@ -83,6 +85,7 @@ export default function Extracharges() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
   const load = () => {
     setLoading(true);
@@ -145,7 +148,7 @@ export default function Extracharges() {
   };
 
   const handleDelete = async (c: ExtraCharge) => {
-    if (!confirm(`Zeitzuschlag "${c.NAME}" wirklich löschen?`)) return;
+    if (!await confirmDialog({ message: `Zeitzuschlag "${c.NAME}" wirklich löschen?`, danger: true })) return;
     try {
       await api.deleteExtraCharge(c.ID);
       showToast('Zeitzuschlag gelöscht', 'success');
@@ -333,6 +336,7 @@ export default function Extracharges() {
         </div>
       )}
 
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

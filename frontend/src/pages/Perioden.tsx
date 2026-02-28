@@ -4,6 +4,8 @@ import { api } from '../api/client';
 import type { Period } from '../api/client';
 import type { Group } from '../types';
 import { useToast } from '../hooks/useToast';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 // ─── Create Modal ──────────────────────────────────────────
 interface CreateModalProps {
@@ -117,6 +119,7 @@ function CreateModal({ groups, onSave, onClose }: CreateModalProps) {
 export default function Perioden() {
   const { canEditSchedule: canEdit } = usePermissions();
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [periods, setPeriods] = useState<Period[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
@@ -158,7 +161,7 @@ export default function Perioden() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Abrechnungszeitraum wirklich löschen?')) return;
+    if (!await confirmDialog({ message: 'Abrechnungszeitraum wirklich löschen?', danger: true })) return;
     setDeleting(id);
     try {
       await api.deletePeriod(id);
@@ -297,6 +300,7 @@ export default function Perioden() {
           onClose={() => setShowCreate(false)}
         />
       )}
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

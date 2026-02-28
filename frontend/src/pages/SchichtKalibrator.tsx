@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '../hooks/useToast';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 function getAuthHeaders(): Record<string, string> {
@@ -236,6 +238,7 @@ function EmployeeRowCells({
 
 export default function SchichtKalibrator() {
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [groupMemberships, setGroupMemberships] = useState<Record<number, number[]>>({});
@@ -319,7 +322,7 @@ export default function SchichtKalibrator() {
   const applyBulkPreset = async () => {
     if (bulkPreset < 0 || selectedIds.size === 0) return;
     const preset = PRESETS[bulkPreset];
-    if (!confirm(`„${preset.label}" auf ${selectedIds.size} Mitarbeiter anwenden?`)) return;
+    if (!await confirmDialog({ message: `„${preset.label}" auf ${selectedIds.size} Mitarbeiter anwenden?`, danger: true })) return;
     for (const id of selectedIds) {
       await saveEmployee(id, { HRSDAY: preset.day, HRSWEEK: preset.week, HRSMONTH: preset.month });
     }
@@ -487,6 +490,7 @@ export default function SchichtKalibrator() {
         💡 Hover über Zeile → „Bearbeiten" klicken. Wochenstunden-Änderung berechnet Tag & Monat automatisch.
         Mit Vorlagen können mehrere Mitarbeiter gleichzeitig angepasst werden.
       </div>
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

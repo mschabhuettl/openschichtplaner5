@@ -4,6 +4,8 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '../hooks/useToast';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -108,6 +110,7 @@ export default function NotfallPlan() {
   const [assigned, setAssigned] = useState<Set<number>>(new Set());
   const [showAll, setShowAll] = useState(false);
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
   // Load shifts + employees + groups once
   useEffect(() => {
@@ -229,7 +232,7 @@ export default function NotfallPlan() {
   const removeSickEmployee = useCallback(async () => {
     if (!sickEmployee) return;
     const emp = employees.find(e => e.ID === sickEmployee);
-    if (!window.confirm(`${emp?.FIRSTNAME} ${emp?.NAME} für ${date} aus dem Dienstplan entfernen?`)) return;
+    if (!await confirmDialog({ message: `${emp?.FIRSTNAME} ${emp?.NAME} für ${date} aus dem Dienstplan entfernen?`, danger: true })) return;
     try {
       const resp = await fetch(`${API}/api/schedule/${sickEmployee}/${date}`, { method: 'DELETE', headers: getAuthHeaders() });
       if (resp.ok) {
@@ -515,6 +518,7 @@ export default function NotfallPlan() {
           </ol>
         </div>
       )}
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

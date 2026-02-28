@@ -3,6 +3,8 @@ import { api } from '../api/client';
 import type { Employee, LeaveType, Group } from '../types';
 import { useToast } from '../hooks/useToast';
 import { usePermissions } from '../hooks/usePermissions';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 // ─── Types ────────────────────────────────────────────────
 interface Absence {
@@ -885,6 +887,7 @@ interface SperrenTabProps {
 }
 function SperrenTab({ groups }: SperrenTabProps) {
   const { canEditAbsences } = usePermissions();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [groupId, setGroupId] = useState<number | null>(null);
   const [bans, setBans] = useState<HolidayBan[]>([]);
   const [loading, setLoading] = useState(false);
@@ -934,7 +937,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
   };
 
   const deleteBan = async (id: number) => {
-    if (!confirm('Urlaubssperre wirklich löschen?')) return;
+    if (!await confirmDialog({ message: 'Urlaubssperre wirklich löschen?', danger: true })) return;
     setDeleting(id);
     try {
       const res = await fetch(`${API}/api/holiday-bans/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
@@ -1074,6 +1077,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
         <span>Urlaubssperren verhindern die Genehmigung von Urlaubsanträgen in gesperrten Zeiträumen.
           Gesperrte Tage werden im Kalender rot/schraffiert angezeigt.</span>
       </div>
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }
@@ -1505,6 +1509,7 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
 export default function Urlaub() {
   const currentYear = new Date().getFullYear();
   const { showToast } = useToast();
+  const { dialogProps: confirmDialogProps } = useConfirm();
   const [year, setYear] = useState(currentYear);
   const [activeTab, setActiveTab] = useState<UrlaubTab>('antraege');
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -1605,6 +1610,7 @@ export default function Urlaub() {
         <TimelineTab year={year} employees={employees} leaveTypes={leaveTypes}
           absences={absences} groups={groups} loading={loading} />
       )}
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

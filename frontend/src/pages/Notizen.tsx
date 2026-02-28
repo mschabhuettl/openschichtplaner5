@@ -4,6 +4,8 @@ import type { Note } from '../api/client';
 import type { Employee, Group } from '../types';
 import { useToast } from '../hooks/useToast';
 import { usePermissions } from '../hooks/usePermissions';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 
 const WEEKDAY_ABBR = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const MONTH_NAMES = [
@@ -218,6 +220,7 @@ export default function Notizen() {
   const [editNote, setEditNote] = useState<Note | null>(null);
   const [modalDate, setModalDate] = useState<string>('');
   const { showToast } = useToast();
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
   const monthPrefix = `${year}-${pad(month)}`;
 
@@ -295,7 +298,7 @@ export default function Notizen() {
   };
 
   const handleDelete = async (note: Note) => {
-    if (!confirm(`Notiz vom ${note.date} löschen?`)) return;
+    if (!await confirmDialog({ message: `Notiz vom ${note.date} löschen?`, danger: true })) return;
     try {
       await api.deleteNote(note.id);
       showToast('Notiz gelöscht', 'success');
@@ -586,6 +589,7 @@ export default function Notizen() {
         onClose={() => setModalOpen(false)}
       />
 
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

@@ -41,6 +41,27 @@ interface Group {
   NAME: string;
 }
 
+// ─── Jahres-Heatmap Types ──────────────────────────────────
+interface MonthCapacity {
+  month: number;
+  num_days: number;
+  avg_staffing: number;
+  coverage_pct: number;
+  ok_days: number;
+  low_days: number;
+  critical_days: number;
+  unplanned_days: number;
+  planned_days: number;
+  worst_status: 'ok' | 'low' | 'critical' | 'unplanned';
+  total_employees: number;
+}
+
+interface YearCapacity {
+  year: number;
+  total_employees: number;
+  months: MonthCapacity[];
+}
+
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 function getAuthHeaders(): Record<string, string> {
@@ -361,6 +382,165 @@ function ProblemDays({ days, onDayClick }: ProblemDayProps) {
   );
 }
 
+// ─── Wochentag-Analyse ──────────────────────────────────────
+interface WeekdayAnalysisProps {
+  days: DayForecast[];
+  totalEmployees: number;
+}
+function WeekdayAnalysis({ days, totalEmployees }: WeekdayAnalysisProps) {
+  const WEEKDAY_FULL = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+
+  // Aggregate per weekday
+  const byWeekday: Record<number, { counts: number[]; absences: number[]; statuses: string[] }> = {};
+  for (let wd = 0; wd < 7; wd++) {
+    byWeekday[wd] = { counts: [], absences: [], statuses: [] };
+  }
+  for (const day of days) {
+    if (day.coverage_status !== 'unplanned') {
+      byWeekday[day.weekday].counts.push(day.scheduled_count);
+      byWeekday[day.weekday].absences.push(day.absent_count);
+      byWeekday[day.weekday].statuses.push(day.coverage_status);
+    }
+  }
+
+  const stats = WEEKDAY_FULL.map((name, wd) => {
+    const { counts, absences, statuses } = byWeekday[wd];
+    if (counts.length === 0) return { name, wd, avg: 0, min: 0, max: 0, avgAbsence: 0, criticalCount: 0, occurrences: 0 };
+    const avg = counts.reduce((a, b) => a + b, 0) / counts.length;
+    const avgAbsence = absences.reduce((a, b) => a + b, 0) / absences.length;
+    const criticalCount = statuses.filter(s => s === 'critical' || s === 'low').length;
+    return {
+      name, wd,
+      avg: Math.round(avg * 10) / 10,
+      min: Math.min(...counts),
+      max: Math.max(...counts),
+      avgAbsence: Math.round(avgAbsence * 10) / 10,
+      criticalCount,
+      occurrences: counts.length,
+    };
+  });
+
+  const maxAvg = Math.max(...stats.map(s => s.avg), 1);
+
+  return (
+    <div className="space-y-3">
+      {stats.map(s => {
+        const isWeekend = s.wd >= 5;
+        const pct = (s.avg / Math.max(totalEmployees, 1)) * 100;
+        const barColor = s.criticalCount > 1 ? '#ef4444' : s.criticalCount === 1 ? '#eab308' : '#22c55e';
+        const barWidth = (s.avg / maxAvg) * 100;
+
+        if (s.occurrences === 0) {
+          return (
+            <div key={s.wd} className={`flex items-center gap-3 rounded-xl px-3 py-2 ${isWeekend ? 'bg-gray-50 opacity-60' : 'bg-white border border-gray-100'}`}>
+              <span className="text-sm font-medium text-gray-400 w-24 flex-shrink-0">{s.name}</span>
+              <span className="text-xs text-gray-300 italic">Keine Daten</span>
+            </div>
+          );
+        }
+
+        return (
+          <div key={s.wd} className={`rounded-xl border px-3 py-2.5 ${isWeekend ? 'bg-gray-50 border-gray-100' : 'bg-white border-gray-200'}`}>
+            <div className="flex items-center gap-3">
+              <span className={`text-sm font-semibold w-24 flex-shrink-0 ${isWeekend ? 'text-gray-400' : 'text-gray-700'}`}>{s.name}</span>
+              {/* Bar */}
+              <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{ width: `${barWidth}%`, backgroundColor: barColor }}
+                />
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0 text-right">
+                <span className="text-sm font-bold text-gray-700 w-8">{s.avg}</span>
+                <span className="text-xs text-gray-400">({Math.round(pct)}%)</span>
+              </div>
+            </div>
+            <div className="mt-1 ml-[7rem] flex items-center gap-3 text-xs text-gray-400">
+              <span>Min: <b className="text-gray-600">{s.min}</b></span>
+              <span>Max: <b className="text-gray-600">{s.max}</b></span>
+              <span>Ø Abwes.: <b className="text-orange-500">{s.avgAbsence}</b></span>
+              {s.criticalCount > 0 && (
+                <span className="text-red-500 font-medium">⚠ {s.criticalCount}× kritisch/knapp</span>
+              )}
+            </div>
+          </div>
+        );
+      })}
+      <p className="text-xs text-gray-400 text-right">Basierend auf {days.filter(d => d.coverage_status !== 'unplanned').length} geplanten Tagen</p>
+    </div>
+  );
+}
+
+// ─── Jahres-Heatmap ─────────────────────────────────────────
+const MONTHS_DE = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+const MONTHS_FULL_DE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+
+interface YearHeatmapProps {
+  yearData: YearCapacity;
+  onMonthClick?: (month: number) => void;
+}
+function YearHeatmap({ yearData, onMonthClick }: YearHeatmapProps) {
+  // maxPct unused — kept for reference
+  void Math.max(...yearData.months.map(m => m.coverage_pct), 1);
+
+  const getHeatColor = (m: MonthCapacity) => {
+    if (m.planned_days === 0) return { bg: '#f3f4f6', text: '#9ca3af', border: '#e5e7eb' };
+    if (m.worst_status === 'critical') return { bg: '#fef2f2', text: '#dc2626', border: '#fca5a5' };
+    if (m.worst_status === 'low') return { bg: '#fefce8', text: '#ca8a04', border: '#fde047' };
+    const intensity = Math.min(m.coverage_pct / 100, 1);
+    const g = Math.round(80 + intensity * 100);
+    return { bg: `rgb(240, ${g + 30}, 240)`.replace('240,', '240,').replace(/rgb\(.*\)/, `hsl(142, 70%, ${95 - intensity * 30}%)`), text: '#15803d', border: `hsl(142, 50%, ${80 - intensity * 20}%)` };
+  };
+
+  return (
+    <div>
+      <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-2">
+        {yearData.months.map(m => {
+          const colors = getHeatColor(m);
+          const hasData = m.planned_days > 0;
+          return (
+            <button
+              key={m.month}
+              onClick={() => onMonthClick?.(m.month)}
+              className="rounded-xl border-2 p-2.5 text-center transition-all hover:scale-105 hover:shadow-md cursor-pointer"
+              style={{ backgroundColor: colors.bg, borderColor: colors.border }}
+              title={`${MONTHS_FULL_DE[m.month - 1]}: Ø ${m.avg_staffing} MA (${m.coverage_pct}%)`}
+            >
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">{MONTHS_DE[m.month - 1]}</p>
+              {hasData ? (
+                <>
+                  <p className="text-lg font-bold mt-1" style={{ color: colors.text }}>{m.coverage_pct}%</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">Ø {m.avg_staffing} MA</p>
+                  <div className="mt-1.5 flex justify-center gap-0.5">
+                    {m.critical_days > 0 && (
+                      <span className="text-[9px] bg-red-100 text-red-600 px-1 rounded-full">{m.critical_days}✗</span>
+                    )}
+                    {m.low_days > 0 && (
+                      <span className="text-[9px] bg-yellow-100 text-yellow-600 px-1 rounded-full">{m.low_days}⚠</span>
+                    )}
+                    {m.critical_days === 0 && m.low_days === 0 && (
+                      <span className="text-[9px] text-green-500">✓</span>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <p className="text-xs text-gray-300 mt-2">–</p>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      {/* Legend */}
+      <div className="mt-3 flex flex-wrap gap-3 items-center text-xs text-gray-500">
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-green-200 border border-green-300" /><span>Gut besetzt</span></div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-yellow-100 border border-yellow-300" /><span>Knapp</span></div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-red-100 border border-red-300" /><span>Kritisch</span></div>
+        <div className="flex items-center gap-1"><div className="w-3 h-3 rounded bg-gray-100 border border-gray-200" /><span>Nicht geplant</span></div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Component ─────────────────────────────────────────
 export default function KapazitaetsForecast() {
   const today = new Date();
@@ -368,7 +548,10 @@ export default function KapazitaetsForecast() {
   const [month, setMonth] = useState(today.getMonth() + 1);
   const [groupId, setGroupId] = useState<number | null>(null);
 
+  const [activeTab, setActiveTab] = useState<'monat' | 'wochentag' | 'jahresuebersicht'>('monat');
   const [forecast, setForecast] = useState<CapacityForecast | null>(null);
+  const [yearData, setYearData] = useState<YearCapacity | null>(null);
+  const [yearLoading, setYearLoading] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -401,6 +584,25 @@ export default function KapazitaetsForecast() {
   }, [year, month, groupId]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Load year data
+  const loadYear = useCallback(async () => {
+    setYearLoading(true);
+    try {
+      const params = new URLSearchParams({ year: String(year) });
+      if (groupId) params.set('group_id', String(groupId));
+      const res = await fetch(`${BASE_URL}/api/capacity-year?${params}`, { headers: getAuthHeaders() });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setYearData(data);
+    } catch { /* ignore */ } finally {
+      setYearLoading(false);
+    }
+  }, [year, groupId]);
+
+  useEffect(() => {
+    if (activeTab === 'jahresuebersicht') loadYear();
+  }, [activeTab, loadYear]);
 
   // Navigation
   const prevMonth = () => {
@@ -452,6 +654,27 @@ export default function KapazitaetsForecast() {
         </div>
       </div>
 
+      {/* Tab navigation */}
+      <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
+        {([
+          { key: 'monat', label: '📅 Monatsvorschau' },
+          { key: 'wochentag', label: '📊 Wochentag-Analyse' },
+          { key: 'jahresuebersicht', label: '🗓 Jahresübersicht' },
+        ] as const).map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === tab.key
+                ? 'bg-white text-blue-700 shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center">
         <select
@@ -491,7 +714,40 @@ export default function KapazitaetsForecast() {
         </div>
       )}
 
-      {forecast && (
+      {/* ── Wochentag-Analyse Tab ── */}
+      {activeTab === 'wochentag' && (
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+          <h2 className="text-base font-semibold text-gray-800 mb-1">Wochentag-Analyse</h2>
+          <p className="text-sm text-gray-500 mb-4">Durchschnittliche Besetzung pro Wochentag — {MONTHS[month - 1]} {year}</p>
+          {forecast ? (
+            <WeekdayAnalysis days={forecast.days} totalEmployees={forecast.total_employees} />
+          ) : loading ? (
+            <div className="text-center py-8 text-gray-400 animate-pulse">Lade Daten…</div>
+          ) : (
+            <div className="text-center py-8 text-gray-400">Keine Daten verfügbar</div>
+          )}
+        </div>
+      )}
+
+      {/* ── Jahresübersicht Tab ── */}
+      {activeTab === 'jahresuebersicht' && (
+        <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+          <h2 className="text-base font-semibold text-gray-800 mb-1">Jahres-Kapazitätsübersicht {year}</h2>
+          <p className="text-sm text-gray-500 mb-4">12-Monats-Überblick der durchschnittlichen Besetzung — klicken zum Navigieren</p>
+          {yearLoading ? (
+            <div className="text-center py-8 text-gray-400 animate-pulse">Lade Jahresdaten…</div>
+          ) : yearData ? (
+            <YearHeatmap
+              yearData={yearData}
+              onMonthClick={m => { setMonth(m); setActiveTab('monat'); }}
+            />
+          ) : (
+            <div className="text-center py-8 text-gray-400">Keine Daten — Tab wechseln zum Laden</div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'monat' && forecast && (
         <>
           {/* Summary KPI cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

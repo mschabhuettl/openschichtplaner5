@@ -162,6 +162,7 @@ function openPrintWindow(html: string) {
 
 // ── Constants ─────────────────────────────────────────────────
 const WEEKDAY_ABBR = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 const MONTH_NAMES = [
   '', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
@@ -1329,6 +1330,118 @@ function BulkContextMenu({
   );
 }
 
+// ── DayDetailModal ───────────────────────────────────────────
+interface DayDetailModalProps {
+  dateStr: string;
+  day: number;
+  weekdayName: string;
+  isHoliday: boolean;
+  isWeekend: boolean;
+  employees: Employee[];
+  entryMap: Map<string, ScheduleEntry>;
+  shifts: ShiftType[];
+  notesMap: Map<string, Note[]>;
+  onClose: () => void;
+}
+
+function DayDetailModal({
+  dateStr, day, weekdayName, isHoliday, isWeekend,
+  employees, entryMap, shifts, notesMap, onClose,
+}: DayDetailModalProps) {
+  // shifts prop available for future use
+  void shifts;
+
+  // Group employees by their shift for this day
+  const groups: Array<{ label: string; colorBk: string; colorText: string; employees: Array<{ emp: Employee; entry: ScheduleEntry }> }> = [];
+  const noEntryEmps: Employee[] = [];
+  const grouped = new Map<string, { label: string; colorBk: string; colorText: string; employees: Array<{ emp: Employee; entry: ScheduleEntry }> }>();
+
+  for (const emp of employees) {
+    const entry = entryMap.get(`${emp.ID}-${day}`);
+    if (!entry) { noEntryEmps.push(emp); continue; }
+    const key = entry.display_name || '?';
+    if (!grouped.has(key)) {
+      grouped.set(key, { label: entry.shift_name || entry.leave_name || entry.display_name || key, colorBk: entry.color_bk || '#64748b', colorText: entry.color_text || '#fff', employees: [] });
+    }
+    grouped.get(key)!.employees.push({ emp, entry });
+  }
+  grouped.forEach(g => groups.push(g));
+  groups.sort((a, b) => b.employees.length - a.employees.length);
+
+  const dayNotes = notesMap.get(`0-${dateStr}`) ?? [];
+
+  const totalAssigned = employees.length - noEntryEmps.length;
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50" onClick={onClose}>
+      <div
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className={`px-4 py-3 flex items-center justify-between ${isHoliday ? 'bg-red-600' : isWeekend ? 'bg-slate-600' : 'bg-indigo-600'} text-white`}>
+          <div>
+            <div className="font-bold text-lg">{weekdayName}, {dateStr}</div>
+            <div className="text-xs opacity-80">
+              {isHoliday ? '🎉 Feiertag · ' : ''}{totalAssigned} von {employees.length} MA eingeteilt
+            </div>
+          </div>
+          <button onClick={onClose} className="text-white/70 hover:text-white text-xl font-bold leading-none">×</button>
+        </div>
+
+        {/* Day notes */}
+        {dayNotes.length > 0 && (
+          <div className="px-4 py-2 bg-yellow-50 dark:bg-yellow-900/20 border-b border-yellow-200 dark:border-yellow-800 text-xs text-yellow-800 dark:text-yellow-200">
+            📝 {dayNotes.map(n => [n.text1, n.text2].filter(Boolean).join(' ')).join(' · ')}
+          </div>
+        )}
+
+        {/* Body */}
+        <div className="overflow-y-auto flex-1 p-4 space-y-3">
+          {groups.map((g, gi) => (
+            <div key={gi}>
+              <div className="flex items-center gap-2 mb-1.5">
+                <span
+                  className="inline-flex items-center justify-center rounded px-2 py-0.5 text-xs font-bold"
+                  style={{ backgroundColor: g.colorBk, color: g.colorText }}
+                >
+                  {g.label}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">{g.employees.length} MA</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5 ml-1">
+                {g.employees.map(({ emp }) => (
+                  <span key={emp.ID} className="text-xs bg-gray-100 dark:bg-gray-700 rounded px-2 py-0.5 text-gray-700 dark:text-gray-200">
+                    {emp.FIRSTNAME} {emp.NAME}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+          {noEntryEmps.length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="inline-flex items-center justify-center rounded px-2 py-0.5 text-xs font-bold bg-gray-200 text-gray-500">—</span>
+                <span className="text-xs text-gray-400">{noEntryEmps.length} ohne Eintrag</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5 ml-1">
+                {noEntryEmps.map(emp => (
+                  <span key={emp.ID} className="text-xs bg-gray-50 dark:bg-gray-700/50 rounded px-2 py-0.5 text-gray-400">
+                    {emp.FIRSTNAME} {emp.NAME}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          {groups.length === 0 && noEntryEmps.length === 0 && (
+            <div className="text-center text-gray-400 py-8">Keine Mitarbeiter vorhanden</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── HoverTooltip ─────────────────────────────────────────────
 interface HoverTooltipState {
   empId: number;
@@ -1782,6 +1895,7 @@ export default function Schedule() {
   const exportRef = useRef<HTMLDivElement>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
   const [notePopup, setNotePopup] = useState<NoteDetailPopupState | null>(null);
+  const [dayDetailModal, setDayDetailModal] = useState<{ day: number; dateStr: string } | null>(null);
 
   // ── Multi-select state ─────────────────────────────────────
   const [selection, setSelection] = useState<{
@@ -3001,6 +3115,28 @@ export default function Schedule() {
         <h1>📅 Dienstplan — {MONTH_NAMES[month]} {year}</h1>
         <p>Gedruckt am {new Date().toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' })} · OpenSchichtplaner5</p>
       </div>
+      {/* Day Detail Modal */}
+      {dayDetailModal && (() => {
+        const { day, dateStr } = dayDetailModal;
+        const wd = getWeekday(year, month, day);
+        const isHol = holidays.has(dateStr);
+        const isWe = wd === 0 || wd === 6;
+        return (
+          <DayDetailModal
+            dateStr={dateStr}
+            day={day}
+            weekdayName={WEEKDAY_NAMES[wd]}
+            isHoliday={isHol}
+            isWeekend={isWe}
+            employees={displayEmployees}
+            entryMap={entryMap}
+            shifts={shifts}
+            notesMap={notesMap}
+            onClose={() => setDayDetailModal(null)}
+          />
+        );
+      })()}
+
       {/* Context menu */}
       {contextMenu && (
         <CellContextMenu
@@ -4611,10 +4747,11 @@ export default function Schedule() {
                 return (
                   <th
                     key={day}
-                    className={`px-0.5 py-1 text-center min-w-[34px] border-r border-slate-600 ${
+                    className={`px-0.5 py-1 text-center min-w-[34px] border-r border-slate-600 cursor-pointer hover:brightness-125 transition-[filter] ${
                       isHol ? 'bg-red-700' : isToday ? 'bg-blue-500' : isWe ? 'bg-slate-600' : ''
                     }`}
-                    title={thTitle}
+                    title={thTitle + ' · Klick für Tagesübersicht'}
+                    onClick={() => setDayDetailModal({ day, dateStr })}
                   >
                     <div className="font-bold">{day}</div>
                     <div className="text-slate-300 text-[10px]">{WEEKDAY_ABBR[wd]}</div>

@@ -179,6 +179,324 @@ function BarChart({ title, icon, values, labels, anomalies, unit, color, anomaly
   );
 }
 
+// ── SVG Multi-Line Chart ──────────────────────────────────────
+interface LineChartSeries {
+  label: string;
+  values: number[];
+  color: string;
+  unit: string;
+}
+
+interface MultiLineChartProps {
+  title: string;
+  icon: string;
+  labels: string[];
+  series: LineChartSeries[];
+  description?: string;
+}
+
+function MultiLineChart({ title, icon, labels, series, description }: MultiLineChartProps) {
+  const W = 700;
+  const H = 200;
+  const PAD = { top: 20, right: 20, bottom: 32, left: 48 };
+  const chartW = W - PAD.left - PAD.right;
+  const chartH = H - PAD.top - PAD.bottom;
+
+  // Compute overall min/max across all series
+  const allValues = series.flatMap(s => s.values);
+  const minVal = Math.min(...allValues, 0);
+  const maxVal = Math.max(...allValues, 1);
+  const range = maxVal - minVal || 1;
+
+  const n = labels.length;
+
+  function xPos(i: number): number {
+    return n <= 1 ? chartW / 2 : (i / (n - 1)) * chartW;
+  }
+  function yPos(v: number): number {
+    return chartH - ((v - minVal) / range) * chartH;
+  }
+
+  // Y-axis ticks
+  const yTicks = [0, 0.25, 0.5, 0.75, 1].map(t => minVal + t * range);
+
+  const [hoveredPoint, setHoveredPoint] = useState<{ si: number; pi: number } | null>(null);
+
+  return (
+    <div style={{
+      background: 'white',
+      border: '1px solid #e2e8f0',
+      borderRadius: 12,
+      padding: '20px 24px',
+      marginBottom: 24,
+      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+        <div>
+          <div style={{ fontSize: 16, fontWeight: 700, color: '#1e293b' }}>{icon} {title}</div>
+          {description && <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{description}</div>}
+        </div>
+        {/* Legend */}
+        <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          {series.map((s, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: '#475569' }}>
+              <svg width="20" height="4"><line x1="0" y1="2" x2="20" y2="2" stroke={s.color} strokeWidth="2.5" /></svg>
+              {s.label}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        style={{ width: '100%', height: 'auto', display: 'block', overflow: 'visible' }}
+      >
+        <g transform={`translate(${PAD.left},${PAD.top})`}>
+          {/* Grid lines + Y-axis labels */}
+          {yTicks.map((tick, i) => {
+            const y = yPos(tick);
+            return (
+              <g key={i}>
+                <line x1={0} y1={y} x2={chartW} y2={y} stroke="#f1f5f9" strokeWidth="1" />
+                <text x={-6} y={y} textAnchor="end" dominantBaseline="middle" fontSize="10" fill="#94a3b8">
+                  {tick.toFixed(tick >= 10 ? 0 : 1)}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* X-axis baseline */}
+          <line x1={0} y1={chartH} x2={chartW} y2={chartH} stroke="#e2e8f0" strokeWidth="1" />
+
+          {/* X-axis labels */}
+          {labels.map((lbl, i) => (
+            <text key={i} x={xPos(i)} y={chartH + 14} textAnchor="middle" fontSize="10" fill="#94a3b8">
+              {lbl}
+            </text>
+          ))}
+
+          {/* Lines + points per series */}
+          {series.map((s, si) => {
+            const points = s.values.map((v, i) => `${xPos(i)},${yPos(v)}`).join(' ');
+            return (
+              <g key={si}>
+                {/* Area fill (subtle) */}
+                <polyline
+                  points={`${xPos(0)},${chartH} ${s.values.map((v, i) => `${xPos(i)},${yPos(v)}`).join(' ')} ${xPos(s.values.length - 1)},${chartH}`}
+                  fill={s.color}
+                  fillOpacity="0.08"
+                  stroke="none"
+                />
+                {/* Line */}
+                <polyline
+                  points={points}
+                  fill="none"
+                  stroke={s.color}
+                  strokeWidth="2.5"
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+                {/* Data points */}
+                {s.values.map((v, pi) => {
+                  const isHovered = hoveredPoint?.si === si && hoveredPoint?.pi === pi;
+                  return (
+                    <g key={pi}
+                      onMouseEnter={() => setHoveredPoint({ si, pi })}
+                      onMouseLeave={() => setHoveredPoint(null)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <circle
+                        cx={xPos(pi)}
+                        cy={yPos(v)}
+                        r={isHovered ? 6 : 4}
+                        fill="white"
+                        stroke={s.color}
+                        strokeWidth="2"
+                      />
+                      {/* Tooltip */}
+                      {isHovered && (
+                        <g>
+                          <rect
+                            x={xPos(pi) - 36}
+                            y={yPos(v) - 32}
+                            width={72}
+                            height={22}
+                            rx={4}
+                            fill="#1e293b"
+                            opacity={0.9}
+                          />
+                          <text
+                            x={xPos(pi)}
+                            y={yPos(v) - 17}
+                            textAnchor="middle"
+                            fontSize="11"
+                            fill="white"
+                            fontWeight="600"
+                          >
+                            {labels[pi]}: {v.toFixed(v < 10 ? 1 : 0)}{s.unit}
+                          </text>
+                        </g>
+                      )}
+                    </g>
+                  );
+                })}
+              </g>
+            );
+          })}
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+// ── Donut Chart ────────────────────────────────────────────────
+interface DonutSegment {
+  label: string;
+  value: number;
+  color: string;
+  icon: string;
+}
+
+interface DonutChartProps {
+  title: string;
+  icon: string;
+  segments: DonutSegment[];
+  description?: string;
+}
+
+function DonutChart({ title, icon, segments, description }: DonutChartProps) {
+  const [hovered, setHovered] = useState<number | null>(null);
+  const total = segments.reduce((a, s) => a + s.value, 0);
+  if (total === 0) return null;
+
+  const R = 70;       // outer radius
+  const r = 44;       // inner radius
+  const CX = 100;
+  const CY = 100;
+  const SIZE = 200;
+
+  // Compute segments
+  let cumulativeAngle = -Math.PI / 2; // start at top
+  const segs = segments.map((s, i) => {
+    const frac = s.value / total;
+    const angle = frac * 2 * Math.PI;
+    const startAngle = cumulativeAngle;
+    cumulativeAngle += angle;
+    const endAngle = cumulativeAngle;
+    const isHovered = hovered === i;
+    const expandR = isHovered ? R + 6 : R;
+    const x1 = CX + expandR * Math.cos(startAngle);
+    const y1 = CY + expandR * Math.sin(startAngle);
+    const x2 = CX + expandR * Math.cos(endAngle);
+    const y2 = CY + expandR * Math.sin(endAngle);
+    const x1i = CX + r * Math.cos(startAngle);
+    const y1i = CY + r * Math.sin(startAngle);
+    const x2i = CX + r * Math.cos(endAngle);
+    const y2i = CY + r * Math.sin(endAngle);
+    const largeArc = angle > Math.PI ? 1 : 0;
+    // Mid-angle for label line
+    const midAngle = startAngle + angle / 2;
+    return { ...s, frac, startAngle, endAngle, x1, y1, x2, y2, x1i, y1i, x2i, y2i, largeArc, midAngle, isHovered };
+  });
+
+  const hoveredSeg = hovered !== null ? segs[hovered] : null;
+
+  return (
+    <div style={{
+      background: 'white',
+      border: '1px solid #e2e8f0',
+      borderRadius: 12,
+      padding: '20px 24px',
+      marginBottom: 24,
+      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+    }}>
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 16, fontWeight: 700, color: '#1e293b' }}>{icon} {title}</div>
+        {description && <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{description}</div>}
+      </div>
+
+      <div style={{ display: 'flex', gap: 32, alignItems: 'center', flexWrap: 'wrap' }}>
+        {/* SVG Donut */}
+        <svg
+          viewBox={`0 0 ${SIZE} ${SIZE}`}
+          style={{ width: 180, height: 180, flexShrink: 0 }}
+        >
+          {segs.map((seg, i) => (
+            <path
+              key={i}
+              d={`M ${seg.x1i} ${seg.y1i} L ${seg.x1} ${seg.y1} A ${seg.isHovered ? R + 6 : R} ${seg.isHovered ? R + 6 : R} 0 ${seg.largeArc} 1 ${seg.x2} ${seg.y2} L ${seg.x2i} ${seg.y2i} A ${r} ${r} 0 ${seg.largeArc} 0 ${seg.x1i} ${seg.y1i} Z`}
+              fill={seg.color}
+              opacity={hovered !== null && hovered !== i ? 0.5 : 1}
+              stroke="white"
+              strokeWidth="2"
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered(null)}
+              style={{ cursor: 'pointer', transition: 'opacity 0.15s' }}
+            />
+          ))}
+          {/* Center label */}
+          <text x={CX} y={CY - 8} textAnchor="middle" fontSize="22" fontWeight="800" fill="#1e293b">
+            {hoveredSeg ? hoveredSeg.value : total}
+          </text>
+          <text x={CX} y={CY + 10} textAnchor="middle" fontSize="10" fill="#64748b">
+            {hoveredSeg ? hoveredSeg.label : 'Gesamt'}
+          </text>
+          <text x={CX} y={CY + 24} textAnchor="middle" fontSize="10" fill="#64748b">
+            {hoveredSeg ? `${(hoveredSeg.frac * 100).toFixed(1)}%` : 'Abwesenheitstage'}
+          </text>
+        </svg>
+
+        {/* Legend */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+          {segs.map((seg, i) => (
+            <div
+              key={i}
+              onMouseEnter={() => setHovered(i)}
+              onMouseLeave={() => setHovered(null)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                cursor: 'pointer',
+                opacity: hovered !== null && hovered !== i ? 0.45 : 1,
+                transition: 'opacity 0.15s',
+              }}
+            >
+              <div style={{
+                width: 14,
+                height: 14,
+                borderRadius: 3,
+                background: seg.color,
+                flexShrink: 0,
+              }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#1e293b' }}>
+                  {seg.icon} {seg.label}
+                </div>
+                <div style={{ fontSize: 11, color: '#64748b' }}>
+                  {seg.value} Tage · {(seg.frac * 100).toFixed(1)}%
+                </div>
+              </div>
+              <div style={{
+                fontSize: 18,
+                fontWeight: 800,
+                color: seg.color,
+                minWidth: 48,
+                textAlign: 'right',
+              }}>
+                {seg.value}
+              </div>
+            </div>
+          ))}
+          <div style={{ marginTop: 4, paddingTop: 8, borderTop: '1px solid #f1f5f9', fontSize: 11, color: '#94a3b8' }}>
+            Gesamt: {total} Abwesenheitstage im Jahr {new Date().getFullYear()}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Anomaly summary card ───────────────────────────────────────
 interface AnomalySummaryProps {
   monthly: MonthData[];
@@ -363,6 +681,41 @@ export default function Analytics() {
             staffingAnomalies={staffingAnomalies}
             staffingValues={staffingValues}
           />
+
+          {/* Multi-Line Trend Chart — alle drei Metriken normalisiert */}
+          {monthly.length > 1 && (
+            <MultiLineChart
+              title="Trend-Vergleich (normalisiert)"
+              icon="📉"
+              labels={labels}
+              description="Alle drei Metriken im Vergleich — Maus über Punkte für Detailwerte"
+              series={[
+                { label: 'Kranktage', values: sickValues, color: '#ef4444', unit: ' Tage' },
+                { label: 'Überstunden', values: otValues, color: '#f59e0b', unit: 'h' },
+                { label: 'Ø MA/Tag', values: staffingValues, color: '#3b82f6', unit: ' MA' },
+              ]}
+            />
+          )}
+
+          {/* Abwesenheits-Donut */}
+          {(() => {
+            const totalSick = monthly.reduce((a, m) => a + m.sick_days, 0);
+            const totalVac = monthly.reduce((a, m) => a + m.vacation_days, 0);
+            const totalOther = monthly.reduce((a, m) => a + Math.max(0, m.absence_days - m.sick_days - m.vacation_days), 0);
+            if (totalSick + totalVac + totalOther === 0) return null;
+            return (
+              <DonutChart
+                title="Abwesenheits-Verteilung"
+                icon="🍩"
+                description="Aufschlüsselung der Abwesenheitstage nach Typ — Maus über Segmente für Details"
+                segments={[
+                  { label: 'Kranktage', value: totalSick, color: '#ef4444', icon: '🤒' },
+                  { label: 'Urlaub', value: totalVac, color: '#3b82f6', icon: '🌴' },
+                  { label: 'Sonstige', value: totalOther, color: '#8b5cf6', icon: '📋' },
+                ].filter(s => s.value > 0)}
+              />
+            );
+          })()}
 
           {/* Krankheitstage Trend */}
           <BarChart

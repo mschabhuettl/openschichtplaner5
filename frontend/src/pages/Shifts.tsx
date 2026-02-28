@@ -349,8 +349,8 @@ export default function Shifts() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
+          <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto">
             <h2 className="text-lg font-bold text-gray-800 mb-4">
               {editId !== null ? 'Schichtart bearbeiten' : 'Neue Schichtart'}
             </h2>

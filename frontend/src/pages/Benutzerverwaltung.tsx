@@ -117,8 +117,8 @@ function AddEmployeeAccessModal({ userId, employees, existingAccess, onSaved, on
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
+      <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-800">Mitarbeiter-Zugriff hinzufügen</h2>
           <button aria-label="Schließen" onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
@@ -215,8 +215,8 @@ function AddGroupAccessModal({ userId, groups, existingAccess, onSaved, onClose 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
+      <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-800">Gruppen-Zugriff hinzufügen</h2>
           <button aria-label="Schließen" onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
@@ -950,7 +950,7 @@ export default function Benutzerverwaltung() {
 
       {/* ── Create / Edit Modal ─────────────────────────────────── */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
@@ -1072,7 +1072,7 @@ export default function Benutzerverwaltung() {
 
       {/* ── Delete Confirm Dialog ───────────────────────────────── */}
       {deleteTarget && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="px-6 py-5">
               <div className="text-4xl text-center mb-3">⚠️</div>
@@ -1106,7 +1106,7 @@ export default function Benutzerverwaltung() {
 
       {/* ── Password Change Modal ───────────────────────────────── */}
       {pwChangeUser && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
               <h2 className="text-lg font-bold text-slate-800">🔑 Passwort ändern</h2>

@@ -153,7 +153,7 @@ function SonderdiensteModal({ employee, date, shifts, workplaces, onClose, onSav
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-scaleIn w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
         <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
           <span>🔷</span> Sonderdienst eintragen
         </h2>
@@ -284,7 +284,7 @@ function AbweichungModal({ employee, date, onClose, onSave }: AbweichungModalPro
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-scaleIn w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
         <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
           <span>⏱️</span> Arbeitszeitabweichung
         </h2>
@@ -831,7 +831,7 @@ function SaveTemplateModal({
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-scaleIn w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
         <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-1 flex items-center gap-2">
           <span>📋</span> Woche als Vorlage speichern
         </h2>
@@ -912,7 +912,7 @@ function ApplyTemplateModal({
 
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40" onClick={onClose}>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-scaleIn w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
         <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-1 flex items-center gap-2">
           <span>▶️</span> Vorlage anwenden
         </h2>

@@ -596,13 +596,14 @@ function AppInner() {
       {/* Onboarding Tour (auto on first visit + manual via 🧭 button) */}
       <GuidedTour open={tourOpen} onClose={closeTour} />
 
-      {/* Mobile overlay backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-20 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {/* Mobile overlay backdrop — fade in/out with opacity transition */}
+      <div
+        className={`fixed inset-0 bg-black/50 z-20 md:hidden transition-opacity duration-200 ease-in-out ${
+          sidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setSidebarOpen(false)}
+        aria-hidden={!sidebarOpen}
+      />
 
       {/* Sidebar — desktop: always visible | mobile: slide-in drawer */}
       <aside aria-label="Seitenmenü" className={`

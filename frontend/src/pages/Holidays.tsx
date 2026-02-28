@@ -302,8 +302,8 @@ export default function Holidays() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
-          <div onClick={e => e.stopPropagation()} className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-backdropIn" onClick={() => setShowModal(false)}>
+          <div onClick={e => e.stopPropagation()} className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md mx-4 p-6">
             <h2 className="text-lg font-bold text-gray-800 mb-4">
               {editId !== null ? 'Feiertag bearbeiten' : 'Neuer Feiertag'}
             </h2>
@@ -358,8 +358,8 @@ export default function Holidays() {
 
       {/* ── Bulk Absence Modal ────────────────────────────────── */}
       {showBulkAbsModal && bulkAbsHoliday && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowBulkAbsModal(false)}>
-          <div onClick={e => e.stopPropagation()} className="bg-white rounded-xl shadow-2xl w-full max-w-sm mx-4 p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-backdropIn" onClick={() => setShowBulkAbsModal(false)}>
+          <div onClick={e => e.stopPropagation()} className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-sm mx-4 p-6">
             <h2 className="text-lg font-bold text-gray-800 mb-1">Feiertag für alle eintragen</h2>
             <p className="text-sm text-gray-500 mb-4">
               Trägt <strong>{bulkAbsHoliday.NAME}</strong> ({bulkAbsHoliday.DATE}) als Abwesenheit für alle aktiven Mitarbeiter ein.

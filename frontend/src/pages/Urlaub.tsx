@@ -70,8 +70,8 @@ function DetailModal({ employee, month, year, absences, leaveTypes, onClose }: D
   });
   const getLT = (id: number) => leaveTypes.find(lt => lt.ID === id);
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
+      <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold text-gray-800">{employee.FIRSTNAME} {employee.NAME}</h2>
@@ -184,8 +184,8 @@ function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceM
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
+      <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-800">Abwesenheit beantragen</h2>
           <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
@@ -256,8 +256,8 @@ interface AbsenceKalenderDetailProps {
 }
 function AbsenceKalenderDetail({ entries, dateLabel, onClose }: AbsenceKalenderDetailProps) {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col"
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md max-h-[80vh] flex flex-col"
         onClick={e => e.stopPropagation()}>
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <div>
@@ -1397,8 +1397,8 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
 
       {/* Rejection reason modal */}
       {rejectModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
+          <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
             <div className="px-6 py-4 border-b flex items-center justify-between">
               <h2 className="text-base font-bold text-gray-800">❌ Antrag ablehnen</h2>
               <button aria-label="Schließen" onClick={() => setRejectModal(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>

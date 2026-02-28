@@ -75,12 +75,12 @@ export function ConfirmDialog({
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-backdropIn"
         onClick={onCancel}
       />
 
       {/* Dialog */}
-      <div ref={dialogRef} className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-md w-full mx-4 animate-in fade-in zoom-in-95 duration-150">
+      <div ref={dialogRef} className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-md w-full mx-4 animate-scaleIn">
         {/* Close button */}
         <button
           onClick={onCancel}

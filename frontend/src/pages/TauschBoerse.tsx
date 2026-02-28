@@ -102,7 +102,7 @@ function NewRequestModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg">
+      <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg">
         <div className="flex items-center justify-between p-5 border-b">
           <h2 className="text-lg font-bold text-gray-800">🔄 Neue Tausch-Anfrage</h2>
           <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
@@ -229,7 +229,7 @@ function RejectDialog({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-5">
+      <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-sm p-5">
         <h3 className="font-bold text-gray-800 mb-3">❌ Anfrage ablehnen</h3>
         <textarea
           rows={3}

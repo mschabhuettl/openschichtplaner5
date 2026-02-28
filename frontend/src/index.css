@@ -301,14 +301,7 @@ html.dark .border-t.border-gray-200 { border-top-color: var(--color-border) !imp
   transition-timing-function: ease;
 }
 
-/* Don't animate transforms or sizes (causes jank) */
-button,
-a,
-[class*="animate-"],
-[class*="transition-"] {
-  transition: unset;
-}
-
+/* Specific element transitions — override the global rule above */
 button { transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease; }
 a { transition: color 150ms ease; }
 
@@ -560,4 +553,40 @@ a { transition: color 150ms ease; }
 }
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* ── Toast slide-in / slide-out ─────────────────────────────────────────── */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(110%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideOut {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(110%); }
+}
+.animate-slideIn  { animation: slideIn  0.25s ease-out forwards; }
+.animate-slideOut { animation: slideOut 0.2s  ease-in  forwards; }
+
+/* ── Modal scale-in ─────────────────────────────────────────────────────── */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.94) translateY(-6px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+@keyframes backdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-scaleIn   { animation: scaleIn    0.2s ease-out forwards; }
+.animate-backdropIn { animation: backdropIn 0.15s ease-out forwards; }
+
+/* ── prefers-reduced-motion: disable all animations/transitions ─────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

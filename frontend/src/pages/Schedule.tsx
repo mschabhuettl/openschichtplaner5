@@ -1376,7 +1376,7 @@ function DayDetailModal({
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50" onClick={onClose}>
       <div
-        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -1671,7 +1671,7 @@ function WeekTemplateModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[85vh] flex flex-col">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg mx-4 max-h-[85vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b dark:border-gray-700">
           <h2 className="text-base font-semibold flex items-center gap-2 dark:text-white">
@@ -3182,10 +3182,10 @@ export default function Schedule() {
       {/* Auto-Planen Modal */}
       {showAutoPlan && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn"
           onClick={e => { if (e.target === e.currentTarget) closeAutoPlan(); }}
         >
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-gray-800">🤖 Auto-Planen</h2>
@@ -3611,10 +3611,10 @@ export default function Schedule() {
 
         return (
           <div
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn"
             onClick={e => { if (e.target === e.currentTarget) closeCopyWeek(); }}
           >
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-lg font-bold text-gray-800">📋 Woche kopieren</h2>
                 <button aria-label="Schließen" onClick={closeCopyWeek} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
@@ -3980,7 +3980,7 @@ export default function Schedule() {
             onClick={() => setShowRecommendations(false)}
           >
             <div
-              className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col"
+              className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg mx-4 max-h-[80vh] flex flex-col"
               onClick={e => e.stopPropagation()}
             >
               <div className="px-5 py-4 border-b flex items-center justify-between bg-gradient-to-r from-amber-50 to-orange-50 rounded-t-xl">

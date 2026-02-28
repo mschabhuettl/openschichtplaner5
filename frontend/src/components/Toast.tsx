@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import type { Toast as ToastType } from '../hooks/useToast';
 
 interface ToastContainerProps {
@@ -19,6 +20,53 @@ const typeIcons: Record<ToastType['type'], string> = {
   warning: '⚠️',
 };
 
+interface ToastItemProps {
+  toast: ToastType;
+  onRemove: (id: string) => void;
+}
+
+function ToastItem({ toast, onRemove }: ToastItemProps) {
+  const [removing, setRemoving] = useState(false);
+
+  const handleRemove = () => {
+    setRemoving(true);
+    setTimeout(() => onRemove(toast.id), 200);
+  };
+
+  // When toast is removed externally (auto-timeout), trigger exit animation
+  useEffect(() => {
+    return () => {
+      // cleanup — no action needed, external removal goes through state
+    };
+  }, []);
+
+  return (
+    <div
+      role={toast.type === 'error' ? 'alert' : 'status'}
+      aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
+      className={`
+        flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg border text-sm font-medium
+        pointer-events-auto cursor-pointer
+        ${removing ? 'animate-slideOut' : 'animate-slideIn'}
+        max-w-sm min-w-[240px]
+        ${typeStyles[toast.type]}
+      `}
+      onClick={handleRemove}
+      title="Klicken zum Schließen"
+    >
+      <span className="text-base flex-shrink-0" aria-hidden="true">{typeIcons[toast.type]}</span>
+      <span className="flex-1">{toast.message}</span>
+      <button
+        onClick={e => { e.stopPropagation(); handleRemove(); }}
+        className="ml-1 opacity-70 hover:opacity-100 text-lg leading-none"
+        aria-label="Benachrichtigung schließen"
+      >
+        ×
+      </button>
+    </div>
+  );
+}
+
 export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
   if (toasts.length === 0) return null;
 
@@ -31,30 +79,7 @@ export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
       aria-atomic="false"
     >
       {toasts.map(toast => (
-        <div
-          key={toast.id}
-          role={toast.type === 'error' ? 'alert' : 'status'}
-          aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
-          className={`
-            flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg border text-sm font-medium
-            pointer-events-auto cursor-pointer
-            animate-[slideIn_0.2s_ease-out]
-            max-w-sm min-w-[240px]
-            ${typeStyles[toast.type]}
-          `}
-          onClick={() => onRemove(toast.id)}
-          title="Klicken zum Schließen"
-        >
-          <span className="text-base flex-shrink-0" aria-hidden="true">{typeIcons[toast.type]}</span>
-          <span className="flex-1">{toast.message}</span>
-          <button
-            onClick={e => { e.stopPropagation(); onRemove(toast.id); }}
-            className="ml-1 opacity-70 hover:opacity-100 text-lg leading-none"
-            aria-label="Benachrichtigung schließen"
-          >
-            ×
-          </button>
-        </div>
+        <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
       ))}
     </div>
   );
@@ -73,6 +98,7 @@ export function Toast({ message, type = 'success', onClose }: ToastProps) {
       className={`
         fixed top-4 right-4 z-[9999] flex items-center gap-2 px-4 py-3
         rounded-lg shadow-lg border text-sm font-medium max-w-sm
+        animate-slideIn
         ${typeStyles[type]}
       `}
       onClick={onClose}

@@ -108,7 +108,7 @@ function AnnualStatementModal({
 
   return (
     <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+      <div className="bg-white rounded-xl shadow-2xl animate-scaleIn max-w-md w-full p-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4">📊 Jahresabschluss {result.year}</h2>
         <div className="space-y-3 mb-5">
           {result.carry_in !== 0 && (
@@ -195,7 +195,7 @@ function DetailPanel({
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div
-        className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] flex flex-col"
+        className="bg-white rounded-xl shadow-2xl animate-scaleIn max-w-3xl w-full max-h-[90vh] flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}

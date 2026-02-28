@@ -293,12 +293,12 @@ export default function SpotlightSearch({ open, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh] px-4"
+      className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh] px-4 animate-backdropIn"
       style={{ background: 'rgba(0,0,0,0.55)' }}
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="w-full max-w-xl rounded-xl shadow-2xl overflow-hidden"
+        className="w-full max-w-xl rounded-xl shadow-2xl overflow-hidden animate-scaleIn"
         style={{ background: 'var(--sp-search-bg, #1e293b)', border: '1px solid rgba(255,255,255,0.1)' }}
         onKeyDown={handleKeyDown}
       >

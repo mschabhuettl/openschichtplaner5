@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { api } from '../api/client';
 import type { EmployeeStats, ExtraChargeSummary, EmployeeYearStats, SicknessStatistics, ShiftStatisticsData } from '../api/client';
 import type { Employee, Group } from '../types';
+import { useT } from '../i18n';
 
 const MONTH_NAMES = [
   '', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
@@ -231,6 +232,7 @@ function OvertimeBar({ value, max }: { value: number; max: number }) {
 }
 
 export default function Statistiken() {
+  const t = useT();
   const now = new Date();
 
   // ── Tabs ────────────────────────────────────────────────
@@ -472,13 +474,13 @@ export default function Statistiken() {
             className={`px-4 py-1.5 transition-colors ${activeTab === 'compare' ? 'bg-indigo-700 text-white' : 'bg-white hover:bg-gray-50 text-gray-700'}`}
             onClick={() => setActiveTab('compare')}
           >
-            📊 Monatsvergleich
+            {t.statistiken.tabMonthly}
           </button>
           <button
             className={`px-4 py-1.5 transition-colors ${activeTab === 'shifts' ? 'bg-emerald-700 text-white' : 'bg-white hover:bg-gray-50 text-gray-700'}`}
             onClick={() => setActiveTab('shifts')}
           >
-            🔄 Schicht-Auswertung
+            {t.statistiken.tabShifts}
           </button>
         </div>
       </div>
@@ -706,7 +708,7 @@ export default function Statistiken() {
           onChange={e => setGroupId(e.target.value ? Number(e.target.value) : undefined)}
           className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
         >
-          <option value="">Alle Mitarbeiter</option>
+          <option value="">{t.statistiken.allEmployees}</option>
           {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
         </select>
 
@@ -771,13 +773,13 @@ export default function Statistiken() {
               >
                 Mitarbeiter {sortKey === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
               </th>
-              <SortHeader label="Soll-Std" skey="target_hours" />
-              <SortHeader label="Ist-Std" skey="actual_hours" />
+              <SortHeader label={t.statistiken.colTargetHrs} skey="target_hours" />
+              <SortHeader label={t.statistiken.colActualHrs} skey="actual_hours" />
               <th className="px-3 py-2 text-center border border-gray-200 min-w-[180px] whitespace-nowrap cursor-pointer hover:bg-slate-200 select-none" onClick={() => handleSort('overtime')}>
                 Überstunden {sortKey === 'overtime' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
               </th>
-              <SortHeader label="Abwesend (Tage)" skey="absences" />
-              <SortHeader label="Urlaub genutzt" skey="vacation" />
+              <SortHeader label={t.statistiken.colAbsent} skey="absences" />
+              <SortHeader label={t.statistiken.colVacation} skey="vacation" />
             </tr>
           </thead>
           <tbody>
@@ -1143,7 +1145,7 @@ export default function Statistiken() {
               onChange={e => setCompareGroupId(e.target.value ? Number(e.target.value) : undefined)}
               className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
             >
-              <option value="">Alle Gruppen</option>
+              <option value="">{t.statistiken.allGroups}</option>
               {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
             </select>
             {!compareLoading && compareData.length > 0 && (
@@ -1327,7 +1329,7 @@ export default function Statistiken() {
               onChange={e => setShiftGroupId(e.target.value ? Number(e.target.value) : undefined)}
               className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
             >
-              <option value="">Alle Gruppen</option>
+              <option value="">{t.statistiken.allGroups}</option>
               {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
             </select>
           </div>

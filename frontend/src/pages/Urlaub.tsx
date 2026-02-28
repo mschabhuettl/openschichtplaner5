@@ -788,6 +788,7 @@ interface AnsprüecheTabProps {
   groups: Group[];
 }
 function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
+  const t = useT();
   const { canEditAbsences } = usePermissions();
   const [groupId, setGroupId] = useState<number | null>(null);
   const [balances, setBalances] = useState<LeaveBalance[]>([]);
@@ -869,7 +870,7 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <select value={groupId ?? ''} onChange={e => setGroupId(e.target.value ? Number(e.target.value) : null)}
           className="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">Alle Gruppen</option>
+          <option value="">{t.urlaub.allGroups}</option>
           {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
         </select>
         <input type="text" placeholder="Suchen..." value={search} onChange={e => setSearch(e.target.value)}
@@ -975,6 +976,7 @@ interface SperrenTabProps {
   groups: Group[];
 }
 function SperrenTab({ groups }: SperrenTabProps) {
+  const t = useT();
   const { canEditAbsences } = usePermissions();
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [groupId, setGroupId] = useState<number | null>(null);
@@ -1049,7 +1051,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <select value={groupId ?? ''} onChange={e => setGroupId(e.target.value ? Number(e.target.value) : null)}
           className="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="">Alle Gruppen</option>
+          <option value="">{t.urlaub.allGroups}</option>
           {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
         </select>
         {canEditAbsences && (
@@ -1111,7 +1113,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
       ) : bans.length === 0 ? (
         <div className="bg-white rounded-lg border p-8 text-center text-gray-400">
           <div className="text-4xl mb-2">🚫</div>
-          <div>Keine Urlaubssperren eingetragen</div>
+          <div>{t.urlaub.noLockouts}</div>
           <div className="text-xs mt-1">Klicken Sie auf "Urlaubssperre anlegen" um eine neue anzulegen.</div>
         </div>
       ) : (
@@ -1185,6 +1187,7 @@ interface AntraegeTabProps {
 interface AbsenceStatusEntry { status: AbsenceStatus; reject_reason: string; }
 
 function AntraegeTab({ year, employees, leaveTypes, absences, loading }: AntraegeTabProps) {
+  const t = useT();
   const [statusMap, setStatusMap] = useState<Record<string, AbsenceStatusEntry>>({});
   const [statusLoading, setStatusLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
@@ -1271,10 +1274,10 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
           onChange={e => setFilterStatus(e.target.value as AbsenceStatus | '')}
           className="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="">Alle Status</option>
-          <option value="pending">⏳ Beantragt ({pendingCount})</option>
-          <option value="approved">✅ Genehmigt</option>
-          <option value="rejected">❌ Abgelehnt</option>
+          <option value="">{t.urlaub.allStatus}</option>
+          <option value="pending">{t.urlaub.statusPending} ({pendingCount})</option>
+          <option value="approved">{t.urlaub.statusApproved}</option>
+          <option value="rejected">{t.urlaub.statusRejected}</option>
         </select>
         <input
           type="text"
@@ -1344,17 +1347,17 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
                           onClick={() => updateStatus(ab.ID, 'approved')}
                           disabled={isUpdating}
                           className="px-2.5 py-1 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-60"
-                          title="Genehmigen"
+                          title={t.urlaub.actionApprove}
                         >
-                          {isUpdating ? '⟳' : '✅ Genehmigen'}
+                          {isUpdating ? '⟳' : `✅ ${t.urlaub.actionApprove}`}
                         </button>
                         <button
                           onClick={() => { setRejectModal({ id: ab.ID }); setRejectReason(''); }}
                           disabled={isUpdating}
                           className="px-2.5 py-1 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
-                          title="Ablehnen"
+                          title={t.urlaub.actionReject}
                         >
-                          {isUpdating ? '⟳' : '❌ Ablehnen'}
+                          {isUpdating ? '⟳' : `❌ ${t.urlaub.actionReject}`}
                         </button>
                       </div>
                     ) : (
@@ -1362,9 +1365,9 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
                         onClick={() => updateStatus(ab.ID, 'pending')}
                         disabled={isUpdating}
                         className="px-2 py-1 text-xs text-gray-500 hover:text-gray-700 border rounded hover:bg-gray-50 disabled:opacity-60"
-                        title="Zurücksetzen"
+                        title={t.urlaub.actionReset}
                       >
-                        {isUpdating ? '⟳' : '↺ Zurücksetzen'}
+                        {isUpdating ? '⟳' : `↺ ${t.urlaub.actionReset}`}
                       </button>
                     )}
                   </td>

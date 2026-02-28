@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
@@ -7,6 +7,7 @@ import { ToastContainer } from './components/Toast';
 import { useToast } from './hooks/useToast';
 import SpotlightSearch from './components/SpotlightSearch';
 import WarningsCenter from './components/WarningsCenter';
+import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Lazy-loaded pages — each page group is a separate chunk
@@ -176,24 +177,72 @@ function AppInner() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [conflictCount, setConflictCount] = useState(0);
   const [spotlightOpen, setSpotlightOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
-  // Global keyboard shortcut: Ctrl+K or standalone "/" opens Spotlight search
+  // "g" prefix navigation: track pending timer via ref (no re-render needed)
+  const gTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const gPendingRef = useRef(false);
+
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    // Ctrl+K (all platforms)
+    // Skip when typing in inputs
+    const tag = (document.activeElement as HTMLElement)?.tagName?.toLowerCase();
+    const isTyping = tag === 'input' || tag === 'textarea' || tag === 'select'
+      || (document.activeElement as HTMLElement)?.isContentEditable;
+
+    // Ctrl+K (all platforms) — Spotlight search (always fires, even in inputs)
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
       e.preventDefault();
       setSpotlightOpen(prev => !prev);
       return;
     }
-    // "/" key — only when not typing in an input/textarea/select
-    if (e.key === '/' && !spotlightOpen) {
-      const tag = (document.activeElement as HTMLElement)?.tagName?.toLowerCase();
-      if (tag !== 'input' && tag !== 'textarea' && tag !== 'select') {
+
+    if (isTyping) return;
+
+    // "/" key — Spotlight search
+    if (e.key === '/') {
+      e.preventDefault();
+      setSpotlightOpen(true);
+      return;
+    }
+
+    // "?" key — Keyboard shortcuts help
+    if (e.key === '?') {
+      e.preventDefault();
+      setShortcutsOpen(prev => !prev);
+      return;
+    }
+
+    // "g" prefix navigation
+    if (e.key === 'g' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      e.preventDefault();
+      gPendingRef.current = true;
+      if (gTimerRef.current) clearTimeout(gTimerRef.current);
+      gTimerRef.current = setTimeout(() => { gPendingRef.current = false; }, 1000);
+      return;
+    }
+
+    // Second key after "g"
+    if (gPendingRef.current) {
+      gPendingRef.current = false;
+      if (gTimerRef.current) { clearTimeout(gTimerRef.current); gTimerRef.current = null; }
+      const goMap: Record<string, string> = {
+        d: '/',                 // Dashboard
+        p: '/schedule',         // dienstPlan
+        m: '/employees',        // Mitarbeiter
+        k: '/konflikte',        // Konflikte
+        s: '/statistiken',      // Statistiken
+        u: '/urlaub',           // Urlaub
+        e: '/einsatzplan',      // Einsatzplan
+        w: '/schichtwuensche',  // Wünsche
+        n: '/notizen',          // Notizen
+      };
+      const dest = goMap[e.key];
+      if (dest) {
         e.preventDefault();
-        setSpotlightOpen(true);
+        navigate(dest);
       }
     }
-  }, [spotlightOpen]);
+  }, [navigate]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
@@ -307,6 +356,15 @@ function AppInner() {
           >
             🔍
           </button>
+          {/* Keyboard shortcuts help */}
+          <button
+            onClick={() => setShortcutsOpen(true)}
+            title="Keyboard-Shortcuts anzeigen (?)"
+            aria-label="Keyboard-Shortcuts anzeigen"
+            className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors text-sm font-bold leading-none"
+          >
+            ?
+          </button>
           {/* Close button — only visible on mobile */}
           <button
             className="md:hidden text-slate-400 hover:text-white p-1"
@@ -394,6 +452,9 @@ function AppInner() {
 
       {/* Global Spotlight Search Modal */}
       <SpotlightSearch open={spotlightOpen} onClose={() => setSpotlightOpen(false)} />
+
+      {/* Keyboard Shortcuts Help Modal */}
+      <KeyboardShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
 
       {/* Mobile overlay backdrop */}
       {sidebarOpen && (

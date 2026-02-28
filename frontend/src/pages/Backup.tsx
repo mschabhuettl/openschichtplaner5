@@ -107,7 +107,7 @@ function BackupHistorySection({ onRestoreFromServer, refreshKey }: BackupHistory
       </p>
 
       {loading && (
-        <div className="flex items-center gap-2 text-sm text-gray-400 py-4">
+        <div className="flex items-center gap-2 text-sm text-gray-600 py-4">
           <span className="animate-spin">⏳</span> Lade Backup-Liste…
         </div>
       )}
@@ -119,7 +119,7 @@ function BackupHistorySection({ onRestoreFromServer, refreshKey }: BackupHistory
       )}
 
       {!loading && !error && backups.length === 0 && (
-        <div className="text-sm text-gray-400 py-4 text-center">
+        <div className="text-sm text-gray-600 py-4 text-center">
           Noch keine Backups vorhanden. Erstelle das erste Backup oben.
         </div>
       )}
@@ -134,7 +134,7 @@ function BackupHistorySection({ onRestoreFromServer, refreshKey }: BackupHistory
                   {idx === 0 && <span className="text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded font-semibold">Aktuell</span>}
                   <span className="text-sm font-mono text-slate-700 truncate">{b.filename}</span>
                 </div>
-                <div className="text-xs text-gray-400 mt-0.5 flex gap-3">
+                <div className="text-xs text-gray-600 mt-0.5 flex gap-3">
                   <span>📅 {formatDateDE(b.created_at)}</span>
                   <span>💾 {formatBytes(b.size_bytes)}</span>
                 </div>
@@ -173,7 +173,7 @@ function BackupHistorySection({ onRestoreFromServer, refreshKey }: BackupHistory
       <button
         onClick={load}
         disabled={loading}
-        className="mt-3 text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors"
+        className="mt-3 text-xs text-gray-600 hover:text-gray-600 flex items-center gap-1 transition-colors"
       >
         🔄 Aktualisieren
       </button>
@@ -240,13 +240,13 @@ function BackupSection({ onBackupCreated }: BackupSectionProps) {
       <button
         onClick={handleDownload}
         disabled={loading}
-        className={`inline-flex items-center gap-2 px-5 py-3 rounded-lg font-semibold text-sm transition-colors shadow-sm ${loading ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800'}`}
+        className={`inline-flex items-center gap-2 px-5 py-3 rounded-lg font-semibold text-sm transition-colors shadow-sm ${loading ? 'bg-gray-200 text-gray-600 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800'}`}
       >
         {loading ? <><span className="animate-spin">⏳</span> Erstelle Backup…</> : <><span>⬇️</span> Backup erstellen &amp; herunterladen</>}
       </button>
 
       {lastDownload && (
-        <p className="mt-3 text-xs text-gray-400 flex items-center gap-1">
+        <p className="mt-3 text-xs text-gray-600 flex items-center gap-1">
           <span>🕐</span>
           Letzter Download: <span className="font-medium text-gray-500 ml-1">{lastDownload}</span>
         </p>
@@ -365,7 +365,7 @@ function RestoreSection({ serverRestoreFile, onServerRestoreConsumed, onRestoreD
           ZIP-Backup hierher klicken oder{' '}
           <span className="text-blue-600 font-medium">Datei auswählen</span>
         </div>
-        <div className="text-xs text-gray-400 mt-1">Nur .zip Dateien</div>
+        <div className="text-xs text-gray-600 mt-1">Nur .zip Dateien</div>
         <input
           ref={inputRef}
           type="file"
@@ -379,7 +379,7 @@ function RestoreSection({ serverRestoreFile, onServerRestoreConsumed, onRestoreD
         <div className="mt-2 text-xs text-gray-500 flex items-center gap-2">
           <span>📁</span>
           <span className="font-medium">{file.name}</span>
-          <span className="text-gray-400">({(file.size / 1024).toFixed(1)} KB)</span>
+          <span className="text-gray-600">({(file.size / 1024).toFixed(1)} KB)</span>
         </div>
       )}
 
@@ -390,7 +390,7 @@ function RestoreSection({ serverRestoreFile, onServerRestoreConsumed, onRestoreD
           disabled={!file || loading}
           className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
             !file || loading
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
               : 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 shadow-sm'
           }`}
         >
@@ -496,7 +496,7 @@ function CompactSection() {
         disabled={loading}
         className={`inline-flex items-center gap-2 px-5 py-3 rounded-lg font-semibold text-sm transition-colors shadow-sm ${
           loading
-            ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
             : 'bg-orange-600 text-white hover:bg-orange-700 active:bg-orange-800'
         }`}
       >

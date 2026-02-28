@@ -108,12 +108,12 @@ function severityBg(s: string) {
 }
 
 function dayStatusColor(status: string, isWeekend: boolean) {
-  if (isWeekend) return 'bg-gray-100 text-gray-400';
+  if (isWeekend) return 'bg-gray-100 text-gray-600';
   if (status === 'ok') return 'bg-green-100 text-green-700';
   if (status === 'low') return 'bg-yellow-100 text-yellow-700';
   if (status === 'critical') return 'bg-red-100 text-red-700 font-bold';
   if (status === 'unplanned') return 'bg-orange-100 text-orange-700';
-  return 'bg-gray-50 text-gray-400';
+  return 'bg-gray-50 text-gray-600';
 }
 
 function ScoreRing({ score, label }: { score: number; label: string }) {
@@ -353,7 +353,7 @@ export default function QualitaetsBericht() {
             <div className="grid grid-cols-7 gap-1 sm:grid-cols-7">
               {/* Day headers */}
               {WEEKDAY_NAMES.map(d => (
-                <div key={d} className="text-xs text-center text-gray-400 font-medium py-1">{d}</div>
+                <div key={d} className="text-xs text-center text-gray-600 font-medium py-1">{d}</div>
               ))}
 
               {/* Empty cells before first day */}
@@ -387,7 +387,7 @@ export default function QualitaetsBericht() {
               <div className="text-xs text-gray-500 mt-0.5">Soll-Stunden gesamt</div>
             </div>
             <div className="bg-white border rounded-lg p-3 text-center shadow-sm">
-              <div className={`text-xl font-bold ${report.hours.total_actual > 0 ? 'text-blue-700' : 'text-gray-400'}`}>
+              <div className={`text-xl font-bold ${report.hours.total_actual > 0 ? 'text-blue-700' : 'text-gray-600'}`}>
                 {report.hours.total_actual.toLocaleString()}h
               </div>
               <div className="text-xs text-gray-500 mt-0.5">Ist-Stunden gesamt</div>
@@ -397,7 +397,7 @@ export default function QualitaetsBericht() {
               <div className="text-xs text-gray-500 mt-0.5">MAs ohne Abw.</div>
             </div>
             <div className="bg-white border rounded-lg p-3 text-center shadow-sm">
-              <div className={`text-xl font-bold ${report.hours.employees_issues > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+              <div className={`text-xl font-bold ${report.hours.employees_issues > 0 ? 'text-red-600' : 'text-gray-600'}`}>
                 {report.hours.employees_issues}
               </div>
               <div className="text-xs text-gray-500 mt-0.5">MAs mit Abw.</div>
@@ -405,7 +405,7 @@ export default function QualitaetsBericht() {
           </div>
 
           {/* Footer note */}
-          <p className="text-xs text-gray-400 text-center pb-2">
+          <p className="text-xs text-gray-600 text-center pb-2">
             Mindestbesetzung: {report.required_min_per_day} MA/Tag (dynamisch) · Score = Besetzung 50% + Stunden 30% + Konflikte 20%
           </p>
         </>

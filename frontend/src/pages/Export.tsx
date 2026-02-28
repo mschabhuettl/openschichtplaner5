@@ -43,7 +43,7 @@ function DownloadButton({
       download
       className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
         disabled
-          ? 'bg-gray-200 text-gray-400 cursor-not-allowed pointer-events-none'
+          ? 'bg-gray-200 text-gray-600 cursor-not-allowed pointer-events-none'
           : 'bg-slate-700 text-white hover:bg-slate-600 active:bg-slate-800'
       }`}
       onClick={(e) => {

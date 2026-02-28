@@ -243,7 +243,7 @@ function DropZone({ onFile }: DropZoneProps) {
       <div className="text-sm text-gray-600 font-medium">
         CSV-Datei hierher ziehen oder <span className="text-blue-600">auswählen</span>
       </div>
-      <div className="text-xs text-gray-400 mt-1">Nur .csv Dateien (UTF-8 oder latin-1)</div>
+      <div className="text-xs text-gray-600 mt-1">Nur .csv Dateien (UTF-8 oder latin-1)</div>
       <input ref={inputRef} type="file" accept=".csv" className="hidden" onChange={handleChange} />
     </div>
   );
@@ -277,7 +277,7 @@ function PreviewTable({ headers, rows }: { headers: string[]; rows: string[][] }
         </tbody>
       </table>
       {rows.length > 5 && (
-        <div className="px-3 py-1.5 text-xs text-gray-400 border-t border-gray-200 bg-gray-50">
+        <div className="px-3 py-1.5 text-xs text-gray-600 border-t border-gray-200 bg-gray-50">
           … und {rows.length - 5} weitere Zeile{rows.length - 5 !== 1 ? 'n' : ''}
         </div>
       )}
@@ -432,7 +432,7 @@ export default function Import() {
           <div className="mt-2 text-xs text-gray-500 flex items-center gap-2">
             <span>📄</span>
             <span className="font-medium">{file.name}</span>
-            <span className="text-gray-400">({(file.size / 1024).toFixed(1)} KB)</span>
+            <span className="text-gray-600">({(file.size / 1024).toFixed(1)} KB)</span>
             <button
               onClick={() => { setFile(null); setPreview(null); setResult(null); setError(null); }}
               className="ml-auto text-red-400 hover:text-red-600 text-xs"
@@ -458,7 +458,7 @@ export default function Import() {
               disabled={loading || !file}
               className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
                 loading || !file
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
                   : 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800'
               }`}
             >

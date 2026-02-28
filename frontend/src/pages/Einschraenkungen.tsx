@@ -248,14 +248,14 @@ export default function Einschraenkungen() {
           onChange={e => setSearch(e.target.value)}
           className="px-3 py-1.5 border rounded-lg shadow-sm text-sm w-52 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
-        <span className="text-xs text-gray-400">
+        <span className="text-xs text-gray-600">
           {restrictions.length} Einschränkung{restrictions.length !== 1 ? 'en' : ''} gesamt
         </span>
       </div>
 
       {/* Employee list with restrictions */}
       {loading ? (
-        <div className="text-center py-12 text-gray-400">⟳ Lade...</div>
+        <div className="text-center py-12 text-gray-600">⟳ Lade...</div>
       ) : (
         <div className="space-y-3">
           {filteredEmps
@@ -267,7 +267,7 @@ export default function Einschraenkungen() {
                   <div className="px-4 py-3 bg-gray-50 border-b flex items-center justify-between">
                     <div>
                       <span className="font-semibold text-gray-800">{emp.NAME}, {emp.FIRSTNAME}</span>
-                      <span className="ml-2 text-xs text-gray-400">{emp.NUMBER}</span>
+                      <span className="ml-2 text-xs text-gray-600">{emp.NUMBER}</span>
                     </div>
                     {empRestr.length === 0 ? (
                       <span className="text-xs text-gray-300 italic">Keine Einschränkungen</span>
@@ -329,7 +329,7 @@ export default function Einschraenkungen() {
               );
             })}
           {filteredEmps.length === 0 && (
-            <div className="text-center py-10 text-gray-400">
+            <div className="text-center py-10 text-gray-600">
               <div className="text-4xl mb-2">🔍</div>
               <div>Keine Mitarbeiter gefunden</div>
             </div>

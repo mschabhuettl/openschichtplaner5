@@ -307,7 +307,7 @@ export default function SchichtBriefing() {
                             <div className="text-xs text-slate-500">{entry.emp.FUNCTION}</div>
                           )}
                         </div>
-                        <div className="text-xs font-mono text-slate-400">
+                        <div className="text-xs font-mono text-slate-600">
                           {entry.emp?.SHORTNAME ?? ''}
                         </div>
                       </div>

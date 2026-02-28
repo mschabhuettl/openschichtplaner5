@@ -363,7 +363,7 @@ export default function Konflikte() {
               📅 {c.shift_name}
             </span>
           ) : (
-            <span className="text-gray-400 text-xs italic">Sonderschicht</span>
+            <span className="text-gray-600 text-xs italic">Sonderschicht</span>
           )}
         </td>
         <td className="px-4 py-3">
@@ -372,7 +372,7 @@ export default function Konflikte() {
               🏖️ {c.absence_name}
             </span>
           ) : (
-            <span className="text-gray-400 text-xs italic">Abwesenheit</span>
+            <span className="text-gray-600 text-xs italic">Abwesenheit</span>
           )}
         </td>
         <td className="px-4 py-3">
@@ -474,7 +474,7 @@ export default function Konflikte() {
 
       {/* Loading State */}
       {loading && (
-        <div className="flex items-center justify-center py-16 text-gray-400">
+        <div className="flex items-center justify-center py-16 text-gray-600">
           <div className="flex flex-col items-center gap-3">
             <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
             <span className="text-sm">Konflikte werden geladen…</span>
@@ -622,7 +622,7 @@ export default function Konflikte() {
               </tbody>
             </table>
           </div>
-          <div className="px-4 py-3 border-t text-xs text-gray-400 bg-gray-50">
+          <div className="px-4 py-3 border-t text-xs text-gray-600 bg-gray-50">
             Tipp: Wähle mehrere Konflikte aus und nutze die Massenauflösung, um schnell aufzuräumen.
           </div>
         </div>
@@ -672,7 +672,7 @@ export default function Konflikte() {
                   }`}>
                     {empConflicts.length} Konflikt{empConflicts.length !== 1 ? 'e' : ''}
                   </span>
-                  <span className="text-gray-400 text-xs ml-1">{isExpanded ? '▲' : '▼'}</span>
+                  <span className="text-gray-600 text-xs ml-1">{isExpanded ? '▲' : '▼'}</span>
                 </div>
 
                 {/* Expanded rows */}
@@ -703,7 +703,7 @@ export default function Konflikte() {
 
       {/* No results after filter */}
       {!loading && conflicts.length > 0 && filteredConflicts.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+        <div className="flex flex-col items-center justify-center py-16 text-gray-600">
           <div className="text-4xl mb-3">🔍</div>
           <p className="text-base font-medium text-gray-600">Kein Ergebnis</p>
           <p className="text-sm mt-1">Keine Konflikte entsprechen dem aktuellen Filter.</p>

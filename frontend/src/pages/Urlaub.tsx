@@ -77,11 +77,11 @@ function DetailModal({ employee, month, year, absences, leaveTypes, onClose }: D
             <h2 className="text-lg font-bold text-gray-800">{employee.FIRSTNAME} {employee.NAME}</h2>
             <p className="text-sm text-gray-500">{MONTHS[month]} {year}</p>
           </div>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl">✕</button>
         </div>
         <div className="px-6 py-4">
           {monthAbs.length === 0 ? (
-            <p className="text-gray-400 text-sm text-center py-4">Keine Abwesenheiten</p>
+            <p className="text-gray-600 text-sm text-center py-4">Keine Abwesenheiten</p>
           ) : (
             <div className="space-y-2">
               {monthAbs.map(ab => {
@@ -188,7 +188,7 @@ function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceM
       <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-800">Abwesenheit beantragen</h2>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl">✕</button>
         </div>
         {error && (
           <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-sm text-red-700">
@@ -264,7 +264,7 @@ function AbsenceKalenderDetail({ entries, dateLabel, onClose }: AbsenceKalenderD
             <h2 className="text-lg font-bold text-gray-800">🗓️ Abwesenheiten</h2>
             <p className="text-sm text-gray-500">{dateLabel}</p>
           </div>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl">✕</button>
         </div>
         <div className="px-6 py-4 overflow-y-auto space-y-2">
           {entries.map((entry, i) => {
@@ -470,7 +470,7 @@ function AbwesenheitenKalender({ employees, leaveTypes, absences, loading }: Abw
                         isToday
                           ? 'bg-blue-600 text-white'
                           : isWeekend
-                          ? 'text-gray-400'
+                          ? 'text-gray-600'
                           : 'text-gray-700'
                       }`}>
                         {day}
@@ -500,7 +500,7 @@ function AbwesenheitenKalender({ employees, leaveTypes, absences, loading }: Abw
                         );
                       })}
                       {entries.length > 4 && (
-                        <div className="text-center text-[10px] text-gray-400 font-semibold">
+                        <div className="text-center text-[10px] text-gray-600 font-semibold">
                           +{entries.length - 4} mehr
                         </div>
                       )}
@@ -514,7 +514,7 @@ function AbwesenheitenKalender({ employees, leaveTypes, absences, loading }: Abw
       )}
 
       {/* Hint */}
-      <p className="mt-2 text-xs text-gray-400 text-center">
+      <p className="mt-2 text-xs text-gray-600 text-center">
         Klick auf einen Tag mit Abwesenheiten für Details
       </p>
 
@@ -653,7 +653,7 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
               <div className="flex items-center gap-1.5">
                 <input type="date" value={filterVon} onChange={e => setFilterVon(e.target.value)}
                   className="text-xs px-2 py-1 border rounded bg-white" placeholder="Von" />
-                <span className="text-xs text-gray-400">–</span>
+                <span className="text-xs text-gray-600">–</span>
                 <input type="date" value={filterBis} onChange={e => setFilterBis(e.target.value)}
                   className="text-xs px-2 py-1 border rounded bg-white" placeholder="Bis" />
                 {(filterVon || filterBis) && (
@@ -728,7 +728,7 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
             </tr>
           </thead>
           <tbody>
-            {loading && <tr><td colSpan={15} className="text-center py-10 text-gray-400">⟳ Lade...</td></tr>}
+            {loading && <tr><td colSpan={15} className="text-center py-10 text-gray-600">⟳ Lade...</td></tr>}
             {!loading && filteredEmployees.map((emp, i) => {
               const used = getUsed(emp.ID);
               const remaining = 30 - used; // simplified
@@ -736,7 +736,7 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
                 <tr key={emp.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
                   <td className={`px-3 py-2 sticky left-0 font-semibold text-gray-800 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                     <div>{emp.NAME}, {emp.FIRSTNAME}</div>
-                    <div className="text-gray-400 font-normal">{emp.NUMBER}</div>
+                    <div className="text-gray-600 font-normal">{emp.NUMBER}</div>
                   </td>
                   {MONTHS.map((_, mi) => {
                     const count = getMonthCount(emp.ID, mi);
@@ -761,7 +761,7 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
               );
             })}
             {!loading && filteredEmployees.length === 0 && (
-              <tr><td colSpan={15} className="text-center py-8 text-gray-400">Keine Mitarbeiter gefunden</td></tr>
+              <tr><td colSpan={15} className="text-center py-8 text-gray-600">Keine Mitarbeiter gefunden</td></tr>
             )}
           </tbody>
         </table>
@@ -877,7 +877,7 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
         <input type="text" placeholder="Suchen..." value={search} onChange={e => setSearch(e.target.value)}
           className="px-3 py-1.5 border rounded shadow-sm text-sm w-36" />
         <button onClick={load} className="px-3 py-1.5 border rounded text-sm hover:bg-gray-50">↻ Neu laden</button>
-        <span className="text-xs text-gray-400">Klicken Sie auf Anspruch-Zahl zum Bearbeiten</span>
+        <span className="text-xs text-gray-600">Klicken Sie auf Anspruch-Zahl zum Bearbeiten</span>
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-x-auto">
@@ -895,13 +895,13 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
           </thead>
           <tbody>
             {loading && (
-              <tr><td colSpan={7} className="text-center py-10 text-gray-400">⟳ Lade Urlaubskonten...</td></tr>
+              <tr><td colSpan={7} className="text-center py-10 text-gray-600">⟳ Lade Urlaubskonten...</td></tr>
             )}
             {!loading && filtered.map((b, i) => (
               <tr key={b.employee_id} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
                 <td className="px-4 py-2">
                   <div className="font-semibold text-gray-800">{b.employee_name}</div>
-                  <div className="text-xs text-gray-400">{b.employee_number}</div>
+                  <div className="text-xs text-gray-600">{b.employee_number}</div>
                 </td>
                 {/* Anspruch - editable */}
                 <td className="px-3 py-2 text-center">
@@ -919,7 +919,7 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
                       />
                       <button onClick={() => saveEntitlement(b.employee_id, Number(editValue))} disabled={saving}
                         className="text-green-600 hover:text-green-800 text-xs font-bold">✓</button>
-                      <button aria-label="Schließen" onClick={() => setEditingId(null)} className="text-gray-400 hover:text-gray-600 text-xs">✕</button>
+                      <button aria-label="Schließen" onClick={() => setEditingId(null)} className="text-gray-600 hover:text-gray-600 text-xs">✕</button>
                     </div>
                   ) : canEditAbsences ? (
                     <button
@@ -946,7 +946,7 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
               </tr>
             ))}
             {!loading && filtered.length === 0 && (
-              <tr><td colSpan={7} className="text-center py-8 text-gray-400">Keine Einträge gefunden</td></tr>
+              <tr><td colSpan={7} className="text-center py-8 text-gray-600">Keine Einträge gefunden</td></tr>
             )}
           </tbody>
         </table>
@@ -1110,9 +1110,9 @@ function SperrenTab({ groups }: SperrenTabProps) {
 
       {/* Bans list */}
       {loading ? (
-        <div className="text-center py-10 text-gray-400">⟳ Lade...</div>
+        <div className="text-center py-10 text-gray-600">⟳ Lade...</div>
       ) : bans.length === 0 ? (
-        <div className="bg-white rounded-lg border p-8 text-center text-gray-400">
+        <div className="bg-white rounded-lg border p-8 text-center text-gray-600">
           <div className="text-4xl mb-2">🚫</div>
           <div>{t.urlaub.noLockouts}</div>
           <div className="text-xs mt-1">Klicken Sie auf "Urlaubssperre anlegen" um eine neue anzulegen.</div>
@@ -1294,7 +1294,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
           onChange={e => setSearch(e.target.value)}
           className="px-3 py-1.5 border rounded shadow-sm text-sm w-44"
         />
-        <span className="text-xs text-gray-400">{filtered.length} Einträge</span>
+        <span className="text-xs text-gray-600">{filtered.length} Einträge</span>
       </div>
 
       {/* Table */}
@@ -1311,10 +1311,10 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
           </thead>
           <tbody>
             {(loading || statusLoading) && (
-              <tr><td colSpan={5} className="text-center py-10 text-gray-400">⟳ Lade...</td></tr>
+              <tr><td colSpan={5} className="text-center py-10 text-gray-600">⟳ Lade...</td></tr>
             )}
             {!loading && !statusLoading && filtered.length === 0 && (
-              <tr><td colSpan={5} className="text-center py-8 text-gray-400">Keine Einträge gefunden</td></tr>
+              <tr><td colSpan={5} className="text-center py-8 text-gray-600">Keine Einträge gefunden</td></tr>
             )}
             {!loading && !statusLoading && filtered.map((ab, i) => {
               const emp = getEmp(ab.EMPLOYEE_ID);
@@ -1328,7 +1328,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
                     <div className="font-semibold text-gray-800">
                       {emp ? `${emp.NAME}, ${emp.FIRSTNAME}` : `MA #${ab.EMPLOYEE_ID}`}
                     </div>
-                    <div className="text-xs text-gray-400">{emp?.NUMBER}</div>
+                    <div className="text-xs text-gray-600">{emp?.NUMBER}</div>
                   </td>
                   <td className="px-4 py-2.5 text-gray-700">
                     {new Date(ab.DATE).toLocaleDateString('de-AT')}
@@ -1342,7 +1342,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
                         {lt.SHORTNAME} – {lt.NAME}
                       </span>
                     ) : (
-                      <span className="text-gray-400">Art #{ab.LEAVE_TYPE_ID}</span>
+                      <span className="text-gray-600">Art #{ab.LEAVE_TYPE_ID}</span>
                     )}
                   </td>
                   <td className="px-4 py-2.5 text-center">
@@ -1401,7 +1401,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
           <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
             <div className="px-6 py-4 border-b flex items-center justify-between">
               <h2 className="text-base font-bold text-gray-800">❌ Antrag ablehnen</h2>
-              <button aria-label="Schließen" onClick={() => setRejectModal(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+              <button aria-label="Schließen" onClick={() => setRejectModal(null)} className="text-gray-600 hover:text-gray-600 text-xl">✕</button>
             </div>
             <div className="px-6 py-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">Begründung (optional)</label>
@@ -1413,7 +1413,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
                 maxLength={500}
                 className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
               />
-              <div className="text-xs text-gray-400 text-right mt-1">{rejectReason.length}/500</div>
+              <div className="text-xs text-gray-600 text-right mt-1">{rejectReason.length}/500</div>
             </div>
             <div className="px-6 py-3 border-t flex justify-end gap-3">
               <button onClick={() => setRejectModal(null)} className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50">Abbrechen</button>
@@ -1506,7 +1506,7 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
       .sort((a, b) => b.total - a.total);
   }, [employees, byEmployee]);
 
-  if (loading) return <div className="py-10 text-center text-gray-400">⟳ Lade...</div>;
+  if (loading) return <div className="py-10 text-center text-gray-600">⟳ Lade...</div>;
 
   return (
     <div className="space-y-5">
@@ -1518,7 +1518,7 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
             {v === 'types' ? '📊 Nach Typ' : v === 'monthly' ? '📅 Monatsverlauf' : '👤 Pro Mitarbeiter'}
           </button>
         ))}
-        <span className="ml-auto text-xs text-gray-400">{totalDays} Abwesenheitstage in {year}</span>
+        <span className="ml-auto text-xs text-gray-600">{totalDays} Abwesenheitstage in {year}</span>
       </div>
 
       {/* ─── View: By Type ─── */}
@@ -1556,7 +1556,7 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
                   </div>
                 );
               })}
-            {byType.size === 0 && <p className="text-gray-400 text-sm text-center py-4">Keine Abwesenheiten in {year}</p>}
+            {byType.size === 0 && <p className="text-gray-600 text-sm text-center py-4">Keine Abwesenheiten in {year}</p>}
           </div>
         </div>
       )}
@@ -1599,7 +1599,7 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
             <h3 className="font-semibold text-gray-800 text-sm">Abwesenheiten pro Mitarbeiter {year}</h3>
           </div>
           {sortedEmployees.length === 0 ? (
-            <p className="text-gray-400 text-sm text-center py-6">Keine Abwesenheiten in {year}</p>
+            <p className="text-gray-600 text-sm text-center py-6">Keine Abwesenheiten in {year}</p>
           ) : (
             <table className="text-sm w-full">
               <thead>
@@ -1621,7 +1621,7 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
                   <tr key={emp.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
                     <td className="px-4 py-2.5">
                       <div className="font-semibold text-gray-800">{emp.NAME}, {emp.FIRSTNAME}</div>
-                      <div className="text-xs text-gray-400">Nr. {emp.NUMBER}</div>
+                      <div className="text-xs text-gray-600">Nr. {emp.NUMBER}</div>
                     </td>
                     <td className="px-4 py-2.5 text-center font-bold text-gray-700">{total}</td>
                     {leaveTypes.filter(lt => byType.has(lt.ID)).map(lt => {
@@ -1733,7 +1733,7 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
             <option key={lt.ID} value={lt.ID}>{lt.NAME}</option>
           ))}
         </select>
-        <span className="text-xs text-gray-400 ml-auto">{filteredEmployees.length} Mitarbeiter</span>
+        <span className="text-xs text-gray-600 ml-auto">{filteredEmployees.length} Mitarbeiter</span>
       </div>
 
       {/* Legend */}
@@ -1771,7 +1771,7 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
                   <th key={`${mi}-${d}`}
                     className={`text-center font-normal py-0.5 border-r border-gray-100 ${
                       new Date(year, mi, d + 1).getDay() === 0 || new Date(year, mi, d + 1).getDay() === 6
-                        ? 'bg-gray-200 text-gray-400' : 'text-gray-300'
+                        ? 'bg-gray-200 text-gray-600' : 'text-gray-300'
                     }`}
                     style={{width: '8px', fontSize: '7px', padding: '1px 0'}}>
                     {d + 1 === 1 || d + 1 === 5 || d + 1 === 10 || d + 1 === 15 || d + 1 === 20 || d + 1 === 25 ? d + 1 : ''}
@@ -1784,7 +1784,7 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
           <tbody>
             {filteredEmployees.length === 0 ? (
               <tr>
-                <td colSpan={366 + 2} className="text-center text-gray-400 py-8">
+                <td colSpan={366 + 2} className="text-center text-gray-600 py-8">
                   Keine Mitarbeiter gefunden
                 </td>
               </tr>

@@ -102,7 +102,7 @@ function BookingModal({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-800">Neue Kontobuchung</h2>
-          <button aria-label="Schließen" onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-slate-600 hover:text-slate-600 text-xl leading-none">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
           {error && (
@@ -414,21 +414,21 @@ export default function Kontobuchungen() {
           <div className={`text-2xl font-bold ${istSum >= 0 ? 'text-green-600' : 'text-red-600'}`}>
             {formatValue(istSum)}
           </div>
-          <div className="text-xs text-slate-400 mt-1">{bookings.filter(b => b.type === 0).length} Buchungen</div>
+          <div className="text-xs text-slate-600 mt-1">{bookings.filter(b => b.type === 0).length} Buchungen</div>
         </div>
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
           <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Soll-Buchungen</div>
           <div className={`text-2xl font-bold ${sollSum >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
             {formatValue(sollSum)}
           </div>
-          <div className="text-xs text-slate-400 mt-1">{bookings.filter(b => b.type === 1).length} Buchungen</div>
+          <div className="text-xs text-slate-600 mt-1">{bookings.filter(b => b.type === 1).length} Buchungen</div>
         </div>
         <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-4">
           <div className="text-xs text-slate-500 uppercase tracking-wide mb-1">Gesamt (Ist + Soll)</div>
           <div className={`text-2xl font-bold ${(istSum + sollSum) >= 0 ? 'text-green-700' : 'text-red-700'}`}>
             {formatValue(istSum + sollSum)}
           </div>
-          <div className="text-xs text-slate-400 mt-1">{bookings.length} Buchungen gesamt</div>
+          <div className="text-xs text-slate-600 mt-1">{bookings.length} Buchungen gesamt</div>
         </div>
       </div>
 
@@ -438,11 +438,11 @@ export default function Kontobuchungen() {
           <h2 className="font-semibold text-slate-700 text-sm">
             Buchungen — {MONTH_NAMES[month - 1]} {year}
           </h2>
-          {loading && <span className="text-xs text-slate-400">Laden…</span>}
+          {loading && <span className="text-xs text-slate-600">Laden…</span>}
         </div>
 
         {!loading && bookings.length === 0 ? (
-          <div className="py-16 text-center text-slate-400">
+          <div className="py-16 text-center text-slate-600">
             <div className="text-4xl mb-3">📂</div>
             <p className="text-sm">Keine Buchungen für diesen Zeitraum</p>
             <button

@@ -306,12 +306,12 @@ export default function Uebergabe() {
 
           {/* Notes */}
           {loading ? (
-            <div className="text-center text-gray-400 py-12">Lade…</div>
+            <div className="text-center text-gray-600 py-12">Lade…</div>
           ) : visibleNotes.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-5xl mb-3">📭</div>
               <p className="text-gray-500">Keine Übergabe-Notizen für diesen Filter</p>
-              <p className="text-xs text-gray-400 mt-1">Erstelle die erste Notiz links</p>
+              <p className="text-xs text-gray-600 mt-1">Erstelle die erste Notiz links</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -348,7 +348,7 @@ export default function Uebergabe() {
                     </div>
 
                     {/* Text */}
-                    <p className={`text-sm whitespace-pre-wrap mb-2 ${note.resolved ? 'line-through text-gray-400' : 'text-gray-800'}`}>
+                    <p className={`text-sm whitespace-pre-wrap mb-2 ${note.resolved ? 'line-through text-gray-600' : 'text-gray-800'}`}>
                       {note.text}
                     </p>
 

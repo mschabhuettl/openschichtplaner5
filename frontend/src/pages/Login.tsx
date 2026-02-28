@@ -39,7 +39,7 @@ export default function Login() {
         <div className="text-center mb-8">
           <div className="text-5xl mb-3">🧸</div>
           <h1 className="text-2xl font-bold text-white tracking-tight">{t.login.title}</h1>
-          <p className="text-slate-400 text-sm mt-1">{t.login.subtitle}</p>
+          <p className="text-slate-600 text-sm mt-1">{t.login.subtitle}</p>
         </div>
 
         {/* Card */}
@@ -125,14 +125,14 @@ export default function Login() {
         <div className="flex justify-center mt-4">
           <button
             onClick={() => setLanguage(language === 'de' ? 'en' : 'de')}
-            className="flex items-center gap-2 text-slate-400 hover:text-slate-200 text-sm transition"
+            className="flex items-center gap-2 text-slate-600 hover:text-slate-200 text-sm transition"
             aria-label={language === 'de' ? 'Switch to English' : 'Auf Deutsch wechseln'}
           >
             {language === 'de' ? '🇬🇧 English' : '🇩🇪 Deutsch'}
           </button>
         </div>
 
-        <p className="text-center text-slate-400 text-xs mt-4">
+        <p className="text-center text-slate-600 text-xs mt-4">
           {t.login.footerText}
         </p>
       </main>

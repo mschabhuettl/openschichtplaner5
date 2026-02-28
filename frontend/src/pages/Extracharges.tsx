@@ -218,7 +218,7 @@ export default function Extracharges() {
       {/* Search & filter bar */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <div className="relative flex-1 min-w-[200px]">
-          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">🔍</span>
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-600 text-sm pointer-events-none">🔍</span>
           <input
             type="text"
             value={search}
@@ -229,7 +229,7 @@ export default function Extracharges() {
           {search && (
             <button aria-label="Schließen"
               onClick={() => setSearch('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-600 text-xs"
             >✕</button>
           )}
         </div>
@@ -245,7 +245,7 @@ export default function Extracharges() {
           </label>
         )}
         {charges.length > 0 && (
-          <span className="text-xs text-gray-400 ml-auto">
+          <span className="text-xs text-gray-600 ml-auto">
             {filtered.length} von {charges.length} Einträgen
           </span>
         )}
@@ -378,7 +378,7 @@ export default function Extracharges() {
                       key={i}
                       type="button"
                       onClick={() => toggleDay(i)}
-                      className={`px-2 py-1 rounded text-xs font-semibold transition-colors ${form.validDays[i] ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-400'}`}
+                      className={`px-2 py-1 rounded text-xs font-semibold transition-colors ${form.validDays[i] ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}
                       title={d}
                     >
                       {WEEKDAYS[i]}

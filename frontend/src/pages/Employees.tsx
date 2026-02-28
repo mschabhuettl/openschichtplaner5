@@ -700,7 +700,7 @@ export default function Employees() {
                     <td className="px-4 py-2 text-center">
                       <div className="flex gap-0.5 justify-center">
                         {(emp.WORKDAYS_LIST || []).slice(0, 7).map((active, idx) => (
-                          <span key={idx} className={`text-[10px] px-1 rounded ${active ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-400'}`}>
+                          <span key={idx} className={`text-[10px] px-1 rounded ${active ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
                             {WEEKDAYS[idx]}
                           </span>
                         ))}
@@ -717,7 +717,7 @@ export default function Employees() {
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={canAdmin ? 9 : 8} className="text-center py-8 text-gray-400">{t.employees.noResults}</td></tr>
+                  <tr><td colSpan={canAdmin ? 9 : 8} className="text-center py-8 text-gray-600">{t.employees.noResults}</td></tr>
                 )}
               </tbody>
             </table>
@@ -740,7 +740,7 @@ export default function Employees() {
                       )}
                     </div>
                     {emp.NUMBER && (
-                      <div className="text-xs text-gray-400 mt-0.5">Nr. {emp.NUMBER}</div>
+                      <div className="text-xs text-gray-600 mt-0.5">Nr. {emp.NUMBER}</div>
                     )}
                   </div>
                   <div className="flex gap-1 flex-shrink-0">
@@ -759,13 +759,13 @@ export default function Employees() {
                 <div className="mt-2 flex items-center gap-3 text-sm text-gray-600 flex-wrap">
                   <span>{emp.HRSDAY?.toFixed(1)}h/Tag</span>
                   {emp.HRSWEEK ? <span>{emp.HRSWEEK?.toFixed(1)}h/Woche</span> : null}
-                  {emp.EMPSTART && <span className="text-xs text-gray-400">Eintritt: {fmtDate(emp.EMPSTART)}</span>}
+                  {emp.EMPSTART && <span className="text-xs text-gray-600">Eintritt: {fmtDate(emp.EMPSTART)}</span>}
                 </div>
                 <div className="mt-2 flex gap-0.5 flex-wrap">
                   {(emp.WORKDAYS_LIST || []).slice(0, 7).map((active, idx) => (
                     <span
                       key={idx}
-                      className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${active ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-400'}`}
+                      className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${active ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}
                     >
                       {WEEKDAYS[idx]}
                     </span>
@@ -774,7 +774,7 @@ export default function Employees() {
               </div>
             ))}
             {filtered.length === 0 && (
-              <div className="text-center py-8 text-gray-400">Keine Mitarbeiter gefunden</div>
+              <div className="text-center py-8 text-gray-600">Keine Mitarbeiter gefunden</div>
             )}
           </div>
         </>
@@ -821,7 +821,7 @@ export default function Employees() {
                           onError={() => setPhotoUrl(null)}
                         />
                       ) : (
-                        <span className="text-xl font-bold text-gray-400">
+                        <span className="text-xl font-bold text-gray-600">
                           {(form.NAME.charAt(0) || '?').toUpperCase()}{(form.FIRSTNAME.charAt(0) || '').toUpperCase()}
                         </span>
                       )}
@@ -919,7 +919,7 @@ export default function Employees() {
                   <div className="flex gap-1">
                     {WEEKDAYS.map((d, i) => (
                       <button key={i} type="button" onClick={() => toggleWorkday(i)}
-                        className={`px-2 py-1 rounded text-xs font-semibold transition-colors ${workdaysList[i] ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-400'}`}>
+                        className={`px-2 py-1 rounded text-xs font-semibold transition-colors ${workdaysList[i] ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
                         {d}
                       </button>
                     ))}
@@ -973,7 +973,7 @@ export default function Employees() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-gray-400 mb-3">Keine Einschränkungen gesetzt.</p>
+                      <p className="text-xs text-gray-600 mb-3">Keine Einschränkungen gesetzt.</p>
                     )}
                     <div className="flex gap-2 items-end flex-wrap">
                       <div className="flex-1 min-w-[140px]">
@@ -1087,7 +1087,7 @@ export default function Employees() {
                   <div key={key} className="flex items-center gap-4">
                     <div className="flex-1">
                       <label className="block text-xs font-semibold text-gray-600 mb-1">{label}</label>
-                      <p className="text-xs text-gray-400">{desc}</p>
+                      <p className="text-xs text-gray-600">{desc}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <input type="color" value={form[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
@@ -1105,7 +1105,7 @@ export default function Employees() {
                       {form.SHORTNAME || form.NAME || 'Vorname'}
                     </span>
                     <span className="px-6 py-1 rounded text-sm border" style={{ backgroundColor: form.CBKSCHED_HEX }}>
-                      <span className="text-gray-400 text-xs">← Dienstplanzeile</span>
+                      <span className="text-gray-600 text-xs">← Dienstplanzeile</span>
                     </span>
                   </div>
                 </div>
@@ -1135,7 +1135,7 @@ export default function Employees() {
               <div className="space-y-3">
                 <p className="text-xs text-gray-500">Gruppen-Zugehörigkeiten dieses Mitarbeiters verwalten.</p>
                 {groups.length === 0 ? (
-                  <div className="text-sm text-gray-400 italic">Keine Gruppen vorhanden.</div>
+                  <div className="text-sm text-gray-600 italic">Keine Gruppen vorhanden.</div>
                 ) : (
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {groups.map(g => {

@@ -164,7 +164,7 @@ export default function MitarbeiterProfil() {
     );
   }
 
-  if (loading) return <div className="p-8 text-center text-gray-400">Lade Profil…</div>;
+  if (loading) return <div className="p-8 text-center text-gray-600">Lade Profil…</div>;
   if (!employee) return <div className="p-8 text-center text-red-500">Mitarbeiter nicht gefunden.</div>;
 
   const totals = yearStats?.totals;
@@ -196,7 +196,7 @@ export default function MitarbeiterProfil() {
     <div className="p-4 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-gray-600 text-2xl">‹</button>
+        <button onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-600 text-2xl">‹</button>
         <div>
           <h1 className="text-2xl font-bold">{employee.FIRSTNAME} {employee.NAME}</h1>
           <div className="text-gray-500 text-sm flex items-center gap-2 flex-wrap">
@@ -298,12 +298,12 @@ export default function MitarbeiterProfil() {
           <div className="border rounded-xl p-4">
             <h2 className="font-semibold mb-3 text-gray-700">🗓️ Bevorstehende Abwesenheiten</h2>
             {upcomingAbsences.length === 0
-              ? <p className="text-gray-400 text-sm">Keine geplanten Abwesenheiten</p>
+              ? <p className="text-gray-600 text-sm">Keine geplanten Abwesenheiten</p>
               : (
                 <div className="space-y-1">
                   {upcomingAbsences.map(a => (
                     <div key={a.date} className="flex items-center gap-2 text-sm">
-                      <span className="text-gray-400 w-24 shrink-0">{formatDate(a.date)}</span>
+                      <span className="text-gray-600 w-24 shrink-0">{formatDate(a.date)}</span>
                       <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-xs">{a.leave_type_short}</span>
                       <span>{a.leave_type_name}</span>
                     </div>
@@ -317,7 +317,7 @@ export default function MitarbeiterProfil() {
           <div className="border rounded-xl p-4">
             <h2 className="font-semibold mb-3 text-gray-700">📅 Nächste 7 Tage</h2>
             {schedule7.length === 0
-              ? <p className="text-gray-400 text-sm">Keine Schichten in den nächsten 7 Tagen</p>
+              ? <p className="text-gray-600 text-sm">Keine Schichten in den nächsten 7 Tagen</p>
               : (
                 <div className="space-y-1">
                   {schedule7.map(e => {
@@ -325,7 +325,7 @@ export default function MitarbeiterProfil() {
                     const isToday = e.date === new Date().toISOString().slice(0, 10);
                     return (
                       <div key={e.date} className={`flex items-center gap-2 text-sm rounded px-2 py-1 ${isToday ? 'bg-blue-50' : ''}`}>
-                        <span className={`w-24 shrink-0 ${isToday ? 'font-bold text-blue-700' : 'text-gray-400'}`}>
+                        <span className={`w-24 shrink-0 ${isToday ? 'font-bold text-blue-700' : 'text-gray-600'}`}>
                           {d.toLocaleDateString('de-AT', { weekday: 'short', day: '2-digit', month: '2-digit' })}
                           {isToday && ' (Heute)'}
                         </span>
@@ -387,7 +387,7 @@ export default function MitarbeiterProfil() {
                     <td className="py-1 pr-2 font-medium">{MONTH_NAMES[m.month - 1]}</td>
                     <td className="py-1 pr-2 text-right">{m.shifts_count}</td>
                     <td className="py-1 pr-2 text-right">{m.actual_hours.toFixed(1)}</td>
-                    <td className="py-1 pr-2 text-right text-gray-400">{m.target_hours.toFixed(1)}</td>
+                    <td className="py-1 pr-2 text-right text-gray-600">{m.target_hours.toFixed(1)}</td>
                     <td className={`py-1 pr-2 text-right font-medium ${m.difference >= 0 ? 'text-green-600' : 'text-red-500'}`}>
                       {m.difference >= 0 ? '+' : ''}{m.difference.toFixed(1)}
                     </td>
@@ -401,7 +401,7 @@ export default function MitarbeiterProfil() {
                     <td className="py-1 pr-2">Gesamt</td>
                     <td className="py-1 pr-2 text-right">{totals.shifts_count}</td>
                     <td className="py-1 pr-2 text-right">{totals.actual_hours.toFixed(1)}</td>
-                    <td className="py-1 pr-2 text-right text-gray-400">{totals.target_hours.toFixed(1)}</td>
+                    <td className="py-1 pr-2 text-right text-gray-600">{totals.target_hours.toFixed(1)}</td>
                     <td className={`py-1 pr-2 text-right ${totals.difference >= 0 ? 'text-green-600' : 'text-red-500'}`}>
                       {totals.difference >= 0 ? '+' : ''}{totals.difference.toFixed(1)}
                     </td>
@@ -421,7 +421,7 @@ export default function MitarbeiterProfil() {
         <div className="border rounded-xl p-4">
           <h2 className="font-semibold mb-4 text-gray-700">📅 Nächste 7 Tage im Detail</h2>
           {schedule7.length === 0
-            ? <p className="text-gray-400">Keine Einträge gefunden.</p>
+            ? <p className="text-gray-600">Keine Einträge gefunden.</p>
             : (
               <div className="space-y-2">
                 {schedule7.map(e => {
@@ -437,7 +437,7 @@ export default function MitarbeiterProfil() {
                         <div className={`text-sm font-semibold ${isToday ? 'text-blue-700' : 'text-gray-700'}`}>
                           {d.toLocaleDateString('de-AT', { weekday: 'short' })}
                         </div>
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-gray-600">
                           {d.toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit' })}
                         </div>
                         {isToday && <div className="text-xs text-blue-500 font-medium">Heute</div>}
@@ -454,7 +454,7 @@ export default function MitarbeiterProfil() {
                           {e.display_name}
                         </span>
                         {shift && shift.STARTEND0 && (
-                          <div className="text-xs text-gray-400 mt-1">{shift.STARTEND0}</div>
+                          <div className="text-xs text-gray-600 mt-1">{shift.STARTEND0}</div>
                         )}
                         {e.kind === 'absence' && (
                           <div className="text-xs text-gray-500 mt-1">Abwesenheit</div>
@@ -473,7 +473,7 @@ export default function MitarbeiterProfil() {
               <div className="space-y-1">
                 {upcomingAbsences.map(a => (
                   <div key={a.date} className="flex items-center gap-2 text-sm">
-                    <span className="text-gray-400 w-24">{formatDate(a.date)}</span>
+                    <span className="text-gray-600 w-24">{formatDate(a.date)}</span>
                     <span className="bg-orange-100 text-orange-800 px-2 py-0.5 rounded text-xs">{a.leave_type_short}</span>
                     <span>{a.leave_type_name}</span>
                   </div>
@@ -488,9 +488,9 @@ export default function MitarbeiterProfil() {
       {tab === 'log' && (
         <div className="border rounded-xl p-4">
           <h2 className="font-semibold mb-3 text-gray-700">🕐 Änderungs-Protokoll</h2>
-          <p className="text-xs text-gray-400 mb-3">Letzte 30 System-Einträge (alle Entitäten)</p>
+          <p className="text-xs text-gray-600 mb-3">Letzte 30 System-Einträge (alle Entitäten)</p>
           {changelog.length === 0
-            ? <p className="text-gray-400 text-sm">Keine Einträge.</p>
+            ? <p className="text-gray-600 text-sm">Keine Einträge.</p>
             : (
               <div className="space-y-2 text-sm">
                 {changelog.map((e, i) => {
@@ -505,7 +505,7 @@ export default function MitarbeiterProfil() {
                   };
                   return (
                     <div key={i} className="flex items-start gap-2 py-1.5 border-b last:border-0">
-                      <div className="w-32 shrink-0 text-gray-400 text-xs">
+                      <div className="w-32 shrink-0 text-gray-600 text-xs">
                         {new Date(e.timestamp).toLocaleString('de-AT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                       </div>
                       <span className={`shrink-0 px-1.5 py-0.5 rounded text-xs font-medium ${actionColor[e.action] ?? 'bg-gray-100 text-gray-600'}`}>
@@ -513,9 +513,9 @@ export default function MitarbeiterProfil() {
                       </span>
                       <div className="flex-1 min-w-0">
                         <span className="text-gray-500">{entityLabels[e.entity] ?? e.entity}</span>
-                        {e.details && <span className="text-gray-400 ml-1 text-xs truncate">· {e.details.slice(0, 60)}</span>}
+                        {e.details && <span className="text-gray-600 ml-1 text-xs truncate">· {e.details.slice(0, 60)}</span>}
                       </div>
-                      <div className="shrink-0 text-gray-400 text-xs">{e.user}</div>
+                      <div className="shrink-0 text-gray-600 text-xs">{e.user}</div>
                     </div>
                   );
                 })}

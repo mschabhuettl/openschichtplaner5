@@ -158,7 +158,7 @@ export default function Personaltabelle() {
       {/* Header */}
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-xl font-bold text-slate-800">👤 Personaltabelle</h1>
-        <span className="text-slate-400 text-sm no-print">Kompakte Übersicht aller Mitarbeiter</span>
+        <span className="text-slate-600 text-sm no-print">Kompakte Übersicht aller Mitarbeiter</span>
         <div className="ml-auto flex gap-2 no-print">
           <button
             onClick={() => exportCSV(filtered, year, month)}
@@ -218,7 +218,7 @@ export default function Personaltabelle() {
           {search && (
             <button
               onClick={() => setSearch('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-700"
             >
               ×
             </button>
@@ -260,7 +260,7 @@ export default function Personaltabelle() {
           <tbody>
             {filtered.length === 0 && !loading && (
               <tr>
-                <td colSpan={COLUMNS.length} className="text-center py-12 text-slate-400">
+                <td colSpan={COLUMNS.length} className="text-center py-12 text-slate-600">
                   {search ? 'Keine Ergebnisse für die Suchanfrage.' : 'Keine Mitarbeiterdaten für diesen Zeitraum.'}
                 </td>
               </tr>
@@ -319,7 +319,7 @@ export default function Personaltabelle() {
       </div>
 
       {/* Legend */}
-      <div className="flex gap-4 text-xs text-slate-400 no-print">
+      <div className="flex gap-4 text-xs text-slate-600 no-print">
         <span><span className="text-green-700 font-semibold">+x,x h</span> = Überstunden</span>
         <span><span className="text-red-700 font-semibold">−x,x h</span> = Minderstunden</span>
         <span><span className="text-blue-700 font-semibold">Urlaub</span> = Urlaubstage</span>

@@ -76,7 +76,7 @@ function MatrixCell({
       <td className="border border-gray-100 p-0 text-center">
         <button
           onClick={onClick}
-          className={`w-full h-full min-h-[2rem] flex items-center justify-center transition-colors text-lg ${checkMode ? 'text-red-300 hover:text-red-500 hover:bg-red-50 text-base' : 'text-gray-200 hover:text-gray-400 hover:bg-gray-50'}`}
+          className={`w-full h-full min-h-[2rem] flex items-center justify-center transition-colors text-lg ${checkMode ? 'text-red-300 hover:text-red-500 hover:bg-red-50 text-base' : 'text-gray-200 hover:text-gray-600 hover:bg-gray-50'}`}
           title={`${skill.name} zuweisen`}
         >
           {checkMode ? '❌' : '+'}
@@ -521,7 +521,7 @@ export default function KompetenzMatrix() {
                 <div key={skill.id} className="flex items-center gap-1.5 bg-white border border-red-200 rounded-lg px-3 py-1.5 text-sm">
                   <span>{skill.icon}</span>
                   <span className="font-semibold" style={{ color: skill.color }}>{skill.name}</span>
-                  <span className="text-gray-400">→</span>
+                  <span className="text-gray-600">→</span>
                   <span className="text-gray-700 font-medium">{holder?.name ?? '?'}</span>
                 </div>
               );
@@ -602,7 +602,7 @@ export default function KompetenzMatrix() {
       {viewMode === 'matrix' && (
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-auto">
           {visibleSkills.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">
+            <div className="p-8 text-center text-gray-600">
               Keine Qualifikationen gefunden. Klicke "+ Qualifikation" um anzufangen.
             </div>
           ) : (
@@ -623,7 +623,7 @@ export default function KompetenzMatrix() {
                         <span className="text-xs font-semibold text-gray-700 leading-tight text-center" style={{ color: skill.color }}>
                           {skill.name}
                         </span>
-                        <span className="text-xs text-gray-400">{skill.holder_count ?? 0}/{matrix.total_employees}</span>
+                        <span className="text-xs text-gray-600">{skill.holder_count ?? 0}/{matrix.total_employees}</span>
                       </button>
                     </th>
                   ))}
@@ -637,7 +637,7 @@ export default function KompetenzMatrix() {
                   <tr key={emp.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
                     <td className="sticky left-0 bg-inherit px-3 py-2 border-r border-gray-200 z-10">
                       <div className="font-semibold text-gray-800 text-sm">{emp.name}</div>
-                      <div className="text-xs text-gray-400">{emp.short} {emp.group && `· ${emp.group}`}</div>
+                      <div className="text-xs text-gray-600">{emp.short} {emp.group && `· ${emp.group}`}</div>
                     </td>
                     {visibleSkills.map(skill => (
                       <MatrixCell
@@ -656,7 +656,7 @@ export default function KompetenzMatrix() {
                     ))}
                     <td className="px-2 py-2 text-center">
                       <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${
-                        emp.skill_count === 0 ? 'bg-gray-100 text-gray-400' :
+                        emp.skill_count === 0 ? 'bg-gray-100 text-gray-600' :
                         emp.skill_count >= 3 ? 'bg-green-100 text-green-700' :
                         'bg-blue-100 text-blue-700'
                       }`}>
@@ -669,7 +669,7 @@ export default function KompetenzMatrix() {
                 <tr className="border-t-2 border-gray-300 bg-gray-50">
                   <td className="sticky left-0 bg-gray-50 px-3 py-2 border-r border-gray-200 z-10">
                     <div className="text-xs font-bold text-gray-600">Abdeckung</div>
-                    <div className="text-xs text-gray-400">{matrix.total_employees} MA gesamt</div>
+                    <div className="text-xs text-gray-600">{matrix.total_employees} MA gesamt</div>
                   </td>
                   {visibleSkills.map(skill => {
                     const holders = matrix.assignments.filter(a => a.skill_id === skill.id).length;
@@ -686,11 +686,11 @@ export default function KompetenzMatrix() {
                             style={{ width: `${pct}%`, backgroundColor: isEinzelkaempfer ? '#ef4444' : skill.color }}
                           />
                         </div>
-                        <div className="text-xs text-gray-400 mt-0.5">{pct}%</div>
+                        <div className="text-xs text-gray-600 mt-0.5">{pct}%</div>
                       </td>
                     );
                   })}
-                  <td className="px-2 py-2 text-center text-xs text-gray-400">–</td>
+                  <td className="px-2 py-2 text-center text-xs text-gray-600">–</td>
                 </tr>
               </tbody>
             </table>
@@ -702,7 +702,7 @@ export default function KompetenzMatrix() {
       {viewMode === 'skills' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {visibleSkills.length === 0 && (
-            <div className="col-span-3 p-8 text-center text-gray-400 bg-white rounded-xl border border-gray-200">
+            <div className="col-span-3 p-8 text-center text-gray-600 bg-white rounded-xl border border-gray-200">
               Keine Qualifikationen. Klicke "+ Qualifikation" um anzufangen.
             </div>
           )}
@@ -722,13 +722,13 @@ export default function KompetenzMatrix() {
                     <div>
                       <div className="font-bold text-gray-800" style={{ color: skill.color }}>{skill.name}</div>
                       {skill.category && (
-                        <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">{skill.category}</span>
+                        <span className="text-xs text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded">{skill.category}</span>
                       )}
                     </div>
                   </div>
                   <button
                     onClick={() => setSkillModal({ skill })}
-                    className="text-gray-400 hover:text-gray-600 text-sm"
+                    className="text-gray-600 hover:text-gray-600 text-sm"
                     title="Bearbeiten"
                   >
                     ✎
@@ -759,24 +759,24 @@ export default function KompetenzMatrix() {
                 <div className="grid grid-cols-3 gap-2 text-center text-xs">
                   <div className="bg-gray-50 rounded-lg p-2">
                     <div className="font-bold text-gray-700">{skill.holder_count ?? 0}</div>
-                    <div className="text-gray-400">Träger</div>
+                    <div className="text-gray-600">Träger</div>
                   </div>
                   <div className="bg-amber-50 rounded-lg p-2">
                     <div className="font-bold text-amber-700">{experts.length}</div>
                     <div className="text-amber-500">Experten</div>
                   </div>
                   <div className={`rounded-lg p-2 ${expiring.length > 0 ? 'bg-red-50' : 'bg-gray-50'}`}>
-                    <div className={`font-bold ${expiring.length > 0 ? 'text-red-600' : 'text-gray-400'}`}>
+                    <div className={`font-bold ${expiring.length > 0 ? 'text-red-600' : 'text-gray-600'}`}>
                       {expiring.length}
                     </div>
-                    <div className={expiring.length > 0 ? 'text-red-400' : 'text-gray-400'}>Ablaufend</div>
+                    <div className={expiring.length > 0 ? 'text-red-400' : 'text-gray-600'}>Ablaufend</div>
                   </div>
                 </div>
 
                 {/* MA with this skill */}
                 {assignments.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-gray-100">
-                    <div className="text-xs text-gray-400 mb-1.5">Zugewiesen an:</div>
+                    <div className="text-xs text-gray-600 mb-1.5">Zugewiesen an:</div>
                     <div className="flex flex-wrap gap-1">
                       {assignments.slice(0, 8).map(a => {
                         const emp = matrix.employees.find(e => e.id === a.employee_id);
@@ -793,7 +793,7 @@ export default function KompetenzMatrix() {
                         );
                       })}
                       {assignments.length > 8 && (
-                        <span className="text-xs text-gray-400">+{assignments.length - 8}</span>
+                        <span className="text-xs text-gray-600">+{assignments.length - 8}</span>
                       )}
                     </div>
                   </div>
@@ -808,7 +808,7 @@ export default function KompetenzMatrix() {
       {viewMode === 'gaps' && (
         <div className="space-y-4">
           {gapData.length === 0 && (
-            <div className="p-8 text-center text-gray-400 bg-white rounded-xl border border-gray-200">
+            <div className="p-8 text-center text-gray-600 bg-white rounded-xl border border-gray-200">
               Keine Qualifikationen definiert.
             </div>
           )}
@@ -827,7 +827,7 @@ export default function KompetenzMatrix() {
                       <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-bold">🚨 EINZELKÄMPFER</span>
                     )}
                   </div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-xs text-gray-600">
                     {holders.length} von {matrix.total_employees} MA qualifiziert
                     ({Math.round(holders.length / matrix.total_employees * 100)}%)
                   </div>

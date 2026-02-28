@@ -115,7 +115,7 @@ const STATUS_CONFIG = {
     label: 'Nicht geplant',
     bg: 'bg-gray-50',
     border: 'border-gray-200',
-    text: 'text-gray-400',
+    text: 'text-gray-600',
     badge: 'bg-gray-100 text-gray-500',
     dot: 'bg-gray-300',
     barColor: '#d1d5db',
@@ -124,7 +124,7 @@ const STATUS_CONFIG = {
     label: 'Unbekannt',
     bg: 'bg-gray-50',
     border: 'border-gray-200',
-    text: 'text-gray-400',
+    text: 'text-gray-600',
     badge: 'bg-gray-100 text-gray-500',
     dot: 'bg-gray-300',
     barColor: '#d1d5db',
@@ -232,7 +232,7 @@ function DayTooltip({ day, onClose }: TooltipProps) {
           )}
 
           {day.absent_employees.length === 0 && day.scheduled_count === 0 && (
-            <p className="text-sm text-gray-400 text-center py-2">Noch keine Planung für diesen Tag</p>
+            <p className="text-sm text-gray-600 text-center py-2">Noch keine Planung für diesen Tag</p>
           )}
         </div>
 
@@ -271,7 +271,7 @@ function CalendarGrid({ days, year, month, onDayClick }: CalendarProps) {
       <div className="grid grid-cols-7 gap-1 min-w-[480px]">
         {/* Header */}
         {WEEKDAY_SHORT.map(wd => (
-          <div key={wd} className="text-center text-xs font-semibold text-gray-400 uppercase py-1.5">{wd}</div>
+          <div key={wd} className="text-center text-xs font-semibold text-gray-600 uppercase py-1.5">{wd}</div>
         ))}
 
         {/* Cells */}
@@ -433,7 +433,7 @@ function WeekdayAnalysis({ days, totalEmployees }: WeekdayAnalysisProps) {
         if (s.occurrences === 0) {
           return (
             <div key={s.wd} className={`flex items-center gap-3 rounded-xl px-3 py-2 ${isWeekend ? 'bg-gray-50 opacity-60' : 'bg-white border border-gray-100'}`}>
-              <span className="text-sm font-medium text-gray-400 w-24 flex-shrink-0">{s.name}</span>
+              <span className="text-sm font-medium text-gray-600 w-24 flex-shrink-0">{s.name}</span>
               <span className="text-xs text-gray-300 italic">Keine Daten</span>
             </div>
           );
@@ -442,7 +442,7 @@ function WeekdayAnalysis({ days, totalEmployees }: WeekdayAnalysisProps) {
         return (
           <div key={s.wd} className={`rounded-xl border px-3 py-2.5 ${isWeekend ? 'bg-gray-50 border-gray-100' : 'bg-white border-gray-200'}`}>
             <div className="flex items-center gap-3">
-              <span className={`text-sm font-semibold w-24 flex-shrink-0 ${isWeekend ? 'text-gray-400' : 'text-gray-700'}`}>{s.name}</span>
+              <span className={`text-sm font-semibold w-24 flex-shrink-0 ${isWeekend ? 'text-gray-600' : 'text-gray-700'}`}>{s.name}</span>
               {/* Bar */}
               <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
                 <div
@@ -452,10 +452,10 @@ function WeekdayAnalysis({ days, totalEmployees }: WeekdayAnalysisProps) {
               </div>
               <div className="flex items-center gap-2 flex-shrink-0 text-right">
                 <span className="text-sm font-bold text-gray-700 w-8">{s.avg}</span>
-                <span className="text-xs text-gray-400">({Math.round(pct)}%)</span>
+                <span className="text-xs text-gray-600">({Math.round(pct)}%)</span>
               </div>
             </div>
-            <div className="mt-1 ml-[7rem] flex items-center gap-3 text-xs text-gray-400">
+            <div className="mt-1 ml-[7rem] flex items-center gap-3 text-xs text-gray-600">
               <span>Min: <b className="text-gray-600">{s.min}</b></span>
               <span>Max: <b className="text-gray-600">{s.max}</b></span>
               <span>Ø Abwes.: <b className="text-orange-500">{s.avgAbsence}</b></span>
@@ -466,7 +466,7 @@ function WeekdayAnalysis({ days, totalEmployees }: WeekdayAnalysisProps) {
           </div>
         );
       })}
-      <p className="text-xs text-gray-400 text-right">Basierend auf {days.filter(d => d.coverage_status !== 'unplanned').length} geplanten Tagen</p>
+      <p className="text-xs text-gray-600 text-right">Basierend auf {days.filter(d => d.coverage_status !== 'unplanned').length} geplanten Tagen</p>
     </div>
   );
 }
@@ -510,7 +510,7 @@ function YearHeatmap({ yearData, onMonthClick }: YearHeatmapProps) {
               {hasData ? (
                 <>
                   <p className="text-lg font-bold mt-1" style={{ color: colors.text }}>{m.coverage_pct}%</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">Ø {m.avg_staffing} MA</p>
+                  <p className="text-[10px] text-gray-600 mt-0.5">Ø {m.avg_staffing} MA</p>
                   <div className="mt-1.5 flex justify-center gap-0.5">
                     {m.critical_days > 0 && (
                       <span className="text-[9px] bg-red-100 text-red-600 px-1 rounded-full">{m.critical_days}✗</span>
@@ -695,7 +695,7 @@ export default function KapazitaetsForecast() {
           {loading ? '…' : '↻ Aktualisieren'}
         </button>
         {forecast && (
-          <span className="text-xs text-gray-400 ml-1">
+          <span className="text-xs text-gray-600 ml-1">
             {forecast.total_employees} Mitarbeiter gesamt
           </span>
         )}
@@ -708,7 +708,7 @@ export default function KapazitaetsForecast() {
       )}
 
       {loading && !forecast && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-600">
           <div className="text-4xl mb-3 animate-pulse">📊</div>
           <p>Lade Forecast…</p>
         </div>
@@ -722,9 +722,9 @@ export default function KapazitaetsForecast() {
           {forecast ? (
             <WeekdayAnalysis days={forecast.days} totalEmployees={forecast.total_employees} />
           ) : loading ? (
-            <div className="text-center py-8 text-gray-400 animate-pulse">Lade Daten…</div>
+            <div className="text-center py-8 text-gray-600 animate-pulse">Lade Daten…</div>
           ) : (
-            <div className="text-center py-8 text-gray-400">Keine Daten verfügbar</div>
+            <div className="text-center py-8 text-gray-600">Keine Daten verfügbar</div>
           )}
         </div>
       )}
@@ -735,14 +735,14 @@ export default function KapazitaetsForecast() {
           <h2 className="text-base font-semibold text-gray-800 mb-1">Jahres-Kapazitätsübersicht {year}</h2>
           <p className="text-sm text-gray-500 mb-4">12-Monats-Überblick der durchschnittlichen Besetzung — klicken zum Navigieren</p>
           {yearLoading ? (
-            <div className="text-center py-8 text-gray-400 animate-pulse">Lade Jahresdaten…</div>
+            <div className="text-center py-8 text-gray-600 animate-pulse">Lade Jahresdaten…</div>
           ) : yearData ? (
             <YearHeatmap
               yearData={yearData}
               onMonthClick={m => { setMonth(m); setActiveTab('monat'); }}
             />
           ) : (
-            <div className="text-center py-8 text-gray-400">Keine Daten — Tab wechseln zum Laden</div>
+            <div className="text-center py-8 text-gray-600">Keine Daten — Tab wechseln zum Laden</div>
           )}
         </div>
       )}
@@ -855,7 +855,7 @@ export default function KapazitaetsForecast() {
                           onClick={() => setSelectedDay(day)}
                           className="w-full flex items-center gap-2 text-left hover:bg-gray-50 rounded-lg px-1 py-0.5 transition-colors"
                         >
-                          <span className="text-xs text-gray-400 w-6 text-right flex-shrink-0">{day.day}.</span>
+                          <span className="text-xs text-gray-600 w-6 text-right flex-shrink-0">{day.day}.</span>
                           <div className="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden">
                             <div
                               className="h-full rounded-full transition-all"

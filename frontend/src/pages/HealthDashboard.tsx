@@ -198,7 +198,7 @@ export default function HealthDashboard() {
                   <div key={i} className={`rounded-lg p-3 text-xs font-mono ${err.level === 'ERROR' ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300' : 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300'}`}>
                     <div className="flex justify-between mb-1">
                       <span className={`font-bold ${err.level === 'ERROR' ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400'}`}>{err.level}</span>
-                      <span className="text-slate-400">{err.timestamp}</span>
+                      <span className="text-slate-600">{err.timestamp}</span>
                     </div>
                     <div className="whitespace-pre-wrap break-all">{err.message}</div>
                   </div>
@@ -216,11 +216,11 @@ export default function HealthDashboard() {
                   <div key={i} className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 text-xs">
                     <div className="flex justify-between mb-1">
                       <span className="font-bold text-orange-700 dark:text-orange-400">Frontend-Fehler</span>
-                      <span className="text-slate-400">{err.timestamp}</span>
+                      <span className="text-slate-600">{err.timestamp}</span>
                     </div>
                     <div className="text-orange-800 dark:text-orange-300 font-mono whitespace-pre-wrap break-all mb-1">{err.error.slice(0, 300)}</div>
                     {err.url && <div className="text-slate-500">URL: {err.url}</div>}
-                    {err.client_ip && <div className="text-slate-400">IP: {err.client_ip}</div>}
+                    {err.client_ip && <div className="text-slate-600">IP: {err.client_ip}</div>}
                   </div>
                 ))
               )}

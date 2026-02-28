@@ -286,7 +286,7 @@ function GroupMultiSelect({
         className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm flex items-center gap-1.5 min-w-[150px]"
       >
         <span className="flex-1 text-left truncate">{label}</span>
-        <span className="text-gray-400 text-xs flex-shrink-0">▾</span>
+        <span className="text-gray-600 text-xs flex-shrink-0">▾</span>
       </button>
       {open && (
         <div className="absolute top-full mt-1 left-0 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl min-w-[190px] py-1">
@@ -378,7 +378,7 @@ function EmployeeMultiSelect({
         }`}
       >
         <span className="flex-1 text-left truncate">👤 {label}</span>
-        <span className="text-gray-400 text-[10px] flex-shrink-0">▾</span>
+        <span className="text-gray-600 text-[10px] flex-shrink-0">▾</span>
       </button>
       {open && (
         <div className="absolute top-full mt-1 left-0 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl w-56 py-1">
@@ -419,11 +419,11 @@ function EmployeeMultiSelect({
                     {isSelected ? '✓' : ''}
                   </span>
                   <span className="truncate">{emp.NAME}, {emp.FIRSTNAME}</span>
-                  {emp.SHORTNAME && <span className="text-gray-400 flex-shrink-0">[{emp.SHORTNAME}]</span>}
+                  {emp.SHORTNAME && <span className="text-gray-600 flex-shrink-0">[{emp.SHORTNAME}]</span>}
                 </button>
               );
             })}
-            {filtered.length === 0 && <div className="px-3 py-2 text-xs text-gray-400">Kein Treffer</div>}
+            {filtered.length === 0 && <div className="px-3 py-2 text-xs text-gray-600">Kein Treffer</div>}
           </div>
           {selectedIds.length > 0 && (
             <div className="border-t px-2 py-1">
@@ -521,7 +521,7 @@ function CellContextMenu({
     >
       {mode === 'menu' && (
         <div className="py-1">
-          <div className="px-3 py-1 text-gray-400 text-[10px] font-medium border-b mb-1">
+          <div className="px-3 py-1 text-gray-600 text-[10px] font-medium border-b mb-1">
             {state.dateStr}
           </div>
           <button
@@ -584,7 +584,7 @@ function CellContextMenu({
 
       {mode === 'shift-select' && (
         <div className="py-1">
-          <div className="px-3 py-1 text-gray-400 text-[10px] font-medium border-b mb-1">Schicht wählen</div>
+          <div className="px-3 py-1 text-gray-600 text-[10px] font-medium border-b mb-1">Schicht wählen</div>
           <div className="overflow-y-auto max-h-60">
             {shifts.filter(s => !s.HIDE).map(s => (
               <button
@@ -614,7 +614,7 @@ function CellContextMenu({
 
       {mode === 'absence-select' && (
         <div className="py-1">
-          <div className="px-3 py-1 text-gray-400 text-[10px] font-medium border-b mb-1">Abwesenheitsart wählen</div>
+          <div className="px-3 py-1 text-gray-600 text-[10px] font-medium border-b mb-1">Abwesenheitsart wählen</div>
           <div className="overflow-y-auto max-h-60">
             {leaveTypes.filter(lt => !lt.HIDE).map(lt => (
               <button
@@ -646,7 +646,7 @@ function CellContextMenu({
         <div className="p-2" style={{ minWidth: 225 }}>
           <div className="text-gray-500 mb-2 font-medium text-[11px] border-b pb-1">⚡ Sonderdienst</div>
           <div className="mb-2">
-            <label className="text-gray-400 text-[10px] block mb-0.5">Schichtart (optional)</label>
+            <label className="text-gray-600 text-[10px] block mb-0.5">Schichtart (optional)</label>
             <select
               className="w-full border rounded p-1 text-xs focus:outline-blue-400"
               value={sonderdienst.shiftId}
@@ -660,7 +660,7 @@ function CellContextMenu({
           </div>
           <div className="flex gap-2 mb-2">
             <div className="flex-1">
-              <label className="text-gray-400 text-[10px] block mb-0.5">Von</label>
+              <label className="text-gray-600 text-[10px] block mb-0.5">Von</label>
               <input
                 type="time"
                 className="w-full border rounded p-1 text-xs focus:outline-blue-400"
@@ -669,7 +669,7 @@ function CellContextMenu({
               />
             </div>
             <div className="flex-1">
-              <label className="text-gray-400 text-[10px] block mb-0.5">Bis</label>
+              <label className="text-gray-600 text-[10px] block mb-0.5">Bis</label>
               <input
                 type="time"
                 className="w-full border rounded p-1 text-xs focus:outline-blue-400"
@@ -701,7 +701,7 @@ function CellContextMenu({
           <div className="text-gray-500 mb-2 font-medium text-[11px] border-b pb-1">⏱️ Arbeitszeitabweichung</div>
           <div className="flex gap-2 mb-2">
             <div className="flex-1">
-              <label className="text-gray-400 text-[10px] block mb-0.5">Von</label>
+              <label className="text-gray-600 text-[10px] block mb-0.5">Von</label>
               <input
                 type="time"
                 className="w-full border rounded p-1 text-xs focus:outline-blue-400"
@@ -710,7 +710,7 @@ function CellContextMenu({
               />
             </div>
             <div className="flex-1">
-              <label className="text-gray-400 text-[10px] block mb-0.5">Bis</label>
+              <label className="text-gray-600 text-[10px] block mb-0.5">Bis</label>
               <input
                 type="time"
                 className="w-full border rounded p-1 text-xs focus:outline-blue-400"
@@ -851,7 +851,7 @@ function NoteDetailPopup({
     >
       <div className="px-3 py-1.5 bg-indigo-50 border-b text-[10px] text-indigo-600 font-semibold rounded-t-lg flex justify-between items-center">
         <span>📝 Notizen · {state.dateStr}</span>
-        <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xs leading-none ml-2">×</button>
+        <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xs leading-none ml-2">×</button>
       </div>
       {state.notes.map(note => (
         <div key={note.id} className="p-2 border-b last:border-b-0">
@@ -1062,7 +1062,7 @@ function AuslastungsBereich({
     <div className="mt-3 bg-white dark:bg-gray-900 rounded-lg shadow border border-gray-200 dark:border-gray-600 overflow-auto">
       <div className="px-3 py-2 bg-slate-50 border-b border-gray-200 flex items-center gap-2">
         <span className="text-xs font-semibold text-slate-600">📊 Auslastung nach Schichtart</span>
-        <span className="text-[10px] text-gray-400">
+        <span className="text-[10px] text-gray-600">
           Grün = OK · Rot = Unterbesetzt · Orange = Überbesetzt · Grau = kein Soll
         </span>
       </div>
@@ -1136,7 +1136,7 @@ const EmployeeCountBadge = memo(function EmployeeCountBadge({ visible, total }: 
       {filtered ? (
         <>
           <span className="font-bold">{visible}</span>
-          <span className="text-gray-400"> / {total} Mitarbeitende</span>
+          <span className="text-gray-600"> / {total} Mitarbeitende</span>
         </>
       ) : (
         <>{total} Mitarbeiter</>
@@ -1188,7 +1188,7 @@ function ShiftFilterDropdown({
         ) : (
           <span className="text-gray-500">Alle Schichten</span>
         )}
-        <span className="text-gray-400 ml-1">▾</span>
+        <span className="text-gray-600 ml-1">▾</span>
       </button>
       {open && (
         <div className="absolute top-full mt-1 left-0 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl min-w-[200px] py-1">
@@ -1268,7 +1268,7 @@ function BulkContextMenu({
     >
       <div className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/40 border-b dark:border-gray-600 text-[10px] text-blue-700 dark:text-blue-300 font-semibold rounded-t-lg flex items-center justify-between">
         <span>✅ {selectionInfo.cells} Zellen ({selectionInfo.employees} MA × {selectionInfo.days} Tage)</span>
-        <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 ml-2">×</button>
+        <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 ml-2">×</button>
       </div>
       {mode === 'menu' ? (
         <div className="py-1">
@@ -1302,7 +1302,7 @@ function BulkContextMenu({
         </div>
       ) : (
         <div className="py-1">
-          <div className="px-3 py-1 text-gray-400 text-[10px] font-medium border-b mb-1">Schicht wählen</div>
+          <div className="px-3 py-1 text-gray-600 text-[10px] font-medium border-b mb-1">Schicht wählen</div>
           {shifts.map(s => (
             <button
               key={s.ID}
@@ -1408,7 +1408,7 @@ function DayDetailModal({
                 >
                   {g.label}
                 </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">{g.employees.length} MA</span>
+                <span className="text-xs text-gray-500 dark:text-gray-600">{g.employees.length} MA</span>
               </div>
               <div className="flex flex-wrap gap-1.5 ml-1">
                 {g.employees.map(({ emp }) => (
@@ -1423,11 +1423,11 @@ function DayDetailModal({
             <div>
               <div className="flex items-center gap-2 mb-1.5">
                 <span className="inline-flex items-center justify-center rounded px-2 py-0.5 text-xs font-bold bg-gray-200 text-gray-500">—</span>
-                <span className="text-xs text-gray-400">{noEntryEmps.length} ohne Eintrag</span>
+                <span className="text-xs text-gray-600">{noEntryEmps.length} ohne Eintrag</span>
               </div>
               <div className="flex flex-wrap gap-1.5 ml-1">
                 {noEntryEmps.map(emp => (
-                  <span key={emp.ID} className="text-xs bg-gray-50 dark:bg-gray-700/50 rounded px-2 py-0.5 text-gray-400">
+                  <span key={emp.ID} className="text-xs bg-gray-50 dark:bg-gray-700/50 rounded px-2 py-0.5 text-gray-600">
                     {emp.FIRSTNAME} {emp.NAME}
                   </span>
                 ))}
@@ -1435,7 +1435,7 @@ function DayDetailModal({
             </div>
           )}
           {groups.length === 0 && noEntryEmps.length === 0 && (
-            <div className="text-center text-gray-400 py-8">Keine Mitarbeiter vorhanden</div>
+            <div className="text-center text-gray-600 py-8">Keine Mitarbeiter vorhanden</div>
           )}
         </div>
       </div>
@@ -1505,7 +1505,7 @@ function HoverTooltip({
       {emp && (
         <div className="font-semibold text-blue-200 mb-0.5">{emp.NAME}, {emp.FIRSTNAME}</div>
       )}
-      <div className="text-gray-400 text-[10px] mb-1">{dateStr}</div>
+      <div className="text-gray-600 text-[10px] mb-1">{dateStr}</div>
       {entry && (
         <div className="flex items-center gap-1.5 mb-1">
           <span
@@ -1521,7 +1521,7 @@ function HoverTooltip({
         <div className="text-green-300 text-[10px] mb-0.5">⏰ {shiftTimes}</div>
       )}
       {entry?.workplace_id != null && (
-        <div className="text-gray-400 text-[10px] mb-0.5">📍 Arbeitsplatz #{entry.workplace_id}</div>
+        <div className="text-gray-600 text-[10px] mb-0.5">📍 Arbeitsplatz #{entry.workplace_id}</div>
       )}
       {/* Schicht-Statistik */}
       {entry?.kind === 'shift' && entry.shift_id != null && (
@@ -1677,20 +1677,20 @@ function WeekTemplateModal({
           <h2 className="text-base font-semibold flex items-center gap-2 dark:text-white">
             📐 Wochenvorlagen
           </h2>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl leading-none">×</button>
         </div>
 
         {/* Tabs */}
         <div className="flex border-b dark:border-gray-700 px-5">
           <button
             onClick={() => setTab('apply')}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab === 'apply' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab === 'apply' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-600'}`}
           >
             Vorlage anwenden
           </button>
           <button
             onClick={() => setTab('save')}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab === 'save' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab === 'save' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-600'}`}
           >
             Vorlage speichern
           </button>
@@ -1701,7 +1701,7 @@ function WeekTemplateModal({
           {tab === 'apply' && (
             <div className="space-y-3">
               {templates.length === 0 ? (
-                <div className="text-center text-gray-400 dark:text-gray-500 py-8 text-sm">
+                <div className="text-center text-gray-600 dark:text-gray-500 py-8 text-sm">
                   Noch keine Vorlagen gespeichert.<br />
                   <button onClick={() => setTab('save')} className="text-blue-500 underline mt-1">Vorlage speichern</button>
                 </div>
@@ -1721,10 +1721,10 @@ function WeekTemplateModal({
                       <div key={tpl.id} className="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-sm dark:text-white truncate">{tpl.name}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <div className="text-xs text-gray-500 dark:text-gray-600">
                             {tpl.createdAt} · {empCount} MA · {wdLabel}
                           </div>
-                          <div className="text-xs text-gray-400 dark:text-gray-500">{tpl.entries.length} Einträge</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-500">{tpl.entries.length} Einträge</div>
                         </div>
                         <button
                           onClick={() => handleApply(tpl)}
@@ -1801,12 +1801,12 @@ function WeekTemplateModal({
                     <div className="font-medium text-gray-700 dark:text-gray-300 mb-2">Vorschau:</div>
                     <div className="flex gap-2 flex-wrap">
                       {preview.map(({ wd, count }) => (
-                        <span key={wd} className={`px-2 py-0.5 rounded ${count > 0 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-gray-200 text-gray-400 dark:bg-gray-600 dark:text-gray-500'}`}>
+                        <span key={wd} className={`px-2 py-0.5 rounded ${count > 0 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-gray-200 text-gray-600 dark:bg-gray-600 dark:text-gray-500'}`}>
                           {WD_NAMES[wd]}: {count}×
                         </span>
                       ))}
                     </div>
-                    <div className="mt-1.5 text-gray-500 dark:text-gray-400">{total} Schicht-Einträge werden gespeichert</div>
+                    <div className="mt-1.5 text-gray-500 dark:text-gray-600">{total} Schicht-Einträge werden gespeichert</div>
                   </div>
                 );
               })()}
@@ -3617,7 +3617,7 @@ export default function Schedule() {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-lg font-bold text-gray-800">📋 Woche kopieren</h2>
-                <button aria-label="Schließen" onClick={closeCopyWeek} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+                <button aria-label="Schließen" onClick={closeCopyWeek} className="text-gray-600 hover:text-gray-600 text-xl leading-none">×</button>
               </div>
 
               {/* Source employee */}
@@ -3668,7 +3668,7 @@ export default function Schedule() {
                       const wd = ['Mo','Di','Mi','Do','Fr','Sa','So'][wdIdx];
                       return (
                         <div key={d} className="flex flex-col items-center flex-1">
-                          <span className="text-[10px] text-gray-400">{wd}</span>
+                          <span className="text-[10px] text-gray-600">{wd}</span>
                           {entry ? (
                             <span
                               className="text-[11px] font-bold px-1 rounded w-full text-center"
@@ -3793,7 +3793,7 @@ export default function Schedule() {
             <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-gray-800">🔄 Schicht-Tausch</h2>
-                <button aria-label="Schließen" onClick={closeSwap} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+                <button aria-label="Schließen" onClick={closeSwap} className="text-gray-600 hover:text-gray-600 text-xl leading-none">×</button>
               </div>
 
               <p className="text-sm text-gray-500 mb-4">
@@ -3834,7 +3834,7 @@ export default function Schedule() {
               {emp1 && emp2 && (
                 <div className="flex items-center justify-center gap-3 mb-4 text-sm font-medium text-gray-700">
                   <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full">{emp1.SHORTNAME || emp1.FIRSTNAME}</span>
-                  <span className="text-gray-400 text-lg">⇄</span>
+                  <span className="text-gray-600 text-lg">⇄</span>
                   <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full">{emp2.SHORTNAME || emp2.FIRSTNAME}</span>
                 </div>
               )}
@@ -3993,12 +3993,12 @@ export default function Schedule() {
                 <button
                   aria-label="Schließen"
                   onClick={() => setShowRecommendations(false)}
-                  className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+                  className="text-gray-600 hover:text-gray-600 text-xl leading-none"
                 >×</button>
               </div>
               <div className="overflow-y-auto flex-1 p-4">
                 {recommendations.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400">
+                  <div className="text-center py-8 text-gray-600">
                     <div className="text-4xl mb-2">🎉</div>
                     <p className="font-medium text-gray-600">Alle gut ausgelastet!</p>
                     <p className="text-sm mt-1">Kein Mitarbeiter liegt deutlich unter dem Durchschnitt.</p>
@@ -4063,7 +4063,7 @@ export default function Schedule() {
                 )}
               </div>
               <div className="px-5 py-3 border-t bg-gray-50 rounded-b-xl flex justify-between items-center">
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-600">
                   {recommendations.length} Mitarbeiter unter Durchschnitt
                 </span>
                 <button
@@ -4345,7 +4345,7 @@ export default function Schedule() {
               {activeFilterCount > 0 && (
                 <span className="px-1.5 py-0.5 text-[10px] font-bold bg-blue-500 text-white rounded-full">{activeFilterCount}</span>
               )}
-              <span className="text-gray-400 text-xs ml-1">{showFilterPanel ? '▲' : '▼'}</span>
+              <span className="text-gray-600 text-xs ml-1">{showFilterPanel ? '▲' : '▼'}</span>
               {activeFilterCount > 0 && (
                 <button
                   className="ml-auto text-xs px-2 py-0.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
@@ -4397,7 +4397,7 @@ export default function Schedule() {
                     onKeyDown={e => { if (e.key === 'Escape') { setEmployeeSearch(''); e.currentTarget.blur(); } }}
                   />
                   {employeeSearch && (
-                    <button aria-label="Suche löschen" className="text-xs text-gray-400 hover:text-gray-600" onClick={() => setEmployeeSearch('')} title="Suche löschen">×</button>
+                    <button aria-label="Suche löschen" className="text-xs text-gray-600 hover:text-gray-600" onClick={() => setEmployeeSearch('')} title="Suche löschen">×</button>
                   )}
                 </div>
 
@@ -4527,7 +4527,7 @@ export default function Schedule() {
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-bold text-gray-800 text-base">⚠️ Dienstplan-Konflikte</h2>
               <button
-                className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+                className="text-gray-600 hover:text-gray-600 text-lg leading-none"
                 onClick={() => setShowConflictModal(false)}
               >
                 ×
@@ -4641,7 +4641,7 @@ export default function Schedule() {
               <h2 className="font-bold text-gray-800 text-base flex items-center gap-2">
                 ⌨️ Tastaturkürzel — Keyboard Power-Mode
               </h2>
-              <button aria-label="Schließen" className="text-gray-400 hover:text-gray-600 text-xl leading-none" onClick={() => setShowKbHelp(false)}>×</button>
+              <button aria-label="Schließen" className="text-gray-600 hover:text-gray-600 text-xl leading-none" onClick={() => setShowKbHelp(false)}>×</button>
             </div>
             <div className="space-y-4 text-sm">
               <div>
@@ -4691,7 +4691,7 @@ export default function Schedule() {
                       );
                     })}
                   </div>
-                  <p className="text-xs text-gray-400 mt-2">Tipp: Zelle auswählen, dann Buchstaben drücken um Schicht direkt zuzuweisen.</p>
+                  <p className="text-xs text-gray-600 mt-2">Tipp: Zelle auswählen, dann Buchstaben drücken um Schicht direkt zuzuweisen.</p>
                 </div>
               )}
             </div>
@@ -5148,7 +5148,7 @@ export default function Schedule() {
 
             {filteredDisplayRows.filter(r => r.type === 'employee').length === 0 && (
               <tr>
-                <td colSpan={displayedDays.length + 1} className="text-center py-8 text-gray-400">
+                <td colSpan={displayedDays.length + 1} className="text-center py-8 text-gray-600">
                   {loading ? (
                     <SkeletonGrid rows={6} cols={Math.min(displayedDays.length || 7, 31)} className="w-full" />
                   ) : 'Keine Mitarbeiter gefunden'}
@@ -5235,7 +5235,7 @@ export default function Schedule() {
               {s.SHORTNAME}
             </span>
           ))}
-          <span className="hidden sm:inline text-xs text-gray-400 ml-2">
+          <span className="hidden sm:inline text-xs text-gray-600 ml-2">
             Hover → Tooltip · Drag &amp; Drop (Alt=Kopieren) · Pfeiltasten → Navigation · Del → Löschen · Enter → Schicht · Ctrl+Z/Y → Undo/Redo
           </span>
         </div>

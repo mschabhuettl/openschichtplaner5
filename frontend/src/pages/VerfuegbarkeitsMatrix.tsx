@@ -148,7 +148,7 @@ function MatrixCell({ wd, dataMode }: { wd: WeekdayData; dataMode: DataMode; shi
         </div>
       ) : wd.configured ? (
         <div
-          className="w-8 h-8 mx-auto rounded-full flex items-center justify-center text-xs text-gray-400 border border-dashed border-gray-300"
+          className="w-8 h-8 mx-auto rounded-full flex items-center justify-center text-xs text-gray-600 border border-dashed border-gray-300"
           title="Kein Einsatz in diesem Zeitraum (aber als Arbeitstag konfiguriert)"
         >
           –
@@ -191,7 +191,7 @@ function HeatmapView({ employees, dataMode }: { employees: Employee[]; dataMode:
         <div className="flex gap-2">
           {WEEKDAYS.map((wd, i) => (
             <div key={wd} className="flex-1 flex flex-col items-center gap-1">
-              <div className="text-xs font-semibold text-gray-600 dark:text-gray-400">{wdCounts[i]}</div>
+              <div className="text-xs font-semibold text-gray-600 dark:text-gray-600">{wdCounts[i]}</div>
               <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full" style={{ height: 80 }}>
                 <div
                   className="w-full rounded-full transition-all"
@@ -229,7 +229,7 @@ function HeatmapView({ employees, dataMode }: { employees: Employee[]; dataMode:
                 >
                   <td className="px-4 py-2">
                     <div className="font-medium text-sm text-gray-800 dark:text-gray-200 truncate max-w-36">{emp.name}</div>
-                    <div className="text-xs text-gray-400">{emp.short}</div>
+                    <div className="text-xs text-gray-600">{emp.short}</div>
                   </td>
                   {emp.weekdays.map(wd => (
                     <MatrixCell key={wd.weekday} wd={wd} dataMode={dataMode} shifts={emp.shift_mix} />
@@ -264,7 +264,7 @@ function CoverageView({ coverage, employees }: { coverage: WeekdayCoverage[]; em
               {WEEKDAY_LONG[i]}
             </div>
             <div className="text-3xl font-black text-gray-800 dark:text-white">{wdc.configured}</div>
-            <div className="text-xs text-gray-400 mb-3">von {employees.length} MA</div>
+            <div className="text-xs text-gray-600 mb-3">von {employees.length} MA</div>
             <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
               <div
                 className={`h-2 rounded-full ${isWeekend ? 'bg-orange-400' : 'bg-green-400'}`}
@@ -280,11 +280,11 @@ function CoverageView({ coverage, employees }: { coverage: WeekdayCoverage[]; em
                 .slice(0, 5)
                 .map(e => (
                   <div key={e.id} className="flex items-center gap-1">
-                    <span className="text-[10px] bg-gray-100 dark:bg-gray-700 px-1.5 py-px rounded font-mono text-gray-600 dark:text-gray-400">{e.short}</span>
+                    <span className="text-[10px] bg-gray-100 dark:bg-gray-700 px-1.5 py-px rounded font-mono text-gray-600 dark:text-gray-600">{e.short}</span>
                   </div>
                 ))}
               {employees.filter(e => e.workdays_config[i]).length > 5 && (
-                <div className="text-xs text-gray-400">+{employees.filter(e => e.workdays_config[i]).length - 5} weitere</div>
+                <div className="text-xs text-gray-600">+{employees.filter(e => e.workdays_config[i]).length - 5} weitere</div>
               )}
             </div>
           </div>
@@ -351,7 +351,7 @@ export default function VerfuegbarkeitsMatrix() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             🗓️ Verfügbarkeits-Matrix
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-sm text-gray-500 dark:text-gray-600 mt-0.5">
             Wochentag-Muster & Besetzungsübersicht pro Mitarbeiter
           </p>
         </div>
@@ -423,7 +423,7 @@ export default function VerfuegbarkeitsMatrix() {
               <div key={pattern} className="flex items-center gap-1.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full px-3 py-1">
                 <span className="text-base">{emp?.pattern_icon}</span>
                 <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{pattern}</span>
-                <span className="text-xs font-bold text-gray-400 bg-gray-100 dark:bg-gray-700 rounded-full px-1.5">{count}</span>
+                <span className="text-xs font-bold text-gray-600 bg-gray-100 dark:bg-gray-700 rounded-full px-1.5">{count}</span>
               </div>
             );
           })}

@@ -282,7 +282,7 @@ export default function Shifts() {
                   );
                 })}
                 {shifts.length === 0 && (
-                  <tr><td colSpan={8} className="text-center py-8 text-gray-400">Keine Schichtarten</td></tr>
+                  <tr><td colSpan={8} className="text-center py-8 text-gray-600">Keine Schichtarten</td></tr>
                 )}
               </tbody>
             </table>
@@ -316,7 +316,7 @@ export default function Shifts() {
                           }
                         </div>
                         {!indiv && (satTime || sunTime) && (
-                          <div className="text-xs text-gray-400 font-mono">
+                          <div className="text-xs text-gray-600 font-mono">
                             {satTime && <span>Sa: {satTime.start}–{satTime.end}</span>}
                             {satTime && sunTime && ' · '}
                             {sunTime && <span>So: {sunTime.start}–{sunTime.end}</span>}
@@ -341,7 +341,7 @@ export default function Shifts() {
               );
             })}
             {shifts.length === 0 && (
-              <div className="text-center py-8 text-gray-400">Keine Schichtarten</div>
+              <div className="text-center py-8 text-gray-600">Keine Schichtarten</div>
             )}
           </div>
         </>

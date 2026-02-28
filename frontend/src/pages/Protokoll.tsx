@@ -238,7 +238,7 @@ export default function Protokoll() {
       {/* Table */}
       <div className="flex-1 overflow-auto bg-white rounded-lg shadow border border-gray-200">
         {filtered.length === 0 && !loading ? (
-          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+          <div className="flex flex-col items-center justify-center py-16 text-gray-600">
             <div className="text-5xl mb-3">📋</div>
             <div className="text-lg font-medium mb-1">Keine Protokolleinträge</div>
             <div className="text-sm">Aktionen werden ab sofort automatisch protokolliert.</div>
@@ -293,7 +293,7 @@ export default function Protokoll() {
         )}
       </div>
 
-      <div className="mt-2 text-xs text-gray-400">
+      <div className="mt-2 text-xs text-gray-600">
         Protokoll wird automatisch bei Erstellen, Ändern und Löschen von Daten geschrieben. Max. 1000 Einträge werden gespeichert.
       </div>
     </div>

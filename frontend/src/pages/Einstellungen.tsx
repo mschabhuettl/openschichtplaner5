@@ -43,7 +43,7 @@ function ColorPicker({ label, value, onChange, hint }: ColorPickerProps) {
         />
         <div className="flex flex-col">
           <span className="text-xs text-gray-500 font-mono">{hex.toUpperCase()}</span>
-          <span className="text-xs text-gray-400">BGR: {value}</span>
+          <span className="text-xs text-gray-600">BGR: {value}</span>
         </div>
         <div
           className="w-12 h-8 rounded border border-gray-200 flex items-center justify-center text-xs font-bold"
@@ -52,7 +52,7 @@ function ColorPicker({ label, value, onChange, hint }: ColorPickerProps) {
           <span style={{ color: value > 8000000 ? '#000' : '#fff' }}>A</span>
         </div>
       </div>
-      {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
+      {hint && <p className="text-xs text-gray-600 mt-1">{hint}</p>}
     </div>
   );
 }
@@ -211,7 +211,7 @@ export default function Einstellungen() {
         <p className="text-sm text-gray-500 mt-0.5">{t.settings.subtitle}</p>
       </div>
 
-      {loading && <div className="text-center py-20 text-gray-400">⟳ Lade Einstellungen...</div>}
+      {loading && <div className="text-center py-20 text-gray-600">⟳ Lade Einstellungen...</div>}
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
           ⚠️ {error}
@@ -240,7 +240,7 @@ export default function Einstellungen() {
                   onChange={e => updateApp('worktime', { sollStundenProWoche: parseFloat(e.target.value) || 40 })}
                   className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <p className="text-xs text-gray-400 mt-1">Wochenstunden-Ziel für Berechnungen</p>
+                <p className="text-xs text-gray-600 mt-1">Wochenstunden-Ziel für Berechnungen</p>
               </div>
 
               <div>
@@ -256,7 +256,7 @@ export default function Einstellungen() {
                   onChange={e => updateApp('worktime', { ueberstundenSchwellenwert: parseFloat(e.target.value) || 2 })}
                   className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <p className="text-xs text-gray-400 mt-1">Ab dieser Differenz → Überstunden-Warnung</p>
+                <p className="text-xs text-gray-600 mt-1">Ab dieser Differenz → Überstunden-Warnung</p>
               </div>
 
               <div>
@@ -271,7 +271,7 @@ export default function Einstellungen() {
                   onChange={e => updateApp('display', { konflikteSchwellenwert: parseInt(e.target.value) || 3 })}
                   className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <p className="text-xs text-gray-400 mt-1">Ab wie vielen Konflikten = kritisch (rot)</p>
+                <p className="text-xs text-gray-600 mt-1">Ab wie vielen Konflikten = kritisch (rot)</p>
               </div>
             </div>
 
@@ -361,7 +361,7 @@ export default function Einstellungen() {
                 label="Geburtstags-Hinweise anzeigen"
               />
             </div>
-            <p className="text-xs text-gray-400 mt-3">
+            <p className="text-xs text-gray-600 mt-3">
               Änderungen werden sofort übernommen und lokal gespeichert.
             </p>
           </Section>
@@ -473,7 +473,7 @@ export default function Einstellungen() {
                     placeholder="z.B. Abwesend"
                     className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <p className="text-xs text-gray-400 mt-1">Voller Name (ANOANAME)</p>
+                  <p className="text-xs text-gray-600 mt-1">Voller Name (ANOANAME)</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Kurzbezeichnung</label>
@@ -485,7 +485,7 @@ export default function Einstellungen() {
                     placeholder="z.B. X"
                     className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <p className="text-xs text-gray-400 mt-1">Kürzel im Dienstplan (ANOASHORT)</p>
+                  <p className="text-xs text-gray-600 mt-1">Kürzel im Dienstplan (ANOASHORT)</p>
                 </div>
                 <ColorPicker label="Textfarbe" value={anoacrtxt} onChange={setAnoacrtxt} hint="Schriftfarbe (ANOACRTXT)" />
                 <ColorPicker label="Balkenfarbe" value={anoacrbar} onChange={setAnoacrbar} hint="Farbe des Eintragsbalkens (ANOACRBAR)" />
@@ -500,7 +500,7 @@ export default function Einstellungen() {
                     />
                     <div>
                       <span className="text-sm font-medium text-gray-700">Fettdruck</span>
-                      <p className="text-xs text-gray-400">Anonymisierter Text fett anzeigen (ANOABOLD)</p>
+                      <p className="text-xs text-gray-600">Anonymisierter Text fett anzeigen (ANOABOLD)</p>
                     </div>
                   </label>
                 </div>
@@ -523,7 +523,7 @@ export default function Einstellungen() {
                   >
                     {anoaname || 'Abwesend'}
                   </div>
-                  <span className="text-xs text-gray-400">← So erscheint eine anonyme Abwesenheit</span>
+                  <span className="text-xs text-gray-600">← So erscheint eine anonyme Abwesenheit</span>
                 </div>
               </div>
             )}
@@ -559,7 +559,7 @@ export default function Einstellungen() {
           {/* ── Save DBF settings ─────────────────────────────────── */}
           {settings && (
           <div className="flex justify-between items-center">
-            <p className="text-xs text-gray-400">
+            <p className="text-xs text-gray-600">
               💾 Lokale Einstellungen werden automatisch gespeichert. Nur DBF-Einstellungen brauchen den Speichern-Button.
             </p>
             <button

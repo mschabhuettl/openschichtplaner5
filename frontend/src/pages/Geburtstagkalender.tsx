@@ -182,7 +182,7 @@ export default function Geburtstagkalender() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-48 text-gray-400 text-sm gap-2">
+      <div className="flex items-center justify-center h-48 text-gray-600 text-sm gap-2">
         <span className="animate-spin text-xl">🔄</span>
         Lade Mitarbeiterdaten…
       </div>
@@ -200,7 +200,7 @@ export default function Geburtstagkalender() {
           <h1 className="text-xl font-bold flex items-center gap-2">
             🎂 Geburtstags-Kalender
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-sm text-gray-500 dark:text-gray-600 mt-0.5">
             {totalWithBirthday} von {totalEmployees} Mitarbeitern haben einen eingetragenen Geburtstag
           </p>
         </div>
@@ -261,7 +261,7 @@ export default function Geburtstagkalender() {
                   <div className="text-sm font-semibold leading-tight">
                     {e.employee.FIRSTNAME} {e.employee.NAME}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-xs text-gray-500 dark:text-gray-600">
                     {String(e.day).padStart(2, '0')}.{String(e.month).padStart(2, '0')}.
                     {e.age !== null && ` · wird ${e.age}`}
                   </div>
@@ -278,7 +278,7 @@ export default function Geburtstagkalender() {
         <>
           <div className="flex gap-2 text-sm">
             <button onClick={expandAll} className="text-indigo-600 dark:text-indigo-400 hover:underline">Alle aufklappen</button>
-            <span className="text-gray-400">·</span>
+            <span className="text-gray-600">·</span>
             <button onClick={collapseAll} className="text-indigo-600 dark:text-indigo-400 hover:underline">Alle zuklappen</button>
           </div>
 
@@ -339,7 +339,7 @@ export default function Geburtstagkalender() {
                       `}>
                         {monthEntries.length} {monthEntries.length === 1 ? 'Geburtstag' : 'Geburtstage'}
                       </span>
-                      <span className="text-gray-400 text-sm">
+                      <span className="text-gray-600 text-sm">
                         {isExpanded ? '▲' : '▼'}
                       </span>
                     </div>
@@ -349,7 +349,7 @@ export default function Geburtstagkalender() {
                   {isExpanded && (
                     <div className="bg-white dark:bg-gray-900">
                       {monthEntries.length === 0 ? (
-                        <p className="px-4 py-3 text-sm text-gray-400 italic">
+                        <p className="px-4 py-3 text-sm text-gray-600 italic">
                           Keine Geburtstage in diesem Monat
                         </p>
                       ) : (
@@ -380,12 +380,12 @@ export default function Geburtstagkalender() {
                                   <div className="font-medium text-sm truncate">
                                     {e.employee.FIRSTNAME} {e.employee.NAME}
                                     {e.employee.SHORTNAME && (
-                                      <span className="ml-1.5 text-xs text-gray-400">
+                                      <span className="ml-1.5 text-xs text-gray-600">
                                         ({e.employee.SHORTNAME})
                                       </span>
                                     )}
                                   </div>
-                                  <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-0.5">
+                                  <div className="text-xs text-gray-500 dark:text-gray-600 flex items-center gap-2 mt-0.5">
                                     <span>
                                       {String(e.day).padStart(2, '0')}.{String(e.month).padStart(2, '0')}.
                                       {e.birthYear !== null && e.birthYear > 1900 ? e.birthYear : ''}
@@ -396,7 +396,7 @@ export default function Geburtstagkalender() {
                                       </span>
                                     )}
                                     {e.employee.FUNCTION && (
-                                      <span className="text-gray-400">· {e.employee.FUNCTION}</span>
+                                      <span className="text-gray-600">· {e.employee.FUNCTION}</span>
                                     )}
                                   </div>
                                 </div>
@@ -433,7 +433,7 @@ export default function Geburtstagkalender() {
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
               {entries.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-gray-400 italic">
+                  <td colSpan={5} className="px-4 py-6 text-center text-gray-600 italic">
                     Keine Geburtstage gefunden
                   </td>
                 </tr>
@@ -453,7 +453,7 @@ export default function Geburtstagkalender() {
                       <div>
                         <span className="font-medium">{e.employee.FIRSTNAME} {e.employee.NAME}</span>
                         {e.employee.SHORTNAME && (
-                          <span className="ml-1 text-xs text-gray-400">({e.employee.SHORTNAME})</span>
+                          <span className="ml-1 text-xs text-gray-600">({e.employee.SHORTNAME})</span>
                         )}
                       </div>
                     </div>
@@ -461,12 +461,12 @@ export default function Geburtstagkalender() {
                   <td className="px-4 py-2 text-gray-600 dark:text-gray-300">
                     {String(e.day).padStart(2, '0')}.{String(e.month).padStart(2, '0')}.
                     {e.birthYear !== null && e.birthYear > 1900 ? e.birthYear : ''}
-                    <span className="ml-1.5 text-xs text-gray-400">{MONTH_NAMES[e.month - 1]}</span>
+                    <span className="ml-1.5 text-xs text-gray-600">{MONTH_NAMES[e.month - 1]}</span>
                   </td>
                   <td className="px-4 py-2 text-indigo-600 dark:text-indigo-400 font-medium">
                     {e.age !== null ? `${e.age} Jahre` : '–'}
                   </td>
-                  <td className="px-4 py-2 text-gray-500 dark:text-gray-400 text-xs">
+                  <td className="px-4 py-2 text-gray-500 dark:text-gray-600 text-xs">
                     {e.daysUntil === 0
                       ? <span className="font-bold text-yellow-600">🎂 Heute!</span>
                       : `in ${e.daysUntil} Tag${e.daysUntil !== 1 ? 'en' : ''}`
@@ -484,7 +484,7 @@ export default function Geburtstagkalender() {
 
       {/* ── No birthdays at all ─────────────────────────────────────────── */}
       {entries.length === 0 && !loading && (
-        <div className="text-center py-12 text-gray-400">
+        <div className="text-center py-12 text-gray-600">
           <div className="text-5xl mb-3">🎂</div>
           <p className="font-medium">Keine Geburtstage vorhanden</p>
           <p className="text-sm mt-1">

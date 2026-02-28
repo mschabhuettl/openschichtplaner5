@@ -316,7 +316,7 @@ export default function RotationsAnalyse() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             🔄 Schicht-Rotations-Analyse
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-sm text-gray-500 dark:text-gray-600 mt-0.5">
             Rotations-Score (Individuum) · Team-Fairness (Gini) · Wochenend-Verteilung · Auto-Balance
           </p>
         </div>
@@ -406,9 +406,9 @@ export default function RotationsAnalyse() {
             },
           ].map(kpi => (
             <div key={kpi.label} className="bg-white dark:bg-gray-800 rounded-lg shadow p-3 border border-gray-200 dark:border-gray-700">
-              <div className="text-xs text-gray-500 dark:text-gray-400">{kpi.icon} {kpi.label}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-600">{kpi.icon} {kpi.label}</div>
               <div className="text-2xl font-bold mt-1" style={kpi.color ? { color: kpi.color } : {}}>{kpi.value}</div>
-              <div className="text-xs text-gray-400 mt-0.5">{kpi.sub}</div>
+              <div className="text-xs text-gray-600 mt-0.5">{kpi.sub}</div>
             </div>
           ))}
         </div>
@@ -426,7 +426,7 @@ export default function RotationsAnalyse() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-500 dark:text-gray-400">
+              <tr className="border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-500 dark:text-gray-600">
                 <th className="text-left px-3 py-2 sticky left-0 bg-gray-50 dark:bg-gray-900 z-10">Mitarbeiter</th>
                 <th className="px-3 py-2 text-center">Score</th>
                 <th className="px-3 py-2 text-center">Status</th>
@@ -461,7 +461,7 @@ export default function RotationsAnalyse() {
                   >
                     <td className={`px-3 py-2 font-medium sticky left-0 z-10 ${idx % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-850'}`}>
                       {r.employee.NAME}, {r.employee.FIRSTNAME}
-                      <span className="ml-1 text-xs text-gray-400">({r.employee.SHORTNAME})</span>
+                      <span className="ml-1 text-xs text-gray-600">({r.employee.SHORTNAME})</span>
                     </td>
                     <td className="px-3 py-2 text-center">
                       <div className="flex items-center justify-center gap-1">
@@ -495,10 +495,10 @@ export default function RotationsAnalyse() {
                       >
                         {r.dominantShift}
                       </span>
-                      <span className="ml-1 text-xs text-gray-400">{r.dominantPct}%</span>
+                      <span className="ml-1 text-xs text-gray-600">{r.dominantPct}%</span>
                     </td>
                     <td className="px-3 py-2 text-center">
-                      <span className={`text-xs font-semibold ${r.weekendShifts === 0 ? 'text-gray-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                      <span className={`text-xs font-semibold ${r.weekendShifts === 0 ? 'text-gray-600' : 'text-blue-600 dark:text-blue-400'}`}>
                         {r.weekendShifts}
                       </span>
                     </td>
@@ -549,7 +549,7 @@ export default function RotationsAnalyse() {
               <div className="flex items-center justify-between mb-2">
                 <div>
                   <span className="font-semibold text-sm">{r.employee.NAME}, {r.employee.FIRSTNAME}</span>
-                  <span className="ml-1 text-xs text-gray-400">({r.employee.SHORTNAME})</span>
+                  <span className="ml-1 text-xs text-gray-600">({r.employee.SHORTNAME})</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-blue-500" title="Wochenendschichten">🗓️ {r.weekendShifts}</span>
@@ -557,7 +557,7 @@ export default function RotationsAnalyse() {
                     <span className="text-lg font-bold" style={{ color: scoreColor(r.rotationScore) }}>
                       {r.rotationScore}
                     </span>
-                    <span className="text-xs text-gray-400">/ 100</span>
+                    <span className="text-xs text-gray-600">/ 100</span>
                   </div>
                 </div>
               </div>
@@ -599,10 +599,10 @@ export default function RotationsAnalyse() {
                     </span>
                   ))}
                 {Object.keys(r.shiftCounts).length > 4 && (
-                  <span className="text-xs text-gray-400">+{Object.keys(r.shiftCounts).length - 4} weitere</span>
+                  <span className="text-xs text-gray-600">+{Object.keys(r.shiftCounts).length - 4} weitere</span>
                 )}
               </div>
-              <div className="mt-1.5 text-xs text-gray-400">{r.totalShifts} Schichten gesamt</div>
+              <div className="mt-1.5 text-xs text-gray-600">{r.totalShifts} Schichten gesamt</div>
             </div>
           ))}
         </div>
@@ -655,12 +655,12 @@ export default function RotationsAnalyse() {
                   {/* Distribution across employees */}
                   <div className="mt-1 flex flex-wrap gap-1">
                     {[...sf.counts].filter(c => c.count > 0).sort((a, b) => b.count - a.count).slice(0, 8).map(c => (
-                      <span key={c.emp.ID} className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">
+                      <span key={c.emp.ID} className="text-xs text-gray-500 dark:text-gray-600 bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">
                         {c.emp.SHORTNAME}: {c.count}
                       </span>
                     ))}
                     {sf.counts.filter(c => c.count > 0).length > 8 && (
-                      <span className="text-xs text-gray-400">+{sf.counts.filter(c => c.count > 0).length - 8} weitere</span>
+                      <span className="text-xs text-gray-600">+{sf.counts.filter(c => c.count > 0).length - 8} weitere</span>
                     )}
                   </div>
                 </div>
@@ -710,7 +710,7 @@ export default function RotationsAnalyse() {
               <div className="text-sm">
                 <span className="text-gray-500">Wochenend-Fairness: </span>
                 <span className="font-bold" style={{ color: fairnessColor(weekendFairness) }}>{weekendFairness}%</span>
-                <span className="ml-2 text-xs text-gray-400">(Gini: {(weekendGini * 100).toFixed(1)}%)</span>
+                <span className="ml-2 text-xs text-gray-600">(Gini: {(weekendGini * 100).toFixed(1)}%)</span>
               </div>
             </div>
 
@@ -743,9 +743,9 @@ export default function RotationsAnalyse() {
                     const belowAvg = r.weekendShifts < avgWE * 0.8;
                     return (
                       <div key={r.employee.ID} className="flex items-center gap-3">
-                        <span className="text-xs text-gray-400 w-5 text-right">{idx + 1}.</span>
+                        <span className="text-xs text-gray-600 w-5 text-right">{idx + 1}.</span>
                         <span className="text-sm font-medium w-36 truncate">{r.employee.NAME}, {r.employee.FIRSTNAME}</span>
-                        <span className="text-xs text-gray-400 w-8">{r.employee.SHORTNAME}</span>
+                        <span className="text-xs text-gray-600 w-8">{r.employee.SHORTNAME}</span>
                         <div className="flex-1 h-5 bg-gray-100 dark:bg-gray-700 rounded overflow-hidden relative">
                           <div
                             className="h-full rounded transition-all"
@@ -803,7 +803,7 @@ export default function RotationsAnalyse() {
             <h2 className="font-bold text-lg">
               🔍 {details.employee.NAME}, {details.employee.FIRSTNAME}
             </h2>
-            <button aria-label="Schließen" onClick={() => setSelectedMA(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+            <button aria-label="Schließen" onClick={() => setSelectedMA(null)} className="text-gray-600 hover:text-gray-600 text-xl">✕</button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
             <div className="text-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
@@ -851,7 +851,7 @@ export default function RotationsAnalyse() {
                       />
                     </div>
                     <span className="text-sm font-medium w-8 text-right">{cnt}</span>
-                    <span className="text-xs text-gray-400 w-8">{Math.round(pct)}%</span>
+                    <span className="text-xs text-gray-600 w-8">{Math.round(pct)}%</span>
                   </div>
                 );
               })}
@@ -883,7 +883,7 @@ export default function RotationsAnalyse() {
       )}
 
       {!loading && rotations.length === 0 && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-600">
           Keine Schichtdaten für den gewählten Zeitraum gefunden.
         </div>
       )}

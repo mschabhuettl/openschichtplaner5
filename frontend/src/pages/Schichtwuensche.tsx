@@ -249,7 +249,7 @@ export default function Schichtwuensche() {
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold">🗓️ Schichtwünsche & Sperrtage</h1>
-          <p className={`text-sm mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+          <p className={`text-sm mt-0.5 ${isDark ? 'text-gray-600' : 'text-gray-500'}`}>
             Mitarbeiterwünsche und gesperrte Tage auf einen Blick
           </p>
         </div>
@@ -347,7 +347,7 @@ export default function Schichtwuensche() {
           {/* Weekday header */}
           <div className="grid grid-cols-7 gap-1 mb-1">
             {['Mo','Di','Mi','Do','Fr','Sa','So'].map(d => (
-              <div key={d} className={`text-center text-xs font-semibold py-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{d}</div>
+              <div key={d} className={`text-center text-xs font-semibold py-1 ${isDark ? 'text-gray-600' : 'text-gray-500'}`}>{d}</div>
             ))}
           </div>
           {/* Day grid */}

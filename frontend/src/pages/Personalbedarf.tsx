@@ -44,7 +44,7 @@ function RequirementCell({ req, onEdit, actual }: RequirementCellProps) {
           {max > 0 ? (
             <>
               <span className="text-green-700 font-bold">{min}</span>
-              <span className="text-gray-400">–</span>
+              <span className="text-gray-600">–</span>
               <span className={`font-bold ${isOverMax ? 'text-red-600' : 'text-blue-700'}`}>{max}</span>
             </>
           ) : (
@@ -95,7 +95,7 @@ function EditModal({ shiftName, weekdayName, existing, onSave, onClose }: EditMo
             <h2 className="text-lg font-bold text-gray-800">Personalbedarf</h2>
             <p className="text-sm text-gray-500 mt-0.5">{shiftName} · {weekdayName}</p>
           </div>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl">✕</button>
         </div>
 
         <div className="px-6 py-4 space-y-4">
@@ -206,7 +206,7 @@ function SpecialEditModal({ shifts, groups, existing, onSave, onClose, defaultDa
             </h2>
             <p className="text-sm text-gray-500 mt-0.5">5SPDEM.DBF</p>
           </div>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl">✕</button>
         </div>
 
         <div className="px-6 py-4 space-y-4">
@@ -373,7 +373,7 @@ function WeeklyTab({
         </div>
         <div className="flex items-center gap-1">
           <span className="font-mono text-green-700 font-bold">2</span>
-          <span className="text-gray-400">–</span>
+          <span className="text-gray-600">–</span>
           <span className="font-mono text-blue-700 font-bold">4</span>
           <span>= min–max Mitarbeiter (max=0: nur min)</span>
         </div>
@@ -388,9 +388,9 @@ function WeeklyTab({
       )}
 
       {loading ? (
-        <div className="text-center py-20 text-gray-400">⟳ Lade Personalbedarf...</div>
+        <div className="text-center py-20 text-gray-600">⟳ Lade Personalbedarf...</div>
       ) : shifts.length === 0 ? (
-        <div className="text-center py-20 text-gray-400">Keine Schichtarten gefunden.</div>
+        <div className="text-center py-20 text-gray-600">Keine Schichtarten gefunden.</div>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-x-auto">
           <table className="text-sm border-collapse w-full">
@@ -625,11 +625,11 @@ function DateSpecificTab({ shifts, groups }: { shifts: ShiftType[]; groups: Grou
       )}
 
       {loading && (
-        <div className="text-center py-10 text-gray-400">⟳ Lade...</div>
+        <div className="text-center py-10 text-gray-600">⟳ Lade...</div>
       )}
 
       {!loading && specialReqs.length === 0 && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-600">
           <div className="text-4xl mb-3">📅</div>
           <p className="text-sm">Keine datumsspezifischen Anforderungen gefunden.</p>
           <p className="text-xs text-gray-300 mt-1">Klicke "+ Datumsspezifischer Bedarf" um einen Eintrag anzulegen.</p>
@@ -642,7 +642,7 @@ function DateSpecificTab({ shifts, groups }: { shifts: ShiftType[]; groups: Grou
             <div key={date} className="bg-white rounded-lg shadow overflow-x-auto">
               <div className="bg-slate-700 text-white px-4 py-2 flex items-center justify-between">
                 <span className="text-sm font-semibold">📅 {formatDate(date)}</span>
-                <span className="text-xs text-slate-400">{byDate[date].length} Eintrag/Einträge</span>
+                <span className="text-xs text-slate-600">{byDate[date].length} Eintrag/Einträge</span>
               </div>
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-200">

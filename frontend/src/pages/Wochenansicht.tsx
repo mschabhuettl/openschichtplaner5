@@ -222,7 +222,7 @@ export default function Wochenansicht() {
       {/* ── Header ── */}
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">📅 Wochenansicht</h1>
-        <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">
+        <span className="text-sm text-gray-500 dark:text-gray-600 ml-1">
           {data ? formatWeekLabel(data.week_start, data.week_end) : '…'}
         </span>
       </div>
@@ -288,7 +288,7 @@ export default function Wochenansicht() {
           {compact ? '🔍 Normal' : '⚡ Kompakt'}
         </button>
 
-        {loading && <span className="text-sm text-gray-400 dark:text-gray-500 animate-pulse">Laden…</span>}
+        {loading && <span className="text-sm text-gray-600 dark:text-gray-500 animate-pulse">Laden…</span>}
       </div>
 
       {error && (
@@ -314,16 +314,16 @@ export default function Wochenansicht() {
                       isToday(d)
                         ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                         : isWeekend
-                        ? 'text-gray-400 dark:text-gray-500 bg-gray-100/50 dark:bg-gray-800/50'
+                        ? 'text-gray-600 dark:text-gray-500 bg-gray-100/50 dark:bg-gray-800/50'
                         : 'text-gray-600 dark:text-gray-300'
                     }`}
                   >
                     <div className="font-bold">{day}</div>
-                    <div className={`text-xs font-normal ${isToday(d) ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500'}`}>{date}</div>
+                    <div className={`text-xs font-normal ${isToday(d) ? 'text-blue-500' : 'text-gray-600 dark:text-gray-500'}`}>{date}</div>
                     {isToday(d) && <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mx-auto mt-0.5" />}
                   </th>
                 ))}
-                <th className="px-2 py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap min-w-[60px] border-l border-gray-200 dark:border-gray-700">
+                <th className="px-2 py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-600 whitespace-nowrap min-w-[60px] border-l border-gray-200 dark:border-gray-700">
                   Schichten
                 </th>
               </tr>
@@ -331,7 +331,7 @@ export default function Wochenansicht() {
             <tbody>
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="text-center py-8 text-gray-400 dark:text-gray-500">
+                  <td colSpan={9} className="text-center py-8 text-gray-600 dark:text-gray-500">
                     Keine Mitarbeiter gefunden.
                   </td>
                 </tr>
@@ -362,7 +362,7 @@ export default function Wochenansicht() {
                             {emp.name.split(',')[0]}
                           </div>
                           {!compact && (
-                            <div className="text-xs text-gray-400 dark:text-gray-500">{emp.short}</div>
+                            <div className="text-xs text-gray-600 dark:text-gray-500">{emp.short}</div>
                           )}
                         </div>
                       </div>
@@ -414,7 +414,7 @@ export default function Wochenansicht() {
 
       {/* ── Summary bar ── */}
       {data && (
-        <div className="flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-600">
           <span className="font-medium">{filtered.length} Mitarbeiter</span>
           {dayHeaders.map(({ day, date: d, date: dateStr }) => {
             const dayMap = entryMap.get(dateStr);
@@ -433,7 +433,7 @@ export default function Wochenansicht() {
       {/* ── Legend ── */}
       {legend.length > 0 && (
         <div className="bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3">
-          <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2">Legende</div>
+          <div className="text-xs font-semibold text-gray-500 dark:text-gray-600 mb-2">Legende</div>
           <div className="flex flex-wrap gap-2">
             {legend.map(item => (
               <div key={item.short} className="flex items-center gap-1.5">
@@ -449,7 +449,7 @@ export default function Wochenansicht() {
                     {item.short}
                   </span>
                 )}
-                <span className="text-xs text-gray-600 dark:text-gray-400">{item.label}</span>
+                <span className="text-xs text-gray-600 dark:text-gray-600">{item.label}</span>
               </div>
             ))}
           </div>

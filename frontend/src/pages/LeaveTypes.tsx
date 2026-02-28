@@ -188,7 +188,7 @@ export default function LeaveTypes() {
                 </tr>
               ))}
               {leaveTypes.length === 0 && (
-                <tr><td colSpan={6} className="text-center py-8 text-gray-400">Keine Abwesenheitsarten</td></tr>
+                <tr><td colSpan={6} className="text-center py-8 text-gray-600">Keine Abwesenheitsarten</td></tr>
               )}
             </tbody>
           </table>

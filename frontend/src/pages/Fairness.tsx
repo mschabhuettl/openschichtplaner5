@@ -70,7 +70,7 @@ function Bar({ value, max, color }: { value: number; max: number; color: string 
 
 // ── Deviation indicator ────────────────────────────────────────
 function DeviationDot({ value, avg }: { value: number; avg: number }) {
-  if (avg === 0) return <span className="text-gray-400">—</span>;
+  if (avg === 0) return <span className="text-gray-600">—</span>;
   const diff = value - avg;
   const pct = Math.round((diff / avg) * 100);
   if (Math.abs(pct) < 10) return <span className="text-gray-500 text-xs">≈</span>;
@@ -199,7 +199,7 @@ export default function Fairness() {
               <div className="flex items-end justify-between">
                 <div>
                   <div className="text-2xl font-bold text-gray-800">{score.toFixed(0)}</div>
-                  <div className="text-xs text-gray-400">/ 100 Punkte</div>
+                  <div className="text-xs text-gray-600">/ 100 Punkte</div>
                 </div>
                 <ScoreBadge score={score} />
               </div>
@@ -259,7 +259,7 @@ export default function Fairness() {
 
       {/* Employee table */}
       {!loadError && loading ? (
-        <div className="flex items-center justify-center h-32 text-gray-400 gap-2">
+        <div className="flex items-center justify-center h-32 text-gray-600 gap-2">
           <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
@@ -267,7 +267,7 @@ export default function Fairness() {
           Lade Daten…
         </div>
       ) : !loadError && employees.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-32 text-gray-400 gap-1">
+        <div className="flex flex-col items-center justify-center h-32 text-gray-600 gap-1">
           <span className="text-3xl">📭</span>
           <span>Keine Schichtdaten für {year} gefunden.</span>
         </div>
@@ -275,7 +275,7 @@ export default function Fairness() {
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2">
             <span className="text-sm font-semibold text-gray-700">👥 Mitarbeiter-Übersicht</span>
-            <span className="ml-auto text-xs text-gray-400">{employees.length} Einträge · Klick auf Spalte zum Sortieren</span>
+            <span className="ml-auto text-xs text-gray-600">{employees.length} Einträge · Klick auf Spalte zum Sortieren</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

@@ -103,13 +103,13 @@ function MiniProfile({ card, upcomingShifts, onClose, onGoToProfile }: MiniProfi
           <Avatar emp={emp} size="lg" />
           <div className="flex-1 min-w-0">
             <div className="font-semibold text-gray-900 dark:text-gray-100 truncate text-lg">{fullName}</div>
-            {emp.FUNCTION && <div className="text-sm text-gray-500 dark:text-gray-400 truncate">{emp.FUNCTION}</div>}
+            {emp.FUNCTION && <div className="text-sm text-gray-500 dark:text-gray-600 truncate">{emp.FUNCTION}</div>}
             <div className="flex items-center gap-1.5 mt-1">
               <AbsenceDot status={absenceStatus} />
-              <span className="text-xs text-gray-500 dark:text-gray-400">{absenceStatus.label}</span>
+              <span className="text-xs text-gray-500 dark:text-gray-600">{absenceStatus.label}</span>
             </div>
           </div>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none">✕</button>
         </div>
 
         {/* Groups */}
@@ -127,25 +127,25 @@ function MiniProfile({ card, upcomingShifts, onClose, onGoToProfile }: MiniProfi
         {todayShift && (
           <div className="rounded-xl p-3 text-sm" style={{ backgroundColor: todayShift.color_bk + '22', borderLeft: `3px solid ${todayShift.color_bk}` }}>
             <div className="font-medium" style={{ color: todayShift.color_bk }}>📅 Heute: {todayShift.shift_name || todayShift.leave_name}</div>
-            {todayShift.workplace_name && <div className="text-gray-500 dark:text-gray-400 text-xs">{todayShift.workplace_name}</div>}
+            {todayShift.workplace_name && <div className="text-gray-500 dark:text-gray-600 text-xs">{todayShift.workplace_name}</div>}
           </div>
         )}
 
         {/* Nächste Schichten */}
         {upcomingShifts.length > 0 && (
           <div>
-            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">Nächste Schichten</div>
+            <div className="text-xs font-semibold text-gray-500 dark:text-gray-600 uppercase tracking-wide mb-2">Nächste Schichten</div>
             <div className="flex flex-col gap-1.5">
               {upcomingShifts.slice(0, 3).map((s, i) => (
                 <div key={i} className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-400 text-xs w-20 shrink-0">{formatDate(s.employee_name)}</span>
+                  <span className="text-gray-600 text-xs w-20 shrink-0">{formatDate(s.employee_name)}</span>
                   <span
                     className="text-xs px-2 py-0.5 rounded-full font-medium"
                     style={{ backgroundColor: s.color_bk + '33', color: s.color_bk }}
                   >
                     {s.shift_short || s.shift_name}
                   </span>
-                  {s.workplace_name && <span className="text-xs text-gray-400 truncate">{s.workplace_name}</span>}
+                  {s.workplace_name && <span className="text-xs text-gray-600 truncate">{s.workplace_name}</span>}
                 </div>
               ))}
             </div>
@@ -155,7 +155,7 @@ function MiniProfile({ card, upcomingShifts, onClose, onGoToProfile }: MiniProfi
         {/* Kontakt */}
         {(emp.PHONE || emp.EMAIL) && (
           <div className="text-sm flex flex-col gap-1">
-            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Kontakt</div>
+            <div className="text-xs font-semibold text-gray-500 dark:text-gray-600 uppercase tracking-wide mb-1">Kontakt</div>
             {emp.PHONE && (
               <a href={`tel:${emp.PHONE}`} className="flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline">
                 <span>📞</span><span>{emp.PHONE}</span>
@@ -201,7 +201,7 @@ function EmployeeCard({ card, onClick }: { card: EmpCard; onClick: () => void })
             {fullName}
           </div>
           {emp.FUNCTION && (
-            <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{emp.FUNCTION}</div>
+            <div className="text-xs text-gray-500 dark:text-gray-600 truncate">{emp.FUNCTION}</div>
           )}
         </div>
         <AbsenceDot status={absenceStatus} />
@@ -241,7 +241,7 @@ function EmployeeCard({ card, onClick }: { card: EmpCard; onClick: () => void })
 
       {/* No shift today */}
       {!todayShift && absenceStatus.status === 'available' && (
-        <div className="text-xs text-gray-400 dark:text-gray-500">Kein Dienst heute</div>
+        <div className="text-xs text-gray-600 dark:text-gray-500">Kein Dienst heute</div>
       )}
     </div>
   );
@@ -288,7 +288,7 @@ function OrgChart({ groups, empCards, groupAssignments, onCardClick }: OrgChartP
               </div>
               <div>
                 <div className="font-semibold text-gray-900 dark:text-gray-100">{group.NAME}</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">{members.length} Mitarbeiter</div>
+                <div className="text-xs text-gray-500 dark:text-gray-600">{members.length} Mitarbeiter</div>
               </div>
             </div>
 
@@ -322,7 +322,7 @@ function OrgChart({ groups, empCards, groupAssignments, onCardClick }: OrgChartP
                 })}
               </div>
             ) : (
-              <div className="px-5 py-3 text-sm text-gray-400 dark:text-gray-500 italic">Keine Mitglieder</div>
+              <div className="px-5 py-3 text-sm text-gray-600 dark:text-gray-500 italic">Keine Mitglieder</div>
             )}
           </div>
         );
@@ -497,7 +497,7 @@ export default function TeamUebersicht() {
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-5">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Team-Übersicht</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <p className="text-sm text-gray-500 dark:text-gray-600 mt-0.5">
               {stats.total} Mitarbeiter · {stats.onDuty} heute im Dienst · {stats.absent} abwesend
             </p>
           </div>
@@ -506,20 +506,20 @@ export default function TeamUebersicht() {
             <div className="flex rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
               <button
                 onClick={() => setView('cards')}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${view === 'cards' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${view === 'cards' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
               >
                 🗂️ Karten
               </button>
               <button
                 onClick={() => setView('org')}
-                className={`px-4 py-2 text-sm font-medium transition-colors ${view === 'org' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                className={`px-4 py-2 text-sm font-medium transition-colors ${view === 'org' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
               >
                 🏢 Organigramm
               </button>
             </div>
             <button
               onClick={() => window.print()}
-              className="px-3 py-2 text-sm font-medium rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              className="px-3 py-2 text-sm font-medium rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               title="Drucken"
             >🖨️</button>
           </div>

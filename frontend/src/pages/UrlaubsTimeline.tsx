@@ -250,7 +250,7 @@ export default function UrlaubsTimeline() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
             🏖️ Urlaubs-Timeline
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400">Gantt-Übersicht aller Abwesenheiten</p>
+          <p className="text-sm text-gray-500 dark:text-gray-600">Gantt-Übersicht aller Abwesenheiten</p>
         </div>
         <div className="ml-auto flex flex-wrap gap-2 items-center">
           {/* Year selector */}
@@ -325,7 +325,7 @@ export default function UrlaubsTimeline() {
               {/* Month header */}
               <div className="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
                 {/* Name column */}
-                <div className="w-36 flex-shrink-0 px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-gray-700">
+                <div className="w-36 flex-shrink-0 px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-600 border-r border-gray-200 dark:border-gray-700">
                   Mitarbeiter
                 </div>
                 {/* Timeline header */}
@@ -356,7 +356,7 @@ export default function UrlaubsTimeline() {
                   )}
                 </div>
                 {/* Days column */}
-                <div className="w-10 flex-shrink-0 px-1 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 border-l border-gray-200 dark:border-gray-700 text-center">
+                <div className="w-10 flex-shrink-0 px-1 py-2 text-xs font-semibold text-gray-500 dark:text-gray-600 border-l border-gray-200 dark:border-gray-700 text-center">
                   Tage
                 </div>
               </div>
@@ -411,7 +411,7 @@ export default function UrlaubsTimeline() {
 
               {/* Employee rows */}
               {filteredEmployees.length === 0 && (
-                <div className="text-center text-gray-500 dark:text-gray-400 py-8 text-sm">
+                <div className="text-center text-gray-500 dark:text-gray-600 py-8 text-sm">
                   Keine Mitarbeiter gefunden
                 </div>
               )}
@@ -516,19 +516,19 @@ export default function UrlaubsTimeline() {
             <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
               {filteredAbsences.length}
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Abwesenheitstage gesamt</div>
+            <div className="text-xs text-gray-500 dark:text-gray-600 mt-1">Abwesenheitstage gesamt</div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
             <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {Object.values(empDays).filter(d => d > 0).length}
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Mitarbeiter mit Abwesenheit</div>
+            <div className="text-xs text-gray-500 dark:text-gray-600 mt-1">Mitarbeiter mit Abwesenheit</div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
             <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
               {Math.max(...overlapByDay)}
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Max. gleichzeitig abwesend</div>
+            <div className="text-xs text-gray-500 dark:text-gray-600 mt-1">Max. gleichzeitig abwesend</div>
           </div>
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
             <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
@@ -536,7 +536,7 @@ export default function UrlaubsTimeline() {
                 ? Math.round(filteredAbsences.length / filteredEmployees.filter(e => (empDays[e.ID] ?? 0) > 0).length || 0)
                 : 0}
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Ø Tage pro MA</div>
+            <div className="text-xs text-gray-500 dark:text-gray-600 mt-1">Ø Tage pro MA</div>
           </div>
         </div>
       )}
@@ -555,7 +555,7 @@ export default function UrlaubsTimeline() {
                 const maxDays = Math.max(...Object.values(empDays), 1);
                 return (
                   <div key={emp.ID} className="flex items-center gap-3">
-                    <span className="text-xs text-gray-400 dark:text-gray-500 w-4 text-right">{i + 1}.</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-500 w-4 text-right">{i + 1}.</span>
                     <span className="text-sm text-gray-800 dark:text-gray-200 w-32 truncate">
                       {emp.FIRSTNAME} {emp.NAME}
                     </span>
@@ -583,7 +583,7 @@ export default function UrlaubsTimeline() {
         >
           <div className="font-semibold text-gray-900 dark:text-white">{tooltip.employeeName}</div>
           <div className="text-indigo-600 dark:text-indigo-400 font-medium">{tooltip.content.leave_type_name}</div>
-          <div className="text-gray-600 dark:text-gray-400 text-xs mt-1">
+          <div className="text-gray-600 dark:text-gray-600 text-xs mt-1">
             {formatDate(tooltip.content.startDate)} – {formatDate(tooltip.content.endDate)}
           </div>
           <div className="text-gray-500 dark:text-gray-500 text-xs">

@@ -310,7 +310,7 @@ export default function SpotlightSearch({ open, onClose }: Props) {
             value={query}
             onChange={handleInput}
             placeholder="Suchen, navigieren, Aktionen… (Ctrl+K)"
-            className="flex-1 bg-transparent text-white placeholder-slate-500 outline-none text-base"
+            className="flex-1 bg-transparent text-white placeholder-slate-400 outline-none focus-visible:outline-none text-base"
             autoComplete="off"
             spellCheck={false}
           />

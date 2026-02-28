@@ -30,7 +30,7 @@ function CycleWeekGrid({ schedule }: { schedule: CycleDay[][] }) {
       <table className="text-xs border-collapse">
         <thead>
           <tr>
-            <th className="px-2 py-1 text-gray-400 font-normal text-right pr-3">Woche</th>
+            <th className="px-2 py-1 text-gray-600 font-normal text-right pr-3">Woche</th>
             {WEEKDAYS.map(d => (
               <th key={d} className="px-2 py-1 text-gray-500 font-semibold text-center w-8">{d}</th>
             ))}
@@ -39,7 +39,7 @@ function CycleWeekGrid({ schedule }: { schedule: CycleDay[][] }) {
         <tbody>
           {schedule.map((week, wi) => (
             <tr key={wi}>
-              <td className="px-2 py-0.5 text-gray-400 text-right pr-3 font-mono">{wi + 1}</td>
+              <td className="px-2 py-0.5 text-gray-600 text-right pr-3 font-mono">{wi + 1}</td>
               {week.map((day, di) => (
                 <td key={di} className="px-1 py-0.5 text-center">
                   {day.shift_id ? (
@@ -95,7 +95,7 @@ function CreateCycleModal({ onCreated, onClose }: CreateCycleModalProps) {
       <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-800">Neuen Zyklus erstellen</h2>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
         <div className="px-6 py-4 space-y-4">
           {error && (
@@ -218,7 +218,7 @@ function EditCycleModal({ cycle, shifts, onSaved, onClose }: EditCycleModalProps
         {/* Header */}
         <div className="px-6 py-4 border-b flex items-center justify-between flex-shrink-0">
           <h2 className="text-lg font-bold text-gray-800">Zyklus bearbeiten</h2>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
 
         {/* Body – scrollable */}
@@ -370,7 +370,7 @@ function EditModal({ employee, groupName, currentAssignment, cycles, onSave, onC
               {employee.FIRSTNAME} {employee.NAME} · {groupName}
             </p>
           </div>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
 
         {/* Body */}
@@ -401,7 +401,7 @@ function EditModal({ employee, groupName, currentAssignment, cycles, onSave, onC
                 Wochenplan-Vorschau — {selectedCycle.weeks} Woche(n)
               </div>
               <CycleWeekGrid schedule={selectedCycle.schedule} />
-              <div className="mt-2 text-xs text-gray-400">
+              <div className="mt-2 text-xs text-gray-600">
                 Muster: <span className="font-mono">{selectedCycle.pattern}</span>
               </div>
             </div>
@@ -415,9 +415,9 @@ function EditModal({ employee, groupName, currentAssignment, cycles, onSave, onC
               value={startDate}
               onChange={e => setStartDate(e.target.value)}
               disabled={!cycleId}
-              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400"
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-600"
             />
-            <p className="text-xs text-gray-400 mt-1">Ab diesem Datum wird der Zyklus auf den Dienstplan angewendet.</p>
+            <p className="text-xs text-gray-600 mt-1">Ab diesem Datum wird der Zyklus auf den Dienstplan angewendet.</p>
           </div>
         </div>
 
@@ -488,7 +488,7 @@ function AddExceptionModal({ employees, assignments, shifts, onCreated, onClose 
       <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-800">🚫 Zyklus-Ausnahme hinzufügen</h2>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
         <div className="px-6 py-4 space-y-4">
           {error && (
@@ -531,7 +531,7 @@ function AddExceptionModal({ employees, assignments, shifts, onCreated, onClose 
                 <option key={s.ID} value={s.ID}>{s.NAME} [{s.SHORTNAME}]</option>
               ))}
             </select>
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-xs text-gray-600 mt-1">
               Leer lassen = freier Tag. Eine Schicht auswählen = diese Schicht wird statt der Zyklus-Schicht eingetragen.
             </p>
           </div>
@@ -819,9 +819,9 @@ export default function Schichtmodell() {
             </div>
 
             {loading ? (
-              <div className="px-4 py-6 text-center text-gray-400 text-sm">⟳ Lade Zyklen...</div>
+              <div className="px-4 py-6 text-center text-gray-600 text-sm">⟳ Lade Zyklen...</div>
             ) : cycles.length === 0 ? (
-              <div className="px-4 py-6 text-center text-gray-400 text-sm italic">
+              <div className="px-4 py-6 text-center text-gray-600 text-sm italic">
                 Noch keine Schichtzyklen vorhanden. Erstelle einen mit "+ Neuer Zyklus".
               </div>
             ) : (
@@ -854,7 +854,7 @@ export default function Schichtmodell() {
                               {assignedCount} MA{assignedCount !== 1 ? 's' : ''}
                             </span>
                           ) : (
-                            <span className="text-gray-400 text-xs">—</span>
+                            <span className="text-gray-600 text-xs">—</span>
                           )}
                         </td>
                         <td className="px-4 py-2.5 text-center">
@@ -885,9 +885,9 @@ export default function Schichtmodell() {
               Verfügbare Schichtmodelle ({cycles.length})
             </h2>
             {loading ? (
-              <div className="text-gray-400 text-sm">⟳ Lade Modelle...</div>
+              <div className="text-gray-600 text-sm">⟳ Lade Modelle...</div>
             ) : cycles.length === 0 ? (
-              <div className="text-gray-400 text-sm italic">Keine Schichtmodelle in der Datenbank gefunden.</div>
+              <div className="text-gray-600 text-sm italic">Keine Schichtmodelle in der Datenbank gefunden.</div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {cycles.map(cycle => (
@@ -926,7 +926,7 @@ export default function Schichtmodell() {
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={6} className="text-center py-10 text-gray-400">⟳ Lade Daten...</td></tr>
+                <tr><td colSpan={6} className="text-center py-10 text-gray-600">⟳ Lade Daten...</td></tr>
               )}
               {!loading && filtered.map((emp, i) => {
                 const asgn = getAssignment(emp.ID);
@@ -939,7 +939,7 @@ export default function Schichtmodell() {
                     <td className="px-4 py-2.5 text-gray-500 font-mono text-xs">{emp.NUMBER}</td>
                     <td className="px-4 py-2.5">
                       <div className="font-semibold text-gray-800">{emp.NAME}, {emp.FIRSTNAME}</div>
-                      <div className="text-xs text-gray-400">{emp.SHORTNAME}</div>
+                      <div className="text-xs text-gray-600">{emp.SHORTNAME}</div>
                     </td>
                     <td className="px-4 py-2.5 text-gray-600 text-sm">{getGroupName(emp)}</td>
                     <td className="px-4 py-2.5">
@@ -948,7 +948,7 @@ export default function Schichtmodell() {
                           {getCycleName(asgn.cycle_id)}
                         </span>
                       ) : (
-                        <span className="text-gray-400 text-xs italic">Kein Modell</span>
+                        <span className="text-gray-600 text-xs italic">Kein Modell</span>
                       )}
                     </td>
                     <td className="px-4 py-2.5 text-gray-500 text-xs font-mono">
@@ -974,7 +974,7 @@ export default function Schichtmodell() {
                 );
               })}
               {!loading && filtered.length === 0 && (
-                <tr><td colSpan={6} className="text-center py-10 text-gray-400">Keine Mitarbeiter gefunden</td></tr>
+                <tr><td colSpan={6} className="text-center py-10 text-gray-600">Keine Mitarbeiter gefunden</td></tr>
               )}
             </tbody>
           </table>
@@ -989,7 +989,7 @@ export default function Schichtmodell() {
               <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
                 🚫 Zyklus-Ausnahmen
               </h2>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-gray-600 mt-0.5">
                 Einmalige Abweichungen vom Schichtzyklus — z.B. ein freier Tag oder eine andere Schicht an einem bestimmten Datum.
               </p>
             </div>
@@ -1002,9 +1002,9 @@ export default function Schichtmodell() {
           </div>
 
           {loadingExceptions ? (
-            <div className="px-4 py-6 text-center text-gray-400 text-sm">⟳ Lade Ausnahmen...</div>
+            <div className="px-4 py-6 text-center text-gray-600 text-sm">⟳ Lade Ausnahmen...</div>
           ) : exceptions.length === 0 ? (
-            <div className="px-4 py-10 text-center text-gray-400 text-sm italic">
+            <div className="px-4 py-10 text-center text-gray-600 text-sm italic">
               Keine Zyklus-Ausnahmen vorhanden.
               <br />
               <span className="text-xs">Klicke "+ Ausnahme hinzufügen", um eine einmalige Abweichung einzutragen.</span>
@@ -1029,7 +1029,7 @@ export default function Schichtmodell() {
                     >
                       <td className="px-4 py-2.5">
                         <div className="font-semibold text-gray-800">{getEmployeeName(exc.employee_id)}</div>
-                        <div className="text-xs text-gray-400">MA #{exc.employee_id}</div>
+                        <div className="text-xs text-gray-600">MA #{exc.employee_id}</div>
                       </td>
                       <td className="px-4 py-2.5 text-center">
                         <span className="font-mono text-sm text-gray-700">{formatDateDE(exc.date)}</span>
@@ -1062,7 +1062,7 @@ export default function Schichtmodell() {
               </tbody>
             </table>
           )}
-          <div className="px-4 py-2 bg-gray-50 border-t text-xs text-gray-400 rounded-b-lg">
+          <div className="px-4 py-2 bg-gray-50 border-t text-xs text-gray-600 rounded-b-lg">
             {exceptions.length} Ausnahme{exceptions.length !== 1 ? 'n' : ''} gesamt
           </div>
         </div>

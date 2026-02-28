@@ -80,7 +80,7 @@ function RightsLabel({ rights }: { rights: number }) {
   if (rights === 0) return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">🚫 Kein Zugriff</span>;
   if (rights === 1) return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">👁️ Lesen</span>;
   if (rights === 2) return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">✏️ Lesen + Schreiben</span>;
-  return <span className="text-gray-400 text-xs">{rights}</span>;
+  return <span className="text-gray-600 text-xs">{rights}</span>;
 }
 
 // ── Add Employee Access Modal ─────────────────────────────────────────────
@@ -121,7 +121,7 @@ function AddEmployeeAccessModal({ userId, employees, existingAccess, onSaved, on
       <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-800">Mitarbeiter-Zugriff hinzufügen</h2>
-          <button aria-label="Schließen" onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-slate-600 hover:text-slate-600 text-xl leading-none">✕</button>
         </div>
         <div className="px-6 py-4 space-y-4">
           {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">⚠️ {error}</div>}
@@ -219,7 +219,7 @@ function AddGroupAccessModal({ userId, groups, existingAccess, onSaved, onClose 
       <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-800">Gruppen-Zugriff hinzufügen</h2>
-          <button aria-label="Schließen" onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-slate-600 hover:text-slate-600 text-xl leading-none">✕</button>
         </div>
         <div className="px-6 py-4 space-y-4">
           {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">⚠️ {error}</div>}
@@ -366,7 +366,7 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
         </div>
         <button
           onClick={onClose}
-          className="text-slate-400 hover:text-slate-600 text-xl leading-none px-2"
+          className="text-slate-600 hover:text-slate-600 text-xl leading-none px-2"
           title="Schließen" aria-label="Schließen"
         >
           ✕
@@ -406,7 +406,7 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
       {/* Tab content */}
       <div className="p-6">
         {loading ? (
-          <div className="text-center py-8 text-slate-400 text-sm">⟳ Lade Zugriffsrechte...</div>
+          <div className="text-center py-8 text-slate-600 text-sm">⟳ Lade Zugriffsrechte...</div>
         ) : (
           <>
             {/* ── Mitarbeiter-Zugriff Tab ── */}
@@ -425,7 +425,7 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
                 </div>
 
                 {employeeAccess.length === 0 ? (
-                  <div className="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-200 text-slate-400 text-sm">
+                  <div className="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-200 text-slate-600 text-sm">
                     Keine Mitarbeiter-Zugriffsrechte konfiguriert.
                     <br />
                     <span className="text-xs">Ohne Einschränkungen gilt die Rollen-Berechtigung.</span>
@@ -485,7 +485,7 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
                 </div>
 
                 {groupAccess.length === 0 ? (
-                  <div className="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-200 text-slate-400 text-sm">
+                  <div className="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-200 text-slate-600 text-sm">
                     Keine Gruppen-Zugriffsrechte konfiguriert.
                     <br />
                     <span className="text-xs">Ohne Einschränkungen gilt die Rollen-Berechtigung.</span>
@@ -846,7 +846,7 @@ export default function Benutzerverwaltung() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center py-10 text-slate-400 text-sm">
+                  <td colSpan={5} className="text-center py-10 text-slate-600 text-sm">
                     {search ? 'Keine Benutzer gefunden.' : 'Keine Benutzer vorhanden.'}
                   </td>
                 </tr>
@@ -862,7 +862,7 @@ export default function Benutzerverwaltung() {
                   >
                     <td className="px-4 py-3 font-semibold text-slate-800">
                       <div className="flex items-center gap-2">
-                        <span className="text-slate-400 text-xs">#{u.ID}</span>
+                        <span className="text-slate-600 text-xs">#{u.ID}</span>
                         {u.NAME}
                         {selectedUserForAccess?.ID === u.ID && (
                           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700 font-medium">🔒 Ausgewählt</span>
@@ -923,7 +923,7 @@ export default function Benutzerverwaltung() {
               )}
             </tbody>
           </table>
-          <div className="px-4 py-2 text-xs text-slate-400 border-t border-slate-100 bg-slate-50">
+          <div className="px-4 py-2 text-xs text-slate-600 border-t border-slate-100 bg-slate-50">
             {filtered.length} Benutzer {search ? `(gefiltert aus ${users.length})` : ''}
             {selectedUserForAccess && (
               <span className="ml-2 text-blue-600">
@@ -944,7 +944,7 @@ export default function Benutzerverwaltung() {
         />
       ) : (
         !loading && !error && (
-          <div className="mt-6 border-2 border-dashed border-slate-200 rounded-xl p-6 text-center text-slate-400 text-sm">
+          <div className="mt-6 border-2 border-dashed border-slate-200 rounded-xl p-6 text-center text-slate-600 text-sm">
             🔒 Benutzer auswählen — klicke auf <strong>"🔒 Rechte"</strong> bei einem Benutzer, um die Zugriffsrechte zu verwalten.
           </div>
         )
@@ -961,7 +961,7 @@ export default function Benutzerverwaltung() {
               </h2>
               <button aria-label="Schließen"
                 onClick={() => setShowModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-xl leading-none"
+                className="text-slate-600 hover:text-slate-600 text-xl leading-none"
               >×</button>
             </div>
 
@@ -1112,7 +1112,7 @@ export default function Benutzerverwaltung() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
               <h2 className="text-lg font-bold text-slate-800">🔑 Passwort ändern</h2>
-              <button aria-label="Schließen" onClick={() => setPwChangeUser(null)} className="text-slate-400 hover:text-slate-600 text-xl leading-none">×</button>
+              <button aria-label="Schließen" onClick={() => setPwChangeUser(null)} className="text-slate-600 hover:text-slate-600 text-xl leading-none">×</button>
             </div>
             <div className="px-6 py-5 space-y-4">
               <p className="text-sm text-slate-600">

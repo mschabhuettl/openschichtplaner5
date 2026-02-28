@@ -319,11 +319,11 @@ export default function MeinProfil() {
         <div className="p-5 space-y-5">
           {monthsData.map(md => (
             <div key={`${md.year}-${md.month}`}>
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+              <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
                 {monthLabel(md.year, md.month)}
               </h3>
               {md.entries.length === 0 ? (
-                <p className="text-sm text-gray-400 italic pl-2">Keine Einträge in diesem Monat</p>
+                <p className="text-sm text-gray-600 italic pl-2">Keine Einträge in diesem Monat</p>
               ) : (
                 <div className="space-y-1.5">
                   {md.entries.map((e, i) => (
@@ -468,7 +468,7 @@ export default function MeinProfil() {
 
           {futureWishes.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Meine offenen Wünsche</p>
+              <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Meine offenen Wünsche</p>
               <div className="space-y-1.5">
                 {futureWishes.map(w => (
                   <WishRow key={w.id} wish={w} onDelete={handleDeleteWish} />

@@ -479,7 +479,7 @@ export default function Druckvorschau() {
         >
           🖨️ Drucken
         </button>
-        <p className="text-xs text-gray-400 mt-2 text-center">
+        <p className="text-xs text-gray-600 mt-2 text-center">
           Strg+P funktioniert ebenfalls
         </p>
       </aside>
@@ -515,7 +515,7 @@ export default function Druckvorschau() {
                     <p className="text-sm text-slate-500 mt-0.5">{groupLabel}</p>
                   )}
                 </div>
-                <div className="text-right text-xs text-gray-400">
+                <div className="text-right text-xs text-gray-600">
                   <p>OpenSchichtplaner5</p>
                   <p>Stand: {new Date().toLocaleDateString('de-AT')}</p>
                 </div>
@@ -524,7 +524,7 @@ export default function Druckvorschau() {
 
             {/* ── Grid ───────────────────────────── */}
             {sortedEmployees.length === 0 ? (
-              <div className="text-center text-gray-400 py-16 text-sm">
+              <div className="text-center text-gray-600 py-16 text-sm">
                 Keine Mitarbeiter für den gewählten Zeitraum
               </div>
             ) : (
@@ -568,7 +568,7 @@ export default function Druckvorschau() {
             )}
 
             {/* ── Footer ─────────────────────────── */}
-            <div className="mt-6 pt-2 border-t border-gray-200 flex justify-between items-center text-xs text-gray-400 print:block">
+            <div className="mt-6 pt-2 border-t border-gray-200 flex justify-between items-center text-xs text-gray-600 print:block">
               <span>Unterschrift Leitung: ___________________________</span>
               <span>Datum: _______________</span>
             </div>

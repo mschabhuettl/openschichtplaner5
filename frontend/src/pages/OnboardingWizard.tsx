@@ -30,11 +30,11 @@ function StepBar({ current }: { current: number }) {
             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold border-2 transition-all
               ${i < current ? 'bg-green-500 border-green-500 text-white' :
                 i === current ? 'bg-blue-600 border-blue-600 text-white shadow-lg scale-110' :
-                'bg-white border-gray-300 text-gray-400'}`}>
+                'bg-white border-gray-300 text-gray-600'}`}>
               {i < current ? '✓' : s.icon}
             </div>
             <span className={`text-xs mt-1 font-medium text-center whitespace-nowrap
-              ${i === current ? 'text-blue-600' : i < current ? 'text-green-600' : 'text-gray-400'}`}>
+              ${i === current ? 'text-blue-600' : i < current ? 'text-green-600' : 'text-gray-600'}`}>
               {s.label}
             </span>
           </div>
@@ -395,7 +395,7 @@ function Step3Groups({ groups, selectedGroups, onChange }: {
             </div>
             <div className="min-w-0">
               <div className="font-medium text-gray-800 truncate">{g.NAME}</div>
-              <div className="text-xs text-gray-400">{g.SHORTNAME}{g.member_count !== undefined ? ` · ${g.member_count} MA` : ''}</div>
+              <div className="text-xs text-gray-600">{g.SHORTNAME}{g.member_count !== undefined ? ` · ${g.member_count} MA` : ''}</div>
             </div>
           </button>
         ))}
@@ -461,7 +461,7 @@ function Step4Summary({ personal, worktime, groups, selectedGroups }: {
       <div className="bg-gray-50 rounded-xl p-4 border">
         <div className="text-xs font-semibold text-gray-500 uppercase mb-3">👥 Gruppen</div>
         {selGroupNames.length === 0
-          ? <span className="text-sm text-gray-400">Keine Gruppen ausgewählt</span>
+          ? <span className="text-sm text-gray-600">Keine Gruppen ausgewählt</span>
           : <div className="flex flex-wrap gap-2">
               {selGroupNames.map(n => (
                 <span key={n} className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full font-medium">{n}</span>
@@ -623,7 +623,7 @@ export default function OnboardingWizard() {
               ← Zurück
             </button>
 
-            <div className="text-sm text-gray-400">Schritt {step + 1} von {STEPS.length}</div>
+            <div className="text-sm text-gray-600">Schritt {step + 1} von {STEPS.length}</div>
 
             {step < STEPS.length - 1 ? (
               <button

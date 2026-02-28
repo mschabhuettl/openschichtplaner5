@@ -485,7 +485,7 @@ export default function VerfügbarkeitsMatrix() {
       {/* Matrix table */}
       <div ref={tableRef} className="flex-1 overflow-auto p-3">
         {employees.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-slate-400">
+          <div className="flex flex-col items-center justify-center h-64 text-slate-600">
             <div className="text-5xl mb-3">📊</div>
             <div className="text-sm font-medium">Keine Mitarbeiter in dieser Gruppe</div>
           </div>
@@ -544,7 +544,7 @@ export default function VerfügbarkeitsMatrix() {
                       className="sticky left-0 z-10 border border-slate-200 px-2 py-1 font-medium text-slate-700 whitespace-nowrap"
                       style={{ minWidth: 160, width: 160, background: empIdx % 2 === 0 ? '#fff' : '#f8fafc' }}
                     >
-                      <span className="text-slate-400 text-xs mr-1">{emp.SHORTNAME}</span>
+                      <span className="text-slate-600 text-xs mr-1">{emp.SHORTNAME}</span>
                       {emp.NAME}, {emp.FIRSTNAME}
                     </td>
                     {/* Day cells */}

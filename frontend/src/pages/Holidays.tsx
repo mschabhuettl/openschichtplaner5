@@ -293,7 +293,7 @@ export default function Holidays() {
                 </tr>
               ))}
               {holidays.length === 0 && (
-                <tr><td colSpan={5} className="text-center py-8 text-gray-400">Keine Feiertage für {year}</td></tr>
+                <tr><td colSpan={5} className="text-center py-8 text-gray-600">Keine Feiertage für {year}</td></tr>
               )}
             </tbody>
           </table>

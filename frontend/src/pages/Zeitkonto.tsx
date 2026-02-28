@@ -222,7 +222,7 @@ function DetailPanel({
             </button>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-700 text-xl font-bold px-2"
+              className="text-gray-600 hover:text-gray-700 text-xl font-bold px-2"
             >
               ✕
             </button>
@@ -243,11 +243,11 @@ function DetailPanel({
         <div className="grid grid-cols-4 gap-3 p-4 border-b border-gray-100 bg-gray-50">
           <div className="text-center">
             <div className="text-lg font-bold text-gray-600">{fmtH(detail.total_target_hours, 0)}h</div>
-            <div className="text-xs text-gray-400">Soll</div>
+            <div className="text-xs text-gray-600">Soll</div>
           </div>
           <div className="text-center">
             <div className="text-lg font-bold text-blue-700">{fmtH(detail.total_actual_hours, 0)}h</div>
-            <div className="text-xs text-gray-400">Ist</div>
+            <div className="text-xs text-gray-600">Ist</div>
           </div>
           {carryForward !== null && carryForward !== 0 ? (
             <div className="text-center">
@@ -261,14 +261,14 @@ function DetailPanel({
               <div className={`text-lg font-bold ${detail.total_difference >= 0 ? 'text-green-700' : 'text-red-700'}`}>
                 {detail.total_difference >= 0 ? '+' : ''}{fmtH(detail.total_difference)}h
               </div>
-              <div className="text-xs text-gray-400">Differenz</div>
+              <div className="text-xs text-gray-600">Differenz</div>
             </div>
           )}
           <div className="text-center">
             <div className={`text-lg font-bold ${detail.total_saldo >= 0 ? 'text-green-700' : 'text-red-700'}`}>
               {detail.total_saldo >= 0 ? '+' : ''}{fmtH(detail.total_saldo)}h
             </div>
-            <div className="text-xs text-gray-400">Jahressaldo</div>
+            <div className="text-xs text-gray-600">Jahressaldo</div>
           </div>
         </div>
 
@@ -354,7 +354,7 @@ function DetailPanel({
           </table>
         </div>
 
-        <div className="px-5 py-3 border-t border-gray-200 text-xs text-gray-400 flex justify-between items-center">
+        <div className="px-5 py-3 border-t border-gray-200 text-xs text-gray-600 flex justify-between items-center">
           <span>Differenz = Ist − Soll | Kum. Saldo = laufender Jahressaldo inkl. Anpassungen + Übertrag</span>
           <button
             onClick={onClose}
@@ -499,7 +499,7 @@ export default function Zeitkonto() {
         )}
         {error && <span className="text-sm text-red-500">Fehler: {error}</span>}
         <span className="text-sm text-gray-500">{rows.length} Mitarbeiter</span>
-        <span className="text-xs text-gray-400 italic">Klick auf MA → Monatsdetails</span>
+        <span className="text-xs text-gray-600 italic">Klick auf MA → Monatsdetails</span>
         <button
           onClick={() => window.print()}
           className="no-print ml-auto px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
@@ -514,11 +514,11 @@ export default function Zeitkonto() {
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
           <div className="bg-white rounded-lg border p-3 shadow-sm text-center">
             <div className="text-xl font-bold text-gray-600">{fmtH(summary.total_target_hours, 0)}h</div>
-            <div className="text-xs text-gray-400">Gesamt Soll</div>
+            <div className="text-xs text-gray-600">Gesamt Soll</div>
           </div>
           <div className="bg-white rounded-lg border p-3 shadow-sm text-center">
             <div className="text-xl font-bold text-blue-700">{fmtH(summary.total_actual_hours, 0)}h</div>
-            <div className="text-xs text-gray-400">Gesamt Ist</div>
+            <div className="text-xs text-gray-600">Gesamt Ist</div>
           </div>
           <div className={`rounded-lg border p-3 shadow-sm text-center ${summary.total_saldo >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
             <div className={`text-xl font-bold ${summary.total_saldo >= 0 ? 'text-green-700' : 'text-red-700'}`}>
@@ -607,7 +607,7 @@ export default function Zeitkonto() {
 
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center py-10 text-gray-400">
+                <td colSpan={6} className="text-center py-10 text-gray-600">
                   {loading ? (
                     <div className="flex items-center justify-center gap-2"><div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" /> Lade Zeitkonto…</div>
                   ) : (
@@ -639,7 +639,7 @@ export default function Zeitkonto() {
                 <td className="px-3 py-2 border border-gray-200">
                   <SaldoBadge value={summary.total_saldo} />
                 </td>
-                <td className="px-3 py-2 border border-gray-200 text-xs text-gray-400 text-center">
+                <td className="px-3 py-2 border border-gray-200 text-xs text-gray-600 text-center">
                   {summary.positive_count} ▲ / {summary.negative_count} ▼
                 </td>
               </tr>

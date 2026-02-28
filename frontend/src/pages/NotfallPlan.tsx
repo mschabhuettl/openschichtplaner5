@@ -314,7 +314,7 @@ export default function NotfallPlan() {
           Schritt 2 — Ausfall melden (optional)
         </h2>
         {loading ? (
-          <p className="text-slate-400 text-sm">Lade Dienstplan…</p>
+          <p className="text-slate-600 text-sm">Lade Dienstplan…</p>
         ) : (
           <>
             <p className="text-xs text-slate-500 mb-3">
@@ -374,7 +374,7 @@ export default function NotfallPlan() {
             )}
 
             {scheduled.length === 0 && (
-              <p className="text-sm text-slate-400 italic">
+              <p className="text-sm text-slate-600 italic">
                 Keine Schichten an diesem Tag eingetragen — wähle trotzdem eine Schicht und suche Kandidaten.
               </p>
             )}
@@ -387,7 +387,7 @@ export default function NotfallPlan() {
         <button
           onClick={computeCandidates}
           disabled={!selectedShift}
-          className="w-full py-3 rounded-xl font-bold text-base transition-all bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-400 shadow-sm"
+          className="w-full py-3 rounded-xl font-bold text-base transition-all bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-200 disabled:text-gray-600 shadow-sm"
         >
           🔍 Einspringer suchen
         </button>
@@ -446,7 +446,7 @@ export default function NotfallPlan() {
                       <span className="font-semibold text-sm text-slate-800">
                         {c.employee.FIRSTNAME} {c.employee.NAME}
                       </span>
-                      <span className="text-xs text-slate-400">({c.employee.SHORTNAME})</span>
+                      <span className="text-xs text-slate-600">({c.employee.SHORTNAME})</span>
                       {c.employee.FUNCTION && (
                         <span className="text-xs bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">
                           {c.employee.FUNCTION}
@@ -464,7 +464,7 @@ export default function NotfallPlan() {
                           ✓ Verfügbar
                         </span>
                       )}
-                      <span className="text-xs text-slate-400">{c.employee.HRSWEEK}h/Woche</span>
+                      <span className="text-xs text-slate-600">{c.employee.HRSWEEK}h/Woche</span>
                     </div>
                   </div>
 

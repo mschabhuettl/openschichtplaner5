@@ -573,7 +573,7 @@ export default function Statistiken() {
           {/* Month-by-month table */}
           <div className="flex-1 overflow-auto bg-white dark:bg-slate-800 rounded-lg shadow border border-gray-200 dark:border-slate-600 dark:border-slate-700">
             {!empStats && !empLoading && (
-              <div className="flex items-center justify-center h-32 text-gray-400 dark:text-slate-500 text-sm">
+              <div className="flex items-center justify-center h-32 text-gray-600 dark:text-slate-500 text-sm">
                 {selectedEmpId ? 'Lade Daten...' : 'Bitte einen Mitarbeiter auswählen'}
               </div>
             )}
@@ -827,7 +827,7 @@ export default function Statistiken() {
 
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center py-8 text-gray-400 dark:text-slate-500">
+                <td colSpan={6} className="text-center py-8 text-gray-600 dark:text-slate-500">
                   {loading ? 'Lade Statistiken...' : 'Keine Daten gefunden'}
                 </td>
               </tr>
@@ -870,7 +870,7 @@ export default function Statistiken() {
               >
                 <div className="text-lg font-bold text-indigo-700">{e.hours.toFixed(1)}h</div>
                 <div className="text-xs font-semibold text-indigo-600 mt-0.5 text-center">{e.charge_name}</div>
-                <div className="text-xs text-gray-400 dark:text-slate-500 mt-1">{e.shift_count} Schicht{e.shift_count !== 1 ? 'en' : ''}</div>
+                <div className="text-xs text-gray-600 dark:text-slate-500 mt-1">{e.shift_count} Schicht{e.shift_count !== 1 ? 'en' : ''}</div>
               </div>
             ))}
           </div>
@@ -912,7 +912,7 @@ export default function Statistiken() {
 
           {/* No data / loading state */}
           {!sickData && !sickLoading && (
-            <div className="flex items-center justify-center h-32 text-gray-400 dark:text-slate-500 text-sm">
+            <div className="flex items-center justify-center h-32 text-gray-600 dark:text-slate-500 text-sm">
               Keine Daten verfügbar
             </div>
           )}
@@ -952,7 +952,7 @@ export default function Statistiken() {
                 <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm p-4">
                   <div className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">📅 Krankheitstage pro Monat</div>
                   {sickData.total_sick_days === 0 ? (
-                    <div className="text-center text-gray-400 dark:text-slate-500 text-sm py-6">Keine Krankmeldungen im Jahr {sickYear}</div>
+                    <div className="text-center text-gray-600 dark:text-slate-500 text-sm py-6">Keine Krankmeldungen im Jahr {sickYear}</div>
                   ) : (
                     <div className="flex items-end gap-1 h-32">
                       {sickData.per_month.map(m => {
@@ -986,7 +986,7 @@ export default function Statistiken() {
                 <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm p-4">
                   <div className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">📊 Krankheitstage nach Wochentag</div>
                   {sickData.total_sick_days === 0 ? (
-                    <div className="text-center text-gray-400 dark:text-slate-500 text-sm py-6">Keine Krankmeldungen im Jahr {sickYear}</div>
+                    <div className="text-center text-gray-600 dark:text-slate-500 text-sm py-6">Keine Krankmeldungen im Jahr {sickYear}</div>
                   ) : (
                     <div className="flex items-end gap-1 h-32">
                       {sickData.per_weekday.map(wd => {
@@ -1012,7 +1012,7 @@ export default function Statistiken() {
                                 title={`${wd.weekday_name}: ${wd.sick_days} Tag${wd.sick_days !== 1 ? 'e' : ''}`}
                               />
                             </div>
-                            <div className={`text-xs leading-none font-medium ${isMonday ? 'text-orange-600 font-bold' : isWeekend ? 'text-gray-400 dark:text-slate-500' : 'text-gray-600 dark:text-slate-300'}`}>
+                            <div className={`text-xs leading-none font-medium ${isMonday ? 'text-orange-600 font-bold' : isWeekend ? 'text-gray-600 dark:text-slate-500' : 'text-gray-600 dark:text-slate-300'}`}>
                               {shortNames[wd.weekday]}
                               {isMonday && <span className="ml-0.5">⚠️</span>}
                             </div>
@@ -1037,7 +1037,7 @@ export default function Statistiken() {
                 <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm p-4">
                   <div className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">👤 Krankheitstage pro Mitarbeiter</div>
                   {sickData.per_employee.filter(e => e.sick_days > 0).length === 0 ? (
-                    <div className="text-center text-gray-400 dark:text-slate-500 text-sm py-6">Alle Mitarbeiter ohne Krankmeldungen</div>
+                    <div className="text-center text-gray-600 dark:text-slate-500 text-sm py-6">Alle Mitarbeiter ohne Krankmeldungen</div>
                   ) : (
                     <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
                       {(() => {
@@ -1104,13 +1104,13 @@ export default function Statistiken() {
                           })}
                         {sickData.per_employee.filter(e => e.sick_days > 0).length === 0 && (
                           <tr>
-                            <td colSpan={5} className="text-center py-4 text-gray-400 dark:text-slate-500">Keine Krankmeldungen</td>
+                            <td colSpan={5} className="text-center py-4 text-gray-600 dark:text-slate-500">Keine Krankmeldungen</td>
                           </tr>
                         )}
                       </tbody>
                     </table>
                   </div>
-                  <div className="mt-2 text-xs text-gray-400 dark:text-slate-500">
+                  <div className="mt-2 text-xs text-gray-600 dark:text-slate-500">
                     Schwellenwerte: 🟢 &lt;50 &nbsp; 🟡 50–199 &nbsp; 🟠 200–499 &nbsp; 🔴 ≥500
                   </div>
                 </div>
@@ -1163,7 +1163,7 @@ export default function Statistiken() {
           </div>
 
           {compareLoading && (
-            <div className="flex-1 flex items-center justify-center text-gray-400 dark:text-slate-500 text-sm">Lade Daten…</div>
+            <div className="flex-1 flex items-center justify-center text-gray-600 dark:text-slate-500 text-sm">Lade Daten…</div>
           )}
           {compareError && (
             <div className="p-3 bg-red-50 text-red-700 rounded text-sm">{compareError}</div>
@@ -1229,7 +1229,7 @@ export default function Statistiken() {
                             className={`w-full rounded-t ${isPos ? 'bg-green-500' : 'bg-red-400'}`}
                             style={{ height: `${h}%`, minHeight: 2 }}
                           />
-                          <div className="text-xs text-gray-400 dark:text-slate-500 truncate w-full text-center leading-none"
+                          <div className="text-xs text-gray-600 dark:text-slate-500 truncate w-full text-center leading-none"
                             style={{ fontSize: '9px' }}>
                             {row.label}
                           </div>
@@ -1339,7 +1339,7 @@ export default function Statistiken() {
           </div>
 
           {shiftLoading && (
-            <div className="flex-1 flex items-center justify-center text-gray-400 dark:text-slate-500 text-sm">Lade Daten…</div>
+            <div className="flex-1 flex items-center justify-center text-gray-600 dark:text-slate-500 text-sm">Lade Daten…</div>
           )}
           {shiftError && (
             <div className="p-3 bg-red-50 text-red-700 rounded text-sm">{shiftError}</div>
@@ -1472,7 +1472,7 @@ export default function Statistiken() {
                               </div>
                               <div className="flex gap-1 ml-[7.5rem]">
                                 {s.monthly_counts.map(mc => (
-                                  <div key={`${mc.year}-${mc.month}`} className="flex-1 text-center text-xs text-gray-400 dark:text-slate-500 truncate">{mc.count > 0 ? mc.count : ''}</div>
+                                  <div key={`${mc.year}-${mc.month}`} className="flex-1 text-center text-xs text-gray-600 dark:text-slate-500 truncate">{mc.count > 0 ? mc.count : ''}</div>
                                 ))}
                               </div>
                             </div>
@@ -1513,7 +1513,7 @@ export default function Statistiken() {
                             <tr key={e.employee_id} className={i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50'}>
                               <td className="px-3 py-2 font-medium text-gray-800 dark:text-slate-200">
                                 {e.name}
-                                {e.short && <span className="text-xs text-gray-400 dark:text-slate-500 ml-1">({e.short})</span>}
+                                {e.short && <span className="text-xs text-gray-600 dark:text-slate-500 ml-1">({e.short})</span>}
                               </td>
                               <td className="px-3 py-2 text-right font-bold text-slate-700 dark:text-slate-200">{e.total_shifts}</td>
                               {cats.map(cat => (

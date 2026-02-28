@@ -67,7 +67,7 @@ function ContextMenu({ x, y, entry, onClose, onAddSonderdienst, onAddAbweichung,
       className="fixed z-[200] bg-white dark:bg-gray-800 rounded-lg shadow-2xl border border-gray-200 dark:border-gray-600 py-1 min-w-[200px]"
       style={style}
     >
-      <div className="px-3 py-1.5 text-[11px] font-semibold text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700 mb-1">
+      <div className="px-3 py-1.5 text-[11px] font-semibold text-gray-600 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700 mb-1">
         {entry.employee_name}
       </div>
       <button
@@ -162,7 +162,7 @@ function SonderdiensteModal({ employee, date, shifts, workplaces, onClose, onSav
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Schicht *</label>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Schicht *</label>
             <select
               value={shiftId}
               onChange={e => setShiftId(Number(e.target.value))}
@@ -176,7 +176,7 @@ function SonderdiensteModal({ employee, date, shifts, workplaces, onClose, onSav
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Arbeitsplatz (optional)</label>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Arbeitsplatz (optional)</label>
             <select
               value={workplaceId}
               onChange={e => setWorkplaceId(Number(e.target.value))}
@@ -189,7 +189,7 @@ function SonderdiensteModal({ employee, date, shifts, workplaces, onClose, onSav
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Zeitbereich (optional, z.B. 06:00-14:00)</label>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Zeitbereich (optional, z.B. 06:00-14:00)</label>
             <input
               type="text"
               value={startend}
@@ -293,7 +293,7 @@ function AbweichungModal({ employee, date, onClose, onSave }: AbweichungModalPro
         </div>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Bezeichnung *</label>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Bezeichnung *</label>
             <input
               type="text"
               value={name}
@@ -303,7 +303,7 @@ function AbweichungModal({ employee, date, onClose, onSave }: AbweichungModalPro
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Kürzel</label>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Kürzel</label>
             <input
               type="text"
               value={shortname}
@@ -313,7 +313,7 @@ function AbweichungModal({ employee, date, onClose, onSave }: AbweichungModalPro
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Erfassungsmodus</label>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Erfassungsmodus</label>
             <div className="flex rounded overflow-hidden border text-xs">
               <button
                 type="button"
@@ -330,7 +330,7 @@ function AbweichungModal({ employee, date, onClose, onSave }: AbweichungModalPro
           {durationMode === 'times' ? (
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Beginn</label>
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Beginn</label>
                 <input
                   type="time"
                   value={startTime}
@@ -339,7 +339,7 @@ function AbweichungModal({ employee, date, onClose, onSave }: AbweichungModalPro
                 />
               </div>
               <div className="flex-1">
-                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Ende</label>
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Ende</label>
                 <input
                   type="time"
                   value={endTime}
@@ -350,7 +350,7 @@ function AbweichungModal({ employee, date, onClose, onSave }: AbweichungModalPro
             </div>
           ) : (
             <div>
-              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Dauer (Minuten)</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Dauer (Minuten)</label>
               <input
                 type="number"
                 min={0}
@@ -419,7 +419,7 @@ function EinsatzplanNotePopup({
     >
       <div className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/40 border-b dark:border-gray-600 text-[10px] text-indigo-600 dark:text-indigo-300 font-semibold rounded-t-lg flex justify-between">
         <span>📝 Notizen</span>
-        <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-200 dark:text-gray-500 dark:hover:text-gray-200">×</button>
+        <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-200 dark:text-gray-500 dark:hover:text-gray-200">×</button>
       </div>
       {notes.map(note => (
         <div key={note.id} className="p-2 border-b last:border-b-0">
@@ -602,7 +602,7 @@ function DayView({
             </div>
             <div className="p-2 flex flex-wrap gap-1.5 bg-white dark:bg-gray-800 min-h-[40px]">
               {shiftEntries.length === 0 ? (
-                <span className="text-xs text-gray-400 dark:text-gray-500 italic">Niemand eingetragen</span>
+                <span className="text-xs text-gray-600 dark:text-gray-500 italic">Niemand eingetragen</span>
               ) : (
                 shiftEntries.map(e => (
                   <ShiftBadge
@@ -643,11 +643,11 @@ function DayView({
       <div className="rounded-lg border overflow-hidden">
         <div className="px-3 py-1.5 text-sm font-bold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
           Frei / kein Eintrag — {freeEntries.length} MA
-          <span className="ml-2 text-[10px] font-normal text-gray-400 dark:text-gray-500">Rechtsklick zum Eintragen</span>
+          <span className="ml-2 text-[10px] font-normal text-gray-600 dark:text-gray-500">Rechtsklick zum Eintragen</span>
         </div>
         <div className="p-2 flex flex-wrap gap-1.5 bg-white dark:bg-gray-800 min-h-[36px]">
           {freeEntries.length === 0 ? (
-            <span className="text-xs text-gray-400 dark:text-gray-500 italic">Alle eingeteilt</span>
+            <span className="text-xs text-gray-600 dark:text-gray-500 italic">Alle eingeteilt</span>
           ) : (
             freeEntries.map(e => (
               <EmptyEmployeeCell key={e.employee_id} entry={e} onContextMenu={onContextMenu} />
@@ -838,7 +838,7 @@ function SaveTemplateModal({
         <p className="text-sm text-gray-500 mb-4">{weekLabel}</p>
         <form onSubmit={handleSubmit} className="space-y-3">
           <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Name *</label>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Name *</label>
             <input
               autoFocus
               type="text"
@@ -850,7 +850,7 @@ function SaveTemplateModal({
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Beschreibung (optional)</label>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Beschreibung (optional)</label>
             <input
               type="text"
               value={description}
@@ -936,7 +936,7 @@ function ApplyTemplateModal({
         ) : (
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Ziel-Montag (Wochenanfang)</label>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Ziel-Montag (Wochenanfang)</label>
               <input
                 type="date"
                 value={targetDate}
@@ -1012,12 +1012,12 @@ function TemplatesPanel({
         <h3 className="font-bold text-indigo-900 flex items-center gap-2">
           <span>📋</span> Gespeicherte Vorlagen
         </h3>
-        <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
+        <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-lg leading-none">×</button>
       </div>
       <div className="overflow-y-auto flex-1 p-3 space-y-2">
-        {loading && <p className="text-sm text-gray-400 text-center py-4">Lade…</p>}
+        {loading && <p className="text-sm text-gray-600 text-center py-4">Lade…</p>}
         {!loading && templates.length === 0 && (
-          <p className="text-sm text-gray-400 text-center py-6">
+          <p className="text-sm text-gray-600 text-center py-6">
             Keine Vorlagen vorhanden.<br />
             <span className="text-xs">Woche anzeigen → „Als Vorlage speichern"</span>
           </p>
@@ -1026,7 +1026,7 @@ function TemplatesPanel({
           <div key={t.id} className="border rounded-lg p-3 bg-gray-50 hover:bg-white transition-colors">
             <div className="font-semibold text-sm text-gray-800 truncate">{t.name}</div>
             {t.description && <div className="text-xs text-gray-500 truncate mb-1">{t.description}</div>}
-            <div className="text-[11px] text-gray-400 mb-2">
+            <div className="text-[11px] text-gray-600 mb-2">
               {t.assignments.length} Eintr. · {t.created_at.slice(0, 10)}
             </div>
             <div className="flex gap-2">
@@ -1415,18 +1415,18 @@ export default function Einsatzplan() {
 
         {/* Employee search */}
         <div className="flex items-center gap-1.5 bg-white dark:bg-gray-700 border dark:border-gray-600 rounded shadow-sm px-2 py-1.5">
-          <span className="text-gray-400 text-sm">🔍</span>
+          <span className="text-gray-600 text-sm">🔍</span>
           <input
             type="text"
             value={employeeSearch}
             onChange={e => setEmployeeSearch(e.target.value)}
             placeholder="Mitarbeiter suchen..."
-            className="text-sm outline-none w-36 bg-transparent"
+            className="text-sm outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:rounded w-36 bg-transparent"
           />
           {employeeSearch && (
             <button
               onClick={() => setEmployeeSearch('')}
-              className="text-gray-400 hover:text-gray-600 text-xs leading-none"
+              className="text-gray-600 hover:text-gray-600 text-xs leading-none"
               title="Suche zurücksetzen"
             >
               ×
@@ -1438,7 +1438,7 @@ export default function Einsatzplan() {
         {!loading && totalCount > 0 && (
           <span className={`text-sm font-medium ${visibleCount < totalCount ? 'text-blue-600' : 'text-gray-500'}`}>
             {visibleCount < totalCount
-              ? <><span className="font-bold">{visibleCount}</span><span className="text-gray-400"> / {totalCount} Mitarbeiter</span></>
+              ? <><span className="font-bold">{visibleCount}</span><span className="text-gray-600"> / {totalCount} Mitarbeiter</span></>
               : <>{totalCount} Mitarbeiter</>
             }
           </span>

@@ -146,7 +146,7 @@ function Widget({
 // ── Empty state ───────────────────────────────────────────────────────────────
 
 function Empty({ text }: { text: string }) {
-  return <p className="text-sm text-gray-400 italic text-center py-2">{text}</p>;
+  return <p className="text-sm text-gray-600 italic text-center py-2">{text}</p>;
 }
 
 // ── "Heute im Dienst" Widget ──────────────────────────────────────────────────
@@ -182,11 +182,11 @@ function TodayOnDutyWidget({ todayData }: { todayData: DashboardToday | null }) 
                 </span>
               )}
               {emp.workplace_name && (
-                <span className="text-xs text-gray-400 shrink-0 hidden sm:block truncate max-w-[80px]">
+                <span className="text-xs text-gray-600 shrink-0 hidden sm:block truncate max-w-[80px]">
                   {emp.workplace_name}
                 </span>
               )}
-              <span className="text-xs text-gray-400 shrink-0 font-mono">
+              <span className="text-xs text-gray-600 shrink-0 font-mono">
                 {emp.employee_short}
               </span>
             </li>
@@ -223,7 +223,7 @@ function TodayAbsencesWidget({ todayData }: { todayData: DashboardToday | null }
               <span className="flex-1 font-medium text-gray-700 truncate">
                 {emp.employee_name}
               </span>
-              <span className="text-xs text-gray-400 shrink-0 font-mono">
+              <span className="text-xs text-gray-600 shrink-0 font-mono">
                 {emp.employee_short}
               </span>
             </li>
@@ -292,7 +292,7 @@ function WochenpeakWidget({ todayData }: { todayData: DashboardToday | null }) {
                 {/* Day label */}
                 <span
                   className={`text-[10px] font-medium select-none ${
-                    d.is_today ? 'text-indigo-600 font-black' : d.is_weekend ? 'text-gray-400' : 'text-gray-500'
+                    d.is_today ? 'text-indigo-600 font-black' : d.is_weekend ? 'text-gray-600' : 'text-gray-500'
                   }`}
                 >
                   {d.weekday_short}
@@ -306,7 +306,7 @@ function WochenpeakWidget({ todayData }: { todayData: DashboardToday | null }) {
           })}
         </div>
         {/* Legend */}
-        <div className="flex items-center gap-3 text-[10px] text-gray-400 pt-1">
+        <div className="flex items-center gap-3 text-[10px] text-gray-600 pt-1">
           <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-[#10b981] inline-block" />Peak</span>
           <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-[#6366f1] inline-block" />Heute</span>
           <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-[#93c5fd] inline-block" />Normal</span>
@@ -360,7 +360,7 @@ function MonthHeatmapWidget({ statsData }: { statsData: DashboardStats | null })
       {/* Weekday headers */}
       <div className="grid grid-cols-7 gap-1 mb-1">
         {weekdays.map((d) => (
-          <div key={d} className="text-center text-[10px] font-bold text-gray-400">{d}</div>
+          <div key={d} className="text-center text-[10px] font-bold text-gray-600">{d}</div>
         ))}
       </div>
       {/* Calendar grid */}
@@ -391,7 +391,7 @@ function MonthHeatmapWidget({ statsData }: { statsData: DashboardStats | null })
         })}
       </div>
       {/* Legend */}
-      <div className="flex items-center gap-3 text-[10px] text-gray-400 pt-2 flex-wrap">
+      <div className="flex items-center gap-3 text-[10px] text-gray-600 pt-2 flex-wrap">
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-[#4ade80] inline-block" />Sehr gut</span>
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-[#86efac] inline-block" />Gut</span>
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-[#fbbf24] inline-block" />Mittel</span>
@@ -434,7 +434,7 @@ function UpcomingHolidaysWidget({ upcomingData }: { upcomingData: DashboardUpcom
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-sm text-gray-800 truncate">{h.name}</div>
-                  <div className="text-xs text-gray-400">{formatHolidayDate(h.date)}</div>
+                  <div className="text-xs text-gray-600">{formatHolidayDate(h.date)}</div>
                 </div>
                 <div className="shrink-0 text-right">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
@@ -508,7 +508,7 @@ function MonthCoverageChart({ statsData }: { statsData: DashboardStats | null })
                   d.is_today
                     ? 'text-indigo-600 font-black'
                     : d.is_weekend
-                    ? 'text-gray-400'
+                    ? 'text-gray-600'
                     : 'text-gray-500'
                 }`}
               >
@@ -524,7 +524,7 @@ function MonthCoverageChart({ statsData }: { statsData: DashboardStats | null })
         })}
       </div>
       {/* Legend */}
-      <div className="flex items-center gap-4 text-xs text-gray-400 pt-1 flex-wrap">
+      <div className="flex items-center gap-4 text-xs text-gray-600 pt-1 flex-wrap">
         <span className="flex items-center gap-1">
           <span className="w-3 h-3 rounded-sm bg-[#4ade80] inline-block" />
           Gut belegt
@@ -581,7 +581,7 @@ function BurnoutRadarWidget({ year, month }: { year: number; month: number }) {
         <div className="flex flex-col items-center justify-center py-4 gap-2">
           <div className="text-2xl">✅</div>
           <p className="text-sm text-green-600 font-medium">Alles im grünen Bereich!</p>
-          <p className="text-xs text-gray-400">Keine Überlastungsrisiken erkannt</p>
+          <p className="text-xs text-gray-600">Keine Überlastungsrisiken erkannt</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -618,7 +618,7 @@ function BurnoutRadarWidget({ year, month }: { year: number; month: number }) {
               </div>
               <div className="mt-1 ml-7">
                 {e.reasons.map((r, i) => (
-                  <span key={i} className="text-[11px] text-gray-500 dark:text-gray-400 mr-2">• {r}</span>
+                  <span key={i} className="text-[11px] text-gray-500 dark:text-gray-600 mr-2">• {r}</span>
                 ))}
               </div>
               {e.target_hours > 0 && (
@@ -636,7 +636,7 @@ function BurnoutRadarWidget({ year, month }: { year: number; month: number }) {
                       title={`Soll: ${e.target_hours}h`}
                     />
                   </div>
-                  <div className="flex justify-between text-[10px] text-gray-400 mt-0.5">
+                  <div className="flex justify-between text-[10px] text-gray-600 mt-0.5">
                     <span>Ist: <span className="font-semibold text-gray-600 dark:text-gray-300">{e.actual_hours}h</span></span>
                     <span>Soll: {e.target_hours}h</span>
                   </div>
@@ -668,8 +668,8 @@ function StaffingWarnings({ warnings }: { warnings: DashboardSummary['staffing_w
           <span className="text-gray-500 text-xs">{formatDateDE(w.date)}</span>
           <span className="ml-auto flex items-center gap-1">
             <span className="font-bold text-red-600">{w.actual}</span>
-            <span className="text-gray-400 text-xs">/ {w.required}</span>
-            <span className="text-gray-400 text-xs">geplant</span>
+            <span className="text-gray-600 text-xs">/ {w.required}</span>
+            <span className="text-gray-600 text-xs">geplant</span>
           </span>
         </li>
       ))}
@@ -710,7 +710,7 @@ function ZeitkontoAlerts({ alerts }: { alerts: DashboardSummary['zeitkonto_alert
         );
       })}
       {alerts.length > 5 && (
-        <p className="text-xs text-gray-400 text-right">
+        <p className="text-xs text-gray-600 text-right">
           + {alerts.length - 5} weitere Mitarbeiter
         </p>
       )}
@@ -864,7 +864,7 @@ function MorningBriefingWidget({ todayData, upcomingData, summaryData, loading }
       {/* Header: greeting + date */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-0.5">{getGreeting()}</p>
+          <p className="text-slate-600 text-xs font-semibold uppercase tracking-widest mb-0.5">{getGreeting()}</p>
           <h2 className="text-xl font-bold text-white">
             {weekday}, {day}. {month} {year}
             {isHoliday && (
@@ -874,7 +874,7 @@ function MorningBriefingWidget({ todayData, upcomingData, summaryData, loading }
             )}
           </h2>
         </div>
-        <div className="text-right text-slate-400 text-xs hidden sm:block">
+        <div className="text-right text-slate-600 text-xs hidden sm:block">
           Tages-Briefing
         </div>
       </div>
@@ -933,7 +933,7 @@ function MorningBriefingWidget({ todayData, upcomingData, summaryData, loading }
               <div className="text-slate-200 text-xs leading-snug">
                 {birthdaysToday.map(b => b.name).join(', ')}
               </div>
-              <div className="text-slate-400 text-xs">
+              <div className="text-slate-600 text-xs">
                 {birthdaysToday.length === 1 ? 'hat heute Geburtstag' : 'haben heute Geburtstag'}
               </div>
             </div>
@@ -985,7 +985,7 @@ function EmployeeRankingWidget({ statsData, monthLabel }: { statsData: Dashboard
           return (
             <div key={emp.employee_id} className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-[11px] font-bold text-gray-400 w-4 text-right shrink-0">
+                <span className="text-[11px] font-bold text-gray-600 w-4 text-right shrink-0">
                   {idx + 1}.
                 </span>
                 <span
@@ -1013,7 +1013,7 @@ function EmployeeRankingWidget({ statsData, monthLabel }: { statsData: Dashboard
                   />
                 </div>
                 {emp.target_hours > 0 && (
-                  <span className="text-[10px] text-gray-400 shrink-0 font-mono">
+                  <span className="text-[10px] text-gray-600 shrink-0 font-mono">
                     / {emp.target_hours}h
                   </span>
                 )}
@@ -1022,7 +1022,7 @@ function EmployeeRankingWidget({ statsData, monthLabel }: { statsData: Dashboard
           );
         })}
         {ranking.length > 8 && (
-          <p className="text-xs text-gray-400 text-right pt-1">
+          <p className="text-xs text-gray-600 text-right pt-1">
             + {ranking.length - 8} weitere Mitarbeiter
           </p>
         )}
@@ -1064,7 +1064,7 @@ function QuickActionsPanel({ conflictsCount }: { conflictsCount: number | null }
             >
               <span className="text-2xl group-hover:scale-110 transition-transform">{action.icon}</span>
               <span className="text-xs font-semibold leading-tight">{action.label}</span>
-              <span className="text-[10px] text-gray-400 leading-tight hidden sm:block">{action.desc}</span>
+              <span className="text-[10px] text-gray-600 leading-tight hidden sm:block">{action.desc}</span>
               {isConflicts && conflictsCount !== null && conflictsCount > 0 && (
                 <span className="absolute -top-1.5 -right-1.5 text-[10px] font-bold bg-red-500 text-white rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
                   {conflictsCount}
@@ -1096,7 +1096,7 @@ function UpcomingBirthdaysWidget({ summaryData }: { summaryData: DashboardSummar
         <div className="space-y-3">
           {thisWeek.length > 0 && (
             <div>
-              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Diese Woche</div>
+              <div className="text-[10px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">Diese Woche</div>
               <ul className="space-y-1.5">
                 {thisWeek.map((b, i) => (
                   <li key={i} className="flex items-center gap-2 text-sm rounded-lg px-2 py-1.5 bg-pink-50">
@@ -1117,16 +1117,16 @@ function UpcomingBirthdaysWidget({ summaryData }: { summaryData: DashboardSummar
           )}
           {later.length > 0 && (
             <div>
-              {thisWeek.length > 0 && <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Bald</div>}
+              {thisWeek.length > 0 && <div className="text-[10px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">Bald</div>}
               <ul className="space-y-1.5 max-h-40 overflow-y-auto">
                 {later.map((b, i) => (
                   <li key={i} className="flex items-center gap-2 text-sm rounded-lg px-2 py-1 text-gray-600">
                     <span className="text-base">🎁</span>
                     <span className="flex-1 font-medium truncate">{b.name}</span>
-                    <span className="text-xs shrink-0 font-mono text-gray-400">
+                    <span className="text-xs shrink-0 font-mono text-gray-600">
                       {b.date.replace('-', '.')}
                     </span>
-                    <span className="text-[10px] text-gray-400 shrink-0">in {b.days_until}d</span>
+                    <span className="text-[10px] text-gray-600 shrink-0">in {b.days_until}d</span>
                   </li>
                 ))}
               </ul>
@@ -1230,12 +1230,12 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">📊 {t.dashboard.title}</h1>
-          <p className="text-gray-400 text-sm mt-0.5">{todayLocale}</p>
+          <p className="text-gray-600 text-sm mt-0.5">{todayLocale}</p>
         </div>
         <div className="flex items-center gap-2">
           {/* Auto-refresh indicator */}
           <span
-            className="hidden sm:flex items-center gap-1 text-xs text-gray-400 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 cursor-pointer hover:bg-gray-100"
+            className="hidden sm:flex items-center gap-1 text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 cursor-pointer hover:bg-gray-100"
             onClick={() => { fetchAll(true); }}
             title="Klicken zum manuellen Aktualisieren"
           >

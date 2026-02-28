@@ -196,7 +196,7 @@ export default function Teamkalender() {
           />
         </label>
 
-        {loading && <span className="text-xs text-gray-400 animate-pulse">Laden…</span>}
+        {loading && <span className="text-xs text-gray-600 animate-pulse">Laden…</span>}
       </div>
 
       {/* Calendar grid */}
@@ -276,14 +276,14 @@ export default function Teamkalender() {
                         );
                       })}
                       {overflow > 0 && (
-                        <div className="text-[9px] text-gray-400 pl-1">+{overflow} weitere…</div>
+                        <div className="text-[9px] text-gray-600 pl-1">+{overflow} weitere…</div>
                       )}
                     </div>
 
                     {/* Summary dot */}
                     {dayEntries.length > 0 && (
                       <div className="flex items-center justify-end mt-0.5">
-                        <span className="text-[9px] text-gray-400">{dayEntries.length} 👤</span>
+                        <span className="text-[9px] text-gray-600">{dayEntries.length} 👤</span>
                       </div>
                     )}
                   </div>
@@ -299,7 +299,7 @@ export default function Teamkalender() {
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-blue-50 border border-blue-400 inline-block" /> Heute</span>
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-50 border border-red-200 inline-block" /> Feiertag</span>
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-slate-50 border border-slate-200 inline-block" /> Wochenende</span>
-        <span className="ml-auto text-gray-400">Auf Tag klicken für Details</span>
+        <span className="ml-auto text-gray-600">Auf Tag klicken für Details</span>
       </div>
 
       {/* Day detail popup */}
@@ -325,7 +325,7 @@ export default function Teamkalender() {
             </div>
             <div className="overflow-y-auto p-3 flex flex-col gap-2">
               {popupEntries.length === 0 && (
-                <div className="text-gray-400 text-sm text-center py-4">Keine Einträge</div>
+                <div className="text-gray-600 text-sm text-center py-4">Keine Einträge</div>
               )}
               {popupEntries.map((e, i) => {
                 const name = e.emp
@@ -345,7 +345,7 @@ export default function Teamkalender() {
                     <div className="flex-1 min-w-0">
                       <div className="text-xs font-semibold text-gray-700 truncate">{name}</div>
                       {(e.shift_name || e.leave_name) && (
-                        <div className="text-[10px] text-gray-400 truncate">{e.shift_name || e.leave_name}</div>
+                        <div className="text-[10px] text-gray-600 truncate">{e.shift_name || e.leave_name}</div>
                       )}
                     </div>
                     <span className="text-xs">{kindIcon}</span>

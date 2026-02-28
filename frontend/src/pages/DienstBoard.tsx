@@ -227,7 +227,7 @@ export default function DienstBoard() {
             Auto-Refresh
           </label>
           {lastRefresh && (
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-gray-600">
               Stand: {lastRefresh.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
             </span>
           )}
@@ -249,7 +249,7 @@ export default function DienstBoard() {
             type="date"
             value={date}
             onChange={e => setDate(e.target.value)}
-            className="text-sm font-medium text-gray-800 border-none outline-none bg-transparent px-2"
+            className="text-sm font-medium text-gray-800 border-none outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:rounded bg-transparent px-2"
           />
           <button onClick={nextDay} className="p-1.5 hover:bg-gray-100 rounded text-gray-600">›</button>
           <button
@@ -307,11 +307,11 @@ export default function DienstBoard() {
       </div>
 
       {loading && (
-        <div className="text-center py-8 text-gray-400 animate-pulse">Lade Daten…</div>
+        <div className="text-center py-8 text-gray-600 animate-pulse">Lade Daten…</div>
       )}
 
       {!loading && entries.length === 0 && (
-        <div className="text-center py-12 text-gray-400">
+        <div className="text-center py-12 text-gray-600">
           <div className="text-4xl mb-2">📭</div>
           <div>Keine Daten für dieses Datum</div>
         </div>
@@ -361,7 +361,7 @@ export default function DienstBoard() {
                         {e.employee_name.split(', ').reverse().join(' ')}
                       </span>
                       {e.workplace_name && (
-                        <span className="text-xs text-gray-400">{e.workplace_name}</span>
+                        <span className="text-xs text-gray-600">{e.workplace_name}</span>
                       )}
                     </div>
                   ))}
@@ -398,7 +398,7 @@ export default function DienstBoard() {
                 className="w-full flex items-center justify-between px-4 py-2.5 bg-gray-50 hover:bg-gray-100 transition-colors"
               >
                 <span className="font-semibold text-gray-500">⚪ Frei / kein Plan</span>
-                <span className="text-gray-400 text-sm">{free.length} MA {showFree ? '▲' : '▼'}</span>
+                <span className="text-gray-600 text-sm">{free.length} MA {showFree ? '▲' : '▼'}</span>
               </button>
               {showFree && (
                 <div className="p-3 flex flex-wrap gap-2">
@@ -420,7 +420,7 @@ export default function DienstBoard() {
           {/* Hour ruler */}
           <div className="border-b border-gray-200 px-4 py-2">
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-36 shrink-0 text-xs text-gray-400">Mitarbeiter</div>
+              <div className="w-36 shrink-0 text-xs text-gray-600">Mitarbeiter</div>
               <div className="relative flex-1 h-5">
                 {/* 24h ruler */}
                 <div className="flex w-full">

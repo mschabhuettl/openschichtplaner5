@@ -110,7 +110,7 @@ function PageLoader() {
     <div
       role="status"
       aria-label="Seite wird geladen"
-      className="flex items-center justify-center h-full min-h-[200px] text-slate-400"
+      className="flex items-center justify-center h-full min-h-[200px] text-slate-500"
     >
       <div className="flex flex-col items-center gap-3">
         <div aria-hidden="true" className="w-8 h-8 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin" />

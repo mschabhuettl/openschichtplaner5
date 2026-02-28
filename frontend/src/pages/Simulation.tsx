@@ -295,7 +295,7 @@ export default function Simulation() {
                                 sel
                                   ? 'bg-red-500 text-white'
                                   : isWeekend
-                                  ? 'bg-gray-100 text-gray-400 hover:bg-red-100'
+                                  ? 'bg-gray-100 text-gray-600 hover:bg-red-100'
                                   : 'bg-gray-50 text-gray-600 hover:bg-red-100'
                               }`}
                             >
@@ -340,7 +340,7 @@ export default function Simulation() {
         {/* RIGHT: Results */}
         <div className="lg:col-span-2 space-y-4">
           {!result && !loading && (
-            <div className="bg-white border-2 border-dashed border-gray-200 rounded-xl p-12 text-center text-gray-400">
+            <div className="bg-white border-2 border-dashed border-gray-200 rounded-xl p-12 text-center text-gray-600">
               <div className="text-5xl mb-4">🧪</div>
               <p className="text-lg font-medium">Szenario konfigurieren</p>
               <p className="text-sm mt-1">Mitarbeiter auswählen → Simulation starten</p>
@@ -440,7 +440,7 @@ export default function Simulation() {
                 {/* Weekday header */}
                 <div className="grid grid-cols-7 gap-1 mb-1">
                   {WEEKDAY_LABELS.map(d => (
-                    <div key={d} className="text-center text-xs text-gray-400 font-semibold py-1">{d}</div>
+                    <div key={d} className="text-center text-xs text-gray-600 font-semibold py-1">{d}</div>
                   ))}
                 </div>
 
@@ -525,7 +525,7 @@ export default function Simulation() {
                 </span>
               </div>
               <button aria-label="Schließen"
-                className="text-gray-400 hover:text-gray-600 text-2xl"
+                className="text-gray-600 hover:text-gray-600 text-2xl"
                 onClick={() => setActiveDay(null)}
               >×</button>
             </div>
@@ -552,7 +552,7 @@ export default function Simulation() {
                       <div key={i} className="flex items-center gap-2 text-sm bg-red-50 rounded px-3 py-1.5">
                         <span className="font-medium text-red-700">{m.shortname}</span>
                         <span className="text-gray-600">{m.name}</span>
-                        {m.shift_name && <span className="ml-auto text-xs text-gray-400">{m.shift_name}</span>}
+                        {m.shift_name && <span className="ml-auto text-xs text-gray-600">{m.shift_name}</span>}
                       </div>
                     ))}
                   </div>
@@ -569,7 +569,7 @@ export default function Simulation() {
                       </span>
                     ))}
                   </div>
-                  <p className="text-xs text-gray-400 mt-2">Diese Mitarbeiter sind geplant und könnten einspringen.</p>
+                  <p className="text-xs text-gray-600 mt-2">Diese Mitarbeiter sind geplant und könnten einspringen.</p>
                 </div>
               )}
 

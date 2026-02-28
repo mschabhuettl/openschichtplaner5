@@ -425,14 +425,14 @@ export default function Notizen() {
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-bold text-slate-800">📝 Notizen</h1>
-            {loading && <span className="text-xs text-slate-400 animate-pulse">Lädt...</span>}
+            {loading && <span className="text-xs text-slate-600 animate-pulse">Lädt...</span>}
           </div>
 
           {/* Filters */}
           <div className="flex items-center gap-3 flex-wrap">
             {/* Search */}
             <div className="relative">
-              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">🔍</span>
+              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-600 text-sm">🔍</span>
               <input
                 type="text"
                 value={searchQuery}
@@ -443,7 +443,7 @@ export default function Notizen() {
               {searchQuery && (
                 <button aria-label="Schließen"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-600 text-xs"
                 >✕</button>
               )}
             </div>
@@ -630,7 +630,7 @@ export default function Notizen() {
                           );
                         })}
                         {dayNotes.length > 3 && (
-                          <div className="text-xs text-slate-400 pl-1">+{dayNotes.length - 3} weitere</div>
+                          <div className="text-xs text-slate-600 pl-1">+{dayNotes.length - 3} weitere</div>
                         )}
                       </div>
                     </>
@@ -660,7 +660,7 @@ export default function Notizen() {
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {selectedDayNotes.length === 0 ? (
-                  <div className="text-sm text-slate-400 text-center py-8">
+                  <div className="text-sm text-slate-600 text-center py-8">
                     <div className="text-3xl mb-2">📭</div>
                     Keine Notizen für diesen Tag
                     {canEdit && (
@@ -696,7 +696,7 @@ export default function Notizen() {
             <>
               <div className="p-4 border-b border-slate-200">
                 <h3 className="font-semibold text-slate-800 text-sm">📋 Alle Notizen – {MONTH_NAMES[month - 1]} {year}</h3>
-                <div className="text-xs text-slate-400 mt-0.5">{allMonthNotes.length} Notiz{allMonthNotes.length !== 1 ? 'en' : ''}</div>
+                <div className="text-xs text-slate-600 mt-0.5">{allMonthNotes.length} Notiz{allMonthNotes.length !== 1 ? 'en' : ''}</div>
                 {/* Category breakdown */}
                 {allMonthNotes.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
@@ -714,7 +714,7 @@ export default function Notizen() {
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {allMonthNotes.length === 0 ? (
-                  <div className="text-sm text-slate-400 text-center py-8">
+                  <div className="text-sm text-slate-600 text-center py-8">
                     <div className="text-3xl mb-2">📭</div>
                     {searchQuery || filterCategory !== 'all' ? 'Keine Notizen gefunden' : 'Keine Notizen in diesem Monat'}
                   </div>
@@ -725,7 +725,7 @@ export default function Notizen() {
                     return (
                       <div key={note.id}>
                         <div
-                          className="text-xs text-slate-400 mb-1 cursor-pointer hover:text-blue-600"
+                          className="text-xs text-slate-600 mb-1 cursor-pointer hover:text-blue-600"
                           onClick={() => setSelectedDay(note.date)}
                         >
                           📅 {new Date(note.date + 'T00:00:00').toLocaleDateString('de-AT', { weekday: 'short', day: 'numeric', month: 'short' })}

@@ -400,7 +400,7 @@ export default function Jahresrueckblick() {
                     showValues
                     formatVal={v => v > 0 ? `${Math.round(v)}` : '0'}
                   />
-                  <div className="flex justify-between text-xs text-slate-400 mt-2">
+                  <div className="flex justify-between text-xs text-slate-600 mt-2">
                     {monthly.map((m, i) => (
                       <div
                         key={i}
@@ -487,7 +487,7 @@ export default function Jahresrueckblick() {
 
               {/* No data state */}
               {totals?.shifts_count === 0 && totals?.actual_hours === 0 && (
-                <div className="text-center py-12 text-slate-400 dark:text-slate-500">
+                <div className="text-center py-12 text-slate-600 dark:text-slate-500">
                   <div className="text-5xl mb-4">📭</div>
                   <p className="text-lg font-medium">Keine Schichtdaten für {year} vorhanden</p>
                   <p className="text-sm mt-1">Wähle ein anderes Jahr oder eine andere Gruppe</p>
@@ -542,19 +542,19 @@ export default function Jahresrueckblick() {
 
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div>
-                          <div className="text-xs text-slate-400">Ist-Stunden</div>
+                          <div className="text-xs text-slate-600">Ist-Stunden</div>
                           <div className="font-semibold text-blue-600 dark:text-blue-400">{m.actual_hours}h</div>
                         </div>
                         <div>
-                          <div className="text-xs text-slate-400">Schichten</div>
+                          <div className="text-xs text-slate-600">Schichten</div>
                           <div className="font-semibold text-purple-600 dark:text-purple-400">{m.shifts_count}</div>
                         </div>
                         <div>
-                          <div className="text-xs text-slate-400">Urlaub</div>
+                          <div className="text-xs text-slate-600">Urlaub</div>
                           <div className="font-semibold text-green-600 dark:text-green-400">{m.vacation_days} T</div>
                         </div>
                         <div>
-                          <div className="text-xs text-slate-400">Krank</div>
+                          <div className="text-xs text-slate-600">Krank</div>
                           <div className="font-semibold text-red-500 dark:text-red-400">{m.sick_days} T</div>
                         </div>
                       </div>
@@ -583,7 +583,7 @@ export default function Jahresrueckblick() {
                       <div key={item.label} className="text-center">
                         <div className="text-2xl">{item.icon}</div>
                         <div className="text-xl font-bold mt-1">{item.value}</div>
-                        <div className="text-xs text-slate-400">{item.label}</div>
+                        <div className="text-xs text-slate-600">{item.label}</div>
                       </div>
                     ))}
                   </div>
@@ -667,7 +667,7 @@ export default function Jahresrueckblick() {
                           >
                             <td className="px-4 py-2.5">
                               <div className="font-medium text-slate-800 dark:text-slate-100">{emp.name}</div>
-                              <div className="text-xs text-slate-400">{emp.group}</div>
+                              <div className="text-xs text-slate-600">{emp.group}</div>
                             </td>
                             <td className="px-3 py-2.5 text-right font-semibold text-blue-600 dark:text-blue-400">
                               {emp.actual_hours}h
@@ -715,7 +715,7 @@ export default function Jahresrueckblick() {
                       })}
                       {employees.length === 0 && (
                         <tr>
-                          <td colSpan={8} className="px-4 py-8 text-center text-slate-400">
+                          <td colSpan={8} className="px-4 py-8 text-center text-slate-600">
                             Keine Mitarbeiter gefunden
                           </td>
                         </tr>
@@ -755,7 +755,7 @@ export default function Jahresrueckblick() {
 
               {/* Bottom performers note (only if we have data) */}
               {bottomEmp && bottomEmp.actual_hours === 0 && data.employees.filter(e => e.actual_hours > 0).length < data.employees.length && (
-                <div className="text-xs text-slate-400 dark:text-slate-500 text-center">
+                <div className="text-xs text-slate-600 dark:text-slate-500 text-center">
                   💡 Mitarbeiter ohne Ist-Stunden werden ganz unten angezeigt. Möglicherweise fehlen Schichtdaten.
                 </div>
               )}

@@ -257,7 +257,7 @@ export default function Workplaces() {
                   </tr>
                 ))}
                 {workplaces.length === 0 && (
-                  <tr><td colSpan={4} className="text-center py-8 text-gray-400">Keine Arbeitsplätze</td></tr>
+                  <tr><td colSpan={4} className="text-center py-8 text-gray-600">Keine Arbeitsplätze</td></tr>
                 )}
               </tbody>
             </table>
@@ -283,7 +283,7 @@ export default function Workplaces() {
               </div>
               <button
                 onClick={() => setSelectedWp(null)}
-                className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+                className="text-gray-600 hover:text-gray-600 text-lg leading-none"
                 title="Schließen"
               >
                 ×
@@ -308,14 +308,14 @@ export default function Workplaces() {
                   <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : wpEmployees.length === 0 ? (
-                <div className="text-xs text-gray-400 py-2 text-center">Keine Mitarbeiter zugeordnet</div>
+                <div className="text-xs text-gray-600 py-2 text-center">Keine Mitarbeiter zugeordnet</div>
               ) : (
                 <ul className="space-y-1">
                   {wpEmployees.map(e => (
                     <li key={e.ID} className="flex items-center justify-between bg-gray-50 rounded px-2 py-1">
                       <span className="text-sm text-gray-800">
                         {e.FIRSTNAME} {e.NAME}
-                        {e.SHORTNAME && <span className="text-gray-400 ml-1">({e.SHORTNAME})</span>}
+                        {e.SHORTNAME && <span className="text-gray-600 ml-1">({e.SHORTNAME})</span>}
                       </span>
                       <button
                         onClick={() => handleRemove(e.ID)}
@@ -346,7 +346,7 @@ export default function Workplaces() {
                       >
                         <span className="text-sm text-gray-700">
                           {e.FIRSTNAME} {e.NAME}
-                          {e.SHORTNAME && <span className="text-gray-400 ml-1">({e.SHORTNAME})</span>}
+                          {e.SHORTNAME && <span className="text-gray-600 ml-1">({e.SHORTNAME})</span>}
                         </span>
                         <span className="text-xs text-green-600 font-bold">
                           {assignBusy === e.ID ? '…' : '+'}
@@ -354,7 +354,7 @@ export default function Workplaces() {
                       </div>
                     ))}
                   {allEmployees.filter(e => !assignedIds.has(e.ID)).length === 0 && (
-                    <div className="text-xs text-gray-400 py-2 text-center">Alle Mitarbeiter zugeordnet</div>
+                    <div className="text-xs text-gray-600 py-2 text-center">Alle Mitarbeiter zugeordnet</div>
                   )}
                 </div>
               </div>

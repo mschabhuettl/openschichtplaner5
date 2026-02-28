@@ -455,10 +455,10 @@ export default function WarningsCenter() {
                   {sortedGroups.map(({ type, items }) => (
                     <div key={type}>
                       <div className="px-4 py-1.5 flex items-center gap-2">
-                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                           {typeLabel(type as Warning['type'])}
                         </span>
-                        <span className="text-xs text-slate-400 dark:text-slate-500">
+                        <span className="text-xs text-slate-600 dark:text-slate-400">
                           ({items.length})
                         </span>
                       </div>
@@ -565,10 +565,10 @@ export default function WarningsCenter() {
                               </div>
                             )}
                             <div className="flex items-center gap-2 mt-1">
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                              <span className="text-[10px] text-slate-600 dark:text-slate-400">
                                 👤 {a.user}
                               </span>
-                              <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                              <span className="text-[10px] text-slate-600 dark:text-slate-400">
                                 · {formatRelative(a.timestamp)}
                               </span>
                             </div>
@@ -590,7 +590,7 @@ export default function WarningsCenter() {
             >
               🔄 Aktualisieren
             </button>
-            <span className="text-xs text-slate-400 dark:text-slate-500">
+            <span className="text-xs text-slate-600 dark:text-slate-400">
               {new Date().toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}
             </span>
           </div>

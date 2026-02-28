@@ -42,7 +42,7 @@ function CreateModal({ groups, onSave, onClose }: CreateModalProps) {
       <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-800">📅 Neuer Abrechnungszeitraum</h2>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl">✕</button>
         </div>
 
         <div className="px-6 py-4 space-y-4">
@@ -234,9 +234,9 @@ export default function Perioden() {
 
       {/* Table */}
       {loading ? (
-        <div className="text-center py-20 text-gray-400">⟳ Lade Abrechnungszeiträume…</div>
+        <div className="text-center py-20 text-gray-600">⟳ Lade Abrechnungszeiträume…</div>
       ) : periods.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-lg shadow text-gray-400">
+        <div className="text-center py-20 bg-white rounded-lg shadow text-gray-600">
           <div className="text-4xl mb-3">📭</div>
           <div className="text-sm">Keine Abrechnungszeiträume vorhanden.</div>
           {canEdit && (
@@ -264,10 +264,10 @@ export default function Perioden() {
               {periods.map((p, i) => (
                 <tr key={p.id} className={i % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100'}>
                   <td className="px-4 py-3 font-medium text-gray-800">
-                    {p.description || <span className="text-gray-400 italic">–</span>}
+                    {p.description || <span className="text-gray-600 italic">–</span>}
                   </td>
                   <td className="px-4 py-3 text-gray-600">
-                    {groupMap[p.group_id] || <span className="text-gray-400">Gruppe {p.group_id}</span>}
+                    {groupMap[p.group_id] || <span className="text-gray-600">Gruppe {p.group_id}</span>}
                   </td>
                   <td className="px-4 py-3 text-gray-600 font-mono text-xs">{formatDate(p.start)}</td>
                   <td className="px-4 py-3 text-gray-600 font-mono text-xs">{formatDate(p.end)}</td>
@@ -286,7 +286,7 @@ export default function Perioden() {
               ))}
             </tbody>
           </table>
-          <div className="px-4 py-2 text-xs text-gray-400 border-t bg-gray-50">
+          <div className="px-4 py-2 text-xs text-gray-600 border-t bg-gray-50">
             {periods.length} Zeitraum{periods.length !== 1 ? 'e' : ''} gefunden
           </div>
         </div>

@@ -169,11 +169,11 @@ export default function Ueberstunden() {
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
           <div className="bg-white rounded-lg border p-3 shadow-sm text-center">
             <div className="text-xl font-bold text-gray-600">{summary.total_soll.toFixed(0)}h</div>
-            <div className="text-xs text-gray-400">Gesamt Soll</div>
+            <div className="text-xs text-gray-600">Gesamt Soll</div>
           </div>
           <div className="bg-white rounded-lg border p-3 shadow-sm text-center">
             <div className="text-xl font-bold text-blue-700">{summary.total_ist.toFixed(0)}h</div>
-            <div className="text-xs text-gray-400">Gesamt Ist</div>
+            <div className="text-xs text-gray-600">Gesamt Ist</div>
           </div>
           <div className={`rounded-lg border p-3 shadow-sm text-center ${summary.total_delta >= 0 ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
             <div className={`text-xl font-bold ${summary.total_delta >= 0 ? 'text-green-700' : 'text-red-700'}`}>
@@ -235,7 +235,7 @@ export default function Ueberstunden() {
 
             {sorted.length === 0 && !loading && (
               <tr>
-                <td colSpan={5} className="text-center py-12 text-gray-400">
+                <td colSpan={5} className="text-center py-12 text-gray-600">
                   {search ? 'Keine Mitarbeiter gefunden' : 'Keine Daten für dieses Jahr / diese Gruppe'}
                 </td>
               </tr>

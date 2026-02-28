@@ -158,7 +158,7 @@ export default function Jahresabschluss() {
             <input type="number" value={maxCarryDays} min="0" max="365" step="1"
               onChange={e => setMaxCarryDays(Number(e.target.value))}
               className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <p className="text-xs text-gray-400 mt-0.5">Rest über diesem Wert verfällt.</p>
+            <p className="text-xs text-gray-600 mt-0.5">Rest über diesem Wert verfällt.</p>
           </div>
           <div>
             <button onClick={loadPreview} disabled={loading}
@@ -252,7 +252,7 @@ export default function Jahresabschluss() {
               { label: 'Mitarbeiter', value: preview.employee_count, color: 'text-gray-700', icon: '👥' },
               { label: 'Gesamter Resturlaub', value: `${fmtNum(preview.details.reduce((s, d) => s + d.remaining, 0))} T`, color: 'text-blue-700', icon: '📊' },
               { label: 'Gesamter Übertrag', value: `${fmtNum(preview.total_carry_forward)} T`, color: 'text-green-700', icon: '↪️' },
-              { label: 'Gesamter Verfall', value: `${fmtNum(preview.total_forfeited)} T`, color: preview.total_forfeited > 0 ? 'text-red-700' : 'text-gray-400', icon: '❌' },
+              { label: 'Gesamter Verfall', value: `${fmtNum(preview.total_forfeited)} T`, color: preview.total_forfeited > 0 ? 'text-red-700' : 'text-gray-600', icon: '❌' },
             ].map(({ label, value, color, icon }) => (
               <div key={label} className="bg-white rounded-lg border p-3 shadow-sm text-center">
                 <div className="text-lg">{icon}</div>
@@ -303,7 +303,7 @@ export default function Jahresabschluss() {
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={8} className="text-center py-8 text-gray-400">Keine Einträge gefunden</td></tr>
+                  <tr><td colSpan={8} className="text-center py-8 text-gray-600">Keine Einträge gefunden</td></tr>
                 )}
               </tbody>
               {filtered.length > 0 && (
@@ -333,7 +333,7 @@ export default function Jahresabschluss() {
 
       {/* Empty state */}
       {!preview && !result && !loading && (
-        <div className="bg-white rounded-lg border p-12 text-center text-gray-400">
+        <div className="bg-white rounded-lg border p-12 text-center text-gray-600">
           <div className="text-5xl mb-3">📅</div>
           <div className="font-semibold text-gray-600 mb-1">Jahresabschluss {year}</div>
           <div className="text-sm">Konfigurieren Sie Jahr und Gruppe, dann klicken Sie auf "Vorschau laden".</div>

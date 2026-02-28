@@ -275,7 +275,7 @@ export default function MitarbeiterVergleich() {
       </div>
 
       {(!emp1Id || !emp2Id) && (
-        <div className="text-center py-16 text-gray-400">
+        <div className="text-center py-16 text-gray-600">
           <div className="text-5xl mb-3">👥</div>
           <p className="text-lg">Bitte zwei Mitarbeiter auswählen, um den Vergleich zu starten.</p>
         </div>
@@ -374,7 +374,7 @@ export default function MitarbeiterVergleich() {
           <div className="bg-white border rounded-xl p-5 shadow-sm">
             <h2 className="font-semibold text-gray-700 mb-4">📅 Monatsübersicht {year}</h2>
             {(loading1 || loading2) && (
-              <div className="text-center py-8 text-gray-400">
+              <div className="text-center py-8 text-gray-600">
                 <div className="animate-spin text-2xl mb-2">⏳</div>
                 <p>Lade Daten…</p>
               </div>

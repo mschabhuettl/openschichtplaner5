@@ -28,7 +28,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 function ShiftBadge({ shift }: { shift?: { id: number; name: string; color: string } | null }) {
-  if (!shift) return <span className="text-gray-400 text-xs italic">Frei / unbekannt</span>;
+  if (!shift) return <span className="text-gray-600 text-xs italic">Frei / unbekannt</span>;
   return (
     <span
       className="px-2 py-0.5 rounded text-xs font-bold text-white"
@@ -105,7 +105,7 @@ function NewRequestModal({
       <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg">
         <div className="flex items-center justify-between p-5 border-b">
           <h2 className="text-lg font-bold text-gray-800">🔄 Neue Tausch-Anfrage</h2>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {error && (
@@ -138,7 +138,7 @@ function NewRequestModal({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-gray-400 text-sm font-semibold">
+          <div className="flex items-center gap-2 text-gray-600 text-sm font-semibold">
             <div className="flex-1 border-t" />
             ↕ tauscht mit
             <div className="flex-1 border-t" />
@@ -385,14 +385,14 @@ export default function TauschBoerse() {
 
         {/* Table */}
         {loading ? (
-          <div className="text-center py-16 text-gray-400">
+          <div className="text-center py-16 text-gray-600">
             <div className="text-4xl mb-3">⏳</div>
             Lade Anfragen…
           </div>
         ) : error ? (
           <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4">{error}</div>
         ) : requests.length === 0 ? (
-          <div className="text-center py-16 text-gray-400 bg-white rounded-xl border border-gray-200">
+          <div className="text-center py-16 text-gray-600 bg-white rounded-xl border border-gray-200">
             <div className="text-5xl mb-4">🤝</div>
             <div className="font-semibold text-gray-600">Keine Tausch-Anfragen</div>
             <div className="text-sm mt-1">
@@ -421,19 +421,19 @@ export default function TauschBoerse() {
                 <tbody className="divide-y divide-gray-100">
                   {requests.map(req => (
                     <tr key={req.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 text-gray-400 font-mono text-xs">#{req.id}</td>
+                      <td className="px-4 py-3 text-gray-600 font-mono text-xs">#{req.id}</td>
                       <td className="px-4 py-3">
                         <div className="font-semibold text-gray-800">{req.requester_short ?? req.requester_id}</div>
-                        <div className="text-xs text-gray-400">{req.requester_name}</div>
+                        <div className="text-xs text-gray-600">{req.requester_name}</div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="text-gray-700">{formatDate(req.requester_date)}</div>
                         <div className="mt-0.5"><ShiftBadge shift={req.requester_shift} /></div>
                       </td>
-                      <td className="px-4 py-3 text-center text-lg text-gray-400">⇄</td>
+                      <td className="px-4 py-3 text-center text-lg text-gray-600">⇄</td>
                       <td className="px-4 py-3">
                         <div className="font-semibold text-gray-800">{req.partner_short ?? req.partner_id}</div>
-                        <div className="text-xs text-gray-400">{req.partner_name}</div>
+                        <div className="text-xs text-gray-600">{req.partner_name}</div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="text-gray-700">{formatDate(req.partner_date)}</div>
@@ -447,10 +447,10 @@ export default function TauschBoerse() {
                           </div>
                         )}
                         {req.resolved_by && req.status === 'approved' && (
-                          <div className="text-xs text-gray-400 mt-1">{formatDT(req.resolved_at)}</div>
+                          <div className="text-xs text-gray-600 mt-1">{formatDT(req.resolved_at)}</div>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-xs text-gray-400 whitespace-nowrap">
+                      <td className="px-4 py-3 text-xs text-gray-600 whitespace-nowrap">
                         {formatDT(req.created_at)}
                         {req.note && (
                           <div className="text-gray-500 italic mt-1 max-w-[140px] truncate" title={req.note}>

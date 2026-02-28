@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.15] — 2026-02-28
+
+### Fixed / Verbessert
+
+#### 🖥️ Tabellen UX
+- `fix(ux)`: Sticky Headers in allen Tabellen-Ansichten (Mitarbeiter, Statistik etc.)
+- `fix(ux)`: Hover-Effekte und Zebra-Striping für bessere Lesbarkeit
+- `fix(ux)`: Dark Mode Korrekturen für Tabellen-Komponenten
+
+---
+
 ## [0.3.14] — 2026-02-28
 
 ### Fixed / Verbessert

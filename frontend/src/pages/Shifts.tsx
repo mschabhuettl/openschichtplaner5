@@ -360,7 +360,7 @@ export default function Shifts() {
                 <label className="block text-xs font-semibold text-gray-600 mb-1">Name *</label>
                 <input
                   type="text"
-                  value={form.NAME}
+                  autoFocus value={form.NAME}
                   onChange={e => { setForm(f => ({ ...f, NAME: e.target.value })); if (error?.includes('Bezeichnung')) setError(null); }}
                   className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 ${!form.NAME.trim() && error?.includes('Bezeichnung') ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-500'}`}
                 />

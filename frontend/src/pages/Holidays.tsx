@@ -263,8 +263,8 @@ export default function Holidays() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
+          <div onClick={e => e.stopPropagation()} className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
             <h2 className="text-lg font-bold text-gray-800 mb-4">
               {editId !== null ? 'Feiertag bearbeiten' : 'Neuer Feiertag'}
             </h2>
@@ -283,7 +283,7 @@ export default function Holidays() {
                 <label className="block text-xs font-semibold text-gray-600 mb-1">Name *</label>
                 <input
                   type="text"
-                  value={form.NAME}
+                  autoFocus value={form.NAME}
                   onChange={e => setForm(f => ({ ...f, NAME: e.target.value }))}
                   className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />

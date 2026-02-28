@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.0] — 2026-02-28
+
+### Hinzugefügt / Added
+
+#### 📅 Tages-Detailansicht im Dienstplan (66fac8b)
+- **Klick auf Kalendertag** öffnet Modal mit detaillierter Tagesansicht
+- Alle Mitarbeiter mit Schichtzuweisung für den gewählten Tag auf einen Blick
+- Besetzungsgrad, Abwesenheiten und freie Plätze sichtbar
+
+#### 👥 Team-Übersicht & Organigramm (7bede8a)
+- **Team-Seite** — Übersicht aller Gruppen mit Mitgliederanzahl, Verantwortlichen und Schichtmodellen
+- **Organigramm** — Visuelles Baumdiagramm der Unternehmenshierarchie
+- Klickbare Gruppen-Kacheln mit Schnellnavigation
+
+#### 📈 SVG Multi-Line Chart + Donut Chart (b13ceca)
+- **Multi-Line Chart** — Zeitreihen-Vergleich mehrerer Mitarbeiter/Gruppen über Monate
+- **Donut Chart** — Anteils-Visualisierung (z. B. Schichttypen-Verteilung)
+- Beide Charts vollständig in SVG — keine externe Chart-Bibliothek nötig
+
+#### ⚙️ Konfigurations-Management (68229d6)
+- **Einstellungs-Dashboard** — Zentrale Übersicht aller Systemeinstellungen
+- Kategorisierte Konfigurationsgruppen (Planung, Benachrichtigungen, Anzeige)
+- Sofortspeicherung mit Validierung
+
+#### 🔍 Error Monitoring & Structured JSON Logging (aa08496)
+- **Error Monitoring** — Fehler werden erfasst, kategorisiert und in einem Health-Dashboard angezeigt
+- **Structured Logging** — Alle Server-Events als JSON-Logs für einfache Weiterverarbeitung
+- Health-Endpoint zeigt Systemstatus, Fehlerrate und letzte Ereignisse
+
+#### 🧩 UI-Komponenten-Bibliothek (e0d8c5b)
+- **StatCard** — Wiederverwendbare Statistik-Kachel mit Trend-Indikator
+- **Badge** — Farbige Status-Badges für konsistente Kennzeichnung
+- **PageHeader** — Einheitlicher Seitenkopf mit Titel, Breadcrumb und Aktions-Buttons
+- **DataTable** — Universelle Tabellen-Komponente mit Sortierung, Filterung und Paginierung
+
+#### 🔒 Security Hardening Round 4 (abd121f)
+- Neue API-Endpoints vollständig abgesichert
+- Erweiterte Autorisierungsprüfungen auf Gruppenebene
+- Verbesserte Fehlerbehandlung ohne Informationslecks
+
+### Verbessert / Changed
+
+#### ⚡ Globaler mtime-basierter DBF-Cache (9bdec03)
+- Cache-Invalidierung basiert auf Datei-Änderungszeit (mtime) statt fester TTL
+- Deutlich reduzierte Datenbanklesevorgänge bei unveränderter Datenlage
+- Konsistente Daten ohne manuelle Cache-Invalidierung
+
+#### 🧪 Testabdeckung (b03d058)
+- **679 Tests** — Erweitertes Test-Suite für alle neuen Features
+- Unit-Tests für Komponenten-Bibliothek, Chart-Rendering, Monitoring-Endpoints
+
+---
+
 ## [0.2.0] — 2026-02-28
 
 ### Hinzugefügt / Added

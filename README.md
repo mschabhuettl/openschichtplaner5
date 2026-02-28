@@ -65,6 +65,7 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 - ✅ **Leitwand** 📺 — TV-Modus / Ops-Dashboard: Echtzeit-Uhr, Mitarbeiterkarten pro Schichtgruppe mit Fortschrittsbalken, Aktiv-Badges, Abwesenheiten, Ticker-Leiste, Vollbild-Button — optimiert für Wanddisplays im Aufenthaltsraum
 - ✅ **Wochenansicht** 🗃️ — Kompakte Mo–So Tabellenübersicht aller Mitarbeiter: farbige Schicht-Badges, Wochen-Navigation, Gruppenfilter, Suche, Kompaktmodus, Heute-Hervorhebung, Legende
 - ✅ **Dienstplan** — Monatsansicht mit Wochenend-Hervorhebung 🟦, heutiger Tag blau, Feiertage, Tooltips; A-Z Schnellfilter; Mitarbeiter-Auslastungsbalken; Schichtfarben-Legende; Schicht-Tausch Modal; Woche-Kopieren Modal; Schicht-Empfehlungen Modal
+- ✅ **Tages-Detailansicht** 🗓️ — Klick auf Kalendertag öffnet Modal mit vollständiger Tagesübersicht: alle Mitarbeiter mit Schichtzuweisung, Besetzungsgrad, Abwesenheiten und freie Plätze
 - ✅ **Einsatzplan** — Tages- und Wochenansicht mit Abweichungen
 - ✅ **Jahresübersicht** — Einzelansicht als Standard (wie Original SP5), 12 Monate auf einen Blick mit farbigen Schicht-Badges
 - ✅ **Geburtstags-Kalender** 🎂 — Alle Mitarbeitergeburtstage nach Monat gruppiert, Kalender- und Listenansicht
@@ -153,6 +154,25 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 - ✅ **Toast-Benachrichtigungen** — Nicht-blockierende Erfolgs-/Fehler-/Info-Meldungen
 - ✅ **DE/EN Sprachumschalter** 🌍 — Vollständige zweisprachige Benutzeroberfläche; Sprachwahl persistent
 
+### 👥 Team & Organisation
+- ✅ **Team-Übersicht** 🏢 — Übersicht aller Gruppen mit Mitgliederanzahl, Verantwortlichen und Schichtmodellen; klickbare Kacheln mit Schnellnavigation
+- ✅ **Organigramm** 🌳 — Visuelles Baumdiagramm der Unternehmenshierarchie auf einen Blick
+
+### 📊 Analytics & Visualisierung
+- ✅ **SVG Multi-Line Chart** 📈 — Zeitreihen-Vergleich mehrerer Mitarbeiter/Gruppen über Monate ohne externe Chart-Bibliothek
+- ✅ **SVG Donut Chart** 🍩 — Anteils-Visualisierung (z. B. Schichttypen-Verteilung) in reinem SVG
+
+### 🔍 Error Monitoring & Health
+- ✅ **Error Monitoring** 🚨 — Fehler werden erfasst, kategorisiert und in einem Health-Dashboard angezeigt
+- ✅ **Structured JSON Logging** 📋 — Alle Server-Events als JSON-Logs für einfache Weiterverarbeitung und Log-Aggregation
+- ✅ **Health-Dashboard** — Systemstatus, Fehlerrate und letzte Ereignisse auf einen Blick
+
+### 🧩 UI-Komponenten-Bibliothek
+- ✅ **StatCard** — Wiederverwendbare Statistik-Kachel mit Trend-Indikator
+- ✅ **Badge** — Farbige Status-Badges für konsistente Kennzeichnung in der ganzen App
+- ✅ **PageHeader** — Einheitlicher Seitenkopf mit Titel, Breadcrumb und Aktions-Buttons
+- ✅ **DataTable** — Universelle Tabellen-Komponente mit Sortierung, Filterung und Paginierung
+
 ### 📱 Mobile & Performance
 - ✅ **Progressive Web App (PWA)** 📲 — Installierbar auf Desktop & Mobile; Service Worker für Offline-Grundfunktion
 - ✅ **SSE Echtzeit-Updates** 📡 — Server-Sent Events: Änderungen erscheinen live bei allen offenen Clients ohne Polling
@@ -173,6 +193,7 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 - ✅ **Benutzerverwaltung** — Rollen, Passwort-Änderung, gruppen- und mitarbeiterbezogene Zugriffsrechte
 - ✅ **Backup & Restore** — ZIP-Backup aller DBF-Dateien inkl. Wiederherstellung
 - ✅ **Abrechnungszeiträume** — Perioden definieren und verwalten
+- ✅ **Konfigurationsmanagement** ⚙️ — Zentrale Einstellungsseite mit kategorisierten Konfigurationsgruppen (Planung, Benachrichtigungen, Anzeige); Sofortspeicherung mit Validierung
 - ✅ **Einstellungen** — Systemkonfiguration (USETT)
 - ✅ **DB-Komprimierung** — Gelöschte Datensätze aus DBF-Dateien entfernen
 

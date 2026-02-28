@@ -8,6 +8,8 @@ import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import type { ShiftType, LeaveType, ScheduleEntry } from '../types';
 import type { Wish } from '../api/client';
+import { Badge } from '../components/Badge';
+import { EmptyState } from '../components/EmptyState';
 
 // ── Helpers ───────────────────────────────────────────────────
 const TODAY = new Date();
@@ -79,9 +81,9 @@ function WishRow({ wish, onDelete }: { wish: Wish; onDelete: (id: number) => voi
   return (
     <div className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 text-xs border border-gray-200">
       <span className="font-semibold text-gray-700">{wish.date}</span>
-      <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${wish.wish_type === 'WUNSCH' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+      <Badge variant={wish.wish_type === 'WUNSCH' ? 'green' : 'red'} shape="square">
         {wish.wish_type === 'WUNSCH' ? '💚 Wunsch' : '🔴 Sperrung'}
-      </span>
+      </Badge>
       {wish.note && <span className="text-gray-500 flex-1 truncate">{wish.note}</span>}
       <button
         onClick={() => onDelete(wish.id)}
@@ -374,7 +376,7 @@ export default function MeinProfil() {
           </div>
           <div className="p-5">
             {absences.length === 0 ? (
-              <p className="text-sm text-gray-400 italic">Keine Abwesenheiten eingetragen</p>
+              <EmptyState icon="📋" title="Keine Abwesenheiten" description="Für dieses Jahr sind keine Abwesenheiten eingetragen." className="py-8" />
             ) : (
               <div className="space-y-1.5 max-h-52 overflow-y-auto">
                 {[...absences].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 30).map(a => (
@@ -400,9 +402,9 @@ export default function MeinProfil() {
           <div className="p-5">
             <div className="flex flex-wrap gap-2">
               {mySkills.map(s => (
-                <span key={s.id} className="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full text-sm font-medium">
-                  {s.name}
-                </span>
+                <Badge key={s.id} variant="indigo" shape="pill" className="text-sm py-1 px-3">
+                  🎓 {s.name}
+                </Badge>
               ))}
             </div>
           </div>

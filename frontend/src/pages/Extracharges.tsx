@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { api } from '../api/client';
 import type { ExtraCharge } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { PageHeader } from '../components/PageHeader';
+import { EmptyState } from '../components/EmptyState';
+import { Badge } from '../components/Badge';
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const WEEKDAY_FULL = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
@@ -36,11 +39,9 @@ function timeToMinutes(time: string): number {
 function parseValidDays(validdays: string): boolean[] {
   const result: boolean[] = new Array(7).fill(false);
   if (!validdays) return result;
-  // Handle both plain '0'/'1' and the UTF-16 encoded version
   const chars = Array.from(validdays);
   for (let i = 0; i < 7 && i < chars.length; i++) {
     const code = chars[i].charCodeAt(0);
-    // '1' = 0x31, U+2031 = 0x2031 (both represent active)
     result[i] = code === 0x31 || code === 0x2031 || chars[i] === '1';
   }
   return result;
@@ -52,8 +53,8 @@ function validDaysToString(days: boolean[]): string {
 
 interface ExtraChargeForm {
   NAME: string;
-  startTime: string;   // HH:MM
-  endTime: string;     // HH:MM
+  startTime: string;
+  endTime: string;
   validDays: boolean[];
   HOLRULE: number;
   HIDE: boolean;
@@ -72,6 +73,8 @@ export default function Extracharges() {
   const { canAdmin } = useAuth();
   const [charges, setCharges] = useState<ExtraCharge[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [showHidden, setShowHidden] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
   // Escape key closes modal
@@ -173,33 +176,93 @@ export default function Extracharges() {
     return active.join(', ');
   };
 
+  // Filtered list
+  const filtered = useMemo(() => {
+    let list = charges;
+    if (!showHidden) list = list.filter(c => c.HIDE !== 1);
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter(c => c.NAME?.toLowerCase().includes(q));
+    }
+    return list;
+  }, [charges, search, showHidden]);
+
+  const hiddenCount = charges.filter(c => c.HIDE === 1).length;
+
   return (
     <div className="p-2 sm:p-4 lg:p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold text-gray-800">⏱️ Zeitzuschläge ({charges.length})</h1>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => window.print()}
-            className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
-            title="Seite drucken"
-          >
-            🖨️ <span className="hidden sm:inline">Drucken</span>
-          </button>
-          {canAdmin && <button
-            onClick={openCreate}
-            className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
-          >
-            + Neu
-          </button>}
+      <PageHeader
+        title="⏱️ Zeitzuschläge"
+        subtitle="Zuschlagspflichtige Arbeitszeiten (z.B. Nacht-, Sonn- und Feiertagszuschläge)"
+        actions={
+          <>
+            <button
+              onClick={() => window.print()}
+              className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
+              title="Seite drucken"
+            >
+              🖨️ <span className="hidden sm:inline">Drucken</span>
+            </button>
+            {canAdmin && (
+              <button
+                onClick={openCreate}
+                className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
+              >
+                + Neu
+              </button>
+            )}
+          </>
+        }
+      />
+
+      {/* Search & filter bar */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <div className="relative flex-1 min-w-[200px]">
+          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">🔍</span>
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Suche nach Name…"
+            className="w-full pl-8 pr-3 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
+            >✕</button>
+          )}
         </div>
+        {hiddenCount > 0 && (
+          <label className="flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={showHidden}
+              onChange={e => setShowHidden(e.target.checked)}
+              className="rounded"
+            />
+            Ausgeblendete anzeigen ({hiddenCount})
+          </label>
+        )}
+        {charges.length > 0 && (
+          <span className="text-xs text-gray-400 ml-auto">
+            {filtered.length} von {charges.length} Einträgen
+          </span>
+        )}
       </div>
-      <p className="text-sm text-gray-500 mb-4">
-        Zuschlagspflichtige Arbeitszeiten (z.B. Nacht-, Sonn- und Feiertagszuschläge)
-      </p>
+
       {loading ? (
         <div className="flex justify-center py-12">
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
         </div>
+      ) : charges.length === 0 ? (
+        <EmptyState
+          icon="⏱️"
+          title="Keine Zeitzuschläge definiert"
+          description="Erstelle Zeitzuschläge für Nacht-, Sonn- und Feiertagsarbeit."
+          actionLabel={canAdmin ? '+ Zeitzuschlag erstellen' : undefined}
+          onAction={canAdmin ? openCreate : undefined}
+        />
       ) : (
         <div className="bg-white rounded-lg shadow overflow-x-auto">
           <table className="w-full text-sm">
@@ -210,12 +273,13 @@ export default function Extracharges() {
                 <th className="px-4 py-2 text-center">Bis</th>
                 <th className="px-4 py-2 text-left">Gültige Tage</th>
                 <th className="px-4 py-2 text-left">Feiertagsregel</th>
+                <th className="px-4 py-2 text-center">Status</th>
                 <th className="px-4 py-2 text-center">Aktionen</th>
               </tr>
             </thead>
             <tbody>
-              {charges.map((c, i) => (
-                <tr key={c.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}>
+              {filtered.map((c, i) => (
+                <tr key={c.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors ${c.HIDE === 1 ? 'opacity-60' : ''}`}>
                   <td className="px-4 py-2 font-semibold">{c.NAME}</td>
                   <td className="px-4 py-2 text-center font-mono text-gray-700">
                     {c.START === 0 && c.END === 0 ? '—' : minutesToTime(c.START)}
@@ -226,8 +290,20 @@ export default function Extracharges() {
                   <td className="px-4 py-2 text-gray-600 text-xs">
                     {activeDaysSummary(c.VALIDDAYS || '')}
                   </td>
-                  <td className="px-4 py-2 text-gray-600 text-xs">
-                    {HOL_RULE_LABELS[c.HOLRULE] || 'Alle Tage'}
+                  <td className="px-4 py-2">
+                    <Badge
+                      variant={c.HOLRULE === 1 ? 'green' : c.HOLRULE === 2 ? 'orange' : 'gray'}
+                      shape="square"
+                    >
+                      {HOL_RULE_LABELS[c.HOLRULE] || 'Alle Tage'}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-2 text-center">
+                    {c.HIDE === 1 ? (
+                      <Badge variant="gray" shape="square">Ausgeblendet</Badge>
+                    ) : (
+                      <Badge variant="green" shape="square">Aktiv</Badge>
+                    )}
                   </td>
                   <td className="px-4 py-2 text-center">
                     <div className="flex gap-1 justify-center">
@@ -237,8 +313,18 @@ export default function Extracharges() {
                   </td>
                 </tr>
               ))}
-              {charges.length === 0 && (
-                <tr><td colSpan={6} className="text-center py-8 text-gray-400">Keine Zeitzuschläge definiert</td></tr>
+              {filtered.length === 0 && charges.length > 0 && (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center">
+                    <EmptyState
+                      icon="🔍"
+                      title="Keine Treffer"
+                      description={`Keine Zuschläge für "${search}" gefunden.`}
+                      actionLabel="Filter zurücksetzen"
+                      onAction={() => { setSearch(''); setShowHidden(false); }}
+                    />
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
@@ -250,7 +336,7 @@ export default function Extracharges() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
           <div onClick={e => e.stopPropagation()} className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6">
             <h2 className="text-lg font-bold text-gray-800 mb-4">
-              {editId !== null ? 'Zeitzuschlag bearbeiten' : 'Neuer Zeitzuschlag'}
+              {editId !== null ? '✏️ Zeitzuschlag bearbeiten' : '➕ Neuer Zeitzuschlag'}
             </h2>
             {error && <div className="mb-3 p-2 bg-red-50 text-red-700 rounded text-sm">{error}</div>}
             <div className="space-y-3">
@@ -318,7 +404,7 @@ export default function Extracharges() {
                   checked={form.HIDE}
                   onChange={e => setForm(f => ({ ...f, HIDE: e.target.checked }))}
                 />
-                Ausgeblendet
+                Ausgeblendet (nicht im Bericht anzeigen)
               </label>
             </div>
             <div className="flex gap-2 mt-5 justify-end">

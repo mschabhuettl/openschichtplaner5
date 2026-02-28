@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { MonthSummary } from '../api/client';
 import type { Employee, Group, ShiftType, LeaveType } from '../types';
+import { EmptyState, ApiErrorState } from '../components/EmptyState';
+import { PageHeader } from '../components/PageHeader';
 
 // Map: SHORTNAME → { bk, text }
 type ShiftColorMap = Map<string, { bk: string; text: string }>;
@@ -203,8 +205,12 @@ function SingleEmployeeView({
     }
   }
 
-  if (loading) return <div className="text-gray-400 animate-pulse">Lade...</div>;
-  if (error) return <div className="text-red-500 text-sm p-2">⚠️ {error}</div>;
+  if (loading) return (
+    <div className="flex justify-center py-12">
+      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+  if (error) return <ApiErrorState message={error} />;
 
   return (
     <div className="space-y-4">
@@ -337,11 +343,18 @@ function AllEmployeesView({
       .catch(() => { setError('Fehler beim Laden der Jahresübersicht'); setLoading(false); });
   }, [year, filteredEmps.length, groupId]);
 
-  if (loading) return <div className="text-gray-400 animate-pulse py-8 text-center">Lade Jahresübersicht...</div>;
-  if (error) return (
-    <div className="p-6">
-      <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">⚠️ {error}</div>
+  if (loading) return (
+    <div className="flex justify-center py-12">
+      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
     </div>
+  );
+  if (error) return <ApiErrorState message={error} />;
+  if (filteredEmps.length === 0) return (
+    <EmptyState
+      icon="👥"
+      title="Keine Mitarbeiter"
+      description="Für diese Gruppe sind keine Mitarbeiter vorhanden."
+    />
   );
 
   return (
@@ -473,63 +486,69 @@ export default function Jahresuebersicht() {
         }
       `}</style>
       {/* Header */}
-      <div className="flex items-center gap-2 sm:gap-3 mb-4 flex-wrap">
-        <h1 className="text-xl font-bold text-gray-800">📆 Jahresübersicht</h1>
+      <PageHeader
+        title="📆 Jahresübersicht"
+        subtitle="Schichten und Stunden pro Mitarbeiter im Jahresüberblick"
+        actions={
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Year navigation */}
+            <div className="flex items-center gap-1">
+              <button onClick={() => setYear(y => y - 1)} className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm" title="Vorjahr">‹</button>
+              <span className="font-bold text-gray-700 min-w-[56px] text-center">{year}</span>
+              <button onClick={() => setYear(y => y + 1)} className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm" title="Folgejahr">›</button>
+            </div>
 
-        {/* Year navigation */}
-        <div className="flex items-center gap-2">
-          <button onClick={() => setYear(y => y - 1)} className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm">‹</button>
-          <span className="font-bold text-gray-700 min-w-[60px] text-center">{year}</span>
-          <button onClick={() => setYear(y => y + 1)} className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm">›</button>
-        </div>
+            {/* View mode */}
+            <div className="flex rounded overflow-hidden border border-gray-300 text-sm">
+              <button
+                onClick={() => setViewMode('all')}
+                className={`px-3 py-1.5 ${viewMode === 'all' ? 'bg-slate-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+              >
+                Alle MA
+              </button>
+              <button
+                onClick={() => setViewMode('single')}
+                className={`px-3 py-1.5 border-l ${viewMode === 'single' ? 'bg-slate-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+              >
+                Einzelansicht
+              </button>
+            </div>
 
-        {/* View mode */}
-        <div className="flex rounded overflow-hidden border border-gray-300 text-sm">
-          <button
-            onClick={() => setViewMode('all')}
-            className={`px-3 py-1.5 ${viewMode === 'all' ? 'bg-slate-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-          >
-            Alle MA
-          </button>
-          <button
-            onClick={() => setViewMode('single')}
-            className={`px-3 py-1.5 border-l ${viewMode === 'single' ? 'bg-slate-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-          >
-            Einzelansicht
-          </button>
-        </div>
+            {/* Group filter */}
+            <select
+              value={groupId ?? ''}
+              onChange={e => setGroupId(e.target.value ? Number(e.target.value) : undefined)}
+              className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
+            >
+              <option value="">Alle Gruppen</option>
+              {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+            </select>
 
-        {/* Group filter */}
-        <select
-          value={groupId ?? ''}
-          onChange={e => setGroupId(e.target.value ? Number(e.target.value) : undefined)}
-          className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
-        >
-          <option value="">Alle Gruppen</option>
-          {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
-        </select>
+            {/* Employee selector */}
+            {viewMode === 'single' && (
+              <select
+                value={selectedEmployeeId ?? ''}
+                onChange={e => setSelectedEmployeeId(Number(e.target.value))}
+                className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm min-w-[200px]"
+              >
+                {filteredEmployees.map(e => (
+                  <option key={e.ID} value={e.ID}>{e.NAME}, {e.FIRSTNAME}</option>
+                ))}
+              </select>
+            )}
 
-        {/* Employee selector (always visible) */}
-        <select
-          value={selectedEmployeeId ?? ''}
-          onChange={e => setSelectedEmployeeId(Number(e.target.value))}
-          className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm min-w-[200px]"
-        >
-          {filteredEmployees.map(e => (
-            <option key={e.ID} value={e.ID}>{e.NAME}, {e.FIRSTNAME}</option>
-          ))}
-        </select>
-
-        {/* Print button */}
-        <button
-          onClick={handlePrint}
-          disabled={printLoading}
-          className="no-print ml-auto px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:opacity-60 text-white text-sm rounded shadow-sm flex items-center gap-1.5"
-          title="Jahresübersicht in neuem Fenster drucken" aria-label="Jahresübersicht in neuem Fenster drucken"
-        >
-          {printLoading ? '⏳ Lade...' : '🖨️ Drucken'}
-        </button>
-      </div>
+            {/* Print button */}
+            <button
+              onClick={handlePrint}
+              disabled={printLoading}
+              className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:opacity-60 text-white text-sm rounded shadow-sm flex items-center gap-1.5"
+              title="Jahresübersicht in neuem Fenster drucken"
+            >
+              {printLoading ? <><span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> Lade…</> : '🖨️ Drucken'}
+            </button>
+          </div>
+        }
+      />
 
       {/* Content */}
       <div className="flex-1 overflow-auto bg-white rounded-lg shadow border border-gray-200 p-4">

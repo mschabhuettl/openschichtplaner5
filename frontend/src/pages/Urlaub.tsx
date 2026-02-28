@@ -1348,11 +1348,17 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
 
   const MONTHS_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 
+  // Normalize field access (API may return snake_case or UPPER_CASE)
+  const getEmpId = (a: Absence) => a.EMPLOYEE_ID ?? (a as any).employee_id ?? 0;
+  const getLtId = (a: Absence) => a.LEAVE_TYPE_ID ?? (a as any).leave_type_id ?? 0;
+  const getDate = (a: Absence) => a.DATE ?? (a as any).date ?? '';
+
   // Absence type breakdown
   const byType = useMemo(() => {
     const map = new Map<number, number>();
     absences.forEach(a => {
-      map.set(a.LEAVE_TYPE_ID, (map.get(a.LEAVE_TYPE_ID) ?? 0) + 1);
+      const ltId = getLtId(a);
+      map.set(ltId, (map.get(ltId) ?? 0) + 1);
     });
     return map;
   }, [absences]);
@@ -1363,8 +1369,8 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
   const byMonth = useMemo(() => {
     const counts = Array(12).fill(0);
     absences.forEach(a => {
-      if (selectedLeaveType !== null && a.LEAVE_TYPE_ID !== selectedLeaveType) return;
-      const m = new Date(a.DATE).getMonth();
+      if (selectedLeaveType !== null && getLtId(a) !== selectedLeaveType) return;
+      const m = new Date(getDate(a)).getMonth();
       if (!isNaN(m)) counts[m]++;
     });
     return counts;
@@ -1376,9 +1382,11 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
   const byEmployee = useMemo(() => {
     const map = new Map<number, Map<number, number>>(); // empId → ltId → count
     absences.forEach(a => {
-      if (!map.has(a.EMPLOYEE_ID)) map.set(a.EMPLOYEE_ID, new Map());
-      const ltMap = map.get(a.EMPLOYEE_ID)!;
-      ltMap.set(a.LEAVE_TYPE_ID, (ltMap.get(a.LEAVE_TYPE_ID) ?? 0) + 1);
+      const eid = getEmpId(a);
+      const ltId = getLtId(a);
+      if (!map.has(eid)) map.set(eid, new Map());
+      const ltMap = map.get(eid)!;
+      ltMap.set(ltId, (ltMap.get(ltId) ?? 0) + 1);
     });
     return map;
   }, [absences]);

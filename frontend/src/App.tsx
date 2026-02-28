@@ -8,6 +8,7 @@ import { useToast } from './hooks/useToast';
 import SpotlightSearch from './components/SpotlightSearch';
 import WarningsCenter from './components/WarningsCenter';
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
+import { GuidedTour, useTour } from './components/GuidedTour';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { api } from './api/client';
 
@@ -183,6 +184,7 @@ function AppInner() {
   const [conflictCount, setConflictCount] = useState(0);
   const [spotlightOpen, setSpotlightOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const { tourOpen, startTour, closeTour } = useTour();
 
   // "g" prefix navigation: track pending timer via ref (no re-render needed)
   const gTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -368,6 +370,15 @@ function AppInner() {
           >
             ?
           </button>
+          {/* Onboarding tour */}
+          <button
+            onClick={startTour}
+            title="Geführte Tour starten"
+            aria-label="Geführte Tour starten"
+            className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors text-sm leading-none"
+          >
+            🧭
+          </button>
           {/* Close button — only visible on mobile */}
           <button
             className="md:hidden text-slate-400 hover:text-white p-1"
@@ -469,6 +480,9 @@ function AppInner() {
 
       {/* Keyboard Shortcuts Help Modal */}
       <KeyboardShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+
+      {/* Onboarding Tour (auto on first visit + manual via 🧭 button) */}
+      <GuidedTour open={tourOpen} onClose={closeTour} />
 
       {/* Mobile overlay backdrop */}
       {sidebarOpen && (

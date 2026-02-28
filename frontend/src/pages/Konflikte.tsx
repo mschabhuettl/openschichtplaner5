@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { HelpTooltip } from '../components/HelpTooltip';
 
 // ─── Types ────────────────────────────────────────────────
 interface Conflict {
@@ -420,8 +421,12 @@ export default function Konflikte() {
               </span>
             )}
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
             Planungskonflikte: Schicht + Abwesenheit / Urlaubssperre
+            <HelpTooltip
+              position="right"
+              text={"Konflikte entstehen wenn:\n• Ein Mitarbeiter gleichzeitig eine Schicht und eine Abwesenheit hat\n• Ein Mitarbeiter während einer Urlaubssperre eingeplant ist\n\nAuflösen: Schicht oder Abwesenheit löschen."}
+            />
           </p>
         </div>
 

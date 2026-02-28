@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../api/client';
+import { HelpTooltip } from '../components/HelpTooltip';
 import type {
   DashboardSummary,
   DashboardToday,
@@ -82,6 +83,7 @@ interface KpiCardProps {
   value: string | number;
   sub?: string;
   accent?: 'blue' | 'green' | 'orange' | 'red' | 'purple' | 'gray' | 'teal';
+  help?: string;
 }
 
 const accentMap: Record<string, { bg: string; text: string }> = {
@@ -94,13 +96,14 @@ const accentMap: Record<string, { bg: string; text: string }> = {
   teal:   { bg: 'bg-teal-50',   text: 'text-teal-600' },
 };
 
-function KpiCard({ icon, label, value, sub, accent = 'blue' }: KpiCardProps) {
+function KpiCard({ icon, label, value, sub, accent = 'blue', help }: KpiCardProps) {
   const ac = accentMap[accent] ?? accentMap.blue;
   return (
     <div className={`rounded-xl shadow p-5 flex flex-col gap-1 ${ac.bg}`}>
       <div className="flex items-center gap-2 text-gray-500 text-xs font-medium uppercase tracking-wide">
         <span>{icon}</span>
         <span>{label}</span>
+        {help && <HelpTooltip text={help} position="bottom" />}
       </div>
       <div className={`text-3xl font-black ${ac.text}`}>{value}</div>
       {sub && <div className="text-xs text-gray-500">{sub}</div>}
@@ -1228,6 +1231,7 @@ export default function Dashboard() {
               value={statsData?.total_employees ?? summaryData?.employees.total ?? '—'}
               sub={`${summaryData?.groups ?? 0} Gruppen`}
               accent="blue"
+              help="Gesamtanzahl aller aktiven Mitarbeiter im System, aufgeteilt nach Gruppen."
             />
             <KpiCard
               icon="🕐"
@@ -1247,6 +1251,7 @@ export default function Dashboard() {
                   : `im ${summaryData?.month_label ?? ''}`
               }
               accent="purple"
+              help="Anzahl der heute oder im gewählten Monat geplanten Schichten."
             />
             <KpiCard
               icon="🏖️"
@@ -1254,6 +1259,7 @@ export default function Dashboard() {
               value={statsData?.vacation_days_used ?? '—'}
               sub={`in ${year}`}
               accent={statsData && statsData.vacation_days_used > 0 ? 'orange' : 'gray'}
+              help="Summe aller verbrauchten Urlaubstage aller Mitarbeiter im laufenden Jahr."
             />
             <KpiCard
               icon="📈"
@@ -1273,6 +1279,7 @@ export default function Dashboard() {
                   ? covAccent
                   : 'gray'
               }
+              help="Prozentualer Anteil der besetzten Schichten im Vergleich zu den benötigten Schichten. ≥80% = gut besetzt."
             />
             <KpiCard
               icon="⚠️"
@@ -1280,6 +1287,7 @@ export default function Dashboard() {
               value={conflictsCount ?? '—'}
               sub={conflictsCount === null ? 'Lädt…' : conflictsCount === 0 ? 'Keine Konflikte ✅' : `im ${summaryData?.month_label ?? 'Monat'}`}
               accent={conflictsCount === null ? 'gray' : conflictsCount === 0 ? 'green' : conflictsCount < 10 ? 'orange' : 'red'}
+              help="Anzahl der Planungskonflikte im gewählten Monat (z.B. Überschneidungen, Unterbesetzung). Klicke auf ⚠️ Konflikte in der Navigation zum Auflösen."
             />
           </>
         )}

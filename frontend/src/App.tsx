@@ -38,6 +38,7 @@ const Groups            = lazy(() => import('./pages/Groups'));
 const Fairness          = lazy(() => import('./pages/Fairness'));
 const MitarbeiterVergleich = lazy(() => import('./pages/MitarbeiterVergleich'));
 const MitarbeiterProfil    = lazy(() => import('./pages/MitarbeiterProfil'));
+const MeinProfil           = lazy(() => import('./pages/MeinProfil'));
 const Teamkalender         = lazy(() => import('./pages/Teamkalender'));
 const UrlaubsTimeline      = lazy(() => import('./pages/UrlaubsTimeline'));
 const Shifts            = lazy(() => import('./pages/Shifts'));
@@ -131,6 +132,7 @@ const navItems: NavItem[] = [
   // ── Top-level ───────────────────────────────────────────────
   { id: 'dashboard',  label: 'Dashboard', icon: '📊', path: '/' },
   { id: 'konflikte',  label: 'Konflikte', icon: '⚠️', path: '/konflikte', badge: true },
+  { id: 'mein-profil', label: 'Mein Profil', icon: '👤', path: '/mein-profil', roles: ['Leser'] },
 
   // ── Planung — Kernplanung ────────────────────────────────────
   { id: 'schedule',         label: 'Dienstplan',       icon: '📅', group: 'Planung', path: '/schedule' },
@@ -609,6 +611,7 @@ function AppInner() {
               <Route path="/mitarbeiter-vergleich" element={<MitarbeiterVergleich />} />
               <Route path="/mitarbeiter" element={<MitarbeiterProfil />} />
               <Route path="/mitarbeiter/:id" element={<MitarbeiterProfil />} />
+              <Route path="/mein-profil" element={<MeinProfil />} />
               <Route path="/teamkalender" element={<Teamkalender />} />
               <Route path="/urlaubs-timeline" element={<UrlaubsTimeline />} />
               <Route path="/fairness" element={<Fairness />} />

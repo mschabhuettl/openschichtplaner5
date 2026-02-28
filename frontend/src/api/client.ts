@@ -1454,4 +1454,24 @@ export const api = {
 
   deleteSwapRequest: (swapId: number) =>
     deleteReq<{ ok: boolean }>(`/api/swap-requests/${swapId}`),
+
+  // ─── Self-Service (Leser) ─────────────────────────────────
+  getMyEmployee: () =>
+    fetchJSON<{ employee: Record<string, unknown> | null; user_id: number }>('/api/me/employee'),
+
+  createSelfWish: (body: {
+    date: string;
+    wish_type: 'WUNSCH' | 'SPERRUNG';
+    shift_id?: number | null;
+    note?: string;
+  }) => postJSON<Wish>('/api/self/wishes', body),
+
+  deleteSelfWish: (wishId: number) =>
+    deleteReq<{ deleted: number }>(`/api/self/wishes/${wishId}`),
+
+  createSelfAbsence: (body: {
+    date: string;
+    leave_type_id: number;
+    note?: string;
+  }) => postJSON<{ id: number; employee_id: number; date: string; leave_type_id: number }>('/api/self/absences', body),
 };

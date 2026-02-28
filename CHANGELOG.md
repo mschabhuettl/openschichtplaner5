@@ -7,6 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.0] — 2026-02-28
+
+### Hinzugefügt / Added
+
+#### 🤖 Auto-Planer mit Restrictions & Optimierungs-Bericht (1e044ac)
+- **Restrictions-aware Auto-Planer** — Automatische Schichtplanung respektiert Mitarbeiter-Einschränkungen (verbotene Schichten, Sperrtage, Wunsch-Schichten)
+- **Optimierungs-Bericht** — Detaillierter Report nach Auto-Planung: welche Regeln angewandt, welche Konflikte aufgetreten, welche Alternativen gewählt
+
+#### 📋 Bulk-Operationen (8282d44)
+- **Massenbearbeitung** — Mehrere Schichten gleichzeitig setzen, löschen oder verschieben
+- **Auswahl-Modus** — Checkboxen im Dienstplan für Mehrfachauswahl; Aktionsleiste erscheint bei aktiver Auswahl
+- **Effizienter Workflow** — Ideal für wiederkehrende Planungsaufgaben über mehrere Mitarbeiter/Tage
+
+#### 👤 Mitarbeiter Self-Service Portal (9e58ceb)
+- **Leser-Rolle** — Neue Benutzerrolle mit eingeschränktem Zugriff auf eigene Daten
+- **Mein Profil** — Mitarbeiter sehen eigene Schichten, Urlaubs-Saldo, Zeitkonto und Abwesenheiten
+- **Schichtwünsche einreichen** — Self-Service Wunsch-/Sperrtag-Einreichung ohne Planer-Eingriff
+
+#### 🔍 Command Palette / Schnellsuche (8819999)
+- **`Ctrl+K` öffnet Palette** — Floating-Suchfeld mit Sofortnavigation zu allen Seiten und Aktionen
+- **Fuzzy-Suche** — Findet Seiten, Mitarbeiter und Aktionen bei Tipp-Fehlern
+- **Tastaturnavigation** — Pfeiltasten + Enter; `Esc` schließt Palette
+
+#### 📡 SSE Echtzeit-Updates (52da614)
+- **Server-Sent Events** — Browser empfängt Live-Updates ohne Polling
+- **Dienstplan-Sync** — Änderungen anderer Planer erscheinen sofort bei allen offenen Clients
+- **Verbindungs-Indicator** — Grüner/roter Punkt zeigt SSE-Verbindungsstatus an
+
+#### 📲 Progressive Web App (PWA) Support (432012d)
+- **Installierbar** — OpenSchichtplaner5 kann als App auf Desktop und Mobile installiert werden
+- **Offline-Grundfunktion** — Service Worker ermöglicht eingeschränkten Betrieb ohne Netzwerk
+- **App-Manifest** — Icons, Splash-Screen, Themecolor für nativen App-Look
+
+#### 🌍 DE/EN Sprachumschalter (a759942)
+- **Zweisprachige UI** — Komplette Benutzeroberfläche auf Deutsch und Englisch verfügbar
+- **Sprachwahl persistent** — Einstellung wird im Browser gespeichert
+- **Sprachumschalter** — DE/EN-Toggle in der Navigation
+
+#### 🛡️ Security Hardening Round 3 (deacfbb)
+- **Erweiterte CSP** — Content Security Policy weiter verschärft
+- **Input-Sanitization** — Zusätzliche serverseitige Validierung aller Eingaben
+- **Rate Limiting** — Login-Endpunkt und kritische API-Routen gegen Brute-Force geschützt
+
+#### 📊 Qualifikations-/Kompetenz-Matrix (a5515bf)
+- **Matrix-Ansicht** — Mitarbeiter × Qualifikationen als interaktive Tabelle
+- **Gap-Analyse** — Fehlende Qualifikationen pro Stelle/Gruppe farblich markiert
+- **Check-Modus** — Qualifikationsnachweise direkt in der Matrix abhaken
+
+---
+
 ## [Unreleased] — 2026-02-28 (full-feature-day)
 
 ### 🧹 Final Polish & Konsistenz-Check

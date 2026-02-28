@@ -106,6 +106,15 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 - ✅ **Zeitzuschläge** — Lohnzuschläge inkl. wochentags-spezifischer Konfiguration
 - ✅ **Schichteinschränkungen** — Verbotene Schichten pro Mitarbeiter
 
+### 🎯 Auto-Planer & Optimierung
+- ✅ **Restrictions-aware Auto-Planer** 🤖 — Automatische Schichtplanung mit Respektierung von Einschränkungen, Sperrtagen und Wünschen
+- ✅ **Optimierungs-Bericht** — Detaillierter Report nach Auto-Planung: angewandte Regeln, Konflikte, gewählte Alternativen
+- ✅ **Qualifikations-/Kompetenz-Matrix** 📊 — Interaktive Mitarbeiter × Qualifikationen-Matrix mit Gap-Analyse und Check-Modus
+
+### 👤 Self-Service & Rollen
+- ✅ **Mitarbeiter Self-Service Portal** — Leser-Rolle mit Zugriff auf eigene Schichten, Urlaubs-Saldo, Zeitkonto
+- ✅ **Schichtwünsche Self-Service** — Wunsch-/Sperrtag-Einreichung direkt durch Mitarbeiter
+
 ### ⚖️ Fairness & Auswertung
 - ✅ **Mitarbeiter-Vergleich** ⚖️ — Zwei Mitarbeiter im Jahresüberblick nebeneinander: Statistik-Balkendiagramme, Schichtarten-Verteilung, Monatsansicht
 - ✅ **Fairness-Score** — Bewertet Gleichverteilung von Wochenend-, Nacht- und Feiertagsschichten mit Mitarbeiter-Ranking und Abweichungsanzeige
@@ -137,11 +146,16 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 - ✅ **Druckoptimiert** — Tabellen brechen korrekt um, Farben werden für S/W-Druck optimiert
 
 ### ⌨️ UX & Bedienung
+- ✅ **Command Palette** 🔍 — `Ctrl+K` öffnet Schnellsuch-Palette mit Fuzzy-Suche zu allen Seiten, Mitarbeitern und Aktionen
 - ✅ **Keyboard Shortcuts** — Globale Tastaturkürzel für Schnellnavigation; `?` öffnet Hilfe-Overlay
+- ✅ **Bulk-Operationen** — Mehrere Schichten gleichzeitig setzen/löschen; Auswahl-Modus mit Checkboxen im Dienstplan
 - ✅ **Erweiterte Filter** — Gruppenfilter in der Mitarbeiterliste; Volltextsuche im Protokoll
 - ✅ **Toast-Benachrichtigungen** — Nicht-blockierende Erfolgs-/Fehler-/Info-Meldungen
+- ✅ **DE/EN Sprachumschalter** 🌍 — Vollständige zweisprachige Benutzeroberfläche; Sprachwahl persistent
 
 ### 📱 Mobile & Performance
+- ✅ **Progressive Web App (PWA)** 📲 — Installierbar auf Desktop & Mobile; Service Worker für Offline-Grundfunktion
+- ✅ **SSE Echtzeit-Updates** 📡 — Server-Sent Events: Änderungen erscheinen live bei allen offenen Clients ohne Polling
 - ✅ **Mobile-freundlich** — Responsive Design mit Hamburger-Menü und Touch-Targets
 - ✅ **Responsive Tabellen** — Horizontales Scrollen auf kleinen Bildschirmen; vergrößerte Touch-Targets
 - ✅ **Code-Splitting** — Lazy Loading aller Seiten (schnellerer Start)

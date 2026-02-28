@@ -71,7 +71,7 @@ export default function HealthDashboard() {
 
   if (loading) {
     return (
-      <div className="p-8 text-center text-slate-500">
+      <div className="p-8 text-center text-slate-500 dark:text-slate-400">
         <div className="animate-spin text-4xl mb-4">⟳</div>
         Lade System-Status…
       </div>
@@ -80,22 +80,22 @@ export default function HealthDashboard() {
 
   if (error) {
     return (
-      <div className="p-8 text-center text-red-600">
+      <div className="p-8 text-center text-red-600 dark:text-red-400">
         Fehler beim Laden: {error}
       </div>
     );
   }
 
-  const statusColor = health?.status === 'ok' ? 'text-green-600' : 'text-red-600';
-  const dbColor = health?.db?.status === 'connected' ? 'text-green-600' : 'text-red-600';
+  const statusColor = health?.status === 'ok' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+  const dbColor = health?.db?.status === 'connected' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-6">
+    <div className="max-w-5xl mx-auto p-6 space-y-6 dark:text-slate-100">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800">🩺 System Health Dashboard</h1>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 dark:text-slate-100">🩺 System Health Dashboard</h1>
         <button
           onClick={() => { fetchHealth(); fetchFrontendErrors(); }}
-          className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors"
+          className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-medium transition-colors"
         >
           ↻ Aktualisieren
         </button>
@@ -103,24 +103,24 @@ export default function HealthDashboard() {
 
       {/* Status Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
-          <div className="text-xs text-slate-500 mb-1">Backend-Status</div>
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4">
+          <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Backend-Status</div>
           <div className={`text-xl font-bold ${statusColor}`}>
             {health?.status === 'ok' ? '✓ Online' : '✗ Fehler'}
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
-          <div className="text-xs text-slate-500 mb-1">Uptime</div>
-          <div className="text-xl font-bold text-slate-800">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4">
+          <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Uptime</div>
+          <div className="text-xl font-bold text-slate-800 dark:text-slate-100">
             {health ? formatUptime(health.uptime_seconds) : '-'}
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
-          <div className="text-xs text-slate-500 mb-1">Version</div>
-          <div className="text-xl font-bold text-slate-800">{health?.version ?? '-'}</div>
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4">
+          <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Version</div>
+          <div className="text-xl font-bold text-slate-800 dark:text-slate-100">{health?.version ?? '-'}</div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
-          <div className="text-xs text-slate-500 mb-1">Datenbank</div>
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4">
+          <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Datenbank</div>
           <div className={`text-xl font-bold ${dbColor}`}>
             {health?.db?.status === 'connected' ? '✓ Verbunden' : '✗ Fehler'}
           </div>
@@ -129,13 +129,13 @@ export default function HealthDashboard() {
 
       {/* Second row */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
-          <div className="text-xs text-slate-500 mb-1">Mitarbeiter in DB</div>
-          <div className="text-2xl font-bold text-slate-800">{health?.db?.employees ?? '-'}</div>
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4">
+          <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Mitarbeiter in DB</div>
+          <div className="text-2xl font-bold text-slate-800 dark:text-slate-100 dark:text-slate-100">{health?.db?.employees ?? '-'}</div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
-          <div className="text-xs text-slate-500 mb-1">Cache-Einträge</div>
-          <div className="text-2xl font-bold text-slate-800">
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4">
+          <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Cache-Einträge</div>
+          <div className="text-2xl font-bold text-slate-800 dark:text-slate-100 dark:text-slate-100">
             {health?.cache && typeof health.cache === 'object'
               ? (health.cache as Record<string, unknown>).entries !== undefined
                 ? String((health.cache as Record<string, unknown>).entries)
@@ -143,8 +143,8 @@ export default function HealthDashboard() {
               : 0}
           </div>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
-          <div className="text-xs text-slate-500 mb-1">Frontend-Fehler gesamt</div>
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4">
+          <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Frontend-Fehler gesamt</div>
           <div className={`text-2xl font-bold ${(health?.frontend_errors_count ?? 0) > 0 ? 'text-orange-500' : 'text-slate-800'}`}>
             {health?.frontend_errors_count ?? 0}
           </div>
@@ -152,8 +152,8 @@ export default function HealthDashboard() {
       </div>
 
       {/* Tabs */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-100">
-        <div className="flex border-b border-slate-100">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
+        <div className="flex border-b border-slate-100 dark:border-slate-700">
           {(['overview', 'backend-errors', 'frontend-errors'] as const).map(tab => (
             <button
               key={tab}
@@ -161,7 +161,7 @@ export default function HealthDashboard() {
               className={`px-5 py-3 text-sm font-medium transition-colors ${
                 activeTab === tab
                   ? 'border-b-2 border-blue-500 text-blue-600'
-                  : 'text-slate-500 hover:text-slate-700'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
               {tab === 'overview' && 'Übersicht'}
@@ -174,17 +174,17 @@ export default function HealthDashboard() {
         <div className="p-4">
           {activeTab === 'overview' && (
             <div className="space-y-3">
-              <div className="text-sm text-slate-600">
+              <div className="text-sm text-slate-600 dark:text-slate-300">
                 <span className="font-medium">DB-Pfad:</span>{' '}
-                <code className="bg-slate-50 px-2 py-0.5 rounded text-xs">{health?.db?.path ?? '-'}</code>
+                <code className="bg-slate-50 dark:bg-slate-700 px-2 py-0.5 rounded text-xs">{health?.db?.path ?? '-'}</code>
               </div>
               {health?.db?.error && (
                 <div className="text-sm text-red-600">
                   <span className="font-medium">DB-Fehler:</span> {health.db.error}
                 </div>
               )}
-              <div className="text-sm text-slate-500">
-                Log-Datei: <code className="bg-slate-50 px-2 py-0.5 rounded text-xs">/tmp/sp5-api.log</code>
+              <div className="text-sm text-slate-500 dark:text-slate-400">
+                Log-Datei: <code className="bg-slate-50 dark:bg-slate-700 px-2 py-0.5 rounded text-xs">/tmp/sp5-api.log</code>
               </div>
             </div>
           )}
@@ -192,12 +192,12 @@ export default function HealthDashboard() {
           {activeTab === 'backend-errors' && (
             <div className="space-y-2">
               {(health?.recent_errors?.length ?? 0) === 0 ? (
-                <p className="text-sm text-slate-500 py-4 text-center">Keine Fehler in den letzten Logs 🎉</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 py-4 text-center">Keine Fehler in den letzten Logs 🎉</p>
               ) : (
                 health?.recent_errors?.map((err, i) => (
-                  <div key={i} className={`rounded-lg p-3 text-xs font-mono ${err.level === 'ERROR' ? 'bg-red-50 text-red-800' : 'bg-yellow-50 text-yellow-800'}`}>
+                  <div key={i} className={`rounded-lg p-3 text-xs font-mono ${err.level === 'ERROR' ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300' : 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300'}`}>
                     <div className="flex justify-between mb-1">
-                      <span className={`font-bold ${err.level === 'ERROR' ? 'text-red-600' : 'text-yellow-600'}`}>{err.level}</span>
+                      <span className={`font-bold ${err.level === 'ERROR' ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400'}`}>{err.level}</span>
                       <span className="text-slate-400">{err.timestamp}</span>
                     </div>
                     <div className="whitespace-pre-wrap break-all">{err.message}</div>
@@ -210,15 +210,15 @@ export default function HealthDashboard() {
           {activeTab === 'frontend-errors' && (
             <div className="space-y-2">
               {(feErrors?.length ?? 0) === 0 ? (
-                <p className="text-sm text-slate-500 py-4 text-center">Keine Frontend-Fehler gemeldet 🎉</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 py-4 text-center">Keine Frontend-Fehler gemeldet 🎉</p>
               ) : (
                 feErrors?.slice().reverse().map((err, i) => (
-                  <div key={i} className="bg-orange-50 rounded-lg p-3 text-xs">
+                  <div key={i} className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-3 text-xs">
                     <div className="flex justify-between mb-1">
-                      <span className="font-bold text-orange-700">Frontend-Fehler</span>
+                      <span className="font-bold text-orange-700 dark:text-orange-400">Frontend-Fehler</span>
                       <span className="text-slate-400">{err.timestamp}</span>
                     </div>
-                    <div className="text-orange-800 font-mono whitespace-pre-wrap break-all mb-1">{err.error.slice(0, 300)}</div>
+                    <div className="text-orange-800 dark:text-orange-300 font-mono whitespace-pre-wrap break-all mb-1">{err.error.slice(0, 300)}</div>
                     {err.url && <div className="text-slate-500">URL: {err.url}</div>}
                     {err.client_ip && <div className="text-slate-400">IP: {err.client_ip}</div>}
                   </div>

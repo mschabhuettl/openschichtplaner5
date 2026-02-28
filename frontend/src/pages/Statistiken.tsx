@@ -199,11 +199,11 @@ function OvertimeBar({ value, max }: { value: number; max: number }) {
   const isPos = value >= 0;
   return (
     <div className="flex items-center gap-1 min-w-[100px]">
-      <div className="flex-1 flex h-3 rounded overflow-hidden bg-gray-100">
+      <div className="flex-1 flex h-3 rounded overflow-hidden bg-gray-100 dark:bg-slate-700">
         {isPos ? (
           <>
             <div className="flex-1" />
-            <div className="w-px bg-gray-400" />
+            <div className="w-px bg-gray-400 dark:bg-slate-500" />
             <div className="flex-1 relative">
               <div
                 className="absolute left-0 top-0 h-full bg-green-500 rounded-r"
@@ -219,7 +219,7 @@ function OvertimeBar({ value, max }: { value: number; max: number }) {
                 style={{ width }}
               />
             </div>
-            <div className="w-px bg-gray-400" />
+            <div className="w-px bg-gray-400 dark:bg-slate-500" />
             <div className="flex-1" />
           </>
         )}
@@ -439,7 +439,7 @@ export default function Statistiken() {
 
   const SortHeader = ({ label, skey }: { label: string; skey: SortKey }) => (
     <th
-      className="px-3 py-2 text-right border border-gray-200 cursor-pointer hover:bg-slate-200 select-none whitespace-nowrap"
+      className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 select-none whitespace-nowrap dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600"
       onClick={() => handleSort(skey)}
     >
       {label} {sortKey === skey ? (sortDir === 'asc' ? '↑' : '↓') : ''}
@@ -450,34 +450,34 @@ export default function Statistiken() {
     <div className="p-2 sm:p-4 lg:p-6 h-full flex flex-col">
       {/* Page header + tab switcher */}
       <div className="flex items-center gap-3 mb-3 flex-wrap">
-        <h1 className="text-xl font-bold text-gray-800">📈 Statistiken</h1>
+        <h1 className="text-xl font-bold text-gray-800 dark:text-slate-100 dark:text-slate-200">📈 Statistiken</h1>
         <div className="flex rounded-lg border overflow-x-auto shadow-sm text-sm min-w-0">
           <button
-            className={`px-4 py-1.5 transition-colors ${activeTab === 'group' ? 'bg-slate-700 text-white' : 'bg-white hover:bg-gray-50 text-gray-700'}`}
+            className={`px-4 py-1.5 transition-colors ${activeTab === 'group' ? 'bg-slate-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
             onClick={() => setActiveTab('group')}
           >
             Gruppenauswertung
           </button>
           <button
-            className={`px-4 py-1.5 transition-colors ${activeTab === 'employee' ? 'bg-slate-700 text-white' : 'bg-white hover:bg-gray-50 text-gray-700'}`}
+            className={`px-4 py-1.5 transition-colors ${activeTab === 'employee' ? 'bg-slate-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
             onClick={() => setActiveTab('employee')}
           >
             👤 Mitarbeiter-Auswertung
           </button>
           <button
-            className={`px-4 py-1.5 transition-colors ${activeTab === 'sickness' ? 'bg-red-700 text-white' : 'bg-white hover:bg-gray-50 text-gray-700'}`}
+            className={`px-4 py-1.5 transition-colors ${activeTab === 'sickness' ? 'bg-red-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
             onClick={() => setActiveTab('sickness')}
           >
             🏥 Krankenstand
           </button>
           <button
-            className={`px-4 py-1.5 transition-colors ${activeTab === 'compare' ? 'bg-indigo-700 text-white' : 'bg-white hover:bg-gray-50 text-gray-700'}`}
+            className={`px-4 py-1.5 transition-colors ${activeTab === 'compare' ? 'bg-indigo-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
             onClick={() => setActiveTab('compare')}
           >
             {t.statistiken.tabMonthly}
           </button>
           <button
-            className={`px-4 py-1.5 transition-colors ${activeTab === 'shifts' ? 'bg-emerald-700 text-white' : 'bg-white hover:bg-gray-50 text-gray-700'}`}
+            className={`px-4 py-1.5 transition-colors ${activeTab === 'shifts' ? 'bg-emerald-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
             onClick={() => setActiveTab('shifts')}
           >
             {t.statistiken.tabShifts}
@@ -493,7 +493,7 @@ export default function Statistiken() {
             <select
               value={selectedEmpId ?? ''}
               onChange={e => setSelectedEmpId(e.target.value ? Number(e.target.value) : null)}
-              className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm min-w-[200px]"
+              className="px-3 py-1.5 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm text-sm min-w-[200px]"
             >
               <option value="">— Mitarbeiter wählen —</option>
               {employees.map(e => (
@@ -507,12 +507,12 @@ export default function Statistiken() {
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setEmpYear(y => y - 1)}
-                className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm"
+                className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm"
               >‹</button>
-              <span className="font-semibold text-gray-700 min-w-[50px] text-center">{empYear}</span>
+              <span className="font-semibold text-gray-700 dark:text-slate-300 min-w-[50px] text-center">{empYear}</span>
               <button
                 onClick={() => setEmpYear(y => y + 1)}
-                className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm"
+                className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm"
               >›</button>
             </div>
 
@@ -533,11 +533,11 @@ export default function Statistiken() {
 
           {/* Employee info banner */}
           {empStats && (
-            <div className="mb-3 px-4 py-2 bg-slate-100 rounded-lg border text-sm text-gray-700 flex flex-wrap gap-4">
-              <span className="font-semibold text-gray-900">{empStats.employee_name}</span>
-              {empStats.employee_short && <span className="text-gray-500">Kürzel: {empStats.employee_short}</span>}
-              {empStats.employee_number && <span className="text-gray-500">Nr.: {empStats.employee_number}</span>}
-              <span className="text-gray-500">Jahr: {empStats.year}</span>
+            <div className="mb-3 px-4 py-2 bg-slate-100 rounded-lg border text-sm text-gray-700 dark:text-slate-300 flex flex-wrap gap-4">
+              <span className="font-semibold text-gray-900 dark:text-slate-100">{empStats.employee_name}</span>
+              {empStats.employee_short && <span className="text-gray-500 dark:text-slate-400">Kürzel: {empStats.employee_short}</span>}
+              {empStats.employee_number && <span className="text-gray-500 dark:text-slate-400">Nr.: {empStats.employee_number}</span>}
+              <span className="text-gray-500 dark:text-slate-400">Jahr: {empStats.year}</span>
             </div>
           )}
 
@@ -545,47 +545,47 @@ export default function Statistiken() {
           {empStats && (
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 mb-3">
               {[
-                { label: 'Soll-Std', value: `${empStats.totals.target_hours.toFixed(0)}h`, color: 'text-gray-700' },
+                { label: 'Soll-Std', value: `${empStats.totals.target_hours.toFixed(0)}h`, color: 'text-gray-700 dark:text-slate-300' },
                 { label: 'Ist-Std', value: `${empStats.totals.actual_hours.toFixed(0)}h`, color: 'text-blue-700' },
                 {
                   label: 'Differenz',
                   value: `${empStats.totals.difference >= 0 ? '+' : ''}${empStats.totals.difference.toFixed(0)}h`,
                   color: empStats.totals.difference >= 0 ? 'text-green-700' : 'text-red-700',
                 },
-                { label: 'Schichten', value: String(empStats.totals.shifts_count), color: 'text-gray-700' },
+                { label: 'Schichten', value: String(empStats.totals.shifts_count), color: 'text-gray-700 dark:text-slate-300' },
                 { label: 'Wochenende', value: String(empStats.totals.weekend_shifts), color: 'text-orange-700' },
                 { label: 'Nachtschichten', value: String(empStats.totals.night_shifts), color: 'text-indigo-700' },
                 { label: 'Urlaubstage', value: String(empStats.totals.vacation_days), color: 'text-sky-700' },
                 { label: 'Abwesenheit', value: String(empStats.totals.absence_days), color: 'text-amber-700' },
               ].map(card => (
-                <div key={card.label} className="bg-white rounded-lg border p-2 shadow-sm text-center">
+                <div key={card.label} className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 p-2 shadow-sm text-center">
                   <div className={`text-lg font-bold ${card.color}`}>{card.value}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">{card.label}</div>
+                  <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{card.label}</div>
                 </div>
               ))}
             </div>
           )}
 
           {/* Month-by-month table */}
-          <div className="flex-1 overflow-auto bg-white rounded-lg shadow border border-gray-200">
+          <div className="flex-1 overflow-auto bg-white dark:bg-slate-800 rounded-lg shadow border border-gray-200 dark:border-slate-600 dark:border-slate-700">
             {!empStats && !empLoading && (
-              <div className="flex items-center justify-center h-32 text-gray-400 text-sm">
+              <div className="flex items-center justify-center h-32 text-gray-400 dark:text-slate-500 text-sm">
                 {selectedEmpId ? 'Lade Daten...' : 'Bitte einen Mitarbeiter auswählen'}
               </div>
             )}
             {empStats && (
               <table className="border-collapse text-sm w-full">
                 <thead className="sticky top-0 z-10">
-                  <tr className="bg-slate-100 text-xs">
-                    <th className="px-3 py-2 text-left border border-gray-200 font-semibold">Monat</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 whitespace-nowrap">Soll-Std</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 whitespace-nowrap">Ist-Std</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 whitespace-nowrap">Differenz</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 whitespace-nowrap">Schichten</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 whitespace-nowrap">🌅 Wochenende</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 whitespace-nowrap">🌙 Nacht</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 whitespace-nowrap">🏖️ Urlaub</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 whitespace-nowrap">Abwesend</th>
+                  <tr className="bg-slate-100 dark:bg-slate-700 text-xs">
+                    <th className="px-3 py-2 text-left border border-gray-200 dark:border-slate-600 dark:border-slate-600 font-semibold dark:bg-slate-700 dark:text-slate-200">Monat</th>
+                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">Soll-Std</th>
+                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">Ist-Std</th>
+                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">Differenz</th>
+                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">Schichten</th>
+                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">🌅 Wochenende</th>
+                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">🌙 Nacht</th>
+                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">🏖️ Urlaub</th>
+                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">Abwesend</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -596,89 +596,89 @@ export default function Statistiken() {
                     const rowBg = isCurrentMonth
                       ? 'bg-blue-50'
                       : i % 2 === 0
-                      ? 'bg-white'
-                      : 'bg-gray-50';
+                      ? 'bg-white dark:bg-slate-800'
+                      : 'bg-gray-50 dark:bg-slate-700/50';
                     return (
                       <tr key={m.month} className={`${rowBg} hover:bg-blue-50/70 transition-colors`}>
-                        <td className={`px-3 py-2 border border-gray-100 font-medium ${isCurrentMonth ? 'text-blue-700' : 'text-gray-800'}`}>
+                        <td className={`px-3 py-2 border border-gray-100 dark:border-slate-700 font-medium ${isCurrentMonth ? 'text-blue-700' : 'text-gray-800 dark:text-slate-200'}`}>
                           {MONTH_NAMES[m.month]}
                           {isCurrentMonth && <span className="ml-1 text-xs text-blue-400">(aktuell)</span>}
                         </td>
-                        <td className="px-3 py-2 border border-gray-100 text-right text-gray-600">
-                          {m.target_hours > 0 ? `${m.target_hours.toFixed(1)}h` : <span className="text-gray-300">—</span>}
+                        <td className="px-3 py-2 border border-gray-100 dark:border-slate-700 text-right text-gray-600">
+                          {m.target_hours > 0 ? `${m.target_hours.toFixed(1)}h` : <span className="text-gray-300 dark:text-slate-600">—</span>}
                         </td>
-                        <td className="px-3 py-2 border border-gray-100 text-right font-semibold text-gray-800">
-                          {m.actual_hours > 0 ? `${m.actual_hours.toFixed(1)}h` : <span className="text-gray-300 font-normal">—</span>}
+                        <td className="px-3 py-2 border border-gray-100 dark:border-slate-700 text-right font-semibold text-gray-800 dark:text-slate-200">
+                          {m.actual_hours > 0 ? `${m.actual_hours.toFixed(1)}h` : <span className="text-gray-300 dark:text-slate-600 font-normal">—</span>}
                         </td>
-                        <td className="px-3 py-2 border border-gray-100 text-right">
+                        <td className="px-3 py-2 border border-gray-100 dark:border-slate-700 text-right">
                           {m.target_hours > 0 ? (
                             <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${diff >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                               {diff >= 0 ? '+' : ''}{diff.toFixed(1)}h
                             </span>
-                          ) : <span className="text-gray-300">—</span>}
+                          ) : <span className="text-gray-300 dark:text-slate-600">—</span>}
                         </td>
-                        <td className="px-3 py-2 border border-gray-100 text-right text-gray-600">
-                          {m.shifts_count > 0 ? m.shifts_count : <span className="text-gray-300">—</span>}
+                        <td className="px-3 py-2 border border-gray-100 dark:border-slate-700 text-right text-gray-600">
+                          {m.shifts_count > 0 ? m.shifts_count : <span className="text-gray-300 dark:text-slate-600">—</span>}
                         </td>
-                        <td className="px-3 py-2 border border-gray-100 text-right">
+                        <td className="px-3 py-2 border border-gray-100 dark:border-slate-700 text-right">
                           {m.weekend_shifts > 0 ? (
                             <span className="px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-xs font-semibold">
                               {m.weekend_shifts}
                             </span>
-                          ) : <span className="text-gray-300">—</span>}
+                          ) : <span className="text-gray-300 dark:text-slate-600">—</span>}
                         </td>
-                        <td className="px-3 py-2 border border-gray-100 text-right">
+                        <td className="px-3 py-2 border border-gray-100 dark:border-slate-700 text-right">
                           {m.night_shifts > 0 ? (
                             <span className="px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs font-semibold">
                               {m.night_shifts}
                             </span>
-                          ) : <span className="text-gray-300">—</span>}
+                          ) : <span className="text-gray-300 dark:text-slate-600">—</span>}
                         </td>
-                        <td className="px-3 py-2 border border-gray-100 text-right">
+                        <td className="px-3 py-2 border border-gray-100 dark:border-slate-700 text-right">
                           {m.vacation_days > 0 ? (
                             <span className="px-1.5 py-0.5 bg-sky-100 text-sky-700 rounded text-xs font-semibold">
                               {m.vacation_days}
                             </span>
-                          ) : <span className="text-gray-300">—</span>}
+                          ) : <span className="text-gray-300 dark:text-slate-600">—</span>}
                         </td>
-                        <td className="px-3 py-2 border border-gray-100 text-right">
+                        <td className="px-3 py-2 border border-gray-100 dark:border-slate-700 text-right">
                           {m.absence_days > 0 ? (
                             <span className="px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-semibold">
                               {m.absence_days}
                             </span>
-                          ) : <span className="text-gray-300">—</span>}
+                          ) : <span className="text-gray-300 dark:text-slate-600">—</span>}
                         </td>
                       </tr>
                     );
                   })}
                 </tbody>
                 <tfoot>
-                  <tr className="bg-slate-100 font-bold border-t-2 border-gray-300 text-sm">
-                    <td className="px-3 py-2 border border-gray-200">Gesamt {empYear}</td>
-                    <td className="px-3 py-2 border border-gray-200 text-right text-gray-700">
+                  <tr className="bg-slate-100 dark:bg-slate-700 font-bold border-t-2 border-gray-300 dark:border-slate-600 text-sm">
+                    <td className="px-3 py-2 border border-gray-200 dark:border-slate-600">Gesamt {empYear}</td>
+                    <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right text-gray-700 dark:text-slate-300">
                       {empStats.totals.target_hours.toFixed(1)}h
                     </td>
-                    <td className="px-3 py-2 border border-gray-200 text-right text-blue-700">
+                    <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right text-blue-700">
                       {empStats.totals.actual_hours.toFixed(1)}h
                     </td>
-                    <td className="px-3 py-2 border border-gray-200 text-right">
+                    <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right">
                       <span className={`font-bold ${empStats.totals.difference >= 0 ? 'text-green-700' : 'text-red-700'}`}>
                         {empStats.totals.difference >= 0 ? '+' : ''}{empStats.totals.difference.toFixed(1)}h
                       </span>
                     </td>
-                    <td className="px-3 py-2 border border-gray-200 text-right text-gray-700">
+                    <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right text-gray-700 dark:text-slate-300">
                       {empStats.totals.shifts_count}
                     </td>
-                    <td className="px-3 py-2 border border-gray-200 text-right text-orange-700">
+                    <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right text-orange-700">
                       {empStats.totals.weekend_shifts}
                     </td>
-                    <td className="px-3 py-2 border border-gray-200 text-right text-indigo-700">
+                    <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right text-indigo-700">
                       {empStats.totals.night_shifts}
                     </td>
-                    <td className="px-3 py-2 border border-gray-200 text-right text-sky-700">
+                    <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right text-sky-700">
                       {empStats.totals.vacation_days}
                     </td>
-                    <td className="px-3 py-2 border border-gray-200 text-right text-amber-700">
+                    <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right text-amber-700">
                       {empStats.totals.absence_days}
                     </td>
                   </tr>
@@ -695,18 +695,18 @@ export default function Statistiken() {
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         {/* Month navigation */}
         <div className="flex items-center gap-2">
-          <button onClick={prevMonth} className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm">‹</button>
-          <span className="font-semibold text-gray-700 min-w-[150px] text-center">
+          <button onClick={prevMonth} className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm">‹</button>
+          <span className="font-semibold text-gray-700 dark:text-slate-300 min-w-[150px] text-center">
             {MONTH_NAMES[month]} {year}
           </span>
-          <button onClick={nextMonth} className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm">›</button>
+          <button onClick={nextMonth} className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm">›</button>
         </div>
 
         {/* Group filter */}
         <select
           value={groupId ?? ''}
           onChange={e => setGroupId(e.target.value ? Number(e.target.value) : undefined)}
-          className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
+          className="px-3 py-1.5 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm text-sm"
         >
           <option value="">{t.statistiken.allEmployees}</option>
           {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
@@ -715,7 +715,7 @@ export default function Statistiken() {
         {loading && <span className="text-sm text-blue-500 animate-pulse">Lade...</span>}
         {error && <span className="text-sm text-red-500">Fehler: {error}</span>}
 
-        <span className="text-sm text-gray-500">{stats.length} Mitarbeiter</span>
+        <span className="text-sm text-gray-500 dark:text-slate-400">{stats.length} Mitarbeiter</span>
 
         {/* HTML Export button */}
         <button
@@ -742,13 +742,13 @@ export default function Statistiken() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-        <div className="bg-white rounded-lg border p-3 shadow-sm text-center">
-          <div className="text-xl font-bold text-gray-700">{totalTarget.toFixed(0)}h</div>
-          <div className="text-xs text-gray-500">Gesamt Soll</div>
+        <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 p-3 shadow-sm text-center">
+          <div className="text-xl font-bold text-gray-700 dark:text-slate-300">{totalTarget.toFixed(0)}h</div>
+          <div className="text-xs text-gray-500 dark:text-slate-400">Gesamt Soll</div>
         </div>
-        <div className="bg-white rounded-lg border p-3 shadow-sm text-center">
+        <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 p-3 shadow-sm text-center">
           <div className="text-xl font-bold text-blue-700">{totalActual.toFixed(0)}h</div>
-          <div className="text-xs text-gray-500">Gesamt Ist</div>
+          <div className="text-xs text-gray-500 dark:text-slate-400">Gesamt Ist</div>
         </div>
         <div className={`rounded-lg border p-3 shadow-sm text-center ${totalOvertime >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
           <div className={`text-xl font-bold ${totalOvertime >= 0 ? 'text-green-700' : 'text-red-700'}`}>
@@ -763,19 +763,19 @@ export default function Statistiken() {
       </div>
 
       {/* Table */}
-      <div className="flex-1 overflow-auto bg-white rounded-lg shadow border border-gray-200">
+      <div className="flex-1 overflow-auto bg-white dark:bg-slate-800 rounded-lg shadow border border-gray-200 dark:border-slate-600 dark:border-slate-700">
         <table className="border-collapse text-sm w-full min-w-[640px]">
           <thead className="sticky top-0 z-10">
-            <tr className="bg-slate-100">
+            <tr className="bg-slate-100 dark:bg-slate-700">
               <th
-                className="px-3 py-2 text-left border border-gray-200 cursor-pointer hover:bg-slate-200 select-none sticky left-0 bg-slate-100 z-10 min-w-[180px]"
+                className="px-3 py-2 text-left border border-gray-200 dark:border-slate-600 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 select-none sticky left-0 bg-slate-100 dark:bg-slate-700 z-10 min-w-[180px] dark:text-slate-200 dark:border-slate-600"
                 onClick={() => handleSort('name')}
               >
                 Mitarbeiter {sortKey === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
               </th>
               <SortHeader label={t.statistiken.colTargetHrs} skey="target_hours" />
               <SortHeader label={t.statistiken.colActualHrs} skey="actual_hours" />
-              <th className="px-3 py-2 text-center border border-gray-200 min-w-[180px] whitespace-nowrap cursor-pointer hover:bg-slate-200 select-none" onClick={() => handleSort('overtime')}>
+              <th className="px-3 py-2 text-center border border-gray-200 dark:border-slate-600 min-w-[180px] whitespace-nowrap cursor-pointer hover:bg-slate-200 select-none" onClick={() => handleSort('overtime')}>
                 Überstunden {sortKey === 'overtime' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
               </th>
               <SortHeader label={t.statistiken.colAbsent} skey="absences" />
@@ -786,36 +786,36 @@ export default function Statistiken() {
             {sorted.map((s, i) => (
               <tr
                 key={s.employee_id}
-                className={`${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}
+                className={`${i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-gray-50 dark:bg-slate-700/50'} hover:bg-blue-50 transition-colors`}
               >
-                <td className="sticky left-0 bg-inherit px-3 py-2 border border-gray-100 font-medium whitespace-nowrap">
+                <td className="sticky left-0 bg-inherit px-3 py-2 border border-gray-100 dark:border-slate-700 font-medium whitespace-nowrap">
                   {s.employee_name}
                 </td>
-                <td className="px-3 py-2 border border-gray-100 text-right text-gray-600">
+                <td className="px-3 py-2 border border-gray-100 dark:border-slate-700 text-right text-gray-600">
                   {s.target_hours.toFixed(1)}h
                 </td>
-                <td className="px-3 py-2 border border-gray-100 text-right font-semibold text-gray-700">
+                <td className="px-3 py-2 border border-gray-100 dark:border-slate-700 text-right font-semibold text-gray-700 dark:text-slate-300">
                   {s.actual_hours.toFixed(1)}h
                 </td>
-                <td className="px-3 py-2 border border-gray-100">
+                <td className="px-3 py-2 border border-gray-100 dark:border-slate-700">
                   <OvertimeBar value={s.overtime_hours} max={maxOvertime} />
                 </td>
-                <td className="px-3 py-2 border border-gray-100 text-right">
+                <td className="px-3 py-2 border border-gray-100 dark:border-slate-700 text-right">
                   {s.absence_days > 0 ? (
                     <span className="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-semibold">
                       {s.absence_days}
                     </span>
                   ) : (
-                    <span className="text-gray-300">—</span>
+                    <span className="text-gray-300 dark:text-slate-600">—</span>
                   )}
                 </td>
-                <td className="px-3 py-2 border border-gray-100 text-right">
+                <td className="px-3 py-2 border border-gray-100 dark:border-slate-700 text-right">
                   {s.vacation_used > 0 ? (
                     <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-semibold">
                       {s.vacation_used}
                     </span>
                   ) : (
-                    <span className="text-gray-300">—</span>
+                    <span className="text-gray-300 dark:text-slate-600">—</span>
                   )}
                 </td>
               </tr>
@@ -823,7 +823,7 @@ export default function Statistiken() {
 
             {sorted.length === 0 && (
               <tr>
-                <td colSpan={6} className="text-center py-8 text-gray-400">
+                <td colSpan={6} className="text-center py-8 text-gray-400 dark:text-slate-500">
                   {loading ? 'Lade Statistiken...' : 'Keine Daten gefunden'}
                 </td>
               </tr>
@@ -832,19 +832,19 @@ export default function Statistiken() {
 
           {sorted.length > 0 && (
             <tfoot>
-              <tr className="bg-slate-100 font-bold border-t-2 border-gray-300">
-                <td className="sticky left-0 bg-slate-100 px-3 py-2 border border-gray-200">
+              <tr className="bg-slate-100 dark:bg-slate-700 font-bold border-t-2 border-gray-300 dark:border-slate-600">
+                <td className="sticky left-0 bg-slate-100 dark:bg-slate-700 px-3 py-2 border border-gray-200 dark:border-slate-600 dark:border-slate-600">
                   Gesamt ({sorted.length} MA)
                 </td>
-                <td className="px-3 py-2 border border-gray-200 text-right">{totalTarget.toFixed(1)}h</td>
-                <td className="px-3 py-2 border border-gray-200 text-right">{totalActual.toFixed(1)}h</td>
-                <td className="px-3 py-2 border border-gray-200">
+                <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right">{totalTarget.toFixed(1)}h</td>
+                <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right">{totalActual.toFixed(1)}h</td>
+                <td className="px-3 py-2 border border-gray-200 dark:border-slate-600">
                   <span className={`text-sm font-bold ${totalOvertime >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {totalOvertime >= 0 ? '+' : ''}{totalOvertime.toFixed(1)}h
                   </span>
                 </td>
-                <td className="px-3 py-2 border border-gray-200 text-right">{totalAbsences}</td>
-                <td className="px-3 py-2 border border-gray-200 text-right">{totalVacation}</td>
+                <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right">{totalAbsences}</td>
+                <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right">{totalVacation}</td>
               </tr>
             </tfoot>
           )}
@@ -853,10 +853,10 @@ export default function Statistiken() {
 
       {/* Zeitzuschlag Summary */}
       {extraSummary.length > 0 && (
-        <div className="mt-4 bg-white rounded-lg shadow border border-gray-200">
+        <div className="mt-4 bg-white dark:bg-slate-800 rounded-lg shadow border border-gray-200 dark:border-slate-600">
           <div className="px-4 py-2 bg-slate-700 text-white text-sm font-semibold rounded-t-lg flex items-center gap-2">
             <span>⏱️ Zeitzuschläge – {MONTH_NAMES[month]} {year}</span>
-            <span className="text-slate-300 font-normal text-xs">(Alle Mitarbeiter)</span>
+            <span className="text-slate-300 dark:text-slate-500 font-normal text-xs">(Alle Mitarbeiter)</span>
           </div>
           <div className="flex flex-wrap gap-3 p-4">
             {extraSummary.map(e => (
@@ -866,7 +866,7 @@ export default function Statistiken() {
               >
                 <div className="text-lg font-bold text-indigo-700">{e.hours.toFixed(1)}h</div>
                 <div className="text-xs font-semibold text-indigo-600 mt-0.5 text-center">{e.charge_name}</div>
-                <div className="text-xs text-gray-400 mt-1">{e.shift_count} Schicht{e.shift_count !== 1 ? 'en' : ''}</div>
+                <div className="text-xs text-gray-400 dark:text-slate-500 mt-1">{e.shift_count} Schicht{e.shift_count !== 1 ? 'en' : ''}</div>
               </div>
             ))}
           </div>
@@ -882,12 +882,12 @@ export default function Statistiken() {
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setSickYear(y => y - 1)}
-                className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm"
+                className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm"
               >‹</button>
-              <span className="font-semibold text-gray-700 min-w-[50px] text-center">{sickYear}</span>
+              <span className="font-semibold text-gray-700 dark:text-slate-300 min-w-[50px] text-center">{sickYear}</span>
               <button
                 onClick={() => setSickYear(y => y + 1)}
-                className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm"
+                className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm"
               >›</button>
             </div>
 
@@ -908,7 +908,7 @@ export default function Statistiken() {
 
           {/* No data / loading state */}
           {!sickData && !sickLoading && (
-            <div className="flex items-center justify-center h-32 text-gray-400 text-sm">
+            <div className="flex items-center justify-center h-32 text-gray-400 dark:text-slate-500 text-sm">
               Keine Daten verfügbar
             </div>
           )}
@@ -917,27 +917,27 @@ export default function Statistiken() {
             <>
               {/* Summary KPI cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-white rounded-lg border shadow-sm p-3 text-center">
+                <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm p-3 text-center">
                   <div className="text-2xl font-bold text-red-600">{sickData.total_sick_days}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Gesamt Krankheitstage</div>
+                  <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Gesamt Krankheitstage</div>
                 </div>
-                <div className="bg-white rounded-lg border shadow-sm p-3 text-center">
+                <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm p-3 text-center">
                   <div className="text-2xl font-bold text-orange-600">{sickData.affected_employees}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">betroffene Mitarbeiter</div>
+                  <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">betroffene Mitarbeiter</div>
                 </div>
-                <div className="bg-white rounded-lg border shadow-sm p-3 text-center">
-                  <div className="text-2xl font-bold text-gray-700">
+                <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm p-3 text-center">
+                  <div className="text-2xl font-bold text-gray-700 dark:text-slate-300">
                     {sickData.total_employees > 0
                       ? ((sickData.total_sick_days / sickData.total_employees)).toFixed(1)
                       : '0'}
                   </div>
-                  <div className="text-xs text-gray-500 mt-0.5">Ø Tage / Mitarbeiter</div>
+                  <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Ø Tage / Mitarbeiter</div>
                 </div>
-                <div className="bg-white rounded-lg border shadow-sm p-3 text-center">
+                <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm p-3 text-center">
                   <div className="text-2xl font-bold text-purple-700">
                     {sickData.per_employee.reduce((s, e) => s + e.sick_episodes, 0)}
                   </div>
-                  <div className="text-xs text-gray-500 mt-0.5">Krankmeldungen gesamt</div>
+                  <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Krankmeldungen gesamt</div>
                 </div>
               </div>
 
@@ -945,10 +945,10 @@ export default function Statistiken() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
                 {/* Chart 1: Monats-Trend */}
-                <div className="bg-white rounded-lg border shadow-sm p-4">
-                  <div className="text-sm font-semibold text-gray-700 mb-3">📅 Krankheitstage pro Monat</div>
+                <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm p-4">
+                  <div className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">📅 Krankheitstage pro Monat</div>
                   {sickData.total_sick_days === 0 ? (
-                    <div className="text-center text-gray-400 text-sm py-6">Keine Krankmeldungen im Jahr {sickYear}</div>
+                    <div className="text-center text-gray-400 dark:text-slate-500 text-sm py-6">Keine Krankmeldungen im Jahr {sickYear}</div>
                   ) : (
                     <div className="flex items-end gap-1 h-32">
                       {sickData.per_month.map(m => {
@@ -979,10 +979,10 @@ export default function Statistiken() {
                 </div>
 
                 {/* Chart 2: Wochentag-Verteilung */}
-                <div className="bg-white rounded-lg border shadow-sm p-4">
-                  <div className="text-sm font-semibold text-gray-700 mb-3">📊 Krankheitstage nach Wochentag</div>
+                <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm p-4">
+                  <div className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">📊 Krankheitstage nach Wochentag</div>
                   {sickData.total_sick_days === 0 ? (
-                    <div className="text-center text-gray-400 text-sm py-6">Keine Krankmeldungen im Jahr {sickYear}</div>
+                    <div className="text-center text-gray-400 dark:text-slate-500 text-sm py-6">Keine Krankmeldungen im Jahr {sickYear}</div>
                   ) : (
                     <div className="flex items-end gap-1 h-32">
                       {sickData.per_weekday.map(wd => {
@@ -1008,7 +1008,7 @@ export default function Statistiken() {
                                 title={`${wd.weekday_name}: ${wd.sick_days} Tag${wd.sick_days !== 1 ? 'e' : ''}`}
                               />
                             </div>
-                            <div className={`text-xs leading-none font-medium ${isMonday ? 'text-orange-600 font-bold' : isWeekend ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <div className={`text-xs leading-none font-medium ${isMonday ? 'text-orange-600 font-bold' : isWeekend ? 'text-gray-400 dark:text-slate-500' : 'text-gray-600 dark:text-slate-300'}`}>
                               {shortNames[wd.weekday]}
                               {isMonday && <span className="ml-0.5">⚠️</span>}
                             </div>
@@ -1030,10 +1030,10 @@ export default function Statistiken() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
                 {/* MA Bar Chart */}
-                <div className="bg-white rounded-lg border shadow-sm p-4">
-                  <div className="text-sm font-semibold text-gray-700 mb-3">👤 Krankheitstage pro Mitarbeiter</div>
+                <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm p-4">
+                  <div className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">👤 Krankheitstage pro Mitarbeiter</div>
                   {sickData.per_employee.filter(e => e.sick_days > 0).length === 0 ? (
-                    <div className="text-center text-gray-400 text-sm py-6">Alle Mitarbeiter ohne Krankmeldungen</div>
+                    <div className="text-center text-gray-400 dark:text-slate-500 text-sm py-6">Alle Mitarbeiter ohne Krankmeldungen</div>
                   ) : (
                     <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
                       {(() => {
@@ -1041,7 +1041,7 @@ export default function Statistiken() {
                         const maxDays = Math.max(...withSick.map(e => e.sick_days), 1);
                         return withSick.map(e => (
                           <div key={e.employee_id} className="flex items-center gap-2">
-                            <div className="text-xs text-gray-600 w-28 truncate shrink-0 text-right" title={e.employee_name}>
+                            <div className="text-xs text-gray-600 dark:text-slate-300 w-28 truncate shrink-0 text-right" title={e.employee_name}>
                               {e.employee_short || e.employee_name.split(',')[0]}
                             </div>
                             <div className="flex-1 h-5 bg-gray-100 rounded overflow-hidden">
@@ -1060,18 +1060,18 @@ export default function Statistiken() {
                 </div>
 
                 {/* Bradford Factor Table */}
-                <div className="bg-white rounded-lg border shadow-sm p-4">
-                  <div className="text-sm font-semibold text-gray-700 mb-1">📋 Bradford-Faktor</div>
-                  <div className="text-xs text-gray-500 mb-3">B = S² × D &nbsp;|&nbsp; S = Episoden, D = Tage &nbsp;|&nbsp; Hoch = viele Kurzabsenzen</div>
+                <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm p-4">
+                  <div className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-1">📋 Bradford-Faktor</div>
+                  <div className="text-xs text-gray-500 dark:text-slate-400 mb-3">B = S² × D &nbsp;|&nbsp; S = Episoden, D = Tage &nbsp;|&nbsp; Hoch = viele Kurzabsenzen</div>
                   <div className="overflow-auto max-h-64">
                     <table className="w-full text-xs border-collapse">
                       <thead>
-                        <tr className="bg-slate-100 text-xs">
-                          <th className="px-2 py-1.5 text-left border border-gray-200 font-semibold">Mitarbeiter</th>
-                          <th className="px-2 py-1.5 text-right border border-gray-200">Tage</th>
-                          <th className="px-2 py-1.5 text-right border border-gray-200">Episoden</th>
-                          <th className="px-2 py-1.5 text-right border border-gray-200">Bradford</th>
-                          <th className="px-2 py-1.5 text-left border border-gray-200">Risiko</th>
+                        <tr className="bg-slate-100 dark:bg-slate-700 text-xs">
+                          <th className="px-2 py-1.5 text-left border border-gray-200 dark:border-slate-600 dark:border-slate-600 font-semibold dark:bg-slate-700 dark:text-slate-200">Mitarbeiter</th>
+                          <th className="px-2 py-1.5 text-right border border-gray-200 dark:border-slate-600">Tage</th>
+                          <th className="px-2 py-1.5 text-right border border-gray-200 dark:border-slate-600">Episoden</th>
+                          <th className="px-2 py-1.5 text-right border border-gray-200 dark:border-slate-600">Bradford</th>
+                          <th className="px-2 py-1.5 text-left border border-gray-200 dark:border-slate-600">Risiko</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1085,14 +1085,14 @@ export default function Statistiken() {
                               : bf >= 50  ? { label: '🟡 Gering', cls: 'text-yellow-700 bg-yellow-50' }
                               : { label: '🟢 OK', cls: 'text-green-700 bg-green-50' };
                             return (
-                              <tr key={e.employee_id} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                <td className="px-2 py-1 border border-gray-100 font-medium" title={e.employee_name}>
+                              <tr key={e.employee_id} className={i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-gray-50 dark:bg-slate-700/50'}>
+                                <td className="px-2 py-1 border border-gray-100 dark:border-slate-700 font-medium" title={e.employee_name}>
                                   {e.employee_name.length > 18 ? e.employee_name.slice(0, 17) + '…' : e.employee_name}
                                 </td>
-                                <td className="px-2 py-1 border border-gray-100 text-right text-red-600 font-semibold">{e.sick_days}</td>
-                                <td className="px-2 py-1 border border-gray-100 text-right text-gray-600">{e.sick_episodes}</td>
-                                <td className="px-2 py-1 border border-gray-100 text-right font-bold text-purple-700">{bf}</td>
-                                <td className="px-2 py-1 border border-gray-100">
+                                <td className="px-2 py-1 border border-gray-100 dark:border-slate-700 text-right text-red-600 font-semibold">{e.sick_days}</td>
+                                <td className="px-2 py-1 border border-gray-100 dark:border-slate-700 text-right text-gray-600">{e.sick_episodes}</td>
+                                <td className="px-2 py-1 border border-gray-100 dark:border-slate-700 text-right font-bold text-purple-700">{bf}</td>
+                                <td className="px-2 py-1 border border-gray-100 dark:border-slate-700">
                                   <span className={`px-1.5 py-0.5 rounded text-xs font-semibold ${risk.cls}`}>{risk.label}</span>
                                 </td>
                               </tr>
@@ -1100,13 +1100,13 @@ export default function Statistiken() {
                           })}
                         {sickData.per_employee.filter(e => e.sick_days > 0).length === 0 && (
                           <tr>
-                            <td colSpan={5} className="text-center py-4 text-gray-400">Keine Krankmeldungen</td>
+                            <td colSpan={5} className="text-center py-4 text-gray-400 dark:text-slate-500">Keine Krankmeldungen</td>
                           </tr>
                         )}
                       </tbody>
                     </table>
                   </div>
-                  <div className="mt-2 text-xs text-gray-400">
+                  <div className="mt-2 text-xs text-gray-400 dark:text-slate-500">
                     Schwellenwerte: 🟢 &lt;50 &nbsp; 🟡 50–199 &nbsp; 🟠 200–499 &nbsp; 🔴 ≥500
                   </div>
                 </div>
@@ -1121,29 +1121,29 @@ export default function Statistiken() {
         <div className="flex flex-col flex-1 min-h-0">
           {/* Controls */}
           <div className="flex items-center gap-3 mb-4 flex-wrap">
-            <label className="text-sm font-medium text-gray-600">Bis Jahr:</label>
+            <label className="text-sm font-medium text-gray-600 dark:text-slate-300">Bis Jahr:</label>
             <input
               type="number" min={2000} max={2099}
               value={compareYear}
               onChange={e => setCompareYear(Number(e.target.value))}
               className="w-24 px-2 py-1.5 border rounded shadow-sm text-sm"
             />
-            <label className="text-sm font-medium text-gray-600">Anzahl Monate:</label>
+            <label className="text-sm font-medium text-gray-600 dark:text-slate-300">Anzahl Monate:</label>
             <select
               value={compareNumMonths}
               onChange={e => setCompareNumMonths(Number(e.target.value))}
-              className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
+              className="px-3 py-1.5 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm text-sm"
             >
               <option value={3}>3 Monate</option>
               <option value={6}>6 Monate</option>
               <option value={12}>12 Monate</option>
               <option value={24}>24 Monate</option>
             </select>
-            <label className="text-sm font-medium text-gray-600">Gruppe:</label>
+            <label className="text-sm font-medium text-gray-600 dark:text-slate-300">Gruppe:</label>
             <select
               value={compareGroupId ?? ''}
               onChange={e => setCompareGroupId(e.target.value ? Number(e.target.value) : undefined)}
-              className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
+              className="px-3 py-1.5 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm text-sm"
             >
               <option value="">{t.statistiken.allGroups}</option>
               {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
@@ -1159,7 +1159,7 @@ export default function Statistiken() {
           </div>
 
           {compareLoading && (
-            <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">Lade Daten…</div>
+            <div className="flex-1 flex items-center justify-center text-gray-400 dark:text-slate-500 text-sm">Lade Daten…</div>
           )}
           {compareError && (
             <div className="p-3 bg-red-50 text-red-700 rounded text-sm">{compareError}</div>
@@ -1177,29 +1177,29 @@ export default function Statistiken() {
                     { label: 'Gesamt Abwesenheit', value: compareData.reduce((a, r) => a + r.absence_days, 0) + ' Tage', color: 'text-orange-700' },
                     { label: 'Gesamt Urlaub', value: compareData.reduce((a, r) => a + r.vacation_days, 0) + ' Tage', color: 'text-indigo-700' },
                   ].map(c => (
-                    <div key={c.label} className="bg-white border rounded-lg p-3 shadow-sm text-center">
+                    <div key={c.label} className="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-3 shadow-sm text-center">
                       <div className={`text-xl font-bold ${c.color}`}>{c.value}</div>
-                      <div className="text-xs text-gray-500 mt-0.5">{c.label}</div>
+                      <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{c.label}</div>
                     </div>
                   ))}
                 </div>
 
                 {/* Visual Bar Chart: Ist-Stunden per month */}
-                <div className="bg-white border rounded-lg p-4 mb-4 shadow-sm">
-                  <div className="text-sm font-semibold text-gray-700 mb-3">📈 Ist-Stunden pro Monat</div>
+                <div className="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-4 mb-4 shadow-sm">
+                  <div className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">📈 Ist-Stunden pro Monat</div>
                   <div className="flex items-end gap-1 h-28">
                     {compareData.map(row => {
                       const h = Math.round((row.actual_hours / maxActual) * 100);
                       const otPos = row.overtime >= 0;
                       return (
                         <div key={`${row.year}-${row.month}`} className="flex-1 flex flex-col items-center gap-0.5 min-w-0">
-                          <div className="text-xs text-gray-500 font-mono leading-none">{row.actual_hours.toFixed(0)}</div>
+                          <div className="text-xs text-gray-500 dark:text-slate-400 font-mono leading-none">{row.actual_hours.toFixed(0)}</div>
                           <div
                             className={`w-full rounded-t ${otPos ? 'bg-blue-500' : 'bg-blue-300'}`}
                             style={{ height: `${h}%`, minHeight: 2 }}
                             title={`${row.label}: ${row.actual_hours}h (Soll: ${row.target_hours}h)`}
                           />
-                          <div className="text-xs text-gray-500 truncate w-full text-center leading-none"
+                          <div className="text-xs text-gray-500 dark:text-slate-400 truncate w-full text-center leading-none"
                             style={{ fontSize: '9px' }}>
                             {row.label}
                           </div>
@@ -1210,8 +1210,8 @@ export default function Statistiken() {
                 </div>
 
                 {/* Overtime Chart */}
-                <div className="bg-white border rounded-lg p-4 mb-4 shadow-sm">
-                  <div className="text-sm font-semibold text-gray-700 mb-3">⚖️ Über-/Unterstunden pro Monat</div>
+                <div className="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-4 mb-4 shadow-sm">
+                  <div className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">⚖️ Über-/Unterstunden pro Monat</div>
                   <div className="flex items-end gap-1 h-20">
                     {compareData.map(row => {
                       const isPos = row.overtime >= 0;
@@ -1225,7 +1225,7 @@ export default function Statistiken() {
                             className={`w-full rounded-t ${isPos ? 'bg-green-500' : 'bg-red-400'}`}
                             style={{ height: `${h}%`, minHeight: 2 }}
                           />
-                          <div className="text-xs text-gray-400 truncate w-full text-center leading-none"
+                          <div className="text-xs text-gray-400 dark:text-slate-500 truncate w-full text-center leading-none"
                             style={{ fontSize: '9px' }}>
                             {row.label}
                           </div>
@@ -1236,7 +1236,7 @@ export default function Statistiken() {
                 </div>
 
                 {/* Detailed Table */}
-                <div className="bg-white border rounded-lg shadow-sm overflow-x-auto">
+                <div className="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg shadow-sm overflow-x-auto">
                   <table className="text-sm w-full">
                     <thead className="bg-slate-700 text-white">
                       <tr>
@@ -1253,7 +1253,7 @@ export default function Statistiken() {
                       {compareData.map((row, i) => {
                         const otColor = row.overtime >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold';
                         return (
-                          <tr key={`${row.year}-${row.month}`} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                          <tr key={`${row.year}-${row.month}`} className={i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-gray-50 dark:bg-slate-700/50'}>
                             <td className="px-3 py-1.5 font-medium border-r border-gray-100">{row.label}</td>
                             <td className="px-3 py-1.5 text-right border-r border-gray-100 text-gray-600">{row.employee_count}</td>
                             <td className="px-3 py-1.5 text-right border-r border-gray-100 text-gray-600">{row.target_hours.toFixed(1)}h</td>
@@ -1306,28 +1306,28 @@ export default function Statistiken() {
         <div className="flex flex-col flex-1 min-h-0">
           {/* Controls */}
           <div className="flex items-center gap-3 mb-4 flex-wrap">
-            <label className="text-sm font-medium text-gray-600">Jahr:</label>
+            <label className="text-sm font-medium text-gray-600 dark:text-slate-300">Jahr:</label>
             <input
               type="number" min={2000} max={2099}
               value={shiftYear}
               onChange={e => setShiftYear(Number(e.target.value))}
               className="w-24 px-2 py-1.5 border rounded shadow-sm text-sm"
             />
-            <label className="text-sm font-medium text-gray-600">Zeitraum:</label>
+            <label className="text-sm font-medium text-gray-600 dark:text-slate-300">Zeitraum:</label>
             <select
               value={shiftMonths}
               onChange={e => setShiftMonths(Number(e.target.value))}
-              className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
+              className="px-3 py-1.5 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm text-sm"
             >
               <option value={3}>3 Monate</option>
               <option value={6}>6 Monate</option>
               <option value={12}>12 Monate</option>
             </select>
-            <label className="text-sm font-medium text-gray-600">Gruppe:</label>
+            <label className="text-sm font-medium text-gray-600 dark:text-slate-300">Gruppe:</label>
             <select
               value={shiftGroupId ?? ''}
               onChange={e => setShiftGroupId(e.target.value ? Number(e.target.value) : undefined)}
-              className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
+              className="px-3 py-1.5 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm text-sm"
             >
               <option value="">{t.statistiken.allGroups}</option>
               {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
@@ -1335,7 +1335,7 @@ export default function Statistiken() {
           </div>
 
           {shiftLoading && (
-            <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">Lade Daten…</div>
+            <div className="flex-1 flex items-center justify-center text-gray-400 dark:text-slate-500 text-sm">Lade Daten…</div>
           )}
           {shiftError && (
             <div className="p-3 bg-red-50 text-red-700 rounded text-sm">{shiftError}</div>
@@ -1358,38 +1358,38 @@ export default function Statistiken() {
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="bg-white rounded-lg border p-3 text-center shadow-sm">
+                  <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 p-3 text-center shadow-sm">
                     <div className="text-2xl font-bold text-emerald-600">{shift_usage.length}</div>
-                    <div className="text-xs text-gray-500 mt-1">Verschiedene Schichten</div>
+                    <div className="text-xs text-gray-500 dark:text-slate-400 mt-1">Verschiedene Schichten</div>
                   </div>
-                  <div className="bg-white rounded-lg border p-3 text-center shadow-sm">
-                    <div className="text-2xl font-bold text-slate-700">{totalAssignments}</div>
-                    <div className="text-xs text-gray-500 mt-1">Schicht-Einsätze gesamt</div>
+                  <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 p-3 text-center shadow-sm">
+                    <div className="text-2xl font-bold text-slate-700 dark:text-slate-200">{totalAssignments}</div>
+                    <div className="text-xs text-gray-500 dark:text-slate-400 mt-1">Schicht-Einsätze gesamt</div>
                   </div>
-                  <div className="bg-white rounded-lg border p-3 text-center shadow-sm">
+                  <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 p-3 text-center shadow-sm">
                     <div className="text-2xl font-bold text-amber-600">{category_totals['Früh'] || 0}</div>
-                    <div className="text-xs text-gray-500 mt-1">Früh-Schichten</div>
+                    <div className="text-xs text-gray-500 dark:text-slate-400 mt-1">Früh-Schichten</div>
                   </div>
-                  <div className="bg-white rounded-lg border p-3 text-center shadow-sm">
+                  <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 p-3 text-center shadow-sm">
                     <div className="text-2xl font-bold text-indigo-600">{category_totals['Nacht'] || 0}</div>
-                    <div className="text-xs text-gray-500 mt-1">Nacht-Schichten</div>
+                    <div className="text-xs text-gray-500 dark:text-slate-400 mt-1">Nacht-Schichten</div>
                   </div>
                 </div>
 
                 {/* Shift Usage Table + Trend Bars */}
-                <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
-                  <div className="px-4 py-2 bg-slate-50 border-b font-semibold text-sm text-slate-700">
+                <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm overflow-hidden">
+                  <div className="px-4 py-2 bg-slate-50 dark:bg-slate-700 border-b dark:border-slate-600 font-semibold text-sm text-slate-700 dark:text-slate-200">
                     📋 Schicht-Häufigkeit ({periods.length} Monate)
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="bg-slate-100 text-left">
-                          <th className="px-3 py-2 font-medium text-gray-600">Schicht</th>
-                          <th className="px-3 py-2 font-medium text-gray-600">Kategorie</th>
-                          <th className="px-3 py-2 font-medium text-gray-600 text-right">Gesamt</th>
+                        <tr className="bg-slate-100 dark:bg-slate-700 text-left">
+                          <th className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300">Schicht</th>
+                          <th className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300">Kategorie</th>
+                          <th className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300 text-right">Gesamt</th>
                           {periods.map(p => (
-                            <th key={`${p.year}-${p.month}`} className="px-2 py-2 font-medium text-gray-500 text-center text-xs whitespace-nowrap">
+                            <th key={`${p.year}-${p.month}`} className="px-2 py-2 font-medium text-gray-500 dark:text-slate-400 text-center text-xs whitespace-nowrap">
                               {p.label}
                             </th>
                           ))}
@@ -1400,8 +1400,8 @@ export default function Statistiken() {
                           const catColor = catColors[s.category] || '#94a3b8';
                           const barWidth = Math.round((s.total / maxTotal) * 100);
                           return (
-                            <tr key={s.shift_id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                              <td className="px-3 py-2 font-medium text-gray-800 whitespace-nowrap">
+                            <tr key={s.shift_id} className={i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50'}>
+                              <td className="px-3 py-2 font-medium text-gray-800 dark:text-slate-200 whitespace-nowrap">
                                 <span
                                   className="inline-block px-2 py-0.5 rounded text-xs font-bold mr-1"
                                   style={{ background: s.color_bk ? `#${(s.color_bk & 0xFFFFFF).toString(16).padStart(6, '0')}` : catColor, color: '#fff' }}
@@ -1415,7 +1415,7 @@ export default function Statistiken() {
                                   {s.category}
                                 </span>
                               </td>
-                              <td className="px-3 py-2 text-right font-bold text-slate-700">
+                              <td className="px-3 py-2 text-right font-bold text-slate-700 dark:text-slate-200">
                                 <div className="flex items-center justify-end gap-2">
                                   <div className="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
                                     <div className="h-full rounded-full" style={{ width: `${barWidth}%`, background: catColor }} />
@@ -1424,8 +1424,8 @@ export default function Statistiken() {
                                 </div>
                               </td>
                               {s.monthly_counts.map(mc => (
-                                <td key={`${mc.year}-${mc.month}`} className="px-2 py-2 text-center text-xs text-gray-600">
-                                  {mc.count > 0 ? mc.count : <span className="text-gray-300">—</span>}
+                                <td key={`${mc.year}-${mc.month}`} className="px-2 py-2 text-center text-xs text-gray-600 dark:text-slate-300">
+                                  {mc.count > 0 ? mc.count : <span className="text-gray-300 dark:text-slate-600">—</span>}
                                 </td>
                               ))}
                             </tr>
@@ -1438,8 +1438,8 @@ export default function Statistiken() {
 
                 {/* Shift Trend Mini Chart */}
                 {shift_usage.length > 0 && periods.length > 1 && (
-                  <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
-                    <div className="px-4 py-2 bg-slate-50 border-b font-semibold text-sm text-slate-700">
+                  <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm overflow-hidden">
+                    <div className="px-4 py-2 bg-slate-50 dark:bg-slate-700 border-b dark:border-slate-600 font-semibold text-sm text-slate-700 dark:text-slate-200">
                       📈 Schicht-Trend (Top 5 Schichten)
                     </div>
                     <div className="p-4 overflow-x-auto">
@@ -1450,7 +1450,7 @@ export default function Statistiken() {
                           return (
                             <div key={s.shift_id}>
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-semibold text-gray-700 w-28 truncate">{s.name}</span>
+                                <span className="text-xs font-semibold text-gray-700 dark:text-slate-300 w-28 truncate">{s.name}</span>
                                 <div className="flex-1 flex items-end gap-1 h-8">
                                   {s.monthly_counts.map(mc => {
                                     const h = Math.round((mc.count / maxCount) * 100);
@@ -1468,7 +1468,7 @@ export default function Statistiken() {
                               </div>
                               <div className="flex gap-1 ml-[7.5rem]">
                                 {s.monthly_counts.map(mc => (
-                                  <div key={`${mc.year}-${mc.month}`} className="flex-1 text-center text-xs text-gray-400 truncate">{mc.count > 0 ? mc.count : ''}</div>
+                                  <div key={`${mc.year}-${mc.month}`} className="flex-1 text-center text-xs text-gray-400 dark:text-slate-500 truncate">{mc.count > 0 ? mc.count : ''}</div>
                                 ))}
                               </div>
                             </div>
@@ -1476,7 +1476,7 @@ export default function Statistiken() {
                         })}
                         <div className="flex gap-1 ml-[7.5rem] mt-1 border-t pt-1">
                           {periods.map(p => (
-                            <div key={`${p.year}-${p.month}`} className="flex-1 text-center text-xs text-gray-500 truncate">{p.label}</div>
+                            <div key={`${p.year}-${p.month}`} className="flex-1 text-center text-xs text-gray-500 dark:text-slate-400 truncate">{p.label}</div>
                           ))}
                         </div>
                       </div>
@@ -1485,20 +1485,20 @@ export default function Statistiken() {
                 )}
 
                 {/* Employee Shift Distribution */}
-                <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
-                  <div className="px-4 py-2 bg-slate-50 border-b font-semibold text-sm text-slate-700">
+                <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm overflow-hidden">
+                  <div className="px-4 py-2 bg-slate-50 dark:bg-slate-700 border-b dark:border-slate-600 font-semibold text-sm text-slate-700 dark:text-slate-200">
                     👥 Mitarbeiter-Schicht-Verteilung
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="bg-slate-100 text-left">
-                          <th className="px-3 py-2 font-medium text-gray-600">Mitarbeiter</th>
-                          <th className="px-3 py-2 font-medium text-gray-600 text-right">Gesamt</th>
+                        <tr className="bg-slate-100 dark:bg-slate-700 text-left">
+                          <th className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300">Mitarbeiter</th>
+                          <th className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300 text-right">Gesamt</th>
                           {['Früh', 'Spät', 'Nacht', 'Sonstige'].map(cat => (
                             <th key={cat} className="px-3 py-2 font-medium text-right" style={{ color: catColors[cat] }}>{cat}</th>
                           ))}
-                          <th className="px-3 py-2 font-medium text-gray-600">Verteilung</th>
+                          <th className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300">Verteilung</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1506,15 +1506,15 @@ export default function Statistiken() {
                           const cats = ['Früh', 'Spät', 'Nacht', 'Sonstige'];
                           const total = e.total_shifts || 1;
                           return (
-                            <tr key={e.employee_id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
-                              <td className="px-3 py-2 font-medium text-gray-800">
+                            <tr key={e.employee_id} className={i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-slate-50'}>
+                              <td className="px-3 py-2 font-medium text-gray-800 dark:text-slate-200">
                                 {e.name}
-                                {e.short && <span className="text-xs text-gray-400 ml-1">({e.short})</span>}
+                                {e.short && <span className="text-xs text-gray-400 dark:text-slate-500 ml-1">({e.short})</span>}
                               </td>
-                              <td className="px-3 py-2 text-right font-bold text-slate-700">{e.total_shifts}</td>
+                              <td className="px-3 py-2 text-right font-bold text-slate-700 dark:text-slate-200">{e.total_shifts}</td>
                               {cats.map(cat => (
-                                <td key={cat} className="px-3 py-2 text-right text-gray-600">
-                                  {e.by_category[cat] || <span className="text-gray-300">—</span>}
+                                <td key={cat} className="px-3 py-2 text-right text-gray-600 dark:text-slate-300">
+                                  {e.by_category[cat] || <span className="text-gray-300 dark:text-slate-600">—</span>}
                                 </td>
                               ))}
                               <td className="px-3 py-2 min-w-[120px]">
@@ -1544,7 +1544,7 @@ export default function Statistiken() {
           })()}
 
           {!shiftLoading && !shiftError && !shiftData && (
-            <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
+            <div className="flex-1 flex items-center justify-center text-gray-400 dark:text-slate-500 text-sm">
               Keine Daten vorhanden.
             </div>
           )}

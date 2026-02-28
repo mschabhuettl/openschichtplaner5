@@ -5,6 +5,7 @@ import { useToast } from '../hooks/useToast';
 import { usePermissions } from '../hooks/usePermissions';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { useT } from '../i18n';
 
 // ─── Types ────────────────────────────────────────────────
 interface Absence {

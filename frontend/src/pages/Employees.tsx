@@ -7,6 +7,7 @@ import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { useT } from '../i18n';
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
@@ -199,6 +200,7 @@ function listToWorkdays(list: boolean[]): string {
 }
 
 export default function Employees() {
+  const t = useT();
   const { canAdmin } = useAuth();
   const navigate = useNavigate();
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -554,7 +556,7 @@ export default function Employees() {
         <div className="flex gap-2 flex-wrap">
           <input
             type="text"
-            placeholder="Suchen..."
+            placeholder={t.employees.searchPlaceholder}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="px-3 py-1.5 border rounded shadow-sm text-sm w-48"
@@ -565,7 +567,7 @@ export default function Employees() {
             className="px-2 py-1.5 border rounded shadow-sm text-sm bg-white"
             title="Nach Gruppe filtern"
           >
-            <option value="">Alle Gruppen</option>
+            <option value="">{t.employees.allGroups}</option>
             {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
           </select>
           <select
@@ -574,16 +576,16 @@ export default function Employees() {
             className="px-2 py-1.5 border rounded shadow-sm text-sm bg-white"
             title="Aktiv/Inaktiv"
           >
-            <option value="active">Aktive</option>
-            <option value="all">Alle</option>
-            <option value="hidden">Inaktive</option>
+            <option value="active">{t.employees.filterActive}</option>
+            <option value="all">{t.employees.filterAll}</option>
+            <option value="hidden">{t.employees.filterHidden}</option>
           </select>
           {(search || filterGroupId !== '' || filterHide !== 'active') && (
             <button
               onClick={() => { setSearch(''); setFilterGroupId(''); setFilterHide('active'); }}
               className="px-2 py-1.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded border border-red-200"
               title="Filter zurücksetzen"
-            >× Reset</button>
+            >{t.employees.resetFilter}</button>
           )}
           <button
             onClick={() => printEmployeeList(filtered)}
@@ -591,39 +593,39 @@ export default function Employees() {
             className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:opacity-50 text-white rounded text-sm font-semibold transition-colors flex items-center gap-1.5"
             title="Mitarbeiterliste drucken (Landscape)"
           >
-            🖨️ Drucken
+            {t.employees.printButton}
           </button>
           {canAdmin && <button
             onClick={openCreate}
             className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
           >
-            + Neu
+            {t.employees.addButton}
           </button>}
         </div>
       </div>
       {/* ── Bulk Action Bar ────────────────────────────────────── */}
       {canAdmin && selectedIds.size > 0 && (
         <div className="mb-3 flex flex-wrap items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
-          <span className="text-sm font-semibold text-blue-700">{selectedIds.size} ausgewählt</span>
+          <span className="text-sm font-semibold text-blue-700">{selectedIds.size} {t.employees.selected}</span>
           <button
             onClick={() => setShowBulkGroupModal(true)}
             disabled={bulkWorking}
             className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
-          >👥 Gruppe zuweisen</button>
+          >{t.employees.assignGroup}</button>
           <button
             onClick={() => handleBulkHide(false)}
             disabled={bulkWorking}
             className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50"
-          >✅ Einblenden</button>
+          >{t.employees.showAll}</button>
           <button
             onClick={() => handleBulkHide(true)}
             disabled={bulkWorking}
             className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 disabled:opacity-50"
-          >🚫 Ausblenden</button>
+          >{t.employees.hideSelected}</button>
           <button
             onClick={() => setSelectedIds(new Set())}
             className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300 ml-auto"
-          >× Auswahl aufheben</button>
+          >{t.employees.clearSelection}</button>
         </div>
       )}
 
@@ -648,14 +650,14 @@ export default function Employees() {
                       title="Alle auswählen"
                     />
                   </th>}
-                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('number')}>Nr.{sortIcon('number')}</th>
-                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('name')}>Name{sortIcon('name')}</th>
-                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('firstname')}>Vorname{sortIcon('firstname')}</th>
-                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('shortname')}>Kürzel{sortIcon('shortname')}</th>
-                  <th className="px-4 py-2 text-right">Std/Tag</th>
-                  <th className="px-4 py-2 text-center">Arbeitstage</th>
-                  <th className="px-4 py-2 text-center">Eintritt</th>
-                  <th className="px-4 py-2 text-center">Aktionen</th>
+                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('number')}>{t.employees.columns.number}{sortIcon('number')}</th>
+                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('name')}>{t.employees.columns.name}{sortIcon('name')}</th>
+                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('firstname')}>{t.employees.columns.firstname}{sortIcon('firstname')}</th>
+                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('shortname')}>{t.employees.columns.shortname}{sortIcon('shortname')}</th>
+                  <th className="px-4 py-2 text-right">{t.employees.columns.hrsDay}</th>
+                  <th className="px-4 py-2 text-center">{t.employees.columns.workdays}</th>
+                  <th className="px-4 py-2 text-center">{t.employees.columns.entry}</th>
+                  <th className="px-4 py-2 text-center">{t.employees.columns.actions}</th>
                 </tr>
               </thead>
               <tbody>
@@ -686,15 +688,15 @@ export default function Employees() {
                     <td className="px-4 py-2 text-center text-gray-500 text-xs">{fmtDate(emp.EMPSTART)}</td>
                     <td className="px-4 py-2 text-center">
                       <div className="flex gap-1 justify-center">
-                        <button onClick={() => navigate(`/mitarbeiter/${emp.ID}`)} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs hover:bg-purple-200">🪪 Profil</button>
-                        {canAdmin && <button onClick={() => openEdit(emp)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>}
-                        {canAdmin && <button onClick={() => handleDelete(emp)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Ausblenden</button>}
+                        <button onClick={() => navigate(`/mitarbeiter/${emp.ID}`)} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs hover:bg-purple-200">{t.employees.actions.profile}</button>
+                        {canAdmin && <button onClick={() => openEdit(emp)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">{t.employees.actions.edit}</button>}
+                        {canAdmin && <button onClick={() => handleDelete(emp)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">{t.employees.actions.hide}</button>}
                       </div>
                     </td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={canAdmin ? 9 : 8} className="text-center py-8 text-gray-400">Keine Mitarbeiter gefunden</td></tr>
+                  <tr><td colSpan={canAdmin ? 9 : 8} className="text-center py-8 text-gray-400">{t.employees.noResults}</td></tr>
                 )}
               </tbody>
             </table>
@@ -917,9 +919,9 @@ export default function Employees() {
                     <label className="block text-xs font-semibold text-gray-600 mb-1">Berechnungsbasis</label>
                     <select value={form.CALCBASE} onChange={e => setForm(f => ({ ...f, CALCBASE: parseInt(e.target.value) }))}
                       className="w-full px-2 py-2 border dark:border-gray-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100">
-                      <option value="0">Pro Tag</option>
-                      <option value="1">Pro Woche</option>
-                      <option value="2">Pro Monat</option>
+                      <option value="0">{t.employees.worktimeUnit.perDay}</option>
+                      <option value="1">{t.employees.worktimeUnit.perWeek}</option>
+                      <option value="2">{t.employees.worktimeUnit.perMonth}</option>
                     </select>
                   </div>
                   <div>
@@ -984,9 +986,9 @@ export default function Employees() {
                   <select value={form.SALUTATION} onChange={e => setForm(f => ({ ...f, SALUTATION: e.target.value }))}
                     className="w-full px-2 py-2 border dark:border-gray-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100">
                     <option value="">—</option>
-                    <option value="Herr">Herr</option>
-                    <option value="Frau">Frau</option>
-                    <option value="Divers">Divers</option>
+                    <option value="Herr">{t.employees.salutation.mr}</option>
+                    <option value="Frau">{t.employees.salutation.ms}</option>
+                    <option value="Divers">{t.employees.salutation.diverse}</option>
                   </select>
                 </div>
                 <div>

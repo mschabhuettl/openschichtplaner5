@@ -13,6 +13,22 @@ const MONTH_NAMES = [
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
 ];
 
+// ─── Category definitions ──────────────────────────────────────
+export const NOTE_CATEGORIES = [
+  { id: '',         label: 'Allgemein', icon: '📝', color: 'bg-yellow-100 border-yellow-300 text-yellow-800' },
+  { id: 'info',     label: 'Info',      icon: 'ℹ️',  color: 'bg-blue-100 border-blue-300 text-blue-800' },
+  { id: 'wichtig',  label: 'Wichtig',   icon: '⚠️',  color: 'bg-orange-100 border-orange-300 text-orange-800' },
+  { id: 'dringend', label: 'Dringend',  icon: '🔴',  color: 'bg-red-100 border-red-300 text-red-800' },
+  { id: 'erledigt', label: 'Erledigt',  icon: '✅',  color: 'bg-green-100 border-green-300 text-green-800' },
+] as const;
+
+export type CategoryId = '' | 'info' | 'wichtig' | 'dringend' | 'erledigt';
+
+function getCategoryDef(cat?: string) {
+  return NOTE_CATEGORIES.find(c => c.id === (cat ?? '')) ?? NOTE_CATEGORIES[0];
+}
+
+// ─── Helpers ───────────────────────────────────────────────────
 function pad(n: number) {
   return String(n).padStart(2, '0');
 }
@@ -21,23 +37,22 @@ function dateStr(year: number, month: number, day: number) {
   return `${year}-${pad(month)}-${pad(day)}`;
 }
 
-// Get days in a month
 function getDaysInMonth(year: number, month: number): number {
   return new Date(year, month, 0).getDate();
 }
 
-// JS weekday (0=Sun) → Mon-based index (0=Mon..6=Sun)
 function firstDayOffset(year: number, month: number): number {
   const d = new Date(year, month - 1, 1).getDay();
-  return (d + 6) % 7; // 0=Mon
+  return (d + 6) % 7;
 }
 
+// ─── NoteModal ─────────────────────────────────────────────────
 interface NoteModalProps {
   open: boolean;
   initialDate?: string;
   initialNote?: Note | null;
   employees: Employee[];
-  onSave: (data: { date: string; text: string; text2: string; employee_id: number }) => Promise<void>;
+  onSave: (data: { date: string; text: string; text2: string; employee_id: number; category: string }) => Promise<void>;
   onClose: () => void;
 }
 
@@ -47,6 +62,7 @@ function NoteModal({ open, initialDate, initialNote, employees, onSave, onClose 
   const [text, setText] = useState('');
   const [text2, setText2] = useState('');
   const [empId, setEmpId] = useState<number>(0);
+  const [category, setCategory] = useState<string>('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,6 +72,7 @@ function NoteModal({ open, initialDate, initialNote, employees, onSave, onClose 
       setText(initialNote?.text1 || '');
       setText2(initialNote?.text2 || '');
       setEmpId(initialNote?.employee_id ?? 0);
+      setCategory(initialNote?.category || '');
       setError(null);
     }
   }, [open, initialNote, initialDate]);
@@ -67,7 +84,7 @@ function NoteModal({ open, initialDate, initialNote, employees, onSave, onClose 
     setSaving(true);
     setError(null);
     try {
-      await onSave({ date, text: text.trim(), text2: text2.trim(), employee_id: empId });
+      await onSave({ date, text: text.trim(), text2: text2.trim(), employee_id: empId, category });
       onClose();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Fehler beim Speichern');
@@ -96,6 +113,28 @@ function NoteModal({ open, initialDate, initialNote, employees, onSave, onClose 
               onChange={e => setDate(e.target.value)}
               className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          {/* Category selector */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Kategorie</label>
+            <div className="flex flex-wrap gap-2">
+              {NOTE_CATEGORIES.map(cat => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setCategory(cat.id)}
+                  className={[
+                    'flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
+                    category === cat.id
+                      ? `${cat.color} ring-2 ring-offset-1 ring-blue-400`
+                      : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200',
+                  ].join(' ')}
+                >
+                  <span>{cat.icon}</span> {cat.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div>
@@ -157,6 +196,7 @@ function NoteModal({ open, initialDate, initialNote, employees, onSave, onClose 
   );
 }
 
+// ─── NoteCard ──────────────────────────────────────────────────
 interface NoteCardProps {
   note: Note;
   employeeName: string;
@@ -166,13 +206,19 @@ interface NoteCardProps {
 }
 
 function NoteCard({ note, employeeName, onEdit, onDelete, canEdit = true }: NoteCardProps) {
+  const cat = getCategoryDef(note.category);
   return (
-    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 group relative">
+    <div className={`border rounded-lg p-3 group relative ${cat.color}`}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          {employeeName && (
-            <div className="text-xs font-medium text-blue-700 mb-1">👤 {employeeName}</div>
-          )}
+          {/* Category badge */}
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <span className="text-xs">{cat.icon}</span>
+            <span className="text-xs font-semibold opacity-70">{cat.label}</span>
+            {employeeName && (
+              <span className="text-xs font-medium text-blue-700 ml-1">· 👤 {employeeName}</span>
+            )}
+          </div>
           <div className="text-sm text-slate-800 break-words">{note.text1}</div>
           {note.text2 && (
             <div className="text-xs text-slate-500 mt-1 break-words">{note.text2}</div>
@@ -183,7 +229,7 @@ function NoteCard({ note, employeeName, onEdit, onDelete, canEdit = true }: Note
           <button
             onClick={() => onEdit(note)}
             title="Bearbeiten"
-            className="p-1 rounded hover:bg-yellow-200 text-slate-600 hover:text-slate-800 text-xs"
+            className="p-1 rounded hover:bg-white/50 text-slate-600 hover:text-slate-800 text-xs"
           >
             ✏️
           </button>
@@ -201,6 +247,7 @@ function NoteCard({ note, employeeName, onEdit, onDelete, canEdit = true }: Note
   );
 }
 
+// ─── Main Page ─────────────────────────────────────────────────
 export default function Notizen() {
   const today = new Date();
   const { canEditSchedule: canEdit } = usePermissions();
@@ -213,6 +260,8 @@ export default function Notizen() {
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [filterEmpId, setFilterEmpId] = useState<number>(0);
   const [filterGroupId, setFilterGroupId] = useState<number>(0);
+  const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [groupMembers, setGroupMembers] = useState<Set<number>>(new Set());
 
   // Modal state
@@ -257,15 +306,22 @@ export default function Notizen() {
     notesMap.get(key)!.push(note);
   }
 
-  // Filter notes by employee/group
-  const filteredNotes = (day: string) => {
-    const dayNotes = notesMap.get(day) ?? [];
+  // Filter notes
+  const applyFilters = (dayNotes: Note[]) => {
     return dayNotes.filter(n => {
       if (filterEmpId > 0 && n.employee_id !== filterEmpId && n.employee_id !== 0) return false;
       if (filterGroupId > 0 && n.employee_id !== 0 && !groupMembers.has(n.employee_id)) return false;
+      if (filterCategory !== 'all' && (n.category || '') !== filterCategory) return false;
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matchText = (n.text1 || '').toLowerCase().includes(q) || (n.text2 || '').toLowerCase().includes(q);
+        if (!matchText) return false;
+      }
       return true;
     });
   };
+
+  const filteredNotes = (day: string) => applyFilters(notesMap.get(day) ?? []);
 
   // Calendar grid
   const daysInMonth = getDaysInMonth(year, month);
@@ -308,7 +364,7 @@ export default function Notizen() {
     }
   };
 
-  const handleSave = async (data: { date: string; text: string; text2: string; employee_id: number }) => {
+  const handleSave = async (data: { date: string; text: string; text2: string; employee_id: number; category: string }) => {
     try {
       if (editNote) {
         await api.updateNote(editNote.id, {
@@ -316,10 +372,11 @@ export default function Notizen() {
           text2: data.text2,
           employee_id: data.employee_id,
           date: data.date,
+          category: data.category,
         });
         showToast('Notiz gespeichert ✓', 'success');
       } else {
-        await api.addNote(data.date, data.text, data.employee_id, data.text2);
+        await api.addNote(data.date, data.text, data.employee_id, data.text2, data.category);
         showToast('Notiz erstellt ✓', 'success');
       }
       loadNotes();
@@ -330,16 +387,9 @@ export default function Notizen() {
 
   const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
 
-  // All notes for list view (selected day)
   const selectedDayNotes = selectedDay ? filteredNotes(selectedDay) : [];
 
-  // All notes for the month, sorted, for the list panel
-  const allMonthNotes = notes
-    .filter(n => {
-      if (filterEmpId > 0 && n.employee_id !== filterEmpId && n.employee_id !== 0) return false;
-      if (filterGroupId > 0 && n.employee_id !== 0 && !groupMembers.has(n.employee_id)) return false;
-      return true;
-    })
+  const allMonthNotes = applyFilters(notes)
     .sort((a, b) => a.date.localeCompare(b.date));
 
   return (
@@ -354,6 +404,36 @@ export default function Notizen() {
 
           {/* Filters */}
           <div className="flex items-center gap-3 flex-wrap">
+            {/* Search */}
+            <div className="relative">
+              <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">🔍</span>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Notizen durchsuchen..."
+                className="pl-8 pr-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-48"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                >✕</button>
+              )}
+            </div>
+
+            {/* Category filter */}
+            <select
+              value={filterCategory}
+              onChange={e => setFilterCategory(e.target.value)}
+              className="text-sm border border-slate-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">Alle Kategorien</option>
+              {NOTE_CATEGORIES.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.icon} {cat.label}</option>
+              ))}
+            </select>
+
             {/* Group filter */}
             <select
               value={filterGroupId}
@@ -378,7 +458,6 @@ export default function Notizen() {
                 ))}
             </select>
 
-            {/* New note button — hidden for Leser */}
             {canEdit && (
             <button
               onClick={() => openCreate(selectedDay || todayStr)}
@@ -387,7 +466,6 @@ export default function Notizen() {
               <span>＋</span> Neue Notiz
             </button>
             )}
-            {/* Print button */}
             <button
               onClick={() => window.print()}
               className="no-print flex items-center gap-1 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded-lg"
@@ -396,6 +474,40 @@ export default function Notizen() {
               🖨️ <span className="hidden sm:inline">Drucken</span>
             </button>
           </div>
+        </div>
+
+        {/* Category quick-filter chips */}
+        <div className="flex items-center gap-2 mt-3 flex-wrap">
+          <span className="text-xs text-slate-500 font-medium">Schnellfilter:</span>
+          <button
+            onClick={() => setFilterCategory('all')}
+            className={[
+              'px-2.5 py-0.5 rounded-full text-xs font-medium border transition-all',
+              filterCategory === 'all' ? 'bg-slate-700 text-white border-slate-700' : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200',
+            ].join(' ')}
+          >
+            Alle
+          </button>
+          {NOTE_CATEGORIES.filter(c => c.id !== '').map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => setFilterCategory(filterCategory === cat.id ? 'all' : cat.id)}
+              className={[
+                'flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border transition-all',
+                filterCategory === cat.id ? `${cat.color} ring-1 ring-offset-0` : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200',
+              ].join(' ')}
+            >
+              {cat.icon} {cat.label}
+            </button>
+          ))}
+          {(searchQuery || filterCategory !== 'all') && (
+            <button
+              onClick={() => { setSearchQuery(''); setFilterCategory('all'); }}
+              className="px-2 py-0.5 rounded text-xs text-red-500 hover:text-red-700 hover:bg-red-50"
+            >
+              ✕ Filter zurücksetzen
+            </button>
+          )}
         </div>
       </div>
 
@@ -441,6 +553,13 @@ export default function Notizen() {
               const wd = isValid ? new Date(year, month - 1, dayNum).getDay() : -1;
               const isWeekend = wd === 0 || wd === 6;
 
+              // dominant category color for the day dot
+              const dominantCat = dayNotes.length > 0 ? getCategoryDef(
+                dayNotes.find(n => n.category === 'dringend')?.category ??
+                dayNotes.find(n => n.category === 'wichtig')?.category ??
+                dayNotes[0]?.category
+              ) : null;
+
               return (
                 <div
                   key={i}
@@ -459,6 +578,9 @@ export default function Notizen() {
                         <span className={`text-xs font-semibold ${isToday ? 'bg-blue-600 text-white rounded-full w-5 h-5 flex items-center justify-center' : 'text-slate-500'}`}>
                           {dayNum}
                         </span>
+                        {dayNotes.length > 0 && dominantCat && (
+                          <span className="text-xs">{dominantCat.icon}</span>
+                        )}
                         <button
                           onClick={e => { e.stopPropagation(); openCreate(ds); }}
                           className="text-slate-300 hover:text-blue-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
@@ -470,10 +592,11 @@ export default function Notizen() {
                       <div className="space-y-0.5">
                         {dayNotes.slice(0, 3).map(n => {
                           const emp = n.employee_id ? empMap.get(n.employee_id) : null;
+                          const noteCat = getCategoryDef(n.category);
                           return (
                             <div
                               key={n.id}
-                              className="text-xs bg-yellow-100 border border-yellow-300 rounded px-1 py-0.5 truncate text-slate-700"
+                              className={`text-xs border rounded px-1 py-0.5 truncate ${noteCat.color}`}
                               title={n.text1}
                             >
                               {emp ? `${emp.SHORTNAME}: ` : ''}{n.text1}
@@ -500,18 +623,21 @@ export default function Notizen() {
                 <h3 className="font-semibold text-slate-800 text-sm">
                   📅 {new Date(selectedDay + 'T00:00:00').toLocaleDateString('de-AT', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </h3>
+                {canEdit && (
                 <button
                   onClick={() => openCreate(selectedDay)}
                   className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
                 >
                   ＋ Neu
                 </button>
+                )}
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {selectedDayNotes.length === 0 ? (
                   <div className="text-sm text-slate-400 text-center py-8">
                     <div className="text-3xl mb-2">📭</div>
                     Keine Notizen für diesen Tag
+                    {canEdit && (
                     <div className="mt-3">
                       <button
                         onClick={() => openCreate(selectedDay)}
@@ -520,6 +646,7 @@ export default function Notizen() {
                         Notiz hinzufügen
                       </button>
                     </div>
+                    )}
                   </div>
                 ) : (
                   selectedDayNotes.map(note => {
@@ -544,12 +671,26 @@ export default function Notizen() {
               <div className="p-4 border-b border-slate-200">
                 <h3 className="font-semibold text-slate-800 text-sm">📋 Alle Notizen – {MONTH_NAMES[month - 1]} {year}</h3>
                 <div className="text-xs text-slate-400 mt-0.5">{allMonthNotes.length} Notiz{allMonthNotes.length !== 1 ? 'en' : ''}</div>
+                {/* Category breakdown */}
+                {allMonthNotes.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {NOTE_CATEGORIES.map(cat => {
+                      const count = allMonthNotes.filter(n => (n.category || '') === cat.id).length;
+                      if (count === 0) return null;
+                      return (
+                        <span key={cat.id} className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs border ${cat.color}`}>
+                          {cat.icon} {count}
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {allMonthNotes.length === 0 ? (
                   <div className="text-sm text-slate-400 text-center py-8">
                     <div className="text-3xl mb-2">📭</div>
-                    Keine Notizen in diesem Monat
+                    {searchQuery || filterCategory !== 'all' ? 'Keine Notizen gefunden' : 'Keine Notizen in diesem Monat'}
                   </div>
                 ) : (
                   allMonthNotes.map(note => {
@@ -568,6 +709,7 @@ export default function Notizen() {
                           employeeName={empName}
                           onEdit={openEdit}
                           onDelete={handleDelete}
+                          canEdit={canEdit}
                         />
                       </div>
                     );

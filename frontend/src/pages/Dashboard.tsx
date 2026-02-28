@@ -455,48 +455,6 @@ function UpcomingHolidaysWidget({ upcomingData }: { upcomingData: DashboardUpcom
   );
 }
 
-// ── "Geburtstage diese Woche" Widget ──────────────────────────────────────────
-
-function BirthdaysThisWeekWidget({ upcomingData }: { upcomingData: DashboardUpcoming | null }) {
-  if (!upcomingData) return <WidgetSkeleton />;
-  const { birthdays_this_week } = upcomingData;
-
-  return (
-    <Widget title="Geburtstage diese Woche" icon="🎂" badge={birthdays_this_week.length}>
-      {birthdays_this_week.length === 0 ? (
-        <Empty text="Keine Geburtstage diese Woche." />
-      ) : (
-        <ul className="space-y-2">
-          {birthdays_this_week.map((b) => (
-            <li key={b.employee_id} className="flex items-center gap-2 text-sm">
-              <span className="text-xl">
-                {b.days_until === 0 ? '🎂' : '🎁'}
-              </span>
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-gray-700 truncate">{b.name}</div>
-                <div className="text-xs text-gray-400">{b.display_date}</div>
-              </div>
-              {b.days_until === 0 ? (
-                <span className="text-xs font-bold text-pink-600 bg-pink-50 px-2 py-0.5 rounded-full shrink-0">
-                  Heute! 🎉
-                </span>
-              ) : b.days_until < 0 ? (
-                <span className="text-xs text-gray-400 shrink-0">
-                  {Math.abs(b.days_until)}d her
-                </span>
-              ) : (
-                <span className="text-xs text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full shrink-0">
-                  in {b.days_until}d
-                </span>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-    </Widget>
-  );
-}
-
 // ── CSS Bar Chart: Monatliche Abdeckung ───────────────────────────────────────
 
 function MonthCoverageChart({ statsData }: { statsData: DashboardStats | null }) {
@@ -1072,6 +1030,113 @@ function EmployeeRankingWidget({ statsData, monthLabel }: { statsData: Dashboard
   );
 }
 
+// ── Quick-Actions Panel ───────────────────────────────────────────────────────
+
+interface QuickAction {
+  icon: string;
+  label: string;
+  desc: string;
+  href: string;
+  accent: string;
+}
+
+const QUICK_ACTIONS: QuickAction[] = [
+  { icon: '📅', label: 'Dienstplan',    desc: 'Schichten planen & zuweisen',   href: '/schedule',   accent: 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700' },
+  { icon: '🏖️', label: 'Urlaub',       desc: 'Urlaubsantrag eintragen',       href: '/vacations',  accent: 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700' },
+  { icon: '👥', label: 'Mitarbeiter',   desc: 'Mitarbeiterdaten bearbeiten',   href: '/employees',  accent: 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700' },
+  { icon: '⚠️', label: 'Konflikte',    desc: 'Offene Konflikte lösen',        href: '/conflicts',  accent: 'bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700' },
+  { icon: '🔄', label: 'Rotation',     desc: 'Rotationspläne verwalten',      href: '/rotations',  accent: 'bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-700' },
+  { icon: '📊', label: 'Auswertung',   desc: 'Berichte & Statistiken',        href: '/reports',    accent: 'bg-teal-50 hover:bg-teal-100 border-teal-200 text-teal-700' },
+];
+
+function QuickActionsPanel({ conflictsCount }: { conflictsCount: number | null }) {
+  return (
+    <Widget title="Schnellzugriff" icon="⚡">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+        {QUICK_ACTIONS.map((action) => {
+          const isConflicts = action.href === '/conflicts';
+          return (
+            <a
+              key={action.href}
+              href={action.href}
+              className={`relative flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 text-center transition-all duration-150 group cursor-pointer ${action.accent}`}
+            >
+              <span className="text-2xl group-hover:scale-110 transition-transform">{action.icon}</span>
+              <span className="text-xs font-semibold leading-tight">{action.label}</span>
+              <span className="text-[10px] text-gray-400 leading-tight hidden sm:block">{action.desc}</span>
+              {isConflicts && conflictsCount !== null && conflictsCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 text-[10px] font-bold bg-red-500 text-white rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                  {conflictsCount}
+                </span>
+              )}
+            </a>
+          );
+        })}
+      </div>
+    </Widget>
+  );
+}
+
+// ── Upcoming Birthdays (30 days) Widget ───────────────────────────────────────
+
+function UpcomingBirthdaysWidget({ summaryData }: { summaryData: DashboardSummary | null }) {
+  if (!summaryData) return <WidgetSkeleton />;
+  const birthdays = summaryData.upcoming_birthdays ?? [];
+
+  // Group by "this week" vs "rest"
+  const thisWeek = birthdays.filter(b => b.days_until <= 7);
+  const later = birthdays.filter(b => b.days_until > 7);
+
+  return (
+    <Widget title="Geburtstage — nächste 30 Tage" icon="🎂" badge={birthdays.length}>
+      {birthdays.length === 0 ? (
+        <Empty text="Keine Geburtstage in den nächsten 30 Tagen." />
+      ) : (
+        <div className="space-y-3">
+          {thisWeek.length > 0 && (
+            <div>
+              <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Diese Woche</div>
+              <ul className="space-y-1.5">
+                {thisWeek.map((b, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm rounded-lg px-2 py-1.5 bg-pink-50">
+                    <span className="text-lg">{b.days_until === 0 ? '🎂' : '🎁'}</span>
+                    <span className="flex-1 font-medium text-gray-700 truncate">{b.name}</span>
+                    <span className="text-xs shrink-0 font-mono text-gray-500">
+                      {b.date.replace('-', '.')}
+                    </span>
+                    {b.days_until === 0 ? (
+                      <span className="text-[10px] font-bold text-pink-600 bg-pink-100 px-2 py-0.5 rounded-full shrink-0">Heute! 🎉</span>
+                    ) : (
+                      <span className="text-[10px] text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full shrink-0">in {b.days_until}d</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {later.length > 0 && (
+            <div>
+              {thisWeek.length > 0 && <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-1.5">Bald</div>}
+              <ul className="space-y-1.5 max-h-40 overflow-y-auto">
+                {later.map((b, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm rounded-lg px-2 py-1 text-gray-600">
+                    <span className="text-base">🎁</span>
+                    <span className="flex-1 font-medium truncate">{b.name}</span>
+                    <span className="text-xs shrink-0 font-mono text-gray-400">
+                      {b.date.replace('-', '.')}
+                    </span>
+                    <span className="text-[10px] text-gray-400 shrink-0">in {b.days_until}d</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+    </Widget>
+  );
+}
+
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
@@ -1293,6 +1358,9 @@ export default function Dashboard() {
         )}
       </div>
 
+      {/* Quick-Actions Panel */}
+      <QuickActionsPanel conflictsCount={conflictsCount} />
+
       {/* Today's grid: "Heute im Dienst" + "Abwesenheiten heute" */}
       {isCurrentMon && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -1333,7 +1401,7 @@ export default function Dashboard() {
       {/* Upcoming & Birthdays */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <UpcomingHolidaysWidget upcomingData={upcomingData} />
-        <BirthdaysThisWeekWidget upcomingData={upcomingData} />
+        <UpcomingBirthdaysWidget summaryData={summaryData} />
       </div>
 
       {/* Burnout-Radar */}

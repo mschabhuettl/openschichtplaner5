@@ -210,6 +210,7 @@ export interface Note {
   date: string;
   text1: string;
   text2: string;
+  category?: string;
 }
 
 export interface NoteCreate {
@@ -217,6 +218,7 @@ export interface NoteCreate {
   text: string;
   employee_id?: number;
   text2?: string;
+  category?: string;
 }
 
 export interface NoteUpdate {
@@ -224,6 +226,7 @@ export interface NoteUpdate {
   text2?: string;
   employee_id?: number;
   date?: string;
+  category?: string;
 }
 
 // ─── Zeitkonto Types ───────────────────────────────────────
@@ -986,8 +989,8 @@ export const api = {
     const qs = urlParams.toString();
     return fetchJSON<Note[]>(`/api/notes${qs ? `?${qs}` : ''}`);
   },
-  addNote: (date: string, text: string, employee_id?: number, text2?: string) =>
-    postJSON<{ ok: boolean; record: Note }>('/api/notes', { date, text, employee_id: employee_id ?? 0, text2: text2 ?? '' }),
+  addNote: (date: string, text: string, employee_id?: number, text2?: string, category?: string) =>
+    postJSON<{ ok: boolean; record: Note }>('/api/notes', { date, text, employee_id: employee_id ?? 0, text2: text2 ?? '', category: category ?? '' }),
   updateNote: (id: number, data: NoteUpdate) =>
     putJSON<{ ok: boolean; record: Note }>(`/api/notes/${id}`, data),
   deleteNote: (id: number) =>

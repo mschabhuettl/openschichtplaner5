@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api/client';
 import type { SearchResult } from '../api/client';
+import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../i18n/context';
 
 interface Props {
   open: boolean;
@@ -22,6 +24,9 @@ const NAV_ITEMS = [
   { title: 'Analytics',         subtitle: 'Erweiterte Analysen',   path: '/analytics',            icon: '🗂', keywords: ['analytics', 'analyse', 'g a'] },
   { title: 'Kompetenz-Matrix',  subtitle: 'Qualifikationen',       path: '/kompetenz-matrix',     icon: '🗂', keywords: ['kompetenz', 'matrix', 'qualifikation', 'g q'] },
   { title: 'Tauschbörse',       subtitle: 'Schichttausch',         path: '/tauschboerse',         icon: '🗂', keywords: ['tausch', 'tauschbörse', 'g t'] },
+  { title: 'Team-Übersicht',    subtitle: 'Team & Mitglieder',     path: '/team',                 icon: '👥', keywords: ['team', 'team-übersicht', 'alt+t', 'g v'] },
+  { title: 'Team-Kalender',     subtitle: 'Teamkalender',          path: '/teamkalender',         icon: '🗓️', keywords: ['teamkalender', 'team kalender'] },
+  { title: 'Health Dashboard',  subtitle: 'System-Status',         path: '/health',               icon: '🩺', keywords: ['health', 'system health', 'status', 'alt+h', 'g h'] },
   { title: 'Gruppen',           subtitle: 'Gruppenübersicht',      path: '/groups',               icon: '🗂', keywords: ['gruppen', 'groups'] },
   { title: 'Schichtmodell',     subtitle: 'Schichtmodelle',        path: '/schichtmodell',        icon: '🗂', keywords: ['schichtmodell', 'modell'] },
   { title: 'Einschränkungen',   subtitle: 'Einschränkungen',       path: '/einschraenkungen',     icon: '🗂', keywords: ['einschränkungen', 'restrictions'] },
@@ -29,13 +34,25 @@ const NAV_ITEMS = [
 ];
 
 // ── Actions ─────────────────────────────────────────────────────────────────
-const ACTION_ITEMS = [
-  { title: 'Neue Schicht anlegen',    subtitle: 'Öffnet Schichtmodelle',   icon: '⚡', path: '/schichtmodell',   keywords: ['neue schicht', 'schicht anlegen', 'schicht erstellen'] },
-  { title: 'Mitarbeiter anlegen',     subtitle: 'Neuen Mitarbeiter erfassen', icon: '⚡', path: '/employees?new=1', keywords: ['mitarbeiter anlegen', 'neuer mitarbeiter', 'mitarbeiter erstellen'] },
-  { title: 'Konflikt lösen',          subtitle: 'Zur Konfliktübersicht',    icon: '⚡', path: '/konflikte',        keywords: ['konflikt lösen', 'konflikte', 'konflikt beheben'] },
-  { title: 'Urlaub eintragen',        subtitle: 'Urlaubsantrag erfassen',   icon: '⚡', path: '/urlaub',           keywords: ['urlaub eintragen', 'urlaub anlegen', 'urlaub erfassen'] },
-  { title: 'Schichtwunsch erfassen',  subtitle: 'Wunsch eintragen',         icon: '⚡', path: '/schichtwuensche',  keywords: ['schichtwunsch', 'wunsch erfassen', 'wunsch eintragen'] },
-  { title: 'Tausch anbieten',         subtitle: 'Schichttausch starten',    icon: '⚡', path: '/tauschboerse',     keywords: ['tausch anbieten', 'schichttausch', 'tauschen'] },
+interface ActionItem {
+  title: string;
+  subtitle: string;
+  icon: string;
+  path?: string;
+  action?: string; // named callback action
+  keywords: string[];
+}
+
+const ACTION_ITEMS: ActionItem[] = [
+  { title: 'Neue Schicht anlegen',    subtitle: 'Öffnet Schichtmodelle',      icon: '⚡', path: '/schichtmodell',   keywords: ['neue schicht', 'schicht anlegen', 'schicht erstellen'] },
+  { title: 'Mitarbeiter anlegen',     subtitle: 'Neuen Mitarbeiter erfassen',  icon: '⚡', path: '/employees?new=1', keywords: ['mitarbeiter anlegen', 'neuer mitarbeiter', 'mitarbeiter erstellen'] },
+  { title: 'Konflikt lösen',          subtitle: 'Zur Konfliktübersicht',       icon: '⚡', path: '/konflikte',        keywords: ['konflikt lösen', 'konflikte', 'konflikt beheben'] },
+  { title: 'Urlaub eintragen',        subtitle: 'Urlaubsantrag erfassen',      icon: '⚡', path: '/urlaub',           keywords: ['urlaub eintragen', 'urlaub anlegen', 'urlaub erfassen'] },
+  { title: 'Schichtwunsch erfassen',  subtitle: 'Wunsch eintragen',            icon: '⚡', path: '/schichtwuensche',  keywords: ['schichtwunsch', 'wunsch erfassen', 'wunsch eintragen'] },
+  { title: 'Tausch anbieten',         subtitle: 'Schichttausch starten',       icon: '⚡', path: '/tauschboerse',     keywords: ['tausch anbieten', 'schichttausch', 'tauschen'] },
+  { title: 'Dark Mode umschalten',    subtitle: 'Hell/Dunkel-Modus wechseln',  icon: '🌙', action: 'toggleTheme',    keywords: ['dark mode', 'dunkel', 'hell', 'theme', 'nachtmodus', 'darkmode'] },
+  { title: 'Sprache wechseln',        subtitle: 'Deutsch / English',           icon: '🌐', action: 'toggleLanguage', keywords: ['sprache', 'language', 'deutsch', 'english', 'sprache wechseln'] },
+  { title: 'Seite drucken',           subtitle: 'Aktuelle Seite drucken',      icon: '🖨️', action: 'print',          keywords: ['drucken', 'print', 'ausdrucken'] },
 ];
 
 // ── Recent pages ─────────────────────────────────────────────────────────────
@@ -88,7 +105,8 @@ interface PaletteItem {
   title: string;
   subtitle?: string;
   icon: string;
-  path: string;
+  path?: string;
+  callbackAction?: string; // named callback for non-navigation actions
   score?: number;
 }
 
@@ -109,6 +127,8 @@ const THRESHOLD = 0.15;
 export default function SpotlightSearch({ open, onClose }: Props) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { toggleTheme } = useTheme();
+  const { language, setLanguage } = useLanguage();
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -202,12 +222,13 @@ export default function SpotlightSearch({ open, onClose }: Props) {
       .sort((a, b) => b.score - a.score)
       .slice(0, 4)
       .map(a => ({
-        id: `action-${a.path}-${a.title}`,
+        id: `action-${(a.path ?? a.action)}-${a.title}`,
         type: 'action' as ItemType,
         title: a.title,
         subtitle: a.subtitle,
         icon: a.icon,
         path: a.path,
+        callbackAction: a.action,
       }));
 
     // API results
@@ -224,9 +245,18 @@ export default function SpotlightSearch({ open, onClose }: Props) {
   })();
 
   const openItem = useCallback((item: PaletteItem) => {
-    navigate(item.path);
+    if (item.callbackAction) {
+      switch (item.callbackAction) {
+        case 'toggleTheme': toggleTheme(); break;
+        case 'toggleLanguage': setLanguage(language === 'de' ? 'en' : 'de'); break;
+        case 'print': window.print(); break;
+      }
+      onClose();
+      return;
+    }
+    if (item.path) navigate(item.path);
     onClose();
-  }, [navigate, onClose]);
+  }, [navigate, onClose, toggleTheme, setLanguage, language]);
 
   // Keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {

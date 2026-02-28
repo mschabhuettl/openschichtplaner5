@@ -9,10 +9,18 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
   {
     title: 'Navigation',
     shortcuts: [
-      { keys: ['Ctrl', 'K'], description: 'Globale Suche öffnen' },
+      { keys: ['Ctrl', 'K'], description: 'Globale Suche / Command Palette öffnen' },
       { keys: ['/'], description: 'Globale Suche öffnen' },
       { keys: ['?'], description: 'Diese Hilfe anzeigen' },
       { keys: ['Esc'], description: 'Schließen / Abbrechen' },
+    ],
+  },
+  {
+    title: 'Command Palette (in Suche)',
+    shortcuts: [
+      { keys: ['↑', '↓'], description: 'Element auswählen' },
+      { keys: ['Enter'], description: 'Ausführen / Navigieren' },
+      { keys: ['Esc'], description: 'Schließen' },
     ],
   },
   {
@@ -30,6 +38,16 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
       { keys: ['g', 'a'], description: 'Analytics & Trends' },
       { keys: ['g', 'q'], description: 'Kompetenz-Matrix' },
       { keys: ['g', 't'], description: 'Tauschbörse' },
+      { keys: ['g', 'v'], description: 'Team-Übersicht' },
+      { keys: ['g', 'h'], description: 'Health Dashboard' },
+    ],
+  },
+  {
+    title: 'Alt-Shortcuts',
+    shortcuts: [
+      { keys: ['Alt', 'T'], description: 'Team-Übersicht' },
+      { keys: ['Alt', 'A'], description: 'Analytics' },
+      { keys: ['Alt', 'H'], description: 'Health Dashboard' },
     ],
   },
   {

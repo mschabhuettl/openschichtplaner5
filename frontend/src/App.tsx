@@ -302,6 +302,21 @@ function AppInner() {
       return;
     }
 
+    // Alt+T → Team-Übersicht, Alt+A → Analytics, Alt+H → Health
+    if (e.altKey && !e.ctrlKey && !e.metaKey) {
+      const altMap: Record<string, string> = {
+        t: '/team',
+        a: '/analytics',
+        h: '/health',
+      };
+      const dest = altMap[e.key.toLowerCase()];
+      if (dest) {
+        e.preventDefault();
+        navigate(dest);
+        return;
+      }
+    }
+
     // Second key after "g"
     if (gPendingRef.current) {
       gPendingRef.current = false;
@@ -319,6 +334,8 @@ function AppInner() {
         a: '/analytics',        // Analytics
         q: '/kompetenz-matrix', // Kompetenz-Matrix (Q for Qualifikation)
         t: '/tauschboerse',     // Tauschbörse
+        v: '/team',             // Team-Übersicht (V for Verwaltung)
+        h: '/health',           // Health Dashboard
       };
       const dest = goMap[e.key];
       if (dest) {

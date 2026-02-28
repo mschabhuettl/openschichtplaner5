@@ -67,7 +67,7 @@ const STEPS: TourStep[] = [
   {
     title: 'Tastatur-Shortcuts — Schnell navigieren',
     description:
-      'Drücke ? für alle Shortcuts.\n• Ctrl+K — Schnellsuche\n• g d — Dashboard\n• g p — Dienstplan\n• g m — Mitarbeiter\n• g k — Konflikte',
+      'Drücke ? für alle Shortcuts.\n• Ctrl+K — Schnellsuche / Command Palette\n• g d — Dashboard\n• g p — Dienstplan\n• g m — Mitarbeiter\n• Alt+T — Team · Alt+A — Analytics · Alt+H — Health',
     icon: '⌨️',
     target: null,
   },

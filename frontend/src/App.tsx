@@ -61,6 +61,7 @@ const KapazitaetsForecast = lazy(() => import('./pages/KapazitaetsForecast'));
 const QualitaetsBericht   = lazy(() => import('./pages/QualitaetsBericht'));
 const SchichtKalibrator   = lazy(() => import('./pages/SchichtKalibrator'));
 const KompetenzMatrix     = lazy(() => import('./pages/KompetenzMatrix'));
+const Analytics           = lazy(() => import('./pages/Analytics'));
 const OnboardingWizard    = lazy(() => import('./pages/OnboardingWizard'));
 const SchichtBriefing     = lazy(() => import('./pages/SchichtBriefing'));
 const AuditLog            = lazy(() => import('./pages/AuditLog'));
@@ -149,6 +150,7 @@ const navItems: NavItem[] = [
   { id: 'qualitaets-bericht', label: 'Qualitätsbericht',   icon: '📋', group: 'Berichte', path: '/qualitaets-bericht' },
   { id: 'schicht-kalibrator', label: 'Schicht-Kalibrator', icon: '⚖️', group: 'Berichte', path: '/schicht-kalibrator' },
   { id: 'kompetenz-matrix',   label: 'Kompetenz-Matrix',   icon: '🎓', group: 'Berichte', path: '/kompetenz-matrix' },
+  { id: 'analytics',          label: 'Analytics & Trends', icon: '📉', group: 'Berichte', path: '/analytics' },
   { id: 'berichte',           label: 'Monatsberichte',     icon: '📄', group: 'Berichte', path: '/berichte' },
   { id: 'export',             label: 'Export',             icon: '⬇️', group: 'Berichte', path: '/export', roles: ['Admin', 'Planer'] },
   { id: 'import',             label: 'Import',             icon: '⬆️', group: 'Berichte', path: '/import', roles: ['Admin'] },
@@ -589,6 +591,7 @@ function AppInner() {
               <Route path="/qualitaets-bericht" element={<QualitaetsBericht />} />
               <Route path="/schicht-kalibrator" element={<SchichtKalibrator />} />
               <Route path="/kompetenz-matrix" element={<KompetenzMatrix />} />
+              <Route path="/analytics" element={<Analytics />} />
               <Route path="/simulation" element={<Simulation />} />
               <Route path="/notfall-plan" element={<NotfallPlan />} />
               <Route path="/leitwand" element={<Leitwand />} />

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.11] — 2026-02-28
+
+### Hinzugefügt / Added
+
+#### 🦴 UX-Verbesserungen
+- `feat(ux)`: Skeleton Screens für Employees & Dienstplan — verhindert Layout-Shifts beim Laden
+- `feat(ux)`: Filter-Persistenz via sessionStorage — Filtereinstellungen bleiben beim Tab-Wechsel erhalten
+- `feat(ux)`: useDebounce Hook auf Suchfelder angewendet — reduziert API-Anfragen bei der Eingabe
+
+---
+
 ## [0.3.10] — 2026-02-28
 
 ### Behoben / Fixed

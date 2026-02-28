@@ -13,6 +13,7 @@ import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 import { GuidedTour, useTour } from './components/GuidedTour';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { InstallBanner } from './components/InstallBanner';
+import { BottomNav } from './components/BottomNav';
 import { api } from './api/client';
 
 // Lazy-loaded pages — each page group is a separate chunk
@@ -589,7 +590,7 @@ function AppInner() {
           </button>
         </header>
 
-        <main id="main-content" className="flex-1 overflow-auto">
+        <main id="main-content" className="flex-1 overflow-auto pb-14 md:pb-0">
           {/* Suspense boundary: shows spinner while a lazy chunk loads */}
           <Suspense fallback={<PageLoader />}>
             <Routes>
@@ -659,6 +660,8 @@ function AppInner() {
             </Routes>
           </Suspense>
         </main>
+        {/* Bottom navigation bar — mobile only */}
+        <BottomNav />
       </div>
     </div>
   );

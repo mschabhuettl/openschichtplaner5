@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
-import type { EmployeeStats, ExtraChargeSummary, EmployeeYearStats, SicknessStatistics } from '../api/client';
+import type { EmployeeStats, ExtraChargeSummary, EmployeeYearStats, SicknessStatistics, ShiftStatisticsData } from '../api/client';
 import type { Employee, Group } from '../types';
 
 const MONTH_NAMES = [
@@ -234,7 +234,7 @@ export default function Statistiken() {
   const now = new Date();
 
   // ── Tabs ────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState<'group' | 'employee' | 'sickness' | 'compare'>('group');
+  const [activeTab, setActiveTab] = useState<'group' | 'employee' | 'sickness' | 'compare' | 'shifts'>('group');
 
   // ── Group-view state ────────────────────────────────────
   const [year, setYear] = useState(now.getFullYear());
@@ -277,6 +277,14 @@ export default function Statistiken() {
   const [compareData, setCompareData] = useState<MonthCompareRow[]>([]);
   const [compareLoading, setCompareLoading] = useState(false);
   const [compareError, setCompareError] = useState<string | null>(null);
+
+  // ── Shift-Statistiken state ─────────────────────────────
+  const [shiftYear, setShiftYear] = useState(now.getFullYear());
+  const [shiftMonths, setShiftMonths] = useState(6);
+  const [shiftGroupId, setShiftGroupId] = useState<number | undefined>(undefined);
+  const [shiftData, setShiftData] = useState<ShiftStatisticsData | null>(null);
+  const [shiftLoading, setShiftLoading] = useState(false);
+  const [shiftError, setShiftError] = useState<string | null>(null);
 
   // Load groups + employees once
   useEffect(() => {
@@ -373,6 +381,16 @@ export default function Statistiken() {
     }).catch(e => { setCompareError(e.message); setCompareLoading(false); });
   }, [activeTab, compareYear, compareNumMonths, compareGroupId]);
 
+  // Load shift statistics
+  useEffect(() => {
+    if (activeTab !== 'shifts') return;
+    setShiftLoading(true);
+    setShiftError(null);
+    api.getShiftStatistics(shiftYear, shiftMonths, shiftGroupId)
+      .then(data => { setShiftData(data); setShiftLoading(false); })
+      .catch(e => { setShiftError(e.message); setShiftLoading(false); });
+  }, [activeTab, shiftYear, shiftMonths, shiftGroupId]);
+
   const prevMonth = () => {
     if (month === 1) { setYear(y => y - 1); setMonth(12); }
     else setMonth(m => m - 1);
@@ -452,6 +470,12 @@ export default function Statistiken() {
             onClick={() => setActiveTab('compare')}
           >
             📊 Monatsvergleich
+          </button>
+          <button
+            className={`px-4 py-1.5 transition-colors ${activeTab === 'shifts' ? 'bg-emerald-700 text-white' : 'bg-white hover:bg-gray-50 text-gray-700'}`}
+            onClick={() => setActiveTab('shifts')}
+          >
+            🔄 Schicht-Auswertung
           </button>
         </div>
       </div>
@@ -1269,6 +1293,256 @@ export default function Statistiken() {
               </div>
             );
           })()}
+        </div>
+      )}
+
+      {/* ── SCHICHT-AUSWERTUNG ───────────────────────────────── */}
+      {activeTab === 'shifts' && (
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Controls */}
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
+            <label className="text-sm font-medium text-gray-600">Jahr:</label>
+            <input
+              type="number" min={2000} max={2099}
+              value={shiftYear}
+              onChange={e => setShiftYear(Number(e.target.value))}
+              className="w-24 px-2 py-1.5 border rounded shadow-sm text-sm"
+            />
+            <label className="text-sm font-medium text-gray-600">Zeitraum:</label>
+            <select
+              value={shiftMonths}
+              onChange={e => setShiftMonths(Number(e.target.value))}
+              className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
+            >
+              <option value={3}>3 Monate</option>
+              <option value={6}>6 Monate</option>
+              <option value={12}>12 Monate</option>
+            </select>
+            <label className="text-sm font-medium text-gray-600">Gruppe:</label>
+            <select
+              value={shiftGroupId ?? ''}
+              onChange={e => setShiftGroupId(e.target.value ? Number(e.target.value) : undefined)}
+              className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
+            >
+              <option value="">Alle Gruppen</option>
+              {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+            </select>
+          </div>
+
+          {shiftLoading && (
+            <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">Lade Daten…</div>
+          )}
+          {shiftError && (
+            <div className="p-3 bg-red-50 text-red-700 rounded text-sm">{shiftError}</div>
+          )}
+
+          {!shiftLoading && !shiftError && shiftData && (() => {
+            const { periods, shift_usage, employee_distribution, category_totals } = shiftData;
+            const totalAssignments = shift_usage.reduce((a, s) => a + s.total, 0);
+            const catColors: Record<string, string> = {
+              'Früh': '#f59e0b',
+              'Spät': '#3b82f6',
+              'Nacht': '#6366f1',
+              'Sonstige': '#94a3b8',
+            };
+            const maxTotal = Math.max(...shift_usage.map(s => s.total), 1);
+            // const maxEmpShifts = Math.max(...employee_distribution.map(e => e.total_shifts), 1);
+
+            return (
+              <div className="flex-1 min-h-0 overflow-auto space-y-6">
+
+                {/* Summary Cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="bg-white rounded-lg border p-3 text-center shadow-sm">
+                    <div className="text-2xl font-bold text-emerald-600">{shift_usage.length}</div>
+                    <div className="text-xs text-gray-500 mt-1">Verschiedene Schichten</div>
+                  </div>
+                  <div className="bg-white rounded-lg border p-3 text-center shadow-sm">
+                    <div className="text-2xl font-bold text-slate-700">{totalAssignments}</div>
+                    <div className="text-xs text-gray-500 mt-1">Schicht-Einsätze gesamt</div>
+                  </div>
+                  <div className="bg-white rounded-lg border p-3 text-center shadow-sm">
+                    <div className="text-2xl font-bold text-amber-600">{category_totals['Früh'] || 0}</div>
+                    <div className="text-xs text-gray-500 mt-1">Früh-Schichten</div>
+                  </div>
+                  <div className="bg-white rounded-lg border p-3 text-center shadow-sm">
+                    <div className="text-2xl font-bold text-indigo-600">{category_totals['Nacht'] || 0}</div>
+                    <div className="text-xs text-gray-500 mt-1">Nacht-Schichten</div>
+                  </div>
+                </div>
+
+                {/* Shift Usage Table + Trend Bars */}
+                <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+                  <div className="px-4 py-2 bg-slate-50 border-b font-semibold text-sm text-slate-700">
+                    📋 Schicht-Häufigkeit ({periods.length} Monate)
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-slate-100 text-left">
+                          <th className="px-3 py-2 font-medium text-gray-600">Schicht</th>
+                          <th className="px-3 py-2 font-medium text-gray-600">Kategorie</th>
+                          <th className="px-3 py-2 font-medium text-gray-600 text-right">Gesamt</th>
+                          {periods.map(p => (
+                            <th key={`${p.year}-${p.month}`} className="px-2 py-2 font-medium text-gray-500 text-center text-xs whitespace-nowrap">
+                              {p.label}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {shift_usage.slice(0, 20).map((s, i) => {
+                          const catColor = catColors[s.category] || '#94a3b8';
+                          const barWidth = Math.round((s.total / maxTotal) * 100);
+                          return (
+                            <tr key={s.shift_id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                              <td className="px-3 py-2 font-medium text-gray-800 whitespace-nowrap">
+                                <span
+                                  className="inline-block px-2 py-0.5 rounded text-xs font-bold mr-1"
+                                  style={{ background: s.color_bk ? `#${(s.color_bk & 0xFFFFFF).toString(16).padStart(6, '0')}` : catColor, color: '#fff' }}
+                                >
+                                  {s.short || s.name.slice(0, 3)}
+                                </span>
+                                {s.name}
+                              </td>
+                              <td className="px-3 py-2">
+                                <span className="text-xs px-1.5 py-0.5 rounded-full font-medium" style={{ background: catColor + '22', color: catColor }}>
+                                  {s.category}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2 text-right font-bold text-slate-700">
+                                <div className="flex items-center justify-end gap-2">
+                                  <div className="w-16 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                    <div className="h-full rounded-full" style={{ width: `${barWidth}%`, background: catColor }} />
+                                  </div>
+                                  {s.total}
+                                </div>
+                              </td>
+                              {s.monthly_counts.map(mc => (
+                                <td key={`${mc.year}-${mc.month}`} className="px-2 py-2 text-center text-xs text-gray-600">
+                                  {mc.count > 0 ? mc.count : <span className="text-gray-300">—</span>}
+                                </td>
+                              ))}
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Shift Trend Mini Chart */}
+                {shift_usage.length > 0 && periods.length > 1 && (
+                  <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+                    <div className="px-4 py-2 bg-slate-50 border-b font-semibold text-sm text-slate-700">
+                      📈 Schicht-Trend (Top 5 Schichten)
+                    </div>
+                    <div className="p-4 overflow-x-auto">
+                      <div className="space-y-3 min-w-[400px]">
+                        {shift_usage.slice(0, 5).map(s => {
+                          const catColor = catColors[s.category] || '#94a3b8';
+                          const maxCount = Math.max(...s.monthly_counts.map(mc => mc.count), 1);
+                          return (
+                            <div key={s.shift_id}>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-semibold text-gray-700 w-28 truncate">{s.name}</span>
+                                <div className="flex-1 flex items-end gap-1 h-8">
+                                  {s.monthly_counts.map(mc => {
+                                    const h = Math.round((mc.count / maxCount) * 100);
+                                    return (
+                                      <div key={`${mc.year}-${mc.month}`} className="flex-1 flex flex-col items-center justify-end h-full">
+                                        <div
+                                          className="w-full rounded-t transition-all"
+                                          style={{ height: `${h}%`, background: catColor, minHeight: mc.count > 0 ? 2 : 0 }}
+                                          title={`${mc.count}`}
+                                        />
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                              <div className="flex gap-1 ml-[7.5rem]">
+                                {s.monthly_counts.map(mc => (
+                                  <div key={`${mc.year}-${mc.month}`} className="flex-1 text-center text-xs text-gray-400 truncate">{mc.count > 0 ? mc.count : ''}</div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })}
+                        <div className="flex gap-1 ml-[7.5rem] mt-1 border-t pt-1">
+                          {periods.map(p => (
+                            <div key={`${p.year}-${p.month}`} className="flex-1 text-center text-xs text-gray-500 truncate">{p.label}</div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Employee Shift Distribution */}
+                <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+                  <div className="px-4 py-2 bg-slate-50 border-b font-semibold text-sm text-slate-700">
+                    👥 Mitarbeiter-Schicht-Verteilung
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-slate-100 text-left">
+                          <th className="px-3 py-2 font-medium text-gray-600">Mitarbeiter</th>
+                          <th className="px-3 py-2 font-medium text-gray-600 text-right">Gesamt</th>
+                          {['Früh', 'Spät', 'Nacht', 'Sonstige'].map(cat => (
+                            <th key={cat} className="px-3 py-2 font-medium text-right" style={{ color: catColors[cat] }}>{cat}</th>
+                          ))}
+                          <th className="px-3 py-2 font-medium text-gray-600">Verteilung</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {employee_distribution.map((e, i) => {
+                          const cats = ['Früh', 'Spät', 'Nacht', 'Sonstige'];
+                          const total = e.total_shifts || 1;
+                          return (
+                            <tr key={e.employee_id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                              <td className="px-3 py-2 font-medium text-gray-800">
+                                {e.name}
+                                {e.short && <span className="text-xs text-gray-400 ml-1">({e.short})</span>}
+                              </td>
+                              <td className="px-3 py-2 text-right font-bold text-slate-700">{e.total_shifts}</td>
+                              {cats.map(cat => (
+                                <td key={cat} className="px-3 py-2 text-right text-gray-600">
+                                  {e.by_category[cat] || <span className="text-gray-300">—</span>}
+                                </td>
+                              ))}
+                              <td className="px-3 py-2 min-w-[120px]">
+                                <div className="flex h-3 rounded-full overflow-hidden">
+                                  {cats.map(cat => {
+                                    const pct = ((e.by_category[cat] || 0) / total) * 100;
+                                    return pct > 0 ? (
+                                      <div
+                                        key={cat}
+                                        style={{ width: `${pct}%`, background: catColors[cat] }}
+                                        title={`${cat}: ${e.by_category[cat] || 0}`}
+                                      />
+                                    ) : null;
+                                  })}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
+            );
+          })()}
+
+          {!shiftLoading && !shiftError && !shiftData && (
+            <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
+              Keine Daten vorhanden.
+            </div>
+          )}
         </div>
       )}
     </div>

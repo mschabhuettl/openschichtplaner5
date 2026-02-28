@@ -793,6 +793,39 @@ export interface SicknessStatistics {
   per_weekday: SicknessWeekdayStat[];
 }
 
+// ─── Shift Statistics ──────────────────────────────────────
+export interface ShiftPeriod {
+  year: number;
+  month: number;
+  label: string;
+}
+
+export interface ShiftUsageEntry {
+  shift_id: number;
+  name: string;
+  short: string;
+  color_bk: number | null;
+  color_text: number | null;
+  category: string;
+  monthly_counts: { year: number; month: number; count: number }[];
+  total: number;
+}
+
+export interface EmpShiftDistribution {
+  employee_id: number;
+  name: string;
+  short: string;
+  total_shifts: number;
+  by_category: Record<string, number>;
+}
+
+export interface ShiftStatisticsData {
+  periods: ShiftPeriod[];
+  shift_usage: ShiftUsageEntry[];
+  employee_distribution: EmpShiftDistribution[];
+  category_totals: Record<string, number>;
+}
+
 // ─── Schedule Templates ─────────────────────────────────────
 export interface TemplateAssignment {
   employee_id: number;
@@ -1385,6 +1418,9 @@ export const api = {
   // ─── Sickness/Krankenstand Statistics ─────────────────────
   getSicknessStatistics: (year: number) =>
     fetchJSON<SicknessStatistics>(`/api/statistics/sickness?year=${year}`),
+
+  getShiftStatistics: (year: number, months: number, groupId?: number) =>
+    fetchJSON<ShiftStatisticsData>(`/api/statistics/shifts?year=${year}&months=${months}${groupId ? `&group_id=${groupId}` : ''}`),
 
   getYearSummary: (year: number, groupId?: number | null) =>
     fetchJSON<unknown>(`/api/statistics/year-summary?year=${year}${groupId ? `&group_id=${groupId}` : ''}`),

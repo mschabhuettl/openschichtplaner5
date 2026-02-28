@@ -1837,6 +1837,7 @@ export default function Schedule() {
   // ── Mobile week view ────────────────────────────────────────
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [mobileWeekOffset, setMobileWeekOffset] = useState(0); // 0 = current/first week
+  const [forceWeekView, setForceWeekView] = useState(false); // desktop week view toggle
 
   // Multi-group selection (empty = all groups)
   const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
@@ -2237,7 +2238,7 @@ export default function Schedule() {
   }, [year, month, mobileWeekOffset]);
 
   // Displayed days: 7-day week on mobile, full month on desktop
-  const displayedDays = isMobile ? mobileWeekData.weekDaysInMonth : days;
+  const displayedDays = (isMobile || forceWeekView) ? mobileWeekData.weekDaysInMonth : days;
 
   // Entry lookup: "empId-day" → entry
   const entryMap = useMemo(() => {
@@ -4066,6 +4067,26 @@ export default function Schedule() {
           <button onClick={nextMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] min-w-[44px]">›</button>
         </div>
 
+        {/* Desktop week view toggle */}
+        {!isMobile && (
+          <div className="flex items-center gap-1 no-print">
+            <button
+              onClick={() => setForceWeekView(v => !v)}
+              className={`px-2 py-1.5 border rounded shadow-sm text-xs flex items-center gap-1 transition-colors ${forceWeekView ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+              title={forceWeekView ? 'Zur Monatsansicht wechseln' : 'Zur Wochenansicht wechseln'}
+            >
+              {forceWeekView ? '📅 Woche' : '📆 Monat'}
+            </button>
+            {forceWeekView && (
+              <>
+                <button onClick={prevWeek} className="px-2 py-1.5 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50 text-xs text-gray-600" title="Vorherige Woche">‹</button>
+                <span className="text-xs text-indigo-700 font-medium px-2 py-1.5 bg-indigo-50 border border-indigo-200 rounded whitespace-nowrap">{mobileWeekData.label}</span>
+                <button onClick={nextWeek} className="px-2 py-1.5 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50 text-xs text-gray-600" title="Nächste Woche">›</button>
+              </>
+            )}
+          </div>
+        )}
+
         {/* Mobile: Week navigation — only shown on small screens */}
         {isMobile && (
           <div className="flex items-center gap-1.5 sm:hidden">
@@ -4944,7 +4965,7 @@ export default function Schedule() {
                                 : isToday
                                 ? (isDark ? '#0d1f3c' : '#eff6ff')
                                 : isWe
-                                ? (isDark ? '#1a2535' : '#f8fafc')
+                                ? (isDark ? '#1a2535' : '#f1f5f9')
                                 : (isDark ? undefined : undefined))),
                           outline: isDndTgt
                             ? '2px solid #1d4ed8'

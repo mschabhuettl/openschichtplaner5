@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSSERefresh } from '../contexts/SSEContext';
 import { HelpTooltip } from '../components/HelpTooltip';
 
 // ─── Types ────────────────────────────────────────────────
@@ -206,6 +207,9 @@ export default function Konflikte() {
   useEffect(() => {
     fetchConflicts();
   }, [fetchConflicts]);
+
+  // SSE: auto-refresh when conflicts change remotely
+  useSSERefresh(['conflict_updated', 'schedule_changed', 'absence_changed'], fetchConflicts);
 
   // Derived: unique conflict types
   const conflictTypes = useMemo(() => {

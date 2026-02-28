@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { SSEProvider, useSSEContext } from './contexts/SSEContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { LanguageProvider, useLanguage } from './i18n/context';
 import { ToastProvider } from './contexts/ToastContext';
@@ -74,6 +75,30 @@ const Uebergabe           = lazy(() => import('./pages/Uebergabe'));
 const DienstBoard         = lazy(() => import('./pages/DienstBoard'));
 const Login             = lazy(() => import('./pages/Login'));
 const NotFound          = lazy(() => import('./pages/NotFound'));
+
+/** SSE live connection indicator dot */
+function LiveIndicator() {
+  const { status } = useSSEContext();
+  const isConnected = status === 'connected';
+  const isConnecting = status === 'connecting';
+  return (
+    <span
+      title={isConnected ? 'Live-Updates aktiv' : isConnecting ? 'Verbinde...' : 'Live-Updates getrennt'}
+      aria-label={isConnected ? 'Live' : 'Getrennt'}
+      className="flex-shrink-0 flex items-center justify-center w-8 h-8"
+    >
+      <span
+        className={`block w-2.5 h-2.5 rounded-full transition-colors duration-500 ${
+          isConnected
+            ? 'bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.7)]'
+            : isConnecting
+            ? 'bg-yellow-400 animate-pulse'
+            : 'bg-red-500'
+        }`}
+      />
+    </span>
+  );
+}
 
 /** Simple loading indicator shown while a lazy chunk is fetching */
 function PageLoader() {
@@ -450,6 +475,8 @@ function AppInner() {
               {isDevMode ? 'Dev-Mode' : user?.role ?? ''}
             </span>
           </span>
+          {/* SSE Live Indicator */}
+          <LiveIndicator />
           {/* Language Toggle */}
           <button
             onClick={() => setLanguage(language === 'de' ? 'en' : 'de')}
@@ -668,7 +695,9 @@ export default function App() {
           <ToastProvider>
             <BrowserRouter>
               <AuthProvider>
-                <AuthGate />
+                <SSEProvider>
+                  <AuthGate />
+                </SSEProvider>
               </AuthProvider>
             </BrowserRouter>
             <GlobalToastContainer />

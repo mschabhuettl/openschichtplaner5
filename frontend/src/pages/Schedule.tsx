@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, memo, type CSSProperties } from 'react';
+import { useSSERefresh } from '../contexts/SSEContext';
 import { useNavigate } from 'react-router-dom';
 import { usePermissions } from '../hooks/usePermissions';
 import { api } from '../api/client';
@@ -1801,6 +1802,9 @@ export default function Schedule() {
   useEffect(() => {
     loadSchedule();
   }, [year, month]);
+
+  // SSE: auto-refresh when schedule or conflicts change remotely
+  useSSERefresh(['schedule_changed', 'conflict_updated', 'absence_changed'], loadSchedule);
 
   // Reload trigger for copy-week (dispatched after successful copy)
   useEffect(() => {

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useSSERefresh } from '../contexts/SSEContext';
 import { api } from '../api/client';
 import type { Note } from '../api/client';
 import type { Employee, Group } from '../types';
@@ -287,6 +288,9 @@ export default function Notizen() {
   }, []);
 
   useEffect(() => { loadNotes(); }, [loadNotes]);
+
+  // SSE: auto-refresh when notes change remotely
+  useSSERefresh(['note_added'], loadNotes);
 
   useEffect(() => {
     if (filterGroupId > 0) {

@@ -203,7 +203,7 @@ function ShiftPicker({
   return (
     <div
       ref={ref}
-      className="absolute z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 p-2 min-w-[160px] text-xs dark:text-gray-200"
+      className="absolute z-50 bg-white rounded-lg shadow-xl border border-gray-200 p-2 min-w-[160px] text-xs"
       style={{ top: '100%', left: 0 }}
     >
       <div className="font-semibold text-gray-600 mb-1 px-1">Schicht wählen</div>
@@ -211,7 +211,7 @@ function ShiftPicker({
         <button
           key={s.ID}
           onClick={() => { onSelect(s.ID); onClose(); }}
-          className="w-full flex items-center gap-1.5 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
+          className="w-full flex items-center gap-1.5 px-2 py-1 rounded hover:bg-gray-100 text-left"
         >
           <span
             className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
@@ -230,7 +230,7 @@ function ShiftPicker({
             <button
               key={lt.ID}
               onClick={() => { onAbsence(lt.ID); onClose(); }}
-              className="w-full flex items-center gap-1.5 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
+              className="w-full flex items-center gap-1.5 px-2 py-1 rounded hover:bg-gray-100 text-left"
             >
               <span
                 className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
@@ -286,9 +286,9 @@ function GroupMultiSelect({
         <span className="text-gray-400 text-xs flex-shrink-0">▾</span>
       </button>
       {open && (
-        <div className="absolute top-full mt-1 left-0 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl min-w-[190px] py-1">
+        <div className="absolute top-full mt-1 left-0 z-50 bg-white border border-gray-200 rounded-lg shadow-xl min-w-[190px] py-1">
           <button
-            className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
             onClick={() => { onChange([]); setOpen(false); }}
           >
             <span
@@ -306,7 +306,7 @@ function GroupMultiSelect({
             return (
               <button
                 key={g.ID}
-                className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
                 onClick={() => {
                   if (isSelected) {
                     onChange(selectedIds.filter(id => id !== g.ID));
@@ -410,7 +410,7 @@ function CellContextMenu({
   return (
     <div
       ref={ref}
-      className="fixed z-[100] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 text-xs dark:text-gray-200"
+      className="fixed z-[100] bg-white rounded-lg shadow-xl border border-gray-200 text-xs"
       style={{ left: state.x, top: state.y, minWidth: 215 }}
     >
       {mode === 'menu' && (
@@ -419,33 +419,33 @@ function CellContextMenu({
             {state.dateStr}
           </div>
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
             onClick={() => setMode('shift-select')}
           >
             📋 Schicht zuweisen...
           </button>
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
             onClick={() => setMode('absence-select')}
           >
             🏖️ Abwesenheit eintragen...
           </button>
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
             onClick={() => setMode('sonderdienst')}
           >
             ⚡ Sonderdienst...
           </button>
           {entry?.kind === 'shift' && (
             <button
-              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
               onClick={() => setMode('deviation')}
             >
               ⏱️ Arbeitszeitabweichung...
             </button>
           )}
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
             onClick={() => setMode('note')}
           >
             💬 Notiz hinzufügen
@@ -460,14 +460,14 @@ function CellContextMenu({
           )}
           <div className="border-t my-1" />
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
             onClick={() => { onCopy(state.empId, state.day); onClose(); }}
           >
             📄 Kopieren
           </button>
           {hasClipboard && (
             <button
-              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
               onClick={() => { onPaste(state.empId, state.day); onClose(); }}
             >
               📌 Einfügen
@@ -484,7 +484,7 @@ function CellContextMenu({
               <button
                 key={s.ID}
                 onClick={() => { onAssignShift(state.empId, state.day, s.ID); onClose(); }}
-                className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
+                className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 text-left"
               >
                 <span
                   className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
@@ -498,7 +498,7 @@ function CellContextMenu({
           </div>
           <div className="border-t my-1" />
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 flex items-center gap-1"
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 text-gray-500 flex items-center gap-1"
             onClick={() => setMode('menu')}
           >
             ← Zurück
@@ -514,7 +514,7 @@ function CellContextMenu({
               <button
                 key={lt.ID}
                 onClick={() => { onAddAbsence(state.empId, state.day, lt.ID); onClose(); }}
-                className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
+                className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 text-left"
               >
                 <span
                   className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
@@ -528,7 +528,7 @@ function CellContextMenu({
           </div>
           <div className="border-t my-1" />
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 flex items-center gap-1"
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 text-gray-500 flex items-center gap-1"
             onClick={() => setMode('menu')}
           >
             ← Zurück
@@ -740,7 +740,7 @@ function NoteDetailPopup({
   return (
     <div
       ref={ref}
-      className="fixed z-[110] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 text-xs dark:text-gray-200"
+      className="fixed z-[110] bg-white rounded-lg shadow-xl border border-gray-200 text-xs"
       style={{ left: state.x, top: state.y, minWidth: 210, maxWidth: 290 }}
     >
       <div className="px-3 py-1.5 bg-indigo-50 border-b text-[10px] text-indigo-600 font-semibold rounded-t-lg flex justify-between items-center">
@@ -953,7 +953,7 @@ function AuslastungsBereich({
   }
 
   return (
-    <div className="mt-3 bg-white dark:bg-gray-900 rounded-lg shadow border border-gray-200 dark:border-gray-600 overflow-auto">
+    <div className="mt-3 bg-white rounded-lg shadow border border-gray-200 overflow-auto">
       <div className="px-3 py-2 bg-slate-50 border-b border-gray-200 flex items-center gap-2">
         <span className="text-xs font-semibold text-slate-600">📊 Auslastung nach Schichtart</span>
         <span className="text-[10px] text-gray-400">
@@ -985,7 +985,7 @@ function AuslastungsBereich({
         <tbody>
           {activeShifts.map(shift => (
             <tr key={shift.ID}>
-              <td className="sticky left-0 z-10 bg-white dark:bg-gray-900 px-3 py-1 border-r border-gray-200 dark:border-gray-700 border-b border-b-gray-100 dark:border-b-gray-700 whitespace-nowrap">
+              <td className="sticky left-0 z-10 bg-white px-3 py-1 border-r border-gray-200 border-b border-b-gray-100 whitespace-nowrap">
                 <span
                   className="inline-flex items-center gap-1.5"
                 >
@@ -1067,7 +1067,7 @@ function ShiftFilterDropdown({
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1.5 px-2 py-1 border dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200"
+        className="flex items-center gap-1.5 px-2 py-1 border rounded bg-white text-xs hover:bg-gray-50"
       >
         {selected ? (
           <>
@@ -1085,9 +1085,9 @@ function ShiftFilterDropdown({
         <span className="text-gray-400 ml-1">▾</span>
       </button>
       {open && (
-        <div className="absolute top-full mt-1 left-0 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl min-w-[200px] py-1">
+        <div className="absolute top-full mt-1 left-0 z-50 bg-white border border-gray-200 rounded-lg shadow-xl min-w-[200px] py-1">
           <button
-            className="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-50 flex items-center gap-2"
             onClick={() => { onChange(''); setOpen(false); }}
           >
             <span
@@ -1103,7 +1103,7 @@ function ShiftFilterDropdown({
           {shifts.map(s => (
             <button
               key={s.ID}
-              className="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              className="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-50 flex items-center gap-2"
               onClick={() => { onChange(s.ID); setOpen(false); }}
             >
               <span
@@ -1157,17 +1157,17 @@ function BulkContextMenu({
   return (
     <div
       ref={ref}
-      className="fixed z-[100] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 text-xs dark:text-gray-200"
+      className="fixed z-[100] bg-white rounded-lg shadow-xl border border-gray-200 text-xs"
       style={{ left: x, top: y, minWidth: 210 }}
     >
-      <div className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/40 border-b dark:border-gray-600 text-[10px] text-blue-700 dark:text-blue-300 font-semibold rounded-t-lg flex items-center justify-between">
+      <div className="px-3 py-1.5 bg-blue-50 border-b text-[10px] text-blue-700 font-semibold rounded-t-lg flex items-center justify-between">
         <span>✅ {selectionInfo.cells} Zellen ({selectionInfo.employees} MA × {selectionInfo.days} Tage)</span>
         <button onClick={onClose} className="text-gray-400 hover:text-gray-600 ml-2">×</button>
       </div>
       {mode === 'menu' ? (
         <div className="py-1">
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
             onClick={() => setMode('shift-select')}
           >
             📋 Schicht zuweisen...
@@ -1180,14 +1180,14 @@ function BulkContextMenu({
           </button>
           <div className="border-t my-1" />
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
             onClick={() => { onCopy(); onClose(); }}
           >
             📄 Kopieren
           </button>
           {hasClipboard && (
             <button
-              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 flex items-center gap-2"
               onClick={onPaste}
             >
               📌 Einfügen
@@ -1201,7 +1201,7 @@ function BulkContextMenu({
             <button
               key={s.ID}
               onClick={() => { onAssignShift(s.ID); onClose(); }}
-              className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
+              className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 text-left"
             >
               <span
                 className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
@@ -1214,7 +1214,7 @@ function BulkContextMenu({
           ))}
           <div className="border-t my-1" />
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 flex items-center gap-1"
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 text-gray-500 flex items-center gap-1"
             onClick={() => setMode('menu')}
           >
             ← Zurück
@@ -2612,7 +2612,7 @@ export default function Schedule() {
           className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
           onClick={e => { if (e.target === e.currentTarget) closeAutoPlan(); }}
         >
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-gray-800">🤖 Auto-Planen</h2>
@@ -2699,7 +2699,7 @@ export default function Schedule() {
                 </div>
 
                 {autoPlanAssignments.length === 0 && (
-                  <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg text-sm text-yellow-700 dark:text-yellow-300">
+                  <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700">
                     ⚠️ Keine Schichtmodell-Zuweisungen gefunden. Bitte erst unter{' '}
                     <strong>Schichtmodell</strong> Mitarbeitern ein Modell zuweisen.
                   </div>
@@ -2709,7 +2709,7 @@ export default function Schedule() {
                 <div className="flex gap-3 justify-end">
                   <button
                     onClick={closeAutoPlan}
-                    className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                    className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
                     disabled={autoPlanLoading}
                   >
                     Abbrechen
@@ -2797,14 +2797,14 @@ export default function Schedule() {
                 <div className="flex gap-3 justify-end">
                   <button
                     onClick={closeAutoPlan}
-                    className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                    className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
                     disabled={autoPlanLoading}
                   >
                     Abbrechen
                   </button>
                   <button
                     onClick={() => setAutoPlanStep('config')}
-                    className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                    className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
                     disabled={autoPlanLoading}
                   >
                     ← Zurück
@@ -2852,7 +2852,7 @@ export default function Schedule() {
               <div className="flex gap-2 justify-end">
                 <button
                   onClick={() => setShowCopyPrevMonth(false)}
-                  className="px-4 py-2 text-sm rounded border hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="px-4 py-2 text-sm rounded border hover:bg-gray-50"
                 >
                   Abbrechen
                 </button>
@@ -2932,7 +2932,7 @@ export default function Schedule() {
             className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
             onClick={e => { if (e.target === e.currentTarget) closeCopyWeek(); }}
           >
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-lg font-bold text-gray-800">📋 Woche kopieren</h2>
                 <button onClick={closeCopyWeek} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
@@ -3019,7 +3019,7 @@ export default function Schedule() {
                 </div>
                 <div className="border rounded-lg overflow-y-auto max-h-40 divide-y">
                   {displayEmployees.filter(e => e.ID !== copyWeekSource).map(emp => (
-                    <label key={emp.ID} className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                    <label key={emp.ID} className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={copyWeekTargets.has(emp.ID)}
@@ -3053,7 +3053,7 @@ export default function Schedule() {
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={closeCopyWeek}
-                  className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                  className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
                   disabled={copyWeekLoading}
                 >
                   Abbrechen
@@ -3400,11 +3400,11 @@ export default function Schedule() {
 
         {/* Month navigation */}
         <div className="flex items-center gap-1.5">
-          <button onClick={prevMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] min-w-[44px]">‹</button>
+          <button onClick={prevMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm min-h-[44px] min-w-[44px]">‹</button>
           <span className="font-semibold text-gray-700 min-w-[120px] sm:min-w-[140px] text-center text-sm">
             {MONTH_NAMES[month]} {year}
           </span>
-          <button onClick={nextMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] min-w-[44px]">›</button>
+          <button onClick={nextMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm min-h-[44px] min-w-[44px]">›</button>
         </div>
 
         {/* Mobile: Week navigation — only shown on small screens */}
@@ -3450,7 +3450,7 @@ export default function Schedule() {
           <button
             onClick={handleUndo}
             disabled={undoStack.length === 0}
-            className="px-2 py-1.5 bg-white border rounded shadow-sm text-xs sm:text-sm flex items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed min-h-[32px]"
+            className="px-2 py-1.5 bg-white border rounded shadow-sm text-xs sm:text-sm flex items-center gap-1 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed min-h-[32px]"
             title={`Rückgängig (Ctrl+Z) — ${undoStack.length} Einträge`}
           >
             ↩ <span className="hidden sm:inline">Undo</span>
@@ -3458,7 +3458,7 @@ export default function Schedule() {
           <button
             onClick={handleRedo}
             disabled={redoStack.length === 0}
-            className="px-2 py-1.5 bg-white border rounded shadow-sm text-xs sm:text-sm flex items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed min-h-[32px]"
+            className="px-2 py-1.5 bg-white border rounded shadow-sm text-xs sm:text-sm flex items-center gap-1 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed min-h-[32px]"
             title={`Wiederholen (Ctrl+Y) — ${redoStack.length} Einträge`}
           >
             ↪ <span className="hidden sm:inline">Redo</span>
@@ -3544,7 +3544,7 @@ export default function Schedule() {
           {/* Keyboard help button */}
           <button
             onClick={() => setShowKbHelp(h => !h)}
-            className="px-2 py-1.5 bg-white border rounded shadow-sm text-xs sm:text-sm flex items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-700 min-h-[32px]"
+            className="px-2 py-1.5 bg-white border rounded shadow-sm text-xs sm:text-sm flex items-center gap-1 hover:bg-gray-50 min-h-[32px]"
             title="Tastaturkürzel anzeigen (?)"
           >
             ⌨️
@@ -3561,7 +3561,7 @@ export default function Schedule() {
             {showExportMenu && (
               <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50 min-w-[160px] py-1">
                 <button
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                   onClick={() => {
                     exportCSV(displayEmployees, days, entryMap, year, month);
                     setShowExportMenu(false);
@@ -3570,7 +3570,7 @@ export default function Schedule() {
                   📄 CSV exportieren
                 </button>
                 <button
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                   onClick={() => {
                     exportHTML(displayEmployees, days, entryMap, holidays, year, month, MONTH_NAMES[month], shifts);
                     setShowExportMenu(false);
@@ -3935,7 +3935,7 @@ export default function Schedule() {
       {/* ── Bulk Action Toolbar ── */}
       {selection && (
         <div className="overflow-x-auto mb-2 no-print">
-        <div className="flex items-center gap-3 px-3 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg shadow-sm text-xs flex-wrap min-w-[480px]">
+        <div className="flex items-center gap-3 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg shadow-sm text-xs flex-wrap min-w-[480px]">
           <span className="text-blue-700 font-semibold flex-shrink-0">
             ✅ {selectionInfo.cells} Zellen ausgewählt ({selectionInfo.employees} MA × {selectionInfo.days} Tage)
           </span>
@@ -3977,7 +3977,7 @@ export default function Schedule() {
           )}
           <button
             onClick={() => { setSelection(null); setBulkShiftId(''); }}
-            className="ml-auto px-2 py-1 bg-white border border-gray-300 text-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="ml-auto px-2 py-1 bg-white border border-gray-300 text-gray-600 rounded hover:bg-gray-50"
           >
             ✕ Auswahl aufheben
           </button>
@@ -4087,10 +4087,10 @@ export default function Schedule() {
               // Group header row
               if (row.type === 'group-header') {
                 return (
-                  <tr key={`grp-${row.groupId}`} className="bg-blue-50 dark:bg-blue-900/20">
+                  <tr key={`grp-${row.groupId}`} className="bg-blue-50">
                     <td
                       colSpan={displayedDays.length + 1}
-                      className="sticky left-0 px-3 py-1 text-xs font-bold text-blue-700 dark:text-blue-300 border-b border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20"
+                      className="sticky left-0 px-3 py-1 text-xs font-bold text-blue-700 border-b border-blue-200 bg-blue-50"
                     >
                       👥 {row.groupName}
                     </td>

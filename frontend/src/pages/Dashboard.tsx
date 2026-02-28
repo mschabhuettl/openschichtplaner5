@@ -1003,6 +1003,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [conflictsCount, setConflictsCount] = useState<number | null>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchAll = useCallback((silent = false) => {
@@ -1013,13 +1014,15 @@ export default function Dashboard() {
     const todayP = api.getDashboardToday();
     const upcomingP = api.getDashboardUpcoming();
     const statsP = api.getDashboardStats();
+    const conflictsP = api.getConflicts({ year, month }).then(c => c.conflicts.length).catch(() => null);
 
-    Promise.all([summaryP, todayP, upcomingP, statsP])
-      .then(([summary, today, upcoming, stats]) => {
+    Promise.all([summaryP, todayP, upcomingP, statsP, conflictsP])
+      .then(([summary, today, upcoming, stats, conflicts]) => {
         setSummaryData(summary);
         setTodayData(today);
         setUpcomingData(upcoming);
         setStatsData(stats);
+        setConflictsCount(conflicts);
         setLastRefresh(new Date());
       })
       .catch((err) => setError(String(err)))
@@ -1135,9 +1138,9 @@ export default function Dashboard() {
       )}
 
       {/* KPI Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {loading ? (
-          Array.from({ length: 4 }).map((_, i) => <KpiSkeleton key={i} />)
+          Array.from({ length: 5 }).map((_, i) => <KpiSkeleton key={i} />)
         ) : (
           <>
             <KpiCard
@@ -1191,6 +1194,13 @@ export default function Dashboard() {
                   ? covAccent
                   : 'gray'
               }
+            />
+            <KpiCard
+              icon="⚠️"
+              label="Konflikte"
+              value={conflictsCount ?? '—'}
+              sub={conflictsCount === null ? 'Lädt…' : conflictsCount === 0 ? 'Keine Konflikte ✅' : `im ${summaryData?.month_label ?? 'Monat'}`}
+              accent={conflictsCount === null ? 'gray' : conflictsCount === 0 ? 'green' : conflictsCount < 10 ? 'orange' : 'red'}
             />
           </>
         )}

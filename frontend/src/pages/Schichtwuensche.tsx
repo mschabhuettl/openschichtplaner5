@@ -54,6 +54,7 @@ export default function Schichtwuensche() {
 
   // filter / view state
   const [filterEmp,   setFilterEmp]   = useState<number | ''>('');
+  const [filterType,  setFilterType]  = useState<'ALL' | 'WUNSCH' | 'SPERRUNG'>('ALL');
   const [viewMode,    setViewMode]    = useState<'calendar' | 'list'>('calendar');
 
   // add-wish dialog
@@ -84,8 +85,10 @@ export default function Schichtwuensche() {
   const shiftMap = useMemo(() => new Map(shifts.map(s => [s.ID, s])), [shifts]);
 
   const filteredWishes = useMemo(() =>
-    filterEmp !== '' ? wishes.filter(w => w.employee_id === filterEmp) : wishes,
-    [wishes, filterEmp]);
+    wishes
+      .filter(w => filterEmp === '' || w.employee_id === filterEmp)
+      .filter(w => filterType === 'ALL' || w.wish_type === filterType),
+    [wishes, filterEmp, filterType]);
 
   // Build map: date → wishes for calendar
   const wishMap = useMemo(() => {
@@ -279,6 +282,19 @@ export default function Schichtwuensche() {
               <option key={e.ID} value={e.ID}>{e.NAME}, {e.FIRSTNAME}</option>
             ))}
           </select>
+        </div>
+
+        {/* Type filter */}
+        <div className={`flex rounded-lg overflow-hidden border ${isDark ? 'border-gray-600' : 'border-gray-300'}`}>
+          {(['ALL', 'WUNSCH', 'SPERRUNG'] as const).map(t => (
+            <button
+              key={t}
+              onClick={() => setFilterType(t)}
+              className={`px-3 py-1.5 text-sm font-medium transition ${filterType === t ? 'bg-indigo-600 text-white' : (isDark ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-white text-gray-700 hover:bg-gray-50')}`}
+            >
+              {t === 'ALL' ? 'Alle' : t === 'WUNSCH' ? '🟢 Wünsche' : '🔴 Sperrtage'}
+            </button>
+          ))}
         </div>
 
         {/* Legend */}

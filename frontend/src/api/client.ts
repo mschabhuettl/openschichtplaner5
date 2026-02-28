@@ -98,6 +98,16 @@ export interface DayCoverage {
   weekday: number;
 }
 
+export interface EmployeeRankingEntry {
+  employee_id: number;
+  employee_name: string;
+  employee_short: string;
+  shifts_count: number;
+  actual_hours: number;
+  target_hours: number;
+  overtime_hours: number;
+}
+
 export interface DashboardStats {
   total_employees: number;
   shifts_this_month: number;
@@ -106,6 +116,7 @@ export interface DashboardStats {
   coverage_by_day: DayCoverage[];
   month: number;
   year: number;
+  employee_ranking: EmployeeRankingEntry[];
 }
 
 // ─── Dashboard Summary Types ───────────────────────────────

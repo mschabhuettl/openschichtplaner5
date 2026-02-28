@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { ToastProvider } from './contexts/ToastContext';
@@ -507,6 +507,7 @@ function AppInner() {
               <Route path="/schichtbriefing" element={<SchichtBriefing />} />
               <Route path="/onboarding" element={<OnboardingWizard />} />
               <Route path="/auditlog" element={<AuditLog />} />
+              <Route path="/login" element={<Navigate to="/" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

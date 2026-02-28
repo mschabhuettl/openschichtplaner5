@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { LanguageProvider, useLanguage } from './i18n/context';
 import { ToastProvider } from './contexts/ToastContext';
 import { ToastContainer } from './components/Toast';
 import { useToast } from './hooks/useToast';
@@ -182,6 +183,7 @@ function AppInner() {
   const location = useLocation();
   const { user, isDevMode, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
+  const { language, setLanguage } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [conflictCount, setConflictCount] = useState(0);
   const [spotlightOpen, setSpotlightOpen] = useState(false);
@@ -339,6 +341,8 @@ function AppInner() {
     }
   }, [activeGroup]);
 
+  const { t } = useLanguage();
+
   const sidebarContent = (
     <>
       <div className="p-4 border-b border-slate-700 flex items-center justify-between">
@@ -352,7 +356,7 @@ function AppInner() {
               </span>
             )}
           </div>
-          <div className="text-xs text-slate-400 mt-0.5">Dienstplanung</div>
+          <div className="text-xs text-slate-400 mt-0.5">{t.nav.dienstplanung}</div>
         </div>
         <div className="flex items-center gap-1">
           {/* Warnings Center bell */}
@@ -406,7 +410,7 @@ function AppInner() {
                   aria-expanded={!isCollapsed}
                   className="w-full flex items-center justify-between px-4 pt-3 pb-1 text-[10px] uppercase tracking-widest text-slate-500 font-semibold hover:text-slate-300 transition-colors"
                 >
-                  <span>{group}</span>
+                  <span>{t.navGroups[group as keyof typeof t.navGroups] ?? group}</span>
                   <span aria-hidden="true" className="text-[9px] opacity-60">{isCollapsed ? '▶' : '▼'}</span>
                 </button>
               )}
@@ -422,7 +426,7 @@ function AppInner() {
                   }`}
                 >
                   <span className="text-base leading-none">{item.icon}</span>
-                  <span className="flex-1 text-left">{item.label}</span>
+                  <span className="flex-1 text-left">{t.navItems[item.id as keyof typeof t.navItems] ?? item.label}</span>
                   {item.badge && conflictCount > 0 && (
                     <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold">
                       {conflictCount > 99 ? '99+' : conflictCount}
@@ -445,6 +449,17 @@ function AppInner() {
               {isDevMode ? 'Dev-Mode' : user?.role ?? ''}
             </span>
           </span>
+          {/* Language Toggle */}
+          <button
+            onClick={() => setLanguage(language === 'de' ? 'en' : 'de')}
+            title={language === 'de' ? 'Switch to English' : 'Auf Deutsch wechseln'}
+            aria-label={language === 'de' ? 'Switch to English' : 'Auf Deutsch wechseln'}
+            className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg
+                       text-slate-400 hover:text-white hover:bg-slate-600 transition-colors
+                       text-sm font-bold leading-none"
+          >
+            {language === 'de' ? '🇩🇪' : '🇬🇧'}
+          </button>
           {/* Dark Mode Toggle */}
           <button
             onClick={toggleTheme}
@@ -462,7 +477,7 @@ function AppInner() {
           className="w-full py-1.5 px-3 text-xs text-slate-400 hover:text-white
                      bg-slate-700 hover:bg-slate-600 rounded transition text-left"
         >
-          ↩ Abmelden
+          ↩ {t.nav.logout}
         </button>
       </div>
     </>
@@ -648,14 +663,16 @@ export default function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        <ToastProvider>
-          <BrowserRouter>
-            <AuthProvider>
-              <AuthGate />
-            </AuthProvider>
-          </BrowserRouter>
-          <GlobalToastContainer />
-        </ToastProvider>
+        <LanguageProvider>
+          <ToastProvider>
+            <BrowserRouter>
+              <AuthProvider>
+                <AuthGate />
+              </AuthProvider>
+            </BrowserRouter>
+            <GlobalToastContainer />
+          </ToastProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

@@ -1,8 +1,11 @@
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage, useT } from '../i18n/context';
 
 export default function Login() {
   const { login, loginDev } = useAuth();
+  const { language, setLanguage } = useLanguage();
+  const t = useT();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -11,7 +14,7 @@ export default function Login() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!username.trim()) {
-      setError('Bitte Benutzername eingeben.');
+      setError(t.login.errorRequired);
       return;
     }
     setError('');
@@ -19,7 +22,7 @@ export default function Login() {
     try {
       await login(username.trim(), password);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Login fehlgeschlagen');
+      setError(err instanceof Error ? err.message : t.login.errorFailed);
     } finally {
       setLoading(false);
     }
@@ -35,8 +38,8 @@ export default function Login() {
         {/* Logo / Header */}
         <div className="text-center mb-8">
           <div className="text-5xl mb-3">🧸</div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">OpenSchichtplaner5</h1>
-          <p className="text-slate-400 text-sm mt-1">Bitte anmelden um fortzufahren</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">{t.login.title}</h1>
+          <p className="text-slate-400 text-sm mt-1">{t.login.subtitle}</p>
         </div>
 
         {/* Card */}
@@ -45,7 +48,7 @@ export default function Login() {
             {/* Username */}
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                Benutzername
+                {t.login.usernameLabel}
               </label>
               <input
                 type="text"
@@ -54,7 +57,7 @@ export default function Login() {
                 autoFocus
                 autoComplete="username"
                 disabled={loading}
-                placeholder="z. B. Admin"
+                placeholder={t.login.usernamePlaceholder}
                 className="w-full px-4 py-2.5 rounded-lg bg-slate-700 text-white border border-slate-600
                            placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500
                            focus:border-transparent disabled:opacity-50 transition"
@@ -64,7 +67,7 @@ export default function Login() {
             {/* Password */}
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                Passwort
+                {t.login.passwordLabel}
               </label>
               <input
                 type="password"
@@ -72,7 +75,7 @@ export default function Login() {
                 onChange={e => setPassword(e.target.value)}
                 autoComplete="current-password"
                 disabled={loading}
-                placeholder="••••••••"
+                placeholder={t.login.passwordPlaceholder}
                 className="w-full px-4 py-2.5 rounded-lg bg-slate-700 text-white border border-slate-600
                            placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500
                            focus:border-transparent disabled:opacity-50 transition"
@@ -97,9 +100,9 @@ export default function Login() {
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
                   <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Anmelden…
+                  {t.login.loggingIn}
                 </span>
-              ) : 'Anmelden'}
+              ) : t.login.loginButton}
             </button>
           </form>
 
@@ -114,12 +117,23 @@ export default function Login() {
                        text-slate-300 text-sm rounded-lg transition
                        focus:outline-none focus:ring-2 focus:ring-slate-400"
           >
-            🛠️ Dev-Mode (kein Passwort)
+            🛠️ {t.login.devModeButton}
           </button>
         </div>
 
-        <p className="text-center text-slate-600 text-xs mt-6">
-          OpenSchichtplaner5 — Open Source
+        {/* Language toggle */}
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={() => setLanguage(language === 'de' ? 'en' : 'de')}
+            className="flex items-center gap-2 text-slate-500 hover:text-slate-300 text-sm transition"
+            aria-label={language === 'de' ? 'Switch to English' : 'Auf Deutsch wechseln'}
+          >
+            {language === 'de' ? '🇬🇧 English' : '🇩🇪 Deutsch'}
+          </button>
+        </div>
+
+        <p className="text-center text-slate-600 text-xs mt-4">
+          {t.login.footerText}
         </p>
       </div>
     </div>

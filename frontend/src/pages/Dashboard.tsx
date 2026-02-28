@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../api/client';
+import { useT } from '../i18n/context';
 import { HelpTooltip } from '../components/HelpTooltip';
 import type {
   DashboardSummary,
@@ -1140,6 +1141,7 @@ function UpcomingBirthdaysWidget({ summaryData }: { summaryData: DashboardSummar
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
+  const t = useT();
   const { year: todayYear, month: todayMonth } = todayYearMonth();
   const [year, setYear] = useState(todayYear);
   const [month, setMonth] = useState(todayMonth);
@@ -1227,7 +1229,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">📊 Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-800">📊 {t.dashboard.title}</h1>
           <p className="text-gray-400 text-sm mt-0.5">{todayLocale}</p>
         </div>
         <div className="flex items-center gap-2">
@@ -1264,7 +1266,7 @@ export default function Dashboard() {
       {/* Error state */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
-          ⚠️ Fehler beim Laden der Dashboard-Daten: {error}
+          ⚠️ {t.dashboard.loadError}: {error}
           <button
             onClick={() => fetchAll(false)}
             className="ml-3 underline hover:no-underline"

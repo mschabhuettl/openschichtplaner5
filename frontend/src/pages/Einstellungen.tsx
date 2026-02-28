@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { UsettSettings } from '../api/client';
 import { useToast } from '../hooks/useToast';
+import { useT } from '../i18n/context';
 
 // ─── Color conversion helpers ──────────────────────────────
 // DBF stores colors as BGR integer: B + G*256 + R*65536
@@ -58,6 +59,7 @@ function ColorPicker({ label, value, onChange, hint }: ColorPickerProps) {
 
 // ─── Main page ─────────────────────────────────────────────
 export default function Einstellungen() {
+  const t = useT();
   const { showToast } = useToast();
   const [settings, setSettings] = useState<UsettSettings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -104,10 +106,10 @@ export default function Einstellungen() {
         ANOABOLD: anoabold ? 1 : 0,
         BACKUPFR: backupfr,
       });
-      showToast('Einstellungen gespeichert ✓', 'success');
+      showToast(t.settings.saveSuccess + ' ✓', 'success');
     } catch (e) {
       setError(String(e));
-      showToast('Fehler beim Speichern', 'error');
+      showToast(t.settings.saveError, 'error');
     } finally {
       setSaving(false);
     }
@@ -122,9 +124,9 @@ export default function Einstellungen() {
     <div className="p-2 sm:p-4 lg:p-6 max-w-3xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-gray-800">⚙️ Einstellungen</h1>
+        <h1 className="text-xl font-bold text-gray-800">⚙️ {t.settings.title}</h1>
         <p className="text-sm text-gray-500 mt-0.5">
-          Globale Programmeinstellungen (5USETT.DBF)
+          {t.settings.subtitle} (5USETT.DBF)
         </p>
       </div>
 
@@ -326,7 +328,7 @@ export default function Einstellungen() {
               disabled={saving}
               className="px-6 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 shadow"
             >
-              {saving ? '⟳ Speichern…' : '💾 Einstellungen speichern'}
+              {saving ? `⟳ ${t.settings.saving}` : `💾 ${t.settings.saveButton}`}
             </button>
           </div>
 

@@ -3,6 +3,7 @@ import { useDebounce } from '../hooks/useDebounce';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import type { Restriction } from '../api/client';
+import { SkeletonTable } from '../components/Skeleton';
 import type { Employee, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
@@ -642,9 +643,7 @@ export default function Employees() {
       )}
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        </div>
+        <SkeletonTable rows={10} cols={6} className="mt-2" />
       ) : (
         <>
           {/* Desktop: Table layout */}

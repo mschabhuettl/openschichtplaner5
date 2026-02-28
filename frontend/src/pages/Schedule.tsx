@@ -9,6 +9,7 @@ import { useToast } from '../hooks/useToast';
 import { useTheme } from '../contexts/ThemeContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { SkeletonGrid } from '../components/Skeleton';
 
 // ── JS weekday → DB weekday (0=Mon..6=Sun) ────────────────────
 function jsWdToDbWd(jsWd: number): number {
@@ -5143,7 +5144,9 @@ export default function Schedule() {
             {filteredDisplayRows.filter(r => r.type === 'employee').length === 0 && (
               <tr>
                 <td colSpan={displayedDays.length + 1} className="text-center py-8 text-gray-400">
-                  {loading ? 'Lade Dienstplan...' : 'Keine Mitarbeiter gefunden'}
+                  {loading ? (
+                    <SkeletonGrid rows={6} cols={Math.min(displayedDays.length || 7, 31)} className="w-full" />
+                  ) : 'Keine Mitarbeiter gefunden'}
                 </td>
               </tr>
             )}

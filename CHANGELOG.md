@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — 2026-02-28 (auth-fixes-and-improvements)
+
+### Sicherheit / Security
+- **Auth-Header-Fixes** — Fehlende Auth-Header in 6 Seiten-Komponenten nachgezogen (fetch-Aufrufe ohne Bearer-Token behoben)
+- **Security Headers** — HTTP Security Headers (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy) im Backend aktiviert
+- **Dev-Token-Schutz** — Dev-Mode-Token (`SP5_DEV_MODE=true`) wird nur noch im Entwicklungsmodus akzeptiert; automatisch gesperrt in Production
+- **Auth-Lücken geschlossen** — Alle nicht-authentifizierten Endpunkte auditiert und abgesichert
+
+### Hinzugefügt / Added
+
+#### ⌨️ Keyboard Shortcuts & Schnellnavigation
+- **Globale Tastaturkürzel** — Schnellnavigation durch die Anwendung per Tastatur
+- **Shortcut-Overlay** — `?`-Taste öffnet Hilfe-Overlay mit allen verfügbaren Kürzeln
+- **Seitenspezifische Shortcuts** — kontextsensitive Kurzbefehle je nach aktiver Seite
+
+#### 🔍 Erweiterte Filter
+- **Gruppenfilter Mitarbeiterliste** — Mitarbeiter nach Gruppe filtern; kombinierbar mit Textsuche
+- **Volltextsuche Protokoll** — Freitext-Suche über alle Felder im Aktivitätsprotokoll
+
+#### 📊 Dashboard-Verbesserungen
+- **Besetzungs-Heatmap** — Kalender-Heatmap mit Farbkodierung des täglichen Besetzungsgrades direkt im Dashboard
+- **Mitarbeiter-Ranking** — Top-Liste der meistbeschäftigten Mitarbeiter im aktuellen Monat
+
+#### 🍞 Toast-Benachrichtigungen
+- **Toast-System** — Nicht-blockierende Erfolgs-/Fehler-/Info-Meldungen nach Benutzeraktionen
+- **Auto-Dismiss** — Toasts verschwinden automatisch nach konfigurierbarer Zeit
+
+#### 📱 Mobile Responsiveness
+- **Responsive Tabellen** — Alle Datentabellen scrollen horizontal auf kleinen Bildschirmen
+- **Touch Targets** — Vergrößerte Klick-/Tipp-Bereiche für Buttons und Links auf mobilen Geräten
+
+#### ⚡ Error Handling & Performance
+- **Retry-Logik** — Fehlgeschlagene API-Anfragen werden automatisch bis zu 3× wiederholt
+- **`useApiData` Hook** — Zentraler React-Hook für datenabruf mit Loading/Error-State, Retry und Caching
+- **EmptyState / ApiErrorState** — Einheitliche UI-Komponenten für leere Zustände und API-Fehler
+- **API-Cache für Stammdaten** — Häufig abgerufene Stammdaten (Gruppen, MA, Schichtarten) werden gecacht; reduziert Serverlast erheblich
+- **Datumsformat-Konsistenz** — Einheitliches ISO-8601-Format (`YYYY-MM-DD`) in allen API-Responses
+
+### Behoben / Fixed
+- **Login-Redirect** — Nach erfolgreichem Login wird nun korrekt zur ursprünglich angeforderten Seite weitergeleitet
+- **Konflikte KPI** — Korrekte Berechnung und Anzeige der Konflikt-Kennzahlen
+- **Schichtwünsche-Typfilter** — Filter nach Wunschtyp (Frei, Schicht, Urlaub …) in der Schichtwunsch-Übersicht funktioniert wieder zuverlässig
+
+---
+
 ## [Unreleased] — 2026-02-27 (security-hardening)
 
 ### Security & Quality

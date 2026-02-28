@@ -136,10 +136,23 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 - ✅ **Sauberes Print-CSS** — Sidebar, Buttons und nicht druckbare Elemente werden ausgeblendet
 - ✅ **Druckoptimiert** — Tabellen brechen korrekt um, Farben werden für S/W-Druck optimiert
 
+### ⌨️ UX & Bedienung
+- ✅ **Keyboard Shortcuts** — Globale Tastaturkürzel für Schnellnavigation; `?` öffnet Hilfe-Overlay
+- ✅ **Erweiterte Filter** — Gruppenfilter in der Mitarbeiterliste; Volltextsuche im Protokoll
+- ✅ **Toast-Benachrichtigungen** — Nicht-blockierende Erfolgs-/Fehler-/Info-Meldungen
+
 ### 📱 Mobile & Performance
 - ✅ **Mobile-freundlich** — Responsive Design mit Hamburger-Menü und Touch-Targets
-- ✅ **Code-Splitting** — Lazy Loading aller 33 Seiten (schnellerer Start)
+- ✅ **Responsive Tabellen** — Horizontales Scrollen auf kleinen Bildschirmen; vergrößerte Touch-Targets
+- ✅ **Code-Splitting** — Lazy Loading aller Seiten (schnellerer Start)
+- ✅ **API-Cache** — Stammdaten werden gecacht; weniger Serverlast, schnellere Navigation
+- ✅ **Error Handling & Retry** — Automatische Wiederholungsversuche bei API-Fehlern; `useApiData`-Hook mit Loading/Error-States
 - ✅ **Optimierter Build** — Vite-basierter Production-Build
+
+### 🔒 Sicherheit
+- ✅ **Security Headers** — HTTP Security Headers (CSP, X-Frame-Options, HSTS u. a.) aktiv
+- ✅ **Auth-Absicherung** — Alle Frontend-Komponenten senden korrekte Bearer-Token; keine ungescützten Endpunkte
+- ✅ **Dev-Mode-Schutz** — Dev-Token nur im Entwicklungsmodus aktiv (`SP5_DEV_MODE=true`)
 
 ### 🔧 System & Administration
 - ✅ **Aktivitätsprotokoll** — Vollständige Änderungshistorie aller API-Aktionen (Erstellt/Geändert/Gelöscht) mit Filtern nach Datum, Benutzer, Aktion, Objekt

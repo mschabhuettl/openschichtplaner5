@@ -1234,7 +1234,8 @@ export const api = {
   getDashboardUpcoming: () => fetchJSON<DashboardUpcoming>('/api/dashboard/upcoming'),
 
   // ─── Dashboard: Stats ──────────────────────────────────────
-  getDashboardStats: () => fetchJSON<DashboardStats>('/api/dashboard/stats'),
+  getDashboardStats: (year?: number, month?: number) =>
+    fetchJSON<DashboardStats>(`/api/dashboard/stats${year && month ? `?year=${year}&month=${month}` : ''}`),
 
   // ─── Schedule Coverage (Personalbedarf-Ampel) ──────────────
   getCoverage: (year: number, month: number) =>

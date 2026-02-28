@@ -506,7 +506,7 @@ function MonthCoverageChart({ statsData }: { statsData: DashboardStats | null })
     <Widget
       title={`Dienstplan-Abdeckung — ${MONTH_NAMES_DE[month]} ${year}`}
       icon="📊"
-      className="col-span-1 md:col-span-2"
+      className=""
     >
       <div className="flex items-end gap-0.5 h-28 w-full">
         {coverage_by_day.map((d) => {
@@ -990,6 +990,85 @@ function MorningBriefingWidget({ todayData, upcomingData, summaryData, loading }
   );
 }
 
+// ── Employee Shift Ranking Widget ────────────────────────────────────────────
+
+function EmployeeRankingWidget({ statsData, monthLabel }: { statsData: DashboardStats | null; monthLabel: string }) {
+  if (!statsData) return <WidgetSkeleton />;
+
+  const ranking = statsData.employee_ranking ?? [];
+  if (ranking.length === 0) return null;
+
+  const maxShifts = Math.max(...ranking.map((e) => e.shifts_count), 1);
+  // Show top 8 by shifts
+  const topEntries = ranking.slice(0, 8);
+
+  return (
+    <Widget title={`Mitarbeiter-Einsatz — ${monthLabel}`} icon="👤" badge={ranking.length}>
+      <div className="space-y-2">
+        {topEntries.map((emp, idx) => {
+          const pct = maxShifts > 0 ? (emp.shifts_count / maxShifts) * 100 : 0;
+          const overtimeColor =
+            emp.overtime_hours > 8
+              ? 'text-red-600'
+              : emp.overtime_hours < -8
+              ? 'text-orange-500'
+              : 'text-green-600';
+          const barColor =
+            emp.overtime_hours > 8
+              ? '#ef4444'
+              : emp.overtime_hours < -8
+              ? '#f97316'
+              : '#6366f1';
+
+          return (
+            <div key={emp.employee_id} className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-[11px] font-bold text-gray-400 w-4 text-right shrink-0">
+                  {idx + 1}.
+                </span>
+                <span
+                  className="inline-flex items-center justify-center rounded px-1.5 py-0.5 text-[10px] font-bold min-w-[2rem] shrink-0 bg-indigo-100 text-indigo-700"
+                >
+                  {emp.employee_short}
+                </span>
+                <span className="flex-1 font-medium text-gray-700 truncate text-xs">
+                  {emp.employee_name}
+                </span>
+                <span className="text-xs font-bold text-gray-600 shrink-0">
+                  {emp.shifts_count}×
+                </span>
+                {emp.actual_hours > 0 && (
+                  <span className={`text-[11px] font-semibold shrink-0 ${overtimeColor}`}>
+                    {emp.actual_hours}h
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 pl-8">
+                <div className="flex-1 bg-gray-100 rounded-full h-1.5">
+                  <div
+                    className="h-1.5 rounded-full transition-all duration-700"
+                    style={{ width: `${pct}%`, background: barColor }}
+                  />
+                </div>
+                {emp.target_hours > 0 && (
+                  <span className="text-[10px] text-gray-400 shrink-0 font-mono">
+                    / {emp.target_hours}h
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        {ranking.length > 8 && (
+          <p className="text-xs text-gray-400 text-right pt-1">
+            + {ranking.length - 8} weitere Mitarbeiter
+          </p>
+        )}
+      </div>
+    </Widget>
+  );
+}
+
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
@@ -1013,7 +1092,7 @@ export default function Dashboard() {
     const summaryP = api.getDashboardSummary(year, month);
     const todayP = api.getDashboardToday();
     const upcomingP = api.getDashboardUpcoming();
-    const statsP = api.getDashboardStats();
+    const statsP = api.getDashboardStats(year, month);
     const conflictsP = api.getConflicts({ year, month }).then(c => c.conflicts.length).catch(() => null);
 
     Promise.all([summaryP, todayP, upcomingP, statsP, conflictsP])
@@ -1221,18 +1300,26 @@ export default function Dashboard() {
           : <WochenpeakWidget todayData={todayData} />
       )}
 
-      {/* Besetzungs-Heatmap: calendar heatmap (full width) */}
-      {isCurrentMon && (
-        loading
-          ? <WidgetSkeleton />
-          : <MonthHeatmapWidget statsData={statsData} />
-      )}
+      {/* Besetzungs-Heatmap + Coverage chart — always shown for all months */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {loading ? (
+          <>
+            <WidgetSkeleton />
+            <WidgetSkeleton />
+          </>
+        ) : (
+          <>
+            <MonthHeatmapWidget statsData={statsData} />
+            <MonthCoverageChart statsData={statsData} />
+          </>
+        )}
+      </div>
 
-      {/* Chart: Monatliche Abdeckung (full width) — shown for non-current months too */}
-      {!isCurrentMon && (
-        loading
-          ? <WidgetSkeleton />
-          : <MonthCoverageChart statsData={statsData} />
+      {/* Employee Shift Ranking */}
+      {loading ? (
+        <WidgetSkeleton />
+      ) : (
+        <EmployeeRankingWidget statsData={statsData} monthLabel={summaryData?.month_label ?? `${month}/${year}`} />
       )}
 
       {/* Upcoming & Birthdays */}

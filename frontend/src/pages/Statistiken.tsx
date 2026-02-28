@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import type { EmployeeStats, ExtraChargeSummary, EmployeeYearStats, SicknessStatistics, ShiftStatisticsData } from '../api/client';
 import type { Employee, Group } from '../types';
 import { useT } from '../i18n';
+import { EmptyState } from '../components/EmptyState';
 
 const MONTH_NAMES = [
   '', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
@@ -1547,8 +1548,12 @@ export default function Statistiken() {
           })()}
 
           {!shiftLoading && !shiftError && !shiftData && (
-            <div className="flex-1 flex items-center justify-center text-gray-400 dark:text-slate-500 text-sm">
-              Keine Daten vorhanden.
+            <div className="flex-1 flex items-center justify-center">
+              <EmptyState
+                icon="📊"
+                title="Keine Schichtdaten vorhanden"
+                description="Für den gewählten Zeitraum sind keine Schichtdaten verfügbar."
+              />
             </div>
           )}
         </div>

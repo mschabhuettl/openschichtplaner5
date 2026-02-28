@@ -10,6 +10,7 @@ import { api } from '../api/client';
 import type { Employee, Group } from '../types';
 import type { DayEntry } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { EmptyState } from '../components/EmptyState';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -581,9 +582,11 @@ export default function TeamUebersicht() {
           </div>
         ) : view === 'cards' ? (
           filteredCards.length === 0 ? (
-            <div className="flex items-center justify-center h-48 text-gray-400 dark:text-gray-500 text-sm">
-              Keine Mitarbeiter gefunden.
-            </div>
+            <EmptyState
+              icon="👥"
+              title="Keine Mitarbeiter gefunden"
+              description="Passe die Filterkriterien an oder füge neue Mitarbeiter hinzu."
+            />
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 team-card-grid">
               {filteredCards.map(card => (

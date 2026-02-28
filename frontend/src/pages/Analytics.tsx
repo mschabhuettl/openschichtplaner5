@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { EmptyState } from '../components/EmptyState';
 
 const MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
                             'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
@@ -689,6 +690,14 @@ export default function Analytics() {
         {/* Print-only year display */}
         <div className="analytics-print-title" style={{ fontSize: 14, color: '#64748b' }}>Jahr: {year}</div>
       </div>
+
+      {!data && !loading && !error && (
+        <EmptyState
+          icon="📈"
+          title="Keine Analysedaten verfügbar"
+          description={`Für das Jahr ${year} sind keine Daten vorhanden.`}
+        />
+      )}
 
       {data && (
         <>

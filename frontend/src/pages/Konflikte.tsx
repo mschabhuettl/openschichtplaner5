@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSSERefresh } from '../contexts/SSEContext';
 import { HelpTooltip } from '../components/HelpTooltip';
+import { EmptyState } from '../components/EmptyState';
 
 // ─── Types ────────────────────────────────────────────────
 interface Conflict {
@@ -497,11 +498,11 @@ export default function Konflikte() {
 
       {/* Empty State */}
       {!loading && !error && conflicts.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-          <div className="text-5xl mb-4">✅</div>
-          <p className="text-lg font-medium text-gray-600">Keine Konflikte</p>
-          <p className="text-sm mt-1">Für {MONTHS[month - 1]} {year} gibt es keine Planungskonflikte.</p>
-        </div>
+        <EmptyState
+          icon="✅"
+          title="Alles in Ordnung"
+          description={`Für ${MONTHS[month - 1]} ${year} gibt es keine Planungskonflikte.`}
+        />
       )}
 
       {/* Filter + Toolbar */}

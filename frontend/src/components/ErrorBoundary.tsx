@@ -7,24 +7,46 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
+  reported: boolean;
+}
+
+async function reportErrorToBackend(error: Error, info: ErrorInfo) {
+  try {
+    await fetch('/api/errors', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        error: error.message + '\n' + (error.stack || ''),
+        component_stack: info.componentStack,
+        url: window.location.href,
+        user_agent: navigator.userAgent,
+        timestamp: new Date().toISOString(),
+      }),
+    });
+  } catch {
+    // best effort — ignore network errors
+  }
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, reported: false };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): Partial<State> {
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('[ErrorBoundary] Render-Fehler abgefangen:', error, info);
+    reportErrorToBackend(error, info).then(() => {
+      this.setState({ reported: true });
+    });
   }
 
   handleReset = () => {
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: false, error: null, reported: false });
     window.location.href = '/';
   };
 
@@ -38,6 +60,9 @@ export class ErrorBoundary extends Component<Props, State> {
             <p className="text-slate-500 text-sm mb-6">
               Ein unerwarteter Fehler ist aufgetreten. Bitte lade die Seite neu oder gehe zurück zum Dashboard.
             </p>
+            {this.state.reported && (
+              <p className="text-xs text-green-600 mb-4">✓ Fehler wurde automatisch gemeldet</p>
+            )}
             {this.state.error && (
               <details className="mb-6 text-left">
                 <summary className="text-xs text-slate-400 cursor-pointer hover:text-slate-600">

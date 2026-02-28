@@ -69,6 +69,7 @@ const Analytics           = lazy(() => import('./pages/Analytics'));
 const OnboardingWizard    = lazy(() => import('./pages/OnboardingWizard'));
 const SchichtBriefing     = lazy(() => import('./pages/SchichtBriefing'));
 const AuditLog            = lazy(() => import('./pages/AuditLog'));
+const HealthDashboard     = lazy(() => import('./pages/HealthDashboard'));
 const NotfallPlan         = lazy(() => import('./pages/NotfallPlan'));
 const Leitwand            = lazy(() => import('./pages/Leitwand'));
 const Simulation          = lazy(() => import('./pages/Simulation'));
@@ -202,6 +203,7 @@ const navItems: NavItem[] = [
   { id: 'perioden',           label: 'Abrechnungszeiträume', icon: '📅', group: 'Administration', path: '/perioden',           roles: ['Admin'] },
   { id: 'einstellungen',      label: 'Einstellungen',        icon: '⚙️', group: 'Administration', path: '/einstellungen',      roles: ['Admin'] },
   { id: 'auditlog',           label: 'Audit-Log',            icon: '🔍', group: 'Administration', path: '/auditlog',           roles: ['Admin', 'Planer'] },
+  { id: 'health',             label: 'System Health',        icon: '🩺', group: 'Administration', path: '/health',             roles: ['Admin'] },
   { id: 'protokoll',          label: 'Protokoll',            icon: '📋', group: 'Administration', path: '/protokoll',          roles: ['Admin'] },
   { id: 'druckvorschau',      label: 'Druckvorschau',        icon: '🖨️', group: 'Administration', path: '/druckvorschau' },
 ];
@@ -648,6 +650,7 @@ function AppInner() {
               <Route path="/schichtbriefing" element={<SchichtBriefing />} />
               <Route path="/onboarding" element={<OnboardingWizard />} />
               <Route path="/auditlog" element={<AuditLog />} />
+              <Route path="/health" element={<HealthDashboard />} />
               <Route path="/login" element={<Navigate to="/" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

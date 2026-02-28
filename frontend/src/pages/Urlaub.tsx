@@ -120,17 +120,63 @@ function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceM
   const [toDate, setToDate] = useState(today);
   const [leaveTypeId, setLeaveTypeId] = useState(leaveTypes[0]?.ID ?? 0);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    setError(null);
+    if (!fromDate || !toDate) { setError('Bitte Von- und Bis-Datum angeben.'); return; }
+    if (toDate < fromDate) { setError('Bis-Datum muss >= Von-Datum sein.'); return; }
+    if (!employeeId) { setError('Bitte einen Mitarbeiter auswählen.'); return; }
+    if (!leaveTypeId) { setError('Bitte eine Abwesenheitsart auswählen.'); return; }
+
+    // Limit range to max 1 year to prevent accidental large entries
+    const diffDays = (new Date(toDate).getTime() - new Date(fromDate).getTime()) / 86400000;
+    if (diffDays > 366) { setError('Zeitraum darf maximal 1 Jahr betragen.'); return; }
+
     setSaving(true);
-    const from = new Date(fromDate);
-    const to = new Date(toDate);
-    for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) {
-      if (d.getDay() !== 0 && d.getDay() !== 6) {
-        onSave({ EMPLOYEE_ID: employeeId, DATE: d.toISOString().slice(0, 10), LEAVE_TYPE_ID: leaveTypeId });
+    try {
+      const from = new Date(fromDate);
+      const to = new Date(toDate);
+      const dates: string[] = [];
+      for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) {
+        if (d.getDay() !== 0 && d.getDay() !== 6) {
+          dates.push(d.toISOString().slice(0, 10));
+        }
       }
+      if (dates.length === 0) { setError('Kein Werktag im ausgewählten Zeitraum.'); setSaving(false); return; }
+
+      // Save all dates to backend
+      let savedCount = 0;
+      let firstError: string | null = null;
+      await Promise.all(dates.map(async (dateStr) => {
+        try {
+          const res = await fetch(`${API}/api/absences`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+            body: JSON.stringify({ employee_id: employeeId, date: dateStr, leave_type_id: leaveTypeId }),
+          });
+          if (res.ok) {
+            await res.json();
+            onSave({ EMPLOYEE_ID: employeeId, DATE: dateStr, LEAVE_TYPE_ID: leaveTypeId });
+            savedCount++;
+          } else if (res.status === 409) {
+            // duplicate – skip silently
+          } else {
+            const err = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
+            if (!firstError) firstError = err.detail ?? `HTTP ${res.status}`;
+          }
+        } catch (e) {
+          if (!firstError) firstError = String(e);
+        }
+      }));
+      if (firstError && savedCount === 0) {
+        setError(firstError);
+        return;
+      }
+      onClose();
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   return (
@@ -140,9 +186,11 @@ function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceM
           <h2 className="text-lg font-bold text-gray-800">Abwesenheit beantragen</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
         </div>
-        <div className="mx-6 mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2 text-sm text-amber-700">
-          <span>🚧</span><span><strong>Lokale Vorschau.</strong> Backend-Speicherung folgt.</span>
-        </div>
+        {error && (
+          <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-sm text-red-700">
+            <span>⚠️</span><span>{error}</span>
+          </div>
+        )}
         <div className="px-6 py-4 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Mitarbeiter</label>
@@ -689,10 +737,15 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
   useEffect(() => { load(); }, [load]);
 
   const saveEntitlement = async (empId: number, days: number) => {
+    // Validate days value
+    if (isNaN(days) || days < 0 || days > 366) {
+      setEditingId(null);
+      return;
+    }
     setSaving(true);
     try {
       const balance = balances.find(b => b.employee_id === empId);
-      await fetch(`${API}/api/leave-entitlements`, {
+      const res = await fetch(`${API}/api/leave-entitlements`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({
@@ -702,6 +755,10 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
           carry_forward: balance?.carry_forward ?? 0,
         }),
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
+        throw new Error(err.detail ?? `HTTP ${res.status}`);
+      }
       await load();
     } finally {
       setSaving(false);

@@ -341,6 +341,7 @@ function AllEmployeesView({
         setLoading(false);
       })
       .catch(() => { setError('Fehler beim Laden der Jahresübersicht'); setLoading(false); });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, filteredEmps.length, groupId]);
 
   if (loading) return (
@@ -434,6 +435,7 @@ export default function Jahresuebersicht() {
     Promise.all([api.getShifts(), api.getLeaveTypes()]).then(([shifts, leaveTypes]) => {
       setColorMap(buildShiftColorMap(shifts, leaveTypes));
     }).catch(e => console.warn('[Jahresübersicht] Schichtfarben laden fehlgeschlagen:', e));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

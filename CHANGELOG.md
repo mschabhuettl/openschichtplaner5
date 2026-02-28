@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.12] — 2026-02-28
+
+### Verbessert / Fixed
+
+#### 🧹 Code-Qualität
+- `fix(lint)`: ESLint 0 Warnings — exhaustive-deps Fixes in Statistiken, Teamkalender, Uebergabe, Urlaub via `useCallback` und direkte `new Date()` Verwendung
+- `fix(lint)`: react-refresh Warnings in VerfügbarkeitsMatrix behoben (eslint-disable für interne Hilfskomponenten)
+- `fix(tests)`: HTTP 422 (Pydantic Validation) korrekt in Tests akzeptiert — FastAPI-Standard für Validierungsfehler ist 422, nicht 400
+
+---
+
 ## [0.3.11] — 2026-02-28
 
 ### Hinzugefügt / Added

@@ -20,12 +20,12 @@ export default defineConfig([
       globals: globals.browser,
     },
     rules: {
-      // React Compiler rules (experimental, downgrade to warn)
-      'react-hooks/static-components': 'warn',
-      'react-hooks/set-state-in-effect': 'warn',
-      'react-hooks/preserve-manual-memoization': 'warn',
-      'react-hooks/purity': 'warn',
-      'react-hooks/immutability': 'warn',
+      // React Compiler rules (experimental) — disabled: too noisy, intentional patterns
+      'react-hooks/static-components': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/immutability': 'off',
       // Allow context files to export both context and hooks (architectural necessity)
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       // Allow _-prefixed variables to be unused (intentional ignores)

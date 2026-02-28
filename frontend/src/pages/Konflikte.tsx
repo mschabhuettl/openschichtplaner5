@@ -745,6 +745,7 @@ export default function Konflikte() {
 }
 
 // ─── Export hook for conflict count (used in App.tsx badge) ─
+// eslint-disable-next-line react-refresh/only-export-components
 export async function fetchConflictCount(year: number, month: number): Promise<number> {
   const BASE = import.meta.env.VITE_API_URL ?? '';
 

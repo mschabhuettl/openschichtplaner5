@@ -3,7 +3,7 @@
  * Digitales Schicht-Übergabe-System: ausgehende Schicht schreibt Notizen
  * für eingehende Schicht. Offene Punkte, Hinweise, kritische Ereignisse.
  */
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 function getAuthHeaders(): Record<string, string> {
@@ -72,7 +72,7 @@ export default function Uebergabe() {
   }, []);
 
   // Load notes
-  const loadNotes = () => {
+  const loadNotes = useCallback(() => {
     setLoading(true);
     const params = new URLSearchParams();
     if (filterDate) params.set('date', filterDate);
@@ -82,9 +82,9 @@ export default function Uebergabe() {
       .then(r => r.json())
       .then(data => { setNotes(data); setLoading(false); })
       .catch(() => setLoading(false));
-  };
+  }, [filterDate, filterShift]);
 
-  useEffect(() => { loadNotes(); }, [filterDate, filterShift]);
+  useEffect(() => { loadNotes(); }, [loadNotes]);
 
   const showToast = (msg: string) => {
     setToast(msg);

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useRef, useEffect, type ReactNode, useCallback } from 'react';
 import { useSSE } from '../hooks/useSSE';
 import type { SSEStatus, SSEEventType } from '../hooks/useSSE';

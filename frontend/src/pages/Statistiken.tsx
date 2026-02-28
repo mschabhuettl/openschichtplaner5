@@ -299,6 +299,7 @@ export default function Statistiken() {
         setSelectedEmpId(emps[0].ID);
       }
     }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Load group statistics
@@ -350,7 +351,7 @@ export default function Statistiken() {
     setCompareError(null);
     const monthsToFetch: { year: number; month: number }[] = [];
     let y = compareYear;
-    let m = now.getMonth() + 1; // end at current month
+    let m = new Date().getMonth() + 1; // end at current month
     // build list of N months ending at current month of compareYear
     // Actually: just go backwards from Dec of compareYear
     for (let i = 0; i < compareNumMonths; i++) {

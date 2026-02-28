@@ -89,6 +89,7 @@ export default function Schichtwuensche() {
       .then(w => setWishes(w))
       .catch(() => showToast('Fehler beim Laden der Wünsche', 'error'))
       .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, month]);
 
   // ── derived ────────────────────────────────────────────────

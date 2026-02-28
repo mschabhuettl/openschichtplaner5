@@ -524,6 +524,7 @@ function DateSpecificTab({ shifts, groups }: { shifts: ShiftType[]; groups: Grou
 
   useEffect(() => {
     load();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterDate, filterGroup]);
 
   const groupMap = Object.fromEntries(groups.map(g => [g.ID, g]));

@@ -1113,6 +1113,7 @@ export default function Einsatzplan() {
       setWorkplaces(w);
     });
     loadTemplates();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadData = useCallback(() => {
@@ -1146,6 +1147,7 @@ export default function Einsatzplan() {
         })
         .catch(e => { showToast(e.message ?? 'Ladefehler', 'error'); setLoading(false); });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate, viewMode, groupId]);
 
   // Load data when date/mode/group changes

@@ -245,7 +245,7 @@ export default function NotfallPlan() {
     } catch {
       showToast('Netzwerkfehler', 'error');
     }
-  }, [sickEmployee, date, employees, showToast]);
+  }, [sickEmployee, date, employees, showToast, confirmDialog]);
 
   const selectedShiftObj = shifts.find(s => s.ID === selectedShift);
   const sickEmpObj = employees.find(e => e.ID === sickEmployee);

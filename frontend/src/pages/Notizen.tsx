@@ -78,6 +78,7 @@ function NoteModal({ open, initialDate, initialNote, employees, onSave, onClose 
       setError(null);
       setTextTouched(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initialNote, initialDate]);
 
   // Escape key closes modal

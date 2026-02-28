@@ -156,6 +156,7 @@ table { border-collapse: collapse; }
 }
 
 // ── Tooltip ────────────────────────────────────────────────────────────────────
+// eslint-disable-next-line react-refresh/only-export-components
 function CellTooltip({ cell, date, empName }: { cell: CellData; date: string; empName: string }) {
   return (
     <div className="absolute z-50 pointer-events-none bottom-full left-1/2 -translate-x-1/2 mb-1 w-48 bg-slate-800 text-white text-xs rounded-lg p-2 shadow-lg whitespace-normal">
@@ -174,6 +175,7 @@ function CellTooltip({ cell, date, empName }: { cell: CellData; date: string; em
 }
 
 // ── Cell ────────────────────────────────────────────────────────────────────────
+// eslint-disable-next-line react-refresh/only-export-components
 function MatrixCell({
   cell,
   isWeekend,

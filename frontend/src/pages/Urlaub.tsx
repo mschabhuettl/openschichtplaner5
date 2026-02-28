@@ -1925,7 +1925,7 @@ export default function Urlaub() {
       })
       .catch(e => showToast(String(e), 'error'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [showToast]);
 
   useEffect(() => { loadAbsences(); }, [loadAbsences]);
 

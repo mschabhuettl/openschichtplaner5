@@ -67,6 +67,7 @@ function getRecentPages(): RecentPage[] {
   } catch { return []; }
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function trackRecentPage(path: string) {
   const allNav = NAV_ITEMS.find(n => n.path === path);
   const title = allNav?.title ?? path;

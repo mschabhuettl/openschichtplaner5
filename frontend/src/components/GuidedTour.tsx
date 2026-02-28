@@ -244,6 +244,7 @@ export function GuidedTour({ open, onClose }: GuidedTourProps) {
 }
 
 /** Hook to programmatically start the tour */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTour() {
   const [tourOpen, setTourOpen] = useState(false);
   const startTour = () => {

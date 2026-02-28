@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { type Language, type Translations, LANG_KEY, getStoredLanguage, getTranslations } from './index';
 

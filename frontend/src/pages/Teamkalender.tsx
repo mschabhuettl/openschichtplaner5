@@ -90,7 +90,8 @@ export default function Teamkalender() {
     const daysInMonth = lastDay.getDate();
     const startWd = jsWdToMon(firstDay.getDay()); // 0=Mon
 
-    const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+    const _today = new Date();
+    const todayStr = `${_today.getFullYear()}-${pad(_today.getMonth() + 1)}-${pad(_today.getDate())}`;
 
     const cells: DayCell[] = [];
 

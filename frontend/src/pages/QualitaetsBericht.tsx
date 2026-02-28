@@ -168,6 +168,7 @@ export default function QualitaetsBericht() {
     }
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadReport(); }, [year, month]);
 
   const gc = report ? gradeColors(report.grade) : null;

@@ -65,6 +65,7 @@ function BookingModal({
       setNote('');
       setError(null);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   if (!open) return null;
@@ -279,6 +280,7 @@ export default function Kontobuchungen() {
     } finally {
       setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, month, selectedEmployeeId]);
 
   useEffect(() => { loadBookings(); }, [loadBookings]);

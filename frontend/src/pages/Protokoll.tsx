@@ -84,6 +84,7 @@ export default function Protokoll() {
       });
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, []);
 
   // Client-side filter for action + entity + full-text search

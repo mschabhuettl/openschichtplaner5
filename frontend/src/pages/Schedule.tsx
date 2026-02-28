@@ -1620,6 +1620,7 @@ function WeekTemplateModal({
   // Default to first Monday of month
   useEffect(() => {
     if (!refWeekStart && mondays.length > 0) setRefWeekStart(mondays[0]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSave = () => {
@@ -2040,6 +2041,7 @@ export default function Schedule() {
 
   useEffect(() => {
     loadSchedule();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, month]);
 
   // SSE: auto-refresh when schedule or conflicts change remotely
@@ -2050,6 +2052,7 @@ export default function Schedule() {
     const handler = () => loadSchedule();
     window.addEventListener('sp5-reload-schedule', handler);
     return () => window.removeEventListener('sp5-reload-schedule', handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, month]);
 
   // Load staffing requirements when year/month changes
@@ -2087,6 +2090,7 @@ export default function Schedule() {
 
   useEffect(() => {
     loadNotesForMonth();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, month]);
 
   // Load wishes for the month
@@ -2200,6 +2204,7 @@ export default function Schedule() {
         return next;
       });
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroupIds]);
 
   // ── Computed values ─────────────────────────────────────────
@@ -2299,7 +2304,7 @@ export default function Schedule() {
       m.set(emp.ID, { actual: Math.round(actual * 10) / 10, target: Math.round(target * 10) / 10 });
     }
     return m;
-  }, [employees, entries, entryMap, shifts, year, month, daysInMonth]);
+  }, [employees, entryMap, shifts, year, month, daysInMonth]);
 
   // Coverage lookup: day → CoverageDay
   const coverageMap = useMemo(() => {

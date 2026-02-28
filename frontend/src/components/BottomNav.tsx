@@ -1,5 +1,4 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useLanguage } from '../i18n/context';
 
 interface BottomNavItem {
   id: string;

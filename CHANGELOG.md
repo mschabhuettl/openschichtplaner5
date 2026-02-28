@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.10] — 2026-02-28
+
+### Behoben / Fixed
+
+#### 🛡️ Sicherheit / Security (8f2e1a4)
+- `fix(security)`: XSS-Prevention — HTML-Ausgaben escapen User-Daten via `html.escape()`
+- `fix(security)`: Path-Traversal-Schutz durch strikte Integer-Typen in FastAPI-Parametern
+- `fix(security)`: HTML-Injection in Export-Endpunkten verhindert
+
+#### 🔔 Toast-Feedback (4d7f3c1, 06df43d)
+- `fix(toast)`: Adaptive Anzeigedauern für Toast-Nachrichten je nach Schwere
+- `fix(toast)`: Fehlende Toast-Feedbacks für Export- und Backup-Aktionen ergänzt
+- `fix(toast)`: Toast-Qualität und Konsistenz verbessert
+
+### Dokumentation / Docs
+
+#### 📖 OpenAPI (f0aa067)
+- `docs(api)`: OpenAPI Tags, Summaries und Descriptions für alle Endpunkte ergänzt
+
+### Neu / Features
+
+#### ⌨️ Keyboard Shortcuts (c95a5f9)
+- `feat(shortcuts)`: Erweiterte Tastaturkürzel
+- `feat(shortcuts)`: Command-Palette-Aktionen ausgebaut
+
+---
+
 ## [0.3.9] — 2026-02-28
 
 ### Behoben / Fixed

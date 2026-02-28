@@ -11,6 +11,7 @@ import WarningsCenter from './components/WarningsCenter';
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 import { GuidedTour, useTour } from './components/GuidedTour';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { InstallBanner } from './components/InstallBanner';
 import { api } from './api/client';
 
 // Lazy-loaded pages — each page group is a separate chunk
@@ -671,6 +672,7 @@ export default function App() {
               </AuthProvider>
             </BrowserRouter>
             <GlobalToastContainer />
+            <InstallBanner />
           </ToastProvider>
         </LanguageProvider>
       </ThemeProvider>

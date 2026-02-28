@@ -234,7 +234,7 @@ export default function Statistiken() {
   const now = new Date();
 
   // ── Tabs ────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState<'group' | 'employee' | 'sickness'>('group');
+  const [activeTab, setActiveTab] = useState<'group' | 'employee' | 'sickness' | 'compare'>('group');
 
   // ── Group-view state ────────────────────────────────────
   const [year, setYear] = useState(now.getFullYear());
@@ -263,6 +263,20 @@ export default function Statistiken() {
   const [sickData, setSickData] = useState<SicknessStatistics | null>(null);
   const [sickLoading, setSickLoading] = useState(false);
   const [sickError, setSickError] = useState<string | null>(null);
+
+  // ── Compare-view state ──────────────────────────────────
+  const [compareYear, setCompareYear] = useState(now.getFullYear());
+  const [compareNumMonths, setCompareNumMonths] = useState(6);
+  const [compareGroupId, setCompareGroupId] = useState<number | undefined>(undefined);
+  type MonthCompareRow = {
+    year: number; month: number; label: string;
+    target_hours: number; actual_hours: number; overtime: number;
+    absence_days: number; vacation_days: number; shifts_count: number;
+    employee_count: number;
+  };
+  const [compareData, setCompareData] = useState<MonthCompareRow[]>([]);
+  const [compareLoading, setCompareLoading] = useState(false);
+  const [compareError, setCompareError] = useState<string | null>(null);
 
   // Load groups + employees once
   useEffect(() => {
@@ -316,6 +330,48 @@ export default function Statistiken() {
       .then(data => { setSickData(data); setSickLoading(false); })
       .catch(e => { setSickError(e.message); setSickLoading(false); });
   }, [activeTab, sickYear]);
+
+  // Load multi-month compare data
+  useEffect(() => {
+    if (activeTab !== 'compare') return;
+    setCompareLoading(true);
+    setCompareError(null);
+    const monthsToFetch: { year: number; month: number }[] = [];
+    let y = compareYear;
+    let m = now.getMonth() + 1; // end at current month
+    // build list of N months ending at current month of compareYear
+    // Actually: just go backwards from Dec of compareYear
+    for (let i = 0; i < compareNumMonths; i++) {
+      monthsToFetch.unshift({ year: y, month: m });
+      m -= 1;
+      if (m < 1) { m = 12; y -= 1; }
+    }
+    Promise.all(monthsToFetch.map(({ year: fy, month: fm }) =>
+      api.getStatistics(fy, fm, compareGroupId).then(rows => ({ year: fy, month: fm, rows }))
+    )).then(results => {
+      const monthNames = ['', 'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+      const rows: MonthCompareRow[] = results.map(({ year: fy, month: fm, rows: r }) => {
+        const total_target = r.reduce((a: number, s: EmployeeStats) => a + (s.target_hours || 0), 0);
+        const total_actual = r.reduce((a: number, s: EmployeeStats) => a + (s.actual_hours || 0), 0);
+        const total_absences = r.reduce((a: number, s: EmployeeStats) => a + (s.absence_days || 0), 0);
+        const total_vacation = r.reduce((a: number, s: EmployeeStats) => a + (s.vacation_used || 0), 0);
+        const total_shifts = r.reduce((a: number, s: EmployeeStats) => a + ((s as unknown as { shifts_count?: number }).shifts_count || 0), 0);
+        return {
+          year: fy, month: fm,
+          label: `${monthNames[fm]} ${fy}`,
+          target_hours: Math.round(total_target * 10) / 10,
+          actual_hours: Math.round(total_actual * 10) / 10,
+          overtime: Math.round((total_actual - total_target) * 10) / 10,
+          absence_days: total_absences,
+          vacation_days: total_vacation,
+          shifts_count: total_shifts,
+          employee_count: r.length,
+        };
+      });
+      setCompareData(rows);
+      setCompareLoading(false);
+    }).catch(e => { setCompareError(e.message); setCompareLoading(false); });
+  }, [activeTab, compareYear, compareNumMonths, compareGroupId]);
 
   const prevMonth = () => {
     if (month === 1) { setYear(y => y - 1); setMonth(12); }
@@ -390,6 +446,12 @@ export default function Statistiken() {
             onClick={() => setActiveTab('sickness')}
           >
             🏥 Krankenstand
+          </button>
+          <button
+            className={`px-4 py-1.5 transition-colors ${activeTab === 'compare' ? 'bg-indigo-700 text-white' : 'bg-white hover:bg-gray-50 text-gray-700'}`}
+            onClick={() => setActiveTab('compare')}
+          >
+            📊 Monatsvergleich
           </button>
         </div>
       </div>
@@ -1024,8 +1086,211 @@ export default function Statistiken() {
           )}
         </div>
       )}
+
+      {/* ── MONATSVERGLEICH ─────────────────────────────────── */}
+      {activeTab === 'compare' && (
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Controls */}
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
+            <label className="text-sm font-medium text-gray-600">Bis Jahr:</label>
+            <input
+              type="number" min={2000} max={2099}
+              value={compareYear}
+              onChange={e => setCompareYear(Number(e.target.value))}
+              className="w-24 px-2 py-1.5 border rounded shadow-sm text-sm"
+            />
+            <label className="text-sm font-medium text-gray-600">Anzahl Monate:</label>
+            <select
+              value={compareNumMonths}
+              onChange={e => setCompareNumMonths(Number(e.target.value))}
+              className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
+            >
+              <option value={3}>3 Monate</option>
+              <option value={6}>6 Monate</option>
+              <option value={12}>12 Monate</option>
+              <option value={24}>24 Monate</option>
+            </select>
+            <label className="text-sm font-medium text-gray-600">Gruppe:</label>
+            <select
+              value={compareGroupId ?? ''}
+              onChange={e => setCompareGroupId(e.target.value ? Number(e.target.value) : undefined)}
+              className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
+            >
+              <option value="">Alle Gruppen</option>
+              {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+            </select>
+            {!compareLoading && compareData.length > 0 && (
+              <button
+                onClick={() => exportCompareCSV(compareData)}
+                className="ml-auto px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-sm font-medium shadow-sm"
+              >
+                ⬇ CSV Export
+              </button>
+            )}
+          </div>
+
+          {compareLoading && (
+            <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">Lade Daten…</div>
+          )}
+          {compareError && (
+            <div className="p-3 bg-red-50 text-red-700 rounded text-sm">{compareError}</div>
+          )}
+          {!compareLoading && !compareError && compareData.length > 0 && (() => {
+            const maxActual = Math.max(...compareData.map(r => r.actual_hours), 1);
+            const maxOT = Math.max(...compareData.map(r => Math.abs(r.overtime)), 1);
+            return (
+              <div className="flex-1 min-h-0 overflow-auto">
+                {/* Summary Cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                  {[
+                    { label: 'Ø Ist-Std/Monat', value: (compareData.reduce((a, r) => a + r.actual_hours, 0) / compareData.length).toFixed(0) + 'h', color: 'text-blue-700' },
+                    { label: 'Gesamt Überstunden', value: (compareData.reduce((a, r) => a + r.overtime, 0) >= 0 ? '+' : '') + compareData.reduce((a, r) => a + r.overtime, 0).toFixed(0) + 'h', color: compareData.reduce((a, r) => a + r.overtime, 0) >= 0 ? 'text-green-700' : 'text-red-700' },
+                    { label: 'Gesamt Abwesenheit', value: compareData.reduce((a, r) => a + r.absence_days, 0) + ' Tage', color: 'text-orange-700' },
+                    { label: 'Gesamt Urlaub', value: compareData.reduce((a, r) => a + r.vacation_days, 0) + ' Tage', color: 'text-indigo-700' },
+                  ].map(c => (
+                    <div key={c.label} className="bg-white border rounded-lg p-3 shadow-sm text-center">
+                      <div className={`text-xl font-bold ${c.color}`}>{c.value}</div>
+                      <div className="text-xs text-gray-500 mt-0.5">{c.label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Visual Bar Chart: Ist-Stunden per month */}
+                <div className="bg-white border rounded-lg p-4 mb-4 shadow-sm">
+                  <div className="text-sm font-semibold text-gray-700 mb-3">📈 Ist-Stunden pro Monat</div>
+                  <div className="flex items-end gap-1 h-28">
+                    {compareData.map(row => {
+                      const h = Math.round((row.actual_hours / maxActual) * 100);
+                      const otPos = row.overtime >= 0;
+                      return (
+                        <div key={`${row.year}-${row.month}`} className="flex-1 flex flex-col items-center gap-0.5 min-w-0">
+                          <div className="text-xs text-gray-500 font-mono leading-none">{row.actual_hours.toFixed(0)}</div>
+                          <div
+                            className={`w-full rounded-t ${otPos ? 'bg-blue-500' : 'bg-blue-300'}`}
+                            style={{ height: `${h}%`, minHeight: 2 }}
+                            title={`${row.label}: ${row.actual_hours}h (Soll: ${row.target_hours}h)`}
+                          />
+                          <div className="text-xs text-gray-500 truncate w-full text-center leading-none"
+                            style={{ fontSize: '9px' }}>
+                            {row.label}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Overtime Chart */}
+                <div className="bg-white border rounded-lg p-4 mb-4 shadow-sm">
+                  <div className="text-sm font-semibold text-gray-700 mb-3">⚖️ Über-/Unterstunden pro Monat</div>
+                  <div className="flex items-end gap-1 h-20">
+                    {compareData.map(row => {
+                      const isPos = row.overtime >= 0;
+                      const h = Math.round((Math.abs(row.overtime) / maxOT) * 100);
+                      return (
+                        <div key={`${row.year}-${row.month}`} className="flex-1 flex flex-col items-center gap-0.5 min-w-0">
+                          <div className={`text-xs font-semibold leading-none ${isPos ? 'text-green-600' : 'text-red-600'}`}>
+                            {isPos ? '+' : ''}{row.overtime.toFixed(0)}
+                          </div>
+                          <div
+                            className={`w-full rounded-t ${isPos ? 'bg-green-500' : 'bg-red-400'}`}
+                            style={{ height: `${h}%`, minHeight: 2 }}
+                          />
+                          <div className="text-xs text-gray-400 truncate w-full text-center leading-none"
+                            style={{ fontSize: '9px' }}>
+                            {row.label}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Detailed Table */}
+                <div className="bg-white border rounded-lg shadow-sm overflow-x-auto">
+                  <table className="text-sm w-full">
+                    <thead className="bg-slate-700 text-white">
+                      <tr>
+                        <th className="px-3 py-2 text-left border-r border-slate-600">Monat</th>
+                        <th className="px-3 py-2 text-right border-r border-slate-600">MA</th>
+                        <th className="px-3 py-2 text-right border-r border-slate-600">Soll-Std</th>
+                        <th className="px-3 py-2 text-right border-r border-slate-600">Ist-Std</th>
+                        <th className="px-3 py-2 text-right border-r border-slate-600">Über/Unter</th>
+                        <th className="px-3 py-2 text-right border-r border-slate-600">Abwesend</th>
+                        <th className="px-3 py-2 text-right">Urlaub</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {compareData.map((row, i) => {
+                        const otColor = row.overtime >= 0 ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold';
+                        return (
+                          <tr key={`${row.year}-${row.month}`} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                            <td className="px-3 py-1.5 font-medium border-r border-gray-100">{row.label}</td>
+                            <td className="px-3 py-1.5 text-right border-r border-gray-100 text-gray-600">{row.employee_count}</td>
+                            <td className="px-3 py-1.5 text-right border-r border-gray-100 text-gray-600">{row.target_hours.toFixed(1)}h</td>
+                            <td className="px-3 py-1.5 text-right border-r border-gray-100 text-blue-700 font-semibold">{row.actual_hours.toFixed(1)}h</td>
+                            <td className={`px-3 py-1.5 text-right border-r border-gray-100 ${otColor}`}>
+                              {row.overtime >= 0 ? '+' : ''}{row.overtime.toFixed(1)}h
+                            </td>
+                            <td className="px-3 py-1.5 text-right border-r border-gray-100 text-orange-700">
+                              {row.absence_days > 0 ? row.absence_days : '—'}
+                            </td>
+                            <td className="px-3 py-1.5 text-right text-indigo-700">
+                              {row.vacation_days > 0 ? row.vacation_days : '—'}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot className="bg-gray-100 border-t-2 border-gray-300 font-bold">
+                      <tr>
+                        <td className="px-3 py-2 border-r border-gray-200">Gesamt</td>
+                        <td className="px-3 py-2 text-right border-r border-gray-200 text-gray-600">—</td>
+                        <td className="px-3 py-2 text-right border-r border-gray-200 text-gray-600">
+                          {compareData.reduce((a, r) => a + r.target_hours, 0).toFixed(1)}h
+                        </td>
+                        <td className="px-3 py-2 text-right border-r border-gray-200 text-blue-700">
+                          {compareData.reduce((a, r) => a + r.actual_hours, 0).toFixed(1)}h
+                        </td>
+                        <td className={`px-3 py-2 text-right border-r border-gray-200 ${compareData.reduce((a, r) => a + r.overtime, 0) >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                          {compareData.reduce((a, r) => a + r.overtime, 0) >= 0 ? '+' : ''}
+                          {compareData.reduce((a, r) => a + r.overtime, 0).toFixed(1)}h
+                        </td>
+                        <td className="px-3 py-2 text-right border-r border-gray-200 text-orange-700">
+                          {compareData.reduce((a, r) => a + r.absence_days, 0)}
+                        </td>
+                        <td className="px-3 py-2 text-right text-indigo-700">
+                          {compareData.reduce((a, r) => a + r.vacation_days, 0)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
     </div>
   );
+}
+
+// ── CSV export for month comparison ──────────────────────
+function exportCompareCSV(data: { year: number; month: number; label: string; target_hours: number; actual_hours: number; overtime: number; absence_days: number; vacation_days: number; shifts_count: number; employee_count: number }[]) {
+  const header = 'Monat;Mitarbeiter;Soll-Std;Ist-Std;Über/Unterstunden;Abwesenheitstage;Urlaubstage';
+  const rows = data.map(r =>
+    [r.label, r.employee_count, r.target_hours.toFixed(2).replace('.', ','),
+      r.actual_hours.toFixed(2).replace('.', ','),
+      r.overtime.toFixed(2).replace('.', ','),
+      r.absence_days, r.vacation_days].join(';')
+  );
+  const csv = [`Monatsvergleich – ${data.length} Monate`, '', header, ...rows].join('\r\n');
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `Monatsvergleich_${data[0]?.label || ''}_${data[data.length - 1]?.label || ''}.csv`;
+  a.click(); URL.revokeObjectURL(url);
 }
 
 // ── CSV export for sickness statistics ───────────────────

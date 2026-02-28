@@ -56,6 +56,7 @@ export default function Protokoll() {
   const [filterAction, setFilterAction] = useState<string>('');
   const [filterEntity, setFilterEntity] = useState<string>('');
   const [filterUser, setFilterUser] = useState<string>('');
+  const [filterSearch, setFilterSearch] = useState<string>('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [limit, setLimit] = useState(200);
@@ -81,10 +82,17 @@ export default function Protokoll() {
 
   useEffect(() => { load(); }, []);
 
-  // Client-side filter for action + entity (cheaper than extra API params)
+  // Client-side filter for action + entity + full-text search
   const filtered = entries.filter(e => {
     if (filterAction && e.action !== filterAction) return false;
     if (filterEntity && e.entity !== filterEntity) return false;
+    if (filterSearch) {
+      const q = filterSearch.toLowerCase();
+      const detailsMatch = (e.details || '').toLowerCase().includes(q);
+      const entityMatch = (ENTITY_LABELS[e.entity] ?? e.entity).toLowerCase().includes(q);
+      const userMatch = e.user.toLowerCase().includes(q);
+      if (!detailsMatch && !entityMatch && !userMatch) return false;
+    }
     return true;
   });
 
@@ -133,6 +141,15 @@ export default function Protokoll() {
       {/* Filter bar */}
       <div className="flex items-center gap-3 mb-3 flex-wrap bg-white border border-gray-200 rounded-lg px-3 py-2 shadow-sm">
         <span className="text-xs font-semibold text-gray-500">🔍 Filter:</span>
+
+        {/* Full-text search */}
+        <input
+          type="text"
+          placeholder="Volltextsuche..."
+          value={filterSearch}
+          onChange={e => setFilterSearch(e.target.value)}
+          className="text-xs px-2 py-1 border rounded bg-white w-36"
+        />
 
         {/* Action filter */}
         <select
@@ -212,9 +229,9 @@ export default function Protokoll() {
           🔄 Aktualisieren
         </button>
 
-        {(filterAction || filterEntity || filterUser || dateFrom || dateTo) && (
+        {(filterSearch || filterAction || filterEntity || filterUser || dateFrom || dateTo) && (
           <button
-            onClick={() => { setFilterAction(''); setFilterEntity(''); setFilterUser(''); setDateFrom(''); setDateTo(''); }}
+            onClick={() => { setFilterSearch(''); setFilterAction(''); setFilterEntity(''); setFilterUser(''); setDateFrom(''); setDateTo(''); }}
             className="text-xs text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50"
           >
             × Filter zurücksetzen

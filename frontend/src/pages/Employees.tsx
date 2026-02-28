@@ -189,6 +189,10 @@ export default function Employees() {
   const navigate = useNavigate();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [search, setSearch] = useState('');
+  const [filterGroupId, setFilterGroupId] = useState<number | ''>('');
+  const [filterHide, setFilterHide] = useState<'all' | 'active' | 'hidden'>('active');
+  const [groups, setGroups] = useState<{ ID: number; NAME: string }[]>([]);
+  const [groupAssignments, setGroupAssignments] = useState<{ employee_id: number; group_id: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
@@ -228,6 +232,12 @@ export default function Employees() {
   };
 
   useEffect(() => { load(); }, []);
+
+  // Load groups and group assignments for filter
+  useEffect(() => {
+    api.getGroups().then(g => setGroups(g.filter(gr => !gr.HIDE))).catch(() => {});
+    api.getGroupAssignments().then(setGroupAssignments).catch(() => {});
+  }, []);
 
   // Load shifts once (for restriction dropdown)
   useEffect(() => {
@@ -273,8 +283,16 @@ export default function Employees() {
   };
   const sortIcon = (key: EmpSortKey) => empSortKey === key ? (empSortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕';
 
+  const empGroupIds = (empId: number) => groupAssignments.filter(a => a.employee_id === empId).map(a => a.group_id);
+
   const filtered = employees
-    .filter(e => `${e.NAME} ${e.FIRSTNAME} ${e.SHORTNAME} ${e.NUMBER}`.toLowerCase().includes(search.toLowerCase()))
+    .filter(e => {
+      if (!`${e.NAME} ${e.FIRSTNAME} ${e.SHORTNAME} ${e.NUMBER}`.toLowerCase().includes(search.toLowerCase())) return false;
+      if (filterGroupId !== '' && !empGroupIds(e.ID).includes(Number(filterGroupId))) return false;
+      if (filterHide === 'active' && e.HIDE) return false;
+      if (filterHide === 'hidden' && !e.HIDE) return false;
+      return true;
+    })
     .sort((a, b) => {
       let av = '', bv = '';
       switch (empSortKey) {
@@ -445,7 +463,9 @@ export default function Employees() {
   return (
     <div className="p-4 sm:p-6">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h1 className="text-xl font-bold text-gray-800">👥 Mitarbeiter ({employees.length})</h1>
+        <h1 className="text-xl font-bold text-gray-800">
+          👥 Mitarbeiter ({filtered.length}{filtered.length !== employees.length ? ` / ${employees.length}` : ''})
+        </h1>
         <div className="flex gap-2 flex-wrap">
           <input
             type="text"
@@ -454,6 +474,32 @@ export default function Employees() {
             onChange={e => setSearch(e.target.value)}
             className="px-3 py-1.5 border rounded shadow-sm text-sm w-48"
           />
+          <select
+            value={filterGroupId}
+            onChange={e => setFilterGroupId(e.target.value === '' ? '' : Number(e.target.value))}
+            className="px-2 py-1.5 border rounded shadow-sm text-sm bg-white"
+            title="Nach Gruppe filtern"
+          >
+            <option value="">Alle Gruppen</option>
+            {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+          </select>
+          <select
+            value={filterHide}
+            onChange={e => setFilterHide(e.target.value as 'all' | 'active' | 'hidden')}
+            className="px-2 py-1.5 border rounded shadow-sm text-sm bg-white"
+            title="Aktiv/Inaktiv"
+          >
+            <option value="active">Aktive</option>
+            <option value="all">Alle</option>
+            <option value="hidden">Inaktive</option>
+          </select>
+          {(search || filterGroupId !== '' || filterHide !== 'active') && (
+            <button
+              onClick={() => { setSearch(''); setFilterGroupId(''); setFilterHide('active'); }}
+              className="px-2 py-1.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded border border-red-200"
+              title="Filter zurücksetzen"
+            >× Reset</button>
+          )}
           <button
             onClick={() => printEmployeeList(filtered)}
             disabled={filtered.length === 0}

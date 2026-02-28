@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useDebounce } from '../hooks/useDebounce';
 import { api } from '../api/client';
 import type { Employee, LeaveType, Group } from '../types';
 import { useToast } from '../hooks/useToast';
@@ -1191,8 +1192,15 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
   const [statusMap, setStatusMap] = useState<Record<string, AbsenceStatusEntry>>({});
   const [statusLoading, setStatusLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
-  const [filterStatus, setFilterStatus] = useState<AbsenceStatus | ''>('pending');
-  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState<AbsenceStatus | ''>(
+    () => (sessionStorage.getItem('urlaub-filterStatus') as AbsenceStatus | '') ?? 'pending'
+  );
+  const [search, setSearch] = useState(() => sessionStorage.getItem('urlaub-search') ?? '');
+  const debouncedSearch = useDebounce(search, 300);
+
+  // Persist filters
+  useEffect(() => { sessionStorage.setItem('urlaub-filterStatus', filterStatus); }, [filterStatus]);
+  useEffect(() => { sessionStorage.setItem('urlaub-search', search); }, [search]);
   // Rejection reason modal
   const [rejectModal, setRejectModal] = useState<{ id: number } | null>(null);
   const [rejectReason, setRejectReason] = useState('');
@@ -1245,7 +1253,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
     if (!a.DATE?.startsWith(String(year))) return false;
     const emp = getEmp(a.EMPLOYEE_ID);
     const empName = emp ? `${emp.NAME} ${emp.FIRSTNAME}` : '';
-    if (search && !empName.toLowerCase().includes(search.toLowerCase())) return false;
+    if (debouncedSearch && !empName.toLowerCase().includes(debouncedSearch.toLowerCase())) return false;
     if (filterStatus !== '' && getStatus(a.ID) !== filterStatus) return false;
     return true;
   }).sort((a, b) => b.DATE.localeCompare(a.DATE));
@@ -1878,8 +1886,14 @@ export default function Urlaub() {
   const currentYear = new Date().getFullYear();
   const { showToast } = useToast();
   const { dialogProps: confirmDialogProps } = useConfirm();
-  const [year, setYear] = useState(currentYear);
+  const [year, setYear] = useState(() => {
+    const v = sessionStorage.getItem('urlaub-year');
+    return v ? Number(v) : currentYear;
+  });
   const [activeTab, setActiveTab] = useState<UrlaubTab>('antraege');
+
+  // Persist year
+  useEffect(() => { sessionStorage.setItem('urlaub-year', String(year)); }, [year]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);

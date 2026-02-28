@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useDebounce } from '../hooks/useDebounce';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import type { Restriction } from '../api/client';
@@ -204,9 +205,20 @@ export default function Employees() {
   const { canAdmin } = useAuth();
   const navigate = useNavigate();
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [search, setSearch] = useState('');
-  const [filterGroupId, setFilterGroupId] = useState<number | ''>('');
-  const [filterHide, setFilterHide] = useState<'all' | 'active' | 'hidden'>('active');
+  const [search, setSearch] = useState(() => sessionStorage.getItem('emp-search') ?? '');
+  const [filterGroupId, setFilterGroupId] = useState<number | ''>(() => {
+    const v = sessionStorage.getItem('emp-filterGroupId');
+    return v ? Number(v) : '';
+  });
+  const [filterHide, setFilterHide] = useState<'all' | 'active' | 'hidden'>(
+    () => (sessionStorage.getItem('emp-filterHide') as 'all' | 'active' | 'hidden') ?? 'active'
+  );
+  const debouncedSearch = useDebounce(search, 300);
+
+  // Persist filters to sessionStorage
+  useEffect(() => { sessionStorage.setItem('emp-search', search); }, [search]);
+  useEffect(() => { sessionStorage.setItem('emp-filterGroupId', filterGroupId === '' ? '' : String(filterGroupId)); }, [filterGroupId]);
+  useEffect(() => { sessionStorage.setItem('emp-filterHide', filterHide); }, [filterHide]);
   const [groups, setGroups] = useState<{ ID: number; NAME: string; SHORTNAME?: string }[]>([]);
   const [groupAssignments, setGroupAssignments] = useState<{ employee_id: number; group_id: number }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -370,7 +382,7 @@ export default function Employees() {
 
   const filtered = employees
     .filter(e => {
-      if (!`${e.NAME} ${e.FIRSTNAME} ${e.SHORTNAME} ${e.NUMBER}`.toLowerCase().includes(search.toLowerCase())) return false;
+      if (!`${e.NAME} ${e.FIRSTNAME} ${e.SHORTNAME} ${e.NUMBER}`.toLowerCase().includes(debouncedSearch.toLowerCase())) return false;
       if (filterGroupId !== '' && !empGroupIds(e.ID).includes(Number(filterGroupId))) return false;
       if (filterHide === 'active' && e.HIDE) return false;
       if (filterHide === 'hidden' && !e.HIDE) return false;
@@ -580,7 +592,7 @@ export default function Employees() {
             <option value="all">{t.employees.filterAll}</option>
             <option value="hidden">{t.employees.filterHidden}</option>
           </select>
-          {(search || filterGroupId !== '' || filterHide !== 'active') && (
+          {(search || filterGroupId !== '' || filterHide !== 'active' || debouncedSearch) && (
             <button
               onClick={() => { setSearch(''); setFilterGroupId(''); setFilterHide('active'); }}
               className="px-2 py-1.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded border border-red-200"

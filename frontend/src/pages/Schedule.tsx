@@ -1828,8 +1828,14 @@ export default function Schedule() {
   const now = new Date();
   const navigate = useNavigate();
   const { canEditSchedule } = usePermissions();
-  const [year, setYear] = useState(now.getFullYear());
-  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [year, setYear] = useState(() => {
+    const v = sessionStorage.getItem('schedule-year');
+    return v ? Number(v) : now.getFullYear();
+  });
+  const [month, setMonth] = useState(() => {
+    const v = sessionStorage.getItem('schedule-month');
+    return v ? Number(v) : now.getMonth() + 1;
+  });
 
   // ── Print color mode ────────────────────────────────────────
   const [printColorMode, setPrintColorMode] = useState<'color' | 'bw'>('color');
@@ -1840,7 +1846,12 @@ export default function Schedule() {
   const [forceWeekView, setForceWeekView] = useState(false); // desktop week view toggle
 
   // Multi-group selection (empty = all groups)
-  const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>([]);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>(() => {
+    try {
+      const v = sessionStorage.getItem('schedule-groupIds');
+      return v ? JSON.parse(v) : [];
+    } catch { return []; }
+  });
 
   // Core data
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -1850,6 +1861,11 @@ export default function Schedule() {
   const [shifts, setShifts] = useState<ShiftType[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Persist year/month/groups to sessionStorage
+  useEffect(() => { sessionStorage.setItem('schedule-year', String(year)); }, [year]);
+  useEffect(() => { sessionStorage.setItem('schedule-month', String(month)); }, [month]);
+  useEffect(() => { sessionStorage.setItem('schedule-groupIds', JSON.stringify(selectedGroupIds)); }, [selectedGroupIds]);
 
   // Group members: groupId → Set<employeeId>
   const [groupMembersMap, setGroupMembersMap] = useState<Map<number, Set<number>>>(new Map());

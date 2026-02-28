@@ -153,12 +153,12 @@ export default function HealthDashboard() {
 
       {/* Tabs */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
-        <div className="flex border-b border-slate-100 dark:border-slate-700">
+        <div className="flex border-b border-slate-100 dark:border-slate-700 overflow-x-auto">
           {(['overview', 'backend-errors', 'frontend-errors'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-5 py-3 text-sm font-medium transition-colors ${
+              className={`px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap flex-shrink-0 ${
                 activeTab === tab
                   ? 'border-b-2 border-blue-500 text-blue-600'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'

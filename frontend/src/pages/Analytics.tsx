@@ -81,7 +81,7 @@ function BarChart({ title, icon, values, labels, anomalies, unit, color, anomaly
           <div style={{ fontSize: 16, fontWeight: 700, color: '#1e293b' }}>{icon} {title}</div>
           {description && <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{description}</div>}
         </div>
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 12, color: '#64748b' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, color: '#64748b', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <span>Ø {mean(values).toFixed(1)}{unit}</span>
           <span>σ {stddev(values).toFixed(1)}</span>
           {anomalyCount > 0 && (
@@ -636,9 +636,9 @@ export default function Analytics() {
   }, [data, year]);
 
   return (
-    <div style={{ padding: '24px 28px', maxWidth: 1100, margin: '0 auto' }}>
+    <div style={{ padding: '16px 16px', maxWidth: 1100, margin: '0 auto' }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#1e293b' }}>
             📈 Analytics & Trends

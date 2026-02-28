@@ -20,6 +20,14 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install backend dependencies
         working-directory: backend
         run: |
@@ -47,8 +55,16 @@ jobs:
           name: coverage-report
           path: backend/coverage.xml
 
-  frontend-build:
-    name: Frontend Build
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: backend/coverage.xml
+          flags: backend
+          fail_ci_if_error: false
+
+  frontend-tests:
+    name: Frontend Tests (vitest)
     runs-on: ubuntu-latest
 
     steps:
@@ -65,6 +81,10 @@ jobs:
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
+
+      - name: Run frontend tests
+        working-directory: frontend
+        run: npm test -- --reporter=verbose --coverage 2>/dev/null || npm test -- --reporter=verbose
 
       - name: Build frontend
         working-directory: frontend

@@ -1342,6 +1342,270 @@ function HoverTooltip({
   );
 }
 
+// ── Wochenvorlagen (Week Templates) ──────────────────────────
+const TEMPLATES_KEY = 'sp5_week_templates';
+
+interface WeekTemplate {
+  id: string;
+  name: string;
+  createdAt: string;
+  // weekday 0=Mon…6=Sun → employee_id → shift_id
+  entries: Array<{ employee_id: number; weekday: number; shift_id: number }>;
+}
+
+function loadTemplates(): WeekTemplate[] {
+  try {
+    return JSON.parse(localStorage.getItem(TEMPLATES_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveTemplates(templates: WeekTemplate[]) {
+  localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+}
+
+interface WeekTemplateModalProps {
+  onClose: () => void;
+  year: number;
+  month: number;
+  employees: Employee[];
+  entryMap: Map<string, import('../types').ScheduleEntry>;
+  onApplyTemplate: (template: WeekTemplate, skipExisting: boolean) => Promise<void>;
+}
+
+function WeekTemplateModal({
+  onClose,
+  year,
+  month,
+  employees,
+  entryMap,
+  onApplyTemplate,
+}: WeekTemplateModalProps) {
+  const [templates, setTemplates] = useState<WeekTemplate[]>(loadTemplates);
+  const [tab, setTab] = useState<'apply' | 'save'>('apply');
+  const [newName, setNewName] = useState('');
+  const [refWeekStart, setRefWeekStart] = useState<string>('');
+  const [applyingId, setApplyingId] = useState<string | null>(null);
+  const [applySkip, setApplySkip] = useState(true);
+
+  // Build list of Mondays in the current month
+  const mondays: string[] = [];
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const daysInMonth = new Date(year, month, 0).getDate();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dt = new Date(year, month - 1, d);
+    if (dt.getDay() === 1) {
+      mondays.push(`${year}-${pad(month)}-${pad(d)}`);
+    }
+  }
+  // Default to first Monday of month
+  useEffect(() => {
+    if (!refWeekStart && mondays.length > 0) setRefWeekStart(mondays[0]);
+  }, []);
+
+  const handleSave = () => {
+    if (!newName.trim() || !refWeekStart) return;
+    // Extract week entries from the chosen reference week (Mon–Sun)
+    const weekEntries: Array<{ employee_id: number; weekday: number; shift_id: number }> = [];
+    const monday = new Date(refWeekStart + 'T00:00:00');
+    for (let wd = 0; wd < 7; wd++) {
+      const dt = new Date(monday);
+      dt.setDate(monday.getDate() + wd);
+      if (dt.getMonth() !== month - 1) continue; // skip days outside month
+      const day = dt.getDate();
+      for (const emp of employees) {
+        const e = entryMap.get(`${emp.ID}-${day}`);
+        if (e && e.kind === 'shift' && e.shift_id) {
+          weekEntries.push({ employee_id: emp.ID, weekday: wd, shift_id: e.shift_id });
+        }
+      }
+    }
+    if (weekEntries.length === 0) return;
+    const tpl: WeekTemplate = {
+      id: Date.now().toString(),
+      name: newName.trim(),
+      createdAt: new Date().toISOString().slice(0, 10),
+      entries: weekEntries,
+    };
+    const updated = [...templates, tpl];
+    saveTemplates(updated);
+    setTemplates(updated);
+    setNewName('');
+    setTab('apply');
+  };
+
+  const handleDelete = (id: string) => {
+    const updated = templates.filter(t => t.id !== id);
+    saveTemplates(updated);
+    setTemplates(updated);
+  };
+
+  const handleApply = async (tpl: WeekTemplate) => {
+    setApplyingId(tpl.id);
+    await onApplyTemplate(tpl, applySkip);
+    setApplyingId(null);
+    onClose();
+  };
+
+  const WD_NAMES = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[85vh] flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b dark:border-gray-700">
+          <h2 className="text-base font-semibold flex items-center gap-2 dark:text-white">
+            📐 Wochenvorlagen
+          </h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex border-b dark:border-gray-700 px-5">
+          <button
+            onClick={() => setTab('apply')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab === 'apply' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
+          >
+            Vorlage anwenden
+          </button>
+          <button
+            onClick={() => setTab('save')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${tab === 'save' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400'}`}
+          >
+            Vorlage speichern
+          </button>
+        </div>
+
+        <div className="overflow-y-auto flex-1 px-5 py-4">
+
+          {tab === 'apply' && (
+            <div className="space-y-3">
+              {templates.length === 0 ? (
+                <div className="text-center text-gray-400 dark:text-gray-500 py-8 text-sm">
+                  Noch keine Vorlagen gespeichert.<br />
+                  <button onClick={() => setTab('save')} className="text-blue-500 underline mt-1">Vorlage speichern</button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2 text-sm mb-3">
+                    <label className="flex items-center gap-1.5 text-gray-600 dark:text-gray-300 cursor-pointer">
+                      <input type="checkbox" checked={applySkip} onChange={e => setApplySkip(e.target.checked)} className="rounded" />
+                      Bereits belegte Tage überspringen
+                    </label>
+                  </div>
+                  {templates.map(tpl => {
+                    const empCount = new Set(tpl.entries.map(e => e.employee_id)).size;
+                    const wdSet = new Set(tpl.entries.map(e => e.weekday));
+                    const wdLabel = WD_NAMES.filter((_, i) => wdSet.has(i)).join(', ');
+                    return (
+                      <div key={tpl.id} className="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm dark:text-white truncate">{tpl.name}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {tpl.createdAt} · {empCount} MA · {wdLabel}
+                          </div>
+                          <div className="text-xs text-gray-400 dark:text-gray-500">{tpl.entries.length} Einträge</div>
+                        </div>
+                        <button
+                          onClick={() => handleApply(tpl)}
+                          disabled={applyingId === tpl.id}
+                          className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded shadow-sm disabled:opacity-50"
+                        >
+                          {applyingId === tpl.id ? '…' : 'Anwenden'}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(tpl.id)}
+                          className="px-2 py-1.5 text-red-400 hover:text-red-600 text-xs"
+                          title="Vorlage löschen"
+                        >
+                          🗑
+                        </button>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+            </div>
+          )}
+
+          {tab === 'save' && (
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Wähle eine Referenzwoche aus dem aktuellen Monat. Die Schichten dieser Woche werden als Muster gespeichert und können auf andere Monate übertragen werden.
+              </p>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name der Vorlage</label>
+                <input
+                  type="text"
+                  value={newName}
+                  onChange={e => setNewName(e.target.value)}
+                  placeholder="z.B. Standard-Besetzung Sommer"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Referenzwoche (Montag)</label>
+                <select
+                  value={refWeekStart}
+                  onChange={e => setRefWeekStart(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+                  {mondays.length === 0 && <option value="">Kein Montag im Monat</option>}
+                  {mondays.map(m => {
+                    const dt = new Date(m + 'T00:00:00');
+                    const sun = new Date(dt); sun.setDate(dt.getDate() + 6);
+                    return (
+                      <option key={m} value={m}>
+                        {dt.getDate()}.{month}.{year} – {Math.min(sun.getDate(), daysInMonth)}.{month}.{year}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+              {refWeekStart && (() => {
+                const monday = new Date(refWeekStart + 'T00:00:00');
+                const preview: { wd: number; count: number }[] = [];
+                for (let wd = 0; wd < 7; wd++) {
+                  const dt = new Date(monday); dt.setDate(monday.getDate() + wd);
+                  if (dt.getMonth() !== month - 1) continue;
+                  const day = dt.getDate();
+                  const count = employees.filter(emp => {
+                    const e = entryMap.get(`${emp.ID}-${day}`);
+                    return e && e.kind === 'shift' && e.shift_id;
+                  }).length;
+                  preview.push({ wd, count });
+                }
+                const total = preview.reduce((s, p) => s + p.count, 0);
+                return (
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 text-xs">
+                    <div className="font-medium text-gray-700 dark:text-gray-300 mb-2">Vorschau:</div>
+                    <div className="flex gap-2 flex-wrap">
+                      {preview.map(({ wd, count }) => (
+                        <span key={wd} className={`px-2 py-0.5 rounded ${count > 0 ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300' : 'bg-gray-200 text-gray-400 dark:bg-gray-600 dark:text-gray-500'}`}>
+                          {WD_NAMES[wd]}: {count}×
+                        </span>
+                      ))}
+                    </div>
+                    <div className="mt-1.5 text-gray-500 dark:text-gray-400">{total} Schicht-Einträge werden gespeichert</div>
+                  </div>
+                );
+              })()}
+              <button
+                onClick={handleSave}
+                disabled={!newName.trim() || !refWeekStart}
+                className="w-full px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-lg shadow-sm disabled:opacity-40 disabled:cursor-not-allowed font-medium"
+              >
+                💾 Vorlage speichern
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Schedule Component ───────────────────────────────────
 export default function Schedule() {
   const now = new Date();
@@ -1478,6 +1742,9 @@ export default function Schedule() {
 
   // Schicht-Empfehlung state
   const [showRecommendations, setShowRecommendations] = useState(false);
+
+  // Wochenvorlagen state
+  const [showWeekTemplates, setShowWeekTemplates] = useState(false);
 
   // Close export menu on outside click
   useEffect(() => {
@@ -2282,6 +2549,37 @@ export default function Schedule() {
     setBulkContextMenu(null);
   };
 
+  // ── Apply Week Template ─────────────────────────────────────
+  const handleApplyTemplate = async (template: WeekTemplate, skipExisting: boolean) => {
+    const daysInCurMonth = new Date(year, month, 0).getDate();
+    const toAssign: Array<{ employee_id: number; date: string; shift_id: number }> = [];
+    for (let d = 1; d <= daysInCurMonth; d++) {
+      const dt = new Date(year, month - 1, d);
+      // JS weekday: 0=Sun, 1=Mon ... 6=Sat → convert to 0=Mon...6=Sun
+      const jsWd = dt.getDay();
+      const wd = (jsWd + 6) % 7; // 0=Mon...6=Sun
+      const dateStr = `${year}-${pad(month)}-${pad(d)}`;
+      for (const te of template.entries) {
+        if (te.weekday !== wd) continue;
+        if (skipExisting && entryMap.has(`${te.employee_id}-${d}`)) continue;
+        toAssign.push({ employee_id: te.employee_id, date: dateStr, shift_id: te.shift_id });
+      }
+    }
+    if (toAssign.length === 0) {
+      showToast('Keine Schichten zu übertragen (alles belegt?)', 'info');
+      return;
+    }
+    setSaving(true);
+    try {
+      const result = await api.bulkSchedule(toAssign, !skipExisting);
+      showToast(`✅ Vorlage angewandt: ${result.created} erstellt, ${result.updated} aktualisiert`, 'success');
+      loadSchedule();
+    } catch (e) {
+      showToast('Fehler beim Anwenden der Vorlage: ' + (e as Error).message, 'error');
+    }
+    setSaving(false);
+  };
+
   // ── Undo/Redo helpers ───────────────────────────────────────
   const UNDO_LIMIT = 20;
 
@@ -2825,6 +3123,18 @@ export default function Schedule() {
             )}
           </div>
         </div>
+      )}
+
+      {/* ── Wochenvorlagen Modal ──────────────────────────────── */}
+      {showWeekTemplates && (
+        <WeekTemplateModal
+          onClose={() => setShowWeekTemplates(false)}
+          year={year}
+          month={month}
+          employees={employees}
+          entryMap={entryMap}
+          onApplyTemplate={handleApplyTemplate}
+        />
       )}
 
       {/* ── Vormonat kopieren Modal ────────────────────────────── */}
@@ -3509,6 +3819,15 @@ export default function Schedule() {
             title="Mitarbeiter mit wenig Schichten anzeigen und Empfehlungen erhalten"
           >
             💡 <span className="hidden sm:inline">Empfehlungen</span>
+          </button>
+
+          {/* Wochenvorlagen button */}
+          <button
+            onClick={() => setShowWeekTemplates(true)}
+            className="px-2 sm:px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            title="Wochenmuster als Vorlage speichern und auf diesen Monat anwenden"
+          >
+            📐 <span className="hidden sm:inline">Vorlagen</span>
           </button>
 
           {/* Auto-Planen button */}

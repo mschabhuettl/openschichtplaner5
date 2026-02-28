@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
-import type { Group } from '../types';
+import type { Group, Employee } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
@@ -52,8 +53,14 @@ function bgrToHex(bgr: number | undefined): string {
 
 export default function Groups() {
   const { canAdmin } = useAuth();
+  const navigate = useNavigate();
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
+  const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
+  const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set());
+  const [groupMembers, setGroupMembers] = useState<Record<number, Employee[]>>({});
+  const [membersLoading, setMembersLoading] = useState<Set<number>>(new Set());
+  const [memberSearch, setMemberSearch] = useState<Record<number, string>>({});
   const [showModal, setShowModal] = useState(false);
 
   // Escape key closes modal
@@ -92,6 +99,50 @@ export default function Groups() {
   };
 
   useEffect(() => { load(); }, []);
+  useEffect(() => {
+    api.getEmployees().then(setAllEmployees).catch(() => {});
+  }, []);
+
+  const toggleMembers = useCallback(async (groupId: number) => {
+    if (expandedGroups.has(groupId)) {
+      setExpandedGroups(prev => { const s = new Set(prev); s.delete(groupId); return s; });
+      return;
+    }
+    setExpandedGroups(prev => new Set([...prev, groupId]));
+    if (groupMembers[groupId]) return;
+    setMembersLoading(prev => new Set([...prev, groupId]));
+    try {
+      const members = await api.getGroupMembers(groupId);
+      setGroupMembers(prev => ({ ...prev, [groupId]: members }));
+    } catch {
+      setGroupMembers(prev => ({ ...prev, [groupId]: [] }));
+    } finally {
+      setMembersLoading(prev => { const s = new Set(prev); s.delete(groupId); return s; });
+    }
+  }, [expandedGroups, groupMembers]);
+
+  const handleAddMember = async (groupId: number, empId: number) => {
+    try {
+      await api.addGroupMember(groupId, empId);
+      const members = await api.getGroupMembers(groupId);
+      setGroupMembers(prev => ({ ...prev, [groupId]: members }));
+      setGroups(prev => prev.map(g => g.ID === groupId ? { ...g, member_count: (g.member_count ?? 0) + 1 } : g));
+      showToast('Mitarbeiter hinzugefügt ✓', 'success');
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : 'Fehler', 'error');
+    }
+  };
+
+  const handleRemoveMember = async (groupId: number, empId: number) => {
+    try {
+      await api.removeGroupMember(groupId, empId);
+      setGroupMembers(prev => ({ ...prev, [groupId]: (prev[groupId] ?? []).filter(e => e.ID !== empId) }));
+      setGroups(prev => prev.map(g => g.ID === groupId ? { ...g, member_count: Math.max(0, (g.member_count ?? 1) - 1) } : g));
+      showToast('Mitarbeiter entfernt', 'success');
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : 'Fehler', 'error');
+    }
+  };
 
   const searchLower = groupSearch.toLowerCase();
   const matchesGroupSearch = (g: Group): boolean => {
@@ -182,9 +233,13 @@ export default function Groups() {
               <span className="ml-2 text-xs text-gray-400 hidden sm:inline">({g.SHORTNAME})</span>
             )}
           </div>
-          <span className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full flex-shrink-0">
-            {g.member_count ?? 0} MA
-          </span>
+          <button
+            onClick={() => toggleMembers(g.ID)}
+            className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 transition-colors ${expandedGroups.has(g.ID) ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-blue-100'}`}
+            title="Mitglieder anzeigen"
+          >
+            {g.member_count ?? 0} MA {expandedGroups.has(g.ID) ? '▲' : '▼'}
+          </button>
           {canAdmin && <div className="flex gap-1 flex-shrink-0">
             <button
               onClick={() => openEdit(g)}
@@ -206,6 +261,67 @@ export default function Groups() {
             >🗑️</button>
           </div>}
         </div>
+        {expandedGroups.has(g.ID) && (
+          <div className="border-b border-gray-100 bg-blue-50/50" style={{ paddingLeft: `${32 + depth * 24}px`, paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
+            {membersLoading.has(g.ID) ? (
+              <div className="flex items-center gap-2 text-xs text-gray-400 py-2">
+                <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+                Lade Mitglieder...
+              </div>
+            ) : (
+              <>
+                {(groupMembers[g.ID] ?? []).length === 0 ? (
+                  <div className="text-xs text-gray-400 italic py-1">Keine Mitglieder in dieser Gruppe.</div>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {(groupMembers[g.ID] ?? []).map(emp => (
+                      <span key={emp.ID} className="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-gray-200 rounded-full text-xs text-gray-700 shadow-sm">
+                        <button onClick={() => navigate(`/mitarbeiter/${emp.ID}`)} className="font-medium hover:text-blue-600 transition-colors">
+                          {emp.FIRSTNAME} {emp.NAME}
+                        </button>
+                        {canAdmin && (
+                          <button
+                            onClick={() => handleRemoveMember(g.ID, emp.ID)}
+                            className="ml-0.5 text-gray-300 hover:text-red-500 transition-colors font-bold text-xs leading-none"
+                            title="Aus Gruppe entfernen"
+                          >×</button>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {canAdmin && (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="🔍 Mitarbeiter hinzufügen..."
+                      value={memberSearch[g.ID] ?? ''}
+                      onChange={e => setMemberSearch(prev => ({ ...prev, [g.ID]: e.target.value }))}
+                      className="px-2 py-1 border rounded text-xs w-48 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                    />
+                    {memberSearch[g.ID] && (
+                      <div className="absolute z-20 bg-white border rounded shadow-lg mt-6 max-h-32 overflow-y-auto w-48" style={{ marginTop: '28px', position: 'absolute' }}>
+                        {allEmployees
+                          .filter(e => !e.HIDE && !((groupMembers[g.ID] ?? []).find(m => m.ID === e.ID)) &&
+                            `${e.NAME} ${e.FIRSTNAME} ${e.SHORTNAME}`.toLowerCase().includes((memberSearch[g.ID] ?? '').toLowerCase()))
+                          .slice(0, 8)
+                          .map(emp => (
+                            <button
+                              key={emp.ID}
+                              onClick={() => { handleAddMember(g.ID, emp.ID); setMemberSearch(prev => ({ ...prev, [g.ID]: '' })); }}
+                              className="block w-full text-left px-3 py-1.5 text-xs hover:bg-blue-50 transition-colors"
+                            >
+                              {emp.FIRSTNAME} {emp.NAME} <span className="text-gray-400">({emp.SHORTNAME})</span>
+                            </button>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        )}
         {children.map(c => renderGroup(c, depth + 1))}
       </div>
     );

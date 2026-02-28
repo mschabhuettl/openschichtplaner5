@@ -205,7 +205,7 @@ export default function Employees() {
   const [search, setSearch] = useState('');
   const [filterGroupId, setFilterGroupId] = useState<number | ''>('');
   const [filterHide, setFilterHide] = useState<'all' | 'active' | 'hidden'>('active');
-  const [groups, setGroups] = useState<{ ID: number; NAME: string }[]>([]);
+  const [groups, setGroups] = useState<{ ID: number; NAME: string; SHORTNAME?: string }[]>([]);
   const [groupAssignments, setGroupAssignments] = useState<{ employee_id: number; group_id: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -221,7 +221,11 @@ export default function Employees() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [workdaysList, setWorkdaysList] = useState<boolean[]>([true, true, true, true, true, false, false]);
-  const [activeTab, setActiveTab] = useState<'basic' | 'personal' | 'colors' | 'notes'>('basic');
+  const [activeTab, setActiveTab] = useState<'basic' | 'personal' | 'colors' | 'notes' | 'groups'>('basic');
+
+  // ── Group assignments for modal ──────────────────────────────
+  const [empGroupIds_modal, setEmpGroupIds_modal] = useState<number[]>([]);
+  const [groupSaving, setGroupSaving] = useState(false);
   const { showToast } = useToast();
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
@@ -335,6 +339,7 @@ export default function Employees() {
     setNewRestrShiftId('');
     setNewRestrReason('');
     setRestrError(null);
+    setEmpGroupIds_modal([]);
     setActiveTab('basic');
     setShowModal(true);
   };
@@ -382,6 +387,7 @@ export default function Employees() {
     setNewRestrShiftId('');
     setNewRestrReason('');
     setRestrError(null);
+    setEmpGroupIds_modal(groupAssignments.filter(a => a.employee_id === emp.ID).map(a => a.group_id));
     loadRestrictions(emp.ID);
     setShowModal(true);
   };
@@ -654,8 +660,8 @@ export default function Employees() {
 
             {/* Tabs */}
             <div className="flex border-b mb-4 gap-1">
-              {(['basic', 'personal', 'colors', 'notes'] as const).map(tab => {
-                const labels: Record<string, string> = { basic: '📋 Grunddaten', personal: '👤 Person', colors: '🎨 Farben', notes: '📝 Notizen' };
+              {(['basic', 'personal', 'colors', 'notes', ...(editId !== null ? ['groups' as const] : [])] as const).map(tab => {
+                const labels: Record<string, string> = { basic: '📋 Grunddaten', personal: '👤 Person', colors: '🎨 Farben', notes: '📝 Notizen', groups: '🏢 Gruppen' };
                 return (
                   <button key={tab} onClick={() => setActiveTab(tab)}
                     className={`px-3 py-1.5 text-xs font-semibold rounded-t border-b-2 transition-colors ${activeTab === tab ? 'border-blue-500 text-blue-600 bg-blue-50' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
@@ -989,8 +995,59 @@ export default function Employees() {
               </div>
             )}
 
+            {/* Tab: Gruppen */}
+            {activeTab === 'groups' && editId !== null && (
+              <div className="space-y-3">
+                <p className="text-xs text-gray-500">Gruppen-Zugehörigkeiten dieses Mitarbeiters verwalten.</p>
+                {groups.length === 0 ? (
+                  <div className="text-sm text-gray-400 italic">Keine Gruppen vorhanden.</div>
+                ) : (
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {groups.map(g => {
+                      const isMember = empGroupIds_modal.includes(g.ID);
+                      return (
+                        <label key={g.ID} className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer transition-colors ${isMember ? 'bg-blue-50 border-blue-300' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
+                          <input
+                            type="checkbox"
+                            checked={isMember}
+                            disabled={groupSaving}
+                            onChange={async () => {
+                              setGroupSaving(true);
+                              try {
+                                if (isMember) {
+                                  await api.removeGroupMember(g.ID, editId);
+                                  setEmpGroupIds_modal(prev => prev.filter(id => id !== g.ID));
+                                  setGroupAssignments(prev => prev.filter(a => !(a.employee_id === editId && a.group_id === g.ID)));
+                                } else {
+                                  await api.addGroupMember(g.ID, editId);
+                                  setEmpGroupIds_modal(prev => [...prev, g.ID]);
+                                  setGroupAssignments(prev => [...prev, { employee_id: editId, group_id: g.ID }]);
+                                }
+                                showToast(isMember ? `Aus "${g.NAME}" entfernt` : `Zu "${g.NAME}" hinzugefügt`, 'success');
+                              } catch (e) {
+                                showToast(e instanceof Error ? e.message : 'Fehler', 'error');
+                              } finally {
+                                setGroupSaving(false);
+                              }
+                            }}
+                            className="rounded"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-gray-800">{g.NAME}</div>
+                            {g.SHORTNAME && <div className="text-xs text-gray-500">{g.SHORTNAME}</div>}
+                          </div>
+                          {isMember && <span className="text-xs text-blue-600 font-semibold">✓ Mitglied</span>}
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex gap-2 mt-5 justify-end border-t pt-4">
               <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200">Abbrechen</button>
+              {activeTab !== 'groups' && (
               <button
                 onClick={handleSave}
                 disabled={saving || !form.NAME.trim()}
@@ -999,6 +1056,7 @@ export default function Employees() {
                 {saving ? <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" /> : null}
                 Speichern
               </button>
+              )}
             </div>
           </div>
         </div>

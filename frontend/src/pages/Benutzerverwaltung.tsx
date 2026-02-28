@@ -670,6 +670,7 @@ export default function Benutzerverwaltung() {
     setFormError(null);
     if (!form.NAME.trim()) { setFormError('Benutzername ist erforderlich.'); return; }
     if (editId === null && !form.PASSWORD.trim()) { setFormError('Passwort ist erforderlich.'); return; }
+    if (editId === null && form.PASSWORD.length < 6) { setFormError('Passwort muss mindestens 6 Zeichen lang sein.'); return; }
 
     setSaving(true);
     try {
@@ -744,6 +745,7 @@ export default function Benutzerverwaltung() {
   const handlePwChange = async () => {
     if (!pwChangeUser) return;
     if (!newPw.trim()) { setPwError('Bitte ein Passwort eingeben.'); return; }
+    if (newPw.length < 6) { setPwError('Passwort muss mindestens 6 Zeichen lang sein.'); return; }
     if (newPw !== confirmPw) { setPwError('Passwörter stimmen nicht überein.'); return; }
     setPwSaving(true);
     setPwError(null);

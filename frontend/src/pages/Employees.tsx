@@ -481,6 +481,16 @@ export default function Employees() {
       setError('Kürzel ist ein Pflichtfeld.');
       return;
     }
+    // E-Mail-Validierung
+    if (form.EMAIL.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.EMAIL.trim())) {
+      setError('Bitte eine gültige E-Mail-Adresse eingeben.');
+      return;
+    }
+    // Datums-Validierung: Eintritt vor Austritt
+    if (form.EMPSTART && form.EMPEND && form.EMPEND < form.EMPSTART) {
+      setError('Austrittsdatum muss nach dem Eintrittsdatum liegen.');
+      return;
+    }
     setSaving(true);
     setError(null);
     const { CFGLABEL_HEX, CBKLABEL_HEX, CBKSCHED_HEX, ...rest } = form;

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.21] — 2026-02-28
+
+### Fixed
+
+- `fix(security)`: CSV import endpoints — MIME-type validation + 10 MB file size limit
+- `fix(security)`: `.env.example` vervollständigt, unsafe defaults entfernt
+- `fix(security)`: Dateiname-Sanitierung bei Photo-Upload
+
+---
+
+## [0.3.20] — 2026-02-28
+
+### Fixed
+
+- `fix(security)`: CSV import file validation — initial hardening
+
+---
+
 ## [0.3.19] — 2026-02-28
 
 ### Fixed

@@ -585,22 +585,8 @@ export default function Analytics() {
 
   const currentYear = new Date().getFullYear();
 
-  if (loading) return <LoadingSpinner message="Lade Analytics-Daten…" />;
-
-  if (error) return (
-    <div className="flex flex-col items-center justify-center py-20 gap-3 text-red-500 dark:text-red-400">
-      <span className="text-3xl">⚠️</span>
-      <span className="text-sm font-medium">Fehler beim Laden: {error}</span>
-      <button
-        onClick={() => window.location.reload()}
-        className="mt-2 px-4 py-2 text-xs bg-red-100 dark:bg-red-900/30 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
-      >
-        Erneut versuchen
-      </button>
-    </div>
-  );
-
   // Compute derived data (memoized to avoid recomputing on unrelated re-renders)
+  // Must be before early returns to satisfy rules-of-hooks
   const {
     monthly, labels,
     sickValues, otValues, staffingValues,
@@ -634,6 +620,21 @@ export default function Analytics() {
       sickAnomalies, otAnomalies, staffingAnomalies,
     };
   }, [data, year]);
+
+  if (loading) return <LoadingSpinner message="Lade Analytics-Daten…" />;
+
+  if (error) return (
+    <div className="flex flex-col items-center justify-center py-20 gap-3 text-red-500 dark:text-red-400">
+      <span className="text-3xl">⚠️</span>
+      <span className="text-sm font-medium">Fehler beim Laden: {error}</span>
+      <button
+        onClick={() => window.location.reload()}
+        className="mt-2 px-4 py-2 text-xs bg-red-100 dark:bg-red-900/30 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+      >
+        Erneut versuchen
+      </button>
+    </div>
+  );
 
   return (
     <div style={{ padding: '16px 16px', maxWidth: 1100, margin: '0 auto' }}>

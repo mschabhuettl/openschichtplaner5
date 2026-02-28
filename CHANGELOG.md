@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.9] — 2026-02-28
+
+### Behoben / Fixed
+
+#### 🛡️ DBF-Robustheit (0df1a43)
+- `fix(robustness)`: DBF-Reads gegen fehlende/korrupte Dateien abgesichert
+- 820 Tests grün
+
+#### 🖨️ Print CSS (b73a1aa)
+- `fix(print)`: Print-CSS für Analytics-Seite und TeamUebersicht verbessert
+
+#### 🔒 Session-Sicherheit
+- `fix(security)`: Session-Cleanup und maximale Sessions pro User
+
+#### 🇩🇪 Deutsche Fehlermeldungen
+- `fix(errors)`: Alle Backend-Fehlerresponses auf Deutsch
+
+#### ⚙️ CI/CD
+- `ci`: Release-Workflow, Trivy-Security-Scan, Frontend-Tests
+
+#### 🐛 Lint-Fix
+- `fix(lint)`: `useMemo` nach Early-Return in `Analytics.tsx` → vor Early-Return verschoben (rules-of-hooks)
+- `fix(lint)`: Ungenutzter `os`-Import in `sp5lib/dbf_reader.py` entfernt
+
+---
+
 ## [0.3.8] — 2026-02-28
 
 ### Behoben / Fixed

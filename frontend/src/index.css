@@ -312,11 +312,37 @@ a,
 button { transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease; }
 a { transition: color 150ms ease; }
 
+/* ── Print Header (only visible when printing) ───────────── */
+.print-header {
+  display: none;
+}
+
 /* ── Global Print Styles ──────────────────────────────────── */
 @media print {
   @page {
     size: landscape;
-    margin: 10mm;
+    margin: 10mm 8mm;
+  }
+
+  /* Show print-only header */
+  .print-header {
+    display: block !important;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    border-bottom: 2px solid #334155;
+  }
+
+  .print-header h1 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 2px 0;
+  }
+
+  .print-header p {
+    font-size: 9px;
+    color: #64748b;
+    margin: 0;
   }
 
   /* Hide navigation, sidebar, header and interactive controls */
@@ -353,7 +379,7 @@ a { transition: color 150ms ease; }
     height: auto !important;
   }
 
-  /* Preserve shift/leave colors when printing */
+  /* Preserve shift/leave colors when printing (color mode) */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -365,6 +391,8 @@ a { transition: color 150ms ease; }
   html.dark .text-gray-900 { color: #111827 !important; }
   html.dark .text-gray-700 { color: #374151 !important; }
   html.dark th { background-color: #f1f5f9 !important; color: #111827 !important; }
+  html.dark td { background-color: #ffffff !important; color: #111827 !important; }
+  html.dark .bg-slate-800, html.dark .bg-slate-900 { background-color: #334155 !important; }
 
   /* Compact table for print */
   table {
@@ -409,6 +437,26 @@ a { transition: color 150ms ease; }
     size: portrait;
     margin: 10mm;
   }
+
+  /* ── B&W Print Mode ── */
+  body.print-bw th {
+    background-color: #e2e8f0 !important;
+    color: #1e293b !important;
+  }
+  body.print-bw td {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  body.print-bw td span,
+  body.print-bw td div {
+    background-color: transparent !important;
+    color: #000000 !important;
+    border-color: #94a3b8 !important;
+  }
+  body.print-bw .print-header {
+    border-bottom-color: #000 !important;
+  }
+  body.print-bw .print-header h1 { color: #000 !important; }
 }
 
 .schedule-grid {
@@ -503,54 +551,7 @@ a { transition: color 150ms ease; }
   }
 }
 
-/* ── Print Styles ────────────────────────────────────────────── */
-
-@media print {
-  /* Hide sidebar, mobile header, and other UI chrome */
-  aside,
-  header,
-  .print\:hidden,
-  [class*="print:hidden"] {
-    display: none !important;
-  }
-
-  /* Full-width content area */
-  body, html {
-    background: white !important;
-    color: black !important;
-  }
-
-  /* Remove background colors from layout containers */
-  .bg-gray-100,
-  .bg-gray-50,
-  .bg-slate-800,
-  .bg-slate-900 {
-    background: white !important;
-  }
-
-  /* Main content takes full width */
-  main {
-    width: 100% !important;
-    overflow: visible !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* Page breaks */
-  table { page-break-inside: avoid; }
-  tr { page-break-inside: avoid; }
-
-  /* Ensure links print as plain text */
-  a[href]:after {
-    content: none !important;
-  }
-
-  /* Remove shadows */
-  * {
-    box-shadow: none !important;
-    text-shadow: none !important;
-  }
-}
+/* ── Print Styles (consolidated above in Global Print Styles) ── */
 
 /* ── Guided Tour Animation ───────────────────────────────────────────────── */
 @keyframes fadeIn {

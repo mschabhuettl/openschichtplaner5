@@ -1614,6 +1614,9 @@ export default function Schedule() {
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
 
+  // ── Print color mode ────────────────────────────────────────
+  const [printColorMode, setPrintColorMode] = useState<'color' | 'bw'>('color');
+
   // ── Mobile week view ────────────────────────────────────────
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [mobileWeekOffset, setMobileWeekOffset] = useState(0); // 0 = current/first week
@@ -2872,19 +2875,11 @@ export default function Schedule() {
   // ── Render ──────────────────────────────────────────────────
   return (
     <div className="p-2 sm:p-4 h-full flex flex-col" onClick={() => { setContextMenu(null); setNotePopup(null); setBulkContextMenu(null); }}>
-      {/* Print styles – injected into <head> at runtime */}
-      <style>{`
-        @media print {
-          @page { size: landscape; margin: 8mm; }
-          body { font-size: 9px !important; background: white !important; }
-          .no-print { display: none !important; }
-          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          table { border-collapse: collapse; font-size: 9px; }
-          th, td { padding: 1px 2px !important; }
-          tr { break-inside: avoid; }
-          thead { display: table-header-group; }
-        }
-      `}</style>
+      {/* Print-only header — hidden on screen, visible when printing */}
+      <div className="print-header">
+        <h1>📅 Dienstplan — {MONTH_NAMES[month]} {year}</h1>
+        <p>Gedruckt am {new Date().toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' })} · OpenSchichtplaner5</p>
+      </div>
       {/* Context menu */}
       {contextMenu && (
         <CellContextMenu
@@ -3859,6 +3854,33 @@ export default function Schedule() {
           >
             🖨️ <span className="hidden sm:inline">Drucken</span>
           </button>
+
+          {/* Direct window.print() button with B&W toggle */}
+          <div className="flex items-center rounded shadow-sm overflow-hidden border border-slate-500">
+            <button
+              onClick={() => {
+                if (printColorMode === 'bw') {
+                  document.body.classList.add('print-bw');
+                } else {
+                  document.body.classList.remove('print-bw');
+                }
+                window.print();
+                // cleanup after print dialog closes
+                setTimeout(() => document.body.classList.remove('print-bw'), 2000);
+              }}
+              className="px-2 sm:px-3 py-1.5 bg-slate-500 hover:bg-slate-600 text-white text-xs sm:text-sm flex items-center gap-1 min-h-[32px]"
+              title={`Direktdruck (${printColorMode === 'color' ? 'Farbe' : 'S/W'})`}
+            >
+              🖨 <span className="hidden sm:inline">{printColorMode === 'color' ? 'Farbe' : 'S/W'}</span>
+            </button>
+            <button
+              onClick={() => setPrintColorMode(m => m === 'color' ? 'bw' : 'color')}
+              className="px-1.5 py-1.5 bg-slate-400 hover:bg-slate-500 text-white text-xs min-h-[32px] border-l border-slate-500"
+              title="Zwischen Farb- und S/W-Druck wechseln"
+            >
+              {printColorMode === 'color' ? '🎨' : '⬛'}
+            </button>
+          </div>
 
           {/* Keyboard help button */}
           <button

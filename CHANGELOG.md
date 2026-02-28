@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.24] — 2026-02-28
+
+### Fixed
+
+- `fix(a11y)`: Farb-Kontrast-Fixes auf allen Seiten — WCAG AA konform (Filter/Search/Button-Elemente)
+- `fix(a11y)`: Focus-Visible auf Filter- und Search-Inputs verbessert
+
+### Tests
+
+- `test`: 1113 Tests passing (war: 1085), Coverage 87%+
+
+---
+
 ## [0.3.23] — 2026-02-28
 
 ### Changed

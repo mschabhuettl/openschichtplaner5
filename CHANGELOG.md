@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.19] — 2026-02-28
+
+### Fixed
+
+- `fix(validation)`: Frontend input validation — email regex, character counter, live feedback
+- `fix(logging)`: X-Request-ID tracking per request, duplicate middleware removed, timestamp fix
+
+---
+
 ## [0.3.18] — 2026-02-28
 
 ### Changed

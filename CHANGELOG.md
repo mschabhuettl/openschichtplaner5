@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.8] — 2026-02-28
+
+### Behoben / Fixed
+
+#### 🐛 Backend-Fehlermeldungen auf Deutsch (968524b)
+- Alle Validierungs- und Fehler-Responses des Backends nun auf Deutsch
+- Konsistente, benutzerfreundliche Fehlertexte in der gesamten API
+- Ruff-Lint: Ambiguous variable name `l` → `loc` in `api/main.py` behoben
+- Unbenutzter `pytest`-Import in `test_security_round5.py` entfernt
+
+### Verbessert / Improved
+
+#### 🔧 CI/CD & Test-Coverage (d646ff4)
+- Verbesserte Test-Abdeckung mit zusätzlichen Tests
+- Frontend-Tests hinzugefügt
+- Release-Workflow optimiert
+- Trivy-Security-Scan integriert
+
+---
+
+## [0.3.7] — 2026-02-28
+
+### Behoben / Fixed
+
+#### 🌙 Dark Mode Statistiken + Health Dashboard (28b3108)
+- Dark-Mode-Klassen für HealthDashboard und Statistiken-Seite ergänzt
+- Korrektes Rendering aller UI-Elemente im dunklen Modus
+
+#### 📱 Mobile Responsive Fixes (3187d33)
+- Mobile Fixes für Analytics- und HealthDashboard-Seiten
+
+### Hinzugefügt / Added
+
+#### 🌍 Erweiterte Übersetzungen / i18n (40e5636)
+- Übersetzungen auf Mitarbeiter-, Urlaub- und Statistiken-Seiten ausgeweitet
+- Konsistente Mehrsprachigkeit in allen Hauptbereichen
+
+---
+
 ## [0.3.0] — 2026-02-28
 
 ### Hinzugefügt / Added

@@ -75,6 +75,7 @@ const Leitwand            = lazy(() => import('./pages/Leitwand'));
 const Simulation          = lazy(() => import('./pages/Simulation'));
 const Uebergabe           = lazy(() => import('./pages/Uebergabe'));
 const DienstBoard         = lazy(() => import('./pages/DienstBoard'));
+const TeamUebersicht      = lazy(() => import('./pages/TeamUebersicht'));
 const Login             = lazy(() => import('./pages/Login'));
 const NotFound          = lazy(() => import('./pages/NotFound'));
 
@@ -160,6 +161,7 @@ const navItems: NavItem[] = [
   { id: 'leitwand',          label: 'Leitwand',              icon: '📺', group: 'Ansichten', path: '/leitwand' },
   { id: 'dienst-board',      label: 'Dienst-Board',          icon: '🖥️', group: 'Ansichten', path: '/dienst-board' },
   { id: 'teamkalender',      label: 'Team-Kalender',         icon: '🗓️', group: 'Ansichten', path: '/teamkalender' },
+  { id: 'team-uebersicht',   label: 'Team-Übersicht',        icon: '👥', group: 'Ansichten', path: '/team' },
   { id: 'geburtstagkalender',label: 'Geburtstags-Kalender',  icon: '🎂', group: 'Ansichten', path: '/geburtstagkalender' },
 
   // ── Werkzeuge ────────────────────────────────────────────────
@@ -611,6 +613,7 @@ function AppInner() {
               <Route path="/kontobuchungen" element={<Kontobuchungen />} />
               <Route path="/notizen" element={<Notizen />} />
               <Route path="/mitarbeiter-vergleich" element={<MitarbeiterVergleich />} />
+              <Route path="/team" element={<TeamUebersicht />} />
               <Route path="/mitarbeiter" element={<MitarbeiterProfil />} />
               <Route path="/mitarbeiter/:id" element={<MitarbeiterProfil />} />
               <Route path="/mein-profil" element={<MeinProfil />} />

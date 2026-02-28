@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.25] — 2026-02-28
+
+### Performance
+
+- `perf`: N+1 Query-Fix in Reports-Analytik — `get_group_members()` pro Employee durch einmaligen Bulk-Fetch ersetzt (N×M → 1 Query)
+- `perf`: Schedule-Export in `database.py` — Gruppen-Loop durch `get_all_group_members()` Bulk-Fetch ersetzt (N Queries → 1)
+- `fix`: Bug in `reports.py` Zeile 2335 — `list[int]` wurde fälschlicherweise als `list[dict]` für Group-Members verwendet
+
+### Tests
+
+- `test`: 1131 Tests passing (war: 1113), neue Coverage-Tests für Schedule
+
+---
+
 ## [0.3.24] — 2026-02-28
 
 ### Fixed

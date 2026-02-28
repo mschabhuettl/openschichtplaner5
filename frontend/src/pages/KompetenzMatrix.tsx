@@ -64,20 +64,22 @@ function MatrixCell({
   assignment,
   skill,
   onClick,
+  checkMode,
 }: {
   assignment?: Assignment;
   skill: Skill;
   onClick: () => void;
+  checkMode?: boolean;
 }) {
   if (!assignment) {
     return (
       <td className="border border-gray-100 p-0 text-center">
         <button
           onClick={onClick}
-          className="w-full h-full min-h-[2rem] flex items-center justify-center text-gray-200 hover:text-gray-400 hover:bg-gray-50 transition-colors text-lg"
+          className={`w-full h-full min-h-[2rem] flex items-center justify-center transition-colors text-lg ${checkMode ? 'text-red-300 hover:text-red-500 hover:bg-red-50 text-base' : 'text-gray-200 hover:text-gray-400 hover:bg-gray-50'}`}
           title={`${skill.name} zuweisen`}
         >
-          +
+          {checkMode ? '❌' : '+'}
         </button>
       </td>
     );
@@ -92,10 +94,14 @@ function MatrixCell({
       <button
         onClick={onClick}
         className="w-full h-full min-h-[2rem] flex items-center justify-center gap-0.5 hover:opacity-80 transition-opacity py-1 px-1"
-        title={`${skill.name} (Stufe ${assignment.level}) – klicken zum Bearbeiten`}
-        style={{ color: skill.color }}
+        title={`${skill.name} (Stufe ${assignment.level}: ${LEVEL_LABELS[assignment.level]}) – klicken zum Bearbeiten`}
+        style={checkMode ? undefined : { color: skill.color }}
       >
-        <span className="text-base">{['', '●', '◆', '★'][assignment.level]}</span>
+        {checkMode ? (
+          <span className="text-base">✅</span>
+        ) : (
+          <span className="text-base">{['', '●', '◆', '★'][assignment.level]}</span>
+        )}
         {isExpired && <span className="text-xs text-red-500" title="Abgelaufen">!</span>}
         {isExpiring && !isExpired && <span className="text-xs text-amber-500" title="Läuft bald ab">⚠</span>}
       </button>
@@ -339,13 +345,18 @@ export default function KompetenzMatrix() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [viewMode, setViewMode] = useState<'matrix' | 'skills' | 'gaps'>('matrix');
+  const [sortMode, setSortMode] = useState<'name' | 'skill_count'>('name');
+  const [checkMode, setCheckMode] = useState(false);
   const [modal, setModal] = useState<ModalState | null>(null);
   const [skillModal, setSkillModal] = useState<{ skill?: Skill } | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
-    fetch(`${API}/api/skills/matrix`)
-      .then(r => r.json())
+    fetch(`${API}/api/skills/matrix`, { headers: getAuthHeaders() })
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then(data => { setMatrix(data); setLoading(false); })
       .catch(e => { setError(e.message); setLoading(false); });
   }, []);
@@ -363,11 +374,14 @@ export default function KompetenzMatrix() {
     (!searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase()))
   ) ?? [];
 
-  const visibleEmployees = matrix?.employees.filter(emp =>
+  const visibleEmployees = (matrix?.employees.filter(emp =>
     !searchQuery ||
     emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     emp.short.toLowerCase().includes(searchQuery.toLowerCase())
-  ) ?? [];
+  ) ?? []).slice().sort((a, b) => {
+    if (sortMode === 'skill_count') return b.skill_count - a.skill_count;
+    return a.name.localeCompare(b.name, 'de');
+  });
 
   // Gap analysis: employees with 0 of critical skills
   const gapData = matrix?.skills.map(skill => {
@@ -377,6 +391,9 @@ export default function KompetenzMatrix() {
     );
     return { skill, holders, nonHolders };
   }) ?? [];
+
+  // Einzelkämpfer-Risiko: skills with only 1 person qualified
+  const einzelkaempfer = gapData.filter(d => d.holders.length === 1);
 
   // ── API actions ───────────────────────────────────────────────────────────
 
@@ -486,6 +503,33 @@ export default function KompetenzMatrix() {
         </div>
       </div>
 
+      {/* ── Einzelkämpfer-Risiko Banner ── */}
+      {einzelkaempfer.length > 0 && (
+        <div className="mb-4 bg-red-50 border border-red-200 rounded-xl p-4 shadow-sm">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xl">🚨</span>
+            <span className="font-bold text-red-700">Einzelkämpfer-Risiko ({einzelkaempfer.length} Qualifikation{einzelkaempfer.length > 1 ? 'en' : ''})</span>
+            <span className="text-xs text-red-500 bg-red-100 px-2 py-0.5 rounded-full font-semibold">KRITISCH</span>
+          </div>
+          <p className="text-xs text-red-600 mb-3">
+            Diese Qualifikationen hat nur <strong>1 Mitarbeiter</strong>. Fällt diese Person aus, gibt es niemanden als Ersatz!
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {einzelkaempfer.map(({ skill, holders }) => {
+              const holder = matrix!.employees.find(e => e.id === holders[0]?.employee_id);
+              return (
+                <div key={skill.id} className="flex items-center gap-1.5 bg-white border border-red-200 rounded-lg px-3 py-1.5 text-sm">
+                  <span>{skill.icon}</span>
+                  <span className="font-semibold" style={{ color: skill.color }}>{skill.name}</span>
+                  <span className="text-gray-400">→</span>
+                  <span className="text-gray-700 font-medium">{holder?.name ?? '?'}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* ── Toolbar ── */}
       <div className="bg-white rounded-xl border border-gray-200 p-3 mb-4 shadow-sm flex flex-wrap gap-3 items-center">
         <input
@@ -506,6 +550,34 @@ export default function KompetenzMatrix() {
           ))}
         </select>
 
+        {viewMode === 'matrix' && (
+          <>
+            <div className="flex gap-1 border border-gray-200 rounded-lg p-0.5 bg-gray-50">
+              <button
+                onClick={() => setSortMode('name')}
+                className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${sortMode === 'name' ? 'bg-white shadow text-slate-700' : 'text-gray-500 hover:text-gray-700'}`}
+                title="Nach Name sortieren"
+              >
+                A–Z
+              </button>
+              <button
+                onClick={() => setSortMode('skill_count')}
+                className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors ${sortMode === 'skill_count' ? 'bg-white shadow text-slate-700' : 'text-gray-500 hover:text-gray-700'}`}
+                title="Nach Qualifikationsanzahl sortieren"
+              >
+                #↓
+              </button>
+            </div>
+            <button
+              onClick={() => setCheckMode(c => !c)}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${checkMode ? 'bg-green-100 border-green-300 text-green-700' : 'bg-gray-100 border-gray-200 text-gray-600 hover:bg-gray-200'}`}
+              title="Anzeige: ✅/❌ vs. Kompetenzstufen"
+            >
+              {checkMode ? '✅ ❌ Modus' : '● ◆ ★ Modus'}
+            </button>
+          </>
+        )}
+
         <div className="flex gap-1 ml-auto">
           {(['matrix', 'skills', 'gaps'] as const).map(mode => (
             <button
@@ -518,6 +590,9 @@ export default function KompetenzMatrix() {
               }`}
             >
               {mode === 'matrix' ? '📊 Matrix' : mode === 'skills' ? '🎯 Skills' : '⚠️ Lücken'}
+              {mode === 'gaps' && einzelkaempfer.length > 0 && (
+                <span className="ml-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 font-bold">{einzelkaempfer.length}</span>
+              )}
             </button>
           ))}
         </div>
@@ -569,6 +644,7 @@ export default function KompetenzMatrix() {
                         key={skill.id}
                         assignment={emp.skills[skill.id]}
                         skill={skill}
+                        checkMode={checkMode}
                         onClick={() => setModal({
                           type: 'assign',
                           employeeId: emp.id,
@@ -589,6 +665,33 @@ export default function KompetenzMatrix() {
                     </td>
                   </tr>
                 ))}
+                {/* ── Coverage footer row ── */}
+                <tr className="border-t-2 border-gray-300 bg-gray-50">
+                  <td className="sticky left-0 bg-gray-50 px-3 py-2 border-r border-gray-200 z-10">
+                    <div className="text-xs font-bold text-gray-600">Abdeckung</div>
+                    <div className="text-xs text-gray-400">{matrix.total_employees} MA gesamt</div>
+                  </td>
+                  {visibleSkills.map(skill => {
+                    const holders = matrix.assignments.filter(a => a.skill_id === skill.id).length;
+                    const pct = matrix.total_employees > 0 ? Math.round(holders / matrix.total_employees * 100) : 0;
+                    const isEinzelkaempfer = holders === 1;
+                    return (
+                      <td key={skill.id} className="px-1 py-2 text-center">
+                        <div className={`text-xs font-bold ${isEinzelkaempfer ? 'text-red-600' : pct >= 50 ? 'text-green-600' : 'text-amber-600'}`}>
+                          {isEinzelkaempfer ? '🚨' : ''}{holders}/{matrix.total_employees}
+                        </div>
+                        <div className="mx-1 mt-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full"
+                            style={{ width: `${pct}%`, backgroundColor: isEinzelkaempfer ? '#ef4444' : skill.color }}
+                          />
+                        </div>
+                        <div className="text-xs text-gray-400 mt-0.5">{pct}%</div>
+                      </td>
+                    );
+                  })}
+                  <td className="px-2 py-2 text-center text-xs text-gray-400">–</td>
+                </tr>
               </tbody>
             </table>
           )}
@@ -709,12 +812,21 @@ export default function KompetenzMatrix() {
               Keine Qualifikationen definiert.
             </div>
           )}
-          {gapData.filter(d => !filterCategory || d.skill.category === filterCategory).map(({ skill, nonHolders, holders }) => (
-            <div key={skill.id} className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+          {gapData.filter(d => !filterCategory || d.skill.category === filterCategory)
+            .sort((a, b) => a.holders.length - b.holders.length)
+            .map(({ skill, nonHolders, holders }) => {
+            const isEinzelkaempfer = holders.length === 1;
+            return (
+            <div key={skill.id} className={`rounded-xl border shadow-sm p-4 ${isEinzelkaempfer ? 'bg-red-50 border-red-300' : 'bg-white border-gray-200'}`}>
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-2xl">{skill.icon}</span>
                 <div className="flex-1">
-                  <div className="font-bold" style={{ color: skill.color }}>{skill.name}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold" style={{ color: skill.color }}>{skill.name}</span>
+                    {isEinzelkaempfer && (
+                      <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-bold">🚨 EINZELKÄMPFER</span>
+                    )}
+                  </div>
                   <div className="text-xs text-gray-400">
                     {holders.length} von {matrix.total_employees} MA qualifiziert
                     ({Math.round(holders.length / matrix.total_employees * 100)}%)
@@ -726,16 +838,22 @@ export default function KompetenzMatrix() {
                     className="h-full rounded-full"
                     style={{
                       width: `${Math.round(holders.length / matrix.total_employees * 100)}%`,
-                      backgroundColor: skill.color,
+                      backgroundColor: isEinzelkaempfer ? '#ef4444' : skill.color,
                     }}
                   />
                 </div>
               </div>
 
+              {isEinzelkaempfer && (
+                <div className="mb-3 text-xs bg-red-100 text-red-700 rounded-lg px-3 py-2 font-medium">
+                  ⚠️ Nur <strong>{matrix.employees.find(e => e.id === holders[0]?.employee_id)?.name ?? '?'}</strong> hat diese Qualifikation. Bei Ausfall gibt es keinen Ersatz!
+                </div>
+              )}
+
               {nonHolders.length > 0 ? (
                 <div>
                   <div className="text-xs font-semibold text-gray-500 mb-2">
-                    ⚠️ {nonHolders.length} MA ohne diese Qualifikation:
+                    {nonHolders.length} MA ohne diese Qualifikation:
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {nonHolders.map(emp => (
@@ -759,7 +877,8 @@ export default function KompetenzMatrix() {
                 <div className="text-xs text-green-600 font-semibold">✅ Alle Mitarbeiter qualifiziert!</div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

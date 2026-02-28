@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import type { Group, Employee } from '../types';
 import { useToast } from '../hooks/useToast';
+import { PageHeader } from '../components/PageHeader';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -329,42 +330,44 @@ export default function Groups() {
 
   return (
     <div className="p-4 sm:p-6">
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h1 className="text-xl font-bold text-gray-800">🏢 Gruppen ({groups.length})</h1>
-        <div className="flex gap-2 flex-wrap items-center">
-          <input
-            type="text"
-            placeholder="🔍 Suchen..."
-            value={groupSearch}
-            onChange={e => setGroupSearch(e.target.value)}
-            className="px-3 py-1.5 border rounded shadow-sm text-sm w-44"
-          />
-          <select
-            value={groupSort}
-            onChange={e => setGroupSort(e.target.value as typeof groupSort)}
-            className="px-3 py-1.5 border rounded shadow-sm text-sm bg-white"
-            title="Sortierung"
-          >
-            <option value="default">Reihenfolge ↕</option>
-            <option value="name-asc">Name A → Z ↑</option>
-            <option value="name-desc">Name Z → A ↓</option>
-            <option value="short-asc">Kürzel A → Z ↑</option>
-          </select>
-          {canAdmin && <button
-            onClick={openCreate}
-            className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
-          >
-            + Neu
-          </button>}
-          <button
-            onClick={() => window.print()}
-            className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
-            title="Seite drucken"
-          >
-            🖨️ <span className="hidden sm:inline">Drucken</span>
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title={`🏢 Gruppen (${groups.length})`}
+        actions={
+          <>
+            <input
+              type="text"
+              placeholder="🔍 Suchen..."
+              value={groupSearch}
+              onChange={e => setGroupSearch(e.target.value)}
+              className="px-3 py-1.5 border rounded shadow-sm text-sm w-44"
+            />
+            <select
+              value={groupSort}
+              onChange={e => setGroupSort(e.target.value as typeof groupSort)}
+              className="px-3 py-1.5 border rounded shadow-sm text-sm bg-white"
+              title="Sortierung"
+            >
+              <option value="default">Reihenfolge ↕</option>
+              <option value="name-asc">Name A → Z ↑</option>
+              <option value="name-desc">Name Z → A ↓</option>
+              <option value="short-asc">Kürzel A → Z ↑</option>
+            </select>
+            {canAdmin && <button
+              onClick={openCreate}
+              className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
+            >
+              + Neu
+            </button>}
+            <button
+              onClick={() => window.print()}
+              className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
+              title="Seite drucken"
+            >
+              🖨️ <span className="hidden sm:inline">Drucken</span>
+            </button>
+          </>
+        }
+      />
       {loading ? (
         <div className="flex justify-center py-12">
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />

@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
+import { StatCard } from '../components/StatCard';
+import { PageHeader } from '../components/PageHeader';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -146,56 +148,36 @@ export default function AuditLog() {
   return (
     <div style={{ padding: '1.5rem', maxWidth: '1400px', margin: '0 auto' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-        <span style={{ fontSize: '2rem' }}>🔍</span>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.6rem', fontWeight: 700 }}>Audit-Log</h1>
-          <p style={{ margin: 0, color: '#6b7280', fontSize: '0.9rem' }}>
-            Vollständige Änderungshistorie — wer hat wann was geändert
-          </p>
-        </div>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', color: '#6b7280', cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={autoRefresh}
-              onChange={e => setAutoRefresh(e.target.checked)}
-            />
-            Auto-Refresh (10s)
-          </label>
-          <button
-            onClick={load}
-            disabled={loading}
-            style={{
-              padding: '0.5rem 1rem', borderRadius: '8px', border: 'none',
-              background: '#3b82f6', color: '#fff', cursor: 'pointer',
-              fontWeight: 600, fontSize: '0.85rem',
-              opacity: loading ? 0.6 : 1,
-            }}
-          >
-            {loading ? '⏳ Laden…' : '🔄 Aktualisieren'}
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="🔍 Audit-Log"
+        subtitle="Vollständige Änderungshistorie — wer hat wann was geändert"
+        actions={
+          <>
+            <label className="flex items-center gap-1.5 text-sm text-gray-500 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={autoRefresh}
+                onChange={e => setAutoRefresh(e.target.checked)}
+              />
+              Auto-Refresh (10s)
+            </label>
+            <button
+              onClick={load}
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-60"
+            >
+              {loading ? '⏳ Laden…' : '🔄 Aktualisieren'}
+            </button>
+          </>
+        }
+      />
 
       {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem', marginBottom: '1.25rem' }}>
-        {[
-          { label: 'Gesamt', value: stats.total, color: '#3b82f6', icon: '📊' },
-          { label: 'Erstellt', value: stats.creates, color: '#22c55e', icon: '➕' },
-          { label: 'Geändert', value: stats.updates, color: '#f59e0b', icon: '✏️' },
-          { label: 'Gelöscht', value: stats.deletes, color: '#ef4444', icon: '🗑️' },
-        ].map(s => (
-          <div key={s.label} style={{
-            background: '#fff', borderRadius: '12px', padding: '1rem',
-            boxShadow: '0 1px 4px rgba(0,0,0,0.08)', textAlign: 'center',
-            borderTop: `3px solid ${s.color}`,
-          }}>
-            <div style={{ fontSize: '1.5rem' }}>{s.icon}</div>
-            <div style={{ fontSize: '1.6rem', fontWeight: 700, color: s.color }}>{s.value}</div>
-            <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>{s.label}</div>
-          </div>
-        ))}
+      <div className="grid grid-cols-4 gap-3 mb-5">
+        <StatCard icon="📊" label="Gesamt"  value={stats.total}   accent="blue" />
+        <StatCard icon="➕" label="Erstellt" value={stats.creates} accent="green" />
+        <StatCard icon="✏️" label="Geändert" value={stats.updates} accent="yellow" />
+        <StatCard icon="🗑️" label="Gelöscht" value={stats.deletes} accent="red" />
       </div>
 
       {/* Filters */}

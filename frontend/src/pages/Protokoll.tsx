@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { ChangelogEntry } from '../api/client';
+import { Badge } from '../components/Badge';
+import { StatCard } from '../components/StatCard';
+import { PageHeader } from '../components/PageHeader';
 
 const ACTION_LABELS: Record<string, string> = {
   CREATE: 'Erstellt',
@@ -22,16 +25,17 @@ const ENTITY_LABELS: Record<string, string> = {
   api: 'API',
 };
 
+const ACTION_BADGE_VARIANT: Record<string, 'green' | 'blue' | 'red' | 'gray'> = {
+  CREATE: 'green',
+  UPDATE: 'blue',
+  DELETE: 'red',
+};
+
 function ActionBadge({ action }: { action: string }) {
-  const colors: Record<string, string> = {
-    CREATE: 'bg-green-100 text-green-800 border border-green-200',
-    UPDATE: 'bg-blue-100 text-blue-800 border border-blue-200',
-    DELETE: 'bg-red-100 text-red-800 border border-red-200',
-  };
   return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap ${colors[action] ?? 'bg-gray-100 text-gray-700'}`}>
+    <Badge variant={ACTION_BADGE_VARIANT[action] ?? 'gray'}>
       {ACTION_LABELS[action] ?? action}
-    </span>
+    </Badge>
   );
 }
 
@@ -108,34 +112,25 @@ export default function Protokoll() {
   return (
     <div className="p-4 sm:p-6 h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-4 flex-wrap">
-        <h1 className="text-xl font-bold text-gray-800">📋 Aktivitätsprotokoll</h1>
-        <span className="text-sm text-gray-500">{filtered.length} Einträge</span>
-        {loading && <span className="text-sm text-blue-500 animate-pulse">Lade...</span>}
-        {error && <span className="text-sm text-red-500">Fehler: {error}</span>}
-        <button
-          onClick={() => window.print()}
-          className="no-print ml-auto px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
-          title="Seite drucken"
-        >
-          🖨️ <span className="hidden sm:inline">Drucken</span>
-        </button>
-      </div>
+      <PageHeader
+        title="📋 Aktivitätsprotokoll"
+        subtitle={`${filtered.length} Einträge${loading ? ' – Lade…' : ''}${error ? ` – Fehler: ${error}` : ''}`}
+        actions={
+          <button
+            onClick={() => window.print()}
+            className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
+            title="Seite drucken"
+          >
+            🖨️ <span className="hidden sm:inline">Drucken</span>
+          </button>
+        }
+      />
 
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-3 mb-4">
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold text-green-700">{creates}</div>
-          <div className="text-xs text-green-600 font-medium">Erstellt</div>
-        </div>
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold text-blue-700">{updates}</div>
-          <div className="text-xs text-blue-600 font-medium">Geändert</div>
-        </div>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold text-red-700">{deletes}</div>
-          <div className="text-xs text-red-600 font-medium">Gelöscht</div>
-        </div>
+        <StatCard accent="green" label="Erstellt" value={creates} icon="✅" />
+        <StatCard accent="blue"  label="Geändert" value={updates} icon="✏️" />
+        <StatCard accent="red"   label="Gelöscht" value={deletes} icon="🗑️" />
       </div>
 
       {/* Filter bar */}

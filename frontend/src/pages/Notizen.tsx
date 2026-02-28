@@ -419,7 +419,7 @@ export default function Notizen() {
                 className="pl-8 pr-3 py-1.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-48"
               />
               {searchQuery && (
-                <button
+                <button aria-label="Schließen"
                   onClick={() => setSearchQuery('')}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
                 >✕</button>

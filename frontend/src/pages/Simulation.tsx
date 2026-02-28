@@ -524,7 +524,7 @@ export default function Simulation() {
                   {activeDay.status === 'critical' ? '🚨 Kritisch' : activeDay.status === 'degraded' ? '⚠️ Reduziert' : '✅ Normal'}
                 </span>
               </div>
-              <button
+              <button aria-label="Schließen"
                 className="text-gray-400 hover:text-gray-600 text-2xl"
                 onClick={() => setActiveDay(null)}
               >×</button>

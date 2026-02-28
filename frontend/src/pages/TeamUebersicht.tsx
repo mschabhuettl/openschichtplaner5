@@ -108,7 +108,7 @@ function MiniProfile({ card, upcomingShifts, onClose, onGoToProfile }: MiniProfi
               <span className="text-xs text-gray-500 dark:text-gray-400">{absenceStatus.label}</span>
             </div>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none">✕</button>
         </div>
 
         {/* Groups */}

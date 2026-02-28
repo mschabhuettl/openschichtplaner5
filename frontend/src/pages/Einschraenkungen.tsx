@@ -163,7 +163,7 @@ export default function Einschraenkungen() {
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
           ⚠️ {error}
-          <button onClick={() => setError(null)} className="ml-3 text-red-400 hover:text-red-600">✕</button>
+          <button aria-label="Schließen" onClick={() => setError(null)} className="ml-3 text-red-400 hover:text-red-600">✕</button>
         </div>
       )}
 

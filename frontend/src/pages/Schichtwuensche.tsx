@@ -217,7 +217,7 @@ export default function Schichtwuensche() {
                 {sh && <span className="opacity-75 truncate">{sh.SHORTNAME}</span>}
                 {isS && <span>🔴</span>}
                 {!isS && <span>🟢</span>}
-                <button
+                <button aria-label="Schließen"
                   onClick={e => { e.stopPropagation(); handleDelete(w.id); }}
                   className="ml-auto opacity-0 group-hover:opacity-100 text-current hover:text-red-500 transition"
                   title="Löschen"

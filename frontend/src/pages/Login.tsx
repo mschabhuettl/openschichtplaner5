@@ -34,7 +34,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+      <main className="w-full max-w-sm" aria-label="Login">
         {/* Logo / Header */}
         <div className="text-center mb-8">
           <div className="text-5xl mb-3">🧸</div>
@@ -125,17 +125,17 @@ export default function Login() {
         <div className="flex justify-center mt-4">
           <button
             onClick={() => setLanguage(language === 'de' ? 'en' : 'de')}
-            className="flex items-center gap-2 text-slate-500 hover:text-slate-300 text-sm transition"
+            className="flex items-center gap-2 text-slate-400 hover:text-slate-200 text-sm transition"
             aria-label={language === 'de' ? 'Switch to English' : 'Auf Deutsch wechseln'}
           >
             {language === 'de' ? '🇬🇧 English' : '🇩🇪 Deutsch'}
           </button>
         </div>
 
-        <p className="text-center text-slate-600 text-xs mt-4">
+        <p className="text-center text-slate-400 text-xs mt-4">
           {t.login.footerText}
         </p>
-      </div>
+      </main>
     </div>
   );
 }

@@ -95,7 +95,7 @@ function CreateCycleModal({ onCreated, onClose }: CreateCycleModalProps) {
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-800">Neuen Zyklus erstellen</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
         <div className="px-6 py-4 space-y-4">
           {error && (
@@ -218,7 +218,7 @@ function EditCycleModal({ cycle, shifts, onSaved, onClose }: EditCycleModalProps
         {/* Header */}
         <div className="px-6 py-4 border-b flex items-center justify-between flex-shrink-0">
           <h2 className="text-lg font-bold text-gray-800">Zyklus bearbeiten</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
 
         {/* Body – scrollable */}
@@ -370,7 +370,7 @@ function EditModal({ employee, groupName, currentAssignment, cycles, onSave, onC
               {employee.FIRSTNAME} {employee.NAME} · {groupName}
             </p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
 
         {/* Body */}
@@ -488,7 +488,7 @@ function AddExceptionModal({ employees, assignments, shifts, onCreated, onClose 
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-800">🚫 Zyklus-Ausnahme hinzufügen</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">✕</button>
         </div>
         <div className="px-6 py-4 space-y-4">
           {error && (

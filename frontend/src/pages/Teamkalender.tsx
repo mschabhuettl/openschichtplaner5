@@ -320,7 +320,7 @@ export default function Teamkalender() {
                 <div className="font-bold text-sm">{popup.date}</div>
                 <div className="text-xs text-slate-300">{popupEntries.length} Einträge</div>
               </div>
-              <button onClick={() => setPopup(null)} className="text-slate-300 hover:text-white text-lg leading-none">×</button>
+              <button aria-label="Schließen" onClick={() => setPopup(null)} className="text-slate-300 hover:text-white text-lg leading-none">×</button>
             </div>
             <div className="overflow-y-auto p-3 flex flex-col gap-2">
               {popupEntries.length === 0 && (

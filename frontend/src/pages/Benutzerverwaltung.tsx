@@ -121,7 +121,7 @@ function AddEmployeeAccessModal({ userId, employees, existingAccess, onSaved, on
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-800">Mitarbeiter-Zugriff hinzufügen</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
         </div>
         <div className="px-6 py-4 space-y-4">
           {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">⚠️ {error}</div>}
@@ -219,7 +219,7 @@ function AddGroupAccessModal({ userId, groups, existingAccess, onSaved, onClose 
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-800">Gruppen-Zugriff hinzufügen</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
         </div>
         <div className="px-6 py-4 space-y-4">
           {error && <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">⚠️ {error}</div>}
@@ -957,7 +957,7 @@ export default function Benutzerverwaltung() {
               <h2 className="text-lg font-bold text-slate-800">
                 {editId !== null ? '✏️ Benutzer bearbeiten' : '＋ Neuer Benutzer'}
               </h2>
-              <button
+              <button aria-label="Schließen"
                 onClick={() => setShowModal(false)}
                 className="text-slate-400 hover:text-slate-600 text-xl leading-none"
               >×</button>
@@ -1110,7 +1110,7 @@ export default function Benutzerverwaltung() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
               <h2 className="text-lg font-bold text-slate-800">🔑 Passwort ändern</h2>
-              <button onClick={() => setPwChangeUser(null)} className="text-slate-400 hover:text-slate-600 text-xl leading-none">×</button>
+              <button aria-label="Schließen" onClick={() => setPwChangeUser(null)} className="text-slate-400 hover:text-slate-600 text-xl leading-none">×</button>
             </div>
             <div className="px-6 py-5 space-y-4">
               <p className="text-sm text-slate-600">

@@ -281,7 +281,7 @@ export default function Groups() {
                           {emp.FIRSTNAME} {emp.NAME}
                         </button>
                         {canAdmin && (
-                          <button
+                          <button aria-label="Schließen"
                             onClick={() => handleRemoveMember(g.ID, emp.ID)}
                             className="ml-0.5 text-gray-300 hover:text-red-500 transition-colors font-bold text-xs leading-none"
                             title="Aus Gruppe entfernen"

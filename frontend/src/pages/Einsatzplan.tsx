@@ -419,7 +419,7 @@ function EinsatzplanNotePopup({
     >
       <div className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/40 border-b dark:border-gray-600 text-[10px] text-indigo-600 dark:text-indigo-300 font-semibold rounded-t-lg flex justify-between">
         <span>📝 Notizen</span>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-200 dark:text-gray-500 dark:hover:text-gray-200">×</button>
+        <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-200 dark:text-gray-500 dark:hover:text-gray-200">×</button>
       </div>
       {notes.map(note => (
         <div key={note.id} className="p-2 border-b last:border-b-0">
@@ -1012,7 +1012,7 @@ function TemplatesPanel({
         <h3 className="font-bold text-indigo-900 flex items-center gap-2">
           <span>📋</span> Gespeicherte Vorlagen
         </h3>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
+        <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
       </div>
       <div className="overflow-y-auto flex-1 p-3 space-y-2">
         {loading && <p className="text-sm text-gray-400 text-center py-4">Lade…</p>}

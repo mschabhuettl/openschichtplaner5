@@ -803,7 +803,7 @@ export default function RotationsAnalyse() {
             <h2 className="font-bold text-lg">
               🔍 {details.employee.NAME}, {details.employee.FIRSTNAME}
             </h2>
-            <button onClick={() => setSelectedMA(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+            <button aria-label="Schließen" onClick={() => setSelectedMA(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
             <div className="text-center p-2 bg-gray-50 dark:bg-gray-700 rounded">

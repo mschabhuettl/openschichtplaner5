@@ -105,7 +105,7 @@ function NewRequestModal({
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg">
         <div className="flex items-center justify-between p-5 border-b">
           <h2 className="text-lg font-bold text-gray-800">🔄 Neue Tausch-Anfrage</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {error && (

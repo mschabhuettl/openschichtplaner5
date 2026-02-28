@@ -222,7 +222,7 @@ function EmployeeRowCells({
               className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded font-semibold disabled:opacity-50 transition-colors">
               {saving ? '⏳' : '✓ Speichern'}
             </button>
-            <button onClick={cancelEdit}
+            <button aria-label="Schließen" onClick={cancelEdit}
               className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs rounded font-semibold transition-colors">✕</button>
           </div>
         ) : (

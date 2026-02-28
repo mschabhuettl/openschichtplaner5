@@ -938,7 +938,7 @@ export default function Employees() {
                             <span className="font-semibold text-orange-800 text-xs px-1.5 py-0.5 bg-orange-200 rounded">{r.shift_short || r.shift_name}</span>
                             <span className="text-orange-700 flex-1 text-xs">{r.shift_name}</span>
                             {r.reason && <span className="text-gray-500 text-xs italic">„{r.reason}"</span>}
-                            <button onClick={() => handleRemoveRestriction(r)} className="ml-auto text-red-500 hover:text-red-700 text-xs px-1.5 py-0.5 hover:bg-red-100 rounded transition-colors" title="Einschränkung entfernen">✕</button>
+                            <button aria-label="Schließen" onClick={() => handleRemoveRestriction(r)} className="ml-auto text-red-500 hover:text-red-700 text-xs px-1.5 py-0.5 hover:bg-red-100 rounded transition-colors" title="Einschränkung entfernen">✕</button>
                           </div>
                         ))}
                       </div>

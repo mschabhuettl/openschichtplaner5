@@ -79,7 +79,7 @@ export function Toast({ message, type = 'success', onClose }: ToastProps) {
     >
       <span className="text-base">{typeIcons[type]}</span>
       <span>{message}</span>
-      <button onClick={onClose} className="ml-1 opacity-70 hover:opacity-100 text-lg">×</button>
+      <button aria-label="Schließen" onClick={onClose} className="ml-1 opacity-70 hover:opacity-100 text-lg">×</button>
     </div>
   );
 }

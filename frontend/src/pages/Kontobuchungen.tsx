@@ -101,7 +101,7 @@ function BookingModal({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-800">Neue Kontobuchung</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
           {error && (

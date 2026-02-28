@@ -227,7 +227,7 @@ export default function Extracharges() {
             className="w-full pl-8 pr-3 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           />
           {search && (
-            <button
+            <button aria-label="Schließen"
               onClick={() => setSearch('')}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
             >✕</button>

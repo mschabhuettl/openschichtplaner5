@@ -95,7 +95,7 @@ function EditModal({ shiftName, weekdayName, existing, onSave, onClose }: EditMo
             <h2 className="text-lg font-bold text-gray-800">Personalbedarf</h2>
             <p className="text-sm text-gray-500 mt-0.5">{shiftName} · {weekdayName}</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
         </div>
 
         <div className="px-6 py-4 space-y-4">
@@ -206,7 +206,7 @@ function SpecialEditModal({ shifts, groups, existing, onSave, onClose, defaultDa
             </h2>
             <p className="text-sm text-gray-500 mt-0.5">5SPDEM.DBF</p>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
         </div>
 
         <div className="px-6 py-4 space-y-4">

@@ -1,7 +1,7 @@
 # ==============================================================================
 # OpenSchichtplaner5 — Makefile
 # ==============================================================================
-.PHONY: dev docker docker-dev test build clean help
+.PHONY: dev prod docker docker-dev docker-down update backup test build clean logs stop help
 
 SHELL := /bin/bash
 BACKEND_DIR := backend
@@ -59,3 +59,26 @@ logs: ## Backend-Logs anzeigen (tail -f)
 
 stop: ## Laufendes Backend stoppen
 	@bash start.sh --stop
+
+prod: ## Docker-Container im Produktionsmodus starten (detached)
+	@echo "▶ Starte OpenSchichtplaner5 im Produktionsmodus..."
+	docker compose up -d --build
+	@echo "✓ Läuft auf http://localhost:8000"
+
+update: ## Git pull + Docker-Neustart (Rolling Update)
+	@echo "▶ Aktualisiere OpenSchichtplaner5..."
+	git pull --ff-only
+	docker compose up -d --build
+	@echo "✓ Update abgeschlossen"
+
+backup: ## Datenbank-Backup erstellen (Volume → lokales Archiv)
+	@BACKUP_DIR="./backups"; \
+	 TIMESTAMP=$$(date +%Y%m%d_%H%M%S); \
+	 BACKUP_FILE="$$BACKUP_DIR/sp5_db_$$TIMESTAMP.tar.gz"; \
+	 mkdir -p "$$BACKUP_DIR"; \
+	 echo "▶ Erstelle Backup → $$BACKUP_FILE"; \
+	 docker run --rm \
+	   -v openschichtplaner5_sp5_data:/data:ro \
+	   -v "$$(pwd)/$$BACKUP_DIR":/backup \
+	   alpine tar czf "/backup/sp5_db_$$TIMESTAMP.tar.gz" -C /data .; \
+	 echo "✓ Backup erstellt: $$BACKUP_FILE"

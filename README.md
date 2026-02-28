@@ -212,40 +212,110 @@ npm run dev
 
 Öffne dann [`http://localhost:5173`](http://localhost:5173) im Browser.
 
-### 🐳 Quick Start mit Docker
+### 🐳 Deployment mit Docker
+
+#### Schnellstart
 
 ```bash
 git clone https://github.com/your-org/openschichtplaner5.git
 cd openschichtplaner5
 
-# .env anpassen (SP5_DB_PATH zeigt auf vorhandene DBF-Dateien)
-cp backend/.env.example backend/.env
-# nano backend/.env  ← SP5_DB_PATH setzen!
+# Konfiguration anpassen (SP5_DB_PATH + SECRET_KEY!)
+cp backend/.env.docker backend/.env.docker.local
+nano backend/.env.docker    # SP5_DB_PATH + SECRET_KEY setzen!
 
-docker-compose up
+# Produktionsmodus starten (detached)
+make prod
+# oder: docker compose up -d --build
 ```
 
 Öffne dann [`http://localhost:8000`](http://localhost:8000) im Browser.
 
-### Konfiguration (.env)
+#### Makefile-Befehle
+
+| Befehl | Beschreibung |
+|--------|-------------|
+| `make prod` | Docker-Container im Produktionsmodus starten (detached) |
+| `make docker` | Docker-Container starten (foreground) |
+| `make docker-dev` | Entwicklungsmodus mit Hot-Reload (`--profile dev`) |
+| `make docker-down` | Container stoppen |
+| `make update` | `git pull` + Docker-Neustart (Rolling Update) |
+| `make backup` | Datenbank-Volume → lokales `.tar.gz`-Archiv |
+| `make build` | Frontend-Bundle bauen |
+| `make test` | Backend- und Frontend-Tests ausführen |
+| `make logs` | Live-Logs anzeigen |
+
+#### Konfiguration (`backend/.env.docker`)
+
+Alle Umgebungsvariablen mit Erklärungen: → [`backend/.env.example`](backend/.env.example)
+
+Wichtigste Pflichtfelder:
 
 ```env
-# backend/.env
-SP5_DB_PATH=/pfad/zu/sp5_db/Daten    # Pflicht: Pfad zu den DBF-Dateien
-ALLOWED_ORIGINS=http://localhost:5173  # CORS Origins (kommagetrennt)
-DEBUG=false
+SP5_DB_PATH=/app/sp5_db/Daten   # Pfad zu den DBF-Dateien im Container
+SECRET_KEY=<openssl rand -hex 32>  # JWT-Schlüssel — UNBEDINGT ändern!
+ALLOWED_ORIGINS=https://meine-domain.de  # Nur eigene Domain erlauben
+SP5_HSTS=true    # HTTPS-Only — nur mit TLS-Reverse-Proxy aktivieren!
+SP5_DEV_MODE=false  # NIEMALS in Produktion auf true setzen!
 ```
 
-### Hintergrundbetrieb (Linux)
+#### Backup & Restore
 
 ```bash
-# Backend
-nohup sh -c 'SP5_DB_PATH=/pfad/zu/Daten uvicorn api.main:app --host 0.0.0.0 --port 8000' \
-  > /tmp/sp5-backend.log 2>&1 &
+# Backup erstellen (Volume → lokales Archiv in ./backups/)
+make backup
 
-# Frontend (Produktion)
-cd frontend && npm run build
-nohup npx serve dist -p 5173 > /tmp/sp5-frontend.log 2>&1 &
+# Restore (Beispiel)
+docker run --rm \
+  -v openschichtplaner5_sp5_data:/data \
+  -v $(pwd)/backups:/backup \
+  alpine tar xzf /backup/sp5_db_<timestamp>.tar.gz -C /data
+```
+
+#### Updates einspielen
+
+```bash
+make update   # git pull + Docker-Neustart in einem Schritt
+```
+
+#### Reverse-Proxy (nginx/caddy)
+
+Für Produktionsumgebungen wird ein Reverse-Proxy mit TLS empfohlen:
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name meine-domain.de;
+    # ssl_certificate ...
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+Mit Reverse-Proxy dann `SP5_HSTS=true` setzen.
+
+#### Production-Readiness-Checkliste
+
+- [ ] `SECRET_KEY` auf sicheren Zufallswert gesetzt (`openssl rand -hex 32`)
+- [ ] `DEBUG=false`
+- [ ] `SP5_DEV_MODE=false`
+- [ ] `ALLOWED_ORIGINS` auf eigene Domain beschränkt
+- [ ] `SP5_HSTS=true` (nur mit HTTPS/Reverse-Proxy)
+- [ ] Regelmäßige Backups per `make backup` oder Cron eingerichtet
+- [ ] Logs unter `./logs/` überwacht
+
+#### Lokaler Betrieb ohne Docker
+
+```bash
+bash start.sh          # Normaler Start (Backend + Frontend)
+bash start.sh --build  # Mit erzwungenem Frontend-Rebuild
+bash start.sh --stop   # Backend stoppen
 ```
 
 ---

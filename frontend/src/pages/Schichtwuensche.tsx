@@ -383,7 +383,7 @@ export default function Schichtwuensche() {
           ) : (
             <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[600px]">
-              <thead>
+              <thead className="sticky top-0 z-10">
                 <tr className={isDark ? 'bg-gray-700' : 'bg-gray-50'}>
                   <th className="text-left px-4 py-2.5 font-semibold">Datum</th>
                   <th className="text-left px-4 py-2.5 font-semibold">Mitarbeiter</th>
@@ -403,7 +403,7 @@ export default function Schichtwuensche() {
                     const isS = w.wish_type === 'SPERRUNG';
                     const jsWd = new Date(w.date).getDay();
                     return (
-                      <tr key={w.id} className={`border-t ${isDark ? 'border-gray-700' : 'border-gray-100'} ${i % 2 === 0 ? '' : (isDark ? 'bg-gray-750' : 'bg-gray-50/50')}`}>
+                      <tr key={w.id} className={`border-t ${isDark ? 'border-gray-700' : 'border-gray-100'} ${i % 2 === 0 ? '' : (isDark ? 'bg-gray-750' : 'bg-gray-50/50')} ${isDark ? 'hover:bg-gray-700' : 'hover:bg-blue-50'} transition-colors`}>
                         <td className="px-4 py-2">
                           <span className="font-medium">{formatDateDE(w.date)}</span>
                           <span className={`ml-1 text-xs opacity-60`}>{WD_ABBR[jsWd]}</span>

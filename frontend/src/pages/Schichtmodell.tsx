@@ -256,7 +256,7 @@ function EditCycleModal({ cycle, shifts, onSaved, onClose }: EditCycleModalProps
             <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">Wochenplan</div>
             <div className="overflow-x-auto">
               <table className="text-sm border-collapse w-full">
-                <thead>
+                <thead className="sticky top-0 z-10 bg-white">
                   <tr>
                     <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 w-16">Tag</th>
                     {Array.from({ length: sizeWeeks }, (_, wi) => (
@@ -268,7 +268,7 @@ function EditCycleModal({ cycle, shifts, onSaved, onClose }: EditCycleModalProps
                 </thead>
                 <tbody>
                   {WEEKDAYS.map((dayLabel, di) => (
-                    <tr key={di} className={di % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    <tr key={di} className={`${di % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}>
                       <td className="px-3 py-1.5 text-xs font-semibold text-gray-600 w-16">{dayLabel}</td>
                       {Array.from({ length: sizeWeeks }, (_, wi) => {
                         const shiftId = grid[wi]?.[di] ?? null;

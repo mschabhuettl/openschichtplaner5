@@ -292,7 +292,7 @@ export default function QualitaetsBericht() {
               <h2 className="font-semibold text-gray-700 text-sm uppercase tracking-wide mb-2">Stunden-Abweichungen</h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border-collapse">
-                  <thead>
+                  <thead className="sticky top-0 z-10">
                     <tr className="bg-gray-100 text-gray-600 text-xs uppercase">
                       <th className="text-left px-3 py-2 rounded-tl">Mitarbeiter</th>
                       <th className="text-right px-3 py-2">Soll-Std</th>
@@ -303,7 +303,7 @@ export default function QualitaetsBericht() {
                   </thead>
                   <tbody>
                     {report.hours.issues.map((issue, i) => (
-                      <tr key={i} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                      <tr key={i} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}>
                         <td className="px-3 py-1.5 font-medium">
                           <span className="inline-block bg-gray-200 text-gray-700 rounded px-1 mr-2 text-xs font-mono">
                             {issue.short}

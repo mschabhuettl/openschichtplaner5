@@ -85,7 +85,7 @@ export default function Export() {
   const [scheduleYear, setScheduleYear] = useState(currentYear);
   const [scheduleMonth, setScheduleMonth] = useState(currentMonth);
   const [scheduleGroup, setScheduleGroup] = useState<string>('');
-  const [scheduleFormat, setScheduleFormat] = useState<'csv' | 'html'>('csv');
+  const [scheduleFormat, setScheduleFormat] = useState<'csv' | 'html' | 'xlsx'>('xlsx');
 
   // Statistics export state
   const [statsYear, setStatsYear] = useState(currentYear);
@@ -93,7 +93,7 @@ export default function Export() {
   const [statsFormat, setStatsFormat] = useState<'csv' | 'html'>('csv');
 
   // Employees export state
-  const [employeesFormat, setEmployeesFormat] = useState<'csv' | 'html'>('csv');
+  const [employeesFormat, setEmployeesFormat] = useState<'csv' | 'html' | 'xlsx'>('xlsx');
 
   // Absences export state
   const [absYear, setAbsYear] = useState(currentYear);
@@ -146,7 +146,7 @@ export default function Export() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800">Export</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Daten als CSV oder HTML exportieren und herunterladen.
+          Daten als CSV, Excel (XLSX) oder HTML exportieren und herunterladen.
         </p>
       </div>
 
@@ -196,8 +196,9 @@ export default function Export() {
               <select
                 className={selectCls}
                 value={scheduleFormat}
-                onChange={(e) => setScheduleFormat(e.target.value as 'csv' | 'html')}
+                onChange={(e) => setScheduleFormat(e.target.value as 'csv' | 'html' | 'xlsx')}
               >
+                <option value="xlsx">Excel (XLSX)</option>
                 <option value="csv">CSV</option>
                 <option value="html">HTML (druckfertig)</option>
               </select>
@@ -206,7 +207,7 @@ export default function Export() {
           <DownloadButton
             url={scheduleUrl}
             label={`Dienstplan ${MONTH_NAMES[scheduleMonth]} ${scheduleYear} herunterladen`}
-            icon={scheduleFormat === 'html' ? '🖨️' : '⬇️'}
+            icon={scheduleFormat === 'xlsx' ? '📊' : scheduleFormat === 'html' ? '🖨️' : '⬇️'}
           />
         </ExportCard>
 
@@ -265,8 +266,9 @@ export default function Export() {
               <select
                 className={selectCls}
                 value={employeesFormat}
-                onChange={(e) => setEmployeesFormat(e.target.value as 'csv' | 'html')}
+                onChange={(e) => setEmployeesFormat(e.target.value as 'csv' | 'html' | 'xlsx')}
               >
+                <option value="xlsx">Excel (XLSX)</option>
                 <option value="csv">CSV</option>
                 <option value="html">HTML (druckfertig)</option>
               </select>
@@ -275,7 +277,7 @@ export default function Export() {
           <DownloadButton
             url={employeesUrl}
             label={`Mitarbeiter als ${employeesFormat.toUpperCase()} herunterladen`}
-            icon={employeesFormat === 'html' ? '🖨️' : '⬇️'}
+            icon={employeesFormat === 'xlsx' ? '📊' : employeesFormat === 'html' ? '🖨️' : '⬇️'}
           />
         </ExportCard>
 

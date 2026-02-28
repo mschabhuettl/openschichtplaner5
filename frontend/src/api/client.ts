@@ -204,6 +204,12 @@ export interface StaffingRequirements {
 }
 
 // ─── Note Types ────────────────────────────────────────────
+export interface BackupEntry {
+  filename: string;
+  size_bytes: number;
+  created_at: string; // ISO 8601
+}
+
 export interface Note {
   id: number;
   employee_id: number;
@@ -1250,6 +1256,23 @@ export const api = {
       throw new Error(detail.detail || res.statusText);
     }
     return res.json();
+  },
+
+  listBackups: async (): Promise<{ backups: BackupEntry[]; backup_dir: string | null }> => {
+    const res = await safeFetch(`${BASE_URL}/api/admin/backups`, { headers: authHeaders() });
+    await handleResponseError(res);
+    return res.json();
+  },
+
+  getBackupDownloadUrl: (filename: string): string =>
+    `${BASE_URL}/api/admin/backups/${encodeURIComponent(filename)}/download`,
+
+  deleteBackup: async (filename: string): Promise<void> => {
+    const res = await safeFetch(`${BASE_URL}/api/admin/backups/${encodeURIComponent(filename)}`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    });
+    await handleResponseError(res);
   },
 
   // ─── Burnout-Radar ─────────────────────────────────────────

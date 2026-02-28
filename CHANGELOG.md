@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.22] — 2026-02-28
+
+### Changed
+
+- `test`: Coverage boost — 1085 Tests total (all passing), test fixes for API alignment
+- `chore`: ruff auto-fix — removed unused imports in test files
+
+---
+
 ## [0.3.21] — 2026-02-28
 
 ### Fixed

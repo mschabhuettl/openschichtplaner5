@@ -143,7 +143,7 @@ export function DataTable<T>({
               {pageSizes.map(s => <option key={s} value={s}>{s} / Seite</option>)}
             </select>
           )}
-          <span className="text-xs text-gray-400">{sorted.length} Einträge</span>
+          <span className="text-xs text-gray-600">{sorted.length} Einträge</span>
         </div>
       )}
 
@@ -166,7 +166,7 @@ export function DataTable<T>({
           <tbody>
             {pageData.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="text-center text-gray-400 italic py-8 text-sm">
+                <td colSpan={columns.length} className="text-center text-gray-600 italic py-8 text-sm">
                   {emptyText}
                 </td>
               </tr>

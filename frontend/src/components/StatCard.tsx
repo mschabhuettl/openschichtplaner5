@@ -39,7 +39,7 @@ export function StatCard({ icon, label, value, sub, accent = 'blue', help, class
       {icon && <div className="text-lg leading-none mb-0.5">{icon}</div>}
       <div className={`text-2xl font-bold ${ac.text}`}>{value}</div>
       <div className={`text-xs font-medium ${ac.sub}`}>{label}</div>
-      {sub && <div className="text-xs text-gray-400 mt-0.5">{sub}</div>}
+      {sub && <div className="text-xs text-gray-600 mt-0.5">{sub}</div>}
     </div>
   );
 }

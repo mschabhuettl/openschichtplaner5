@@ -227,11 +227,11 @@ export default function Groups() {
           className="flex items-center gap-2 sm:gap-3 py-2.5 border-b border-gray-100 hover:bg-blue-50 transition-colors pr-3"
           style={{ paddingLeft: `${16 + depth * 24}px` }}
         >
-          <span className="text-gray-400 flex-shrink-0">{depth > 0 ? '└' : '●'}</span>
+          <span className="text-gray-600 flex-shrink-0">{depth > 0 ? '└' : '●'}</span>
           <div className="flex-1 min-w-0">
             <span className="font-semibold text-gray-800 truncate">{g.NAME}</span>
             {g.SHORTNAME && g.SHORTNAME !== g.NAME && (
-              <span className="ml-2 text-xs text-gray-400 hidden sm:inline">({g.SHORTNAME})</span>
+              <span className="ml-2 text-xs text-gray-600 hidden sm:inline">({g.SHORTNAME})</span>
             )}
           </div>
           <button
@@ -265,14 +265,14 @@ export default function Groups() {
         {expandedGroups.has(g.ID) && (
           <div className="border-b border-gray-100 bg-blue-50/50" style={{ paddingLeft: `${32 + depth * 24}px`, paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
             {membersLoading.has(g.ID) ? (
-              <div className="flex items-center gap-2 text-xs text-gray-400 py-2">
+              <div className="flex items-center gap-2 text-xs text-gray-600 py-2">
                 <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
                 Lade Mitglieder...
               </div>
             ) : (
               <>
                 {(groupMembers[g.ID] ?? []).length === 0 ? (
-                  <div className="text-xs text-gray-400 italic py-1">Keine Mitglieder in dieser Gruppe.</div>
+                  <div className="text-xs text-gray-600 italic py-1">Keine Mitglieder in dieser Gruppe.</div>
                 ) : (
                   <div className="flex flex-wrap gap-1.5 mb-2">
                     {(groupMembers[g.ID] ?? []).map(emp => (
@@ -312,7 +312,7 @@ export default function Groups() {
                               onClick={() => { handleAddMember(g.ID, emp.ID); setMemberSearch(prev => ({ ...prev, [g.ID]: '' })); }}
                               className="block w-full text-left px-3 py-1.5 text-xs hover:bg-blue-50 transition-colors"
                             >
-                              {emp.FIRSTNAME} {emp.NAME} <span className="text-gray-400">({emp.SHORTNAME})</span>
+                              {emp.FIRSTNAME} {emp.NAME} <span className="text-gray-600">({emp.SHORTNAME})</span>
                             </button>
                           ))}
                       </div>
@@ -374,7 +374,7 @@ export default function Groups() {
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-x-auto">
-          {topLevel.length === 0 && <div className="text-center py-8 text-gray-400">Keine Gruppen</div>}
+          {topLevel.length === 0 && <div className="text-center py-8 text-gray-600">Keine Gruppen</div>}
           {topLevel.map(g => renderGroup(g))}
         </div>
       )}

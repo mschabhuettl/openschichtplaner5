@@ -213,7 +213,7 @@ export default function SchichtBriefing() {
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">
             Tagesübersicht für die Schichtleitung
-            {lastUpdated && <span className="ml-2 text-xs text-gray-400">· Stand: {lastUpdated.toLocaleTimeString('de-AT')}</span>}
+            {lastUpdated && <span className="ml-2 text-xs text-gray-600">· Stand: {lastUpdated.toLocaleTimeString('de-AT')}</span>}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -265,12 +265,12 @@ export default function SchichtBriefing() {
         {/* Left: Shifts */}
         <div className="lg:col-span-2 space-y-4">
           {loading ? (
-            <div className="bg-white rounded-xl p-8 text-center text-gray-400 shadow-sm border border-gray-200">
+            <div className="bg-white rounded-xl p-8 text-center text-gray-600 shadow-sm border border-gray-200">
               <div className="text-3xl mb-2">⏳</div>
               <div>Lade Dienstplan…</div>
             </div>
           ) : Object.keys(shiftGroups).length === 0 ? (
-            <div className="bg-white rounded-xl p-8 text-center text-gray-400 shadow-sm border border-gray-200">
+            <div className="bg-white rounded-xl p-8 text-center text-gray-600 shadow-sm border border-gray-200">
               <div className="text-3xl mb-2">📭</div>
               <div>Kein Dienstplan für diesen Tag eingetragen</div>
             </div>
@@ -410,7 +410,7 @@ export default function SchichtBriefing() {
                 rows={6}
               />
               <div className="flex justify-between items-center mt-2 pt-2 border-t border-gray-100">
-                <span className="text-xs text-gray-400">{notes.length} Zeichen</span>
+                <span className="text-xs text-gray-600">{notes.length} Zeichen</span>
                 <button
                   onClick={saveNotes}
                   className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition-colors"

@@ -92,7 +92,7 @@ export default function KeyboardShortcutsModal({ open, onClose }: Props) {
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl leading-none p-1"
+            className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 text-xl leading-none p-1"
             aria-label="Schließen"
           >
             ✕
@@ -103,7 +103,7 @@ export default function KeyboardShortcutsModal({ open, onClose }: Props) {
         <div className="px-6 py-4 space-y-5 max-h-[70vh] overflow-y-auto">
           {SHORTCUT_GROUPS.map(group => (
             <div key={group.title}>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-2">
                 {group.title}
               </h3>
               <div className="space-y-1.5">
@@ -114,7 +114,7 @@ export default function KeyboardShortcutsModal({ open, onClose }: Props) {
                       {s.keys.map((k, ki) => (
                         <span key={ki} className="inline-flex items-center">
                           {ki > 0 && (
-                            <span className="text-slate-400 text-xs mx-0.5">+</span>
+                            <span className="text-slate-500 dark:text-slate-400 text-xs mx-0.5">+</span>
                           )}
                           <kbd className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono
                                          bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200
@@ -132,7 +132,7 @@ export default function KeyboardShortcutsModal({ open, onClose }: Props) {
         </div>
 
         {/* Footer hint */}
-        <div className="px-6 py-3 bg-slate-50 dark:bg-slate-900/50 text-xs text-slate-400 text-center border-t border-slate-200 dark:border-slate-700">
+        <div className="px-6 py-3 bg-slate-50 dark:bg-slate-900/50 text-xs text-slate-600 dark:text-slate-400 text-center border-t border-slate-200 dark:border-slate-700">
           Drücke <kbd className="px-1 py-0.5 rounded bg-slate-200 dark:bg-slate-700 font-mono">?</kbd> jederzeit um diese Hilfe zu öffnen
         </div>
       </div>

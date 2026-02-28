@@ -114,7 +114,7 @@ function DistributionChart({ employees }: { employees: Employee[] }) {
               className={`w-full rounded-t-md transition-all duration-500 ${b.color}`}
               style={{ height: `${(counts[i] / maxCount) * 56}px`, minHeight: counts[i] > 0 ? '4px' : '0' }}
             />
-            <span className="text-[9px] text-gray-400 text-center leading-tight">{b.label}</span>
+            <span className="text-[9px] text-gray-600 text-center leading-tight">{b.label}</span>
           </div>
         ))}
       </div>
@@ -172,7 +172,7 @@ function EmployeeRowCells({
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full text-white ${barColor}`}>{pct}%</span>
-            <span className="text-[10px] text-gray-400">{ptLabel(pct)}</span>
+            <span className="text-[10px] text-gray-600">{ptLabel(pct)}</span>
           </div>
           <HoursBar value={emp.HRSWEEK} max={FULLTIME_WEEK} color={barColor} />
         </div>
@@ -415,12 +415,12 @@ export default function SchichtKalibrator() {
           <input type="checkbox" checked={showHidden} onChange={e => setShowHidden(e.target.checked)} className="accent-blue-500" />
           Ausgeblendete zeigen
         </label>
-        <span className="text-sm text-gray-400 ml-auto">{filtered.length} Mitarbeiter</span>
+        <span className="text-sm text-gray-600 ml-auto">{filtered.length} Mitarbeiter</span>
       </div>
 
       {/* Table */}
       {loading ? (
-        <div className="flex-1 flex items-center justify-center text-gray-400">
+        <div className="flex-1 flex items-center justify-center text-gray-600">
           <div className="text-center">
             <div className="text-4xl mb-2 animate-spin">⚙️</div>
             <div>Lade Mitarbeiterdaten…</div>
@@ -448,7 +448,7 @@ export default function SchichtKalibrator() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={bulkPreset >= 0 ? 9 : 8} className="text-center py-16 text-gray-400">
+                  <td colSpan={bulkPreset >= 0 ? 9 : 8} className="text-center py-16 text-gray-600">
                     <div className="text-4xl mb-2">👥</div>
                     <div>Keine Mitarbeiter gefunden</div>
                   </td>
@@ -474,7 +474,7 @@ export default function SchichtKalibrator() {
                       </div>
                       <div>
                         <div className="font-semibold text-gray-800 text-sm">{emp.FIRSTNAME} {emp.NAME}</div>
-                        {emp.FUNCTION && <div className="text-xs text-gray-400">{emp.FUNCTION}</div>}
+                        {emp.FUNCTION && <div className="text-xs text-gray-600">{emp.FUNCTION}</div>}
                       </div>
                     </div>
                   </td>
@@ -486,7 +486,7 @@ export default function SchichtKalibrator() {
         </div>
       )}
 
-      <div className="text-xs text-gray-400">
+      <div className="text-xs text-gray-600">
         💡 Hover über Zeile → „Bearbeiten" klicken. Wochenstunden-Änderung berechnet Tag & Monat automatisch.
         Mit Vorlagen können mehrere Mitarbeiter gleichzeitig angepasst werden.
       </div>

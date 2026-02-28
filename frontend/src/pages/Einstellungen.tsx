@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { UsettSettings } from '../api/client';
+import { useToast } from '../hooks/useToast';
 
 // ─── Color conversion helpers ──────────────────────────────
 // DBF stores colors as BGR integer: B + G*256 + R*65536
@@ -57,11 +58,11 @@ function ColorPicker({ label, value, onChange, hint }: ColorPickerProps) {
 
 // ─── Main page ─────────────────────────────────────────────
 export default function Einstellungen() {
+  const { showToast } = useToast();
   const [settings, setSettings] = useState<UsettSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   // Local edit state
   const [anoaname, setAnoaname] = useState('Abwesend');
@@ -93,7 +94,6 @@ export default function Einstellungen() {
   const handleSave = async () => {
     setSaving(true);
     setError(null);
-    setSuccess(null);
     try {
       await api.updateSettings({
         ANOANAME: anonymEnabled ? anoaname : '',
@@ -104,9 +104,10 @@ export default function Einstellungen() {
         ANOABOLD: anoabold ? 1 : 0,
         BACKUPFR: backupfr,
       });
-      setSuccess('Einstellungen erfolgreich gespeichert.');
+      showToast('Einstellungen gespeichert ✓', 'success');
     } catch (e) {
       setError(String(e));
+      showToast('Fehler beim Speichern', 'error');
     } finally {
       setSaving(false);
     }
@@ -134,12 +135,6 @@ export default function Einstellungen() {
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
           ⚠️ {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700">
-          ✅ {success}
         </div>
       )}
 

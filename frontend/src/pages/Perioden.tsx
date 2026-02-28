@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { Period } from '../api/client';
 import type { Group } from '../types';
+import { useToast } from '../hooks/useToast';
 
 // ─── Create Modal ──────────────────────────────────────────
 interface CreateModalProps {
@@ -115,6 +116,7 @@ function CreateModal({ groups, onSave, onClose }: CreateModalProps) {
 // ─── Main Page ─────────────────────────────────────────────
 export default function Perioden() {
   const { canEditSchedule: canEdit } = usePermissions();
+  const { showToast } = useToast();
   const [periods, setPeriods] = useState<Period[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
@@ -152,6 +154,7 @@ export default function Perioden() {
   const handleCreate = async (data: { group_id: number; start: string; end: string; description: string }) => {
     await api.createPeriod(data);
     load(filterGroup === '' ? undefined : filterGroup);
+    showToast('Abrechnungszeitraum erstellt ✓', 'success');
   };
 
   const handleDelete = async (id: number) => {
@@ -160,8 +163,10 @@ export default function Perioden() {
     try {
       await api.deletePeriod(id);
       setPeriods(prev => prev.filter(p => p.id !== id));
+      showToast('Abrechnungszeitraum gelöscht', 'success');
     } catch (e) {
       setError(String(e));
+      showToast(String(e), 'error');
     } finally {
       setDeleting(null);
     }

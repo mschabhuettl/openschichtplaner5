@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { api } from '../api/client';
 import type { EmployeeStats, ExtraChargeSummary, EmployeeYearStats, SicknessStatistics, ShiftStatisticsData } from '../api/client';
 import type { Employee, Group } from '../types';
@@ -409,28 +409,31 @@ export default function Statistiken() {
     }
   };
 
-  const sorted = [...stats].sort((a, b) => {
-    let av: number | string, bv: number | string;
-    switch (sortKey) {
-      case 'name': av = a.employee_name; bv = b.employee_name; break;
-      case 'overtime': av = a.overtime_hours; bv = b.overtime_hours; break;
-      case 'actual_hours': av = a.actual_hours; bv = b.actual_hours; break;
-      case 'target_hours': av = a.target_hours; bv = b.target_hours; break;
-      case 'absences': av = a.absence_days; bv = b.absence_days; break;
-      case 'vacation': av = a.vacation_used; bv = b.vacation_used; break;
-      default: av = ''; bv = '';
-    }
-    if (av < bv) return sortDir === 'asc' ? -1 : 1;
-    if (av > bv) return sortDir === 'asc' ? 1 : -1;
-    return 0;
-  });
+  const { sorted, maxOvertime, totalTarget, totalActual, totalOvertime, totalAbsences, totalVacation } = useMemo(() => {
+    const sorted = [...stats].sort((a, b) => {
+      let av: number | string, bv: number | string;
+      switch (sortKey) {
+        case 'name': av = a.employee_name; bv = b.employee_name; break;
+        case 'overtime': av = a.overtime_hours; bv = b.overtime_hours; break;
+        case 'actual_hours': av = a.actual_hours; bv = b.actual_hours; break;
+        case 'target_hours': av = a.target_hours; bv = b.target_hours; break;
+        case 'absences': av = a.absence_days; bv = b.absence_days; break;
+        case 'vacation': av = a.vacation_used; bv = b.vacation_used; break;
+        default: av = ''; bv = '';
+      }
+      if (av < bv) return sortDir === 'asc' ? -1 : 1;
+      if (av > bv) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
 
-  const maxOvertime = Math.max(...stats.map(s => Math.abs(s.overtime_hours)), 1);
-  const totalTarget = stats.reduce((a, s) => a + s.target_hours, 0);
-  const totalActual = stats.reduce((a, s) => a + s.actual_hours, 0);
-  const totalOvertime = totalActual - totalTarget;
-  const totalAbsences = stats.reduce((a, s) => a + s.absence_days, 0);
-  const totalVacation = stats.reduce((a, s) => a + s.vacation_used, 0);
+    const maxOvertime = Math.max(...stats.map(s => Math.abs(s.overtime_hours)), 1);
+    const totalTarget = stats.reduce((a, s) => a + s.target_hours, 0);
+    const totalActual = stats.reduce((a, s) => a + s.actual_hours, 0);
+    const totalOvertime = totalActual - totalTarget;
+    const totalAbsences = stats.reduce((a, s) => a + s.absence_days, 0);
+    const totalVacation = stats.reduce((a, s) => a + s.vacation_used, 0);
+    return { sorted, maxOvertime, totalTarget, totalActual, totalOvertime, totalAbsences, totalVacation };
+  }, [stats, sortKey, sortDir]);
 
   const SortHeader = ({ label, skey }: { label: string; skey: SortKey }) => (
     <th

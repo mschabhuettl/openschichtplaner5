@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
@@ -600,28 +600,40 @@ export default function Analytics() {
     </div>
   );
 
-  // Compute derived data
-  const monthly = data?.monthly ?? [];
-  const labels = monthly.map(m => MONTH_NAMES_SHORT[m.month - 1]);
+  // Compute derived data (memoized to avoid recomputing on unrelated re-renders)
+  const {
+    monthly, labels,
+    sickValues, otValues, staffingValues,
+    sickAnomalies, otAnomalies, staffingAnomalies,
+  } = useMemo(() => {
+    const monthly = data?.monthly ?? [];
+    const labels = monthly.map((m: { month: number }) => MONTH_NAMES_SHORT[m.month - 1]);
 
-  const sickValues = monthly.map(m => m.sick_days);
-  const otValues = monthly.map(m => Math.max(0, m.overtime));
-  const staffingValues = monthly.map(m => {
-    const days = new Date(year, m.month, 0).getDate();
-    return parseFloat((m.shifts_count / days).toFixed(1));
-  });
+    const sickValues = monthly.map((m: { sick_days: number }) => m.sick_days);
+    const otValues = monthly.map((m: { overtime: number }) => Math.max(0, m.overtime));
+    const staffingValues = monthly.map((m: { shifts_count: number; month: number }) => {
+      const days = new Date(year, m.month, 0).getDate();
+      return parseFloat((m.shifts_count / days).toFixed(1));
+    });
 
-  const sickMean = mean(sickValues);
-  const sickSd = stddev(sickValues);
-  const otMean = mean(otValues);
-  const otSd = stddev(otValues);
-  const staffMean = mean(staffingValues);
-  const staffSd = stddev(staffingValues);
+    const sickMean = mean(sickValues);
+    const sickSd = stddev(sickValues);
+    const otMean = mean(otValues);
+    const otSd = stddev(otValues);
+    const staffMean = mean(staffingValues);
+    const staffSd = stddev(staffingValues);
 
-  const sickAnomalies = sickValues.map(v => isAnomaly(v, sickMean, sickSd));
-  const otAnomalies = otValues.map(v => isAnomaly(v, otMean, otSd));
-  // For staffing, low staffing can also be notable — but spec says anomaly = > 2σ
-  const staffingAnomalies = staffingValues.map(v => isAnomaly(v, staffMean, staffSd));
+    const sickAnomalies = sickValues.map((v: number) => isAnomaly(v, sickMean, sickSd));
+    const otAnomalies = otValues.map((v: number) => isAnomaly(v, otMean, otSd));
+    // For staffing, low staffing can also be notable — but spec says anomaly = > 2σ
+    const staffingAnomalies = staffingValues.map((v: number) => isAnomaly(v, staffMean, staffSd));
+
+    return {
+      monthly, labels,
+      sickValues, otValues, staffingValues,
+      sickAnomalies, otAnomalies, staffingAnomalies,
+    };
+  }, [data, year]);
 
   return (
     <div style={{ padding: '24px 28px', maxWidth: 1100, margin: '0 auto' }}>

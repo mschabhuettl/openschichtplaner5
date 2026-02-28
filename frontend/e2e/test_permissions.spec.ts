@@ -7,6 +7,7 @@ const __dirname = path.dirname(__filename);
 
 const BASE_URL = 'http://localhost:5173';
 const LESER_SESSION = path.join(__dirname, '.auth/leser.json');
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const PLANER_SESSION = path.join(__dirname, '.auth/planer.json');
 const ADMIN_SESSION = path.join(__dirname, '.auth/admin.json');
 

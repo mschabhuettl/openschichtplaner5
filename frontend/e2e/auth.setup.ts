@@ -16,6 +16,7 @@ export const PLANER_SESSION = path.join(__dirname, '.auth', 'planer.json');
 const BASE_URL = 'http://localhost:5173';
 const SESSION_KEY = 'sp5_session';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function createSession(role: string, userObj: object, token: string, devMode: boolean) {
   return { token, user: userObj, devMode };
 }

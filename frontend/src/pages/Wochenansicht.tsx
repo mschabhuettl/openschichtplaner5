@@ -172,7 +172,7 @@ export default function Wochenansicht() {
     try {
       const result = await api.getScheduleWeek(weekDate, groupId ?? undefined);
       setData(result);
-    } catch (e) {
+    } catch (_e) {
       setError('Fehler beim Laden der Wochendaten.');
     } finally {
       setLoading(false);

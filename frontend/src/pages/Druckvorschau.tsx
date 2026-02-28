@@ -70,7 +70,7 @@ function PrintGrid({
   holidays,
   year,
   month,
-  shifts: _shiftsUnused,
+  shifts: _shifts,
   config,
 }: {
   employees: Employee[];

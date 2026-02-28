@@ -3755,6 +3755,7 @@ export default function Schedule() {
             showToast(res.message || `${res.swapped_days} Tag(e) getauscht`, res.errors?.length ? 'warning' : 'success');
             closeSwap();
             window.dispatchEvent(new CustomEvent('sp5-reload-schedule'));
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } catch (e: any) {
             showToast(e.message || 'Fehler beim Tausch', 'error');
           } finally {

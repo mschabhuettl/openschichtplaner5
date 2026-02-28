@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const BASE_URL = (import.meta as any).env?.VITE_API_URL ?? '';
 
 function getAuthHeaders(): Record<string, string> {
@@ -159,6 +160,7 @@ export default function QualitaetsBericht() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setReport(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
       setError(e.message || 'Fehler beim Laden');
     } finally {

@@ -92,7 +92,7 @@ export default function Personaltabelle() {
     try {
       const data = await api.getStatistics(year, month, groupId || undefined);
       setStats(data);
-    } catch (e) {
+    } catch (_e) {
       setError('Fehler beim Laden der Daten.');
     } finally {
       setLoading(false);

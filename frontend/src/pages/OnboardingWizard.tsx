@@ -534,7 +534,7 @@ export default function OnboardingWizard() {
 
       // Add to groups
       for (const gid of selectedGroups) {
-        try { await api.addGroupMember(gid, empId); } catch {}
+        try { await api.addGroupMember(gid, empId); } catch (_e) { /* ignore */ }
       }
 
       setDone({ id: empId, name: `${personal.FIRSTNAME} ${personal.LASTNAME}`.trim() });

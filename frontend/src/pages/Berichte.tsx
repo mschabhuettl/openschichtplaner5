@@ -909,7 +909,7 @@ async function reportAbsenceStats(year: number, groupId: number | null, employee
     stats[a.employee_id][ltId] = (stats[a.employee_id][ltId] || 0) + 1;
   }
 
-  let headerCols = '<th>Mitarbeiter</th>' + ltList.map(lt => `<th style="text-align:center">${lt.SHORTNAME}<br><span style="font-size:9px;font-weight:normal">${lt.NAME}</span></th>`).join('') + '<th style="text-align:right">∑</th>';
+  const headerCols = '<th>Mitarbeiter</th>' + ltList.map(lt => `<th style="text-align:center">${lt.SHORTNAME}<br><span style="font-size:9px;font-weight:normal">${lt.NAME}</span></th>`).join('') + '<th style="text-align:right">∑</th>';
 
   let rows = '';
   for (const emp of emps) {
@@ -962,7 +962,7 @@ async function reportShiftStats(year: number, month: number, groupId: number | n
     stats[e.employee_id][lbl] = (stats[e.employee_id][lbl] || 0) + 1;
   }
 
-  let headerCols = '<th>Mitarbeiter</th>' + shiftLabels.map(l => `<th style="text-align:center">${l}</th>`).join('') + '<th style="text-align:right">∑</th>';
+  const headerCols = '<th>Mitarbeiter</th>' + shiftLabels.map(l => `<th style="text-align:center">${l}</th>`).join('') + '<th style="text-align:right">∑</th>';
 
   let rows = '';
   for (const emp of emps) {

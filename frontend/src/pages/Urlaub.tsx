@@ -1437,8 +1437,11 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
   const MONTHS_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 
   // Normalize field access (API may return snake_case or UPPER_CASE)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getEmpId = (a: Absence) => a.EMPLOYEE_ID ?? (a as any).employee_id ?? 0;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getLtId = (a: Absence) => a.LEAVE_TYPE_ID ?? (a as any).leave_type_id ?? 0;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getDate = (a: Absence) => a.DATE ?? (a as any).date ?? '';
 
   // Absence type breakdown
@@ -1653,7 +1656,9 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
   const absMap = useMemo(() => {
     const m = new Map<string, Absence>();
     absences.forEach(a => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const date = (a.DATE ?? (a as any).date ?? '');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const eid = a.EMPLOYEE_ID ?? (a as any).employee_id;
       if (date && eid) m.set(`${eid}_${date}`, a);
     });
@@ -1664,8 +1669,10 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
   const countByEmployee = useMemo(() => {
     const c = new Map<number, number>();
     absences.forEach(a => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const eid = a.EMPLOYEE_ID ?? (a as any).employee_id;
       if (!eid || eid < 0) return;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (filterLeaveType && (a.LEAVE_TYPE_ID ?? (a as any).leave_type_id) !== filterLeaveType) return;
       c.set(eid, (c.get(eid) ?? 0) + 1);
     });
@@ -1683,7 +1690,9 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
   const usedLeaveTypeIds = useMemo(() => {
     const ids = new Set<number>();
     absences.forEach(a => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const eid = a.EMPLOYEE_ID ?? (a as any).employee_id;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (eid && eid > 0) ids.add(a.LEAVE_TYPE_ID ?? (a as any).leave_type_id);
     });
     return ids;
@@ -1782,7 +1791,9 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
                         const dateStr = `${year}-${String(mi + 1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
                         const absence = absMap.get(`${emp.ID}_${dateStr}`);
                         const isWeekend = new Date(year, mi, dayNum).getDay() === 0 || new Date(year, mi, dayNum).getDay() === 6;
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const lt = absence ? getLT(absence.LEAVE_TYPE_ID ?? (absence as any).leave_type_id) : null;
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const show = !filterLeaveType || !absence || (absence.LEAVE_TYPE_ID ?? (absence as any).leave_type_id) === filterLeaveType;
 
                         return (
@@ -1834,7 +1845,9 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {leaveTypes.filter(lt => usedLeaveTypeIds.has(lt.ID)).map(lt => {
           const count = absences.filter(a => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const eid = a.EMPLOYEE_ID ?? (a as any).employee_id;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return eid && eid > 0 && (a.LEAVE_TYPE_ID ?? (a as any).leave_type_id) === lt.ID;
           }).length;
           return count > 0 ? (

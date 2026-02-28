@@ -196,7 +196,7 @@ export default function Konflikte() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: ConflictsResponse = await res.json();
       setConflicts(data.conflicts ?? []);
-    } catch (e) {
+    } catch (_e) {
       setError('Fehler beim Laden der Konflikte.');
       setConflicts([]);
     } finally {

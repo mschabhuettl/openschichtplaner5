@@ -6,6 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const BASE_URL = 'http://localhost:5173';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ADMIN_SESSION = path.join(__dirname, '.auth/admin.json');
 const SESSION_KEY = 'sp5_session';
 

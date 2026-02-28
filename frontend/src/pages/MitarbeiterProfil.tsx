@@ -47,6 +47,7 @@ function MiniBar({ value, max, color, label, sub }: MiniBar) {
 }
 
 interface KPICard { label: string; value: string | number; icon: string; color: string; sub?: string; }
+interface MonthStat { month: number; actual_hours: number; target_hours: number; shifts_count: number; difference: number; weekend_shifts: number; night_shifts: number; vacation_days: number; }
 function KPICard({ label, value, icon, color, sub }: KPICard) {
   return (
     <div className={`rounded-xl p-3 border ${color} flex flex-col gap-1`}>
@@ -65,6 +66,7 @@ export default function MitarbeiterProfil() {
   const [shifts, setShifts] = useState<ShiftType[]>([]);
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [groupName, setGroupName] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [yearStats, setYearStats] = useState<any>(null);
   const [schedule7, setSchedule7] = useState<ScheduleEntry[]>([]);
   const [changelog, setChangelog] = useState<ChangelogEntry[]>([]);
@@ -108,6 +110,7 @@ export default function MitarbeiterProfil() {
         setGroupName(g?.NAME ?? '');
       }
       setYearStats(stats);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setAbsences(absData as any);
       // Filter changelog for this employee where possible
       const empLog = clog.filter(e =>
@@ -165,8 +168,10 @@ export default function MitarbeiterProfil() {
   if (!employee) return <div className="p-8 text-center text-red-500">Mitarbeiter nicht gefunden.</div>;
 
   const totals = yearStats?.totals;
-  const months: any[] = yearStats?.months ?? [];
-  const maxHours = Math.max(...months.map((m: any) => m.actual_hours), 1);
+   
+  const months: MonthStat[] = yearStats?.months ?? [];
+   
+  const maxHours = Math.max(...months.map((m) => m.actual_hours), 1);
 
   // Upcoming absences (next 30 days)
   const now = new Date();
@@ -347,7 +352,7 @@ export default function MitarbeiterProfil() {
           <div className="border rounded-xl p-4">
             <h2 className="font-semibold mb-3 text-gray-700">⏱️ Stunden pro Monat {year}</h2>
             <div className="space-y-1.5">
-              {months.map((m: any) => (
+              {months.map((m) => (
                 <MiniBar
                   key={m.month}
                   label={MONTH_NAMES[m.month - 1]}
@@ -377,7 +382,7 @@ export default function MitarbeiterProfil() {
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {months.map((m: any) => (
+                {months.map((m) => (
                   <tr key={m.month} className="hover:bg-gray-50">
                     <td className="py-1 pr-2 font-medium">{MONTH_NAMES[m.month - 1]}</td>
                     <td className="py-1 pr-2 text-right">{m.shifts_count}</td>

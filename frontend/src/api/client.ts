@@ -475,7 +475,7 @@ async function handleResponseError(res: Response): Promise<void> {
 async function safeFetch(input: string, init?: RequestInit, _attempt = 0): Promise<Response> {
   try {
     return await fetch(input, init);
-  } catch (err) {
+  } catch (_err) {
     // TypeError: Failed to fetch — server unreachable or CORS
     if (_attempt < 2) {
       // Exponential backoff: 500ms, 1500ms

@@ -323,7 +323,7 @@ function AppInner() {
   // Update document title based on active route
   useEffect(() => {
     const label = currentItem?.label;
-    document.title = label ? `OpenSP5 — ${label}` : 'OpenSchichtplaner5';
+    document.title = label ? `${label} — SP5` : 'OpenSchichtplaner5';
   }, [currentItem]);
 
   // Filter nav items based on user role

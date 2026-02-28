@@ -585,9 +585,9 @@ export default function Analytics() {
   const currentYear = new Date().getFullYear();
 
   if (loading) return (
-    <div style={{ padding: 32, textAlign: 'center', color: '#64748b' }}>
-      <div style={{ fontSize: 32 }}>📊</div>
-      <div style={{ marginTop: 8 }}>Lade Analytics-Daten…</div>
+    <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-500">
+      <div className="w-10 h-10 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+      <span>Lade Analytics-Daten…</span>
     </div>
   );
 

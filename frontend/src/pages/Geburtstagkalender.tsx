@@ -170,7 +170,7 @@ export default function Geburtstagkalender() {
   const toggleMonth = (m: number) => {
     setExpandedMonths(prev => {
       const s = new Set(prev);
-      s.has(m) ? s.delete(m) : s.add(m);
+      if (s.has(m)) { s.delete(m); } else { s.add(m); }
       return s;
     });
   };

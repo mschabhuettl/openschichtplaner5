@@ -274,7 +274,7 @@ export default function Kontobuchungen() {
     try {
       const data = await api.getBookings(year, month, selectedEmployeeId);
       setBookings(data);
-    } catch (err) {
+    } catch (_err) {
       showToast('Fehler beim Laden der Buchungen', 'error');
     } finally {
       setLoading(false);

@@ -44,6 +44,27 @@ const STEPS: TourStep[] = [
     target: null,
   },
   {
+    title: 'Team-Übersicht & Kalender',
+    description:
+      'Unter "Team-Übersicht" siehst du alle Mitarbeiter auf einen Blick — mit Verfügbarkeit, Schichten und Kontaktdaten. Der Team-Kalender zeigt gemeinsame Termine und Abwesenheiten.',
+    icon: '👥',
+    target: null,
+  },
+  {
+    title: 'Analytics & Trends',
+    description:
+      'Die Analytics-Seite zeigt Auslastungstrends, Schichtverteilung und Überstunden-Entwicklung über Zeit. Ideal für strategische Personalplanung.',
+    icon: '📉',
+    target: null,
+  },
+  {
+    title: 'Mein Profil',
+    description:
+      'Unter "Mein Profil" siehst du deine eigenen Stunden, Schichten und Abwesenheiten. Passe deine Benachrichtigungseinstellungen und Präferenzen an.',
+    icon: '👤',
+    target: null,
+  },
+  {
     title: 'Tastatur-Shortcuts — Schnell navigieren',
     description:
       'Drücke ? für alle Shortcuts.\n• Ctrl+K — Schnellsuche\n• g d — Dashboard\n• g p — Dienstplan\n• g m — Mitarbeiter\n• g k — Konflikte',

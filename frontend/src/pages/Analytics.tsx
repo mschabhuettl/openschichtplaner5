@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
                             'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
@@ -584,17 +585,18 @@ export default function Analytics() {
 
   const currentYear = new Date().getFullYear();
 
-  if (loading) return (
-    <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-500">
-      <div className="w-10 h-10 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
-      <span>Lade Analytics-Daten…</span>
-    </div>
-  );
+  if (loading) return <LoadingSpinner message="Lade Analytics-Daten…" />;
 
   if (error) return (
-    <div style={{ padding: 32, textAlign: 'center', color: '#dc2626' }}>
-      <div style={{ fontSize: 32 }}>⚠️</div>
-      <div style={{ marginTop: 8 }}>Fehler: {error}</div>
+    <div className="flex flex-col items-center justify-center py-20 gap-3 text-red-500 dark:text-red-400">
+      <span className="text-3xl">⚠️</span>
+      <span className="text-sm font-medium">Fehler beim Laden: {error}</span>
+      <button
+        onClick={() => window.location.reload()}
+        className="mt-2 px-4 py-2 text-xs bg-red-100 dark:bg-red-900/30 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+      >
+        Erneut versuchen
+      </button>
     </div>
   );
 

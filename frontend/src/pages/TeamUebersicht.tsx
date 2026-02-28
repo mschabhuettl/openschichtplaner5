@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import type { Employee, Group } from '../types';
 import type { DayEntry } from '../types';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -339,6 +340,7 @@ export default function TeamUebersicht() {
   const [absences, setAbsences] = useState<{ employee_id: number; date: string }[]>([]);
   const [groupAssignments, setGroupAssignments] = useState<{ employee_id: number; group_id: number }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [view, setView] = useState<'cards' | 'org'>('cards');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterGroup, setFilterGroup] = useState<number | 'all'>('all');
@@ -362,7 +364,10 @@ export default function TeamUebersicht() {
       setTodayEntries(dayEntries);
       setAbsences(abs.map(a => ({ employee_id: a.employee_id, date: a.date })));
       setGroupAssignments(assignments);
-    }).catch(console.error).finally(() => setLoading(false));
+    }).catch((e: unknown) => {
+      console.error(e);
+      setError(e instanceof Error ? e.message : 'Unbekannter Fehler');
+    }).finally(() => setLoading(false));
   }, []);
 
   // Compute absence status per employee
@@ -545,11 +550,17 @@ export default function TeamUebersicht() {
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-6 pb-6 min-h-0">
         {loading ? (
-          <div className="flex items-center justify-center h-48 text-gray-400 dark:text-gray-500">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-4 border-gray-200 dark:border-gray-700 border-t-blue-500 rounded-full animate-spin" />
-              <span className="text-sm">Lade Team-Daten…</span>
-            </div>
+          <LoadingSpinner message="Lade Team-Daten…" />
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-3 text-red-500 dark:text-red-400">
+            <span className="text-3xl">⚠️</span>
+            <span className="text-sm font-medium">Fehler beim Laden: {error}</span>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-2 px-4 py-2 text-xs bg-red-100 dark:bg-red-900/30 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+            >
+              Erneut versuchen
+            </button>
           </div>
         ) : view === 'cards' ? (
           filteredCards.length === 0 ? (

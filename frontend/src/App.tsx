@@ -211,6 +211,43 @@ const navItems: NavItem[] = [
   { id: 'druckvorschau',      label: 'Druckvorschau',        icon: '🖨️', group: 'Administration', path: '/druckvorschau' },
 ];
 
+/** Global offline banner — shown when the browser loses connectivity */
+function OfflineBanner() {
+  const [offline, setOffline] = useState(!navigator.onLine);
+  const [showOnlineFlash, setShowOnlineFlash] = useState(false);
+
+  useEffect(() => {
+    const onOffline = () => { setOffline(true); setShowOnlineFlash(false); };
+    const onOnline = () => {
+      setOffline(false);
+      setShowOnlineFlash(true);
+      setTimeout(() => setShowOnlineFlash(false), 3000);
+    };
+    window.addEventListener('offline', onOffline);
+    window.addEventListener('online', onOnline);
+    return () => {
+      window.removeEventListener('offline', onOffline);
+      window.removeEventListener('online', onOnline);
+    };
+  }, []);
+
+  if (offline) {
+    return (
+      <div className="fixed top-0 left-0 right-0 z-[99999] bg-yellow-400 text-yellow-900 text-sm font-medium text-center py-2 px-4 shadow-md">
+        ⚠️ Keine Verbindung — Daten könnten veraltet sein
+      </div>
+    );
+  }
+  if (showOnlineFlash) {
+    return (
+      <div className="fixed top-0 left-0 right-0 z-[99999] bg-green-500 text-white text-sm font-medium text-center py-2 px-4 shadow-md">
+        ✓ Verbindung wiederhergestellt
+      </div>
+    );
+  }
+  return null;
+}
+
 function AppInner() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -520,6 +557,9 @@ function AppInner() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100">
+      {/* Global offline connectivity banner */}
+      <OfflineBanner />
+
       {/* Skip link for keyboard navigation */}
       <a
         href="#main-content"

@@ -416,15 +416,15 @@ function AppInner() {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Mobile top bar with hamburger */}
-        <header className="md:hidden flex items-center gap-3 px-4 py-3 bg-slate-800 text-white shadow">
+        <header className="md:hidden flex items-center gap-1 px-2 py-1 bg-slate-800 text-white shadow">
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Menü öffnen"
-            className="text-xl leading-none"
+            className="flex items-center justify-center w-11 h-11 rounded-lg text-xl text-slate-300 hover:text-white hover:bg-slate-700 transition-colors flex-shrink-0"
           >
             ☰
           </button>
-          <span className="font-semibold text-sm flex-1">
+          <span className="font-semibold text-sm flex-1 min-w-0 truncate px-1">
             {currentItem?.icon} {currentItem?.label}
           </span>
           <WarningsCenter />
@@ -432,7 +432,7 @@ function AppInner() {
             onClick={() => setSpotlightOpen(true)}
             title="Schnellsuche"
             aria-label="Schnellsuche öffnen"
-            className="text-slate-400 hover:text-white transition-colors text-base leading-none p-1"
+            className="flex items-center justify-center w-11 h-11 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors text-base flex-shrink-0"
           >
             🔍
           </button>
@@ -440,7 +440,7 @@ function AppInner() {
             onClick={toggleTheme}
             title={isDark ? 'Hell-Modus' : 'Dunkel-Modus'}
             aria-label={isDark ? 'Hell-Modus aktivieren' : 'Dunkel-Modus aktivieren'}
-            className="text-slate-400 hover:text-white transition-colors text-base leading-none p-1"
+            className="flex items-center justify-center w-11 h-11 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors text-base flex-shrink-0"
           >
             {isDark ? '☀️' : '🌙'}
           </button>

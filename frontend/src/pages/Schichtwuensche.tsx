@@ -369,7 +369,8 @@ export default function Schichtwuensche() {
               Keine Einträge für {MONTH_NAMES[month - 1]} {year}
             </div>
           ) : (
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[600px]">
               <thead>
                 <tr className={isDark ? 'bg-gray-700' : 'bg-gray-50'}>
                   <th className="text-left px-4 py-2.5 font-semibold">Datum</th>
@@ -422,6 +423,7 @@ export default function Schichtwuensche() {
                   })}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       )}

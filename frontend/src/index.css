@@ -425,7 +425,7 @@ a { transition: color 150ms ease; }
   justify-content: center;
 }
 
-/* ── Mobile UX Improvements (Task-04) ───────────────────────── */
+/* ── Mobile UX Improvements (Task-04 + Task-05) ─────────────── */
 
 /* 1. Touch-smooth scrolling on all scrollable containers */
 .overflow-auto,
@@ -468,6 +468,38 @@ a { transition: color 150ms ease; }
   .table-mobile-scroll {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* 5. Global table responsiveness: make ALL tables scroll horizontally
+        on mobile rather than overflowing the viewport.
+        We convert <table> to a scrollable block on narrow screens.
+        Tables that already have an overflow-x-auto parent are unaffected
+        because the parent already clips them. */
+  table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  /* Keep thead/tbody/tr/td as normal block/table-* so layout is preserved */
+  thead, tbody, tfoot {
+    display: table;
+    width: 100%;
+  }
+
+  /* 6. Page-level padding: reduce horizontal padding on mobile so content
+        fits without requiring sideways scroll of the entire page */
+  main > div,
+  main > section {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  /* 7. Flex-wrap filter bars so they wrap instead of overflow */
+  .flex.gap-2.items-center:not(.no-wrap),
+  .flex.gap-3.items-center:not(.no-wrap) {
+    flex-wrap: wrap;
   }
 }
 

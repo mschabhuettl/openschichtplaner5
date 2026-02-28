@@ -231,6 +231,7 @@ export default function Protokoll() {
             <div className="text-sm">Aktionen werden ab sofort automatisch protokolliert.</div>
           </div>
         ) : (
+          <div className="overflow-x-auto">
           <table className="w-full text-sm border-collapse min-w-[700px]">
             <thead className="sticky top-0 z-10 bg-slate-100">
               <tr>
@@ -275,6 +276,7 @@ export default function Protokoll() {
               })}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 

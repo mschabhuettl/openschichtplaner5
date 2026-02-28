@@ -7,6 +7,57 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] — 2026-02-28 (full-feature-day)
+
+### 🧹 QA & Cleanup
+- **TestRBACDel-Eintrag entfernt** — Testdatensatz aus der Mitarbeiterliste bereinigt
+- **604 Backend-Tests bestehen** — Vollständige Test-Suite grün nach allen heutigen Feature-Implementierungen
+- **Frontend-Build erfolgreich** — Production-Build kompiliert ohne Fehler (2.92s)
+
+### Hinzugefügt / Added
+
+#### 📊 Kapazitäts-Forecast: Wochentag-Analyse + Jahres-Heatmap (a5a264e)
+- **Wochentag-Analyse-Tab** — Besetzungstrends nach Wochentag aggregiert; ideale Planungsgrundlage
+- **Jahres-Heatmap-Tab** — Farbkodierter Jahresüberblick aller 365 Tage als Heatmap
+- **API: `/api/capacity-year`** — Neuer Backend-Endpunkt liefert Jahres-Kapazitätsdaten pro Monat
+
+#### 📁 Excel/XLSX Export (6dd0044)
+- **Dienstplan als XLSX** — Vollständiger Monatsdienstplan als Excel-Datei exportierbar
+- **Mitarbeiterliste als XLSX** — Stammdaten-Export in Excel-Format
+- **Serverseiter Export** — Backend generiert echte XLSX-Dateien mit openpyxl; kein Client-Side-Workaround
+
+#### 🔒 Security Hardening Round 2 (7706f1c)
+- **Session-Invalidierung** — Logout invalidiert serverseitig gespeicherte Sessions
+- **Content Security Policy (CSP)** — CSP-Header schützt vor XSS-Angriffen
+- **Upload-Limit** — Maximale Request-Größe begrenzt
+- **Audit Logging** — Sicherheitsrelevante Aktionen werden protokolliert
+
+#### 📅 Wochenvorlagen im Dienstplan (c78f89f)
+- **Vorlagen speichern** — Aktuelle Wochenbelegung als benannte Vorlage sichern
+- **Vorlagen anwenden** — Gespeicherte Wochenvorlagen auf beliebige Wochen übertragen
+- **Vorlagen-Verwaltung** — Vorlagen bearbeiten, umbenennen und löschen
+
+#### 👥 Gruppen-Tab + Mitglieder-Verwaltung (00a1251)
+- **Gruppen-Tab im MA-Modal** — Mitarbeiter direkt im Bearbeitungs-Dialog Gruppen zuweisen
+- **Mitglieder-Verwaltung** — Gruppenmitglieder in der Gruppen-Verwaltung direkt hinzufügen/entfernen
+
+#### ✨ Mitarbeiter-Hervorhebung & Vormonat kopieren (3e5280d)
+- **MA-Hervorhebung im Dienstplan** — Klick auf Mitarbeiter hebt alle seine Schichten farblich hervor
+- **Vormonat kopieren** — Kompletten Vormonat in den aktuellen Monat übertragen (mit Bestätigungs-Dialog)
+
+#### 🔔 In-App Benachrichtigungs-System (92ea7eb)
+- **Notification-Center** — Glocken-Symbol in der Navigation zeigt ungelesene Benachrichtigungen
+- **Warnungs-Feed** — Überstunden, Konflikte, Abwesenheits-Überschreitungen als Benachrichtigungen
+- **Aktivitäts-Log** — Letzte Aktionen (Schicht gesetzt, MA geändert etc.) im Notification-Panel
+- **API: `/api/warnings`** — Backend-Endpunkt aggregiert aktive Warnungen mit Schweregrad
+
+#### ⌨️ Keyboard Shortcuts (cd3bd84)
+- **Globale Shortcuts** — Navigation per Tastatur durch alle Hauptbereiche
+- **`?` öffnet Hilfe** — Tastaturkürzel-Overlay mit vollständiger Übersicht
+- **Seiten-spezifische Shortcuts** — Kontextsensitive Kürzel je nach aktiver Seite
+
+---
+
 ## [Unreleased] — 2026-02-28 (auth-fixes-and-improvements)
 
 ### Sicherheit / Security

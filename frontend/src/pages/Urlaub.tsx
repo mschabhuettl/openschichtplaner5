@@ -38,7 +38,7 @@ interface HolidayBan {
   reason: string;
 }
 
-type UrlaubTab = 'antraege' | 'abwesenheiten' | 'ansprueche' | 'sperren' | 'timeline';
+type UrlaubTab = 'antraege' | 'abwesenheiten' | 'ansprueche' | 'sperren' | 'timeline' | 'statistik';
 
 const MONTHS = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 const API = import.meta.env.VITE_API_URL ?? '';
@@ -1093,12 +1093,17 @@ interface AntraegeTabProps {
   loading: boolean;
 }
 
+interface AbsenceStatusEntry { status: AbsenceStatus; reject_reason: string; }
+
 function AntraegeTab({ year, employees, leaveTypes, absences, loading }: AntraegeTabProps) {
-  const [statusMap, setStatusMap] = useState<Record<string, AbsenceStatus>>({});
+  const [statusMap, setStatusMap] = useState<Record<string, AbsenceStatusEntry>>({});
   const [statusLoading, setStatusLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [filterStatus, setFilterStatus] = useState<AbsenceStatus | ''>('pending');
   const [search, setSearch] = useState('');
+  // Rejection reason modal
+  const [rejectModal, setRejectModal] = useState<{ id: number } | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   // Load status from backend
   const loadStatus = useCallback(async () => {
@@ -1113,23 +1118,31 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
 
   useEffect(() => { loadStatus(); }, [loadStatus]);
 
-  const getStatus = (id: number): AbsenceStatus =>
-    (statusMap[String(id)] as AbsenceStatus) ?? 'pending';
+  const getStatusEntry = (id: number): AbsenceStatusEntry =>
+    statusMap[String(id)] ?? { status: 'pending', reject_reason: '' };
+  const getStatus = (id: number): AbsenceStatus => getStatusEntry(id).status;
 
-  const updateStatus = async (id: number, status: AbsenceStatus) => {
+  const updateStatus = async (id: number, status: AbsenceStatus, reject_reason = '') => {
     setUpdatingId(id);
     try {
       const res = await fetch(`${API}/api/absences/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, reject_reason }),
       });
       if (res.ok) {
-        setStatusMap(prev => ({ ...prev, [String(id)]: status }));
+        setStatusMap(prev => ({ ...prev, [String(id)]: { status, reject_reason } }));
       }
     } catch { /* ignore */ } finally {
       setUpdatingId(null);
     }
+  };
+
+  const handleRejectConfirm = async () => {
+    if (!rejectModal) return;
+    await updateStatus(rejectModal.id, 'rejected', rejectReason);
+    setRejectModal(null);
+    setRejectReason('');
   };
 
   const getEmp = (id: number) => employees.find(e => e.ID === id);
@@ -1145,13 +1158,20 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
     return true;
   }).sort((a, b) => b.DATE.localeCompare(a.DATE));
 
-  const statusBadge = (status: AbsenceStatus) => {
+  const statusBadge = (entry: AbsenceStatusEntry) => {
+    const { status, reject_reason } = entry;
     if (status === 'approved') return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">✅ Genehmigt</span>;
-    if (status === 'rejected') return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">❌ Abgelehnt</span>;
+    if (status === 'rejected') return (
+      <span className="inline-flex flex-col items-center gap-0.5">
+        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">❌ Abgelehnt</span>
+        {reject_reason && <span className="text-xs text-red-500 italic max-w-[160px] truncate" title={reject_reason}>{reject_reason}</span>}
+      </span>
+    );
     return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">⏳ Beantragt</span>;
   };
 
   const pendingCount = absences.filter(a => a.DATE?.startsWith(String(year)) && getStatus(a.ID) === 'pending').length;
+
 
   return (
     <div>
@@ -1199,7 +1219,8 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
             {!loading && !statusLoading && filtered.map((ab, i) => {
               const emp = getEmp(ab.EMPLOYEE_ID);
               const lt = getLT(ab.LEAVE_TYPE_ID);
-              const status = getStatus(ab.ID);
+              const statusEntry = getStatusEntry(ab.ID);
+              const status = statusEntry.status;
               const isUpdating = updatingId === ab.ID;
               return (
                 <tr key={ab.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
@@ -1225,7 +1246,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
                     )}
                   </td>
                   <td className="px-4 py-2.5 text-center">
-                    {statusBadge(status)}
+                    {statusBadge(statusEntry)}
                   </td>
                   <td className="px-4 py-2.5 text-center">
                     {status === 'pending' ? (
@@ -1239,7 +1260,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
                           {isUpdating ? '⟳' : '✅ Genehmigen'}
                         </button>
                         <button
-                          onClick={() => updateStatus(ab.ID, 'rejected')}
+                          onClick={() => { setRejectModal({ id: ab.ID }); setRejectReason(''); }}
                           disabled={isUpdating}
                           className="px-2.5 py-1 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
                           title="Ablehnen"
@@ -1273,6 +1294,240 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
           Abwesenheiten mit Status "Beantragt" sind noch zu bearbeiten.
         </span>
       </div>
+
+      {/* Rejection reason modal */}
+      {rejectModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div className="px-6 py-4 border-b flex items-center justify-between">
+              <h2 className="text-base font-bold text-gray-800">❌ Antrag ablehnen</h2>
+              <button onClick={() => setRejectModal(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+            </div>
+            <div className="px-6 py-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Begründung (optional)</label>
+              <textarea
+                value={rejectReason}
+                onChange={e => setRejectReason(e.target.value)}
+                placeholder="z.B. Personalmangel in diesem Zeitraum..."
+                rows={3}
+                maxLength={500}
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
+              />
+              <div className="text-xs text-gray-400 text-right mt-1">{rejectReason.length}/500</div>
+            </div>
+            <div className="px-6 py-3 border-t flex justify-end gap-3">
+              <button onClick={() => setRejectModal(null)} className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50">Abbrechen</button>
+              <button
+                onClick={handleRejectConfirm}
+                disabled={updatingId !== null}
+                className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
+              >
+                {updatingId !== null ? '⟳' : 'Ablehnen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+// ─── Tab 6: Statistik ─────────────────────────────────────────
+interface StatistikTabProps {
+  year: number;
+  employees: Employee[];
+  leaveTypes: LeaveType[];
+  absences: Absence[];
+  loading: boolean;
+}
+
+function StatistikTab({ year, employees, leaveTypes, absences, loading }: StatistikTabProps) {
+  const [viewMode, setViewMode] = useState<'types' | 'monthly' | 'employee'>('types');
+  const [selectedLeaveType, setSelectedLeaveType] = useState<number | null>(null);
+
+  const MONTHS_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+
+  // Absence type breakdown
+  const byType = useMemo(() => {
+    const map = new Map<number, number>();
+    absences.forEach(a => {
+      map.set(a.LEAVE_TYPE_ID, (map.get(a.LEAVE_TYPE_ID) ?? 0) + 1);
+    });
+    return map;
+  }, [absences]);
+
+  const totalDays = absences.length;
+
+  // Monthly breakdown (all types or filtered)
+  const byMonth = useMemo(() => {
+    const counts = Array(12).fill(0);
+    absences.forEach(a => {
+      if (selectedLeaveType !== null && a.LEAVE_TYPE_ID !== selectedLeaveType) return;
+      const m = new Date(a.DATE).getMonth();
+      if (!isNaN(m)) counts[m]++;
+    });
+    return counts;
+  }, [absences, selectedLeaveType]);
+
+  const maxMonthly = Math.max(...byMonth, 1);
+
+  // Per-employee breakdown
+  const byEmployee = useMemo(() => {
+    const map = new Map<number, Map<number, number>>(); // empId → ltId → count
+    absences.forEach(a => {
+      if (!map.has(a.EMPLOYEE_ID)) map.set(a.EMPLOYEE_ID, new Map());
+      const ltMap = map.get(a.EMPLOYEE_ID)!;
+      ltMap.set(a.LEAVE_TYPE_ID, (ltMap.get(a.LEAVE_TYPE_ID) ?? 0) + 1);
+    });
+    return map;
+  }, [absences]);
+
+  // Sort employees by total absence days desc
+  const sortedEmployees = useMemo(() => {
+    return employees
+      .map(emp => {
+        const ltMap = byEmployee.get(emp.ID) ?? new Map<number, number>();
+        const total = [...ltMap.values()].reduce((s, v) => s + v, 0);
+        return { emp, ltMap, total };
+      })
+      .filter(x => x.total > 0)
+      .sort((a, b) => b.total - a.total);
+  }, [employees, byEmployee]);
+
+  if (loading) return <div className="py-10 text-center text-gray-400">⟳ Lade...</div>;
+
+  return (
+    <div className="space-y-5">
+      {/* View toggle */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {(['types', 'monthly', 'employee'] as const).map(v => (
+          <button key={v} onClick={() => setViewMode(v)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${viewMode === v ? 'bg-slate-700 text-white' : 'bg-white border hover:bg-gray-50 text-gray-700'}`}>
+            {v === 'types' ? '📊 Nach Typ' : v === 'monthly' ? '📅 Monatsverlauf' : '👤 Pro Mitarbeiter'}
+          </button>
+        ))}
+        <span className="ml-auto text-xs text-gray-400">{totalDays} Abwesenheitstage in {year}</span>
+      </div>
+
+      {/* ─── View: By Type ─── */}
+      {viewMode === 'types' && (
+        <div className="bg-white rounded-xl shadow border overflow-hidden">
+          <div className="px-5 py-3 bg-slate-50 border-b">
+            <h3 className="font-semibold text-gray-800 text-sm">Abwesenheitstypen {year}</h3>
+          </div>
+          <div className="p-5 space-y-3">
+            {leaveTypes
+              .filter(lt => (byType.get(lt.ID) ?? 0) > 0)
+              .sort((a, b) => (byType.get(b.ID) ?? 0) - (byType.get(a.ID) ?? 0))
+              .map(lt => {
+                const count = byType.get(lt.ID) ?? 0;
+                const pct = totalDays > 0 ? (count / totalDays) * 100 : 0;
+                return (
+                  <div key={lt.ID} className="space-y-1">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded flex items-center justify-center text-xs font-bold flex-shrink-0"
+                          style={{ backgroundColor: lt.COLORBK_HEX ?? '#e5e7eb', color: lt.COLORBK_LIGHT ? '#333' : '#fff' }}>
+                          {lt.SHORTNAME}
+                        </div>
+                        <span className="font-medium text-gray-800">{lt.NAME}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500 text-xs">{pct.toFixed(1)}%</span>
+                        <span className="font-bold text-gray-800">{count} Tage</span>
+                      </div>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div className="h-2 rounded-full transition-all"
+                        style={{ width: `${pct}%`, backgroundColor: lt.COLORBK_HEX ?? '#6b7280' }} />
+                    </div>
+                  </div>
+                );
+              })}
+            {byType.size === 0 && <p className="text-gray-400 text-sm text-center py-4">Keine Abwesenheiten in {year}</p>}
+          </div>
+        </div>
+      )}
+
+      {/* ─── View: Monthly ─── */}
+      {viewMode === 'monthly' && (
+        <div className="bg-white rounded-xl shadow border overflow-hidden">
+          <div className="px-5 py-3 bg-slate-50 border-b flex items-center justify-between">
+            <h3 className="font-semibold text-gray-800 text-sm">Monatsverlauf {year}</h3>
+            <select value={selectedLeaveType ?? ''} onChange={e => setSelectedLeaveType(e.target.value ? Number(e.target.value) : null)}
+              className="border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400">
+              <option value="">Alle Typen</option>
+              {leaveTypes.filter(lt => byType.has(lt.ID)).map(lt =>
+                <option key={lt.ID} value={lt.ID}>{lt.NAME}</option>)}
+            </select>
+          </div>
+          <div className="p-5">
+            <div className="flex items-end gap-1.5 h-48">
+              {byMonth.map((count, m) => (
+                <div key={m} className="flex flex-col items-center gap-1 flex-1 min-w-0">
+                  <span className="text-xs font-bold text-gray-700">{count > 0 ? count : ''}</span>
+                  <div className="w-full rounded-t transition-all"
+                    style={{
+                      height: `${(count / maxMonthly) * 160}px`,
+                      minHeight: count > 0 ? '4px' : '0',
+                      backgroundColor: count > 0 ? '#3b82f6' : '#e5e7eb',
+                    }} />
+                  <span className="text-xs text-gray-500">{MONTHS_SHORT[m]}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── View: Per Employee ─── */}
+      {viewMode === 'employee' && (
+        <div className="bg-white rounded-xl shadow border overflow-hidden">
+          <div className="px-5 py-3 bg-slate-50 border-b">
+            <h3 className="font-semibold text-gray-800 text-sm">Abwesenheiten pro Mitarbeiter {year}</h3>
+          </div>
+          {sortedEmployees.length === 0 ? (
+            <p className="text-gray-400 text-sm text-center py-6">Keine Abwesenheiten in {year}</p>
+          ) : (
+            <table className="text-sm w-full">
+              <thead>
+                <tr className="bg-slate-700 text-white text-xs">
+                  <th className="px-4 py-3 text-left">Mitarbeiter</th>
+                  <th className="px-4 py-3 text-center">Gesamt</th>
+                  {leaveTypes.filter(lt => byType.has(lt.ID)).map(lt => (
+                    <th key={lt.ID} className="px-3 py-3 text-center">
+                      <span className="inline-flex items-center justify-center w-6 h-6 rounded text-xs font-bold"
+                        style={{ backgroundColor: lt.COLORBK_HEX ?? '#e5e7eb', color: lt.COLORBK_LIGHT ? '#333' : '#fff' }}>
+                        {lt.SHORTNAME}
+                      </span>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {sortedEmployees.map(({ emp, ltMap, total }, i) => (
+                  <tr key={emp.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
+                    <td className="px-4 py-2.5">
+                      <div className="font-semibold text-gray-800">{emp.NAME}, {emp.FIRSTNAME}</div>
+                      <div className="text-xs text-gray-400">Nr. {emp.NUMBER}</div>
+                    </td>
+                    <td className="px-4 py-2.5 text-center font-bold text-gray-700">{total}</td>
+                    {leaveTypes.filter(lt => byType.has(lt.ID)).map(lt => {
+                      const c = ltMap.get(lt.ID) ?? 0;
+                      return (
+                        <td key={lt.ID} className="px-3 py-2.5 text-center text-sm text-gray-600">
+                          {c > 0 ? <span className="font-semibold text-gray-800">{c}</span> : <span className="text-gray-300">–</span>}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -1553,6 +1808,7 @@ export default function Urlaub() {
     { id: 'ansprueche', label: 'Urlaubsansprüche', icon: '📊' },
     { id: 'sperren', label: 'Urlaubssperren', icon: '🚫' },
     { id: 'timeline', label: 'Jahres-Timeline', icon: '📅' },
+    { id: 'statistik', label: 'Statistik', icon: '📈' },
   ];
 
   return (
@@ -1609,6 +1865,10 @@ export default function Urlaub() {
       {activeTab === 'timeline' && (
         <TimelineTab year={year} employees={employees} leaveTypes={leaveTypes}
           absences={absences} groups={groups} loading={loading} />
+      )}
+      {activeTab === 'statistik' && (
+        <StatistikTab year={year} employees={employees} leaveTypes={leaveTypes}
+          absences={absences} loading={loading} />
       )}
       <ConfirmDialog {...confirmDialogProps} />
     </div>

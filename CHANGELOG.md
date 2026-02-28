@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.18] — 2026-02-28
+
+### Changed
+
+- `polish(ux)`: Consistent animations & transitions across all modals, toasts, and overlays
+- `polish(ux)`: `prefers-reduced-motion` media query disables all animations/transitions for accessibility
+- `polish(ux)`: Unified `@keyframes` — `fadeIn`, `slideIn`, `slideOut`, `scaleIn`, `backdropIn`
+- `polish(ux)`: Global theme-switch transitions (background-color, color, border-color) at 150ms
+
+### QA
+
+- 914 pytest tests — all passed, 0 DeprecationWarnings
+- Ruff: All checks passed
+- Frontend: Build ✓, ESLint 0 warnings, TypeScript 0 errors
+
+---
+
 ## [0.3.17] — 2026-02-28
 
 ### Fixed

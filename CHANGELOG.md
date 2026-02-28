@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.14] — 2026-02-28
+
+### Fixed / Verbessert
+
+#### 🔐 Security & Qualität
+- `fix`: Security Review — Input-Validierung, Auth-Hardening, sichere Defaults
+- `fix(tests)`: Test Coverage auf 80%+ erhöht — 914 Tests, alle passing
+
+#### 🖼️ UX
+- `feat(ux)`: Empty States mit einheitlicher `EmptyState`-Komponente in allen Listen-Ansichten
+
+---
+
 ## [0.3.12] — 2026-02-28
 
 ### Verbessert / Fixed

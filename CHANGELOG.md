@@ -7,6 +7,75 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.0] — 2026-03-01
+
+> **Major Milestone Release** — This release marks the completion of a comprehensive hardening, feature, and quality pass across the entire OpenSchichtplaner5 stack. It represents a production-ready foundation with enterprise-grade security, full internationalisation, a polished UX, and a rigorous test suite.
+
+### Security
+
+- **HttpOnly cookie auth** — auth token migrated from `localStorage` to HttpOnly `SameSite=Strict` cookies; XSS resistance significantly improved; backwards-compatible `X-Auth-Token` header fallback retained for dev mode
+- **CSP, COOP, CORP, Permissions-Policy headers** — full suite of modern security headers added to all responses
+- **CORS whitelist** — explicit origin whitelist enforced; wildcard removed from production config
+- **Rate limiting** — per-IP rate limiting on auth and sensitive endpoints
+- **Audit logging** — structured audit trail for all employee/group/shift/settings mutations with slow-query warnings
+- **Admin-gating of import endpoints** — CSV/JSON import routes now require `require_admin`; 9 previously unprotected endpoints fixed
+- **Exception leakage sanitised** — internal error details no longer exposed to API clients (bulk-absence + import routers)
+- **XSS prevention in HTML exports** — all user-supplied strings run through `html.escape` before rendering
+- **File size & content-type validation** — CSV import endpoints reject oversized or incorrectly typed uploads
+- **Session memory leak fixed** — max sessions per user enforced with periodic cleanup
+- **Docker hardening** — container runs as non-root user with resource limits and security options
+
+### Features
+
+- **Internationalisation (i18n)** — full German/English translation coverage across Employees, Urlaub, Statistiken, Konflikte, and all shared components; `t.months[]` array replaces hardcoded month names
+- **Command Palette & keyboard shortcuts** — extended shortcut system with searchable command palette (`Ctrl+K`)
+- **Progressive Web App (PWA)** — service worker, manifest, and offline banner; installable on mobile and desktop
+- **Server-Sent Events (SSE)** — real-time push updates to connected clients for schedule changes
+- **Bulk operations** — bulk absence creation and bulk shift mutations exposed via API
+- **Self-service portal** — employees can submit shift wishes (`wunsch`/`sperrung`) via dedicated endpoint; case-insensitive `wish_type` accepted
+- **Health Dashboard** — live system health overview with responsive layout and dark mode support
+- **OpenAPI documentation** — comprehensive docstrings and schema annotations on all API endpoints
+- **Filter persistence** — filter state persisted via `sessionStorage` with `useDebounce` hook for all list views
+
+### Performance
+
+- **DBF global cache** — `_GLOBAL_DBF_CACHE` with mtime-based invalidation; key endpoints now respond in <30 ms (employees ~10 ms, schedule ~20 ms, conflicts ~10 ms)
+- **N+1 query elimination** — group-member lookups in reports and database export replaced with bulk fetches (N×M → 1 query each)
+- **React.lazy & bundle splitting** — all page-level components lazy-loaded; largest chunk 250 kB (gzip 76 kB), no chunk exceeds 500 kB
+- **`useMemo` in Analytics/Statistiken** — expensive derived computations memoised to prevent redundant re-renders
+- **Response time test suite** — `test_response_times.py` asserts all 5 key endpoints respond within 2 s under test load
+
+### Testing
+
+- **1157 backend tests passing** — coverage 81 %+ (up from ~60 % at v0.3.0); parametrised DB-error tests, DeprecationWarnings fixed
+- **85 frontend unit tests** — covering `Skeleton`, `EmptyState`/`ApiErrorState`/`InlineError`, `FieldError`, `useDebounce`, `ConfirmDialog` (up from 41)
+- **E2E test foundation** — Playwright-based end-to-end smoke tests for critical user flows
+- **CI pipeline** — GitHub Actions workflow with lint, type-check, backend tests, frontend build, and coverage gate
+
+### UX
+
+- **Animations & transitions** — consistent entrance/exit animations throughout the app using CSS transitions
+- **Skeleton screens** — loading skeletons for Employees and Dienstplan pages replace bare spinners
+- **Empty states** — `EmptyState` component with contextual illustrations and call-to-action across all list views
+- **Accessibility (WCAG AA)** — `aria-label`, `role`, colour-contrast fixes, `focus-visible` improvements, `<main>` landmark on all pages
+- **Dark mode** — dark mode classes added to Health Dashboard, Statistiken, and all table components
+- **Table polish** — sticky headers, hover effects, and consistent row sizing across all data tables
+- **Print support** — print CSS and print buttons added to Analytics and TeamUebersicht pages
+- **Form UX** — `onBlur` validation, Escape-key dismissal, loading states, and adaptive toast durations
+- **Offline banner** — visible indicator when network connection is lost
+- **Error handling consistency** — unified frontend error boundaries and loading states across all routes
+
+### DevOps
+
+- **Structured logging** — JSON-structured logs with `X-Request-ID` correlation across all requests; millisecond timestamps; duplicate middleware removed
+- **Docker hardening** — non-root container user, `--cap-drop ALL`, memory/CPU resource limits, read-only filesystem where possible
+- **CI/CD pipeline** — automated release workflow with tag-triggered builds and version bumping
+- **Dead code removal** — unused imports, stale `console.log` statements, deprecated `datetime` API usage all cleaned up
+- **Type hints throughout backend** — `backend/api/types.py` with shared type aliases; consistent typing across all routers
+- **Deutsche Fehlermeldungen** — all backend error messages localised to German for consistent UX
+
+---
+
 ## [0.3.32] — 2026-03-01
 
 ### Performance

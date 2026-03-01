@@ -130,7 +130,7 @@ export function GuidedTour({ open, onClose }: GuidedTourProps) {
       }, 800);
       return () => clearTimeout(t);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, []); // intentionally empty — mount-only
 
   // Handle explicit open via prop (🧭 button)

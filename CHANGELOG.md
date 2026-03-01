@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.0] - 2026-03-01
+
+### Release für manuelles Testing
+
+- fix(security): Security Audit 10 — Notification Ownership Checks, atomare Writes
+- fix(mobile): Vollständige Mobile UX Überarbeitung (Login, Sidebar, Touch Targets, Keyboard-Safe)
+- fix(mobile): Statistiken Tab-Overflow, Toast-Deduplizierung, Header-Polish
+- feat(ux): Notification System mit Glocke, Tauschbörse-Trigger, Urlaubs-Trigger
+- feat(dev): Dev-Mode Guard + Role Switcher (simuliert Admin/Planer/Leser ohne Re-Login)
+- fix(ux): Leser-Rolle Berechtigungen (18 Nav-Items beschränkt), Route Guard
+- fix(config): Einheitliche .env im Root für start.sh und Docker
+- fix(lint): ruff + ESLint 0 Warnings/Errors
+
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),

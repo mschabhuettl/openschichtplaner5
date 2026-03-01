@@ -1870,7 +1870,7 @@ export default function Schedule() {
 
   // Match current user to an employee (by SHORTNAME or NAME)
   // Used in Leser-view to highlight the user's own row
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   const currentUserEmpId = useMemo(() => {
     if (!isLeserView || !user || !employees.length) return null;
     const uName = user.NAME.toLowerCase();

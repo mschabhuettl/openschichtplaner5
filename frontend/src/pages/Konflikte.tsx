@@ -202,7 +202,7 @@ export default function Konflikte() {
     } finally {
       setLoading(false);
     }
-  }, [year, month]);
+  }, [year, month, t.konflikte.loading]);
 
   useEffect(() => {
     fetchConflicts();

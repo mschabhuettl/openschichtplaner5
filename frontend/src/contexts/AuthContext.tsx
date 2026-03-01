@@ -23,15 +23,25 @@ export interface CurrentUser {
   ACCADMWND: boolean;
 }
 
+/** The roles available in the dev view-role simulator. */
+export type DevViewRole = 'dev' | 'admin' | 'planer' | 'lese';
+
 export interface AuthContextType {
   user: CurrentUser | null;
   isDevMode: boolean;
+  /**
+   * Dev-mode simulation: which role perspective to render the UI as.
+   * Always 'dev' for non-dev sessions. Does NOT affect backend auth —
+   * all API calls still use the full dev token.
+   */
+  devViewRole: DevViewRole;
+  setDevViewRole: (role: DevViewRole) => void;
   isLoading: boolean;
   token: string | null;
   login: (username: string, password: string) => Promise<void>;
   loginDev: () => void;
   logout: () => void;
-  // Permission helpers
+  // Permission helpers — respect devViewRole in dev mode
   canWrite: boolean;
   canWriteDuties: boolean;
   canWriteAbsences: boolean;
@@ -67,7 +77,7 @@ function applyRoleDefaults(user: Partial<CurrentUser>): CurrentUser {
   };
 }
 
-// ── Dev-Mode pseudo user ─────────────────────────────────────
+// ── Dev-Mode pseudo user (always full access) ─────────────────────────────────────
 const DEV_USER: CurrentUser = {
   ID: 0,
   NAME: 'Developer',
@@ -88,6 +98,39 @@ const DEV_USER: CurrentUser = {
   ACCADMWND: true,
 };
 
+/**
+ * Returns simulated permissions for the given devViewRole.
+ * Used only for UI rendering — backend still gets the full dev token.
+ */
+function devViewPermissions(role: DevViewRole) {
+  switch (role) {
+    case 'lese':
+      return {
+        canWrite: false, canWriteDuties: false, canWriteAbsences: false,
+        canWriteOvertimes: false, canAdmin: false, canBackup: false,
+        simulatedRole: 'Leser' as const,
+      };
+    case 'planer':
+      return {
+        canWrite: true, canWriteDuties: true, canWriteAbsences: true,
+        canWriteOvertimes: true, canAdmin: false, canBackup: false,
+        simulatedRole: 'Planer' as const,
+      };
+    case 'admin':
+      return {
+        canWrite: true, canWriteDuties: true, canWriteAbsences: true,
+        canWriteOvertimes: true, canAdmin: true, canBackup: true,
+        simulatedRole: 'Admin' as const,
+      };
+    default: // 'dev' — full access
+      return {
+        canWrite: true, canWriteDuties: true, canWriteAbsences: true,
+        canWriteOvertimes: true, canAdmin: true, canBackup: true,
+        simulatedRole: 'Admin' as const,
+      };
+  }
+}
+
 // ── Session persistence key ───────────────────────────────────
 const SESSION_KEY = 'sp5_session';
 
@@ -95,6 +138,7 @@ interface StoredSession {
   token: string;
   user: CurrentUser;
   devMode: boolean;
+  devViewRole?: DevViewRole;
 }
 
 // ── Context ───────────────────────────────────────────────────
@@ -103,6 +147,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [isDevMode, setIsDevMode] = useState(false);
+  const [devViewRole, setDevViewRoleState] = useState<DevViewRole>('dev');
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
 
@@ -115,6 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session.devMode) {
           setUser(DEV_USER);
           setIsDevMode(true);
+          setDevViewRoleState(session.devViewRole ?? 'dev');
           setToken(null);
         } else if (session.user) {
           // Token is managed by HttpOnly cookie; only restore user metadata from localStorage
@@ -136,6 +182,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(null);
       setUser(null);
       setIsDevMode(false);
+      setDevViewRoleState('dev');
     };
     window.addEventListener('sp5:unauthorized', handler);
     return () => window.removeEventListener('sp5:unauthorized', handler);
@@ -161,21 +208,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);  // token managed by HttpOnly cookie
     setUser(resolvedUser);
     setIsDevMode(false);
+    setDevViewRoleState('dev');
   };
 
   const loginDev = () => {
-    const session: StoredSession = { token: '', user: DEV_USER, devMode: true };
+    const session: StoredSession = { token: '', user: DEV_USER, devMode: true, devViewRole: 'dev' };
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
     setToken(null);
     setUser(DEV_USER);
     setIsDevMode(true);
+    setDevViewRoleState('dev');
+  };
+
+  /** Switch the simulated view-role. Only changes UI — backend token stays __dev_mode__. */
+  const setDevViewRole = (role: DevViewRole) => {
+    if (!isDevMode) return;
+    setDevViewRoleState(role);
+    // Persist so it survives page refresh
+    try {
+      const raw = localStorage.getItem(SESSION_KEY);
+      if (raw) {
+        const session: StoredSession = JSON.parse(raw);
+        session.devViewRole = role;
+        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      }
+    } catch { /* ignore */ }
   };
 
   const logout = async () => {
     const BASE = import.meta.env.VITE_API_URL ?? '';
     const headers: Record<string, string> = {};
     if (token) {
-      // Dev mode: still send X-Auth-Token header for __dev_mode__ token
       headers['X-Auth-Token'] = token;
     }
     fetch(`${BASE}/api/auth/logout`, {
@@ -187,22 +250,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     setUser(null);
     setIsDevMode(false);
+    setDevViewRoleState('dev');
   };
 
-  // Permission helpers
-  const canWrite = isDevMode || !!(user && (
+  // Permission helpers — in dev mode, simulate the selected view-role for UI purposes
+  const simPerms = isDevMode ? devViewPermissions(devViewRole) : null;
+
+  const canWrite = simPerms ? simPerms.canWrite : !!(user && (
     user.WDUTIES || user.WABSENCES || user.WOVERTIMES || user.WNOTES
   ));
-  const canWriteDuties = isDevMode || !!(user?.WDUTIES);
-  const canWriteAbsences = isDevMode || !!(user?.WABSENCES);
-  const canWriteOvertimes = isDevMode || !!(user?.WOVERTIMES);
-  const canAdmin = isDevMode || !!(user?.ACCADMWND);
-  const canBackup = isDevMode || !!(user?.BACKUP);
+  const canWriteDuties = simPerms ? simPerms.canWriteDuties : !!(user?.WDUTIES);
+  const canWriteAbsences = simPerms ? simPerms.canWriteAbsences : !!(user?.WABSENCES);
+  const canWriteOvertimes = simPerms ? simPerms.canWriteOvertimes : !!(user?.WOVERTIMES);
+  const canAdmin = simPerms ? simPerms.canAdmin : !!(user?.ACCADMWND);
+  const canBackup = simPerms ? simPerms.canBackup : !!(user?.BACKUP);
 
   return (
     <AuthContext.Provider value={{
       user,
       isDevMode,
+      devViewRole,
+      setDevViewRole,
       isLoading,
       token,
       login,

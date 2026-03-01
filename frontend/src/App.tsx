@@ -15,6 +15,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { InstallBanner } from './components/InstallBanner';
 import { BottomNav } from './components/BottomNav';
 import { api } from './api/client';
+import { DevRoleSwitcher } from './components/DevRoleSwitcher';
 
 // Lazy-loaded pages — each page group is a separate chunk
 const Dashboard         = lazy(() => import('./pages/Dashboard'));
@@ -380,10 +381,18 @@ function AppInner() {
     document.title = label ? `${label} — SP5` : 'OpenSchichtplaner5';
   }, [currentItem]);
 
-  // Filter nav items based on user role
+  // Filter nav items based on user role (or simulated devViewRole in dev mode)
+  const { devViewRole } = useAuth();
   const visibleItems = navItems.filter(item => {
-    if (isDevMode) return true;
     if (!item.roles) return true; // no restriction
+    if (isDevMode) {
+      // In dev mode, simulate visibility based on devViewRole
+      if (devViewRole === 'dev') return true;
+      const simRole = devViewRole === 'admin' ? 'Admin'
+        : devViewRole === 'planer' ? 'Planer'
+        : 'Leser';
+      return item.roles.includes(simRole as 'Admin' | 'Planer' | 'Leser');
+    }
     const role = user?.role ?? 'Leser';
     return item.roles.includes(role as 'Admin' | 'Planer' | 'Leser');
   });
@@ -768,6 +777,7 @@ export default function App() {
                 <SSEProvider>
                   <AuthGate />
                 </SSEProvider>
+                <DevRoleSwitcher />
               </AuthProvider>
             </BrowserRouter>
             <GlobalToastContainer />

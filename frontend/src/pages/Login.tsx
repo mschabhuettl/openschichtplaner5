@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage, useT } from '../i18n/context';
 
@@ -10,6 +10,15 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [serverDevMode, setServerDevMode] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const BASE = import.meta.env.VITE_API_URL ?? '';
+    fetch(`${BASE}/api/dev/mode`)
+      .then(r => r.json())
+      .then(d => setServerDevMode(d.dev_mode === true))
+      .catch(() => setServerDevMode(false));
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -106,19 +115,21 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="my-5 border-t border-slate-700" />
-
-          {/* Dev Mode button */}
-          <button
-            type="button"
-            onClick={handleDevMode}
-            className="w-full py-2 px-4 bg-slate-600 hover:bg-slate-500 active:bg-slate-700
-                       text-slate-300 text-sm rounded-lg transition
-                       focus:outline-none focus:ring-2 focus:ring-slate-400"
-          >
-            🛠️ {t.login.devModeButton}
-          </button>
+          {/* Divider + Dev Mode button — only when server reports dev mode active */}
+          {serverDevMode === true && (
+            <>
+              <div className="my-5 border-t border-slate-700" />
+              <button
+                type="button"
+                onClick={handleDevMode}
+                className="w-full py-2 px-4 bg-amber-900/40 hover:bg-amber-800/60 active:bg-amber-900/70
+                           text-amber-300 text-sm rounded-lg border border-amber-700/50 transition
+                           focus:outline-none focus:ring-2 focus:ring-amber-500"
+              >
+                🛠️ {t.login.devModeButton}
+              </button>
+            </>
+          )}
         </div>
 
         {/* Language toggle */}

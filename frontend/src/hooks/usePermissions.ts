@@ -1,18 +1,21 @@
 import { useAuth } from '../contexts/AuthContext';
 
 export function usePermissions() {
-  const { user, isDevMode, canWriteDuties, canWriteAbsences, canAdmin } = useAuth();
+  const { user, isDevMode, devViewRole, canWriteDuties, canWriteAbsences, canAdmin } = useAuth();
+
+  // In dev mode with 'dev' view-role: full access to everything
+  const isFullDevView = isDevMode && (devViewRole === 'dev');
 
   return {
     // Kann Schicht im Dienstplan setzen/löschen?
-    canEditSchedule: isDevMode || canWriteDuties,
+    canEditSchedule: isFullDevView || canWriteDuties,
     // Kann Abwesenheiten eintragen?
-    canEditAbsences: isDevMode || canWriteAbsences,
+    canEditAbsences: isFullDevView || canWriteAbsences,
     // Kann Stammdaten bearbeiten (Mitarbeiter, Schichten etc.)?
-    canEditMasterData: isDevMode || (user?.WACCEMWND ?? false),
+    canEditMasterData: isFullDevView || (user?.WACCEMWND ?? false),
     // Kann Admin-Bereich sehen?
-    canSeeAdmin: isDevMode || canAdmin,
+    canSeeAdmin: isFullDevView || canAdmin,
     // Kann Backup machen?
-    canDoBackup: isDevMode || (user?.BACKUP ?? false),
+    canDoBackup: isFullDevView || (user?.BACKUP ?? false),
   };
 }

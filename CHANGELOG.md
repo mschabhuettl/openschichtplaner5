@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.1] — 2026-03-01
+
+### Added
+
+- **Dev Mode guard** — `__dev_mode__` token is now rejected with 401 when `SP5_DEV_MODE` is not set; backend adds `GET /api/dev/mode` endpoint (no auth required) so the frontend can conditionally show the dev login button
+- **Dev Role Switcher** — floating UI overlay (top-right, visible only in dev mode) to simulate the app as seen by Admin / Planer / Leser; backend calls always run as full dev, only the UI permission logic is adjusted
+- `GET /api/auth/me` endpoint added for current-user introspection
+- Login page hides dev login button when server reports `dev_mode: false`
+- `devViewRole` state in `AuthContext` drives nav filtering and permission helpers during dev-mode simulation
+
+### Changed
+
+- `usePermissions` and nav-item filtering now respect `devViewRole` in dev mode
+- Permission helpers (`canAdmin`, `canWrite`, etc.) simulate the selected view-role in dev mode
+
+---
+
 ## [0.4.0] — 2026-03-01
 
 > **Major Milestone Release** — This release marks the completion of a comprehensive hardening, feature, and quality pass across the entire OpenSchichtplaner5 stack. It represents a production-ready foundation with enterprise-grade security, full internationalisation, a polished UX, and a rigorous test suite.

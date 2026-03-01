@@ -118,18 +118,26 @@ export function GuidedTour({ open, onClose }: GuidedTourProps) {
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(false);
 
-  // Show automatically on first visit
+  // Auto-show on first visit — runs ONCE on mount only (empty deps).
+  // Mark as seen immediately so navigation re-renders never re-trigger it.
+  useEffect(() => {
+    const done = localStorage.getItem(TOUR_STORAGE_KEY);
+    if (!done) {
+      const t = setTimeout(() => {
+        localStorage.setItem(TOUR_STORAGE_KEY, '1'); // mark seen before showing
+        setStep(0);
+        setVisible(true);
+      }, 800);
+      return () => clearTimeout(t);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally empty — mount-only
+
+  // Handle explicit open via prop (🧭 button)
   useEffect(() => {
     if (open) {
       setStep(0);
       setVisible(true);
-      return;
-    }
-    const done = localStorage.getItem(TOUR_STORAGE_KEY);
-    if (!done) {
-      // Small delay so app has time to render
-      const t = setTimeout(() => { setStep(0); setVisible(true); }, 800);
-      return () => clearTimeout(t);
     }
   }, [open]);
 

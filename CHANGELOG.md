@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.7] — 2026-03-01
+
+### Fixed
+- **Mobile UX Overhaul** (Login, Sidebar, Touch Targets, CSS)
+  - Login: Language switcher moved to top-right with border + chevron; inputs use `text-base` (16px) to prevent iOS auto-zoom; password show/hide eye-icon toggle; subtitle contrast improved (`text-slate-300`); keyboard-aware container with `overflow-y-auto`; card border (`border-slate-600`); all buttons `min-h-[44px]`
+  - Sidebar nav items: `min-h-[48px]`, `text-base`, active route highlighted in blue (`bg-blue-600`)
+  - Mobile header: fixed 56px height (`h-14`), "SP5" title truncation
+  - Logout button enlarged to `py-2.5 text-sm min-h-[44px]`
+  - `body { overflow-x: hidden }` to prevent horizontal scroll blowout
+  - `@media (max-width: 640px)` touch target rules (`min-height: 44px`) for all interactive elements
+- **Onboarding Tour Bug**: Tour now only auto-shows once on mount (empty deps array); `localStorage` key set *before* showing the modal — prevents re-trigger on every navigation or re-render
+- **Statistiken Tab Overflow**: Tab container uses `overflow-x-auto flex-nowrap` — tabs scroll horizontally on mobile instead of overflowing; tab buttons `min-h-[44px] whitespace-nowrap`
+
+---
+
 ## [0.4.5] — 2026-03-01
 
 ### Added

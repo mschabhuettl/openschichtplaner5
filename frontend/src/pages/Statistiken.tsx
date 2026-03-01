@@ -453,35 +453,35 @@ export default function Statistiken() {
   return (
     <div className="p-2 sm:p-4 lg:p-6 h-full flex flex-col">
       {/* Page header + tab switcher */}
-      <div className="flex items-center gap-3 mb-3 flex-wrap">
-        <h1 className="text-xl font-bold text-gray-800 dark:text-slate-100 dark:text-slate-200">📈 Statistiken</h1>
-        <div className="flex rounded-lg border overflow-x-auto shadow-sm text-sm min-w-0">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
+        <h1 className="text-xl font-bold text-gray-800 dark:text-slate-100 dark:text-slate-200 flex-shrink-0">📈 Statistiken</h1>
+        <div className="flex rounded-lg border overflow-x-auto shadow-sm text-sm min-w-0 flex-nowrap" style={{WebkitOverflowScrolling:'touch'}}>
           <button
-            className={`px-4 py-1.5 transition-colors ${activeTab === 'group' ? 'bg-slate-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
+            className={`px-4 py-2.5 min-h-[44px] whitespace-nowrap transition-colors ${activeTab === 'group' ? 'bg-slate-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
             onClick={() => setActiveTab('group')}
           >
             Gruppenauswertung
           </button>
           <button
-            className={`px-4 py-1.5 transition-colors ${activeTab === 'employee' ? 'bg-slate-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
+            className={`px-4 py-2.5 min-h-[44px] whitespace-nowrap transition-colors ${activeTab === 'employee' ? 'bg-slate-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
             onClick={() => setActiveTab('employee')}
           >
             👤 Mitarbeiter-Auswertung
           </button>
           <button
-            className={`px-4 py-1.5 transition-colors ${activeTab === 'sickness' ? 'bg-red-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
+            className={`px-4 py-2.5 min-h-[44px] whitespace-nowrap transition-colors ${activeTab === 'sickness' ? 'bg-red-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
             onClick={() => setActiveTab('sickness')}
           >
             🏥 Krankenstand
           </button>
           <button
-            className={`px-4 py-1.5 transition-colors ${activeTab === 'compare' ? 'bg-indigo-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
+            className={`px-4 py-2.5 min-h-[44px] whitespace-nowrap transition-colors ${activeTab === 'compare' ? 'bg-indigo-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
             onClick={() => setActiveTab('compare')}
           >
             {t.statistiken.tabMonthly}
           </button>
           <button
-            className={`px-4 py-1.5 transition-colors ${activeTab === 'shifts' ? 'bg-emerald-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
+            className={`px-4 py-2.5 min-h-[44px] whitespace-nowrap transition-colors ${activeTab === 'shifts' ? 'bg-emerald-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
             onClick={() => setActiveTab('shifts')}
           >
             {t.statistiken.tabShifts}

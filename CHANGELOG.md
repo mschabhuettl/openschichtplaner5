@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.2] — 2026-03-01
+
+### Changed
+
+- **Leser role nav restrictions** — 18 nav items (Statistiken, Leitwand, Dienst-Board, Team-Übersicht, Notfall-Plan, Übergabe, Simulation, Verfügbarkeits-Matrix, Jahresrückblick, MA-Vergleich, MA-Profil, Fairness, Rotations-Analyse, Kapazitäts-Forecast, Qualitätsbericht, Schicht-Kalibrator, Kompetenz-Matrix, Analytics, Monatsberichte) now require `Admin` or `Planer` role
+- **Route guard** — new `RoleRoute` component blocks direct URL access to restricted pages for Leser; shows a "Kein Zugriff 🔒" page instead of page content
+- **Mobile DevRoleSwitcher** — compact button on small screens (below the mobile header, smaller padding/font); avoids overlapping the hamburger menu
+
+---
+
 ## [0.4.1] — 2026-03-01
 
 ### Added

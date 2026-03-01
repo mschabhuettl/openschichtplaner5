@@ -105,6 +105,39 @@ function LiveIndicator() {
   );
 }
 
+/** Access denied page for Leser trying to reach restricted routes */
+function AccessDenied() {
+  const navigate = useNavigate();
+  return (
+    <div className="flex flex-col items-center justify-center h-full min-h-[300px] gap-4 text-center px-6">
+      <div className="text-5xl">🔒</div>
+      <h1 className="text-xl font-bold text-slate-700 dark:text-slate-200">Kein Zugriff</h1>
+      <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs">
+        Diese Seite ist nur für Admins und Planer zugänglich.
+      </p>
+      <button
+        onClick={() => navigate('/')}
+        className="mt-2 px-4 py-2 bg-slate-700 text-white text-sm rounded-lg hover:bg-slate-600 transition-colors"
+      >
+        Zurück zum Dashboard
+      </button>
+    </div>
+  );
+}
+
+/** Route guard: renders children only if the current role allows it */
+function RoleRoute({ allowedRoles, children }: { allowedRoles: Array<'Admin' | 'Planer' | 'Leser'>; children: React.ReactNode }) {
+  const { user, isDevMode, devViewRole } = useAuth();
+  let role: 'Admin' | 'Planer' | 'Leser';
+  if (isDevMode) {
+    role = devViewRole === 'admin' ? 'Admin' : devViewRole === 'planer' ? 'Planer' : devViewRole === 'dev' ? 'Admin' : 'Leser';
+  } else {
+    role = (user?.role as 'Admin' | 'Planer' | 'Leser') ?? 'Leser';
+  }
+  if (!allowedRoles.includes(role)) return <AccessDenied />;
+  return <>{children}</>;
+}
+
 /** Simple loading indicator shown while a lazy chunk is fetching */
 function PageLoader() {
   return (
@@ -157,35 +190,35 @@ const navItems: NavItem[] = [
   { id: 'zeitkonto',      label: 'Zeitkonto',      icon: '⏱️', group: 'Zeitwirtschaft', path: '/zeitkonto' },
   { id: 'ueberstunden',   label: 'Überstunden',    icon: '⏰', group: 'Zeitwirtschaft', path: '/ueberstunden',   roles: ['Admin', 'Planer'] },
   { id: 'kontobuchungen', label: 'Kontobuchungen', icon: '💰', group: 'Zeitwirtschaft', path: '/kontobuchungen', roles: ['Admin', 'Planer'] },
-  { id: 'statistiken',    label: 'Statistiken',    icon: '📈', group: 'Zeitwirtschaft', path: '/statistiken' },
+  { id: 'statistiken',    label: 'Statistiken',    icon: '📈', group: 'Zeitwirtschaft', path: '/statistiken', roles: ['Admin', 'Planer'] },
 
   // ── Ansichten ────────────────────────────────────────────────
-  { id: 'leitwand',          label: 'Leitwand',              icon: '📺', group: 'Ansichten', path: '/leitwand' },
-  { id: 'dienst-board',      label: 'Dienst-Board',          icon: '🖥️', group: 'Ansichten', path: '/dienst-board' },
+  { id: 'leitwand',          label: 'Leitwand',              icon: '📺', group: 'Ansichten', path: '/leitwand',   roles: ['Admin', 'Planer'] },
+  { id: 'dienst-board',      label: 'Dienst-Board',          icon: '🖥️', group: 'Ansichten', path: '/dienst-board', roles: ['Admin', 'Planer'] },
   { id: 'teamkalender',      label: 'Team-Kalender',         icon: '🗓️', group: 'Ansichten', path: '/teamkalender' },
-  { id: 'team-uebersicht',   label: 'Team-Übersicht',        icon: '👥', group: 'Ansichten', path: '/team' },
+  { id: 'team-uebersicht',   label: 'Team-Übersicht',        icon: '👥', group: 'Ansichten', path: '/team',       roles: ['Admin', 'Planer'] },
   { id: 'geburtstagkalender',label: 'Geburtstags-Kalender',  icon: '🎂', group: 'Ansichten', path: '/geburtstagkalender' },
 
   // ── Werkzeuge ────────────────────────────────────────────────
-  { id: 'notfall-plan',           label: 'Notfall-Plan',        icon: '🚨', group: 'Werkzeuge', path: '/notfall-plan' },
-  { id: 'uebergabe',              label: 'Übergabe',             icon: '🤝', group: 'Werkzeuge', path: '/uebergabe' },
-  { id: 'simulation',             label: 'Simulation',           icon: '🧪', group: 'Werkzeuge', path: '/simulation' },
-  { id: 'verfuegbarkeits-matrix', label: 'Verfügbarkeits-Matrix',icon: '🧩', group: 'Werkzeuge', path: '/verfuegbarkeits-matrix' },
+  { id: 'notfall-plan',           label: 'Notfall-Plan',        icon: '🚨', group: 'Werkzeuge', path: '/notfall-plan',           roles: ['Admin', 'Planer'] },
+  { id: 'uebergabe',              label: 'Übergabe',             icon: '🤝', group: 'Werkzeuge', path: '/uebergabe',              roles: ['Admin', 'Planer'] },
+  { id: 'simulation',             label: 'Simulation',           icon: '🧪', group: 'Werkzeuge', path: '/simulation',             roles: ['Admin', 'Planer'] },
+  { id: 'verfuegbarkeits-matrix', label: 'Verfügbarkeits-Matrix',icon: '🧩', group: 'Werkzeuge', path: '/verfuegbarkeits-matrix', roles: ['Admin', 'Planer'] },
   { id: 'notizen',                label: 'Notizen',              icon: '📝', group: 'Werkzeuge', path: '/notizen', roles: ['Admin', 'Planer'] },
   { id: 'jahresabschluss',        label: 'Jahresabschluss',      icon: '📅', group: 'Werkzeuge', path: '/jahresabschluss', roles: ['Admin', 'Planer'] },
 
   // ── Berichte & Analysen ──────────────────────────────────────
-  { id: 'jahresrueckblick',   label: 'Jahresrückblick',    icon: '🗓️', group: 'Berichte', path: '/jahresrueckblick' },
-  { id: 'mitarbeiter-vergleich', label: 'MA-Vergleich',   icon: '⚖️', group: 'Berichte', path: '/mitarbeiter-vergleich' },
-  { id: 'mitarbeiter-profil', label: 'MA-Profil',          icon: '🪪', group: 'Berichte', path: '/mitarbeiter' },
-  { id: 'fairness',           label: 'Fairness-Score',     icon: '📐', group: 'Berichte', path: '/fairness' },
-  { id: 'rotations-analyse',  label: 'Rotations-Analyse',  icon: '🔄', group: 'Berichte', path: '/rotations-analyse' },
-  { id: 'kapazitaets-forecast', label: 'Kapazitäts-Forecast', icon: '📊', group: 'Berichte', path: '/kapazitaets-forecast' },
-  { id: 'qualitaets-bericht', label: 'Qualitätsbericht',   icon: '📋', group: 'Berichte', path: '/qualitaets-bericht' },
-  { id: 'schicht-kalibrator', label: 'Schicht-Kalibrator', icon: '⚖️', group: 'Berichte', path: '/schicht-kalibrator' },
-  { id: 'kompetenz-matrix',   label: 'Kompetenz-Matrix',   icon: '🎓', group: 'Berichte', path: '/kompetenz-matrix' },
-  { id: 'analytics',          label: 'Analytics & Trends', icon: '📉', group: 'Berichte', path: '/analytics' },
-  { id: 'berichte',           label: 'Monatsberichte',     icon: '📄', group: 'Berichte', path: '/berichte' },
+  { id: 'jahresrueckblick',   label: 'Jahresrückblick',    icon: '🗓️', group: 'Berichte', path: '/jahresrueckblick',    roles: ['Admin', 'Planer'] },
+  { id: 'mitarbeiter-vergleich', label: 'MA-Vergleich',   icon: '⚖️', group: 'Berichte', path: '/mitarbeiter-vergleich', roles: ['Admin', 'Planer'] },
+  { id: 'mitarbeiter-profil', label: 'MA-Profil',          icon: '🪪', group: 'Berichte', path: '/mitarbeiter',           roles: ['Admin', 'Planer'] },
+  { id: 'fairness',           label: 'Fairness-Score',     icon: '📐', group: 'Berichte', path: '/fairness',              roles: ['Admin', 'Planer'] },
+  { id: 'rotations-analyse',  label: 'Rotations-Analyse',  icon: '🔄', group: 'Berichte', path: '/rotations-analyse',    roles: ['Admin', 'Planer'] },
+  { id: 'kapazitaets-forecast', label: 'Kapazitäts-Forecast', icon: '📊', group: 'Berichte', path: '/kapazitaets-forecast', roles: ['Admin', 'Planer'] },
+  { id: 'qualitaets-bericht', label: 'Qualitätsbericht',   icon: '📋', group: 'Berichte', path: '/qualitaets-bericht',   roles: ['Admin', 'Planer'] },
+  { id: 'schicht-kalibrator', label: 'Schicht-Kalibrator', icon: '⚖️', group: 'Berichte', path: '/schicht-kalibrator',   roles: ['Admin', 'Planer'] },
+  { id: 'kompetenz-matrix',   label: 'Kompetenz-Matrix',   icon: '🎓', group: 'Berichte', path: '/kompetenz-matrix',     roles: ['Admin', 'Planer'] },
+  { id: 'analytics',          label: 'Analytics & Trends', icon: '📉', group: 'Berichte', path: '/analytics',            roles: ['Admin', 'Planer'] },
+  { id: 'berichte',           label: 'Monatsberichte',     icon: '📄', group: 'Berichte', path: '/berichte',             roles: ['Admin', 'Planer'] },
   { id: 'export',             label: 'Export',             icon: '⬇️', group: 'Berichte', path: '/export', roles: ['Admin', 'Planer'] },
   { id: 'import',             label: 'Import',             icon: '⬆️', group: 'Berichte', path: '/import', roles: ['Admin'] },
 
@@ -670,25 +703,25 @@ function AppInner() {
               <Route path="/einsatzplan" element={<Einsatzplan />} />
               <Route path="/jahresuebersicht" element={<Jahresuebersicht />} />
               <Route path="/personaltabelle" element={<Personaltabelle />} />
-              <Route path="/statistiken" element={<Statistiken />} />
+              <Route path="/statistiken" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Statistiken /></RoleRoute>} />
               <Route path="/urlaub" element={<Urlaub />} />
               <Route path="/schichtmodell" element={<Schichtmodell />} />
               <Route path="/personalbedarf" element={<Personalbedarf />} />
-              <Route path="/jahresrueckblick" element={<Jahresrueckblick />} />
+              <Route path="/jahresrueckblick" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Jahresrueckblick /></RoleRoute>} />
               <Route path="/jahresabschluss" element={<Jahresabschluss />} />
               <Route path="/zeitkonto" element={<Zeitkonto />} />
               <Route path="/ueberstunden" element={<Ueberstunden />} />
               <Route path="/kontobuchungen" element={<Kontobuchungen />} />
               <Route path="/notizen" element={<Notizen />} />
-              <Route path="/mitarbeiter-vergleich" element={<MitarbeiterVergleich />} />
-              <Route path="/team" element={<TeamUebersicht />} />
-              <Route path="/mitarbeiter" element={<MitarbeiterProfil />} />
-              <Route path="/mitarbeiter/:id" element={<MitarbeiterProfil />} />
+              <Route path="/mitarbeiter-vergleich" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterVergleich /></RoleRoute>} />
+              <Route path="/team" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><TeamUebersicht /></RoleRoute>} />
+              <Route path="/mitarbeiter" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterProfil /></RoleRoute>} />
+              <Route path="/mitarbeiter/:id" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterProfil /></RoleRoute>} />
               <Route path="/mein-profil" element={<MeinProfil />} />
               <Route path="/teamkalender" element={<Teamkalender />} />
               <Route path="/urlaubs-timeline" element={<UrlaubsTimeline />} />
-              <Route path="/fairness" element={<Fairness />} />
-              <Route path="/berichte" element={<Berichte />} />
+              <Route path="/fairness" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Fairness /></RoleRoute>} />
+              <Route path="/berichte" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Berichte /></RoleRoute>} />
               <Route path="/export" element={<Export />} />
               <Route path="/import" element={<Import />} />
               <Route path="/employees" element={<Employees />} />
@@ -705,19 +738,19 @@ function AppInner() {
               <Route path="/einstellungen" element={<Einstellungen />} />
               <Route path="/protokoll" element={<Protokoll />} />
               <Route path="/druckvorschau" element={<Druckvorschau />} />
-              <Route path="/dienst-board" element={<DienstBoard />} />
+              <Route path="/dienst-board" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><DienstBoard /></RoleRoute>} />
               <Route path="/wochenansicht" element={<Wochenansicht />} />
-              <Route path="/verfuegbarkeits-matrix" element={<VerfügbarkeitsMatrix />} />
-              <Route path="/rotations-analyse" element={<RotationsAnalyse />} />
-              <Route path="/kapazitaets-forecast" element={<KapazitaetsForecast />} />
-              <Route path="/qualitaets-bericht" element={<QualitaetsBericht />} />
-              <Route path="/schicht-kalibrator" element={<SchichtKalibrator />} />
-              <Route path="/kompetenz-matrix" element={<KompetenzMatrix />} />
-              <Route path="/analytics" element={<Analytics />} />
-              <Route path="/simulation" element={<Simulation />} />
-              <Route path="/notfall-plan" element={<NotfallPlan />} />
-              <Route path="/leitwand" element={<Leitwand />} />
-              <Route path="/uebergabe" element={<Uebergabe />} />
+              <Route path="/verfuegbarkeits-matrix" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><VerfügbarkeitsMatrix /></RoleRoute>} />
+              <Route path="/rotations-analyse" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><RotationsAnalyse /></RoleRoute>} />
+              <Route path="/kapazitaets-forecast" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><KapazitaetsForecast /></RoleRoute>} />
+              <Route path="/qualitaets-bericht" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><QualitaetsBericht /></RoleRoute>} />
+              <Route path="/schicht-kalibrator" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><SchichtKalibrator /></RoleRoute>} />
+              <Route path="/kompetenz-matrix" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><KompetenzMatrix /></RoleRoute>} />
+              <Route path="/analytics" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Analytics /></RoleRoute>} />
+              <Route path="/simulation" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Simulation /></RoleRoute>} />
+              <Route path="/notfall-plan" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><NotfallPlan /></RoleRoute>} />
+              <Route path="/leitwand" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Leitwand /></RoleRoute>} />
+              <Route path="/uebergabe" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Uebergabe /></RoleRoute>} />
               <Route path="/schichtbriefing" element={<SchichtBriefing />} />
               <Route path="/onboarding" element={<OnboardingWizard />} />
               <Route path="/auditlog" element={<AuditLog />} />

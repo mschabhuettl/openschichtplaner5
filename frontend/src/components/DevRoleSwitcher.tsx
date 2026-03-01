@@ -16,11 +16,14 @@ export function DevRoleSwitcher() {
 
   const current = ROLES.find(r => r.key === devViewRole) ?? ROLES[0];
 
+  // Detect mobile viewport for compact styling
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return (
     <div style={{
       position: 'fixed',
-      top: '12px',
-      right: '12px',
+      top: isMobile ? '54px' : '12px',  // below mobile header bar on small screens
+      right: isMobile ? '6px' : '12px',
       zIndex: 9999,
       fontFamily: 'monospace',
     }}>
@@ -33,19 +36,20 @@ export function DevRoleSwitcher() {
           color: devViewRole === 'dev' ? '#fbbf24' : '#fb923c',
           border: `2px solid ${devViewRole === 'dev' ? '#f59e0b' : '#ea580c'}`,
           borderRadius: '8px',
-          padding: '6px 12px',
+          padding: isMobile ? '3px 7px' : '6px 12px',
           cursor: 'pointer',
-          fontSize: '13px',
+          fontSize: isMobile ? '11px' : '13px',
           fontFamily: 'monospace',
           fontWeight: 'bold',
           display: 'flex',
           alignItems: 'center',
-          gap: '6px',
+          gap: isMobile ? '4px' : '6px',
           boxShadow: `0 2px 10px ${devViewRole === 'dev' ? 'rgba(245,158,11,0.35)' : 'rgba(234,88,12,0.35)'}`,
           whiteSpace: 'nowrap',
+          opacity: 0.85,
         }}
       >
-        {current.icon} {devViewRole === 'dev' ? 'DEV MODE' : `Ansicht: ${current.label}`} ▾
+        {current.icon} {isMobile ? current.label : (devViewRole === 'dev' ? 'DEV MODE' : `Ansicht: ${current.label}`)} ▾
       </button>
 
       {open && (

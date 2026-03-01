@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.4] — 2026-03-01
+
+### Changed
+- **Dienstplan (Schedule)**: Leser-Rolle sieht jetzt einen dezenten 👁️ "Nur-Lese-Ansicht" Banner oben; eigene Mitarbeiter-Zeile wird mit blauem Hintergrund + "(Du)" Badge hervorgehoben
+- **Schichtwünsche**: Leser sehen automatisch nur ihre eigenen Wünsche; Mitarbeiter-Filter ausgeblendet; beim "Wunsch eintragen" wird eigener Mitarbeiter vorausgewählt und gesperrt
+
+---
+
 ## [0.4.3] — 2026-03-01
 
 ### Changed

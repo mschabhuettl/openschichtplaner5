@@ -18,6 +18,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.8] — 2026-03-01
+
+### Security
+- **Notifications: Atomic file writes** — `_save()` now uses write-to-tempfile + `os.replace()` to prevent partial reads under concurrent load (race condition fix)
+- **Notifications: Read-lock protection** — GET endpoints now use `_load_safe()` (under `_lock`) instead of unlocked `_load()`, preventing inconsistent reads during concurrent writes
+- **Notifications: IDOR fix in `/api/notifications`** — Non-admin users can only query their own `employee_id`; attempting to read another user's notifications returns 403
+- **Notifications: IDOR fix in mark-read/delete** — Non-admin users can only mark-read or delete their own notifications; ownership is verified per request
+- **Notifications: `/api/notifications/all` now requires Admin role** — Previously only required Planer; now enforces `require_admin` to restrict full notification dump to admins only
+- **Dependencies** — `pip-audit` check: no known CVEs in current deps (fastapi 0.129.0, starlette 0.52.1, uvicorn 0.41.0, pydantic 2.12.5); npm audit: 0 vulnerabilities
+
+---
+
 ## [0.4.7] — 2026-03-01
 
 ### Fixed

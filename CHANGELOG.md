@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.5] — 2026-03-01
+
+### Added
+- **In-App Benachrichtigungen**: Neues Backend-System (`/api/notifications`) mit file-basierter Persistenz
+  - Notification Bell 🔔 im Header mit Unread-Badge-Counter
+  - Benachrichtigungen als gelesen markieren (einzeln oder alle)
+  - Benachrichtigungen löschen
+- **Benachrichtigungs-Trigger**:
+  - Urlaubsantrag genehmigt/abgelehnt → Benachrichtigung für den betroffenen Mitarbeiter
+  - Neue Tauschanfrage → Benachrichtigung für den Partner-Mitarbeiter
+- **Onboarding-Tour aktualisiert** (v2): Neue Steps für Tauschbörse, Rollen-Switcher und Benachrichtigungen; Tour-Key auf `v2` aktualisiert (alle User sehen die Tour erneut)
+
+---
+
 ## [0.4.4] — 2026-03-01
 
 ### Changed

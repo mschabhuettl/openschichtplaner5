@@ -9,6 +9,7 @@ import { ToastContainer } from './components/Toast';
 import { useToast } from './hooks/useToast';
 import SpotlightSearch from './components/SpotlightSearch';
 import WarningsCenter from './components/WarningsCenter';
+import { NotificationBell } from './components/NotificationBell';
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 import { GuidedTour, useTour } from './components/GuidedTour';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -490,6 +491,8 @@ function AppInner() {
         <div className="flex items-center gap-1">
           {/* Warnings Center bell */}
           <WarningsCenter />
+          {/* In-App Notifications */}
+          <NotificationBell />
           {/* Spotlight search button */}
           <button
             onClick={() => setSpotlightOpen(true)}
@@ -672,6 +675,8 @@ function AppInner() {
             {currentItem?.icon} {currentItem?.label}
           </span>
           <WarningsCenter />
+          {/* In-App Notifications */}
+          <NotificationBell />
           <button
             onClick={() => setSpotlightOpen(true)}
             title="Schnellsuche"

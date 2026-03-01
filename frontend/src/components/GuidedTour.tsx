@@ -4,7 +4,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 
-export const TOUR_STORAGE_KEY = 'sp5_tour_done_v1';
+export const TOUR_STORAGE_KEY = 'sp5_tour_done_v2';
 
 export interface TourStep {
   title: string;
@@ -62,6 +62,27 @@ const STEPS: TourStep[] = [
     description:
       'Unter "Mein Profil" siehst du deine eigenen Stunden, Schichten und Abwesenheiten. Passe deine Benachrichtigungseinstellungen und Präferenzen an.',
     icon: '👤',
+    target: null,
+  },
+  {
+    title: 'Tauschbörse — Dienste flexibel tauschen',
+    description:
+      'Unter "Tauschbörse" können Mitarbeiter Tauschanfragen stellen und Planer sie genehmigen oder ablehnen. Tauschanfragen lösen automatisch eine Benachrichtigung beim betroffenen Mitarbeiter aus.',
+    icon: '🔄',
+    target: null,
+  },
+  {
+    title: 'Rollen-Switcher — Perspektive wechseln',
+    description:
+      'Oben rechts kannst du zwischen verschiedenen Rollen wechseln:\n• Admin — voller Zugriff\n• Planer — Dienstplanung & Genehmigungen\n• Leser — nur lesen (Self-Service Portal)\n\nIdeal um die App aus Mitarbeiter-Sicht zu erleben.',
+    icon: '👤',
+    target: null,
+  },
+  {
+    title: 'Benachrichtigungen — Immer informiert',
+    description:
+      'Die Glocke 🔔 in der Kopfzeile zeigt dir Benachrichtigungen:\n• Urlaubsanträge genehmigt/abgelehnt\n• Neue Tauschanfragen\n\nBenachrichtigungen können als "gelesen" markiert oder gelöscht werden.',
+    icon: '🔔',
     target: null,
   },
   {

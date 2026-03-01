@@ -689,7 +689,7 @@ function AppInner() {
             onClick={toggleTheme}
             title={isDark ? 'Hell-Modus' : 'Dunkel-Modus'}
             aria-label={isDark ? 'Hell-Modus aktivieren' : 'Dunkel-Modus aktivieren'}
-            className="flex items-center justify-center w-11 h-11 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors text-base flex-shrink-0"
+            className="hidden sm:flex items-center justify-center w-11 h-11 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors text-base flex-shrink-0"
           >
             {isDark ? '☀️' : '🌙'}
           </button>

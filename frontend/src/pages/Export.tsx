@@ -80,6 +80,7 @@ export default function Export() {
   const currentMonth = now.getMonth() + 1;
 
   const [groups, setGroups] = useState<Group[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Schedule export state
   const [scheduleYear, setScheduleYear] = useState(currentYear);
@@ -101,10 +102,12 @@ export default function Export() {
   const [absFormat, setAbsFormat] = useState<'csv' | 'html'>('csv');
 
   useEffect(() => {
+    setLoading(true);
     fetch(`${API}/api/groups`, { headers: getAuthHeaders() })
       .then((r) => r.json())
       .then(setGroups)
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   const scheduleMonthStr = `${scheduleYear}-${String(scheduleMonth).padStart(2, '0')}`;
@@ -140,6 +143,17 @@ export default function Export() {
   const selectCls =
     'border border-gray-300 rounded-lg px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-400';
   const labelCls = 'text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1';
+
+  if (loading) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[200px]">
+        <div className="flex flex-col items-center gap-3 text-slate-400">
+          <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-500 rounded-full animate-spin" />
+          <span className="text-sm">Export wird geladen…</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-2 sm:p-4 lg:p-6 max-w-3xl mx-auto">

@@ -66,7 +66,7 @@ interface PersonalData {
   TOWN: string;
 }
 
-function Step1Personal({ data, onChange }: { data: PersonalData; onChange: (d: PersonalData) => void }) {
+function Step1Personal({ data, onChange, lastnameBlurred, onLastnameBlur }: { data: PersonalData; onChange: (d: PersonalData) => void; lastnameBlurred?: boolean; onLastnameBlur?: () => void }) {
   const set = (key: keyof PersonalData, val: string | number) =>
     onChange({ ...data, [key]: val });
 
@@ -77,23 +77,31 @@ function Step1Personal({ data, onChange }: { data: PersonalData; onChange: (d: P
     return f + l;
   };
 
+  const lastnameInvalid = lastnameBlurred && !data.LASTNAME.trim();
+
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Persönliche Daten</h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Nachname *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1" htmlFor="wizard-lastname">Nachname *</label>
             <input
+              id="wizard-lastname"
               type="text"
               value={data.LASTNAME}
+              required
+              aria-required="true"
+              aria-invalid={lastnameInvalid}
+              onBlur={onLastnameBlur}
               onChange={e => {
                 const v = e.target.value;
                 onChange({ ...data, LASTNAME: v, SHORTNAME: autoShort(v, data.FIRSTNAME) });
               }}
-              className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent ${lastnameInvalid ? 'border-red-400 focus:ring-red-400' : ''}`}
               placeholder="Mustermann"
             />
+            {lastnameInvalid && <p className="text-red-500 text-xs mt-0.5" role="alert">Nachname ist ein Pflichtfeld</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Vorname</label>
@@ -495,6 +503,7 @@ export default function OnboardingWizard() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ id: number; name: string } | null>(null);
+  const [lastnameBlurred, setLastnameBlurred] = useState(false);
 
   useEffect(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -601,7 +610,7 @@ export default function OnboardingWizard() {
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-lg p-8 min-h-[400px] flex flex-col">
           <div className="flex-1">
-            {step === 0 && <Step1Personal data={personal} onChange={setPersonal} />}
+            {step === 0 && <Step1Personal data={personal} onChange={setPersonal} lastnameBlurred={lastnameBlurred} onLastnameBlur={() => setLastnameBlurred(true)} />}
             {step === 1 && <Step2Worktime data={worktime} onChange={setWorktime} />}
             {step === 2 && <Step3Groups groups={groups} selectedGroups={selectedGroups} onChange={setSelectedGroups} />}
             {step === 3 && <Step4Summary personal={personal} worktime={worktime} groups={groups} selectedGroups={selectedGroups} />}

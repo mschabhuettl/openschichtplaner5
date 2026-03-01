@@ -361,6 +361,7 @@ export default function Shifts() {
                 <input
                   type="text"
                   autoFocus value={form.NAME}
+                  required aria-required="true"
                   onChange={e => { setForm(f => ({ ...f, NAME: e.target.value })); if (error?.includes('Bezeichnung')) setError(null); }}
                   className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 ${!form.NAME.trim() && error?.includes('Bezeichnung') ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-500'}`}
                 />
@@ -371,6 +372,7 @@ export default function Shifts() {
                 <input
                   type="text"
                   value={form.SHORTNAME}
+                  required aria-required="true"
                   onChange={e => { setForm(f => ({ ...f, SHORTNAME: e.target.value })); if (error?.includes('Kürzel')) setError(null); }}
                   className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 ${!form.SHORTNAME.trim() && error?.includes('Kürzel') ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-500'}`}
                 />

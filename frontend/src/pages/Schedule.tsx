@@ -1919,7 +1919,7 @@ export default function Schedule() {
   const [filterEmployeeIds, setFilterEmployeeIds] = useState<number[]>([]);
   const [showTerminated, setShowTerminated] = useState(false);
   const [employeeSort, setEmployeeSort] = useState<'position' | 'name-asc' | 'name-desc' | 'number-asc' | 'number-desc' | 'group'>('position');
-  const [showFilterPanel, setShowFilterPanel] = useState(true);
+  const [showFilterPanel, setShowFilterPanel] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 640);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // UI state

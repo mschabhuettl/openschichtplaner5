@@ -199,6 +199,7 @@ function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceM
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Mitarbeiter</label>
             <select value={employeeId} onChange={e => setEmployeeId(Number(e.target.value))}
+              required aria-required="true"
               className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               {employees.map(e => <option key={e.ID} value={e.ID}>{e.NAME}, {e.FIRSTNAME}</option>)}
             </select>
@@ -208,17 +209,20 @@ function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceM
               <label className="block text-sm font-medium text-gray-700 mb-1">Von</label>
               <input type="date" value={fromDate}
                 onChange={e => { setFromDate(e.target.value); if (e.target.value > toDate) setToDate(e.target.value); }}
+                required aria-required="true"
                 className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Bis</label>
               <input type="date" value={toDate} min={fromDate} onChange={e => setToDate(e.target.value)}
+                required aria-required="true"
                 className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Art der Abwesenheit</label>
             <select value={leaveTypeId} onChange={e => setLeaveTypeId(Number(e.target.value))}
+              required aria-required="true"
               className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               {leaveTypes.map(lt => <option key={lt.ID} value={lt.ID}>{lt.NAME} ({lt.SHORTNAME})</option>)}
             </select>

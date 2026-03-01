@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.9] — 2026-03-01
+
+### Fixed
+- **Mobile: Dienstplan Filter-Panel** — Filter-Bereich startet auf Mobile (< 640px) standardmäßig eingeklappt, um mehr Platz für die Tabelle zu schaffen; manuell über den 🔍 Filter-Header aufklappbar
+- **Mobile: Statistiken Tab Overflow** — horizontales Überlaufen der Statistik-Tabelle auf kleinen Screens behoben
+- **Toast Deduplication** — doppelte Toast-Notifications werden dedupliziert (kein Spam bei wiederholten Fehlern)
+- **Mobile: Header & Touch Targets** — kompaktere Darstellung des Headers, größere Touch-Targets für alle interaktiven Elemente
+- **UX: Loading-State Export** — Export-Seite zeigt Lade-Spinner während Gruppen vom Server geladen werden
+- **UX: Form Validation Onboarding** — Nachname-Feld im Onboarding-Wizard zeigt Fehlerhinweis + `aria-required` bei leerem Pflichtfeld
+- **UX: aria-required Urlaub** — Urlaubsantrag-Formular: Mitarbeiter, Von/Bis, Abwesenheitsart mit `required` + `aria-required` für Screenreader
+- **UX: aria-required Shifts** — Schicht-Name und Kürzel-Felder mit `required` + `aria-required` ausgestattet
+
+### Security
+- **Security Audit #10 (Notifications)** — Ownership-Checks für alle Notification-Endpoints; atomare File-Writes; IDOR-Fixes; `/api/notifications/all` erfordert jetzt Admin-Rolle
+- **Dependencies** — `pip-audit` ohne bekannte CVEs; npm audit: 0 Vulnerabilities
+
+---
+
 ## [0.4.8] — 2026-03-01
 
 ### Security

@@ -4790,7 +4790,7 @@ export default function Schedule() {
         <table className="border-collapse text-xs" style={isDragging ? { userSelect: 'none' } : undefined}>
           <thead>
             <tr className="bg-slate-700 text-white">
-              <th className="sticky left-0 z-20 bg-slate-700 px-3 py-2 text-left min-w-[160px] border-r border-slate-600">
+              <th className="sticky left-0 z-20 bg-slate-700 px-3 py-2 text-left min-w-[90px] sm:min-w-[160px] border-r border-slate-600">
                 Mitarbeiter
               </th>
               {displayedDays.map(day => {
@@ -4823,8 +4823,8 @@ export default function Schedule() {
                     title={thTitle + ' · Klick für Tagesübersicht'}
                     onClick={() => setDayDetailModal({ day, dateStr })}
                   >
-                    <div className="font-bold">{day}</div>
                     <div className="text-slate-300 text-[10px]">{WEEKDAY_ABBR[wd]}</div>
+                    <div className="font-bold">{day}</div>
                     {isHol && <div className="text-yellow-300 text-[8px] leading-none">★</div>}
                     {isToday && !isHol && <div className="text-blue-200 text-[8px] leading-none">●</div>}
                     {coverageDot && (
@@ -4847,7 +4847,7 @@ export default function Schedule() {
           <tbody>
             {/* ── Tagesnotizen row ── */}
             <tr className="bg-indigo-50 border-b border-indigo-200">
-              <td className="sticky left-0 z-10 bg-indigo-50 px-3 py-1 border-r border-indigo-200 font-semibold text-[11px] text-indigo-700 whitespace-nowrap">
+              <td className="sticky left-0 z-10 bg-indigo-50 px-2 sm:px-3 py-1 border-r border-indigo-200 font-semibold text-[11px] text-indigo-700 whitespace-nowrap min-w-[90px] sm:min-w-[160px]">
                 📝 Tagesnotizen
               </td>
               {displayedDays.map(day => {
@@ -4912,7 +4912,7 @@ export default function Schedule() {
               return (
                 <tr key={emp.ID} className={empRowStyle ? undefined : (isCurrentUserRow ? 'bg-blue-50 dark:bg-blue-950/30' : rowBg)} style={empRowStyle}>
                   <td
-                    className="sticky left-0 z-10 bg-inherit px-3 py-1 border-r border-gray-200 border-b border-b-gray-100 font-medium whitespace-nowrap cursor-pointer select-none"
+                    className="sticky left-0 z-10 bg-white dark:bg-gray-900 px-2 sm:px-3 py-1 border-r border-gray-200 border-b border-b-gray-100 font-medium whitespace-nowrap cursor-pointer select-none min-w-[90px] sm:min-w-[160px] max-w-[90px] sm:max-w-[160px] overflow-hidden"
                     style={highlightedEmpId === emp.ID
                       ? { ...(empNameStyle || {}), outline: '2px solid #0ea5e9', outlineOffset: '-2px', backgroundColor: empNameStyle?.backgroundColor ?? '#e0f2fe' }
                       : empNameStyle}
@@ -4937,8 +4937,8 @@ export default function Schedule() {
                       return (
                         <>
                           {emp.BOLD === 1
-                            ? <strong>{emp.NAME}, {emp.FIRSTNAME}</strong>
-                            : <>{emp.NAME}, {emp.FIRSTNAME}</>}
+                            ? <strong className="block truncate text-[11px] sm:text-xs">{emp.NAME}, {emp.FIRSTNAME}</strong>
+                            : <span className="block truncate text-[11px] sm:text-xs">{emp.NAME}, {emp.FIRSTNAME}</span>}
                           {isLeserView && currentUserEmpId === emp.ID && (
                             <span className="ml-1.5 rounded bg-blue-500 px-1 py-0.5 text-[10px] font-bold text-white">Du</span>
                           )}
@@ -5064,7 +5064,7 @@ export default function Schedule() {
                         {entry ? (
                           <div className="relative">
                             <span
-                              className="block px-0.5 py-0.5 font-bold text-[11px]"
+                              className="block px-0.5 py-1.5 sm:py-0.5 font-bold text-[11px] min-h-[34px] sm:min-h-0 flex items-center justify-center"
                               style={{ color: entry.color_text }}
                             >
                               {entry.display_name || '?'}
@@ -5111,7 +5111,7 @@ export default function Schedule() {
                             </button>
                           </div>
                         ) : (
-                          <div className="relative h-6">
+                          <div className="relative h-[34px] sm:h-6">
                             {/* Conflict icon for empty cells */}
                             {hasConflict && (
                               <span

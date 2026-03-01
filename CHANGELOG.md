@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.29] — 2026-03-01
+
+### Tests
+
+- `test(frontend)`: Unit tests added for `Skeleton` (12 tests), `EmptyState`/`ApiErrorState`/`InlineError` (14 tests), `useDebounce` (6 tests), `ConfirmDialog` (12 tests) — total frontend tests: 85 (was: 41)
+
+---
+
 ## [0.3.28] — 2026-03-01
 
 ### Security

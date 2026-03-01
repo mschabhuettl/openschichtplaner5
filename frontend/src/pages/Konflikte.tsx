@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSSERefresh } from '../contexts/SSEContext';
 import { HelpTooltip } from '../components/HelpTooltip';
 import { EmptyState } from '../components/EmptyState';
+import { useT } from '../i18n';
 
 // ─── Types ────────────────────────────────────────────────
 interface Conflict {
@@ -33,22 +34,17 @@ function getAuthHeaders(): Record<string, string> {
   } catch { return {}; }
 }
 
-const MONTHS = [
-  'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
-];
-
 function formatDate(dateStr: string): string {
   const [y, m, d] = dateStr.split('-');
   return `${d}.${m}.${y}`;
 }
 
-function conflictTypeLabel(type: string): { label: string; icon: string; color: string } {
+function conflictTypeLabel(type: string, labels: { typeShiftAbsence: string; typeHolidayBan: string }): { label: string; icon: string; color: string } {
   switch (type) {
     case 'shift_and_absence':
-      return { label: 'Schicht + Abwesenheit', icon: '⚡', color: 'bg-red-100 text-red-700' };
+      return { label: labels.typeShiftAbsence, icon: '⚡', color: 'bg-red-100 text-red-700' };
     case 'holiday_ban':
-      return { label: 'Urlaubssperre', icon: '🚫', color: 'bg-orange-100 text-orange-700' };
+      return { label: labels.typeHolidayBan, icon: '🚫', color: 'bg-orange-100 text-orange-700' };
     default:
       return { label: type, icon: '⚠️', color: 'bg-yellow-100 text-yellow-700' };
   }
@@ -70,6 +66,7 @@ interface ConfirmModalProps {
   onCancel: () => void;
 }
 function ConfirmModal({ title, message, confirmLabel, confirmClass, onConfirm, onCancel }: ConfirmModalProps) {
+  const t = useT();
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
       <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-sm">
@@ -84,7 +81,7 @@ function ConfirmModal({ title, message, confirmLabel, confirmClass, onConfirm, o
             onClick={onCancel}
             className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50 text-gray-700"
           >
-            Abbrechen
+            {t.konflikte.cancel}
           </button>
           <button
             onClick={onConfirm}
@@ -107,15 +104,16 @@ interface BulkDeleteModalProps {
 }
 function BulkDeleteModal({ count, deleteType, onConfirm, onCancel }: BulkDeleteModalProps) {
   const [selectedType, setSelectedType] = useState<'shift' | 'absence'>(deleteType);
+  const t = useT();
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
       <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
         <div className="px-6 py-4 border-b">
-          <h2 className="text-base font-bold text-gray-800">🗑 Massenauflösung: {count} Konflikte</h2>
+          <h2 className="text-base font-bold text-gray-800">🗑 {t.konflikte.title}: {count}</h2>
         </div>
         <div className="px-6 py-4 space-y-3">
           <p className="text-sm text-gray-600">
-            Was soll bei allen <strong>{count}</strong> ausgewählten Konflikten gelöscht werden?
+            {t.konflikte.colActions}: <strong>{count}</strong>
           </p>
           <label className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-blue-50 transition-colors">
             <input
@@ -127,8 +125,8 @@ function BulkDeleteModal({ count, deleteType, onConfirm, onCancel }: BulkDeleteM
               className="text-blue-600"
             />
             <div>
-              <div className="text-sm font-medium text-gray-800">📅 Schichten löschen</div>
-              <div className="text-xs text-gray-500">Die Schichtzuweisung wird entfernt, Abwesenheit bleibt erhalten</div>
+              <div className="text-sm font-medium text-gray-800">{t.konflikte.bulkModalDeleteShifts}</div>
+              <div className="text-xs text-gray-500">{t.konflikte.bulkModalDeleteShiftsDesc}</div>
             </div>
           </label>
           <label className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer hover:bg-orange-50 transition-colors">
@@ -141,8 +139,8 @@ function BulkDeleteModal({ count, deleteType, onConfirm, onCancel }: BulkDeleteM
               className="text-orange-600"
             />
             <div>
-              <div className="text-sm font-medium text-gray-800">🏖️ Abwesenheiten löschen</div>
-              <div className="text-xs text-gray-500">Die Abwesenheit wird entfernt, Schicht bleibt erhalten</div>
+              <div className="text-sm font-medium text-gray-800">{t.konflikte.bulkModalDeleteAbsences}</div>
+              <div className="text-xs text-gray-500">{t.konflikte.bulkModalDeleteAbsencesDesc}</div>
             </div>
           </label>
         </div>
@@ -151,13 +149,13 @@ function BulkDeleteModal({ count, deleteType, onConfirm, onCancel }: BulkDeleteM
             onClick={onCancel}
             className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50 text-gray-700"
           >
-            Abbrechen
+            {t.konflikte.cancel}
           </button>
           <button
             onClick={() => onConfirm(selectedType)}
             className={`px-4 py-2 text-sm rounded-lg text-white font-medium ${selectedType === 'shift' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-orange-500 hover:bg-orange-600'}`}
           >
-            {count} Konflikte auflösen
+            {count} {t.konflikte.title}
           </button>
         </div>
       </div>
@@ -167,6 +165,7 @@ function BulkDeleteModal({ count, deleteType, onConfirm, onCancel }: BulkDeleteM
 
 // ─── Main Component ────────────────────────────────────────
 export default function Konflikte() {
+  const t = useT();
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
@@ -198,7 +197,7 @@ export default function Konflikte() {
       const data: ConflictsResponse = await res.json();
       setConflicts(data.conflicts ?? []);
     } catch (_e) {
-      setError('Fehler beim Laden der Konflikte.');
+      setError(t.konflikte.loading);
       setConflicts([]);
     } finally {
       setLoading(false);
@@ -325,7 +324,7 @@ export default function Konflikte() {
     const shiftState = getActionState('shift', c);
     const absState = getActionState('absence', c);
     const key = conflictKey(c);
-    const typeInfo = conflictTypeLabel(c.type);
+    const typeInfo = conflictTypeLabel(c.type, t.konflikte);
     return (
       <tr
         key={`${c.employee_id}-${c.date}-${idx}`}
@@ -363,7 +362,7 @@ export default function Konflikte() {
               📅 {c.shift_name}
             </span>
           ) : (
-            <span className="text-gray-600 text-xs italic">Sonderschicht</span>
+            <span className="text-gray-600 text-xs italic">{t.konflikte.colShift}</span>
           )}
         </td>
         <td className="px-4 py-3">
@@ -372,7 +371,7 @@ export default function Konflikte() {
               🏖️ {c.absence_name}
             </span>
           ) : (
-            <span className="text-gray-600 text-xs italic">Abwesenheit</span>
+            <span className="text-gray-600 text-xs italic">{t.konflikte.colAbsence}</span>
           )}
         </td>
         <td className="px-4 py-3">
@@ -390,7 +389,7 @@ export default function Konflikte() {
                   : 'bg-blue-600 text-white hover:bg-blue-700'
               }`}
             >
-              {shiftState === 'loading' ? '…' : shiftState === 'done' ? '✓ Schicht gelöscht' : shiftState === 'error' ? '✕ Fehler' : '🗑 Schicht'}
+              {shiftState === 'loading' ? '…' : shiftState === 'done' ? t.konflikte.btnDeletedShift : shiftState === 'error' ? t.konflikte.btnError : t.konflikte.btnDeleteShift}
             </button>
             <button
               onClick={() => setConfirmAction({ type: 'absence', conflict: c })}
@@ -405,7 +404,7 @@ export default function Konflikte() {
                   : 'bg-orange-500 text-white hover:bg-orange-600'
               }`}
             >
-              {absState === 'loading' ? '…' : absState === 'done' ? '✓ Abw. gelöscht' : absState === 'error' ? '✕ Fehler' : '🗑 Abwesenheit'}
+              {absState === 'loading' ? '…' : absState === 'done' ? t.konflikte.btnDeletedAbsence : absState === 'error' ? t.konflikte.btnError : t.konflikte.btnDeleteAbsence}
             </button>
           </div>
         </td>
@@ -419,7 +418,7 @@ export default function Konflikte() {
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-            ⚠️ Konflikte
+            ⚠️ {t.konflikte.title}
             {!loading && conflicts.length > 0 && (
               <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-red-500 text-white text-xs font-bold">
                 {conflicts.length}
@@ -427,10 +426,10 @@ export default function Konflikte() {
             )}
           </h1>
           <p className="text-sm text-gray-500 mt-1 flex items-center gap-2">
-            Planungskonflikte: Schicht + Abwesenheit / Urlaubssperre
+            {t.konflikte.subtitle}
             <HelpTooltip
               position="right"
-              text={"Konflikte entstehen wenn:\n• Ein Mitarbeiter gleichzeitig eine Schicht und eine Abwesenheit hat\n• Ein Mitarbeiter während einer Urlaubssperre eingeplant ist\n\nAuflösen: Schicht oder Abwesenheit löschen."}
+              text={t.konflikte.helpText}
             />
           </p>
         </div>
@@ -442,7 +441,7 @@ export default function Konflikte() {
             onChange={e => setMonth(Number(e.target.value))}
             className="text-sm border rounded-lg px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {MONTHS.map((m, i) => (
+            {t.months.map((m, i) => (
               <option key={i + 1} value={i + 1}>{m}</option>
             ))}
           </select>
@@ -477,7 +476,7 @@ export default function Konflikte() {
         <div className="flex items-center justify-center py-16 text-gray-600">
           <div className="flex flex-col items-center gap-3">
             <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
-            <span className="text-sm">Konflikte werden geladen…</span>
+            <span className="text-sm">{t.konflikte.loading}</span>
           </div>
         </div>
       )}
@@ -486,7 +485,7 @@ export default function Konflikte() {
       {bulkProgress && (
         <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm flex items-center gap-3">
           <div className="w-4 h-4 border-2 border-blue-400 border-t-blue-700 rounded-full animate-spin" />
-          <span>Auflösung läuft: {bulkProgress.done} / {bulkProgress.total} Konflikte verarbeitet…</span>
+          <span>{t.konflikte.title}: {bulkProgress.done} / {bulkProgress.total}…</span>
           <div className="flex-1 bg-blue-200 rounded-full h-2">
             <div
               className="bg-blue-600 h-2 rounded-full transition-all"
@@ -500,8 +499,8 @@ export default function Konflikte() {
       {!loading && !error && conflicts.length === 0 && (
         <EmptyState
           icon="✅"
-          title="Alles in Ordnung"
-          description={`Für ${MONTHS[month - 1]} ${year} gibt es keine Planungskonflikte.`}
+          title={t.konflikte.allOk}
+          description={`${t.months[month - 1]} ${year} — ${t.konflikte.noConflictsDesc}`}
         />
       )}
 
@@ -512,7 +511,7 @@ export default function Konflikte() {
             {/* Search */}
             <input
               type="text"
-              placeholder="🔍 Mitarbeiter / Schicht / Abwesenheit suchen…"
+              placeholder={t.konflikte.searchPlaceholder}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               className="text-sm border rounded-lg px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 w-72"
@@ -524,16 +523,16 @@ export default function Konflikte() {
                 onClick={() => setFilterType('all')}
                 className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${filterType === 'all' ? 'bg-white shadow text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}
               >
-                Alle ({conflicts.length})
+                {t.konflikte.filterAll} ({conflicts.length})
               </button>
-              {conflictTypes.map(t => {
-                const info = conflictTypeLabel(t);
-                const cnt = conflicts.filter(c => c.type === t).length;
+              {conflictTypes.map(ctype => {
+                const info = conflictTypeLabel(ctype, t.konflikte);
+                const cnt = conflicts.filter(c => c.type === ctype).length;
                 return (
                   <button
-                    key={t}
-                    onClick={() => setFilterType(t)}
-                    className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${filterType === t ? 'bg-white shadow text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}
+                    key={ctype}
+                    onClick={() => setFilterType(ctype)}
+                    className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${filterType === ctype ? 'bg-white shadow text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}
                   >
                     {info.icon} {info.label} ({cnt})
                   </button>
@@ -547,13 +546,13 @@ export default function Konflikte() {
                 onClick={() => setViewMode('list')}
                 className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${viewMode === 'list' ? 'bg-white shadow text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}
               >
-                ☰ Liste
+                {t.konflikte.viewList}
               </button>
               <button
                 onClick={() => setViewMode('grouped')}
                 className={`px-3 py-1.5 text-xs rounded-md font-medium transition-colors ${viewMode === 'grouped' ? 'bg-white shadow text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}
               >
-                👥 Gruppiert
+                {t.konflikte.viewGrouped}
               </button>
             </div>
           </div>
@@ -562,19 +561,19 @@ export default function Konflikte() {
           {selectedKeys.size > 0 && (
             <div className="mb-4 flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <span className="text-sm font-medium text-blue-800">
-                {selectedKeys.size} Konflikte ausgewählt
+                {selectedKeys.size} {t.konflikte.title}
               </span>
               <button
                 onClick={() => setShowBulkModal(true)}
                 className="px-3 py-1.5 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium transition-colors"
               >
-                🗑 Massenauflösung…
+                {t.konflikte.bulkResolveBtn}
               </button>
               <button
                 onClick={() => setSelectedKeys(new Set())}
                 className="px-3 py-1.5 text-xs rounded-lg border hover:bg-gray-50 text-gray-600 font-medium transition-colors"
               >
-                ✕ Auswahl aufheben
+                {t.konflikte.clearSelection}
               </button>
             </div>
           )}
@@ -582,7 +581,7 @@ export default function Konflikte() {
           {/* Filtered count mismatch info */}
           {filteredConflicts.length !== conflicts.length && (
             <div className="mb-3 text-xs text-gray-500">
-              {filteredConflicts.length} von {conflicts.length} Konflikten angezeigt
+              {filteredConflicts.length} / {conflicts.length} {t.konflikte.title}
               {searchQuery && ` (Filter: "${searchQuery}")`}
             </div>
           )}
@@ -594,7 +593,7 @@ export default function Konflikte() {
         <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
           <div className="px-4 py-3 border-b bg-red-50 flex items-center justify-between">
             <span className="text-red-600 font-medium text-sm">
-              🔴 {filteredConflicts.length} Konflikt{filteredConflicts.length !== 1 ? 'e' : ''} in {MONTHS[month - 1]} {year}
+              🔴 {filteredConflicts.length} {t.konflikte.title} — {t.months[month - 1]} {year}
             </span>
           </div>
           <div className="overflow-x-auto">
@@ -609,12 +608,12 @@ export default function Konflikte() {
                       className="rounded text-blue-600"
                     />
                   </th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Mitarbeiter</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Datum</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Typ</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Schicht</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Abwesenheit</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">Aktionen</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colEmployee}</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colDate}</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colType}</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colShift}</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colAbsence}</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colActions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -623,7 +622,7 @@ export default function Konflikte() {
             </table>
           </div>
           <div className="px-4 py-3 border-t text-xs text-gray-600 bg-gray-50">
-            Tipp: Wähle mehrere Konflikte aus und nutze die Massenauflösung, um schnell aufzuräumen.
+            {t.konflikte.tableTip}
           </div>
         </div>
       )}
@@ -670,7 +669,7 @@ export default function Konflikte() {
                     empConflicts.length >= 3 ? 'bg-orange-100 text-orange-700' :
                     'bg-yellow-100 text-yellow-700'
                   }`}>
-                    {empConflicts.length} Konflikt{empConflicts.length !== 1 ? 'e' : ''}
+                    {empConflicts.length} {t.konflikte.title}
                   </span>
                   <span className="text-gray-600 text-xs ml-1">{isExpanded ? '▲' : '▼'}</span>
                 </div>
@@ -682,11 +681,11 @@ export default function Konflikte() {
                       <thead className="bg-gray-50 border-b">
                         <tr>
                           <th className="px-3 py-2"></th>
-                          <th className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">Datum</th>
-                          <th className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">Typ</th>
-                          <th className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">Schicht</th>
-                          <th className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">Abwesenheit</th>
-                          <th className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">Aktionen</th>
+                          <th className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">{t.konflikte.colDate}</th>
+                          <th className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">{t.konflikte.colType}</th>
+                          <th className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">{t.konflikte.colShift}</th>
+                          <th className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">{t.konflikte.colAbsence}</th>
+                          <th className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">{t.konflikte.colActions}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
@@ -705,13 +704,13 @@ export default function Konflikte() {
       {!loading && conflicts.length > 0 && filteredConflicts.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-gray-600">
           <div className="text-4xl mb-3">🔍</div>
-          <p className="text-base font-medium text-gray-600">Kein Ergebnis</p>
-          <p className="text-sm mt-1">Keine Konflikte entsprechen dem aktuellen Filter.</p>
+          <p className="text-base font-medium text-gray-600">{t.konflikte.noResults}</p>
+          <p className="text-sm mt-1">{t.konflikte.noResultsDesc}</p>
           <button
             onClick={() => { setSearchQuery(''); setFilterType('all'); }}
             className="mt-3 px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700"
           >
-            Filter zurücksetzen
+            {t.konflikte.resetFilter}
           </button>
         </div>
       )}
@@ -719,13 +718,13 @@ export default function Konflikte() {
       {/* Confirm single delete Modal */}
       {confirmAction && (
         <ConfirmModal
-          title={confirmAction.type === 'shift' ? 'Schicht löschen?' : 'Abwesenheit löschen?'}
+          title={confirmAction.type === 'shift' ? t.konflikte.confirmDeleteShift : t.konflikte.confirmDeleteAbsence}
           message={
             confirmAction.type === 'shift'
-              ? `Schicht "${confirmAction.conflict.shift_name || 'Sonderschicht'}" von ${confirmAction.conflict.employee_name} am ${formatDate(confirmAction.conflict.date)} wirklich löschen?`
-              : `Abwesenheit "${confirmAction.conflict.absence_name || 'Abwesenheit'}" von ${confirmAction.conflict.employee_name} am ${formatDate(confirmAction.conflict.date)} wirklich löschen?`
+              ? `"${confirmAction.conflict.shift_name || t.konflikte.colShift}" — ${confirmAction.conflict.employee_name} ${formatDate(confirmAction.conflict.date)}`
+              : `"${confirmAction.conflict.absence_name || t.konflikte.colAbsence}" — ${confirmAction.conflict.employee_name} ${formatDate(confirmAction.conflict.date)}`
           }
-          confirmLabel={confirmAction.type === 'shift' ? 'Schicht löschen' : 'Abwesenheit löschen'}
+          confirmLabel={confirmAction.type === 'shift' ? t.konflikte.confirmDeleteShiftLabel : t.konflikte.confirmDeleteAbsenceLabel}
           confirmClass={confirmAction.type === 'shift' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-orange-500 hover:bg-orange-600'}
           onConfirm={() => handleDelete(confirmAction.type, confirmAction.conflict)}
           onCancel={() => setConfirmAction(null)}

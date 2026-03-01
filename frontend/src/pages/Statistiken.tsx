@@ -6,7 +6,7 @@ import type { Employee, Group } from '../types';
 import { useT } from '../i18n';
 import { EmptyState } from '../components/EmptyState';
 
-const MONTH_NAMES = [
+const MONTH_NAMES_DE = [
   '', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
 ];
@@ -18,7 +18,7 @@ function exportStatisticsHTML(
   month: number,
   groupLabel: string,
 ) {
-  const monthName = MONTH_NAMES[month];
+  const monthName = MONTH_NAMES_DE[month];
   const now = new Date().toLocaleString('de-AT');
 
   const totalTarget = stats.reduce((a, s) => a + s.target_hours, 0);
@@ -605,7 +605,7 @@ export default function Statistiken() {
                     return (
                       <tr key={m.month} className={`${rowBg} hover:bg-blue-50/70 transition-colors`}>
                         <td className={`px-3 py-2 border border-gray-100 dark:border-slate-700 font-medium ${isCurrentMonth ? 'text-blue-700' : 'text-gray-800 dark:text-slate-200'}`}>
-                          {MONTH_NAMES[m.month]}
+                          {t.months[m.month - 1]}
                           {isCurrentMonth && <span className="ml-1 text-xs text-blue-400">(aktuell)</span>}
                         </td>
                         <td className="px-3 py-2 border border-gray-100 dark:border-slate-700 text-right text-gray-600">
@@ -701,7 +701,7 @@ export default function Statistiken() {
         <div className="flex items-center gap-2">
           <button onClick={prevMonth} className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm">‹</button>
           <span className="font-semibold text-gray-700 dark:text-slate-300 min-w-[150px] text-center">
-            {MONTH_NAMES[month]} {year}
+            {t.months[month - 1]} {year}
           </span>
           <button onClick={nextMonth} className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm">›</button>
         </div>
@@ -859,7 +859,7 @@ export default function Statistiken() {
       {extraSummary.length > 0 && (
         <div className="mt-4 bg-white dark:bg-slate-800 rounded-lg shadow border border-gray-200 dark:border-slate-600">
           <div className="px-4 py-2 bg-slate-700 text-white text-sm font-semibold rounded-t-lg flex items-center gap-2">
-            <span>⏱️ Zeitzuschläge – {MONTH_NAMES[month]} {year}</span>
+            <span>⏱️ Zeitzuschläge – {t.months[month - 1]} {year}</span>
             <span className="text-slate-300 dark:text-slate-500 font-normal text-xs">(Alle Mitarbeiter)</span>
           </div>
           <div className="flex flex-wrap gap-3 p-4">

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.30] — 2026-03-01
+
+### Security
+
+- `feat(security)`: Migrate auth token storage from `localStorage` to HttpOnly cookies for improved XSS resistance
+  - Backend `/api/auth/login` sets `sp5_token` HttpOnly cookie (`SameSite=Strict`, `Secure` in production)
+  - Backend middleware reads token from cookie OR `X-Auth-Token` header (backwards compat for dev mode / existing sessions)
+  - Backend `/api/auth/logout` clears the cookie via `Max-Age=0`
+  - Frontend no longer stores real token in `localStorage`; all requests use `credentials: 'include'` for automatic cookie transmission
+  - Dev mode (`__dev_mode__`) still works via `X-Auth-Token` header
+
+---
+
 ## [0.3.29] — 2026-03-01
 
 ### Tests

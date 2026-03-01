@@ -429,22 +429,23 @@ export function invalidateCachePath(path: string): void {
   _apiCache.delete(path);
 }
 
-/** Read auth token from localStorage (set by AuthContext). */
-function getAuthToken(): string | null {
+/** Read dev-mode token from localStorage (only used for __dev_mode__ header injection). */
+function getDevToken(): string | null {
   try {
     const raw = localStorage.getItem('sp5_session');
     if (!raw) return null;
     const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
-    return session.devMode ? '__dev_mode__' : (session.token ?? null);
+    // Only inject X-Auth-Token header for dev mode; normal sessions use HttpOnly cookie
+    return session.devMode ? '__dev_mode__' : null;
   } catch {
     return null;
   }
 }
 
-/** Build auth headers, injecting X-Auth-Token when a session token exists. */
+/** Build auth headers. For dev mode injects X-Auth-Token; normal sessions rely on HttpOnly cookie. */
 function authHeaders(extra: Record<string, string> = {}): Record<string, string> {
-  const token = getAuthToken();
-  return token ? { ...extra, 'X-Auth-Token': token } : extra;
+  const devToken = getDevToken();
+  return devToken ? { ...extra, 'X-Auth-Token': devToken } : extra;
 }
 
 /** Extract the most informative error message from an API error response. */
@@ -473,14 +474,16 @@ async function handleResponseError(res: Response): Promise<void> {
 /** Wrap fetch calls with auto-retry (2 attempts, exponential backoff) on network errors.
  *  Only network-level errors are retried; HTTP 4xx/5xx are NOT retried. */
 async function safeFetch(input: string, init?: RequestInit, _attempt = 0): Promise<Response> {
+  // Always include credentials so HttpOnly cookies are sent automatically
+  const mergedInit: RequestInit = { credentials: 'include', ...init };
   try {
-    return await fetch(input, init);
+    return await fetch(input, mergedInit);
   } catch (_err) {
     // TypeError: Failed to fetch — server unreachable or CORS
     if (_attempt < 2) {
       // Exponential backoff: 500ms, 1500ms
       await new Promise(r => setTimeout(r, 500 * (2 ** _attempt)));
-      return safeFetch(input, init, _attempt + 1);
+      return safeFetch(input, mergedInit, _attempt + 1);
     }
     throw new Error('Server nicht erreichbar. Bitte Verbindung prüfen.');
   }
@@ -1272,6 +1275,7 @@ export const api = {
     formData.append('file', file);
     const res = await fetch(`${BASE_URL}/api/employees/${id}/photo`, {
       method: 'POST',
+      credentials: 'include',
       body: formData,
     });
     if (!res.ok) {
@@ -1299,6 +1303,7 @@ export const api = {
     formData.append('file', file);
     const res = await fetch(`${BASE_URL}/api/backup/restore`, {
       method: 'POST',
+      credentials: 'include',
       body: formData,
     });
     if (!res.ok) {
@@ -1397,7 +1402,7 @@ export const api = {
     const qs = new URLSearchParams({ year: String(year), month: String(month), format });
     if (groupId != null) qs.set('group_id', String(groupId));
     const url = `${BASE_URL}/api/reports/monthly?${qs.toString()}`;
-    const res = await fetch(url);
+    const res = await fetch(url, { credentials: 'include' });
     if (!res.ok) {
       const data = await res.json().catch(() => ({ detail: res.statusText }));
       throw new Error((data as { detail?: string }).detail || res.statusText);

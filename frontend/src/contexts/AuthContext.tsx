@@ -116,8 +116,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(DEV_USER);
           setIsDevMode(true);
           setToken(null);
-        } else if (session.token && session.user) {
-          setToken(session.token);
+        } else if (session.user) {
+          // Token is managed by HttpOnly cookie; only restore user metadata from localStorage
+          setToken(null);
           setUser(applyRoleDefaults(session.user));
         }
       }
@@ -145,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await fetch(`${BASE}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',  // allow HttpOnly cookie to be set
       body: JSON.stringify({ username, password }),
     });
     if (!res.ok) {
@@ -153,9 +155,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const data = await res.json();
     const resolvedUser = applyRoleDefaults(data.user);
-    const session: StoredSession = { token: data.token, user: resolvedUser, devMode: false };
+    // Store user info only — token is kept in HttpOnly cookie, not localStorage
+    const session: StoredSession = { token: '', user: resolvedUser, devMode: false };
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    setToken(data.token);
+    setToken(null);  // token managed by HttpOnly cookie
     setUser(resolvedUser);
     setIsDevMode(false);
   };
@@ -169,13 +172,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    const BASE = import.meta.env.VITE_API_URL ?? '';
+    const headers: Record<string, string> = {};
     if (token) {
-      const BASE = import.meta.env.VITE_API_URL ?? '';
-      fetch(`${BASE}/api/auth/logout`, {
-        method: 'POST',
-        headers: { 'X-Auth-Token': token },
-      }).catch(() => {});
+      // Dev mode: still send X-Auth-Token header for __dev_mode__ token
+      headers['X-Auth-Token'] = token;
     }
+    fetch(`${BASE}/api/auth/logout`, {
+      method: 'POST',
+      headers,
+      credentials: 'include',  // send cookie so backend can clear it
+    }).catch(() => {});
     localStorage.removeItem(SESSION_KEY);
     setToken(null);
     setUser(null);

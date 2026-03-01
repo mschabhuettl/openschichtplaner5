@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.32] — 2026-03-01
+
+### Performance
+
+- `perf`: Profiled all major API endpoints — all respond <30ms (employees: ~10ms, schedule: ~20ms, conflicts: ~10ms) thanks to existing `_GLOBAL_DBF_CACHE` mtime-based cache
+- `perf`: Verified frontend bundle — no chunk exceeds 500kB (largest: index.js 250kB gzip 76kB, well-split via dynamic imports)
+- `test`: Added `test_response_times.py` — asserts 5 key endpoints respond in <2s each
+
+---
+
 ## [0.3.31] — 2026-03-01
 
 ### Internationalization

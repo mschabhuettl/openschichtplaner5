@@ -551,9 +551,9 @@ function AppInner() {
                   key={item.id}
                   onClick={() => goTo(item.path)}
                   aria-current={isActive(item) ? 'page' : undefined}
-                  className={`w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-base min-h-[48px] transition-colors ${
                     isActive(item)
-                      ? 'bg-slate-600 text-white font-semibold'
+                      ? 'bg-blue-600 text-white font-semibold'
                       : 'text-slate-300 hover:bg-slate-700 hover:text-white'
                   }`}
                 >
@@ -608,8 +608,8 @@ function AppInner() {
         </div>
         <button
           onClick={logout}
-          className="w-full py-1.5 px-3 text-xs text-slate-400 hover:text-white
-                     bg-slate-700 hover:bg-slate-600 rounded transition text-left"
+          className="w-full py-2.5 px-3 text-sm text-slate-400 hover:text-white
+                     bg-slate-700 hover:bg-slate-600 rounded transition text-left min-h-[44px]"
         >
           ↩ {t.nav.logout}
         </button>
@@ -663,7 +663,7 @@ function AppInner() {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Mobile top bar with hamburger */}
-        <header className="md:hidden flex items-center gap-1 px-2 py-1 bg-slate-800 text-white shadow">
+        <header className="md:hidden flex items-center gap-1 px-2 bg-slate-800 text-white shadow h-14 flex-shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Menü öffnen"
@@ -672,7 +672,7 @@ function AppInner() {
             ☰
           </button>
           <span className="font-semibold text-sm flex-1 min-w-0 truncate px-1">
-            {currentItem?.icon} {currentItem?.label}
+            <span className="hidden xs:inline">{currentItem?.icon} </span>SP5
           </span>
           <WarningsCenter />
           {/* In-App Notifications */}

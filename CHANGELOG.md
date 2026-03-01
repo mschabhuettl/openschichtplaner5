@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.8] — 2026-03-01
+
+### Security
+- **Notification Ownership Checks** (Security Audit #10)
+  - `GET /api/notifications`: Non-admin users can no longer pass arbitrary `employee_id` to read another user's notifications — enforces `employee_id == current_user.ID` for non-admins (403 otherwise)
+  - `PATCH /api/notifications/{id}/read`: Added ownership check — non-admins can only mark their own notifications as read (403 if notification belongs to another user)
+  - `DELETE /api/notifications/{id}`: Added ownership check — non-admins can only delete their own notifications (403 if notification belongs to another user)
+  - `GET /api/notifications/all`: Elevated to `require_admin` — was incorrectly accessible to all Planer-role users
+
+---
+
 ## [0.4.7] — 2026-03-01
 
 ### Fixed

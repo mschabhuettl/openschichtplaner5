@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.26] — 2026-03-01
+
+### Refactor
+
+- `refactor`: Type hints und Type Aliases in `backend/api/types.py` — konsistente Typisierung durch gesamtes Backend
+- `fix`: Wish-Endpoint akzeptiert jetzt case-insensitiven `wish_type` (lowercase `wunsch`/`sperrung` → wird intern uppercased)
+
+### Tests
+
+- `test`: 1152 Tests passing (war: 1131), 21 neue Tests für Wish-Endpoint und diverse Edge Cases
+
+---
+
 ## [0.3.25] — 2026-02-28
 
 ### Performance

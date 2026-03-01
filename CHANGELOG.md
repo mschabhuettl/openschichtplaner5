@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.28] — 2026-03-01
+
+### Security
+
+- `fix(security)`: `require_admin` auf alle Import-Endpoints (9 Stellen) — CSV/JSON-Import war zuvor ohne Admin-Check zugänglich
+- `fix(security)`: Exception-Leakage in Bulk-Absence + Import-Routers sanitiert — interne Fehler nicht mehr an Client weitergegeben
+
+### Fixed
+
+- `fix(lint)`: E702 — inline `import` statements auf separate Zeilen aufgeteilt (reports.py)
+
+---
+
 ## [0.3.26] — 2026-03-01
 
 ### Refactor

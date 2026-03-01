@@ -14,6 +14,7 @@ import { useToast } from '../hooks/useToast';
 import { useTheme } from '../contexts/ThemeContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { useAuth } from '../contexts/AuthContext';
 
 // ── helpers ──────────────────────────────────────────────────
 
@@ -43,6 +44,8 @@ function isoDate(year: number, month: number, day: number) {
 export default function Schichtwuensche() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const { devViewRole, user } = useAuth();
+  const isLeserView = devViewRole === 'lese' || user?.role === 'Leser';
   const { showToast } = useToast();
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
@@ -95,6 +98,24 @@ export default function Schichtwuensche() {
   // ── derived ────────────────────────────────────────────────
   const empMap  = useMemo(() => new Map(employees.map(e => [e.ID, e])), [employees]);
   const shiftMap = useMemo(() => new Map(shifts.map(s => [s.ID, s])), [shifts]);
+
+  // Match current user to employee + auto-filter in Leser mode
+  const currentUserEmpId = useMemo(() => {
+    if (!user || !employees.length) return null;
+    const uName = user.NAME.toLowerCase();
+    const match = employees.find(e =>
+      (e.SHORTNAME || '').toLowerCase() === uName ||
+      e.NAME.toLowerCase() === uName,
+    );
+    return match?.ID ?? null;
+  }, [employees, user]);
+
+  // In Leser view, auto-apply employee filter to own entries
+  useEffect(() => {
+    if (isLeserView && currentUserEmpId !== null) {
+      setFilterEmp(currentUserEmpId);
+    }
+  }, [isLeserView, currentUserEmpId]);
 
   const filteredWishes = useMemo(() =>
     wishes
@@ -245,6 +266,13 @@ export default function Schichtwuensche() {
   // ── render ─────────────────────────────────────────────────
   return (
     <div className={`min-h-screen p-4 md:p-6 ${bg}`}>
+      {/* Read-only banner for Leser */}
+      {isLeserView && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300">
+          <span>👁️</span>
+          <span>Du siehst hier deine eigenen Wünsche und kannst neue eintragen.</span>
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div>
@@ -265,7 +293,7 @@ export default function Schichtwuensche() {
               className={`px-3 py-1.5 text-sm font-medium transition ${viewMode === 'list' ? 'bg-indigo-600 text-white' : (isDark ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-white text-gray-700 hover:bg-gray-50')}`}
             >📋 Liste</button>
           </div>
-          <button onClick={() => { setAdding(true); setNewDate(isoDate(year, month, 1)); }} className={btnPrimary}>
+          <button onClick={() => { setAdding(true); setNewDate(isoDate(year, month, 1)); if (isLeserView && currentUserEmpId !== null) setNewEmp(currentUserEmpId); }} className={btnPrimary}>
             + Wunsch eintragen
           </button>
         </div>
@@ -281,8 +309,8 @@ export default function Schichtwuensche() {
           <button onClick={nextMonth} className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} transition`}>›</button>
         </div>
 
-        {/* Employee filter */}
-        <div className="flex items-center gap-2">
+        {/* Employee filter — hidden for Leser (they only see their own) */}
+        {!isLeserView && <div className="flex items-center gap-2">
           <label className="text-sm font-medium opacity-70">Mitarbeiter:</label>
           <select
             value={filterEmp}
@@ -294,7 +322,7 @@ export default function Schichtwuensche() {
               <option key={e.ID} value={e.ID}>{e.NAME}, {e.FIRSTNAME}</option>
             ))}
           </select>
-        </div>
+        </div>}
 
         {/* Type filter */}
         <div className={`flex rounded-lg overflow-hidden border ${isDark ? 'border-gray-600' : 'border-gray-300'}`}>
@@ -447,19 +475,25 @@ export default function Schichtwuensche() {
             <h2 className="text-lg font-bold mb-4">Wunsch / Sperrtag eintragen</h2>
 
             <div className="space-y-3">
-              {/* Employee */}
+              {/* Employee — locked for Leser (only their own) */}
               <div>
                 <label className="block text-sm font-medium mb-1">Mitarbeiter *</label>
-                <select
-                  value={newEmp}
-                  onChange={e => setNewEmp(e.target.value === '' ? '' : Number(e.target.value))}
-                  className={`w-full border rounded-lg px-3 py-2 text-sm ${inputCls}`}
-                >
-                  <option value="">— wählen —</option>
-                  {employees.map(e => (
-                    <option key={e.ID} value={e.ID}>{e.NAME}, {e.FIRSTNAME}</option>
-                  ))}
-                </select>
+                {isLeserView && currentUserEmpId !== null ? (
+                  <div className={`w-full border rounded-lg px-3 py-2 text-sm ${inputCls} opacity-80`}>
+                    {empMap.get(currentUserEmpId) ? `${empMap.get(currentUserEmpId)!.NAME}, ${empMap.get(currentUserEmpId)!.FIRSTNAME}` : 'Ich'}
+                  </div>
+                ) : (
+                  <select
+                    value={newEmp}
+                    onChange={e => setNewEmp(e.target.value === '' ? '' : Number(e.target.value))}
+                    className={`w-full border rounded-lg px-3 py-2 text-sm ${inputCls}`}
+                  >
+                    <option value="">— wählen —</option>
+                    {employees.map(e => (
+                      <option key={e.ID} value={e.ID}>{e.NAME}, {e.FIRSTNAME}</option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               {/* Date */}

@@ -402,7 +402,69 @@ export default function TauschBoerse() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+          <>
+          {/* Mobile Cards (sm and below) */}
+          <div className="sm:hidden space-y-3">
+            {requests.map(req => (
+              <div key={req.id} className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-400 font-mono">#{req.id}</span>
+                  <StatusBadge status={req.status} />
+                </div>
+                {/* Requester side */}
+                <div className="bg-gray-50 rounded-lg p-2.5">
+                  <div className="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-1">Antragsteller</div>
+                  <div className="font-semibold text-gray-800 text-sm">{req.requester_short ?? req.requester_name ?? req.requester_id}</div>
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="text-sm text-gray-700">{formatDate(req.requester_date)}</span>
+                    <ShiftBadge shift={req.requester_shift} />
+                  </div>
+                </div>
+                <div className="text-center text-lg text-gray-400">⇅</div>
+                {/* Partner side */}
+                <div className="bg-gray-50 rounded-lg p-2.5">
+                  <div className="text-xs text-gray-500 font-semibold uppercase tracking-wide mb-1">Partner</div>
+                  <div className="font-semibold text-gray-800 text-sm">{req.partner_short ?? req.partner_name ?? req.partner_id}</div>
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="text-sm text-gray-700">{formatDate(req.partner_date)}</span>
+                    <ShiftBadge shift={req.partner_shift} />
+                  </div>
+                </div>
+                {req.note && (
+                  <p className="text-xs text-gray-500 italic">„{req.note}"</p>
+                )}
+                {req.reject_reason && (
+                  <p className="text-xs text-red-500">Ablehnungsgrund: {req.reject_reason}</p>
+                )}
+                <div className="text-xs text-gray-400">{formatDT(req.created_at)}</div>
+                {req.status === 'pending' && (
+                  <div className="flex gap-2">
+                    <button onClick={() => handleApprove(req.id)}
+                      className="flex-1 py-2 rounded-lg bg-green-500 text-white text-sm font-semibold hover:bg-green-600">
+                      ✓ Genehmigen
+                    </button>
+                    <button onClick={() => setRejectId(req.id)}
+                      className="flex-1 py-2 rounded-lg bg-red-500 text-white text-sm font-semibold hover:bg-red-600">
+                      ✕ Ablehnen
+                    </button>
+                    <button onClick={() => handleDelete(req.id)}
+                      className="px-3 py-2 rounded-lg bg-gray-200 text-gray-600 text-sm hover:bg-gray-300">
+                      🗑
+                    </button>
+                  </div>
+                )}
+                {req.status !== 'pending' && (
+                  <button onClick={() => handleDelete(req.id)}
+                    className="w-full py-2 rounded-lg bg-gray-100 text-gray-500 text-sm hover:bg-gray-200">
+                    🗑 Löschen
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table (hidden on mobile) */}
+          <div className="hidden sm:block bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-200">
@@ -499,6 +561,7 @@ export default function TauschBoerse() {
               </table>
             </div>
           </div>
+          </>
         )}
       </div>
 

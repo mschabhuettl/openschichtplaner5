@@ -4,10 +4,11 @@
  * und ermöglicht das Einreichen von Schichtwünschen und Urlaubsanträgen.
  */
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import type { ShiftType, LeaveType, ScheduleEntry } from '../types';
-import type { Wish } from '../api/client';
+import type { Wish, SwapRequest } from '../api/client';
 import { Badge } from '../components/Badge';
 import { EmptyState } from '../components/EmptyState';
 
@@ -94,9 +95,53 @@ function WishRow({ wish, onDelete }: { wish: Wish; onDelete: (id: number) => voi
   );
 }
 
+// ── Swap Status helpers ────────────────────────────────────────
+const SWAP_STATUS_LABEL: Record<string, string> = {
+  pending: 'Ausstehend', approved: 'Genehmigt', rejected: 'Abgelehnt', cancelled: 'Storniert',
+};
+const SWAP_STATUS_COLOR: Record<string, string> = {
+  pending: 'bg-yellow-100 text-yellow-800', approved: 'bg-green-100 text-green-800',
+  rejected: 'bg-red-100 text-red-800', cancelled: 'bg-gray-100 text-gray-500',
+};
+
+function SwapRow({ req, empId }: { req: SwapRequest; empId: number }) {
+  const isRequester = req.requester_id === empId;
+  const myDate = isRequester ? req.requester_date : req.partner_date;
+  const myShift = isRequester ? req.requester_shift : req.partner_shift;
+  const theirName = isRequester
+    ? (req.partner_short ?? req.partner_name ?? `#${req.partner_id}`)
+    : (req.requester_short ?? req.requester_name ?? `#${req.requester_id}`);
+  const theirDate = isRequester ? req.partner_date : req.requester_date;
+  const theirShift = isRequester ? req.partner_shift : req.requester_shift;
+  return (
+    <div className="flex flex-wrap items-center gap-2 p-2.5 rounded-lg bg-gray-50 border border-gray-200 text-xs">
+      <span className="font-semibold text-gray-700 shrink-0">{myDate}</span>
+      {myShift && (
+        <span className="px-1.5 py-0.5 rounded text-white font-medium text-xs shrink-0"
+          style={{ background: myShift.color || '#6b7280' }}>
+          {myShift.name}
+        </span>
+      )}
+      <span className="text-gray-400 shrink-0">⇄</span>
+      <span className="text-gray-700 shrink-0">{theirName}</span>
+      <span className="font-semibold text-gray-700 shrink-0">{theirDate}</span>
+      {theirShift && (
+        <span className="px-1.5 py-0.5 rounded text-white font-medium text-xs shrink-0"
+          style={{ background: theirShift.color || '#6b7280' }}>
+          {theirShift.name}
+        </span>
+      )}
+      <span className={`ml-auto px-1.5 py-0.5 rounded-full text-xs font-semibold shrink-0 ${SWAP_STATUS_COLOR[req.status] ?? 'bg-gray-100 text-gray-600'}`}>
+        {SWAP_STATUS_LABEL[req.status] ?? req.status}
+      </span>
+    </div>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────
 export default function MeinProfil() {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [empId, setEmpId] = useState<number | null>(null);
   const [empName, setEmpName] = useState('');
@@ -110,6 +155,7 @@ export default function MeinProfil() {
   const [entitlements, setEntitlements] = useState<Entitlement[]>([]);
   const [wishes, setWishes] = useState<Wish[]>([]);
   const [mySkills, setMySkills] = useState<{ id: string; name: string }[]>([]);
+  const [mySwaps, setMySwaps] = useState<SwapRequest[]>([]);
 
   // Wish form
   const [wishDate, setWishDate] = useState('');
@@ -195,6 +241,12 @@ export default function MeinProfil() {
           setMySkills(skillList.filter(s => mySkillIds.has(s.id)));
         }
       } catch { /* skills optional */ }
+
+      // Swap requests
+      try {
+        const swaps = await api.getSwapRequests({ employee_id: eid });
+        setMySwaps(swaps);
+      } catch { /* optional */ }
 
     } catch (err) {
       setError('Fehler beim Laden der Daten.');
@@ -535,6 +587,65 @@ export default function MeinProfil() {
             <p className={`text-xs rounded-lg px-3 py-2 ${absMsg.type === 'ok' ? 'text-green-700 bg-green-50 border border-green-200' : 'text-red-600 bg-red-50 border border-red-200'}`}>
               {absMsg.text}
             </p>
+          )}
+        </div>
+      </div>
+
+      {/* Tauschbörse */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🔄</span>
+            <h2 className="font-semibold text-gray-800">Meine Tausch-Anfragen</h2>
+          </div>
+          <button
+            onClick={() => navigate('/tauschboerse')}
+            className="text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors px-2 py-1 rounded-lg hover:bg-blue-50"
+          >
+            Zur Tauschbörse →
+          </button>
+        </div>
+        <div className="p-5">
+          {mySwaps.length === 0 ? (
+            <div className="text-center py-6">
+              <EmptyState
+                icon="🔄"
+                title="Keine Tausch-Anfragen"
+                description="Du hast noch keine Schicht-Tauschanfragen gestellt."
+                className="py-0"
+              />
+              <button
+                onClick={() => navigate('/tauschboerse')}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+              >
+                + Neue Tausch-Anfrage stellen
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {empId && [...mySwaps]
+                .sort((a, b) => b.id - a.id)
+                .slice(0, 5)
+                .map(req => (
+                  <SwapRow key={req.id} req={req} empId={empId} />
+                ))}
+              {mySwaps.length > 5 && (
+                <button
+                  onClick={() => navigate('/tauschboerse')}
+                  className="w-full text-xs text-blue-600 hover:text-blue-800 py-2 text-center"
+                >
+                  Alle {mySwaps.length} Anfragen anzeigen →
+                </button>
+              )}
+              <div className="pt-2">
+                <button
+                  onClick={() => navigate('/tauschboerse')}
+                  className="px-4 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                >
+                  + Neue Tausch-Anfrage
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>

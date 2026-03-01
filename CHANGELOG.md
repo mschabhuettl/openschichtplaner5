@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.3] — 2026-03-01
+
+### Changed
+- **MeinProfil (Self-Service Portal)**: Added "Meine Tausch-Anfragen" section showing the
+  employee's own swap requests (as requester or partner) with inline status badges and a
+  direct link/button to the full Tauschbörse
+- **Tauschbörse**: Added mobile card view (visible on small screens); desktop table is now
+  hidden on mobile and replaced by swipe-friendly cards with full approve/reject/delete actions
+
+---
+
 ## [0.4.2] — 2026-03-01
 
 ### Changed

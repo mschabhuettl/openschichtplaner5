@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo, memo, type CSSProperties } from '
 import { useSSERefresh } from '../contexts/SSEContext';
 import { useNavigate } from 'react-router-dom';
 import { usePermissions } from '../hooks/usePermissions';
+import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api/client';
 import type { ShiftRequirement, Note, ConflictEntry, CoverageDay } from '../api/client';
 import type { Employee, Group, ScheduleEntry, ShiftType, LeaveType } from '../types';
@@ -1830,6 +1831,9 @@ export default function Schedule() {
   const now = new Date();
   const navigate = useNavigate();
   const { canEditSchedule } = usePermissions();
+  const { devViewRole, user } = useAuth();
+  // Leser view: read-only mode (devViewRole 'lese' or real Leser role)
+  const isLeserView = devViewRole === 'lese' || user?.role === 'Leser';
   const [year, setYear] = useState(() => {
     const v = sessionStorage.getItem('schedule-year');
     return v ? Number(v) : now.getFullYear();
@@ -1863,6 +1867,20 @@ export default function Schedule() {
   const [shifts, setShifts] = useState<ShiftType[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Match current user to an employee (by SHORTNAME or NAME)
+  // Used in Leser-view to highlight the user's own row
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const currentUserEmpId = useMemo(() => {
+    if (!isLeserView || !user || !employees.length) return null;
+    const uName = user.NAME.toLowerCase();
+    const match = employees.find(e =>
+      (e.SHORTNAME || '').toLowerCase() === uName ||
+      e.NAME.toLowerCase() === uName,
+    );
+    return match?.ID ?? null;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [employees, isLeserView, user?.NAME]);
 
   // Persist year/month/groups to sessionStorage
   useEffect(() => { sessionStorage.setItem('schedule-year', String(year)); }, [year]);
@@ -3133,6 +3151,13 @@ export default function Schedule() {
   // ── Render ──────────────────────────────────────────────────
   return (
     <div className="p-2 sm:p-4 h-full flex flex-col" onClick={() => { setContextMenu(null); setNotePopup(null); setBulkContextMenu(null); }}>
+      {/* Read-only banner for Leser role */}
+      {isLeserView && (
+        <div className="no-print mb-2 flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300">
+          <span>👁️</span>
+          <span><strong>Nur-Lese-Ansicht</strong> — Du kannst keine Änderungen vornehmen.</span>
+        </div>
+      )}
       {/* Print-only header — hidden on screen, visible when printing */}
       <div className="print-header">
         <h1>📅 Dienstplan — {MONTH_NAMES[month]} {year}</h1>
@@ -4883,8 +4908,9 @@ export default function Schedule() {
               const empNameStyle = (emp.CBKLABEL != null && emp.CBKLABEL !== 16777215 && emp.CBKLABEL !== 0 && emp.CBKLABEL_HEX)
                 ? { backgroundColor: emp.CBKLABEL_HEX, color: emp.CFGLABEL_HEX || '#000' }
                 : undefined;
+              const isCurrentUserRow = isLeserView && currentUserEmpId !== null && currentUserEmpId === emp.ID;
               return (
-                <tr key={emp.ID} className={empRowStyle ? undefined : rowBg} style={empRowStyle}>
+                <tr key={emp.ID} className={empRowStyle ? undefined : (isCurrentUserRow ? 'bg-blue-50 dark:bg-blue-950/30' : rowBg)} style={empRowStyle}>
                   <td
                     className="sticky left-0 z-10 bg-inherit px-3 py-1 border-r border-gray-200 border-b border-b-gray-100 font-medium whitespace-nowrap cursor-pointer select-none"
                     style={highlightedEmpId === emp.ID
@@ -4913,6 +4939,9 @@ export default function Schedule() {
                           {emp.BOLD === 1
                             ? <strong>{emp.NAME}, {emp.FIRSTNAME}</strong>
                             : <>{emp.NAME}, {emp.FIRSTNAME}</>}
+                          {isLeserView && currentUserEmpId === emp.ID && (
+                            <span className="ml-1.5 rounded bg-blue-500 px-1 py-0.5 text-[10px] font-bold text-white">Du</span>
+                          )}
                           {hasBirthdayThisMonth && (
                             <span
                               className="ml-1 text-sm cursor-default"

@@ -27,8 +27,9 @@ header()  { echo -e "\n${BOLD}${BLUE}$*${RESET}"; }
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 BACKEND_DIR="$REPO_DIR/backend"
 FRONTEND_DIR="$REPO_DIR/frontend"
-ENV_FILE="$BACKEND_DIR/.env"
-ENV_EXAMPLE="$BACKEND_DIR/.env.example"
+# .env im Root-Verzeichnis (neben start.sh) — wird auch von Docker genutzt
+ENV_FILE="$REPO_DIR/.env"
+ENV_EXAMPLE="$REPO_DIR/.env.example"
 VENV_DIR="$BACKEND_DIR/.venv"
 REQUIREMENTS="$BACKEND_DIR/requirements.txt"
 PID_FILE="/tmp/sp5-backend.pid"

@@ -13,7 +13,7 @@ services:
       # Logs auf dem Host einsehbar (optional: auskommentieren)
       - ./logs:/app/logs
     env_file:
-      - backend/.env.docker
+      - .env
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -51,7 +51,7 @@ services:
       - ./backend:/app/backend
       - ./frontend:/app/frontend
     env_file:
-      - backend/.env.docker
+      - .env
     environment:
       # Debug-Modus im Dev-Profil überschreiben
       DEBUG: "true"

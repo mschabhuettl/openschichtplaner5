@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.31] — 2026-03-01
+
+### Internationalization
+
+- `feat(i18n)`: Wire translations in `Konflikte.tsx` — all UI strings now use `t.konflikte.*` keys (page title, column headers, filters, modals, action buttons, empty states)
+- `feat(i18n)`: Add `t.months[]` array to both `de.ts` and `en.ts`; replace hardcoded `MONTH_NAMES` in `Statistiken.tsx` with i18n-aware `t.months`
+- `feat(i18n)`: Add full `konflikte` translation section to `de.ts` and `en.ts`
+
+---
+
 ## [0.3.30] — 2026-03-01
 
 ### Security

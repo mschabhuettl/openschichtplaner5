@@ -171,6 +171,21 @@ cd frontend
 npx tsc --noEmit
 ```
 
+### Pre-commit hooks
+
+The repo ships with a `.pre-commit-config.yaml`. Install the hooks once:
+
+```bash
+pip install pre-commit
+pre-commit install
+```
+
+After that, linting and basic checks run automatically before every commit. Run manually against all files:
+
+```bash
+pre-commit run --all-files
+```
+
 ---
 
 ## Project Structure

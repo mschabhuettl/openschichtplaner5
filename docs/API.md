@@ -12,7 +12,8 @@ All API endpoints are prefixed with `/api/`. Authentication is done via a `Beare
 2. [Employees](#employees)
 3. [Schedule](#schedule)
 4. [Reports & Export](#reports--export)
-5. [Health & Status](#health--status)
+5. [Shift Wishes](#shift-wishes)
+6. [Health & Status](#health--status)
 
 ---
 
@@ -490,6 +491,56 @@ curl -s "http://localhost:8000/api/statistics?year=2026" \
 
 ---
 
+## Shift Wishes
+
+### List wishes (admin)
+
+```bash
+curl -s http://localhost:8000/api/wishes \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+**Response:** Array of wish objects with fields `id`, `employee_id`, `date`, `wish_type`, `status`, `created_at`.
+
+---
+
+### Create wish (admin)
+
+```bash
+curl -s -X POST http://localhost:8000/api/wishes \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"employee_id": 1, "date": "2026-04-01", "wish_type": "free"}'
+```
+
+---
+
+### Approve / reject wish
+
+```bash
+curl -s -X POST http://localhost:8000/api/wishes/42/approve \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"action": "approve"}'
+```
+
+`action` can be `"approve"` or `"reject"`.
+
+---
+
+### Submit own wish (self-service)
+
+Employees can submit their own wishes without admin role:
+
+```bash
+curl -s -X POST http://localhost:8000/api/self/wishes \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"date": "2026-04-15", "wish_type": "free", "note": "Arzttermin"}'
+```
+
+---
+
 ## Health & Status
 
 ### Health check
@@ -520,6 +571,51 @@ curl -s http://localhost:8000/api/stats \
 ```bash
 curl -s http://localhost:8000/api/dashboard/summary \
   -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+### Runtime metrics
+
+```bash
+curl -s http://localhost:8000/api/metrics
+```
+
+No authentication required when called from localhost. Returns request count, error rate, cache hit rate, average DB-read latency, uptime, and active session count.
+
+**Response:**
+
+```json
+{
+  "request_count": 1240,
+  "error_rate": 0.002,
+  "cache_hit_rate": 0.87,
+  "avg_db_latency_ms": 3.4,
+  "uptime_seconds": 43200.0,
+  "active_sessions": 3
+}
+```
+
+---
+
+### API version
+
+```bash
+curl -s http://localhost:8000/api/version
+```
+
+No authentication required.
+
+**Response:**
+
+```json
+{
+  "version": "0.9.2",
+  "service": "OpenSchichtplaner5 API",
+  "python_version": "3.11.0",
+  "build_date": "2026-03-06",
+  "min_compatible_frontend": "0.4.0"
+}
 ```
 
 ---

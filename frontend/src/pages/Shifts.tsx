@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useDebounce } from '../hooks/useDebounce';
 import { api } from '../api/client';
 import type { ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
@@ -82,6 +83,8 @@ export default function Shifts() {
   type ShiftSortDir = 'asc' | 'desc';
   const [shiftSortKey, setShiftSortKey] = useState<ShiftSortKey>('name');
   const [shiftSortDir, setShiftSortDir] = useState<ShiftSortDir>('asc');
+  const [shiftSearch, setShiftSearch] = useState('');
+  const debouncedShiftSearch = useDebounce(shiftSearch, 300);
 
   const handleShiftSort = (key: ShiftSortKey) => {
     if (shiftSortKey === key) setShiftSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -89,16 +92,21 @@ export default function Shifts() {
   };
   const shiftSortIcon = (key: ShiftSortKey) => shiftSortKey === key ? (shiftSortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕';
 
-  const sortedShifts = [...shifts].sort((a, b) => {
-    let av = '', bv = '';
-    switch (shiftSortKey) {
-      case 'name':      av = a.NAME || ''; bv = b.NAME || ''; break;
-      case 'shortname': av = a.SHORTNAME || ''; bv = b.SHORTNAME || ''; break;
-      case 'duration':  return shiftSortDir === 'asc' ? (a.DURATION0 || 0) - (b.DURATION0 || 0) : (b.DURATION0 || 0) - (a.DURATION0 || 0);
-    }
-    const cmp = av.localeCompare(bv, 'de');
-    return shiftSortDir === 'asc' ? cmp : -cmp;
-  });
+  const sortedShifts = useMemo(() => {
+    const q = debouncedShiftSearch.toLowerCase();
+    return [...shifts]
+      .filter(s => !q || (s.NAME || '').toLowerCase().includes(q) || (s.SHORTNAME || '').toLowerCase().includes(q))
+      .sort((a, b) => {
+        let av = '', bv = '';
+        switch (shiftSortKey) {
+          case 'name':      av = a.NAME || ''; bv = b.NAME || ''; break;
+          case 'shortname': av = a.SHORTNAME || ''; bv = b.SHORTNAME || ''; break;
+          case 'duration':  return shiftSortDir === 'asc' ? (a.DURATION0 || 0) - (b.DURATION0 || 0) : (b.DURATION0 || 0) - (a.DURATION0 || 0);
+        }
+        const cmp = av.localeCompare(bv, 'de');
+        return shiftSortDir === 'asc' ? cmp : -cmp;
+      });
+  }, [shifts, debouncedShiftSearch, shiftSortKey, shiftSortDir]);
 
   const load = () => {
     setLoading(true);
@@ -222,9 +230,25 @@ export default function Shifts() {
 
   return (
     <div className="p-4 sm:p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold text-gray-800">🕐 Schichtarten ({shifts.length})</h1>
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <h1 className="text-xl font-bold text-gray-800">
+          🕐 Schichtarten ({sortedShifts.length}{sortedShifts.length !== shifts.length ? ` / ${shifts.length}` : ''})
+        </h1>
+        <div className="flex items-center gap-2 flex-wrap">
+          <input
+            type="text"
+            placeholder="🔍 Suchen..."
+            value={shiftSearch}
+            onChange={e => setShiftSearch(e.target.value)}
+            className="px-3 py-1.5 border rounded shadow-sm text-sm w-40"
+          />
+          {shiftSearch && (
+            <button
+              onClick={() => setShiftSearch('')}
+              className="px-2 py-1.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded border border-red-200"
+              title="Suche zurücksetzen"
+            >✕</button>
+          )}
           <button
             onClick={() => window.print()}
             className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"

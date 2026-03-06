@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useDebounce } from '../hooks/useDebounce';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import type { Group, Employee } from '../types';
@@ -77,6 +78,7 @@ export default function Groups() {
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [error, setError] = useState<string | null>(null);
   const [groupSearch, setGroupSearch] = useState('');
+  const debouncedGroupSearch = useDebounce(groupSearch, 300);
   const [groupSort, setGroupSort] = useState<'default' | 'name-asc' | 'name-desc' | 'short-asc'>('default');
 
   const sortGroups = (list: Group[]): Group[] => {
@@ -145,7 +147,7 @@ export default function Groups() {
     }
   };
 
-  const searchLower = groupSearch.toLowerCase();
+  const searchLower = debouncedGroupSearch.toLowerCase();
   const matchesGroupSearch = (g: Group): boolean => {
     if (!searchLower) return true;
     return (g.NAME || '').toLowerCase().includes(searchLower) ||
@@ -343,6 +345,13 @@ export default function Groups() {
               onChange={e => setGroupSearch(e.target.value)}
               className="px-3 py-1.5 border rounded shadow-sm text-sm w-44"
             />
+            {groupSearch && (
+              <button
+                onClick={() => setGroupSearch('')}
+                className="px-2 py-1.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded border border-red-200"
+                title="Suche zurücksetzen"
+              >✕ Reset</button>
+            )}
             <select
               value={groupSort}
               onChange={e => setGroupSort(e.target.value as typeof groupSort)}

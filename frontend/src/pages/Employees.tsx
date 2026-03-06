@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import type { Restriction } from '../api/client';
 import { SkeletonTable } from '../components/Skeleton';
@@ -205,21 +205,41 @@ export default function Employees() {
   const t = useT();
   const { canAdmin } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [search, setSearch] = useState(() => sessionStorage.getItem('emp-search') ?? '');
+  const [search, setSearch] = useState(
+    () => searchParams.get('search') ?? sessionStorage.getItem('emp-search') ?? ''
+  );
   const [filterGroupId, setFilterGroupId] = useState<number | ''>(() => {
+    const urlVal = searchParams.get('gruppe');
+    if (urlVal) return Number(urlVal);
     const v = sessionStorage.getItem('emp-filterGroupId');
     return v ? Number(v) : '';
   });
   const [filterHide, setFilterHide] = useState<'all' | 'active' | 'hidden'>(
-    () => (sessionStorage.getItem('emp-filterHide') as 'all' | 'active' | 'hidden') ?? 'active'
+    () => {
+      const urlVal = searchParams.get('status') as 'all' | 'active' | 'hidden' | null;
+      if (urlVal && ['all', 'active', 'hidden'].includes(urlVal)) return urlVal;
+      return (sessionStorage.getItem('emp-filterHide') as 'all' | 'active' | 'hidden') ?? 'active';
+    }
   );
   const debouncedSearch = useDebounce(search, 300);
 
-  // Persist filters to sessionStorage
-  useEffect(() => { sessionStorage.setItem('emp-search', search); }, [search]);
-  useEffect(() => { sessionStorage.setItem('emp-filterGroupId', filterGroupId === '' ? '' : String(filterGroupId)); }, [filterGroupId]);
-  useEffect(() => { sessionStorage.setItem('emp-filterHide', filterHide); }, [filterHide]);
+  // Sync filters to URL params and sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem('emp-search', search);
+    sessionStorage.setItem('emp-filterGroupId', filterGroupId === '' ? '' : String(filterGroupId));
+    sessionStorage.setItem('emp-filterHide', filterHide);
+    setSearchParams(params => {
+      const next = new URLSearchParams(params);
+      if (debouncedSearch) next.set('search', debouncedSearch); else next.delete('search');
+      if (filterGroupId !== '') next.set('gruppe', String(filterGroupId)); else next.delete('gruppe');
+      if (filterHide !== 'active') next.set('status', filterHide); else next.delete('status');
+      return next;
+    }, { replace: true });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch, filterGroupId, filterHide]);
   const [groups, setGroups] = useState<{ ID: number; NAME: string; SHORTNAME?: string }[]>([]);
   const [groupAssignments, setGroupAssignments] = useState<{ employee_id: number; group_id: number }[]>([]);
   const [loading, setLoading] = useState(true);

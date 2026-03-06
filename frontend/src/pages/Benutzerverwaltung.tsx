@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useDebounce } from '../hooks/useDebounce';
 import { api } from '../api/client';
 import type { Employee, Group } from '../types';
 import { useToast } from '../hooks/useToast';
@@ -598,6 +599,7 @@ export default function Benutzerverwaltung() {
 
   // Search
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
 
   // ── Selected user for access management ────────────────────
   const [selectedUserForAccess, setSelectedUserForAccess] = useState<SP5User | null>(null);
@@ -635,7 +637,7 @@ export default function Benutzerverwaltung() {
   // ── Filtering ───────────────────────────────────────────────
 
   const filtered = users.filter(u => {
-    const q = search.toLowerCase();
+    const q = debouncedSearch.toLowerCase();
     return (
       u.NAME.toLowerCase().includes(q) ||
       u.DESCRIP.toLowerCase().includes(q) ||
@@ -814,7 +816,7 @@ export default function Benutzerverwaltung() {
       </div>
 
       {/* Search */}
-      <div className="mb-4">
+      <div className="mb-4 flex items-center gap-2">
         <input
           type="search"
           placeholder="Suche nach Name, Beschreibung oder Rolle…"
@@ -822,6 +824,13 @@ export default function Benutzerverwaltung() {
           onChange={e => setSearch(e.target.value)}
           className="w-full sm:w-80 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
         />
+        {search && (
+          <button
+            onClick={() => setSearch('')}
+            className="px-2 py-2 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded border border-red-200"
+            title="Suche zurücksetzen"
+          >✕ Reset</button>
+        )}
       </div>
 
       {/* Content */}

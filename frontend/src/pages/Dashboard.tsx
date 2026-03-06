@@ -1188,6 +1188,7 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [conflictsCount, setConflictsCount] = useState<number | null>(null);
+  const [pendingRequestsCount, setPendingRequestsCount] = useState<number | null>(null);
   const refreshTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchAll = useCallback((silent = false) => {
@@ -1199,14 +1200,21 @@ export default function Dashboard() {
     const upcomingP = api.getDashboardUpcoming();
     const statsP = api.getDashboardStats(year, month);
     const conflictsP = api.getConflicts({ year, month }).then(c => c.conflicts.length).catch(() => null);
+    const pendingP = api.getAbsenceStatuses().then(statuses => {
+      return Object.values(statuses).filter(s => {
+        const status = typeof s === 'string' ? s : s?.status;
+        return status === 'pending';
+      }).length;
+    }).catch(() => null);
 
-    Promise.all([summaryP, todayP, upcomingP, statsP, conflictsP])
-      .then(([summary, today, upcoming, stats, conflicts]) => {
+    Promise.all([summaryP, todayP, upcomingP, statsP, conflictsP, pendingP])
+      .then(([summary, today, upcoming, stats, conflicts, pending]) => {
         setSummaryData(summary);
         setTodayData(today);
         setUpcomingData(upcoming);
         setStatsData(stats);
         setConflictsCount(conflicts);
+        setPendingRequestsCount(pending);
         setLastRefresh(new Date());
       })
       .catch((err) => setError(String(err)))
@@ -1322,9 +1330,9 @@ export default function Dashboard() {
       )}
 
       {/* KPI Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {loading ? (
-          Array.from({ length: 5 }).map((_, i) => <KpiSkeleton key={i} />)
+          Array.from({ length: 6 }).map((_, i) => <KpiSkeleton key={i} />)
         ) : (
           <>
             <KpiCard
@@ -1390,6 +1398,14 @@ export default function Dashboard() {
               sub={conflictsCount === null ? 'Lädt…' : conflictsCount === 0 ? 'Keine Konflikte ✅' : `im ${summaryData?.month_label ?? 'Monat'}`}
               accent={conflictsCount === null ? 'gray' : conflictsCount === 0 ? 'green' : conflictsCount < 10 ? 'orange' : 'red'}
               help="Anzahl der Planungskonflikte im gewählten Monat (z.B. Überschneidungen, Unterbesetzung). Klicke auf ⚠️ Konflikte in der Navigation zum Auflösen."
+            />
+            <KpiCard
+              icon="📋"
+              label="Offene Anträge"
+              value={pendingRequestsCount ?? '—'}
+              sub={pendingRequestsCount === null ? 'Lädt…' : pendingRequestsCount === 0 ? 'Alle bearbeitet ✅' : 'warten auf Freigabe'}
+              accent={pendingRequestsCount === null ? 'gray' : pendingRequestsCount === 0 ? 'green' : pendingRequestsCount < 5 ? 'orange' : 'red'}
+              help="Anzahl offener Abwesenheitsanträge, die noch nicht genehmigt oder abgelehnt wurden."
             />
           </>
         )}

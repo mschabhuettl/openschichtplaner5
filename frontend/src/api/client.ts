@@ -1042,6 +1042,9 @@ export const api = {
   deleteAbsence: (employee_id: number, date: string) =>
     deleteReq<{ ok: boolean; deleted: number }>(`/api/absences/${employee_id}/${date}`),
 
+  getAbsenceStatuses: () =>
+    fetchJSON<Record<string, { status: string; reject_reason?: string } | string>>('/api/absences/status'),
+
   getGroupAssignments: () =>
     fetchJSON<{ employee_id: number; group_id: number }[]>('/api/group-assignments'),
 

@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.9.3] - 2026-03-06
+
+### Tests
+- **test(frontend):** component tests für Holidays, Notifications, AbsenceRequests (+18 Tests, ~165+ gesamt)
+
+### Performance
+- **perf(backend):** N+1-Fix in bulk_create_absence, schedule endpoint optimiert (~75% schneller)
+
+### Docs
+- **docs:** README, API.md, DEVELOPMENT.md, .env.example aktualisiert für v0.9.2
+
+---
+
 ## [0.9.2] - 2026-03-06
 
 ### Bug Fixes

@@ -1,15 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-
-const API = import.meta.env.VITE_API_URL ?? '';
-function getAuthHeaders(): Record<string, string> {
-  try {
-    const raw = localStorage.getItem('sp5_session');
-    if (!raw) return {};
-    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
-    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
-    return token ? { 'X-Auth-Token': token } : {};
-  } catch { return {}; }
-}
+import { api } from '../api/client';
 
 interface DayEntry {
   employee_id: number;
@@ -152,10 +142,8 @@ export default function DienstBoard() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const url = `${API}/api/schedule/day?date=${date}${groupId ? `&group_id=${groupId}` : ''}`;
-      const res = await fetch(url, { headers: getAuthHeaders() });
-      const data = await res.json();
-      setEntries(data);
+      const data = await api.getScheduleDay(date, groupId ? Number(groupId) : undefined);
+      setEntries(data as DayEntry[]);
       setLastRefresh(new Date());
     } finally {
       setLoading(false);
@@ -163,8 +151,8 @@ export default function DienstBoard() {
   }, [date, groupId]);
 
   useEffect(() => {
-    fetch(`${API}/api/shifts`, { headers: getAuthHeaders() }).then(r => r.json()).then(setShifts);
-    fetch(`${API}/api/groups`, { headers: getAuthHeaders() }).then(r => r.json()).then(setGroups);
+    api.getShifts().then(s => setShifts(s as Shift[]));
+    api.getGroups().then(g => setGroups(g as Group[]));
   }, []);
 
   useEffect(() => { load(); }, [load]);

@@ -1,18 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { StatCard } from '../components/StatCard';
 import { PageHeader } from '../components/PageHeader';
-
-const API = import.meta.env.VITE_API_URL ?? '';
-
-function getAuthHeaders(): Record<string, string> {
-  try {
-    const raw = localStorage.getItem('sp5_session');
-    if (!raw) return {};
-    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
-    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
-    return token ? { 'X-Auth-Token': token } : {};
-  } catch { return {}; }
-}
+import { api } from '../api/client';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ChangelogEntry {
@@ -96,14 +85,13 @@ export default function AuditLog() {
     setLoading(true);
     setError('');
     try {
-      const params = new URLSearchParams({ limit: String(limit) });
-      if (filterUser) params.set('user', filterUser);
-      if (dateFrom) params.set('date_from', dateFrom);
-      if (dateTo) params.set('date_to', dateTo);
-      const res = await fetch(`${API}/api/changelog?${params}`, { headers: getAuthHeaders() });
-      if (!res.ok) throw new Error(await res.text());
-      const data: ChangelogEntry[] = await res.json();
-      setEntries(data);
+      const data = await api.getChangelog({
+        limit,
+        user: filterUser || undefined,
+        date_from: dateFrom || undefined,
+        date_to: dateTo || undefined,
+      });
+      setEntries(data as ChangelogEntry[]);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Fehler beim Laden');
     } finally {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
@@ -379,9 +379,12 @@ export default function Employees() {
   };
   const sortIcon = (key: EmpSortKey) => empSortKey === key ? (empSortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕';
 
-  const empGroupIds = (empId: number) => groupAssignments.filter(a => a.employee_id === empId).map(a => a.group_id);
+  const empGroupIds = useCallback(
+    (empId: number) => groupAssignments.filter(a => a.employee_id === empId).map(a => a.group_id),
+    [groupAssignments],
+  );
 
-  const filtered = employees
+  const filtered = useMemo(() => employees
     .filter(e => {
       if (!`${e.NAME} ${e.FIRSTNAME} ${e.SHORTNAME} ${e.NUMBER}`.toLowerCase().includes(debouncedSearch.toLowerCase())) return false;
       if (filterGroupId !== '' && !empGroupIds(e.ID).includes(Number(filterGroupId))) return false;
@@ -399,7 +402,7 @@ export default function Employees() {
       }
       const cmp = av.localeCompare(bv, 'de');
       return empSortDir === 'asc' ? cmp : -cmp;
-    });
+    }), [employees, debouncedSearch, filterGroupId, filterHide, empGroupIds, empSortKey, empSortDir]);
 
   const loadRestrictions = (empId: number) => {
     api.getRestrictions(empId)

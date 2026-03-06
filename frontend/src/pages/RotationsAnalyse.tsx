@@ -119,17 +119,7 @@ function fairnessLabel(score: number): string {
   return 'Unfair';
 }
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? '';
-
-function getAuthHeaders(): Record<string, string> {
-  try {
-    const raw = localStorage.getItem('sp5_session');
-    if (!raw) return {};
-    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
-    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
-    return token ? { 'X-Auth-Token': token } : {};
-  } catch { return {}; }
-}
+import { api } from '../api/client';
 
 
 const _MONTHS = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
@@ -153,14 +143,12 @@ export default function RotationsAnalyse() {
     setLoading(true);
     setError(null);
     try {
-      const [empRes, shiftRes] = await Promise.all([
-        fetch(`${BASE_URL}/api/employees`, { headers: getAuthHeaders() }),
-        fetch(`${BASE_URL}/api/shifts`, { headers: getAuthHeaders() }),
+      const [emps, shifts] = await Promise.all([
+        api.getEmployees(),
+        api.getShifts(),
       ]);
-      const emps: Employee[] = await empRes.json();
-      const shifts: ShiftDef[] = await shiftRes.json();
-      setEmployees(emps);
-      setShiftDefs(shifts);
+      setEmployees(emps as Employee[]);
+      setShiftDefs(shifts as ShiftDef[]);
 
       // Load schedule for last N months
       const now = new Date();
@@ -171,10 +159,7 @@ export default function RotationsAnalyse() {
       }
 
       const scheduleResults = await Promise.all(
-        periods.map(p =>
-          fetch(`${BASE_URL}/api/schedule?year=${p.year}&month=${p.month}`, { headers: getAuthHeaders() })
-            .then(r => r.json() as Promise<ScheduleEntry[]>)
-        )
+        periods.map(p => api.getSchedule(p.year, p.month))
       );
       const allEntries: ScheduleEntry[] = scheduleResults.flat();
 

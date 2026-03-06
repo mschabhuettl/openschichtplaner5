@@ -1,15 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-const API = import.meta.env.VITE_API_URL ?? '';
-
-function getAuthHeaders(): Record<string, string> {
-  try {
-    const raw = localStorage.getItem('sp5_session');
-    if (!raw) return {};
-    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
-    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
-    return token ? { 'X-Auth-Token': token } : {};
-  } catch { return {}; }
-}
+import { api } from '../api/client';
 
 
 // ── Types ─────────────────────────────────────────────────────────────────────

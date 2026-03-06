@@ -1,19 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { EmptyState } from '../components/EmptyState';
+import { api } from '../api/client';
 
 const MONTH_NAMES_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
                             'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-
-function getAuthHeaders(): Record<string, string> {
-  try {
-    const raw = localStorage.getItem('sp5_session');
-    if (!raw) return {};
-    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
-    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
-    return token ? { 'X-Auth-Token': token } : {};
-  } catch { return {}; }
-}
 
 interface MonthData {
   month: number;
@@ -575,12 +566,8 @@ export default function Analytics() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetch(`/api/statistics/year-summary?year=${year}`, { headers: getAuthHeaders() })
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json() as Promise<YearSummary>;
-      })
-      .then(d => { setData(d); setLoading(false); })
+    api.getYearSummary(year)
+      .then(d => { setData(d as YearSummary); setLoading(false); })
       .catch(e => { setError(String(e)); setLoading(false); });
   }, [year]);
 

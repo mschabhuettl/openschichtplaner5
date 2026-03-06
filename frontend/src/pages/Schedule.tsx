@@ -179,7 +179,7 @@ function getWeekday(year: number, month: number, day: number): number {
 }
 
 // ── ShiftPicker ───────────────────────────────────────────────
-function ShiftPicker({
+const ShiftPicker = memo(function ShiftPicker({
   onSelect,
   onAbsence,
   onClose,
@@ -249,10 +249,10 @@ function ShiftPicker({
       )}
     </div>
   );
-}
+});
 
 // ── GroupMultiSelect ──────────────────────────────────────────
-function GroupMultiSelect({
+const GroupMultiSelect = memo(function GroupMultiSelect({
   groups,
   selectedIds,
   onChange,
@@ -334,10 +334,10 @@ function GroupMultiSelect({
       )}
     </div>
   );
-}
+});
 
 // ── EmployeeMultiSelect ───────────────────────────────────────
-function EmployeeMultiSelect({
+const EmployeeMultiSelect = memo(function EmployeeMultiSelect({
   employees,
   selectedIds,
   onChange,
@@ -437,7 +437,7 @@ function EmployeeMultiSelect({
       )}
     </div>
   );
-}
+});
 
 // ── Note context menu ─────────────────────────────────────────
 interface ContextMenuState {
@@ -468,7 +468,7 @@ interface CellContextMenuProps {
   onPaste: (empId: number, day: number) => void;
 }
 
-function CellContextMenu({
+const CellContextMenu = memo(function CellContextMenu({
   state, entry, shifts, leaveTypes, hasClipboard,
   onClose, onAddNote, onAssignShift, onAddAbsence,
   onAddSonderdienst, onAddDeviation, onDelete, onCopy, onPaste,
@@ -772,7 +772,7 @@ function CellContextMenu({
       )}
     </div>
   );
-}
+});
 
 // ── NoteDetailPopup ──────────────────────────────────────────
 interface NoteDetailPopupState {
@@ -951,7 +951,7 @@ function NoteDetailPopup({
 }
 
 // ── Auslastungsbereich ────────────────────────────────────────
-function AuslastungsBereich({
+const AuslastungsBereich = memo(function AuslastungsBereich({
   shifts,
   days,
   year,
@@ -1127,7 +1127,7 @@ function AuslastungsBereich({
       </table>
     </div>
   );
-}
+});
 
 // ── Employee Count Badge ──────────────────────────────────────
 const EmployeeCountBadge = memo(function EmployeeCountBadge({ visible, total }: { visible: number; total: number }) {
@@ -1452,7 +1452,7 @@ interface HoverTooltipState {
   y: number;
 }
 
-function HoverTooltip({
+const HoverTooltip = memo(function HoverTooltip({
   state,
   emp,
   entry,
@@ -1559,7 +1559,7 @@ function HoverTooltip({
       )}
     </div>
   );
-}
+});
 
 // ── Wochenvorlagen (Week Templates) ──────────────────────────
 const TEMPLATES_KEY = 'sp5_week_templates';
@@ -2685,14 +2685,17 @@ export default function Schedule() {
   }, []);
 
   // ── Global mouseup handler (ends drag) ─────────────────────
+  // Use a ref so we don't re-register the listener on every isDragging change.
+  const isDraggingRef = useRef(isDragging);
+  useEffect(() => { isDraggingRef.current = isDragging; }, [isDragging]);
   useEffect(() => {
     const handler = () => {
-      if (isDragging) setIsDragging(false);
+      if (isDraggingRef.current) setIsDragging(false);
       dragAnchorRef.current = null;
     };
     document.addEventListener('mouseup', handler);
     return () => document.removeEventListener('mouseup', handler);
-  }, [isDragging]);
+  }, []); // stable — reads latest value via ref
 
   // ── Cell drag-select handlers ───────────────────────────────
   const handleCellMouseDown = (e: React.MouseEvent, empId: number, day: number) => {

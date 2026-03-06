@@ -5,16 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 
-const API = import.meta.env.VITE_API_URL ?? '';
-function getAuthHeaders(): Record<string, string> {
-  try {
-    const raw = localStorage.getItem('sp5_session');
-    if (!raw) return {};
-    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
-    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
-    return token ? { 'X-Auth-Token': token } : {};
-  } catch { return {}; }
-}
+
 
 interface Restriction {
   id: number;
@@ -49,15 +40,14 @@ export default function Einschraenkungen() {
     setLoading(true);
     setError(null);
     try {
-      const [emps, sh] = await Promise.all([api.getEmployees(), api.getShifts()]);
+      const [emps, sh, restrictions] = await Promise.all([
+        api.getEmployees(),
+        api.getShifts(),
+        api.getRestrictions(),
+      ]);
       setEmployees(emps);
       setShifts(sh);
-      const res = await fetch(`${API}/api/restrictions`, { headers: getAuthHeaders() });
-      if (res.ok) {
-        setRestrictions(await res.json());
-      } else {
-        setRestrictions([]);
-      }
+      setRestrictions(restrictions as Restriction[]);
     } catch (e) {
       setError(String(e));
     } finally {
@@ -81,17 +71,12 @@ export default function Einschraenkungen() {
     if (!formEmpId || !formShiftId) return;
     setSaving(true);
     try {
-      const res = await fetch(`${API}/api/restrictions`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify({
-          employee_id: formEmpId,
-          shift_id: formShiftId,
-          reason: formReason,
-          weekday: formWeekday,
-        }),
+      await api.addRestriction({
+        employee_id: formEmpId,
+        shift_id: formShiftId,
+        reason: formReason,
+        weekday: formWeekday,
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
       setShowForm(false);
       setFormReason('');
       await loadAll();
@@ -107,12 +92,8 @@ export default function Einschraenkungen() {
     if (!await confirmDialog({ message: 'Einschränkung wirklich löschen?', danger: true })) return;
     setDeleting(key);
     try {
-      const res = await fetch(`${API}/api/restrictions/${empId}/${shiftId}?weekday=${weekday}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-      });
-      if (res.ok) await loadAll();
-      else setError(`Fehler: HTTP ${res.status}`);
+      await api.removeRestriction(empId, shiftId, weekday);
+      await loadAll();
     } catch (e) {
       setError(String(e));
     } finally {

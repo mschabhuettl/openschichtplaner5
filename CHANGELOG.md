@@ -1,5 +1,25 @@
 # Changelog
 
+## [v0.8.0-quality] — 2026-03-06 — Quality Session Final (Tag: v0.8.0-quality-2026-03-06)
+
+### Session Summary (04:00–10:00 Uhr, 38 Commits)
+- **1252 pytest tests** — alle grün ✅
+- **Frontend build** — 0 Fehler, `dist/` sauber ✅
+- **ruff** — 22 auto-fixes + 5 strukturelle noqa-Annotierungen → `All checks passed!` ✅
+- **mypy** — `Success: no issues found in 21 source files` ✅
+
+### Bug Fixes
+- **Schedule D&D overwrite/swap/rollback** — Drag & Drop Schicht-Tausch mit korrektem Rollback bei Fehler
+- **Urlaubsantrag Genehmigungsworkflow** — Vollständiger Approve/Reject-Workflow implementiert
+- **Bulk Shift Validation** — Massenbearbeitung mit Validierungs-Feedback
+
+### Code Quality
+- ruff F401/F541 auto-fixed (unused imports, bare f-strings)
+- noqa E402 für strukturelle Imports in dependencies.py und test_dbf_writer.py
+- E741 ambiguous variable `l` → `length` in test helper
+
+---
+
 ## [0.7.0] — 2026-03-06 — Quality Session
 
 ### Security

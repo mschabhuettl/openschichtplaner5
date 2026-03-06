@@ -26,25 +26,61 @@ function DownloadButton({
   icon: string;
   disabled?: boolean;
 }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleClick = async () => {
+    if (disabled || loading) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(url, { credentials: 'include' });
+      if (!res.ok) {
+        let msg = `Fehler ${res.status}`;
+        try { const j = await res.json(); msg = j.detail ?? msg; } catch {}
+        throw new Error(msg);
+      }
+      const blob = await res.blob();
+      // Extract filename from Content-Disposition header if available
+      const cd = res.headers.get('content-disposition') ?? '';
+      const match = cd.match(/filename="?([^";\n]+)"?/);
+      const filename = match ? match[1] : label.replace(/\s+/g, '_');
+      const objUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objUrl;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(objUrl);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Unbekannter Fehler');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <a
-      href={disabled ? undefined : url}
-      target="_blank"
-      rel="noopener noreferrer"
-      download
-      className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-        disabled
-          ? 'bg-gray-200 text-gray-600 cursor-not-allowed pointer-events-none'
-          : 'bg-slate-700 text-white hover:bg-slate-600 active:bg-slate-800'
-      }`}
-      onClick={(e) => {
-        if (disabled) e.preventDefault();
-        else window.open(url, '_blank');
-      }}
-    >
-      <span>{icon}</span>
-      {label}
-    </a>
+    <div className="flex flex-col gap-1">
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={disabled || loading}
+        className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+          disabled || loading
+            ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+            : 'bg-slate-700 text-white hover:bg-slate-600 active:bg-slate-800'
+        }`}
+      >
+        {loading ? (
+          <span className="w-4 h-4 border-2 border-gray-400 border-t-white rounded-full animate-spin inline-block" />
+        ) : (
+          <span>{icon}</span>
+        )}
+        {loading ? 'Wird exportiert…' : label}
+      </button>
+      {error && (
+        <p className="text-xs text-red-600">⚠️ {error}</p>
+      )}
+    </div>
   );
 }
 

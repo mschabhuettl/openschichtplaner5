@@ -1209,7 +1209,8 @@ export default function Berichte() {
       setLoading(false);
       showToast('Stammdaten konnten nicht geladen werden — Backend prüfen. ' + String(err), 'error');
     });
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // nur beim Mount ausführen
 
   const run = async (fn: () => Promise<void> | void) => {
     try {

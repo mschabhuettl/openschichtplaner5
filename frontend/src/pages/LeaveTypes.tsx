@@ -58,7 +58,8 @@ export default function LeaveTypes() {
     }).catch((err) => { setLoading(false); showToast('Abwesenheitsarten konnten nicht geladen werden. ' + String(err), 'error'); });
   };
 
-  useEffect(() => { load(); }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, []); // nur beim Mount ausführen
 
   const openCreate = () => {
     setEditId(null);

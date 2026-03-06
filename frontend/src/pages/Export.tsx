@@ -37,7 +37,7 @@ function DownloadButton({
       const res = await fetch(url, { credentials: 'include' });
       if (!res.ok) {
         let msg = `Fehler ${res.status}`;
-        try { const j = await res.json(); msg = j.detail ?? msg; } catch {}
+        try { const j = await res.json(); msg = j.detail ?? msg; } catch { /* JSON-Parsing fehlgeschlagen – Fallback-Fehlermeldung wird verwendet */ }
         throw new Error(msg);
       }
       const blob = await res.blob();

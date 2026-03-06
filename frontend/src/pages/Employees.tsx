@@ -347,7 +347,8 @@ export default function Employees() {
     }).catch((err) => { setLoading(false); showToast('Mitarbeiter konnten nicht geladen werden. ' + String(err), 'error'); });
   };
 
-  useEffect(() => { load(); }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, []); // nur beim Mount ausführen
 
   // Load groups and group assignments for filter
   useEffect(() => {

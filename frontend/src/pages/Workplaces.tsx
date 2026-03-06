@@ -63,7 +63,8 @@ export default function Workplaces() {
     }).catch((err) => { setLoading(false); showToast('Arbeitsplätze konnten nicht geladen werden. ' + String(err), 'error'); });
   };
 
-  useEffect(() => { load(); }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, []); // nur beim Mount ausführen
 
   // Load all employees once (for assignment panel)
   useEffect(() => {

@@ -101,7 +101,8 @@ export default function Groups() {
     }).catch((err) => { setLoading(false); showToast('Gruppen konnten nicht geladen werden. ' + String(err), 'error'); });
   };
 
-  useEffect(() => { load(); }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, []); // nur beim Mount ausführen
   useEffect(() => {
     api.getEmployees().then(setAllEmployees).catch(() => {});
   }, []);

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.9.4] - 2026-03-06
+
+### Fixes
+- **fix(sse):** max-retries limit, reconnect backoff improvements, subscriber cleanup, onerror handling
+- **fix(schedule):** keyboard navigation (PageUp/PageDown), empty state, error retry
+- **fix(mobile):** touch-friendly buttons, table overflow fixes
+
+---
+
 ## [0.9.3] - 2026-03-06
 
 ### Tests

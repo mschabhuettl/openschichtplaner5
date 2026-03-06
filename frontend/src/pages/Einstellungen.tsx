@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { api } from '../api/client';
 import type { UsettSettings } from '../api/client';
 import { useToast } from '../hooks/useToast';
@@ -104,6 +104,9 @@ export default function Einstellungen() {
   const [backupfr, setBackupfr] = useState(0);
   const [anonymEnabled, setAnonymEnabled] = useState(true);
 
+  // ── Unsaved-changes tracking ───────────────────────────────
+  const [isDirty, setIsDirty] = useState(false);
+
   // ── Import/Export UI state ─────────────────────────────────
   const [importText, setImportText] = useState('');
   const [importError, setImportError] = useState<string | null>(null);
@@ -122,10 +125,38 @@ export default function Einstellungen() {
         setAnoabold(!!s.ANOABOLD);
         setBackupfr(s.BACKUPFR ?? 0);
         setAnonymEnabled(!!(s.ANOANAME && s.ANOANAME.trim()));
+        setIsDirty(false);
       })
       .catch(e => setError(String(e)))
       .finally(() => setLoading(false));
   }, []);
+
+  // Mark dirty whenever DBF fields diverge from loaded values
+  useEffect(() => {
+    if (!settings) return;
+    const changed =
+      anoaname !== (settings.ANOANAME || 'Abwesend') ||
+      anoashort !== (settings.ANOASHORT || 'X') ||
+      anoacrtxt !== (settings.ANOACRTXT ?? 0) ||
+      anoacrbar !== (settings.ANOACRBAR ?? 16711680) ||
+      anoacrbk !== (settings.ANOACRBK ?? 16777215) ||
+      anoabold !== !!settings.ANOABOLD ||
+      backupfr !== (settings.BACKUPFR ?? 0);
+    setIsDirty(changed);
+  }, [settings, anoaname, anoashort, anoacrtxt, anoacrbar, anoacrbk, anoabold, backupfr]);
+
+  // Warn before leaving with unsaved DBF changes
+  const handleBeforeUnload = useCallback((e: BeforeUnloadEvent) => {
+    if (isDirty) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  }, [isDirty]);
+
+  useEffect(() => {
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [handleBeforeUnload]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -140,6 +171,7 @@ export default function Einstellungen() {
         ANOABOLD: anoabold ? 1 : 0,
         BACKUPFR: backupfr,
       });
+      setIsDirty(false);
       showToast(t.settings.saveSuccess + ' ✓', 'success');
     } catch (e) {
       setError(String(e));
@@ -558,17 +590,28 @@ export default function Einstellungen() {
 
           {/* ── Save DBF settings ─────────────────────────────────── */}
           {settings && (
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center gap-4">
             <p className="text-xs text-gray-600">
               💾 Lokale Einstellungen werden automatisch gespeichert. Nur DBF-Einstellungen brauchen den Speichern-Button.
             </p>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 shadow"
-            >
-              {saving ? `⟳ ${t.settings.saving}` : `💾 ${t.settings.saveButton}`}
-            </button>
+            <div className="flex items-center gap-3 shrink-0">
+              {isDirty && (
+                <span className="text-xs text-amber-600 font-medium animate-pulse">
+                  ⚠ Ungespeicherte Änderungen
+                </span>
+              )}
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow ${
+                  isDirty
+                    ? 'bg-amber-500 hover:bg-amber-600 text-white'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50'
+                }`}
+              >
+                {saving ? `⟳ ${t.settings.saving}` : `💾 ${t.settings.saveButton}`}
+              </button>
+            </div>
           </div>
           )}
 

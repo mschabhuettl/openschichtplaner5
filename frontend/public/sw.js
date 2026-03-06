@@ -4,6 +4,7 @@ const CACHE_NAME = 'osp5-v1';
 // Assets to cache on install
 const STATIC_ASSETS = [
   '/',
+  '/offline.html',
   '/manifest.json',
   '/favicon.svg',
   '/icon-192.png',
@@ -46,7 +47,9 @@ self.addEventListener('fetch', (event) => {
   // Network-first for HTML navigation (always fresh app shell)
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(() => caches.match('/'))
+      fetch(request).catch(() =>
+        caches.match('/offline.html') || caches.match('/')
+      )
     );
     return;
   }

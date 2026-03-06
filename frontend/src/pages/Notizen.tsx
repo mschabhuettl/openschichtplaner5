@@ -168,15 +168,15 @@ function NoteModal({ open, initialDate, initialNote, employees, onSave, onClose 
           <div>
             <div className="flex justify-between items-center mb-1">
               <label className="block text-sm font-medium text-slate-700">Notiz *</label>
-              <span className={`text-xs ${text.length > 480 ? 'text-red-500 font-semibold' : 'text-slate-400'}`}>{text.length}/500</span>
+              <span className={`text-xs ${text.length > 110 ? 'text-red-500 font-semibold' : 'text-slate-400'}`}>{text.length}/125</span>
             </div>
             <textarea
               value={text}
-              onChange={e => { if (e.target.value.length <= 500) { setText(e.target.value); if (error?.includes('leer')) setError(null); } }}
+              onChange={e => { if (e.target.value.length <= 125) { setText(e.target.value); if (error?.includes('leer')) setError(null); } }}
               onBlur={() => setTextTouched(true)}
               rows={3}
               placeholder="Notiztext eingeben..."
-              maxLength={500}
+              maxLength={125}
               className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 resize-none ${!text.trim() && textTouched ? 'border-red-400 focus:ring-red-400' : 'border-slate-300 focus:ring-blue-500'}`}
             />
             {!text.trim() && textTouched && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
@@ -185,13 +185,13 @@ function NoteModal({ open, initialDate, initialNote, employees, onSave, onClose 
           <div>
             <div className="flex justify-between items-center mb-1">
               <label className="block text-sm font-medium text-slate-700">Ergänzung (optional)</label>
-              {text2.length > 0 && <span className={`text-xs ${text2.length > 230 ? 'text-red-500 font-semibold' : 'text-slate-400'}`}>{text2.length}/250</span>}
+              {text2.length > 0 && <span className={`text-xs ${text2.length > 110 ? 'text-red-500 font-semibold' : 'text-slate-400'}`}>{text2.length}/125</span>}
             </div>
             <input
               type="text"
               value={text2}
-              onChange={e => { if (e.target.value.length <= 250) setText2(e.target.value); }}
-              maxLength={250}
+              onChange={e => { if (e.target.value.length <= 125) setText2(e.target.value); }}
+              maxLength={125}
               placeholder="Weitere Info..."
               className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />

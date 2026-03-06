@@ -96,6 +96,42 @@ jobs:
           flags: backend
           fail_ci_if_error: false
 
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pip-audit
+        run: pip install pip-audit
+
+      - name: Audit Python dependencies (pip-audit)
+        working-directory: backend
+        run: |
+          pip install -r requirements.txt
+          pip-audit --requirement requirements.txt --fix-mode none
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Audit npm dependencies (npm audit)
+        working-directory: frontend
+        # --audit-level=critical: only fail on critical vulnerabilities
+        run: npm audit --audit-level=critical
+
   frontend-tests:
     name: Frontend Tests (vitest)
     runs-on: ubuntu-latest
@@ -115,9 +151,16 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Run frontend tests
+      - name: Run frontend tests with coverage
         working-directory: frontend
-        run: npm test -- --reporter=verbose --coverage 2>/dev/null || npm test -- --reporter=verbose
+        run: npm test -- --reporter=verbose --coverage --coverage.provider=v8 --coverage.reporter=lcov --coverage.reporter=text
+
+      - name: Upload frontend coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: frontend-coverage-report
+          path: frontend/coverage/
 
       - name: Build frontend
         working-directory: frontend
@@ -125,4 +168,4 @@ jobs:
 
       - name: Check for TypeScript errors
         working-directory: frontend
-        run: npx tsc --noEmit || true
+        run: npx tsc --noEmit

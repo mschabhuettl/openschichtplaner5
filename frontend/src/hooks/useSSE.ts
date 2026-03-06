@@ -6,6 +6,8 @@ export type SSEEventType =
   | 'schedule_changed'
   | 'conflict_updated'
   | 'note_added'
+  | 'note_updated'
+  | 'note_deleted'
   | 'absence_changed'
   | 'connected';
 

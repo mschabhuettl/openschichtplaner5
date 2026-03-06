@@ -1205,7 +1205,10 @@ export default function Berichte() {
       setGroups(grps);
       setShifts(shfs);
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch((err) => {
+      setLoading(false);
+      showToast('Stammdaten konnten nicht geladen werden — Backend prüfen. ' + String(err), 'error');
+    });
   }, []);
 
   const run = async (fn: () => Promise<void> | void) => {

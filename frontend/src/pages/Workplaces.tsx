@@ -60,7 +60,7 @@ export default function Workplaces() {
     api.getWorkplaces().then(data => {
       setWorkplaces(data);
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch((err) => { setLoading(false); showToast('Arbeitsplätze konnten nicht geladen werden. ' + String(err), 'error'); });
   };
 
   useEffect(() => { load(); }, []);

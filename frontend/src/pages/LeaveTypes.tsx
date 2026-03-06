@@ -55,7 +55,7 @@ export default function LeaveTypes() {
     api.getLeaveTypes().then(data => {
       setLeaveTypes(data);
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch((err) => { setLoading(false); showToast('Abwesenheitsarten konnten nicht geladen werden. ' + String(err), 'error'); });
   };
 
   useEffect(() => { load(); }, []);

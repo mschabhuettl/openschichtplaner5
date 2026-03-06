@@ -1867,6 +1867,7 @@ export default function Schedule() {
   const [shifts, setShifts] = useState<ShiftType[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Match current user to an employee (by SHORTNAME or NAME)
   // Used in Leser-view to highlight the user's own row
@@ -2043,6 +2044,7 @@ export default function Schedule() {
   // Load schedule + holidays when year/month/group changes
   const loadSchedule = () => {
     setLoading(true);
+    setLoadError(null);
     // Always load without group filter; filtering done client-side for multi-group
     const groupIdForConflicts = selectedGroupIds.length === 1 ? selectedGroupIds[0] : undefined;
     Promise.all([
@@ -2053,6 +2055,9 @@ export default function Schedule() {
       setEntries(sched);
       setHolidays(new Set(hols.map(h => h.DATE)));
       setConflicts(conflictsResult.conflicts);
+      setLoading(false);
+    }).catch((err) => {
+      setLoadError('Dienstplan konnte nicht geladen werden. Bitte Backend-Verbindung prüfen. (' + String(err) + ')');
       setLoading(false);
     });
   };
@@ -3154,6 +3159,14 @@ export default function Schedule() {
   // ── Render ──────────────────────────────────────────────────
   return (
     <div className="p-2 sm:p-4 h-full flex flex-col" onClick={() => { setContextMenu(null); setNotePopup(null); setBulkContextMenu(null); }}>
+      {/* Error banner — shown when schedule data failed to load */}
+      {loadError && (
+        <div className="mb-2 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
+          <span>⚠️</span>
+          <span className="flex-1">{loadError}</span>
+          <button onClick={loadSchedule} className="underline hover:no-underline shrink-0">Nochmals versuchen</button>
+        </div>
+      )}
       {/* Read-only banner for Leser role */}
       {isLeserView && (
         <div className="no-print mb-2 flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300">

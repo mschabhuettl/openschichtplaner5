@@ -96,7 +96,7 @@ export default function Groups() {
     api.getGroups().then(data => {
       setGroups(data);
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch((err) => { setLoading(false); showToast('Gruppen konnten nicht geladen werden. ' + String(err), 'error'); });
   };
 
   useEffect(() => { load(); }, []);

@@ -324,7 +324,7 @@ export default function Employees() {
     api.getEmployees().then(data => {
       setEmployees(data);
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch((err) => { setLoading(false); showToast('Mitarbeiter konnten nicht geladen werden. ' + String(err), 'error'); });
   };
 
   useEffect(() => { load(); }, []);

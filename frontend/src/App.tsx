@@ -15,7 +15,7 @@ import { GuidedTour, useTour } from './components/GuidedTour';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { InstallBanner } from './components/InstallBanner';
 import { BottomNav } from './components/BottomNav';
-import { api } from './api/client';
+import { api, checkApiCompatibility } from './api/client';
 import { DevRoleSwitcher } from './components/DevRoleSwitcher';
 
 // Lazy-loaded pages — each page group is a separate chunk
@@ -247,6 +247,40 @@ const navItems: NavItem[] = [
 ];
 
 /** Global offline banner — shown when the browser loses connectivity */
+function ApiIncompatibleBanner() {
+  const [info, setInfo] = useState<{ backendVersion: string; requiredVersion: string } | null>(null);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    checkApiCompatibility();
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { backendVersion: string; requiredVersion: string };
+      setInfo(detail);
+    };
+    window.addEventListener('sp5:api-incompatible', handler);
+    return () => window.removeEventListener('sp5:api-incompatible', handler);
+  }, []);
+
+  if (!info || dismissed) return null;
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999,
+      background: '#b45309', color: '#fff', padding: '10px 20px',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      fontSize: '14px', boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+    }}>
+      <span>
+        ⚠️ API-Versionskonflikt: Backend {info.backendVersion} ist zu alt (mind. {info.requiredVersion} erforderlich).
+        Bitte Backend aktualisieren.
+      </span>
+      <button onClick={() => setDismissed(true)} style={{
+        background: 'transparent', border: '1px solid #fff', color: '#fff',
+        borderRadius: 4, padding: '2px 10px', cursor: 'pointer',
+      }}>×</button>
+    </div>
+  );
+}
+
 function OfflineBanner() {
   const [offline, setOffline] = useState(!navigator.onLine);
   const [showOnlineFlash, setShowOnlineFlash] = useState(false);
@@ -623,6 +657,8 @@ function AppInner() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100">
+      {/* API version compatibility banner */}
+      <ApiIncompatibleBanner />
       {/* Global offline connectivity banner */}
       <OfflineBanner />
 

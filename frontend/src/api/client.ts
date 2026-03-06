@@ -391,6 +391,51 @@ export interface Period {
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
+// ─── API Compatibility Check ───────────────────────────────────
+/** Minimum backend API version this frontend requires (semver). */
+const REQUIRED_API_MIN_VERSION = '0.4.0';
+
+function parseVersion(v: string): [number, number, number] {
+  const parts = v.split('.').map(Number);
+  return [parts[0] ?? 0, parts[1] ?? 0, parts[2] ?? 0];
+}
+
+function isVersionAtLeast(actual: string, required: string): boolean {
+  const [aMaj, aMin, aPatch] = parseVersion(actual);
+  const [rMaj, rMin, rPatch] = parseVersion(required);
+  if (aMaj !== rMaj) return aMaj > rMaj;
+  if (aMin !== rMin) return aMin > rMin;
+  return aPatch >= rPatch;
+}
+
+/**
+ * Check backend API compatibility on app start.
+ * Returns an object with `compatible` flag and version info.
+ * Shows a dismissible banner via a CustomEvent if the backend is too old.
+ */
+export async function checkApiCompatibility(): Promise<{
+  compatible: boolean;
+  backendVersion: string | null;
+  requiredVersion: string;
+}> {
+  try {
+    const res = await fetch(`${BASE_URL}/api/version`, { credentials: 'include' });
+    if (!res.ok) return { compatible: true, backendVersion: null, requiredVersion: REQUIRED_API_MIN_VERSION };
+    const data = await res.json() as { version?: string };
+    const backendVersion = data.version ?? '0.0.0';
+    const compatible = isVersionAtLeast(backendVersion, REQUIRED_API_MIN_VERSION);
+    if (!compatible) {
+      window.dispatchEvent(new CustomEvent('sp5:api-incompatible', {
+        detail: { backendVersion, requiredVersion: REQUIRED_API_MIN_VERSION },
+      }));
+    }
+    return { compatible, backendVersion, requiredVersion: REQUIRED_API_MIN_VERSION };
+  } catch {
+    // Network error — don't block the app
+    return { compatible: true, backendVersion: null, requiredVersion: REQUIRED_API_MIN_VERSION };
+  }
+}
+
 /** Fired when any API call returns 401 — AuthContext listens and logs the user out. */
 function dispatchUnauthorized() {
   window.dispatchEvent(new CustomEvent('sp5:unauthorized'));

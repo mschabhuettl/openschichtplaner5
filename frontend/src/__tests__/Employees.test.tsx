@@ -126,6 +126,7 @@ function renderEmployees() {
 describe('Employees', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(api.getEmployees).mockResolvedValue(mockEmployees as any);
     vi.mocked(api.getGroups).mockResolvedValue([]);
     vi.mocked(api.getGroupAssignments).mockResolvedValue([]);

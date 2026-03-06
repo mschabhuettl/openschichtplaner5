@@ -81,6 +81,7 @@ describe('Employees page', () => {
     localStorage.setItem('sp5_language', 'de');
     // Clear session storage to avoid search filter bleed between tests
     sessionStorage.clear();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(api.getEmployees).mockResolvedValue(mockEmployees as any);
     vi.mocked(api.getGroups).mockResolvedValue([]);
     vi.mocked(api.getGroupAssignments).mockResolvedValue([]);

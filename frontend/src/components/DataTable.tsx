@@ -193,11 +193,13 @@ export function DataTable<T>({
           <button
             onClick={() => setPage(1)}
             disabled={safePage === 1}
+            aria-label="Erste Seite"
             className="px-2 py-1 rounded border border-gray-200 disabled:opacity-30 hover:bg-gray-100"
           >«</button>
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={safePage === 1}
+            aria-label="Vorherige Seite"
             className="px-2 py-1 rounded border border-gray-200 disabled:opacity-30 hover:bg-gray-100"
           >‹</button>
           <span className="px-3 text-gray-600">
@@ -206,11 +208,13 @@ export function DataTable<T>({
           <button
             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             disabled={safePage === totalPages}
+            aria-label="Nächste Seite"
             className="px-2 py-1 rounded border border-gray-200 disabled:opacity-30 hover:bg-gray-100"
           >›</button>
           <button
             onClick={() => setPage(totalPages)}
             disabled={safePage === totalPages}
+            aria-label="Letzte Seite"
             className="px-2 py-1 rounded border border-gray-200 disabled:opacity-30 hover:bg-gray-100"
           >»</button>
         </div>

@@ -67,6 +67,7 @@ describe('Groups page', () => {
     vi.clearAllMocks();
     // Force German locale so translations are predictable
     localStorage.setItem('sp5_language', 'de');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(api.getGroups).mockResolvedValue(mockGroups as any);
     vi.mocked(api.getEmployees).mockResolvedValue([]);
   });

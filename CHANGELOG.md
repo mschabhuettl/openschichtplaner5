@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.9.7] - 2026-03-06
+
+### Fixes
+- **fix(dashboard):** today's schedule widget, open requests badge
+
+### Tests
+- **test(backend):** cover notifications read-all, wishes approve endpoints (+14 Tests)
+
+---
+
 ## [0.9.6] - 2026-03-06
 
 ### Fixes

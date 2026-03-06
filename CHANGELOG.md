@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.0-rc2] - 2026-03-06
+
+### Fixed
+- fix(monitoring): 404 counter in metrics, user_id in structured 500 error logs
+- docs(api): OpenAPI summaries complete (100%)
+
 ## [1.0.0-rc1] - 2026-03-06
 
 ### Release Candidate 1 — Quality Day Session Complete

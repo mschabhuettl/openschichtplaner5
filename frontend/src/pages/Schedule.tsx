@@ -3015,6 +3015,10 @@ export default function Schedule() {
 
     setSaving(true);
     try {
+      // If target cell already has an entry, delete it first (we have undo to recover)
+      if (beforeTarget !== null) {
+        await api.deleteScheduleEntry(targetEmpId, targetDateStr);
+      }
       // Write to target cell
       if (srcEntry.kind === 'shift' || srcEntry.kind === 'special_shift') {
         if (srcEntry.shift_id) await api.createScheduleEntry(targetEmpId, targetDateStr, srcEntry.shift_id);

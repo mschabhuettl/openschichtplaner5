@@ -13,6 +13,7 @@ vi.mock('../api/client', () => ({
     getDashboardStats: vi.fn(),
     getConflicts: vi.fn(),
     getBurnoutRadar: vi.fn(),
+    getAbsenceStatuses: vi.fn(),
   },
 }));
 
@@ -95,6 +96,7 @@ describe('Dashboard', () => {
     vi.mocked(api.getDashboardStats).mockResolvedValue(mockStats);
     vi.mocked(api.getConflicts).mockResolvedValue({ conflicts: [] });
     vi.mocked(api.getBurnoutRadar).mockResolvedValue([]);
+    vi.mocked(api.getAbsenceStatuses).mockResolvedValue({});
   });
 
   it('renders without crashing', () => {

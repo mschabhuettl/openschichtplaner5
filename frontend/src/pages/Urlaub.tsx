@@ -125,9 +125,11 @@ function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceM
   const [leaveTypeId, setLeaveTypeId] = useState(leaveTypes[0]?.ID ?? 0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [warnings, setWarnings] = useState<string[]>([]);
 
   const handleSubmit = async () => {
     setError(null);
+    setWarnings([]);
     if (!fromDate || !toDate) { setError('Bitte Von- und Bis-Datum angeben.'); return; }
     if (toDate < fromDate) { setError('Bis-Datum muss >= Von-Datum sein.'); return; }
     if (!employeeId) { setError('Bitte einen Mitarbeiter auswählen.'); return; }
@@ -160,7 +162,13 @@ function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceM
             body: JSON.stringify({ employee_id: employeeId, date: dateStr, leave_type_id: leaveTypeId }),
           });
           if (res.ok) {
-            await res.json();
+            const data = await res.json();
+            if (data.warnings?.length) {
+              setWarnings(prev => {
+                const newWarnings = (data.warnings as string[]).filter(w => !prev.includes(w));
+                return [...prev, ...newWarnings];
+              });
+            }
             onSave({ EMPLOYEE_ID: employeeId, DATE: dateStr, LEAVE_TYPE_ID: leaveTypeId });
             savedCount++;
           } else if (res.status === 409) {
@@ -177,7 +185,10 @@ function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceM
         setError(firstError);
         return;
       }
-      onClose();
+      // If there are warnings, don't close immediately — show them first
+      if (warnings.length === 0) {
+        onClose();
+      }
     } finally {
       setSaving(false);
     }
@@ -193,6 +204,14 @@ function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceM
         {error && (
           <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-sm text-red-700">
             <span>⚠️</span><span>{error}</span>
+          </div>
+        )}
+        {warnings.length > 0 && (
+          <div className="mx-6 mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+            <div className="font-semibold mb-1">⚠️ Hinweise:</div>
+            <ul className="list-disc list-inside space-y-1">
+              {warnings.map((w, i) => <li key={i}>{w}</li>)}
+            </ul>
           </div>
         )}
         <div className="px-6 py-4 space-y-4">
@@ -229,11 +248,15 @@ function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceM
           </div>
         </div>
         <div className="px-6 py-4 border-t flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50">Abbrechen</button>
-          <button onClick={handleSubmit} disabled={saving || !employeeId || !leaveTypeId}
-            className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">
-            {saving ? '⟳' : 'Beantragen'}
+          <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50">
+            {warnings.length > 0 ? 'Schließen' : 'Abbrechen'}
           </button>
+          {warnings.length === 0 && (
+            <button onClick={handleSubmit} disabled={saving || !employeeId || !leaveTypeId}
+              className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">
+              {saving ? '⟳' : 'Beantragen'}
+            </button>
+          )}
         </div>
       </div>
     </div>

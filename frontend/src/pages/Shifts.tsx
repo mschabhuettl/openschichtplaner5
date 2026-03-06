@@ -78,6 +78,28 @@ export default function Shifts() {
   const { showToast } = useToast();
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
+  type ShiftSortKey = 'name' | 'shortname' | 'duration';
+  type ShiftSortDir = 'asc' | 'desc';
+  const [shiftSortKey, setShiftSortKey] = useState<ShiftSortKey>('name');
+  const [shiftSortDir, setShiftSortDir] = useState<ShiftSortDir>('asc');
+
+  const handleShiftSort = (key: ShiftSortKey) => {
+    if (shiftSortKey === key) setShiftSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setShiftSortKey(key); setShiftSortDir('asc'); }
+  };
+  const shiftSortIcon = (key: ShiftSortKey) => shiftSortKey === key ? (shiftSortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕';
+
+  const sortedShifts = [...shifts].sort((a, b) => {
+    let av = '', bv = '';
+    switch (shiftSortKey) {
+      case 'name':      av = a.NAME || ''; bv = b.NAME || ''; break;
+      case 'shortname': av = a.SHORTNAME || ''; bv = b.SHORTNAME || ''; break;
+      case 'duration':  return shiftSortDir === 'asc' ? (a.DURATION0 || 0) - (b.DURATION0 || 0) : (b.DURATION0 || 0) - (a.DURATION0 || 0);
+    }
+    const cmp = av.localeCompare(bv, 'de');
+    return shiftSortDir === 'asc' ? cmp : -cmp;
+  });
+
   const load = () => {
     setLoading(true);
     api.getShifts().then(data => {
@@ -230,17 +252,17 @@ export default function Shifts() {
               <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
                 <tr>
                   <th className="px-4 py-2 text-left">Farbe</th>
-                  <th className="px-4 py-2 text-left">Name</th>
-                  <th className="px-4 py-2 text-left">Kürzel</th>
+                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleShiftSort('name')}>Name{shiftSortIcon('name')}</th>
+                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleShiftSort('shortname')}>Kürzel{shiftSortIcon('shortname')}</th>
                   <th className="px-4 py-2 text-center">Mo–Fr</th>
                   <th className="px-4 py-2 text-center">Sa</th>
                   <th className="px-4 py-2 text-center">So</th>
-                  <th className="px-4 py-2 text-right">Dauer</th>
+                  <th className="px-4 py-2 text-right cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleShiftSort('duration')}>Dauer{shiftSortIcon('duration')}</th>
                   <th className="px-4 py-2 text-center">Aktionen</th>
                 </tr>
               </thead>
               <tbody>
-                {shifts.map((s, i) => {
+                {sortedShifts.map((s, i) => {
                   const times = s.TIMES_BY_WEEKDAY || {};
                   const weekdayTime = times['0'] || times['1'] || null;
                   const satTime = times['5'] || null;

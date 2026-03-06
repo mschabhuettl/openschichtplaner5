@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
-import type { ChangelogEntry } from '../api/client';
+import type { ChangelogEntry, EmployeeYearStats } from '../api/client';
 import type { Employee, ShiftType, ScheduleEntry } from '../types';
 
 const MONTH_NAMES = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
@@ -66,8 +66,7 @@ export default function MitarbeiterProfil() {
   const [shifts, setShifts] = useState<ShiftType[]>([]);
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [groupName, setGroupName] = useState('');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [yearStats, setYearStats] = useState<any>(null);
+  const [yearStats, setYearStats] = useState<EmployeeYearStats | null>(null);
   const [schedule7, setSchedule7] = useState<ScheduleEntry[]>([]);
   const [changelog, setChangelog] = useState<ChangelogEntry[]>([]);
   const [absences, setAbsences] = useState<{ date: string; leave_type_name: string; leave_type_short: string }[]>([]);
@@ -110,8 +109,7 @@ export default function MitarbeiterProfil() {
         setGroupName(g?.NAME ?? '');
       }
       setYearStats(stats);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setAbsences(absData as any);
+      setAbsences(absData);
       // Filter changelog for this employee where possible
       const empLog = clog.filter(e =>
         (e.entity === 'employee' && e.entity_id === employeeId) ||

@@ -246,8 +246,8 @@ export default function Jahresrueckblick() {
     ? Math.round((totals.actual_hours / totals.target_hours) * 100)
     : 0;
 
-  const avgHoursPerEmployee = data && data.employees.length > 0
-    ? Math.round(totals!.actual_hours / data.employees.length)
+  const avgHoursPerEmployee = data && data.employees.length > 0 && totals
+    ? Math.round(totals.actual_hours / data.employees.length)
     : 0;
 
   const topEmp = data?.employees[0];

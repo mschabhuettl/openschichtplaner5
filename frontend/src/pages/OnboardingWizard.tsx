@@ -506,8 +506,7 @@ export default function OnboardingWizard() {
   const [lastnameBlurred, setLastnameBlurred] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    api.getGroups().then((d: any[]) => setGroups(d)).catch(() => {});
+    api.getGroups().then((d) => setGroups(d)).catch(() => {});
   }, []);
 
   const canProceed = () => {

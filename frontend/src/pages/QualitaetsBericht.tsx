@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const BASE_URL = (import.meta as any).env?.VITE_API_URL ?? '';
+const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 function getAuthHeaders(): Record<string, string> {
   try {

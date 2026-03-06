@@ -1452,13 +1452,10 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
 
   const MONTHS_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 
-  // Normalize field access (API may return snake_case or UPPER_CASE)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getEmpId = (a: Absence) => a.EMPLOYEE_ID ?? (a as any).employee_id ?? 0;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getLtId = (a: Absence) => a.LEAVE_TYPE_ID ?? (a as any).leave_type_id ?? 0;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const getDate = (a: Absence) => a.DATE ?? (a as any).date ?? '';
+  // Field accessors (data is now always normalized to UPPER_CASE on load)
+  const getEmpId = (a: Absence) => a.EMPLOYEE_ID;
+  const getLtId = (a: Absence) => a.LEAVE_TYPE_ID;
+  const getDate = (a: Absence) => a.DATE;
 
   // Absence type breakdown
   const byType = useMemo(() => {
@@ -1672,10 +1669,8 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
   const absMap = useMemo(() => {
     const m = new Map<string, Absence>();
     absences.forEach(a => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const date = (a.DATE ?? (a as any).date ?? '');
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const eid = a.EMPLOYEE_ID ?? (a as any).employee_id;
+      const date = a.DATE;
+      const eid = a.EMPLOYEE_ID;
       if (date && eid) m.set(`${eid}_${date}`, a);
     });
     return m;
@@ -1685,11 +1680,9 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
   const countByEmployee = useMemo(() => {
     const c = new Map<number, number>();
     absences.forEach(a => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const eid = a.EMPLOYEE_ID ?? (a as any).employee_id;
+      const eid = a.EMPLOYEE_ID;
       if (!eid || eid < 0) return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (filterLeaveType && (a.LEAVE_TYPE_ID ?? (a as any).leave_type_id) !== filterLeaveType) return;
+      if (filterLeaveType && a.LEAVE_TYPE_ID !== filterLeaveType) return;
       c.set(eid, (c.get(eid) ?? 0) + 1);
     });
     return c;
@@ -1706,10 +1699,7 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
   const usedLeaveTypeIds = useMemo(() => {
     const ids = new Set<number>();
     absences.forEach(a => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const eid = a.EMPLOYEE_ID ?? (a as any).employee_id;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (eid && eid > 0) ids.add(a.LEAVE_TYPE_ID ?? (a as any).leave_type_id);
+      if (a.EMPLOYEE_ID && a.EMPLOYEE_ID > 0) ids.add(a.LEAVE_TYPE_ID);
     });
     return ids;
   }, [absences]);
@@ -1807,10 +1797,8 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
                         const dateStr = `${year}-${String(mi + 1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
                         const absence = absMap.get(`${emp.ID}_${dateStr}`);
                         const isWeekend = new Date(year, mi, dayNum).getDay() === 0 || new Date(year, mi, dayNum).getDay() === 6;
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        const lt = absence ? getLT(absence.LEAVE_TYPE_ID ?? (absence as any).leave_type_id) : null;
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        const show = !filterLeaveType || !absence || (absence.LEAVE_TYPE_ID ?? (absence as any).leave_type_id) === filterLeaveType;
+                        const lt = absence ? getLT(absence.LEAVE_TYPE_ID) : null;
+                        const show = !filterLeaveType || !absence || absence.LEAVE_TYPE_ID === filterLeaveType;
 
                         return (
                           <td key={`${mi}-${d}`}
@@ -1860,12 +1848,9 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
       {/* Summary stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {leaveTypes.filter(lt => usedLeaveTypeIds.has(lt.ID)).map(lt => {
-          const count = absences.filter(a => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const eid = a.EMPLOYEE_ID ?? (a as any).employee_id;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return eid && eid > 0 && (a.LEAVE_TYPE_ID ?? (a as any).leave_type_id) === lt.ID;
-          }).length;
+          const count = absences.filter(a =>
+            a.EMPLOYEE_ID > 0 && a.LEAVE_TYPE_ID === lt.ID
+          ).length;
           return count > 0 ? (
             <div key={lt.ID} className="bg-white rounded-xl border p-3 flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
@@ -1904,18 +1889,16 @@ export default function Urlaub() {
   const [absences, setAbsences] = useState<Absence[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load absences
+  // Load absences - uses api client for typed response, maps lowercase keys to uppercase Absence
   const loadAbsences = useCallback(async () => {
     try {
-      const res = await fetch(`${API}/api/absences?year=${year}`, { headers: getAuthHeaders() });
-      if (res.ok) { setAbsences(await res.json()); return; }
-    } catch { /* try without year filter */ }
-    try {
-      const res = await fetch(`${API}/api/absences`, { headers: getAuthHeaders() });
-      if (res.ok) {
-        const all = await res.json() as Absence[];
-        setAbsences(all.filter(a => a.DATE?.startsWith(String(year))));
-      }
+      const data = await api.getAbsences({ year });
+      setAbsences(data.map(a => ({
+        ID: a.id,
+        EMPLOYEE_ID: a.employee_id,
+        DATE: a.date,
+        LEAVE_TYPE_ID: a.leave_type_id,
+      })));
     } catch { setAbsences([]); }
   }, [year]);
 

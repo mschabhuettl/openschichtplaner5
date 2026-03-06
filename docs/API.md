@@ -610,7 +610,7 @@ No authentication required.
 
 ```json
 {
-  "version": "0.9.2",
+  "version": "0.9.5",
   "service": "OpenSchichtplaner5 API",
   "python_version": "3.11.0",
   "build_date": "2026-03-06",

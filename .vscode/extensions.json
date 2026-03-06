@@ -1,0 +1,24 @@
+{
+  "recommendations": [
+    // Python
+    "ms-python.python",
+    "ms-python.pylance",
+    "charliermarsh.ruff",
+    "ms-python.mypy-type-checker",
+
+    // Frontend
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "Vue.volar",
+
+    // Testing
+    "ms-playwright.playwright",
+
+    // General
+    "editorconfig.editorconfig",
+    "mikestead.dotenv",
+    "eamodio.gitlens",
+    "usernamehw.errorlens"
+  ]
+}

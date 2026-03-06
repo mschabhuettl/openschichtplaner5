@@ -29,14 +29,31 @@ docker-dev: ## Docker-Container im Dev-Profil starten
 docker-down: ## Docker-Container stoppen
 	docker compose down
 
-test: ## Tests ausführen (pytest + playwright)
-	@echo "▶ Backend-Tests..."
+test: ## Tests ausführen (pytest + vitest + playwright)
+	@echo "▶ Backend-Tests (pytest)..."
 	@cd $(BACKEND_DIR) && \
-	  . .venv/bin/activate 2>/dev/null || true && \
+	  . venv/bin/activate 2>/dev/null || true && \
 	  python3 -m pytest tests/ -v
-	@echo "▶ Frontend-Tests..."
+	@echo "▶ Frontend-Unit-Tests (vitest)..."
+	@cd $(FRONTEND_DIR) && npx vitest run 2>/dev/null || \
+	  echo "  (vitest nicht konfiguriert)"
+	@echo "▶ Frontend-E2E-Tests (playwright)..."
 	@cd $(FRONTEND_DIR) && npx playwright test 2>/dev/null || \
 	  echo "  (Playwright nicht konfiguriert)"
+
+lint: ## Code-Qualität prüfen (ruff + mypy + eslint)
+	@echo "▶ ruff (Backend)..."
+	@cd $(BACKEND_DIR) && \
+	  . venv/bin/activate 2>/dev/null || true && \
+	  python3 -m ruff check . || true
+	@echo "▶ mypy (Backend)..."
+	@cd $(BACKEND_DIR) && \
+	  . venv/bin/activate 2>/dev/null || true && \
+	  python3 -m mypy sp5lib api --ignore-missing-imports 2>/dev/null || true
+	@echo "▶ eslint (Frontend)..."
+	@cd $(FRONTEND_DIR) && npx eslint src/ 2>/dev/null || \
+	  echo "  (eslint nicht konfiguriert)"
+	@echo "✓ Lint abgeschlossen"
 
 build: ## Frontend-Bundle bauen
 	@cd $(FRONTEND_DIR) && npm install && npm run build

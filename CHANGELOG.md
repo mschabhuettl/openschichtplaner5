@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.9.1] - 2026-03-06
+
+### Bug Fixes
+- **fix:** test_event_generator + schichtwuensche workflow verification
+- **fix(zeitkonto):** correctness + report edge cases + type cleanup
+- **fix(frontend):** bundle optimization, aria-labels, lint cleanup
+- **fix(security):** CORS hardening, remove hashed_password from user response, bump pypdf 6.7.4→6.7.5 (CVE-2026-28804 fix)
+- **fix(mobile):** hide secondary table columns on small screens
+
+### Tests
+- **test(backend):** increase coverage for low-coverage modules — sqlite_adapter 0→90%, events.py 53→85% (~1327 tests total)
+
+### Internationalization
+- **i18n:** translate all error messages and UI strings to German
+
+---
+
 ## [v0.9.0-quality-afternoon] — 2026-03-06 Nachmittag — Bugfixes & Test-Hygiene (Tag: v0.9.0-quality-afternoon-2026-03-06)
 
 ### Summary

@@ -344,6 +344,11 @@ export default function TauschBoerse() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-6 space-y-5">
+        {/* Info banner */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-800">
+          ℹ️ <strong>So funktioniert die Tauschbörse:</strong> Ein Mitarbeiter stellt eine Tausch-Anfrage (eigene Schicht ↔ Schicht eines Kollegen). Die Anfrage bleibt <em>ausstehend</em>, bis ein Planer sie <strong>genehmigt</strong> oder <strong>ablehnt</strong>. Erst nach Genehmigung wird der Tausch im Schichtplan wirksam.
+        </div>
+
         {/* Flash message */}
         {actionMsg && (
           <div className="bg-blue-50 border border-blue-200 text-blue-800 rounded-lg px-4 py-3 text-sm font-medium">

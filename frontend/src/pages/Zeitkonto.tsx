@@ -509,6 +509,11 @@ export default function Zeitkonto() {
         </button>
       </div>
 
+      {/* Info banner */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-800 mb-4">
+        ℹ️ <strong>Zeitkonto:</strong> <strong>Soll-Std</strong> = vertraglich vereinbarte Arbeitsstunden (laut Schichtplan). <strong>Ist-Std</strong> = tatsächlich geleistete Stunden. Die <strong>Differenz</strong> zeigt Über- oder Minusstunden — grün = Plusstunden, rot = Minusstunden.
+      </div>
+
       {/* Summary cards */}
       {summary && (
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">

@@ -322,8 +322,9 @@ export default function Einschraenkungen() {
       <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700 flex items-start gap-2">
         <span className="text-base flex-shrink-0">ℹ️</span>
         <span>
-          Schichteinschränkungen verhindern die automatische Zuweisung bestimmter Schichten an Mitarbeiter.
-          Ein Wochentag von 0 bedeutet die Einschränkung gilt für alle Tage.
+          <strong>Schichteinschränkungen</strong> verhindern die automatische Zuweisung bestimmter Schichtarten an einen Mitarbeiter.
+          Wochentag: <strong>0 = alle Tage</strong>, 1 = Montag, 2 = Dienstag, … 7 = Sonntag.
+          Einschränkungen gelten ab dem angegebenen Datum und können befristet oder dauerhaft sein.
         </span>
       </div>
       <ConfirmDialog {...confirmDialogProps} />

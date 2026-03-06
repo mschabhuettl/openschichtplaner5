@@ -1,5 +1,23 @@
 # Changelog
 
+## [v0.9.0-quality-afternoon] — 2026-03-06 Nachmittag — Bugfixes & Test-Hygiene (Tag: v0.9.0-quality-afternoon-2026-03-06)
+
+### Summary
+- **1294 pytest tests** — alle grün ✅ (5 Test-Fixes für korrektes API-Verhalten)
+- **Frontend build + 147 Tests** — alles sauber ✅
+- **ruff** — `All checks passed!` ✅
+- **mypy** — `Success: no issues found in 22 source files` ✅
+
+### Bug Fixes
+- **Analytics-Korrektheit** — Feiertage werden von Soll-Stunden abgezogen; Abwesenheitstage korrekt aus Ist-Stunden herausgerechnet
+- **Krankenstand** — Kranken-Tage zählen nicht als Urlaub; Krankenstand-Schichtstunden werden aus Statistiken ausgeschlossen
+- **Jahresabschluss-Sicherheit** — Bestätigungs-Eingabe + Idempotenz-Warnung hinzugefügt
+- **Thread-Safety** — Duplicate-Check + 409-Conflict für doppelte Wünsche (gleicher MA + Datum + Typ)
+- **wishes.json Pfad-Bug** — `_wishes_path()` verwendete hartkodiertes `backend/data/` statt `self.db_path` → Tests isoliert; Produktionsdaten korrekt migriert
+
+### Test Fixes
+- 5 Tests aktualisiert: korrekte Daten für Wunsch-Tests (verhindert Konflikte mit Session-DB), Restriction-Wochentag-Range (0–7 mit 7=Sonntag korrekt), mypy `no-redef` in sqlite_adapter.py behoben
+
 ## v0.8.0 — Quality Session 2026-03-06: 48 commits, 1294 backend tests, 147 frontend tests, Playwright E2E, 0 mypy/ESLint/ruff errors
 
 ## [v0.8.0-quality] — 2026-03-06 — Quality Session Final (Tag: v0.8.0-quality-2026-03-06)

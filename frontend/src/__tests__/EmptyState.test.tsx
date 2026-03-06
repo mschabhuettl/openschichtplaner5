@@ -80,13 +80,13 @@ describe('InlineError', () => {
   it('renders retry button when onRetry provided', () => {
     const onRetry = vi.fn();
     render(<InlineError message="Error" onRetry={onRetry} />);
-    const btn = screen.getByText('Retry');
+    const btn = screen.getByText('Wiederholen');
     fireEvent.click(btn);
     expect(onRetry).toHaveBeenCalledOnce();
   });
 
   it('does not render retry button without onRetry', () => {
     render(<InlineError message="Error" />);
-    expect(screen.queryByText('Retry')).toBeNull();
+    expect(screen.queryByText('Wiederholen')).toBeNull();
   });
 });

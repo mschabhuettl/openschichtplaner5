@@ -173,6 +173,10 @@ export default function MitarbeiterProfil() {
 
   // Upcoming absences (next 30 days)
   const now = new Date();
+
+  // Current month stats for KPI strip
+  const currentMonthNum = now.getMonth() + 1;
+  const currentMonthStat = months.find(m => m.month === currentMonthNum);
   const nowStr = now.toISOString().slice(0, 10);
   const upcomingAbsences = absences
     .filter(a => a.date >= nowStr)
@@ -220,7 +224,16 @@ export default function MitarbeiterProfil() {
 
       {/* KPI Strip */}
       {totals && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mb-4">
+          {currentMonthStat && (
+            <KPICard
+              label={`${MONTH_NAMES[currentMonthNum - 1]} Ist/Soll`}
+              value={`${currentMonthStat.actual_hours.toFixed(0)}h`}
+              icon="📆"
+              color={currentMonthStat.difference >= 0 ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-red-50 border-red-200 text-red-900'}
+              sub={`Soll: ${currentMonthStat.target_hours.toFixed(0)}h (${currentMonthStat.difference >= 0 ? '+' : ''}${currentMonthStat.difference.toFixed(0)}h)`}
+            />
+          )}
           <KPICard label="Schichten" value={totals.shifts_count} icon="📋" color="bg-blue-50 border-blue-200 text-blue-900" sub={`${year}`} />
           <KPICard label="Ist-Stunden" value={`${totals.actual_hours.toFixed(0)}h`} icon="⏱️" color="bg-green-50 border-green-200 text-green-900" sub={`Soll: ${totals.target_hours.toFixed(0)}h`} />
           <KPICard label="Urlaub" value={`${totals.vacation_days}d`} icon="🏖️" color="bg-yellow-50 border-yellow-200 text-yellow-900" sub="Verbrauch" />

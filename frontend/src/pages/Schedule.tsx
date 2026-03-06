@@ -3095,6 +3095,17 @@ export default function Schedule() {
       }
     }
 
+    // PageUp / PageDown → navigate months
+    if (e.key === 'PageUp' || e.key === 'PageDown') {
+      const activeTag = (document.activeElement as HTMLElement)?.tagName;
+      if (activeTag !== 'INPUT' && activeTag !== 'TEXTAREA' && activeTag !== 'SELECT') {
+        e.preventDefault();
+        if (e.key === 'PageUp') prevMonth();
+        else nextMonth();
+        return;
+      }
+    }
+
     // Escape → clear all UI state
     if (e.key === 'Escape') {
       if (showKbHelp) { setShowKbHelp(false); return; }
@@ -4698,6 +4709,7 @@ export default function Schedule() {
                 <div className="space-y-1">
                   {[
                     ['↑ ↓ ← →', 'Zwischen Zellen navigieren'],
+                    ['PageUp / PageDown', 'Voriger / nächster Monat'],
                     ['Escape', 'Auswahl aufheben / Overlays schließen'],
                     ['Ctrl+F', 'Mitarbeiter-Suche fokussieren'],
                   ].map(([key, desc]) => (

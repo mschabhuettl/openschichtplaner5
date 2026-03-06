@@ -27,17 +27,19 @@ interface UseSSEOptions {
 
 const MAX_RETRY_DELAY = 30_000; // 30s cap
 const INITIAL_RETRY_DELAY = 1_000; // 1s
+const MAX_RETRIES = 3; // give up after 3 consecutive failures
 
 /**
  * useSSE — connects to /api/events and returns connection status.
  *
- * Automatically reconnects with exponential backoff.
+ * Automatically reconnects with exponential backoff (max 3 retries).
  * Passes the auth token as a query parameter (EventSource doesn't support headers).
  */
 export function useSSE({ token, onEvent, baseUrl }: UseSSEOptions) {
   const [status, setStatus] = useState<SSEStatus>('disconnected');
   const esRef = useRef<EventSource | null>(null);
   const retryDelayRef = useRef(INITIAL_RETRY_DELAY);
+  const retryCountRef = useRef(0);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onEventRef = useRef(onEvent);
   onEventRef.current = onEvent;
@@ -73,12 +75,21 @@ export function useSSE({ token, onEvent, baseUrl }: UseSSEOptions) {
     es.addEventListener('connected', () => {
       setStatus('connected');
       retryDelayRef.current = INITIAL_RETRY_DELAY; // reset backoff on success
+      retryCountRef.current = 0; // reset retry counter on successful connection
     });
 
     es.onerror = () => {
       es.close();
       esRef.current = null;
       setStatus('disconnected');
+
+      retryCountRef.current += 1;
+      if (retryCountRef.current > MAX_RETRIES) {
+        // Gave up after max retries — stay disconnected
+        console.warn(`[SSE] gave up after ${MAX_RETRIES} retries`);
+        return;
+      }
+
       // Exponential backoff reconnect
       const delay = retryDelayRef.current;
       retryDelayRef.current = Math.min(delay * 2, MAX_RETRY_DELAY);
@@ -98,6 +109,8 @@ export function useSSE({ token, onEvent, baseUrl }: UseSSEOptions) {
       esRef.current?.close();
       esRef.current = null;
       if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+      retryDelayRef.current = INITIAL_RETRY_DELAY;
+      retryCountRef.current = 0;
     };
   }, [token, connect]);
 

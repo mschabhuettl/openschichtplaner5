@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.5] - 2026-03-06
+
+### Fixes
+- **fix(auth):** login loading state, show/hide password toggle, German error messages, live password mismatch validation
+- **fix(security):** rate-limit backup endpoints, improve brute-force lockout message with remaining seconds
+
+---
+
 ## [0.9.4] - 2026-03-06
 
 ### Fixes

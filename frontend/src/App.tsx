@@ -12,7 +12,7 @@ import WarningsCenter from './components/WarningsCenter';
 import { NotificationBell } from './components/NotificationBell';
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 import { GuidedTour, useTour } from './components/GuidedTour';
-import { ErrorBoundary } from './components/ErrorBoundary';
+import { ErrorBoundary, PageErrorBoundary } from './components/ErrorBoundary';
 import { InstallBanner } from './components/InstallBanner';
 import { BottomNav } from './components/BottomNav';
 import { api, checkApiCompatibility } from './api/client';
@@ -315,6 +315,58 @@ function OfflineBanner() {
     );
   }
   return null;
+}
+
+/** Banner shown when the backend API is completely unreachable at startup */
+function BackendUnreachableBanner() {
+  const [unreachable, setUnreachable] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const check = async () => {
+      try {
+        const res = await fetch('/api/version', { signal: AbortSignal.timeout(5000) });
+        if (!cancelled && !res.ok && res.status === 0) setUnreachable(true);
+      } catch (err) {
+        if (!cancelled) {
+          // TypeError: Failed to fetch → backend nicht erreichbar
+          if (err instanceof TypeError) setUnreachable(true);
+        }
+      }
+    };
+    check();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (!unreachable || dismissed) return null;
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, zIndex: 99998,
+      background: '#dc2626', color: '#fff', padding: '10px 20px',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      fontSize: '14px', boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+    }}>
+      <span>
+        🔴 Backend nicht erreichbar — bitte prüfe ob der Server läuft.
+      </span>
+      <button onClick={() => setDismissed(true)} style={{
+        background: 'transparent', border: '1px solid #fff', color: '#fff',
+        borderRadius: 4, padding: '2px 10px', cursor: 'pointer',
+      }}>×</button>
+    </div>
+  );
+}
+
+/** Wraps a route element in a per-page ErrorBoundary + Suspense */
+function PB({ children, name }: { children: React.ReactNode; name: string }) {
+  return (
+    <PageErrorBoundary pageName={name}>
+      <Suspense fallback={<PageLoader />}>
+        {children}
+      </Suspense>
+    </PageErrorBoundary>
+  );
 }
 
 function AppInner() {
@@ -671,6 +723,8 @@ function AppInner() {
       <ApiIncompatibleBanner />
       {/* Global offline connectivity banner */}
       <OfflineBanner />
+      {/* Backend unreachable banner (startup check) */}
+      <BackendUnreachableBanner />
 
       {/* Skip link for keyboard navigation */}
       <a
@@ -802,74 +856,72 @@ function AppInner() {
         </header>
 
         <main id="main-content" className="flex-1 overflow-auto pb-14 md:pb-0">
-          {/* Suspense boundary: shows spinner while a lazy chunk loads */}
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/konflikte" element={<Konflikte />} />
-              <Route path="/geburtstagkalender" element={<Geburtstagkalender />} />
-              <Route path="/schichtwuensche" element={<Schichtwuensche />} />
-              <Route path="/tauschboerse" element={<TauschBoerse />} />
-              <Route path="/schedule" element={<Schedule />} />
-              <Route path="/einsatzplan" element={<Einsatzplan />} />
-              <Route path="/jahresuebersicht" element={<Jahresuebersicht />} />
-              <Route path="/personaltabelle" element={<Personaltabelle />} />
-              <Route path="/statistiken" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Statistiken /></RoleRoute>} />
-              <Route path="/urlaub" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Urlaub /></RoleRoute>} />
-              <Route path="/schichtmodell" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Schichtmodell /></RoleRoute>} />
-              <Route path="/personalbedarf" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Personalbedarf /></RoleRoute>} />
-              <Route path="/jahresrueckblick" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Jahresrueckblick /></RoleRoute>} />
-              <Route path="/jahresabschluss" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Jahresabschluss /></RoleRoute>} />
-              <Route path="/zeitkonto" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Zeitkonto /></RoleRoute>} />
-              <Route path="/ueberstunden" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Ueberstunden /></RoleRoute>} />
-              <Route path="/kontobuchungen" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Kontobuchungen /></RoleRoute>} />
-              <Route path="/notizen" element={<Notizen />} />
-              <Route path="/mitarbeiter-vergleich" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterVergleich /></RoleRoute>} />
-              <Route path="/team" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><TeamUebersicht /></RoleRoute>} />
-              <Route path="/mitarbeiter" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterProfil /></RoleRoute>} />
-              <Route path="/mitarbeiter/:id" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterProfil /></RoleRoute>} />
-              <Route path="/mein-profil" element={<MeinProfil />} />
-              <Route path="/teamkalender" element={<Teamkalender />} />
-              <Route path="/urlaubs-timeline" element={<UrlaubsTimeline />} />
-              <Route path="/fairness" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Fairness /></RoleRoute>} />
-              <Route path="/berichte" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Berichte /></RoleRoute>} />
-              <Route path="/export" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Export /></RoleRoute>} />
-              <Route path="/import" element={<RoleRoute allowedRoles={['Admin']}><Import /></RoleRoute>} />
-              <Route path="/employees" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Employees /></RoleRoute>} />
-              <Route path="/groups" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Groups /></RoleRoute>} />
-              <Route path="/shifts" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Shifts /></RoleRoute>} />
-              <Route path="/leave-types" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><LeaveTypes /></RoleRoute>} />
-              <Route path="/holidays" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Holidays /></RoleRoute>} />
-              <Route path="/workplaces" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Workplaces /></RoleRoute>} />
-              <Route path="/extracharges" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Extracharges /></RoleRoute>} />
-              <Route path="/einschraenkungen" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Einschraenkungen /></RoleRoute>} />
-              <Route path="/benutzerverwaltung" element={<RoleRoute allowedRoles={['Admin']}><Benutzerverwaltung /></RoleRoute>} />
-              <Route path="/backup" element={<RoleRoute allowedRoles={['Admin']}><Backup /></RoleRoute>} />
-              <Route path="/perioden" element={<RoleRoute allowedRoles={['Admin']}><Perioden /></RoleRoute>} />
-              <Route path="/einstellungen" element={<RoleRoute allowedRoles={['Admin']}><Einstellungen /></RoleRoute>} />
-              <Route path="/protokoll" element={<RoleRoute allowedRoles={['Admin']}><Protokoll /></RoleRoute>} />
-              <Route path="/druckvorschau" element={<Druckvorschau />} />
-              <Route path="/dienst-board" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><DienstBoard /></RoleRoute>} />
-              <Route path="/wochenansicht" element={<Wochenansicht />} />
-              <Route path="/verfuegbarkeits-matrix" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><VerfügbarkeitsMatrix /></RoleRoute>} />
-              <Route path="/rotations-analyse" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><RotationsAnalyse /></RoleRoute>} />
-              <Route path="/kapazitaets-forecast" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><KapazitaetsForecast /></RoleRoute>} />
-              <Route path="/qualitaets-bericht" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><QualitaetsBericht /></RoleRoute>} />
-              <Route path="/schicht-kalibrator" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><SchichtKalibrator /></RoleRoute>} />
-              <Route path="/kompetenz-matrix" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><KompetenzMatrix /></RoleRoute>} />
-              <Route path="/analytics" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Analytics /></RoleRoute>} />
-              <Route path="/simulation" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Simulation /></RoleRoute>} />
-              <Route path="/notfall-plan" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><NotfallPlan /></RoleRoute>} />
-              <Route path="/leitwand" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Leitwand /></RoleRoute>} />
-              <Route path="/uebergabe" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Uebergabe /></RoleRoute>} />
-              <Route path="/schichtbriefing" element={<SchichtBriefing />} />
-              <Route path="/onboarding" element={<OnboardingWizard />} />
-              <Route path="/auditlog" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><AuditLog /></RoleRoute>} />
-              <Route path="/health" element={<RoleRoute allowedRoles={['Admin']}><HealthDashboard /></RoleRoute>} />
-              <Route path="/login" element={<Navigate to="/" replace />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
+          {/* Per-page Suspense + ErrorBoundary via <PB> wrapper */}
+          <Routes>
+            <Route path="/" element={<PB name="Dashboard"><Dashboard /></PB>} />
+            <Route path="/konflikte" element={<PB name="Konflikte"><Konflikte /></PB>} />
+            <Route path="/geburtstagkalender" element={<PB name="Geburtstagkalender"><Geburtstagkalender /></PB>} />
+            <Route path="/schichtwuensche" element={<PB name="Schichtwünsche"><Schichtwuensche /></PB>} />
+            <Route path="/tauschboerse" element={<PB name="Tauschbörse"><TauschBoerse /></PB>} />
+            <Route path="/schedule" element={<PB name="Dienstplan"><Schedule /></PB>} />
+            <Route path="/einsatzplan" element={<PB name="Einsatzplan"><Einsatzplan /></PB>} />
+            <Route path="/jahresuebersicht" element={<PB name="Jahresübersicht"><Jahresuebersicht /></PB>} />
+            <Route path="/personaltabelle" element={<PB name="Personaltabelle"><Personaltabelle /></PB>} />
+            <Route path="/statistiken" element={<PB name="Statistiken"><RoleRoute allowedRoles={['Admin', 'Planer']}><Statistiken /></RoleRoute></PB>} />
+            <Route path="/urlaub" element={<PB name="Urlaubsverwaltung"><RoleRoute allowedRoles={['Admin', 'Planer']}><Urlaub /></RoleRoute></PB>} />
+            <Route path="/schichtmodell" element={<PB name="Schichtmodelle"><RoleRoute allowedRoles={['Admin', 'Planer']}><Schichtmodell /></RoleRoute></PB>} />
+            <Route path="/personalbedarf" element={<PB name="Personalbedarf"><RoleRoute allowedRoles={['Admin', 'Planer']}><Personalbedarf /></RoleRoute></PB>} />
+            <Route path="/jahresrueckblick" element={<PB name="Jahresrückblick"><RoleRoute allowedRoles={['Admin', 'Planer']}><Jahresrueckblick /></RoleRoute></PB>} />
+            <Route path="/jahresabschluss" element={<PB name="Jahresabschluss"><RoleRoute allowedRoles={['Admin', 'Planer']}><Jahresabschluss /></RoleRoute></PB>} />
+            <Route path="/zeitkonto" element={<PB name="Zeitkonto"><RoleRoute allowedRoles={['Admin', 'Planer']}><Zeitkonto /></RoleRoute></PB>} />
+            <Route path="/ueberstunden" element={<PB name="Überstunden"><RoleRoute allowedRoles={['Admin', 'Planer']}><Ueberstunden /></RoleRoute></PB>} />
+            <Route path="/kontobuchungen" element={<PB name="Kontobuchungen"><RoleRoute allowedRoles={['Admin', 'Planer']}><Kontobuchungen /></RoleRoute></PB>} />
+            <Route path="/notizen" element={<PB name="Notizen"><Notizen /></PB>} />
+            <Route path="/mitarbeiter-vergleich" element={<PB name="MA-Vergleich"><RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterVergleich /></RoleRoute></PB>} />
+            <Route path="/team" element={<PB name="Team-Übersicht"><RoleRoute allowedRoles={['Admin', 'Planer']}><TeamUebersicht /></RoleRoute></PB>} />
+            <Route path="/mitarbeiter" element={<PB name="MA-Profil"><RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterProfil /></RoleRoute></PB>} />
+            <Route path="/mitarbeiter/:id" element={<PB name="MA-Profil"><RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterProfil /></RoleRoute></PB>} />
+            <Route path="/mein-profil" element={<PB name="Mein Profil"><MeinProfil /></PB>} />
+            <Route path="/teamkalender" element={<PB name="Team-Kalender"><Teamkalender /></PB>} />
+            <Route path="/urlaubs-timeline" element={<PB name="Urlaubs-Timeline"><UrlaubsTimeline /></PB>} />
+            <Route path="/fairness" element={<PB name="Fairness-Score"><RoleRoute allowedRoles={['Admin', 'Planer']}><Fairness /></RoleRoute></PB>} />
+            <Route path="/berichte" element={<PB name="Monatsberichte"><RoleRoute allowedRoles={['Admin', 'Planer']}><Berichte /></RoleRoute></PB>} />
+            <Route path="/export" element={<PB name="Export"><RoleRoute allowedRoles={['Admin', 'Planer']}><Export /></RoleRoute></PB>} />
+            <Route path="/import" element={<PB name="Import"><RoleRoute allowedRoles={['Admin']}><Import /></RoleRoute></PB>} />
+            <Route path="/employees" element={<PB name="Mitarbeiter"><RoleRoute allowedRoles={['Admin', 'Planer']}><Employees /></RoleRoute></PB>} />
+            <Route path="/groups" element={<PB name="Gruppen"><RoleRoute allowedRoles={['Admin', 'Planer']}><Groups /></RoleRoute></PB>} />
+            <Route path="/shifts" element={<PB name="Schichtarten"><RoleRoute allowedRoles={['Admin', 'Planer']}><Shifts /></RoleRoute></PB>} />
+            <Route path="/leave-types" element={<PB name="Abwesenheitsarten"><RoleRoute allowedRoles={['Admin', 'Planer']}><LeaveTypes /></RoleRoute></PB>} />
+            <Route path="/holidays" element={<PB name="Feiertage"><RoleRoute allowedRoles={['Admin', 'Planer']}><Holidays /></RoleRoute></PB>} />
+            <Route path="/workplaces" element={<PB name="Arbeitsplätze"><RoleRoute allowedRoles={['Admin', 'Planer']}><Workplaces /></RoleRoute></PB>} />
+            <Route path="/extracharges" element={<PB name="Zeitzuschläge"><RoleRoute allowedRoles={['Admin', 'Planer']}><Extracharges /></RoleRoute></PB>} />
+            <Route path="/einschraenkungen" element={<PB name="Schichteinschränkungen"><RoleRoute allowedRoles={['Admin', 'Planer']}><Einschraenkungen /></RoleRoute></PB>} />
+            <Route path="/benutzerverwaltung" element={<PB name="Benutzerverwaltung"><RoleRoute allowedRoles={['Admin']}><Benutzerverwaltung /></RoleRoute></PB>} />
+            <Route path="/backup" element={<PB name="Backup & Restore"><RoleRoute allowedRoles={['Admin']}><Backup /></RoleRoute></PB>} />
+            <Route path="/perioden" element={<PB name="Abrechnungszeiträume"><RoleRoute allowedRoles={['Admin']}><Perioden /></RoleRoute></PB>} />
+            <Route path="/einstellungen" element={<PB name="Einstellungen"><RoleRoute allowedRoles={['Admin']}><Einstellungen /></RoleRoute></PB>} />
+            <Route path="/protokoll" element={<PB name="Protokoll"><RoleRoute allowedRoles={['Admin']}><Protokoll /></RoleRoute></PB>} />
+            <Route path="/druckvorschau" element={<PB name="Druckvorschau"><Druckvorschau /></PB>} />
+            <Route path="/dienst-board" element={<PB name="Dienst-Board"><RoleRoute allowedRoles={['Admin', 'Planer']}><DienstBoard /></RoleRoute></PB>} />
+            <Route path="/wochenansicht" element={<PB name="Wochenansicht"><Wochenansicht /></PB>} />
+            <Route path="/verfuegbarkeits-matrix" element={<PB name="Verfügbarkeits-Matrix"><RoleRoute allowedRoles={['Admin', 'Planer']}><VerfügbarkeitsMatrix /></RoleRoute></PB>} />
+            <Route path="/rotations-analyse" element={<PB name="Rotations-Analyse"><RoleRoute allowedRoles={['Admin', 'Planer']}><RotationsAnalyse /></RoleRoute></PB>} />
+            <Route path="/kapazitaets-forecast" element={<PB name="Kapazitäts-Forecast"><RoleRoute allowedRoles={['Admin', 'Planer']}><KapazitaetsForecast /></RoleRoute></PB>} />
+            <Route path="/qualitaets-bericht" element={<PB name="Qualitätsbericht"><RoleRoute allowedRoles={['Admin', 'Planer']}><QualitaetsBericht /></RoleRoute></PB>} />
+            <Route path="/schicht-kalibrator" element={<PB name="Schicht-Kalibrator"><RoleRoute allowedRoles={['Admin', 'Planer']}><SchichtKalibrator /></RoleRoute></PB>} />
+            <Route path="/kompetenz-matrix" element={<PB name="Kompetenz-Matrix"><RoleRoute allowedRoles={['Admin', 'Planer']}><KompetenzMatrix /></RoleRoute></PB>} />
+            <Route path="/analytics" element={<PB name="Analytics & Trends"><RoleRoute allowedRoles={['Admin', 'Planer']}><Analytics /></RoleRoute></PB>} />
+            <Route path="/simulation" element={<PB name="Simulation"><RoleRoute allowedRoles={['Admin', 'Planer']}><Simulation /></RoleRoute></PB>} />
+            <Route path="/notfall-plan" element={<PB name="Notfall-Plan"><RoleRoute allowedRoles={['Admin', 'Planer']}><NotfallPlan /></RoleRoute></PB>} />
+            <Route path="/leitwand" element={<PB name="Leitwand"><RoleRoute allowedRoles={['Admin', 'Planer']}><Leitwand /></RoleRoute></PB>} />
+            <Route path="/uebergabe" element={<PB name="Übergabe"><RoleRoute allowedRoles={['Admin', 'Planer']}><Uebergabe /></RoleRoute></PB>} />
+            <Route path="/schichtbriefing" element={<PB name="Schicht-Briefing"><SchichtBriefing /></PB>} />
+            <Route path="/onboarding" element={<PB name="Onboarding-Wizard"><OnboardingWizard /></PB>} />
+            <Route path="/auditlog" element={<PB name="Audit-Log"><RoleRoute allowedRoles={['Admin', 'Planer']}><AuditLog /></RoleRoute></PB>} />
+            <Route path="/health" element={<PB name="System Health"><RoleRoute allowedRoles={['Admin']}><HealthDashboard /></RoleRoute></PB>} />
+            <Route path="/login" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<PB name="404"><NotFound /></PB>} />
+          </Routes>
         </main>
         {/* Bottom navigation bar — mobile only */}
         <BottomNav />

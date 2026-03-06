@@ -19,7 +19,7 @@ import argparse
 import os
 import sys
 import calendar
-from datetime import date, timedelta
+from datetime import date
 from pathlib import Path
 from dotenv import load_dotenv
 

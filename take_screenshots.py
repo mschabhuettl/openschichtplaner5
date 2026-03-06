@@ -118,7 +118,7 @@ def screenshot_all():
                 # Check if we got redirected to login
                 login_check = page.query_selector("input[type='password']")
                 if login_check:
-                    print(f"  [!] Got login page, re-injecting session...", flush=True)
+                    print("  [!] Got login page, re-injecting session...", flush=True)
                     inject_devmode_session(page)
                     page.goto(url, timeout=30000)
                     page.wait_for_load_state("networkidle", timeout=15000)

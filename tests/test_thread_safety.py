@@ -7,7 +7,6 @@ do not corrupt the cache dict or raise exceptions.
 import threading
 import sys
 import os
-import pytest
 
 # Ensure the backend package is importable
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))

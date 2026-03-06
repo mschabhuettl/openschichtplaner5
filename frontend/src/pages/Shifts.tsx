@@ -6,6 +6,7 @@ import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { HelpTooltip } from '../components/HelpTooltip';
 
 // Convert HTML #RRGGBB to BGR integer (Windows color storage)
 function hexToBGR(hex: string): number {
@@ -414,7 +415,10 @@ export default function Shifts() {
                 {!form.NAME.trim() && error?.includes('Bezeichnung') && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Kürzel *</label>
+                <label className="block text-xs font-semibold text-gray-600 mb-1 flex items-center gap-1">
+                  Kürzel *
+                  <HelpTooltip text={"Kurzes Kürzel für die Schicht (1–4 Zeichen), das im Dienstplan angezeigt wird.\nBeispiel: F = Frühschicht, S = Spätschicht, N = Nachtschicht"} position="right" />
+                </label>
                 <input
                   type="text"
                   value={form.SHORTNAME}

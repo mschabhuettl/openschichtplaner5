@@ -386,7 +386,19 @@ export default function Groups() {
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-x-auto">
-          {topLevel.length === 0 && <div className="text-center py-8 text-gray-600">Keine Gruppen</div>}
+          {topLevel.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+              <div className="text-5xl mb-4 opacity-60">👥</div>
+              <h3 className="text-base font-semibold text-slate-700 dark:text-slate-200 mb-1">Noch keine Gruppen angelegt</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs mb-4">Gruppen helfen dabei, Mitarbeiter zu organisieren und den Dienstplan übersichtlich zu gestalten.</p>
+              <button
+                onClick={() => { setEditId(null); setShowModal(true); }}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors"
+              >
+                ➕ Erste Gruppe anlegen
+              </button>
+            </div>
+          )}
           {topLevel.map(g => renderGroup(g))}
         </div>
       )}

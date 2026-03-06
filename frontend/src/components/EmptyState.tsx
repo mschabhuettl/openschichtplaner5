@@ -78,7 +78,7 @@ export function InlineError({ message, onRetry }: { message: string; onRetry?: (
           onClick={onRetry}
           className="text-xs underline hover:no-underline shrink-0"
         >
-          Retry
+          Wiederholen
         </button>
       )}
     </div>

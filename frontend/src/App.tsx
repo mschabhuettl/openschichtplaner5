@@ -327,6 +327,7 @@ function AppInner() {
   const [conflictCount, setConflictCount] = useState(0);
   const [spotlightOpen, setSpotlightOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [quickHelpOpen, setQuickHelpOpen] = useState(false);
   const { tourOpen, startTour, closeTour } = useTour();
 
   // "g" prefix navigation: track pending timer via ref (no re-render needed)
@@ -549,6 +550,15 @@ function AppInner() {
           >
             ?
           </button>
+          {/* Erste Schritte */}
+          <button
+            onClick={() => setQuickHelpOpen(true)}
+            title="Erste Schritte anzeigen"
+            aria-label="Erste Schritte anzeigen"
+            className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors text-sm leading-none"
+          >
+            📖
+          </button>
           {/* Onboarding tour */}
           <button
             onClick={startTour}
@@ -677,6 +687,62 @@ function AppInner() {
 
       {/* Keyboard Shortcuts Help Modal */}
       <KeyboardShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+
+      {/* Erste Schritte Modal */}
+      {quickHelpOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setQuickHelpOpen(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">📖 Erste Schritte</h2>
+              <button onClick={() => setQuickHelpOpen(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none">✕</button>
+            </div>
+            <ol className="space-y-4 text-sm text-gray-700 dark:text-gray-300">
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center text-base">1</span>
+                <div>
+                  <p className="font-semibold">Mitarbeiter anlegen</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Navigieren Sie zu <strong>Mitarbeiter</strong> und legen Sie alle Mitarbeitenden mit Namen, Kürzel und Arbeitszeitmodell an.</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center text-base">2</span>
+                <div>
+                  <p className="font-semibold">Gruppen erstellen</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Unter <strong>Gruppen</strong> können Sie Teams oder Abteilungen anlegen und Mitarbeiter zuweisen.</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center text-base">3</span>
+                <div>
+                  <p className="font-semibold">Schichttypen definieren</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Erstellen Sie unter <strong>Schichten</strong> die Schichttypen (z. B. Frühschicht, Spätschicht) mit Kürzel und Dauer.</p>
+                </div>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold flex items-center justify-center text-base">4</span>
+                <div>
+                  <p className="font-semibold">Dienstplan befüllen</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Im <strong>Dienstplan</strong> können Sie Schichten per Klick oder Drag &amp; Drop zuweisen.</p>
+                </div>
+              </li>
+            </ol>
+            <div className="mt-5 flex justify-between items-center">
+              <button
+                onClick={() => { setQuickHelpOpen(false); startTour(); }}
+                className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200 underline"
+              >
+                🧭 Geführte Tour starten
+              </button>
+              <button
+                onClick={() => setQuickHelpOpen(false)}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors"
+              >
+                Los geht's!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Onboarding Tour (auto on first visit + manual via 🧭 button) */}
       <GuidedTour open={tourOpen} onClose={closeTour} />

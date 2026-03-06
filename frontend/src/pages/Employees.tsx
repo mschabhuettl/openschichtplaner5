@@ -798,7 +798,21 @@ export default function Employees() {
               </div>
             ))}
             {filtered.length === 0 && (
-              <div className="text-center py-8 text-gray-600">Keine Mitarbeiter gefunden</div>
+              employees.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+                  <div className="text-5xl mb-4 opacity-60">👤</div>
+                  <h3 className="text-base font-semibold text-slate-700 dark:text-slate-200 mb-1">Noch keine Mitarbeiter angelegt</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs mb-4">Legen Sie Ihren ersten Mitarbeiter an, um mit der Dienstplanung zu beginnen.</p>
+                  <button
+                    onClick={() => { setEditId(null); setShowModal(true); }}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors"
+                  >
+                    ➕ Ersten Mitarbeiter anlegen
+                  </button>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-600">Keine Mitarbeiter gefunden</div>
+              )
             )}
           </div>
         </>

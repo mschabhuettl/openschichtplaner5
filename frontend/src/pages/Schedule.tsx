@@ -1436,7 +1436,11 @@ function DayDetailModal({
             </div>
           )}
           {groups.length === 0 && noEntryEmps.length === 0 && (
-            <div className="text-center text-gray-600 py-8">Keine Mitarbeiter vorhanden</div>
+            <div className="flex flex-col items-center justify-center py-8 px-6 text-center">
+              <div className="text-4xl mb-3 opacity-60">📋</div>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Keine Mitarbeiter für diesen Tag vorhanden.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">Bitte legen Sie zuerst Mitarbeiter und Gruppen an.</p>
+            </div>
           )}
         </div>
       </div>
@@ -5200,7 +5204,18 @@ export default function Schedule() {
                 <td colSpan={displayedDays.length + 1} className="text-center py-8 text-gray-600">
                   {loading ? (
                     <SkeletonGrid rows={6} cols={Math.min(displayedDays.length || 7, 31)} className="w-full" />
-                  ) : 'Keine Mitarbeiter gefunden'}
+                  ) : (
+                    <div className="flex flex-col items-center py-4 gap-2">
+                      <span className="text-2xl opacity-50">📋</span>
+                      <span>Keine Mitarbeiter vorhanden</span>
+                      <button
+                        onClick={() => navigate('/employees')}
+                        className="mt-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-medium transition-colors"
+                      >
+                        👤 Mitarbeiter anlegen
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             )}

@@ -1031,6 +1031,41 @@ function EmployeeRankingWidget({ statsData, monthLabel }: { statsData: Dashboard
   );
 }
 
+// ── Zuletzt besucht Widget ────────────────────────────────────────────────────
+
+const RECENT_KEY = 'sp5_recent_pages';
+interface RecentPage { path: string; title: string; ts: number }
+
+function getRecentPages(): RecentPage[] {
+  try { return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]'); }
+  catch { return []; }
+}
+
+function RecentPagesWidget() {
+  const [pages, setPages] = useState<RecentPage[]>([]);
+  useEffect(() => {
+    setPages(getRecentPages().slice(0, 3));
+  }, []);
+
+  if (pages.length === 0) return null;
+
+  return (
+    <Widget title="Zuletzt besucht" icon="🕐">
+      <div className="flex flex-wrap gap-2">
+        {pages.map(p => (
+          <a
+            key={p.path}
+            href={p.path}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-sm font-medium text-slate-700 transition-colors"
+          >
+            <span className="text-slate-400 text-xs font-mono truncate max-w-[120px]">{p.title || p.path}</span>
+          </a>
+        ))}
+      </div>
+    </Widget>
+  );
+}
+
 // ── Quick-Actions Panel ───────────────────────────────────────────────────────
 
 interface QuickAction {
@@ -1362,6 +1397,9 @@ export default function Dashboard() {
 
       {/* Quick-Actions Panel */}
       <QuickActionsPanel conflictsCount={conflictsCount} />
+
+      {/* Zuletzt besucht */}
+      <RecentPagesWidget />
 
       {/* Today's grid: "Heute im Dienst" + "Abwesenheiten heute" */}
       {isCurrentMon && (

@@ -7,7 +7,7 @@ import { LanguageProvider, useLanguage } from './i18n/context';
 import { ToastProvider } from './contexts/ToastContext';
 import { ToastContainer } from './components/Toast';
 import { useToast } from './hooks/useToast';
-import SpotlightSearch from './components/SpotlightSearch';
+import SpotlightSearch, { trackRecentPage } from './components/SpotlightSearch';
 import WarningsCenter from './components/WarningsCenter';
 import { NotificationBell } from './components/NotificationBell';
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
@@ -409,11 +409,15 @@ function AppInner() {
 
   const currentItem = navItems.find(i => isActive(i));
 
-  // Update document title based on active route
+  // Update document title based on active route + track recent pages
   useEffect(() => {
     const label = currentItem?.label;
     document.title = label ? `${label} — SP5` : 'OpenSchichtplaner5';
-  }, [currentItem]);
+    // Track this page visit for "Zuletzt besucht" quick-access
+    if (location.pathname !== '/login') {
+      trackRecentPage(location.pathname);
+    }
+  }, [currentItem, location.pathname]);
 
   // Filter nav items based on user role (or simulated devViewRole in dev mode)
   const { devViewRole } = useAuth();

@@ -660,7 +660,7 @@ export default function Employees() {
       ) : (
         <>
           {/* Desktop: Table layout */}
-          <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+          <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
                 <tr>

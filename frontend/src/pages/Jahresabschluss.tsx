@@ -1,17 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 import type { Group } from '../types';
-
-const API = import.meta.env.VITE_API_URL ?? '';
-function getAuthHeaders(): Record<string, string> {
-  try {
-    const raw = localStorage.getItem('sp5_session');
-    if (!raw) return {};
-    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
-    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
-    return token ? { 'X-Auth-Token': token } : {};
-  } catch { return {}; }
-}
 
 interface EmployeeCloseDetail {
   employee_id: number;
@@ -45,6 +35,7 @@ interface AnnualCloseResult {
 }
 
 export default function Jahresabschluss() {
+  const { canAdmin } = useAuth();
   const currentYear = new Date().getFullYear() - 1; // default: last year
   const [year, setYear] = useState(currentYear);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -67,14 +58,12 @@ export default function Jahresabschluss() {
     setError(null);
     setResult(null);
     try {
-      const params = new URLSearchParams({
-        year: String(year),
-        max_carry_forward_days: String(maxCarryDays),
+      const data = await api.getAnnualClosePreview({
+        year,
+        max_carry_forward_days: maxCarryDays,
+        group_id: groupId ?? undefined,
       });
-      if (groupId !== null) params.set('group_id', String(groupId));
-      const res = await fetch(`${API}/api/annual-close/preview?${params}`, { headers: getAuthHeaders() });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
-      setPreview(await res.json());
+      setPreview(data as AnnualClosePreview);
     } catch (e) {
       setError(String(e));
     } finally {
@@ -87,16 +76,12 @@ export default function Jahresabschluss() {
     setError(null);
     setShowConfirm(false);
     try {
-      const body: Record<string, unknown> = { year, max_carry_forward_days: maxCarryDays };
-      if (groupId !== null) body.group_id = groupId;
-      const res = await fetch(`${API}/api/annual-close`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify(body),
+      const data = await api.runAnnualClose({
+        year,
+        max_carry_forward_days: maxCarryDays,
+        group_id: groupId ?? undefined,
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
-      const data = await res.json();
-      setResult(data);
+      setResult(data as AnnualCloseResult);
       setPreview(null);
     } catch (e) {
       setError(String(e));
@@ -239,10 +224,17 @@ export default function Jahresabschluss() {
             <div className="flex items-center gap-2">
               <input type="text" placeholder="Suchen..." value={search} onChange={e => setSearch(e.target.value)}
                 className="px-3 py-1.5 border rounded shadow-sm text-sm w-36" />
-              <button onClick={() => setShowConfirm(true)}
-                className="px-5 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 flex items-center gap-2 font-semibold">
-                ✅ Jahresabschluss durchführen
-              </button>
+              {canAdmin && (
+                <button onClick={() => setShowConfirm(true)}
+                  className="px-5 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 flex items-center gap-2 font-semibold">
+                  ✅ Jahresabschluss durchführen
+                </button>
+              )}
+              {!canAdmin && (
+                <span className="px-5 py-2 bg-gray-100 text-gray-400 text-sm rounded-lg border border-gray-200 flex items-center gap-2 cursor-not-allowed" title="Nur Administratoren können den Jahresabschluss durchführen">
+                  🔒 Jahresabschluss durchführen
+                </span>
+              )}
             </div>
           </div>
 
@@ -341,7 +333,7 @@ export default function Jahresabschluss() {
       )}
 
       {/* Confirmation dialog */}
-      {showConfirm && preview && (
+      {showConfirm && preview && canAdmin && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
           <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
             <div className="px-6 py-4 border-b">

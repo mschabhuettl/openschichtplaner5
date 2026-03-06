@@ -147,8 +147,8 @@ export default function RotationsAnalyse() {
         api.getEmployees(),
         api.getShifts(),
       ]);
-      setEmployees(emps as Employee[]);
-      setShiftDefs(shifts as ShiftDef[]);
+      setEmployees(emps as unknown as Employee[]);
+      setShiftDefs(shifts as unknown as ShiftDef[]);
 
       // Load schedule for last N months
       const now = new Date();
@@ -161,7 +161,7 @@ export default function RotationsAnalyse() {
       const scheduleResults = await Promise.all(
         periods.map(p => api.getSchedule(p.year, p.month))
       );
-      const allEntries: ScheduleEntry[] = scheduleResults.flat();
+      const allEntries: ScheduleEntry[] = (scheduleResults as unknown as ScheduleEntry[][]).flat();
 
       // Aggregate per employee + shift_name
       const byEmp: Record<number, Record<string, number>> = {};

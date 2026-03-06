@@ -1513,6 +1513,18 @@ export const api = {
   deleteSwapRequest: (swapId: number) =>
     deleteReq<{ ok: boolean }>(`/api/swap-requests/${swapId}`),
 
+  // ─── Annual Close (Jahresabschluss) ──────────────────────
+  getAnnualClosePreview: (params: { year: number; max_carry_forward_days: number; group_id?: number }) => {
+    const p = new URLSearchParams({
+      year: String(params.year),
+      max_carry_forward_days: String(params.max_carry_forward_days),
+    });
+    if (params.group_id != null) p.set('group_id', String(params.group_id));
+    return fetchJSON<unknown>(`/api/annual-close/preview?${p}`);
+  },
+  runAnnualClose: (data: { year: number; max_carry_forward_days: number; group_id?: number }) =>
+    postJSON<unknown>('/api/annual-close', data),
+
   // ─── Self-Service (Leser) ─────────────────────────────────
   getMyEmployee: () =>
     fetchJSON<{ employee: Record<string, unknown> | null; user_id: number }>('/api/me/employee'),

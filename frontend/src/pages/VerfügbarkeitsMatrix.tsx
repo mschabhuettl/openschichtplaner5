@@ -222,12 +222,12 @@ export default function VerfügbarkeitsMatrix() {
   // Load static data
   useEffect(() => {
     Promise.all([
-      fetch(`${API}/api/groups`, { headers: getAuthHeaders() }).then(r => r.json()),
-      fetch(`${API}/api/employees`, { headers: getAuthHeaders() }).then(r => r.json()),
-      fetch(`${API}/api/group-assignments`, { headers: getAuthHeaders() }).then(r => r.json()),
+      api.getGroups(),
+      api.getEmployees(),
+      api.getGroupAssignments(),
     ]).then(([grps, emps, ga]) => {
-      setGroups(grps.filter((g: Group) => g.ID !== 1));
-      setAllEmployees(emps.filter((e: Employee) => !e.HIDE));
+      setGroups((grps as unknown as Group[]).filter((g: Group) => g.ID !== 1));
+      setAllEmployees((emps as unknown as Employee[]).filter((e: Employee) => !e.HIDE));
       setGroupAssignments(ga);
     });
   }, []);
@@ -236,11 +236,11 @@ export default function VerfügbarkeitsMatrix() {
   useEffect(() => {
     setLoading(true);
     Promise.all([
-      fetch(`${API}/api/schedule?year=${year}&month=${month}`, { headers: getAuthHeaders() }).then(r => r.json()),
-      fetch(`${API}/api/holidays?year=${year}`, { headers: getAuthHeaders() }).then(r => r.json()),
+      api.getSchedule(year, month),
+      api.getHolidays(year),
     ]).then(([sched, hols]) => {
-      setScheduleEntries(sched);
-      setHolidays(hols.filter((h: Holiday) => {
+      setScheduleEntries(sched as unknown as ScheduleEntry[]);
+      setHolidays((hols as unknown as Holiday[]).filter((h: Holiday) => {
         const d = new Date(h.date);
         return d.getFullYear() === year && d.getMonth() + 1 === month;
       }));

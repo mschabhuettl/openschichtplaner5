@@ -709,14 +709,14 @@ function AppInner() {
               <Route path="/jahresuebersicht" element={<Jahresuebersicht />} />
               <Route path="/personaltabelle" element={<Personaltabelle />} />
               <Route path="/statistiken" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Statistiken /></RoleRoute>} />
-              <Route path="/urlaub" element={<Urlaub />} />
-              <Route path="/schichtmodell" element={<Schichtmodell />} />
-              <Route path="/personalbedarf" element={<Personalbedarf />} />
+              <Route path="/urlaub" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Urlaub /></RoleRoute>} />
+              <Route path="/schichtmodell" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Schichtmodell /></RoleRoute>} />
+              <Route path="/personalbedarf" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Personalbedarf /></RoleRoute>} />
               <Route path="/jahresrueckblick" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Jahresrueckblick /></RoleRoute>} />
-              <Route path="/jahresabschluss" element={<Jahresabschluss />} />
-              <Route path="/zeitkonto" element={<Zeitkonto />} />
-              <Route path="/ueberstunden" element={<Ueberstunden />} />
-              <Route path="/kontobuchungen" element={<Kontobuchungen />} />
+              <Route path="/jahresabschluss" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Jahresabschluss /></RoleRoute>} />
+              <Route path="/zeitkonto" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Zeitkonto /></RoleRoute>} />
+              <Route path="/ueberstunden" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Ueberstunden /></RoleRoute>} />
+              <Route path="/kontobuchungen" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Kontobuchungen /></RoleRoute>} />
               <Route path="/notizen" element={<Notizen />} />
               <Route path="/mitarbeiter-vergleich" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterVergleich /></RoleRoute>} />
               <Route path="/team" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><TeamUebersicht /></RoleRoute>} />
@@ -727,16 +727,16 @@ function AppInner() {
               <Route path="/urlaubs-timeline" element={<UrlaubsTimeline />} />
               <Route path="/fairness" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Fairness /></RoleRoute>} />
               <Route path="/berichte" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Berichte /></RoleRoute>} />
-              <Route path="/export" element={<Export />} />
+              <Route path="/export" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Export /></RoleRoute>} />
               <Route path="/import" element={<RoleRoute allowedRoles={['Admin']}><Import /></RoleRoute>} />
-              <Route path="/employees" element={<Employees />} />
-              <Route path="/groups" element={<Groups />} />
-              <Route path="/shifts" element={<Shifts />} />
-              <Route path="/leave-types" element={<LeaveTypes />} />
-              <Route path="/holidays" element={<Holidays />} />
-              <Route path="/workplaces" element={<Workplaces />} />
-              <Route path="/extracharges" element={<Extracharges />} />
-              <Route path="/einschraenkungen" element={<Einschraenkungen />} />
+              <Route path="/employees" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Employees /></RoleRoute>} />
+              <Route path="/groups" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Groups /></RoleRoute>} />
+              <Route path="/shifts" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Shifts /></RoleRoute>} />
+              <Route path="/leave-types" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><LeaveTypes /></RoleRoute>} />
+              <Route path="/holidays" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Holidays /></RoleRoute>} />
+              <Route path="/workplaces" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Workplaces /></RoleRoute>} />
+              <Route path="/extracharges" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Extracharges /></RoleRoute>} />
+              <Route path="/einschraenkungen" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Einschraenkungen /></RoleRoute>} />
               <Route path="/benutzerverwaltung" element={<RoleRoute allowedRoles={['Admin']}><Benutzerverwaltung /></RoleRoute>} />
               <Route path="/backup" element={<RoleRoute allowedRoles={['Admin']}><Backup /></RoleRoute>} />
               <Route path="/perioden" element={<RoleRoute allowedRoles={['Admin']}><Perioden /></RoleRoute>} />

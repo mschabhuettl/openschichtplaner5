@@ -7,17 +7,7 @@ import { useToast } from '../hooks/useToast';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 
-const API = import.meta.env.VITE_API_URL ?? '';
-
-function getAuthHeaders(): Record<string, string> {
-  try {
-    const raw = localStorage.getItem('sp5_session');
-    if (!raw) return {};
-    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
-    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
-    return token ? { 'X-Auth-Token': token } : {};
-  } catch { return {}; }
-}
+import { api } from '../api/client';
 
 interface Employee {
   ID: number;
@@ -115,12 +105,12 @@ export default function NotfallPlan() {
   // Load shifts + employees + groups once
   useEffect(() => {
     Promise.all([
-      fetch(`${API}/api/shifts`).then(r => r.json()),
-      fetch(`${API}/api/employees`).then(r => r.json()),
-      fetch(`${API}/api/groups`).then(r => r.json()),
+      api.getShifts(),
+      api.getEmployees(),
+      api.getGroups(),
     ]).then(([s, e, g]) => {
-      setShifts((s as Shift[]).filter(x => !x.HIDE));
-      setEmployees((e as Employee[]).filter(x => !x.HIDE));
+      setShifts((s as unknown as Shift[]).filter(x => !x.HIDE));
+      setEmployees((e as unknown as Employee[]).filter(x => !x.HIDE));
       setGroups(g as Group[]);
     });
   }, []);
@@ -129,10 +119,9 @@ export default function NotfallPlan() {
   useEffect(() => {
     if (!date) return;
     setLoading(true);
-    fetch(`${API}/api/schedule/day?date=${date}`)
-      .then(r => r.json())
-      .then((d: DayEntry[]) => {
-        setDayEntries(d);
+    api.getScheduleDay(date)
+      .then((d) => {
+        setDayEntries(d as DayEntry[]);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -205,23 +194,14 @@ export default function NotfallPlan() {
     if (!selectedShift) return;
     setAssigning(empId);
     try {
-      const resp = await fetch(`${API}/api/schedule`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-        body: JSON.stringify({ employee_id: empId, date, shift_id: selectedShift }),
-      });
-      if (resp.ok) {
-        const emp = employees.find(e => e.ID === empId);
-        const shift = shifts.find(s => s.ID === selectedShift);
-        showToast(`✅ ${emp?.FIRSTNAME} ${emp?.NAME} → ${shift?.NAME} am ${date}`, 'success');
-        setAssigned(prev => new Set([...prev, empId]));
-        // Refresh day entries
-        const updated = await fetch(`${API}/api/schedule/day?date=${date}`, { headers: getAuthHeaders() }).then(r => r.json());
-        setDayEntries(updated);
-      } else {
-        const err = await resp.json();
-        showToast(err.detail || 'Fehler beim Zuweisen', 'error');
-      }
+      await api.createScheduleEntry(empId, date, selectedShift);
+      const emp = employees.find(e => e.ID === empId);
+      const shift = shifts.find(s => s.ID === selectedShift);
+      showToast(`✅ ${emp?.FIRSTNAME} ${emp?.NAME} → ${shift?.NAME} am ${date}`, 'success');
+      setAssigned(prev => new Set([...prev, empId]));
+      // Refresh day entries
+      const updated = await api.getScheduleDay(date);
+      setDayEntries(updated as DayEntry[]);
     } catch {
       showToast('Netzwerkfehler', 'error');
     } finally {
@@ -234,14 +214,10 @@ export default function NotfallPlan() {
     const emp = employees.find(e => e.ID === sickEmployee);
     if (!await confirmDialog({ message: `${emp?.FIRSTNAME} ${emp?.NAME} für ${date} aus dem Dienstplan entfernen?`, danger: true })) return;
     try {
-      const resp = await fetch(`${API}/api/schedule/${sickEmployee}/${date}`, { method: 'DELETE', headers: getAuthHeaders() });
-      if (resp.ok) {
-        showToast(`Eintrag von ${emp?.FIRSTNAME} ${emp?.NAME} entfernt`, 'success');
-        const updated = await fetch(`${API}/api/schedule/day?date=${date}`, { headers: getAuthHeaders() }).then(r => r.json());
-        setDayEntries(updated);
-      } else {
-        showToast('Fehler beim Entfernen', 'error');
-      }
+      await api.deleteScheduleEntry(sickEmployee, date);
+      showToast(`Eintrag von ${emp?.FIRSTNAME} ${emp?.NAME} entfernt`, 'success');
+      const updated = await api.getScheduleDay(date);
+      setDayEntries(updated as DayEntry[]);
     } catch {
       showToast('Netzwerkfehler', 'error');
     }

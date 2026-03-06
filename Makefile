@@ -65,6 +65,11 @@ prod: ## Docker-Container im Produktionsmodus starten (detached)
 	docker compose up -d --build
 	@echo "✓ Läuft auf http://localhost:8000"
 
+prod-secure: ## Docker-Container mit expliziter Prod-Compose starten (empfohlen für Server)
+	@echo "▶ Starte OpenSchichtplaner5 mit docker-compose.prod.yml..."
+	docker compose -f docker-compose.prod.yml up -d --build
+	@echo "✓ Läuft auf http://127.0.0.1:8000 (nur localhost — Reverse-Proxy vorschalten!)"
+
 update: ## Git pull + Docker-Neustart (Rolling Update)
 	@echo "▶ Aktualisiere OpenSchichtplaner5..."
 	git pull --ff-only

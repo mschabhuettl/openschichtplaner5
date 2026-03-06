@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased] — 2026-03-06
+
+### DevOps / Deployment
+
+- **docker-compose.prod.yml** — Neue explizite Produktions-Compose-Datei: Port bindet nur auf `127.0.0.1` (Reverse-Proxy-ready), `restart: always`, Named-Volumes für Daten + Logs, Log-Rotation (10 MB × 5), explizite Prod-Overrides (`DEBUG=false`, `SP5_DEV_MODE=false`)
+- **Makefile: `make prod-secure`** — Neues Target startet Container mit `docker-compose.prod.yml`
+- **README: Nginx-Security-Header** — Nginx-Beispiel-Konfiguration mit vollständigen Security-Headern ergänzt: HSTS, X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy, Content-Security-Policy; SSE-spezifischer Location-Block; HTTP→HTTPS-Redirect
+- **README: Prod-Anleitung** — Klarer empfohlener Server-Setup-Flow (`cp .env.example → make prod-secure → nginx`) + erweiterte Production-Readiness-Checkliste
+- **.env.example** — `MAX_SESSIONS_PER_USER` in Root- und Backend-`.env.example` ergänzt (war im Code verwendet, aber nicht dokumentiert)
+
 ## [0.5.0] - 2026-03-01
 
 ### Release für manuelles Testing

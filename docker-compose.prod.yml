@@ -1,0 +1,96 @@
+# ==============================================================================
+# OpenSchichtplaner5 — Production Compose
+#
+# Verwendung:
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Voraussetzungen:
+#   1. .env-Datei im Root mit allen Pflicht-Vars (siehe .env.example)
+#   2. SECRET_KEY auf sicheren Zufallswert gesetzt:
+#      openssl rand -hex 32
+#   3. SP5_DB_PATH auf den Pfad zu den .DBF-Dateien gesetzt
+#   4. ALLOWED_ORIGINS auf die eigene Domain beschränkt
+#   5. SP5_DEV_MODE=false (nie in Produktion aktivieren!)
+#
+# Für TLS/HTTPS: Reverse-Proxy (nginx/caddy) vorschalten.
+# Mit Reverse-Proxy dann SP5_HSTS=true setzen.
+# ==============================================================================
+
+services:
+
+  # ----------------------------------------------------------------------------
+  # sp5 — Hauptanwendung (Backend + eingebettetes Frontend)
+  # ----------------------------------------------------------------------------
+  sp5:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: openschichtplaner5:latest
+
+    # Produktions-Port: nur auf localhost binden, Reverse-Proxy vorschalten!
+    # Ohne Reverse-Proxy: "8000:8000" (direkt erreichbar)
+    ports:
+      - "127.0.0.1:8000:8000"
+
+    # Persistente Daten via Named-Volumes (keine Dev-Bind-Mounts!)
+    volumes:
+      - sp5_data:/app/data
+      - sp5_logs:/app/logs
+
+    # Alle Env-Vars aus der Root-.env laden
+    env_file:
+      - .env
+
+    # Produktions-Overrides (überschreiben .env-Defaults falls nötig)
+    environment:
+      DEBUG: "false"
+      LOG_LEVEL: "INFO"
+      SP5_DEV_MODE: "false"
+
+    # Container bei Absturz und nach Neustart immer neu starten
+    restart: always
+
+    security_opt:
+      - no-new-privileges:true
+
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+
+    # Ressourcen-Limits (an eigene Hardware anpassen)
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+        reservations:
+          memory: 128M
+          cpus: "0.25"
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+# ------------------------------------------------------------------------------
+# Volumes — Named Volumes für persistente Daten
+# ------------------------------------------------------------------------------
+volumes:
+  sp5_data:
+    driver: local
+    labels:
+      com.openschichtplaner5.volume: "database"
+      com.openschichtplaner5.backup: "required"
+
+  sp5_logs:
+    driver: local
+    labels:
+      com.openschichtplaner5.volume: "logs"

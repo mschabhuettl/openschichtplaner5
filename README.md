@@ -319,21 +319,71 @@ Für Produktionsumgebungen wird ein Reverse-Proxy mit TLS empfohlen:
 
 ```nginx
 server {
-    listen 443 ssl;
+    listen 443 ssl http2;
     server_name meine-domain.de;
-    # ssl_certificate ...
+
+    ssl_certificate     /etc/letsencrypt/live/meine-domain.de/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/meine-domain.de/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    # ── Security Headers ─────────────────────────────────────────────────────
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+    add_header X-Frame-Options           "SAMEORIGIN"                                   always;
+    add_header X-Content-Type-Options    "nosniff"                                      always;
+    add_header X-XSS-Protection          "1; mode=block"                                always;
+    add_header Referrer-Policy           "strict-origin-when-cross-origin"              always;
+    add_header Permissions-Policy        "camera=(), microphone=(), geolocation=()"     always;
+    # CSP anpassen falls eigene CDN/Fonts verwendet werden:
+    add_header Content-Security-Policy   "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; frame-ancestors 'none';" always;
+    # ─────────────────────────────────────────────────────────────────────────
 
     location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_pass         http://127.0.0.1:8000;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+        proxy_buffering    off;
     }
+
+    # SSE (Server-Sent Events) benötigt keine Pufferung
+    location /api/sse {
+        proxy_pass         http://127.0.0.1:8000;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+        proxy_read_timeout 3600s;
+        proxy_buffering    off;
+        proxy_cache        off;
+        chunked_transfer_encoding on;
+    }
+}
+
+# HTTP → HTTPS redirect
+server {
+    listen 80;
+    server_name meine-domain.de;
+    return 301 https://$host$request_uri;
 }
 ```
 
 Mit Reverse-Proxy dann `SP5_HSTS=true` setzen.
+
+#### Empfohlener Start auf einem Server
+
+```bash
+# 1. .env aus Vorlage erstellen und anpassen
+cp .env.example .env
+nano .env   # SECRET_KEY, SP5_DB_PATH, ALLOWED_ORIGINS setzen
+
+# 2. Mit expliziter Prod-Compose starten (bindet nur auf localhost)
+make prod-secure
+# oder direkt:
+docker compose -f docker-compose.prod.yml up -d --build
+
+# 3. nginx als Reverse-Proxy vorschalten (siehe Konfiguration oben)
+```
 
 #### Production-Readiness-Checkliste
 
@@ -342,6 +392,8 @@ Mit Reverse-Proxy dann `SP5_HSTS=true` setzen.
 - [ ] `SP5_DEV_MODE=false`
 - [ ] `ALLOWED_ORIGINS` auf eigene Domain beschränkt
 - [ ] `SP5_HSTS=true` (nur mit HTTPS/Reverse-Proxy)
+- [ ] Nginx-Security-Header gesetzt (X-Frame-Options, CSP, HSTS, …)
+- [ ] Port 8000 nur auf `127.0.0.1` gebunden (via `docker-compose.prod.yml`)
 - [ ] Regelmäßige Backups per `make backup` oder Cron eingerichtet
 - [ ] Logs unter `./logs/` überwacht
 

@@ -31,6 +31,7 @@ interface AnnualCloseResult {
   processed: number;
   total_carry_forward: number;
   total_forfeited: number;
+  already_existed: boolean;
   details: { employee_id: number; employee_name: string; remaining: number; carry_forward: number; forfeited: number }[];
 }
 
@@ -47,6 +48,7 @@ export default function Jahresabschluss() {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [confirmInput, setConfirmInput] = useState('');
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -168,6 +170,11 @@ export default function Jahresabschluss() {
               <div className="text-green-700 text-sm">
                 {result.processed} Mitarbeiter verarbeitet — Überträge für {result.next_year} gespeichert.
               </div>
+              {result.already_existed && (
+                <div className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-1.5">
+                  ⚠️ Für {result.next_year} existierten bereits Einträge — diese wurden überschrieben.
+                </div>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4 mb-4">
@@ -225,7 +232,7 @@ export default function Jahresabschluss() {
               <input type="text" placeholder="Suchen..." value={search} onChange={e => setSearch(e.target.value)}
                 className="px-3 py-1.5 border rounded shadow-sm text-sm w-36" />
               {canAdmin && (
-                <button onClick={() => setShowConfirm(true)}
+                <button onClick={() => { setShowConfirm(true); setConfirmInput(''); }}
                   className="px-5 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 flex items-center gap-2 font-semibold">
                   ✅ Jahresabschluss durchführen
                 </button>
@@ -354,11 +361,24 @@ export default function Jahresabschluss() {
                 </ul>
               </div>
               <p className="text-xs text-gray-500">Diese Aktion kann nicht rückgängig gemacht werden.</p>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Zur Bestätigung bitte Jahr <strong>{preview.year}</strong> eingeben:
+                </label>
+                <input
+                  type="text"
+                  value={confirmInput}
+                  onChange={e => setConfirmInput(e.target.value)}
+                  placeholder={String(preview.year)}
+                  className="w-full border rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  autoFocus
+                />
+              </div>
             </div>
             <div className="px-6 py-4 border-t flex justify-end gap-3">
               <button onClick={() => setShowConfirm(false)} disabled={running}
                 className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50">Abbrechen</button>
-              <button onClick={runAnnualClose} disabled={running}
+              <button onClick={runAnnualClose} disabled={running || confirmInput !== String(preview?.year)}
                 className="px-5 py-2 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-60 flex items-center gap-2 font-semibold">
                 {running ? <span className="animate-spin">⟳</span> : '✅'} Jahresabschluss durchführen
               </button>

@@ -1,5 +1,53 @@
 # Changelog
 
+## [0.7.0] — 2026-03-06 — Quality Session
+
+### Security
+- **fix: DB path not exposed in /api/health** — `path` field removed from public health endpoint (security test regression fix)
+- **fix(security): RoleRoute guards** — Admin-only routes wrapped with proper role guards
+- **GZip + Cache-Control** — Response compression + correct cache invalidation
+- **Nginx security headers** — HSTS, CSP, X-Frame-Options, Referrer-Policy, Permissions-Policy in deployment docs
+
+### Performance
+- **GZipMiddleware** — Automatic response compression for all endpoints
+- **React.memo** — Schedule sub-components memoized; `useEffect` deps fixed; Employees filter memoized
+- **Cache-Control headers** — Proper HTTP caching for static-like resources
+
+### UX / Frontend
+- **Animated spinners** — Text-only loading indicators upgraded to animated spinners (Benutzerverwaltung, Einstellungen, Einschraenkungen, MitarbeiterProfil)
+- **Sortable Shifts table** — Name, Kürzel, Dauer columns sortable
+- **Dashboard: Recent Pages widget** — Tracks and displays recently visited pages
+- **Error states on API failure** — Improved error display when API calls fail
+- **TypeScript any-type elimination** — Replaced `any` types with proper typed API responses
+- **api/client.ts migration** — 10 pages migrated from raw `fetch()` to centralized API client
+
+### Backend / API
+- **Health endpoint enhanced** — `/api/health` enriched with uptime, DB status details
+- **/api/metrics endpoint** — New endpoint exposing request count, error rate, cache hit rate, DB latency
+- **Error traceback logging** — Improved structured error logging with tracebacks
+- **OpenAPI docs quality** — Better descriptions, tags, and examples across all endpoints
+- **Data integrity validation** — Pydantic Field constraints on auth models; improved input validation
+
+### Tests
+- **1162 tests passing** — Full test suite green (up from ~1100)
+- **Test alignment fixes** — Assertions aligned with actual API behavior (422 from Pydantic, etc.)
+- **Coverage boost** — Additional tests for misc flows, swap requests, security endpoints
+
+### DevOps / Deployment
+- **docker-compose.prod.yml** — Neue explizite Produktions-Compose-Datei: Port bindet nur auf `127.0.0.1` (Reverse-Proxy-ready), `restart: always`, Named-Volumes für Daten + Logs, Log-Rotation (10 MB × 5), explizite Prod-Overrides (`DEBUG=false`, `SP5_DEV_MODE=false`)
+- **Makefile: `make prod-secure`** — Neues Target startet Container mit `docker-compose.prod.yml`
+- **README: Nginx-Security-Header** — Nginx-Beispiel-Konfiguration mit vollständigen Security-Headern ergänzt: HSTS, X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy, Content-Security-Policy; SSE-spezifischer Location-Block; HTTP→HTTPS-Redirect
+- **README: Prod-Anleitung** — Klarer empfohlener Server-Setup-Flow (`cp .env.example → make prod-secure → nginx`) + erweiterte Production-Readiness-Checkliste
+- **.env.example** — `MAX_SESSIONS_PER_USER` dokumentiert
+- **ruff + ESLint CI** — Lint-Job in CI ergänzt; 0 Warnings/Errors
+
+### Code Quality
+- **ruff format + mypy** — Backend vollständig formatiert, Typ-Fehler behoben
+- **Docstrings** — Verbesserte Docstrings für alle API-Module
+- **Component library** — Frontend-Komponenten konsolidiert und refaktoriert
+
+---
+
 ## [Unreleased] — 2026-03-06
 
 ### DevOps / Deployment

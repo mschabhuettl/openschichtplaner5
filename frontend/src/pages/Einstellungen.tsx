@@ -211,7 +211,7 @@ export default function Einstellungen() {
         <p className="text-sm text-gray-500 mt-0.5">{t.settings.subtitle}</p>
       </div>
 
-      {loading && <div className="text-center py-20 text-gray-600">⟳ Lade Einstellungen...</div>}
+      {loading && <div className="flex justify-center py-20"><div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>}
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
           ⚠️ {error}

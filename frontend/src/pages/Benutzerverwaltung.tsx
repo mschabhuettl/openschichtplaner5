@@ -406,7 +406,7 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
       {/* Tab content */}
       <div className="p-6">
         {loading ? (
-          <div className="text-center py-8 text-slate-600 text-sm">⟳ Lade Zugriffsrechte...</div>
+          <div className="flex justify-center py-10"><div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
         ) : (
           <>
             {/* ── Mitarbeiter-Zugriff Tab ── */}
@@ -826,7 +826,7 @@ export default function Benutzerverwaltung() {
 
       {/* Content */}
       {loading ? (
-        <div className="text-slate-500 text-sm py-12 text-center">Lade Benutzer…</div>
+        <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
       ) : error ? (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm">
           Fehler beim Laden: {error}

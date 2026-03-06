@@ -164,7 +164,7 @@ export default function MitarbeiterProfil() {
     );
   }
 
-  if (loading) return <div className="p-8 text-center text-gray-600">Lade Profil…</div>;
+  if (loading) return <div className="p-8 flex justify-center"><div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>;
   if (!employee) return <div className="p-8 text-center text-red-500">Mitarbeiter nicht gefunden.</div>;
 
   const totals = yearStats?.totals;

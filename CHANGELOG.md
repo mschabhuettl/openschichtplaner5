@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.9.2] - 2026-03-06
+
+### Bug Fixes
+- **fix(logging):** replace print() with logger, structured auth events, exception tracebacks
+- **fix(dbf):** edge case handling, encoding errors, transaction rollback, empty file guard
+- **fix(frontend):** consistent API error handling, network error message, loading states
+- **fix(validation):** Pydantic constraints for Employee/Shift/Schedule, German 422 responses
+- **fix(mobile):** responsive table fixes
+
+### Tests
+- **~1325 passed** (3 pre-existing failures in edge cases)
+
+---
+
 ## [0.9.1] - 2026-03-06
 
 ### Bug Fixes

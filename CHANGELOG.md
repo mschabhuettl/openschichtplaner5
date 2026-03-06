@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.9.8] - 2026-03-06
+
+### Fixes
+- **fix(print):** print CSS already complete; fix eslint no-explicit-any in Holidays test
+
+### Tests
+- **test(backend):** cover new endpoints since v0.9.5
+
+---
+
 ## [0.9.7] - 2026-03-06
 
 ### Fixes

@@ -287,9 +287,9 @@ export default function Holidays() {
                   </td>
                   <td className="px-4 py-2 text-center">
                     <div className="flex gap-1 justify-center flex-wrap">
-                      {canAdmin && <button onClick={() => openBulkAbsModal(h)} className="px-2 py-1 bg-teal-100 text-teal-700 rounded text-xs hover:bg-teal-200" title="Als Abwesenheit für alle MA eintragen">👥 Bulk</button>}
-                      {canAdmin && <button onClick={() => openEdit(h)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>}
-                      {canAdmin && <button onClick={() => handleDelete(h)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Löschen</button>}
+                      {canAdmin && <button onClick={() => openBulkAbsModal(h)} className="px-2 py-1 min-h-[2rem] bg-teal-100 text-teal-700 rounded text-xs hover:bg-teal-200" title="Als Abwesenheit für alle MA eintragen">👥 Bulk</button>}
+                      {canAdmin && <button onClick={() => openEdit(h)} className="px-2 py-1 min-h-[2rem] bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>}
+                      {canAdmin && <button onClick={() => handleDelete(h)} className="px-2 py-1 min-h-[2rem] bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Löschen</button>}
                     </div>
                   </td>
                 </tr>

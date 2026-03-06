@@ -245,13 +245,13 @@ export default function Workplaces() {
                       <div className="flex gap-1 justify-center">
                         <button
                           onClick={() => openEdit(w)}
-                          className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
+                          className="px-2 py-1 min-h-[2rem] bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
                         >
                           Bearbeiten
                         </button>
                         <button
                           onClick={() => handleDelete(w)}
-                          className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
+                          className="px-2 py-1 min-h-[2rem] bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
                         >
                           Ausblenden
                         </button>

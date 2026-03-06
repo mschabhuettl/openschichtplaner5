@@ -308,8 +308,8 @@ export default function Extracharges() {
                   </td>
                   <td className="px-4 py-2 text-center">
                     <div className="flex gap-1 justify-center">
-                      {canAdmin && <button onClick={() => openEdit(c)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>}
-                      {canAdmin && <button onClick={() => handleDelete(c)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Löschen</button>}
+                      {canAdmin && <button onClick={() => openEdit(c)} className="px-2 py-1 min-h-[2rem] bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>}
+                      {canAdmin && <button onClick={() => handleDelete(c)} className="px-2 py-1 min-h-[2rem] bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Löschen</button>}
                     </div>
                   </td>
                 </tr>

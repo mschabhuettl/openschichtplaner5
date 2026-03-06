@@ -65,6 +65,7 @@ describe('Holidays page', () => {
     localStorage.setItem('sp5_language', 'de');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(api.getHolidays).mockResolvedValue(mockHolidays as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(api.getLeaveTypes).mockResolvedValue(mockLeaveTypes as any);
   });
 

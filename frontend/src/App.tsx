@@ -728,7 +728,7 @@ function AppInner() {
               <Route path="/fairness" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Fairness /></RoleRoute>} />
               <Route path="/berichte" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Berichte /></RoleRoute>} />
               <Route path="/export" element={<Export />} />
-              <Route path="/import" element={<Import />} />
+              <Route path="/import" element={<RoleRoute allowedRoles={['Admin']}><Import /></RoleRoute>} />
               <Route path="/employees" element={<Employees />} />
               <Route path="/groups" element={<Groups />} />
               <Route path="/shifts" element={<Shifts />} />
@@ -737,11 +737,11 @@ function AppInner() {
               <Route path="/workplaces" element={<Workplaces />} />
               <Route path="/extracharges" element={<Extracharges />} />
               <Route path="/einschraenkungen" element={<Einschraenkungen />} />
-              <Route path="/benutzerverwaltung" element={<Benutzerverwaltung />} />
-              <Route path="/backup" element={<Backup />} />
-              <Route path="/perioden" element={<Perioden />} />
-              <Route path="/einstellungen" element={<Einstellungen />} />
-              <Route path="/protokoll" element={<Protokoll />} />
+              <Route path="/benutzerverwaltung" element={<RoleRoute allowedRoles={['Admin']}><Benutzerverwaltung /></RoleRoute>} />
+              <Route path="/backup" element={<RoleRoute allowedRoles={['Admin']}><Backup /></RoleRoute>} />
+              <Route path="/perioden" element={<RoleRoute allowedRoles={['Admin']}><Perioden /></RoleRoute>} />
+              <Route path="/einstellungen" element={<RoleRoute allowedRoles={['Admin']}><Einstellungen /></RoleRoute>} />
+              <Route path="/protokoll" element={<RoleRoute allowedRoles={['Admin']}><Protokoll /></RoleRoute>} />
               <Route path="/druckvorschau" element={<Druckvorschau />} />
               <Route path="/dienst-board" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><DienstBoard /></RoleRoute>} />
               <Route path="/wochenansicht" element={<Wochenansicht />} />
@@ -758,8 +758,8 @@ function AppInner() {
               <Route path="/uebergabe" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><Uebergabe /></RoleRoute>} />
               <Route path="/schichtbriefing" element={<SchichtBriefing />} />
               <Route path="/onboarding" element={<OnboardingWizard />} />
-              <Route path="/auditlog" element={<AuditLog />} />
-              <Route path="/health" element={<HealthDashboard />} />
+              <Route path="/auditlog" element={<RoleRoute allowedRoles={['Admin', 'Planer']}><AuditLog /></RoleRoute>} />
+              <Route path="/health" element={<RoleRoute allowedRoles={['Admin']}><HealthDashboard /></RoleRoute>} />
               <Route path="/login" element={<Navigate to="/" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

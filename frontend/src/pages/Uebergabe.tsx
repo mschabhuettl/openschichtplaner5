@@ -78,10 +78,14 @@ export default function Uebergabe() {
     if (filterDate) params.set('date', filterDate);
     if (filterShift) params.set('shift_id', filterShift);
     params.set('limit', '100');
-    fetch(`${API}/api/handover?${params}`, { headers: getAuthHeaders() })
-      .then(r => r.json())
+    fetch(`${API}/api/handover?${params}`, { credentials: 'include', headers: getAuthHeaders() })
+      .then(r => { if (!r.ok) throw new Error(`Fehler ${r.status}`); return r.json(); })
       .then(data => { setNotes(data); setLoading(false); })
-      .catch(() => setLoading(false));
+      .catch((e: unknown) => {
+        setLoading(false);
+        setToast('⚠️ Notizen konnten nicht geladen werden: ' + (e instanceof Error ? e.message : 'Server nicht erreichbar'));
+        setTimeout(() => setToast(''), 4000);
+      });
   }, [filterDate, filterShift]);
 
   useEffect(() => { loadNotes(); }, [loadNotes]);
@@ -101,29 +105,51 @@ export default function Uebergabe() {
       shift_name: shift?.name ?? '',
       created_at: new Date().toISOString(),
     };
-    await fetch(`${API}/api/handover`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-      body: JSON.stringify(payload),
-    });
-    setSaving(false);
-    setForm(f => ({ ...f, text: '', tags: [], priority: 'normal' }));
-    showToast('✅ Übergabe-Notiz gespeichert');
-    loadNotes();
+    try {
+      const res = await fetch(`${API}/api/handover`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`Fehler ${res.status}: ${res.statusText}`);
+      setForm(f => ({ ...f, text: '', tags: [], priority: 'normal' }));
+      showToast('✅ Übergabe-Notiz gespeichert');
+      loadNotes();
+    } catch (e: unknown) {
+      showToast('⚠️ Notiz konnte nicht gespeichert werden: ' + (e instanceof Error ? e.message : 'Server nicht erreichbar'));
+    } finally {
+      setSaving(false);
+    }
   };
 
   const toggleResolved = async (note: HandoverNote) => {
-    await fetch(`${API}/api/handover/${note.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-      body: JSON.stringify({ resolved: !note.resolved }),
-    });
-    loadNotes();
+    try {
+      const res = await fetch(`${API}/api/handover/${note.id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ resolved: !note.resolved }),
+      });
+      if (!res.ok) throw new Error(`Fehler ${res.status}`);
+      loadNotes();
+    } catch (e: unknown) {
+      showToast('⚠️ Status konnte nicht aktualisiert werden: ' + (e instanceof Error ? e.message : 'Server nicht erreichbar'));
+    }
   };
 
   const deleteNote = async (id: string) => {
-    await fetch(`${API}/api/handover/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
-    loadNotes();
+    try {
+      const res = await fetch(`${API}/api/handover/${id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: getAuthHeaders(),
+      });
+      if (!res.ok) throw new Error(`Fehler ${res.status}`);
+      loadNotes();
+    } catch (e: unknown) {
+      showToast('⚠️ Notiz konnte nicht gelöscht werden: ' + (e instanceof Error ? e.message : 'Server nicht erreichbar'));
+    }
   };
 
   const toggleTag = (tag: string) => {

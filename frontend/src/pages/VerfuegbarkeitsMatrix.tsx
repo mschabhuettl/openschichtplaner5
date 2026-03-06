@@ -316,10 +316,10 @@ export default function VerfuegbarkeitsMatrix() {
     setError(null);
     const params = new URLSearchParams({ year: String(year), months: String(months) });
     if (selectedGroup) params.set('group_id', String(selectedGroup));
-    fetch(`${API}/api/availability-matrix?${params}`, { headers: getAuthHeaders() })
-      .then(r => r.json())
+    fetch(`${API}/api/availability-matrix?${params}`, { credentials: 'include', headers: getAuthHeaders() })
+      .then(r => { if (!r.ok) throw new Error(`Fehler ${r.status}: ${r.statusText}`); return r.json(); })
       .then(setData)
-      .catch(e => setError(e.message))
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : 'Server nicht erreichbar'))
       .finally(() => setLoading(false));
   }, [year, months, selectedGroup]);
 

@@ -138,9 +138,14 @@ export default function Simulation() {
     try {
       const data = await fetch(BASE + '/api/simulation', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ year, month, absences, scenario_name: scenarioName }),
       });
+      if (!data.ok) {
+        const detail = await data.json().catch(() => ({ detail: data.statusText }));
+        throw new Error((detail as { detail?: string }).detail || `Fehler ${data.status}`);
+      }
       const json = await data.json();
       setResult(json as SimResult);
     } catch (e: unknown) {

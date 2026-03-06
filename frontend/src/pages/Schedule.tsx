@@ -4128,9 +4128,9 @@ export default function Schedule() {
             </button>
             {forceWeekView && (
               <>
-                <button onClick={prevWeek} className="px-2 py-1.5 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50 text-xs text-gray-600" title="Vorherige Woche">‹</button>
+                <button onClick={prevWeek} aria-label="Vorherige Woche" className="px-2 py-1.5 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50 text-xs text-gray-600" title="Vorherige Woche">‹</button>
                 <span className="text-xs text-indigo-700 font-medium px-2 py-1.5 bg-indigo-50 border border-indigo-200 rounded whitespace-nowrap">{mobileWeekData.label}</span>
-                <button onClick={nextWeek} className="px-2 py-1.5 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50 text-xs text-gray-600" title="Nächste Woche">›</button>
+                <button onClick={nextWeek} aria-label="Nächste Woche" className="px-2 py-1.5 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50 text-xs text-gray-600" title="Nächste Woche">›</button>
               </>
             )}
           </div>

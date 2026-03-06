@@ -122,8 +122,9 @@ export default function Extracharges() {
   };
 
   const handleSave = async () => {
-    setSaving(true);
     setError(null);
+    if (!form.NAME.trim()) { setError('Bezeichnung ist ein Pflichtfeld.'); return; }
+    setSaving(true);
     const payload = {
       NAME: form.NAME,
       START: timeToMinutes(form.startTime),

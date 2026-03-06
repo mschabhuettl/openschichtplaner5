@@ -495,9 +495,9 @@ export default function Jahresuebersicht() {
           <div className="flex flex-wrap items-center gap-2">
             {/* Year navigation */}
             <div className="flex items-center gap-1">
-              <button onClick={() => setYear(y => y - 1)} className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm" title="Vorjahr">‹</button>
+              <button onClick={() => setYear(y => y - 1)} aria-label="Vorjahr" className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm" title="Vorjahr">‹</button>
               <span className="font-bold text-gray-700 min-w-[56px] text-center">{year}</span>
-              <button onClick={() => setYear(y => y + 1)} className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm" title="Folgejahr">›</button>
+              <button onClick={() => setYear(y => y + 1)} aria-label="Folgejahr" className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm" title="Folgejahr">›</button>
             </div>
 
             {/* View mode */}

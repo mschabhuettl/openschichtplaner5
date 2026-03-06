@@ -90,8 +90,10 @@ export default function Workplaces() {
   };
 
   const handleSave = async () => {
-    setSaving(true);
     setError(null);
+    if (!form.NAME.trim()) { setError('Bezeichnung ist ein Pflichtfeld.'); return; }
+    if (!form.SHORTNAME.trim()) { setError('Kürzel ist ein Pflichtfeld.'); return; }
+    setSaving(true);
     const payload = {
       NAME: form.NAME,
       SHORTNAME: form.SHORTNAME,

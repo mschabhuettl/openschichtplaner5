@@ -302,11 +302,11 @@ export default function Schichtwuensche() {
       {/* Month navigation + filter */}
       <div className={`flex flex-wrap items-center gap-4 mb-4 p-3 rounded-xl border ${card}`}>
         <div className="flex items-center gap-2">
-          <button onClick={prevMonth} className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} transition`}>‹</button>
+          <button onClick={prevMonth} aria-label="Vorheriger Monat" className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} transition`}>‹</button>
           <span className="font-semibold text-base min-w-[160px] text-center">
             {MONTH_NAMES[month - 1]} {year}
           </span>
-          <button onClick={nextMonth} className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} transition`}>›</button>
+          <button onClick={nextMonth} aria-label="Nächster Monat" className={`w-8 h-8 rounded-lg flex items-center justify-center ${isDark ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'} transition`}>›</button>
         </div>
 
         {/* Employee filter — hidden for Leser (they only see their own) */}

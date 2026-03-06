@@ -163,8 +163,10 @@ export default function Holidays() {
   };
 
   const handleSave = async () => {
-    setSaving(true);
     setError(null);
+    if (!form.NAME.trim()) { setError('Bezeichnung ist ein Pflichtfeld.'); return; }
+    if (!form.DATE) { setError('Datum ist ein Pflichtfeld.'); return; }
+    setSaving(true);
     try {
       if (editId !== null) {
         await api.updateHoliday(editId, form);

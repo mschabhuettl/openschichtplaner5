@@ -1,5 +1,7 @@
 # Changelog
 
+## v0.8.0 — Quality Session 2026-03-06: 48 commits, 1294 backend tests, 147 frontend tests, Playwright E2E, 0 mypy/ESLint/ruff errors
+
 ## [v0.8.0-quality] — 2026-03-06 — Quality Session Final (Tag: v0.8.0-quality-2026-03-06)
 
 ### Session Summary (04:00–10:00 Uhr, 38 Commits)

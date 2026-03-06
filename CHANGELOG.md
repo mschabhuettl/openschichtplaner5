@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.9.9] - 2026-03-06
+
+### Fixes & Features
+- **fix(config):** save toast + unsaved-changes warning in Systemeinstellungen and Einstellungen
+- **feat(ui):** dark mode already complete (confirmed)
+- **fix(darkmode):** dark mode toggle with ThemeContext already implemented
+
+---
+
 ## [0.9.8] - 2026-03-06
 
 ### Fixes

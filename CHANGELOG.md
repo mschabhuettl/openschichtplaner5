@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.0-rc1] - 2026-03-06
+
+### Release Candidate 1 — Quality Day Session Complete
+
+- **fix(ux):** help tooltips + info banners (Tauschbörse, Restrictions, Zeitkonto)
+- **chore:** repo cleanup — remove redundant env files, update .gitignore, remove stale screenshots
+- **Gesamte Quality-Session:** 80+ Commits, v0.8.0 → v1.0.0-rc1
+- **Tests:** 1368 passed (backend), 165+ component tests (frontend)
+- **Frontend:** clean build, zero type errors, zero lint errors
+
+---
+
 ## [0.9.9] - 2026-03-06
 
 ### Fixes & Features

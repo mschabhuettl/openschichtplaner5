@@ -610,6 +610,16 @@ export default function Benutzerverwaltung() {
   const [confirmPw, setConfirmPw] = useState('');
   const [pwError, setPwError] = useState<string | null>(null);
   const [pwSaving, setPwSaving] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
+
+  const pwStrength = (pw: string): { label: string; color: string; width: string } => {
+    if (pw.length === 0) return { label: '', color: '', width: '0%' };
+    if (pw.length < 6) return { label: 'Zu kurz', color: 'bg-red-400', width: '25%' };
+    if (pw.length < 8 || !/[0-9]/.test(pw)) return { label: 'Schwach', color: 'bg-orange-400', width: '50%' };
+    if (pw.length < 12 || !/[^a-zA-Z0-9]/.test(pw)) return { label: 'Mittel', color: 'bg-yellow-400', width: '75%' };
+    return { label: 'Stark', color: 'bg-green-500', width: '100%' };
+  };
 
   // ── Data loading ────────────────────────────────────────────
 
@@ -742,6 +752,8 @@ export default function Benutzerverwaltung() {
     setNewPw('');
     setConfirmPw('');
     setPwError(null);
+    setShowNewPw(false);
+    setShowConfirmPw(false);
   };
 
   const handlePwChange = async () => {
@@ -1132,25 +1144,56 @@ export default function Benutzerverwaltung() {
               )}
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1 uppercase tracking-wide">Neues Passwort *</label>
-                <input
-                  type="password"
-                  value={newPw}
-                  onChange={e => setNewPw(e.target.value)}
-                  placeholder="Neues Passwort"
-                  autoFocus
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                />
+                <div className="relative">
+                  <input
+                    type={showNewPw ? 'text' : 'password'}
+                    value={newPw}
+                    onChange={e => setNewPw(e.target.value)}
+                    placeholder="Neues Passwort"
+                    autoFocus
+                    className="w-full px-3 py-2 pr-10 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPw(v => !v)}
+                    aria-label={showNewPw ? 'Passwort verbergen' : 'Passwort anzeigen'}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showNewPw ? '🙈' : '👁️'}
+                  </button>
+                </div>
+                {newPw.length > 0 && (() => { const s = pwStrength(newPw); return (
+                  <div className="mt-1">
+                    <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                      <div className={`h-full ${s.color} transition-all`} style={{ width: s.width }} />
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5">{s.label}</p>
+                  </div>
+                ); })()}
               </div>
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1 uppercase tracking-wide">Bestätigung *</label>
-                <input
-                  type="password"
-                  value={confirmPw}
-                  onChange={e => setConfirmPw(e.target.value)}
-                  placeholder="Passwort wiederholen"
-                  onKeyDown={e => e.key === 'Enter' && handlePwChange()}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPw ? 'text' : 'password'}
+                    value={confirmPw}
+                    onChange={e => setConfirmPw(e.target.value)}
+                    placeholder="Passwort wiederholen"
+                    onKeyDown={e => e.key === 'Enter' && handlePwChange()}
+                    className="w-full px-3 py-2 pr-10 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPw(v => !v)}
+                    aria-label={showConfirmPw ? 'Passwort verbergen' : 'Passwort anzeigen'}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showConfirmPw ? '🙈' : '👁️'}
+                  </button>
+                </div>
+                {confirmPw.length > 0 && newPw !== confirmPw && (
+                  <p className="text-xs text-red-500 mt-0.5">Passwörter stimmen nicht überein.</p>
+                )}
               </div>
             </div>
             <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50 rounded-b-2xl">

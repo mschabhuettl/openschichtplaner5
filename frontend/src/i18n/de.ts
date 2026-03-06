@@ -40,7 +40,7 @@ const de = {
     devModeButton: 'Dev-Mode',
     devModeHint: 'Kein Account? Einfach Dev-Mode nutzen.',
     errorRequired: 'Bitte Benutzername eingeben.',
-    errorFailed: 'Login fehlgeschlagen',
+    errorFailed: 'Falscher Benutzername oder Passwort.',
     footerText: 'OpenSchichtplaner5 · Open-Source Dienstplanung',
   },
 

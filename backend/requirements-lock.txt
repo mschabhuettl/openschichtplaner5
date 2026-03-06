@@ -63,7 +63,7 @@ Pygments==2.19.2
 PyGObject==3.50.0
 PyMsgBox==2.0.1
 pyparsing==3.3.2
-pypdf==6.7.4
+pypdf==6.7.5
 pyperclip==1.11.0
 PyQt5==5.15.11
 PyQt5-Qt5==5.15.18

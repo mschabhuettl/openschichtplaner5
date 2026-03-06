@@ -312,7 +312,7 @@ export default function Notizen() {
   useEffect(() => { loadNotes(); }, [loadNotes]);
 
   // SSE: auto-refresh when notes change remotely
-  useSSERefresh(['note_added'], loadNotes);
+  useSSERefresh(['note_added', 'note_updated', 'note_deleted'], loadNotes);
 
   useEffect(() => {
     if (filterGroupId > 0) {
@@ -406,8 +406,9 @@ export default function Notizen() {
         showToast('Notiz erstellt ✓', 'success');
       }
       loadNotes();
-    } catch {
+    } catch (e: unknown) {
       showToast('Fehler beim Speichern der Notiz', 'error');
+      throw e; // re-throw so NoteModal keeps open and shows inline error
     }
   };
 

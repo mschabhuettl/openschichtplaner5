@@ -31,6 +31,7 @@ const EMPTY_FORM: WorkplaceForm = {
 export default function Workplaces() {
   const { canAdmin } = useAuth();
   const [workplaces, setWorkplaces] = useState<Workplace[]>([]);
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
@@ -210,6 +211,16 @@ export default function Workplaces() {
             <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
+          <>
+          <div className="mb-3">
+            <input
+              type="text"
+              placeholder="🔍 Arbeitsplatz suchen…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full sm:w-72 px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
           <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
@@ -221,7 +232,7 @@ export default function Workplaces() {
                 </tr>
               </thead>
               <tbody>
-                {workplaces.map((w, i) => (
+                {workplaces.filter(w => !search || w.NAME.toLowerCase().includes(search.toLowerCase()) || (w.SHORTNAME || '').toLowerCase().includes(search.toLowerCase())).map((w, i) => (
                   <tr
                     key={w.ID}
                     className={`border-b cursor-pointer ${
@@ -265,6 +276,7 @@ export default function Workplaces() {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 

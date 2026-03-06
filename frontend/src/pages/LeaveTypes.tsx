@@ -34,6 +34,7 @@ const EMPTY_FORM: LeaveTypeForm = {
 export default function LeaveTypes() {
   const { canAdmin } = useAuth();
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
@@ -148,6 +149,16 @@ export default function LeaveTypes() {
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
+        <>
+        <div className="mb-3">
+          <input
+            type="text"
+            placeholder="🔍 Abwesenheitsart suchen…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full sm:w-72 px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+        </div>
         <div className="bg-white rounded-lg shadow overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
@@ -161,7 +172,7 @@ export default function LeaveTypes() {
               </tr>
             </thead>
             <tbody>
-              {leaveTypes.map((lt, i) => (
+              {leaveTypes.filter(lt => !search || lt.NAME.toLowerCase().includes(search.toLowerCase()) || (lt.SHORTNAME || '').toLowerCase().includes(search.toLowerCase())).map((lt, i) => (
                 <tr key={lt.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}>
                   <td className="px-4 py-2">
                     <div
@@ -196,6 +207,7 @@ export default function LeaveTypes() {
             </tbody>
           </table>
         </div>
+        </>
       )}
 
       {/* Modal */}

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.9.6] - 2026-03-06
+
+### Fixes
+- **fix(notifications):** mark-all-read endpoint and button
+- **fix(employees):** employee detail panel with IST/SOLL hours
+- **fix(ux):** search/filter added to 5 list pages (Shifts, Groups, Holidays, LeaveTypes, Workplaces)
+
+---
+
 ## [0.9.5] - 2026-03-06
 
 ### Fixes

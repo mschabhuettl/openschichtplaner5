@@ -12,6 +12,15 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [serverDevMode, setServerDevMode] = useState<boolean | null>(null);
+  const [sessionExpired, setSessionExpired] = useState(false);
+
+  useEffect(() => {
+    // Check if we were redirected due to an expired session
+    if (sessionStorage.getItem('sp5_session_expired') === '1') {
+      sessionStorage.removeItem('sp5_session_expired');
+      setSessionExpired(true);
+    }
+  }, []);
 
   useEffect(() => {
     const BASE = import.meta.env.VITE_API_URL ?? '';
@@ -131,6 +140,12 @@ export default function Login() {
               </div>
 
               {/* Error message */}
+              {sessionExpired && !error && (
+                <div className="bg-amber-900/40 border border-amber-600 text-amber-300 text-sm rounded-lg px-4 py-2.5">
+                  🔒 Deine Sitzung ist abgelaufen. Bitte melde dich neu an.
+                </div>
+              )}
+
               {error && (
                 <div className="bg-red-900/40 border border-red-700 text-red-300 text-sm rounded-lg px-4 py-2.5">
                   ⚠️ {error}

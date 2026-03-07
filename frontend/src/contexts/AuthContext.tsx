@@ -179,6 +179,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const handler = () => {
       localStorage.removeItem(SESSION_KEY);
+      // Signal to Login page that session expired (not a manual logout)
+      sessionStorage.setItem('sp5_session_expired', '1');
       setToken(null);
       setUser(null);
       setIsDevMode(false);

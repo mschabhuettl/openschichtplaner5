@@ -10,23 +10,28 @@ on:
 # Triggered separately via the e2e-tests job below.
 
 jobs:
-  lint:
-    name: Lint (ruff + eslint)
+  lint-python:
+    name: Lint Python (ruff)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install ruff
         run: pip install ruff
 
       - name: Run ruff (Python lint)
-        working-directory: backend
-        run: ruff check . --output-format=github
+        run: ruff check backend/ --output-format=github
+
+  lint-frontend:
+    name: Lint Frontend (ESLint + build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -41,7 +46,11 @@ jobs:
 
       - name: Run ESLint (TypeScript lint)
         working-directory: frontend
-        run: npx eslint src --ext .ts,.tsx --max-warnings=0
+        run: npm run lint
+
+      - name: Build frontend (TypeScript check + bundle)
+        working-directory: frontend
+        run: npm run build
 
   backend-tests:
     name: Backend Tests (pytest --cov)

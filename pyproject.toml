@@ -1,0 +1,24 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["backend/venv", "backend/coverage_html", "backend/__pycache__"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "B008",  # do not perform function calls in default arguments (FastAPI Depends pattern)
+    "B904",  # raise-without-from-inside-except — existing codebase, fix incrementally
+]
+
+[tool.ruff.lint.per-file-ignores]
+"backend/tests/**" = ["B011"]  # assert False pattern in tests
+"backend/api/main.py" = ["E402"]  # sys.path manipulation requires imports after
+"backend/api/routers/reports.py" = ["B905"]  # zip() without strict= — existing code

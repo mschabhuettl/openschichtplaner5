@@ -1,4 +1,4 @@
-import type React from 'react';
+import React from 'react';
 
 /**
  * Skeleton — animated placeholder components for loading states.
@@ -95,15 +95,15 @@ export function SkeletonGrid({ rows = 6, cols = 7, className = '' }: SkeletonGri
         ))}
         {/* Data rows */}
         {Array.from({ length: rows }).map((_, row) => (
-          <>
-            <Skeleton key={`label-${row}`} className="h-9 rounded-none" />
+          <React.Fragment key={`row-${row}`}>
+            <Skeleton className="h-9 rounded-none" />
             {Array.from({ length: cols }).map((_, col) => (
               <Skeleton
                 key={`cell-${row}-${col}`}
                 className={`h-9 rounded-none ${(row + col) % 5 === 0 ? 'bg-blue-100 dark:bg-blue-900' : ''}`}
               />
             ))}
-          </>
+          </React.Fragment>
         ))}
       </div>
     </div>

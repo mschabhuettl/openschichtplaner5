@@ -24,17 +24,18 @@ test.describe('Mitarbeiterverwaltung', () => {
     await page.goto(BASE_URL);
     await page.evaluate(({ key, value }) => {
       localStorage.setItem(key, JSON.stringify(value));
+      localStorage.setItem('sp5_language', 'de'); // Force German for consistent selectors
     }, { key: SESSION_KEY, value: adminSession });
     await page.reload();
     await expect(page.locator('text=Dashboard').first()).toBeVisible({ timeout: 5000 });
   });
 
-  test('Mitarbeiter-Liste öffnen und "Hinzufügen" Button sichtbar', async ({ page }) => {
-    // Navigate to employee/personal table
-    await page.goto(`${BASE_URL}/personaltabelle`);
-    // "Hinzufügen" button should be visible for Admin users
+  test('Mitarbeiter-Liste öffnen und "Neu" Button sichtbar', async ({ page }) => {
+    // Navigate to the employees page (Stammdaten > Mitarbeiter)
+    await page.goto(`${BASE_URL}/employees`);
+    // The "+ Neu" add-button should be visible for Admin users (canAdmin = true)
     await expect(
-      page.locator('button:has-text("Hinzufügen"), button:has-text("Neu"), [data-testid="add-employee"]').first()
+      page.locator('button:has-text("Neu"), button:has-text("Hinzufügen"), [data-testid="add-employee"]').first()
     ).toBeVisible({ timeout: 8000 });
   });
 });

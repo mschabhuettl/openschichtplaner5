@@ -20,6 +20,9 @@ test.describe('Authentication', () => {
 
   test('Login via Dev-Mode zeigt Dashboard', async ({ page }) => {
     await page.goto(BASE_URL);
+    // Force German so selector matches 'Dev-Mode' button text
+    await page.evaluate(() => localStorage.setItem('sp5_language', 'de'));
+    await page.reload();
     // Dev-Mode bypasses backend — reliable for E2E smoke test
     await page.click('button:has-text("Dev-Mode")');
     await expect(page.locator('text=Dashboard').first()).toBeVisible({ timeout: 5000 });
@@ -29,6 +32,7 @@ test.describe('Authentication', () => {
     await page.goto(BASE_URL);
     await page.evaluate(({ key, value }) => {
       localStorage.setItem(key, JSON.stringify(value));
+      localStorage.setItem('sp5_language', 'de');
     }, {
       key: SESSION_KEY,
       value: {

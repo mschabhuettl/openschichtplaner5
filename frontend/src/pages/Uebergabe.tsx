@@ -68,7 +68,11 @@ export default function Uebergabe() {
 
   // Load shifts
   useEffect(() => {
-    fetch(`${API}/api/shifts`, { headers: getAuthHeaders() }).then(r => r.json()).then(setShifts).catch(() => {});
+    fetch(`${API}/api/shifts`, { headers: getAuthHeaders() })
+      .then(r => r.json())
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .then((data: any[]) => setShifts(data.map(s => ({ id: s.ID ?? s.id, name: s.NAME ?? s.name, short: s.SHORTNAME ?? s.short ?? '', color: s.COLORBK ?? s.color ?? '' }))))
+      .catch(() => {});
   }, []);
 
   // Load notes

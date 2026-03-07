@@ -42,6 +42,7 @@ export async function loginViaStorage(page: Page, role: 'admin' | 'planer' | 'le
   await page.goto(BASE_URL);
   await page.evaluate(({ key, value }) => {
     localStorage.setItem(key, JSON.stringify(value));
+    localStorage.setItem('sp5_language', 'de'); // Force German for consistent selectors
   }, { key: SESSION_KEY, value: session });
 
   // Reload to pick up the session

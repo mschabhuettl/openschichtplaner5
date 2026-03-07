@@ -36,14 +36,12 @@ test.describe('Navigation Tests (als admin)', () => {
     page.on('console', msg => {
       if (msg.type() === 'error') {
         const text = msg.text();
-        // Filter expected network/API errors — only catch real JS errors
+        // Filter expected network errors from API calls
         const isNetworkError = text.includes('401') || text.includes('403') ||
           text.includes('404') || text.includes('500') ||
           text.includes('Failed to load resource') ||
           text.includes('net::ERR') ||
-          text.includes('favicon') ||
-          text.includes('NetworkError') ||
-          text.includes('fetch');
+          text.includes('favicon');
         if (!isNetworkError) {
           consoleErrors.push(text);
         }
@@ -57,8 +55,6 @@ test.describe('Navigation Tests (als admin)', () => {
       expect(body).not.toContain('Cannot GET');
     }
 
-    // eslint-disable-next-line no-console
-    if (consoleErrors.length > 0) console.log('NAV_ERRORS:', JSON.stringify(consoleErrors));
     expect(consoleErrors.length).toBe(0);
   });
 

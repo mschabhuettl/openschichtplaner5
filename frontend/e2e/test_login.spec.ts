@@ -13,6 +13,9 @@ const SESSION_KEY = 'sp5_session';
 test.describe('Login Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(BASE_URL);
+    // Force German to ensure German text selectors work in headless browser
+    await page.evaluate(() => localStorage.setItem('sp5_language', 'de'));
+    await page.reload();
   });
 
   test('Login mit falschen Daten zeigt Fehlermeldung', async ({ page }) => {
@@ -60,11 +63,17 @@ test.describe('Login Tests', () => {
 });
 
 test.describe('Login: Erfolgreicher API-Login', () => {
-  test('Login mit admin/Test1234 via API', async ({ page }) => {
+  // NOTE: Real API login is already verified in auth.setup.ts (admin/leser/planer sessions).
+  // This test uses the saved admin storageState to verify the session is valid without
+  // consuming additional rate-limit slots (5/min login limit).
+  test.use({ storageState: path.join(__dirname, '.auth/admin.json') });
+
+  test('Admin-Session ist aktiv und Dashboard sichtbar', async ({ page }) => {
     await page.goto(BASE_URL);
-    await page.fill('input[autocomplete="username"]', 'admin');
-    await page.fill('input[type="password"]', 'Test1234');
-    await page.click('button[type="submit"]');
+    // Dashboard should be visible immediately — session restored from storageState
     await expect(page.locator('text=Dashboard').first()).toBeVisible({ timeout: 8000 });
+    // Login form must NOT be visible
+    const loginForm = await page.locator('input[autocomplete="username"]').count();
+    expect(loginForm).toBe(0);
   });
 });

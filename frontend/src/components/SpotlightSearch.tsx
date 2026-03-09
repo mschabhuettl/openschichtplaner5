@@ -296,15 +296,22 @@ export default function SpotlightSearch({ open, onClose }: Props) {
       className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh] px-4 animate-backdropIn"
       style={{ background: 'rgba(0,0,0,0.55)' }}
       onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Schnellsuche"
     >
       <div
         className="w-full max-w-xl rounded-xl shadow-2xl overflow-hidden animate-scaleIn"
         style={{ background: 'var(--sp-search-bg, #1e293b)', border: '1px solid rgba(255,255,255,0.1)' }}
         onKeyDown={handleKeyDown}
+        role="combobox"
+        aria-expanded={items.length > 0}
+        aria-haspopup="listbox"
+        aria-owns="spotlight-results"
       >
         {/* Search Input */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
-          <span className="text-slate-400 text-lg flex-shrink-0">🔍</span>
+          <span className="text-slate-400 text-lg flex-shrink-0" aria-hidden="true">🔍</span>
           <input
             ref={inputRef}
             value={query}
@@ -313,6 +320,10 @@ export default function SpotlightSearch({ open, onClose }: Props) {
             className="flex-1 bg-transparent text-white placeholder-slate-400 outline-none focus-visible:outline-none text-base"
             autoComplete="off"
             spellCheck={false}
+            aria-label="Schnellsuche"
+            aria-autocomplete="list"
+            aria-controls="spotlight-results"
+            aria-activedescendant={selectedIndex >= 0 ? `spotlight-item-${selectedIndex}` : undefined}
           />
           {loading && (
             <div className="w-4 h-4 border-2 border-slate-500 border-t-white rounded-full animate-spin flex-shrink-0" />
@@ -323,7 +334,7 @@ export default function SpotlightSearch({ open, onClose }: Props) {
         </div>
 
         {/* Results */}
-        <div ref={listRef} className="max-h-[60vh] overflow-y-auto">
+        <div ref={listRef} id="spotlight-results" className="max-h-[60vh] overflow-y-auto" role="listbox" aria-label="Suchergebnisse">
           {items.length === 0 && query.trim() && !loading && (
             <div className="px-5 py-8 text-center text-slate-500 text-sm">
               Keine Ergebnisse für „{query}"
@@ -363,7 +374,10 @@ export default function SpotlightSearch({ open, onClose }: Props) {
                   {entries.map(({ item, globalIdx: idx }) => (
                     <button
                       key={item.id}
+                      id={`spotlight-item-${idx}`}
                       data-idx={idx}
+                      role="option"
+                      aria-selected={idx === selectedIndex}
                       onClick={() => openItem(item)}
                       onMouseEnter={() => setSelectedIndex(idx)}
                       className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${

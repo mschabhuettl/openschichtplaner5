@@ -739,11 +739,11 @@ function AppInner() {
 
       {/* Erste Schritte Modal */}
       {quickHelpOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setQuickHelpOpen(false)}>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setQuickHelpOpen(false)} role="dialog" aria-modal="true" aria-labelledby="quick-help-title">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">📖 Erste Schritte</h2>
-              <button onClick={() => setQuickHelpOpen(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none">✕</button>
+              <h2 id="quick-help-title" className="text-lg font-bold text-gray-800 dark:text-gray-100">📖 Erste Schritte</h2>
+              <button onClick={() => setQuickHelpOpen(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl leading-none" aria-label="Schließen">✕</button>
             </div>
             <ol className="space-y-4 text-sm text-gray-700 dark:text-gray-300">
               <li className="flex items-start gap-3">

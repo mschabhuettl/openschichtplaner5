@@ -166,11 +166,11 @@ export default function Teamkalender() {
         <span className="text-xl">📅</span>
         <h1 className="text-lg font-bold text-gray-800">Team-Kalender</h1>
         <div className="flex items-center gap-1 ml-2">
-          <button onClick={prevMonth} className="px-2 py-1 rounded hover:bg-gray-100 text-gray-600">‹</button>
+          <button aria-label="Vorheriger Monat" onClick={prevMonth} className="px-2 py-1 rounded hover:bg-gray-100 text-gray-600">‹</button>
           <span className="font-semibold text-gray-700 min-w-[160px] text-center">
             {MONTH_NAMES[month - 1]} {year}
           </span>
-          <button onClick={nextMonth} className="px-2 py-1 rounded hover:bg-gray-100 text-gray-600">›</button>
+          <button aria-label="Nächster Monat" onClick={nextMonth} className="px-2 py-1 rounded hover:bg-gray-100 text-gray-600">›</button>
         </div>
         <button onClick={goToday} className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm">Heute</button>
 

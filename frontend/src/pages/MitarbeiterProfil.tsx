@@ -198,7 +198,7 @@ export default function MitarbeiterProfil() {
     <div className="p-4 max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-600 text-2xl">‹</button>
+        <button aria-label="Zurück" onClick={() => navigate(-1)} className="text-gray-600 hover:text-gray-600 text-2xl">‹</button>
         <div>
           <h1 className="text-2xl font-bold">{employee.FIRSTNAME} {employee.NAME}</h1>
           <div className="text-gray-500 text-sm flex items-center gap-2 flex-wrap">

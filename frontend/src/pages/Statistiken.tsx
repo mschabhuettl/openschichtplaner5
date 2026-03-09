@@ -702,11 +702,11 @@ export default function Statistiken() {
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         {/* Month navigation */}
         <div className="flex items-center gap-2">
-          <button onClick={prevMonth} className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm">‹</button>
+          <button aria-label="Vorheriger Monat" onClick={prevMonth} className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm">‹</button>
           <span className="font-semibold text-gray-700 dark:text-slate-300 min-w-[150px] text-center">
             {t.months[month - 1]} {year}
           </span>
-          <button onClick={nextMonth} className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm">›</button>
+          <button aria-label="Nächster Monat" onClick={nextMonth} className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm">›</button>
         </div>
 
         {/* Group filter */}

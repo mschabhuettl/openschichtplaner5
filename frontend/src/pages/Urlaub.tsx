@@ -1979,9 +1979,9 @@ export default function Urlaub() {
           <p className="text-sm text-gray-500 mt-0.5">Ansprüche, Abwesenheiten und Sperrzeiten</p>
         </div>
         <div className="flex items-center gap-1">
-          <button onClick={() => setYear(y => y - 1)} className="px-2 py-1.5 min-w-[32px] rounded border hover:bg-gray-50 text-sm">‹</button>
+          <button aria-label="Vorheriges Jahr" onClick={() => setYear(y => y - 1)} className="px-2 py-1.5 min-w-[32px] rounded border hover:bg-gray-50 text-sm">‹</button>
           <span className="px-3 py-1 font-bold text-gray-800 text-sm">{year}</span>
-          <button onClick={() => setYear(y => y + 1)} className="px-2 py-1.5 min-w-[32px] rounded border hover:bg-gray-50 text-sm">›</button>
+          <button aria-label="Nächstes Jahr" onClick={() => setYear(y => y + 1)} className="px-2 py-1.5 min-w-[32px] rounded border hover:bg-gray-50 text-sm">›</button>
           <button
             onClick={() => window.print()}
             className="no-print ml-2 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"

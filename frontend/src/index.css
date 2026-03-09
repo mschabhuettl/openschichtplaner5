@@ -606,6 +606,38 @@ a { transition: color 150ms ease; }
 }
 
 /* ── prefers-reduced-motion: disable all animations/transitions ─────────── */
+/* ── Accessible Focus Styles ──────────────────────────────────── */
+/* Visible focus ring for keyboard navigation (focus-visible only) */
+*:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Suppress default outline for mouse clicks — focus-visible handles keyboard */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Higher contrast focus ring in dark mode */
+html.dark *:focus-visible {
+  outline-color: #60a5fa;
+}
+
+/* Special focus styles for inputs — use ring instead of outline to avoid layout shifts */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+html.dark input:focus-visible,
+html.dark select:focus-visible,
+html.dark textarea:focus-visible {
+  box-shadow: 0 0 0 2px #60a5fa;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

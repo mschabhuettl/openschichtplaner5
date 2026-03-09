@@ -379,7 +379,7 @@ export default function VerfügbarkeitsMatrix() {
 
         {/* Month nav */}
         <div className="flex items-center gap-1 ml-auto">
-          <button onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors">‹</button>
+          <button aria-label="Vorheriger Monat" onClick={prevMonth} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors">‹</button>
           <div className="flex items-center gap-1">
             <select
               value={month}
@@ -399,7 +399,7 @@ export default function VerfügbarkeitsMatrix() {
               max={2099}
             />
           </div>
-          <button onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors">›</button>
+          <button aria-label="Nächster Monat" onClick={nextMonth} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors">›</button>
         </div>
 
         {/* Group filter */}

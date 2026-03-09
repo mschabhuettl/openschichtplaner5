@@ -127,9 +127,9 @@ export default function Jahresabschluss() {
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Abzuschließendes Jahr</label>
             <div className="flex items-center gap-1">
-              <button onClick={() => setYear(y => y - 1)} className="px-2 py-2 border rounded hover:bg-gray-50 text-sm">‹</button>
+              <button aria-label="Vorheriges Jahr" onClick={() => setYear(y => y - 1)} className="px-2 py-2 border rounded hover:bg-gray-50 text-sm">‹</button>
               <span className="px-4 py-2 font-bold text-gray-800 text-sm border rounded bg-gray-50 flex-1 text-center">{year}</span>
-              <button onClick={() => setYear(y => y + 1)} className="px-2 py-2 border rounded hover:bg-gray-50 text-sm">›</button>
+              <button aria-label="Nächstes Jahr" onClick={() => setYear(y => y + 1)} className="px-2 py-2 border rounded hover:bg-gray-50 text-sm">›</button>
             </div>
           </div>
           <div>

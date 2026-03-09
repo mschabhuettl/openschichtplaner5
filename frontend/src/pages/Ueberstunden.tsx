@@ -128,9 +128,9 @@ export default function Ueberstunden() {
 
         {/* Year navigation */}
         <div className="flex items-center gap-1.5">
-          <button onClick={() => setYear(y => y - 1)} className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm">‹</button>
+          <button aria-label="Vorheriges Jahr" onClick={() => setYear(y => y - 1)} className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm">‹</button>
           <span className="font-semibold text-gray-700 min-w-[50px] text-center">{year}</span>
-          <button onClick={() => setYear(y => y + 1)} className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm">›</button>
+          <button aria-label="Nächstes Jahr" onClick={() => setYear(y => y + 1)} className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm">›</button>
         </div>
 
         {/* Group filter */}

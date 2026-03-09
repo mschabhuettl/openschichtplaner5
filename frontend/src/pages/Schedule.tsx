@@ -4270,11 +4270,11 @@ export default function Schedule() {
 
         {/* Month navigation */}
         <div className="flex items-center gap-1.5">
-          <button onClick={prevMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] min-w-[44px]">‹</button>
+          <button aria-label="Vorheriger Monat" onClick={prevMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] min-w-[44px]">‹</button>
           <span className="font-semibold text-gray-700 min-w-[120px] sm:min-w-[140px] text-center text-sm">
             {MONTH_NAMES[month]} {year}
           </span>
-          <button onClick={nextMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] min-w-[44px]">›</button>
+          <button aria-label="Nächster Monat" onClick={nextMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] min-w-[44px]">›</button>
         </div>
 
         {/* Desktop week view toggle */}

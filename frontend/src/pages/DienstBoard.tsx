@@ -232,14 +232,14 @@ export default function DienstBoard() {
       {/* Date selector + Group filter */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-lg shadow-sm p-1">
-          <button onClick={prevDay} className="p-1.5 hover:bg-gray-100 rounded text-gray-600">‹</button>
+          <button aria-label="Vorheriger Tag" onClick={prevDay} className="p-1.5 hover:bg-gray-100 rounded text-gray-600">‹</button>
           <input
             type="date"
             value={date}
             onChange={e => setDate(e.target.value)}
             className="text-sm font-medium text-gray-800 border-none outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:rounded bg-transparent px-2"
           />
-          <button onClick={nextDay} className="p-1.5 hover:bg-gray-100 rounded text-gray-600">›</button>
+          <button aria-label="Nächster Tag" onClick={nextDay} className="p-1.5 hover:bg-gray-100 rounded text-gray-600">›</button>
           <button
             onClick={() => setDate(today)}
             className={`px-2 py-1 text-xs rounded font-medium ${date === today ? 'bg-blue-100 text-blue-700' : 'hover:bg-gray-100 text-gray-500'}`}

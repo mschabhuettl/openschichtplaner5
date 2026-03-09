@@ -54,6 +54,7 @@ const Benutzerverwaltung = lazy(() => import('./pages/Benutzerverwaltung'));
 const Backup            = lazy(() => import('./pages/Backup'));
 const Perioden          = lazy(() => import('./pages/Perioden'));
 const Einstellungen     = lazy(() => import('./pages/Einstellungen'));
+const EmailSettings     = lazy(() => import('./pages/EmailSettings'));
 const Protokoll         = lazy(() => import('./pages/Protokoll'));
 const TauschBoerse      = lazy(() => import('./pages/TauschBoerse'));
 const Konflikte         = lazy(() => import('./pages/Konflikte'));
@@ -240,6 +241,7 @@ const navItems: NavItem[] = [
   { id: 'backup',             label: 'Backup & Restore',     icon: '💾', group: 'Administration', path: '/backup',             roles: ['Admin'] },
   { id: 'perioden',           label: 'Abrechnungszeiträume', icon: '📅', group: 'Administration', path: '/perioden',           roles: ['Admin'] },
   { id: 'einstellungen',      label: 'Einstellungen',        icon: '⚙️', group: 'Administration', path: '/einstellungen',      roles: ['Admin'] },
+  { id: 'email-settings',    label: 'E-Mail',               icon: '📧', group: 'Administration', path: '/email-settings',     roles: ['Admin'] },
   { id: 'auditlog',           label: 'Audit-Log',            icon: '🔍', group: 'Administration', path: '/auditlog',           roles: ['Admin', 'Planer'] },
   { id: 'health',             label: 'System Health',        icon: '🩺', group: 'Administration', path: '/health',             roles: ['Admin'] },
   { id: 'protokoll',          label: 'Protokoll',            icon: '📋', group: 'Administration', path: '/protokoll',          roles: ['Admin'] },
@@ -900,6 +902,7 @@ function AppInner() {
             <Route path="/backup" element={<PB name="Backup & Restore"><RoleRoute allowedRoles={['Admin']}><Backup /></RoleRoute></PB>} />
             <Route path="/perioden" element={<PB name="Abrechnungszeiträume"><RoleRoute allowedRoles={['Admin']}><Perioden /></RoleRoute></PB>} />
             <Route path="/einstellungen" element={<PB name="Einstellungen"><RoleRoute allowedRoles={['Admin']}><Einstellungen /></RoleRoute></PB>} />
+            <Route path="/email-settings" element={<PB name="E-Mail"><RoleRoute allowedRoles={['Admin']}><EmailSettings /></RoleRoute></PB>} />
             <Route path="/protokoll" element={<PB name="Protokoll"><RoleRoute allowedRoles={['Admin']}><Protokoll /></RoleRoute></PB>} />
             <Route path="/druckvorschau" element={<PB name="Druckvorschau"><Druckvorschau /></PB>} />
             <Route path="/dienst-board" element={<PB name="Dienst-Board"><RoleRoute allowedRoles={['Admin', 'Planer']}><DienstBoard /></RoleRoute></PB>} />

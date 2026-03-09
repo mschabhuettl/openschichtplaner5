@@ -1417,8 +1417,8 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
       <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700 flex items-start gap-2">
         <span className="text-base flex-shrink-0">ℹ️</span>
         <span>
-          Der Genehmigungsstatus wird lokal im System gespeichert und hat keinen Einfluss auf die Abwesenheitseinträge in der Datenbank.
-          Abwesenheiten mit Status "Beantragt" sind noch zu bearbeiten.
+          Neue Abwesenheiten starten mit Status „Beantragt" und müssen genehmigt oder abgelehnt werden.
+          Bei Ablehnung wird der Eintrag automatisch aus der Datenbank entfernt.
         </span>
       </div>
 

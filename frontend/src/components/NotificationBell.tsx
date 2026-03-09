@@ -3,6 +3,7 @@
  * Pollt alle 60s nach neuen Notifications. Unterstützt "gelesen markieren".
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const BASE = import.meta.env.VITE_API_URL ?? '';
 const POLL_INTERVAL_MS = 60_000;
@@ -57,6 +58,7 @@ export function NotificationBell({ employeeId }: Props) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -245,6 +247,16 @@ export function NotificationBell({ employeeId }: Props) {
                 </div>
               ))
             )}
+          </div>
+
+          {/* Footer: link to full notifications page */}
+          <div className="border-t border-gray-200 dark:border-gray-700 px-4 py-2.5">
+            <button
+              onClick={() => { setOpen(false); navigate('/benachrichtigungen'); }}
+              className="w-full text-center text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
+            >
+              Alle Benachrichtigungen anzeigen →
+            </button>
           </div>
         </div>
       )}

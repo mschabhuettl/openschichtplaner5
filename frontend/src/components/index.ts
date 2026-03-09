@@ -15,6 +15,7 @@ export { HelpTooltip } from './HelpTooltip';
 export { InstallBanner } from './InstallBanner';
 export { LoadingSpinner } from './LoadingSpinner';
 export { NotificationBell } from './NotificationBell';
+export { NotificationsPage } from './NotificationsPage';
 export { PageHeader } from './PageHeader';
 export { Skeleton, SkeletonText, SkeletonCard, SkeletonTable, SkeletonGrid } from './Skeleton';
 export { StatCard } from './StatCard';

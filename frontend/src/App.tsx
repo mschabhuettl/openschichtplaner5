@@ -10,6 +10,7 @@ import { useToast } from './hooks/useToast';
 import SpotlightSearch, { trackRecentPage } from './components/SpotlightSearch';
 import WarningsCenter from './components/WarningsCenter';
 import { NotificationBell } from './components/NotificationBell';
+import { NotificationsPage } from './components/NotificationsPage';
 import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 import { GuidedTour, useTour } from './components/GuidedTour';
 import { ErrorBoundary, PageErrorBoundary } from './components/ErrorBoundary';
@@ -879,6 +880,7 @@ function AppInner() {
             <Route path="/ueberstunden" element={<PB name="Überstunden"><RoleRoute allowedRoles={['Admin', 'Planer']}><Ueberstunden /></RoleRoute></PB>} />
             <Route path="/kontobuchungen" element={<PB name="Kontobuchungen"><RoleRoute allowedRoles={['Admin', 'Planer']}><Kontobuchungen /></RoleRoute></PB>} />
             <Route path="/notizen" element={<PB name="Notizen"><Notizen /></PB>} />
+            <Route path="/benachrichtigungen" element={<PB name="Benachrichtigungen"><NotificationsPage /></PB>} />
             <Route path="/mitarbeiter-vergleich" element={<PB name="MA-Vergleich"><RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterVergleich /></RoleRoute></PB>} />
             <Route path="/team" element={<PB name="Team-Übersicht"><RoleRoute allowedRoles={['Admin', 'Planer']}><TeamUebersicht /></RoleRoute></PB>} />
             <Route path="/mitarbeiter" element={<PB name="MA-Profil"><RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterProfil /></RoleRoute></PB>} />

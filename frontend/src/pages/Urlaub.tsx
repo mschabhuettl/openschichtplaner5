@@ -8,6 +8,28 @@ import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useT } from '../i18n';
 
+const API_BASE = import.meta.env.VITE_API_URL ?? '';
+
+/** Download a file from the API by fetching with credentials and triggering a download. */
+async function downloadExport(url: string, fallbackFilename: string): Promise<void> {
+  const res = await fetch(url, { credentials: 'include' });
+  if (!res.ok) {
+    let msg = `Fehler ${res.status}`;
+    try { const j = await res.json(); msg = (j as { detail?: string }).detail ?? msg; } catch { /* ignore */ }
+    throw new Error(msg);
+  }
+  const blob = await res.blob();
+  const cd = res.headers.get('content-disposition') ?? '';
+  const match = cd.match(/filename="?([^";\n]+)"?/);
+  const filename = match ? match[1] : fallbackFilename;
+  const objUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = objUrl;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(objUrl);
+}
+
 // ─── Types ────────────────────────────────────────────────
 interface Absence {
   ID: number;
@@ -1966,6 +1988,28 @@ export default function Urlaub() {
             title="Seite drucken"
           >
             🖨️ <span className="hidden sm:inline">Drucken</span>
+          </button>
+          <button
+            onClick={() => {
+              downloadExport(`${API_BASE}/api/export/absences?year=${year}&format=csv`, `abwesenheiten_${year}.csv`)
+                .then(() => showToast('CSV exportiert ✓', 'success'))
+                .catch((e: Error) => showToast(`Export-Fehler: ${e.message}`, 'error'));
+            }}
+            className="no-print px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
+            title="Abwesenheiten als CSV exportieren"
+          >
+            ⬇️ <span className="hidden sm:inline">CSV</span>
+          </button>
+          <button
+            onClick={() => {
+              downloadExport(`${API_BASE}/api/export/absences?year=${year}&format=xlsx`, `abwesenheiten_${year}.xlsx`)
+                .then(() => showToast('Excel exportiert ✓', 'success'))
+                .catch((e: Error) => showToast(`Export-Fehler: ${e.message}`, 'error'));
+            }}
+            className="no-print px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
+            title="Abwesenheiten als Excel exportieren"
+          >
+            📊 <span className="hidden sm:inline">Excel</span>
           </button>
         </div>
       </div>

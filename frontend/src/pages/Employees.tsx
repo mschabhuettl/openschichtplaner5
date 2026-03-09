@@ -11,6 +11,28 @@ import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useT } from '../i18n';
 
+const API_BASE = import.meta.env.VITE_API_URL ?? '';
+
+/** Download a file from the API by fetching with credentials and triggering a download. */
+async function downloadExport(url: string, fallbackFilename: string): Promise<void> {
+  const res = await fetch(url, { credentials: 'include' });
+  if (!res.ok) {
+    let msg = `Fehler ${res.status}`;
+    try { const j = await res.json(); msg = (j as { detail?: string }).detail ?? msg; } catch { /* ignore */ }
+    throw new Error(msg);
+  }
+  const blob = await res.blob();
+  const cd = res.headers.get('content-disposition') ?? '';
+  const match = cd.match(/filename="?([^";\n]+)"?/);
+  const filename = match ? match[1] : fallbackFilename;
+  const objUrl = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = objUrl;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(objUrl);
+}
+
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
 /** Format an ISO date string (YYYY-MM-DD) to German short format (DD.MM.YYYY). */
@@ -641,6 +663,28 @@ export default function Employees() {
             title="Mitarbeiterliste drucken (Landscape)"
           >
             {t.employees.printButton}
+          </button>
+          <button
+            onClick={() => {
+              downloadExport(`${API_BASE}/api/export/employees?format=csv`, 'mitarbeiter.csv')
+                .then(() => showToast('CSV exportiert ✓', 'success'))
+                .catch((e: Error) => showToast(`Export-Fehler: ${e.message}`, 'error'));
+            }}
+            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-sm font-semibold transition-colors flex items-center gap-1.5"
+            title="Mitarbeiterliste als CSV exportieren"
+          >
+            ⬇️ CSV
+          </button>
+          <button
+            onClick={() => {
+              downloadExport(`${API_BASE}/api/export/employees?format=xlsx`, 'mitarbeiter.xlsx')
+                .then(() => showToast('Excel exportiert ✓', 'success'))
+                .catch((e: Error) => showToast(`Export-Fehler: ${e.message}`, 'error'));
+            }}
+            className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-semibold transition-colors flex items-center gap-1.5"
+            title="Mitarbeiterliste als Excel exportieren"
+          >
+            📊 Excel
           </button>
           {canAdmin && <button
             onClick={openCreate}

@@ -948,7 +948,8 @@ export interface SwapRequest {
   partner_id: number;
   partner_date: string;
   note: string;
-  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+  status: 'pending_partner' | 'pending' | 'approved' | 'rejected' | 'cancelled';
+  partner_accepted: boolean | null;
   created_at: string;
   resolved_at: string | null;
   resolved_by: string | null;
@@ -1575,6 +1576,20 @@ export const api = {
 
   deleteSwapRequest: (swapId: number) =>
     deleteReq<{ ok: boolean }>(`/api/swap-requests/${swapId}`),
+
+  // ─── Self-Service Swap Requests ──────────────────────────
+  createSelfSwapRequest: (body: {
+    partner_id: number;
+    requester_date: string;
+    partner_date: string;
+    note?: string;
+  }) => postJSON<SwapRequest>('/api/self/swap-requests', body),
+
+  respondSwapRequest: (swapId: number, accept: boolean) =>
+    patchJSON<SwapRequest>(`/api/self/swap-requests/${swapId}/respond`, { accept }),
+
+  cancelSelfSwapRequest: (swapId: number) =>
+    deleteReq<{ ok: boolean }>(`/api/self/swap-requests/${swapId}`),
 
   // ─── Annual Close (Jahresabschluss) ──────────────────────
   getAnnualClosePreview: (params: { year: number; max_carry_forward_days: number; group_id?: number }) => {

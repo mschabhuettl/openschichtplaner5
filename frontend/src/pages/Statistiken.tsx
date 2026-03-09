@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useToast } from '../hooks/useToast';
 import { api } from '../api/client';
-import type { EmployeeStats, ExtraChargeSummary, EmployeeYearStats, SicknessStatistics, ShiftStatisticsData } from '../api/client';
+import type { EmployeeStats, ExtraChargeSummary, EmployeeYearStats, SicknessStatistics, ShiftStatisticsData, YearSummaryData } from '../api/client';
 import type { Employee, Group } from '../types';
 import { useT } from '../i18n';
 import { EmptyState } from '../components/EmptyState';
@@ -192,6 +192,110 @@ function exportEmployeeCSV(data: EmployeeYearStats) {
   URL.revokeObjectURL(url);
 }
 
+// ── CSV Export for group view ──────────────────────────────
+function exportGroupCSV(
+  stats: EmployeeStats[],
+  year: number,
+  month: number,
+  groupLabel: string,
+) {
+  const monthName = MONTH_NAMES_DE[month];
+  const header = [
+    'Mitarbeiter', 'Gruppe', 'Soll-Stunden', 'Ist-Stunden',
+    'Überstunden', 'Abwesenheitstage', 'Urlaubstage', 'Krankentage',
+  ].join(';');
+
+  const rows = stats.map(s =>
+    [
+      s.employee_name,
+      s.group_name,
+      s.target_hours.toFixed(2).replace('.', ','),
+      s.actual_hours.toFixed(2).replace('.', ','),
+      s.overtime_hours.toFixed(2).replace('.', ','),
+      s.absence_days,
+      s.vacation_used,
+      s.sick_days || 0,
+    ].join(';')
+  );
+
+  const totalTarget = stats.reduce((a, s) => a + s.target_hours, 0);
+  const totalActual = stats.reduce((a, s) => a + s.actual_hours, 0);
+  const totalRow = [
+    'GESAMT',
+    groupLabel,
+    totalTarget.toFixed(2).replace('.', ','),
+    totalActual.toFixed(2).replace('.', ','),
+    (totalActual - totalTarget).toFixed(2).replace('.', ','),
+    stats.reduce((a, s) => a + s.absence_days, 0),
+    stats.reduce((a, s) => a + s.vacation_used, 0),
+    stats.reduce((a, s) => a + (s.sick_days || 0), 0),
+  ].join(';');
+
+  const csv = [
+    `Gruppenauswertung ${monthName} ${year}`,
+    `Gruppe: ${groupLabel} | ${stats.length} Mitarbeiter`,
+    '',
+    header,
+    ...rows,
+    totalRow,
+  ].join('\r\n');
+
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Gruppenauswertung_${monthName}_${year}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── CSV Export for year summary ────────────────────────────
+function exportYearSummaryCSV(data: YearSummaryData, groupLabel: string) {
+  const monthNames = ['', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  
+  // Section 1: Monthly overview
+  const monthHeader = 'Monat;Mitarbeiter;Soll-Std;Ist-Std;Überstunden;Abwesenheit;Urlaub;Krankheit;Schichten';
+  const monthRows = data.monthly.map(m =>
+    [monthNames[m.month], m.employee_count,
+      m.target_hours.toFixed(2).replace('.', ','),
+      m.actual_hours.toFixed(2).replace('.', ','),
+      m.overtime.toFixed(2).replace('.', ','),
+      m.absence_days, m.vacation_days, m.sick_days, m.shifts_count].join(';')
+  );
+  
+  // Section 2: Employee overview
+  const empHeader = '\r\n\r\nMitarbeiter-Übersicht\r\nName;Gruppe;Soll-Std;Ist-Std;Überstunden;Abwesenheit;Urlaub;Krankheit;Schichten';
+  const empRows = data.employees.map(e =>
+    [e.name, e.group,
+      e.target_hours.toFixed(2).replace('.', ','),
+      e.actual_hours.toFixed(2).replace('.', ','),
+      e.overtime.toFixed(2).replace('.', ','),
+      e.absence_days, e.vacation_days, e.sick_days, e.shifts_count].join(';')
+  );
+
+  const csv = [
+    `Jahresrückblick ${data.year}`,
+    `Gruppe: ${groupLabel}`,
+    '',
+    'Monatsübersicht',
+    monthHeader,
+    ...monthRows,
+    empHeader,
+    ...empRows,
+  ].join('\r\n');
+
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Jahresrueckblick_${data.year}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 type SortKey = 'name' | 'overtime' | 'actual_hours' | 'target_hours' | 'absences' | 'vacation';
 type SortDir = 'asc' | 'desc';
 
@@ -239,7 +343,7 @@ export default function Statistiken() {
   const now = new Date();
 
   // ── Tabs ────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState<'group' | 'employee' | 'sickness' | 'compare' | 'shifts'>('group');
+  const [activeTab, setActiveTab] = useState<'group' | 'employee' | 'sickness' | 'compare' | 'shifts' | 'yearreview'>('group');
 
   // ── Group-view state ────────────────────────────────────
   const [year, setYear] = useState(now.getFullYear());
@@ -291,6 +395,17 @@ export default function Statistiken() {
   const [shiftLoading, setShiftLoading] = useState(false);
   const [shiftError, setShiftError] = useState<string | null>(null);
 
+  // ── Year Review (Jahresrückblick) state ──────────────────
+  const [yrYear, setYrYear] = useState(now.getFullYear());
+  const [yrGroupId, setYrGroupId] = useState<number | undefined>(undefined);
+  const [yrData, setYrData] = useState<YearSummaryData | null>(null);
+  const [yrPrevData, setYrPrevData] = useState<YearSummaryData | null>(null);
+  const [yrLoading, setYrLoading] = useState(false);
+  const [yrError, setYrError] = useState<string | null>(null);
+
+  // ── Previous month data for group view comparison ───────
+  const [prevMonthStats, setPrevMonthStats] = useState<EmployeeStats[]>([]);
+
   // Load groups + employees once
   useEffect(() => {
     api.getGroups().then(setGroups).catch(() => {});
@@ -319,6 +434,33 @@ export default function Statistiken() {
       })
       .catch(e => { setError(e.message); setLoading(false); });
   }, [year, month, groupId, activeTab]);
+
+  // Load previous month stats for comparison (group view)
+  useEffect(() => {
+    if (activeTab !== 'group') return;
+    const prevY = month === 1 ? year - 1 : year;
+    const prevM = month === 1 ? 12 : month - 1;
+    api.getStatistics(prevY, prevM, groupId)
+      .then(setPrevMonthStats)
+      .catch(() => setPrevMonthStats([]));
+  }, [year, month, groupId, activeTab]);
+
+  // Load year review data
+  useEffect(() => {
+    if (activeTab !== 'yearreview') return;
+    setYrLoading(true);
+    setYrError(null);
+    Promise.all([
+      api.getYearSummary(yrYear, yrGroupId),
+      api.getYearSummary(yrYear - 1, yrGroupId),
+    ])
+      .then(([curr, prev]) => {
+        setYrData(curr);
+        setYrPrevData(prev);
+        setYrLoading(false);
+      })
+      .catch(e => { setYrError(e.message); setYrLoading(false); });
+  }, [activeTab, yrYear, yrGroupId]);
 
   // Load employee yearly stats
   const loadEmpStats = useCallback(() => {
@@ -487,6 +629,12 @@ export default function Statistiken() {
             onClick={() => setActiveTab('shifts')}
           >
             {t.statistiken.tabShifts}
+          </button>
+          <button
+            className={`px-4 py-2.5 min-h-[44px] whitespace-nowrap shrink-0 transition-colors ${activeTab === 'yearreview' ? 'bg-purple-700 text-white' : 'bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 text-gray-700 dark:text-slate-200'}`}
+            onClick={() => setActiveTab('yearreview')}
+          >
+            📅 Jahresrückblick
           </button>
         </div>
         </div>
@@ -724,7 +872,21 @@ export default function Statistiken() {
 
         <span className="text-sm text-gray-500 dark:text-slate-400">{stats.length} Mitarbeiter</span>
 
-        {/* HTML Export button */}
+        {/* Export buttons */}
+        <button
+          onClick={() => {
+            const groupLabel = groupId
+              ? (groups.find(g => g.ID === groupId)?.NAME ?? `Gruppe ${groupId}`)
+              : 'Alle Mitarbeiter';
+            exportGroupCSV(sorted, year, month, groupLabel);
+            showToast('CSV exportiert ✓', 'success');
+          }}
+          disabled={sorted.length === 0 || loading}
+          className="ml-auto px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm rounded shadow-sm flex items-center gap-1.5"
+          title="Statistiken als CSV exportieren"
+        >
+          ⬇️ CSV
+        </button>
         <button
           onClick={() => {
             const groupLabel = groupId
@@ -733,10 +895,10 @@ export default function Statistiken() {
             exportStatisticsHTML(sorted, year, month, groupLabel);
           }}
           disabled={sorted.length === 0 || loading}
-          className="ml-auto px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm rounded shadow-sm flex items-center gap-1.5"
+          className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:opacity-50 text-white text-sm rounded shadow-sm flex items-center gap-1.5"
           title="Statistiken als HTML öffnen und drucken"
         >
-          📊 HTML exportieren
+          📊 HTML
         </button>
         <button
           onClick={() => window.print()}
@@ -747,27 +909,65 @@ export default function Statistiken() {
         </button>
       </div>
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-        <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 p-3 shadow-sm text-center">
-          <div className="text-xl font-bold text-gray-700 dark:text-slate-300">{totalTarget.toFixed(0)}h</div>
-          <div className="text-xs text-gray-500 dark:text-slate-400">Gesamt Soll</div>
-        </div>
-        <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 p-3 shadow-sm text-center">
-          <div className="text-xl font-bold text-blue-700">{totalActual.toFixed(0)}h</div>
-          <div className="text-xs text-gray-500 dark:text-slate-400">Gesamt Ist</div>
-        </div>
-        <div className={`rounded-lg border p-3 shadow-sm text-center ${totalOvertime >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
-          <div className={`text-xl font-bold ${totalOvertime >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-            {totalOvertime >= 0 ? '+' : ''}{totalOvertime.toFixed(0)}h
+      {/* Summary cards with previous month comparison */}
+      {(() => {
+        const prevTarget = prevMonthStats.reduce((a, s) => a + s.target_hours, 0);
+        const prevActual = prevMonthStats.reduce((a, s) => a + s.actual_hours, 0);
+        const prevOvertime = prevActual - prevTarget;
+        const prevAbsences = prevMonthStats.reduce((a, s) => a + s.absence_days, 0);
+        const prevSick = prevMonthStats.reduce((a, s) => a + (s.sick_days || 0), 0);
+        const totalSick = stats.reduce((a, s) => a + (s.sick_days || 0), 0);
+        const sickRate = stats.length > 0 ? ((totalSick / stats.length) * 100).toFixed(1) : '0.0';
+        const DeltaBadge = ({ current, previous, suffix = 'h', invert = false }: { current: number; previous: number; suffix?: string; invert?: boolean }) => {
+          if (prevMonthStats.length === 0) return null;
+          const delta = current - previous;
+          if (Math.abs(delta) < 0.1) return null;
+          const isPositive = invert ? delta < 0 : delta > 0;
+          return (
+            <div className={`text-xs mt-0.5 ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
+              {delta > 0 ? '▲' : '▼'} {Math.abs(delta).toFixed(delta % 1 === 0 ? 0 : 1)}{suffix} vs Vormonat
+            </div>
+          );
+        };
+        return (
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-4">
+            <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 p-3 shadow-sm text-center">
+              <div className="text-xl font-bold text-gray-700 dark:text-slate-300">{totalTarget.toFixed(0)}h</div>
+              <div className="text-xs text-gray-500 dark:text-slate-400">Gesamt Soll</div>
+              <DeltaBadge current={totalTarget} previous={prevTarget} />
+            </div>
+            <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 p-3 shadow-sm text-center">
+              <div className="text-xl font-bold text-blue-700">{totalActual.toFixed(0)}h</div>
+              <div className="text-xs text-gray-500 dark:text-slate-400">Gesamt Ist</div>
+              <DeltaBadge current={totalActual} previous={prevActual} />
+            </div>
+            <div className={`rounded-lg border p-3 shadow-sm text-center ${totalOvertime >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
+              <div className={`text-xl font-bold ${totalOvertime >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+                {totalOvertime >= 0 ? '+' : ''}{totalOvertime.toFixed(0)}h
+              </div>
+              <div className={`text-xs ${totalOvertime >= 0 ? 'text-green-600' : 'text-red-600'}`}>Überstunden</div>
+              <DeltaBadge current={totalOvertime} previous={prevOvertime} />
+            </div>
+            <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg border p-3 shadow-sm text-center">
+              <div className="text-xl font-bold text-amber-700">{totalAbsences}</div>
+              <div className="text-xs text-amber-600">Abwesenheitstage</div>
+              <DeltaBadge current={totalAbsences} previous={prevAbsences} suffix="" invert />
+            </div>
+            <div className="bg-red-50 dark:bg-red-900/20 rounded-lg border p-3 shadow-sm text-center">
+              <div className="text-xl font-bold text-red-700">{sickRate}%</div>
+              <div className="text-xs text-red-600">Krankenstand-Rate</div>
+              {prevMonthStats.length > 0 && (
+                <DeltaBadge
+                  current={totalSick}
+                  previous={prevSick}
+                  suffix=" Tage"
+                  invert
+                />
+              )}
+            </div>
           </div>
-          <div className={`text-xs ${totalOvertime >= 0 ? 'text-green-600' : 'text-red-600'}`}>Überstunden</div>
-        </div>
-        <div className="bg-amber-50 rounded-lg border p-3 shadow-sm text-center">
-          <div className="text-xl font-bold text-amber-700">{totalAbsences}</div>
-          <div className="text-xs text-amber-600">Abwesenheitstage</div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* Table */}
       <div className="flex-1 overflow-auto bg-white dark:bg-slate-800 rounded-lg shadow border border-gray-200 dark:border-slate-600 dark:border-slate-700">
@@ -1559,6 +1759,332 @@ export default function Statistiken() {
               />
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── JAHRESRÜCKBLICK (Year Review) ────────────────────── */}
+      {activeTab === 'yearreview' && (
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Controls */}
+          <div className="flex items-center gap-3 mb-4 flex-wrap">
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setYrYear(y => y - 1)}
+                className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm"
+              >‹</button>
+              <span className="font-semibold text-gray-700 dark:text-slate-300 min-w-[50px] text-center">{yrYear}</span>
+              <button
+                onClick={() => setYrYear(y => y + 1)}
+                className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm"
+              >›</button>
+            </div>
+            <select
+              value={yrGroupId ?? ''}
+              onChange={e => setYrGroupId(e.target.value ? Number(e.target.value) : undefined)}
+              className="px-3 py-1.5 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm text-sm"
+            >
+              <option value="">{t.statistiken.allGroups}</option>
+              {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+            </select>
+
+            {yrLoading && <span className="text-sm text-blue-500 animate-pulse">Lade...</span>}
+            {yrError && <span className="text-sm text-red-500">Fehler: {yrError}</span>}
+
+            {yrData && (
+              <button
+                onClick={() => {
+                  const label = yrGroupId ? (groups.find(g => g.ID === yrGroupId)?.NAME ?? 'Gruppe') : 'Alle Mitarbeiter';
+                  exportYearSummaryCSV(yrData, label);
+                  showToast('CSV exportiert ✓', 'success');
+                }}
+                className="ml-auto px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded shadow-sm flex items-center gap-1.5"
+              >
+                ⬇️ CSV exportieren
+              </button>
+            )}
+          </div>
+
+          {!yrData && !yrLoading && (
+            <div className="flex items-center justify-center h-32 text-gray-600 dark:text-slate-500 text-sm">
+              Keine Daten verfügbar
+            </div>
+          )}
+
+          {yrData && (() => {
+            const totals = yrData.totals;
+            const prev = yrPrevData?.totals;
+            const monthShort = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+            const maxMonthlyHours = Math.max(...yrData.monthly.map(m => m.actual_hours), 1);
+            const maxMonthlyOT = Math.max(...yrData.monthly.map(m => Math.abs(m.overtime)), 1);
+            const sickRate = totals.sick_days > 0 && yrData.employees.length > 0
+              ? (totals.sick_days / yrData.employees.length).toFixed(1)
+              : '0';
+            const prevSickRate = prev && yrPrevData && yrPrevData.employees.length > 0
+              ? (prev.sick_days / yrPrevData.employees.length).toFixed(1)
+              : null;
+
+            const YoYDelta = ({ current, previous, suffix = '', invert = false }: { current: number; previous: number | undefined; suffix?: string; invert?: boolean }) => {
+              if (previous === undefined) return null;
+              const delta = current - previous;
+              if (Math.abs(delta) < 0.1) return <span className="text-xs text-gray-400">= Vorjahr</span>;
+              const isGood = invert ? delta < 0 : delta > 0;
+              return (
+                <span className={`text-xs ${isGood ? 'text-green-600' : 'text-red-600'}`}>
+                  {delta > 0 ? '▲' : '▼'} {Math.abs(delta).toFixed(Math.abs(delta) % 1 === 0 ? 0 : 1)}{suffix} vs {yrYear - 1}
+                </span>
+              );
+            };
+
+            return (
+              <div className="flex-1 min-h-0 overflow-auto space-y-4">
+                {/* Year KPI cards with YoY comparison */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+                  {[
+                    { label: 'Soll-Stunden', value: `${totals.target_hours.toFixed(0)}h`, color: 'text-gray-700 dark:text-slate-300', delta: <YoYDelta current={totals.target_hours} previous={prev?.target_hours} suffix="h" /> },
+                    { label: 'Ist-Stunden', value: `${totals.actual_hours.toFixed(0)}h`, color: 'text-blue-700', delta: <YoYDelta current={totals.actual_hours} previous={prev?.actual_hours} suffix="h" /> },
+                    { label: 'Überstunden', value: `${totals.overtime >= 0 ? '+' : ''}${totals.overtime.toFixed(0)}h`, color: totals.overtime >= 0 ? 'text-green-700' : 'text-red-700', delta: <YoYDelta current={totals.overtime} previous={prev?.overtime} suffix="h" /> },
+                    { label: 'Schichten', value: String(totals.shifts_count), color: 'text-slate-700 dark:text-slate-300', delta: <YoYDelta current={totals.shifts_count} previous={prev?.shifts_count} /> },
+                    { label: 'Abwesenheit', value: `${totals.absence_days} Tage`, color: 'text-amber-700', delta: <YoYDelta current={totals.absence_days} previous={prev?.absence_days} suffix="" invert /> },
+                    { label: 'Urlaub', value: `${totals.vacation_days} Tage`, color: 'text-sky-700', delta: <YoYDelta current={totals.vacation_days} previous={prev?.vacation_days} suffix="" /> },
+                    { label: 'Ø Krankentage/MA', value: sickRate, color: 'text-red-700', delta: prevSickRate ? <YoYDelta current={Number(sickRate)} previous={Number(prevSickRate)} suffix="" invert /> : null },
+                  ].map(card => (
+                    <div key={card.label} className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 p-2.5 shadow-sm text-center">
+                      <div className={`text-lg font-bold ${card.color}`}>{card.value}</div>
+                      <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">{card.label}</div>
+                      {card.delta && <div className="mt-0.5">{card.delta}</div>}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Charts row: Monthly hours + Overtime trend */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {/* Monthly hours bar chart */}
+                  <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm p-4">
+                    <div className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">📈 Ist-Stunden pro Monat</div>
+                    <div className="flex items-end gap-1 h-32">
+                      {yrData.monthly.map((m, idx) => {
+                        const h = Math.round((m.actual_hours / maxMonthlyHours) * 100);
+                        const prevH = yrPrevData?.monthly[idx]?.actual_hours;
+                        const prevPct = prevH ? Math.round((prevH / maxMonthlyHours) * 100) : 0;
+                        const isCurMonth = yrYear === now.getFullYear() && m.month === now.getMonth() + 1;
+                        return (
+                          <div key={m.month} className="flex-1 flex flex-col items-center gap-0.5">
+                            <div className="text-xs text-gray-500 dark:text-slate-400 font-mono leading-none">
+                              {m.actual_hours > 0 ? m.actual_hours.toFixed(0) : ''}
+                            </div>
+                            <div className="w-full flex items-end justify-center gap-px" style={{ height: '96px' }}>
+                              {/* Previous year ghost bar */}
+                              {prevPct > 0 && (
+                                <div
+                                  className="w-1/3 rounded-t bg-gray-200 dark:bg-slate-600 opacity-50"
+                                  style={{ height: `${prevPct}%`, minHeight: 2 }}
+                                  title={`${yrYear - 1}: ${prevH?.toFixed(0)}h`}
+                                />
+                              )}
+                              {/* Current year bar */}
+                              <div
+                                className={`${prevPct > 0 ? 'w-2/3' : 'w-full'} rounded-t ${isCurMonth ? 'bg-blue-600' : 'bg-blue-400 hover:bg-blue-500'}`}
+                                style={{ height: `${h}%`, minHeight: m.actual_hours > 0 ? 2 : 0 }}
+                                title={`${monthShort[m.month - 1]} ${yrYear}: ${m.actual_hours.toFixed(0)}h`}
+                              />
+                            </div>
+                            <div className={`text-xs leading-none ${isCurMonth ? 'font-bold text-blue-600' : 'text-gray-500 dark:text-slate-400'}`}>
+                              {monthShort[m.month - 1]}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {yrPrevData && (
+                      <div className="mt-2 flex items-center gap-3 text-xs text-gray-500 dark:text-slate-400">
+                        <span className="flex items-center gap-1"><span className="w-3 h-2 bg-blue-400 rounded inline-block" /> {yrYear}</span>
+                        <span className="flex items-center gap-1"><span className="w-3 h-2 bg-gray-300 rounded inline-block opacity-50" /> {yrYear - 1}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Overtime trend */}
+                  <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm p-4">
+                    <div className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">⚖️ Überstunden-Trend</div>
+                    <div className="flex items-end gap-1 h-32">
+                      {yrData.monthly.map(m => {
+                        const isPos = m.overtime >= 0;
+                        const h = Math.round((Math.abs(m.overtime) / maxMonthlyOT) * 100);
+                        const isCurMonth = yrYear === now.getFullYear() && m.month === now.getMonth() + 1;
+                        return (
+                          <div key={m.month} className="flex-1 flex flex-col items-center gap-0.5">
+                            <div className={`text-xs font-semibold leading-none ${isPos ? 'text-green-600' : 'text-red-600'}`}>
+                              {m.overtime !== 0 ? `${isPos ? '+' : ''}${m.overtime.toFixed(0)}` : ''}
+                            </div>
+                            <div className="w-full flex items-end justify-center" style={{ height: '96px' }}>
+                              <div
+                                className={`w-full rounded-t ${isPos ? 'bg-green-500' : 'bg-red-400'} ${isCurMonth ? 'ring-2 ring-offset-1 ring-blue-400' : ''}`}
+                                style={{ height: `${h}%`, minHeight: Math.abs(m.overtime) > 0 ? 2 : 0 }}
+                                title={`${monthShort[m.month - 1]}: ${m.overtime >= 0 ? '+' : ''}${m.overtime.toFixed(1)}h`}
+                              />
+                            </div>
+                            <div className={`text-xs leading-none ${isCurMonth ? 'font-bold text-blue-600' : 'text-gray-500 dark:text-slate-400'}`}>
+                              {monthShort[m.month - 1]}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {/* Cumulative overtime line */}
+                    {(() => {
+                      let cumulative = 0;
+                      const cumValues = yrData.monthly.map(m => { cumulative += m.overtime; return cumulative; });
+                      const maxCum = Math.max(Math.abs(Math.min(...cumValues)), Math.abs(Math.max(...cumValues)), 1);
+                      return (
+                        <div className="mt-3 border-t dark:border-slate-700 pt-2">
+                          <div className="text-xs text-gray-500 dark:text-slate-400 mb-1">Kumuliert: <span className={`font-bold ${cumulative >= 0 ? 'text-green-600' : 'text-red-600'}`}>{cumulative >= 0 ? '+' : ''}{cumulative.toFixed(0)}h</span></div>
+                          <div className="flex items-center gap-px h-4">
+                            {cumValues.map((v, i) => {
+                              const pct = (Math.abs(v) / maxCum) * 50;
+                              return (
+                                <div key={i} className="flex-1 flex justify-center" title={`${monthShort[i]}: ${v >= 0 ? '+' : ''}${v.toFixed(0)}h kum.`}>
+                                  <div
+                                    className={`w-full rounded-sm ${v >= 0 ? 'bg-green-300' : 'bg-red-300'}`}
+                                    style={{ height: `${Math.max(pct, 8)}%`, minHeight: 3 }}
+                                  />
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* Sickness + Absence monthly chart */}
+                <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm p-4">
+                  <div className="text-sm font-semibold text-gray-700 dark:text-slate-300 mb-3">🏥 Kranken- & Abwesenheitstage pro Monat</div>
+                  <div className="flex items-end gap-1 h-24">
+                    {yrData.monthly.map(m => {
+                      const maxVal = Math.max(...yrData.monthly.map(x => x.sick_days + x.absence_days), 1);
+                      const sickH = Math.round((m.sick_days / maxVal) * 100);
+                      const absH = Math.round(((m.absence_days - m.sick_days) / maxVal) * 100);
+                      return (
+                        <div key={m.month} className="flex-1 flex flex-col items-center gap-0.5">
+                          <div className="text-xs text-gray-500 dark:text-slate-400 leading-none">
+                            {m.sick_days + m.absence_days > 0 ? m.absence_days : ''}
+                          </div>
+                          <div className="w-full flex flex-col items-center justify-end" style={{ height: '72px' }}>
+                            {absH > 0 && (
+                              <div
+                                className="w-full bg-amber-300 rounded-t"
+                                style={{ height: `${absH}%`, minHeight: 2 }}
+                                title={`Abwesend: ${m.absence_days - m.sick_days}`}
+                              />
+                            )}
+                            {sickH > 0 && (
+                              <div
+                                className="w-full bg-red-400"
+                                style={{ height: `${sickH}%`, minHeight: 2 }}
+                                title={`Krank: ${m.sick_days}`}
+                              />
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-slate-400 leading-none">{monthShort[m.month - 1]}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-2 flex items-center gap-3 text-xs text-gray-500 dark:text-slate-400">
+                    <span className="flex items-center gap-1"><span className="w-3 h-2 bg-red-400 rounded inline-block" /> Krankheit</span>
+                    <span className="flex items-center gap-1"><span className="w-3 h-2 bg-amber-300 rounded inline-block" /> Sonstige Abwesenheit</span>
+                  </div>
+                </div>
+
+                {/* Employee yearly leaderboard */}
+                <div className="bg-white dark:bg-slate-800 rounded-lg border dark:border-slate-700 shadow-sm overflow-hidden">
+                  <div className="px-4 py-2 bg-slate-50 dark:bg-slate-700 border-b dark:border-slate-600 font-semibold text-sm text-slate-700 dark:text-slate-200 flex items-center justify-between">
+                    <span>👥 Mitarbeiter-Jahresübersicht ({yrData.employees.length} MA)</span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-slate-100 dark:bg-slate-700 text-xs">
+                          <th className="px-3 py-2 text-left border border-gray-200 dark:border-slate-600 font-semibold dark:text-slate-200 sticky left-0 bg-slate-100 dark:bg-slate-700 z-10 min-w-[160px]">Mitarbeiter</th>
+                          <th className="px-3 py-2 text-left border border-gray-200 dark:border-slate-600 dark:text-slate-200">Gruppe</th>
+                          <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Soll</th>
+                          <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Ist</th>
+                          <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Über/Unter</th>
+                          <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Schichten</th>
+                          <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Krank</th>
+                          <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Urlaub</th>
+                          <th className="px-3 py-2 text-center border border-gray-200 dark:border-slate-600 dark:text-slate-200 min-w-[240px]">Monats-Verlauf (Ist-Std)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {yrData.employees.map((e, i) => {
+                          const maxEmpMonth = Math.max(...e.monthly_hours, 1);
+                          return (
+                            <tr key={e.employee_id} className={`${i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-gray-50 dark:bg-slate-700/50'} hover:bg-blue-50 dark:hover:bg-slate-600/50 transition-colors`}>
+                              <td className="sticky left-0 bg-inherit px-3 py-1.5 border border-gray-100 dark:border-slate-700 font-medium whitespace-nowrap">{e.name}</td>
+                              <td className="px-3 py-1.5 border border-gray-100 dark:border-slate-700 text-gray-500 dark:text-slate-400 text-xs">{e.group}</td>
+                              <td className="px-3 py-1.5 border border-gray-100 dark:border-slate-700 text-right text-gray-600 dark:text-slate-300">{e.target_hours.toFixed(0)}h</td>
+                              <td className="px-3 py-1.5 border border-gray-100 dark:border-slate-700 text-right font-semibold text-blue-700">{e.actual_hours.toFixed(0)}h</td>
+                              <td className="px-3 py-1.5 border border-gray-100 dark:border-slate-700 text-right">
+                                <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${e.overtime >= 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                  {e.overtime >= 0 ? '+' : ''}{e.overtime.toFixed(0)}h
+                                </span>
+                              </td>
+                              <td className="px-3 py-1.5 border border-gray-100 dark:border-slate-700 text-right text-gray-600 dark:text-slate-300">{e.shifts_count}</td>
+                              <td className="px-3 py-1.5 border border-gray-100 dark:border-slate-700 text-right">
+                                {e.sick_days > 0 ? (
+                                  <span className="px-1.5 py-0.5 bg-red-100 text-red-700 rounded text-xs font-semibold">{e.sick_days}</span>
+                                ) : <span className="text-gray-300 dark:text-slate-600">—</span>}
+                              </td>
+                              <td className="px-3 py-1.5 border border-gray-100 dark:border-slate-700 text-right">
+                                {e.vacation_days > 0 ? (
+                                  <span className="px-1.5 py-0.5 bg-sky-100 text-sky-700 rounded text-xs font-semibold">{e.vacation_days}</span>
+                                ) : <span className="text-gray-300 dark:text-slate-600">—</span>}
+                              </td>
+                              <td className="px-3 py-1.5 border border-gray-100 dark:border-slate-700">
+                                {/* Mini sparkline */}
+                                <div className="flex items-end gap-px h-5">
+                                  {e.monthly_hours.map((h, mi) => {
+                                    const pct = maxEmpMonth > 0 ? Math.round((h / maxEmpMonth) * 100) : 0;
+                                    return (
+                                      <div
+                                        key={mi}
+                                        className="flex-1 bg-blue-400 dark:bg-blue-500 rounded-t hover:bg-blue-600 transition-colors"
+                                        style={{ height: `${pct}%`, minHeight: h > 0 ? 2 : 0 }}
+                                        title={`${monthShort[mi]}: ${h.toFixed(1)}h`}
+                                      />
+                                    );
+                                  })}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                      <tfoot>
+                        <tr className="bg-slate-100 dark:bg-slate-700 font-bold border-t-2 border-gray-300 dark:border-slate-600 text-sm">
+                          <td className="sticky left-0 bg-slate-100 dark:bg-slate-700 px-3 py-2 border border-gray-200 dark:border-slate-600">Gesamt</td>
+                          <td className="px-3 py-2 border border-gray-200 dark:border-slate-600"></td>
+                          <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right">{totals.target_hours.toFixed(0)}h</td>
+                          <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right text-blue-700">{totals.actual_hours.toFixed(0)}h</td>
+                          <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right">
+                            <span className={totals.overtime >= 0 ? 'text-green-700' : 'text-red-700'}>
+                              {totals.overtime >= 0 ? '+' : ''}{totals.overtime.toFixed(0)}h
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right">{totals.shifts_count}</td>
+                          <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right text-red-700">{totals.sick_days}</td>
+                          <td className="px-3 py-2 border border-gray-200 dark:border-slate-600 text-right text-sky-700">{totals.vacation_days}</td>
+                          <td className="px-3 py-2 border border-gray-200 dark:border-slate-600"></td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>

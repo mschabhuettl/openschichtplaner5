@@ -887,6 +887,50 @@ export interface ShiftStatisticsData {
   category_totals: Record<string, number>;
 }
 
+// ─── Year Summary (Jahresrückblick) ─────────────────────────
+export interface YearSummaryMonth {
+  month: number;
+  actual_hours: number;
+  target_hours: number;
+  absence_days: number;
+  vacation_days: number;
+  sick_days: number;
+  shifts_count: number;
+  employee_count: number;
+  overtime: number;
+}
+
+export interface YearSummaryEmployee {
+  employee_id: number;
+  name: string;
+  group: string;
+  actual_hours: number;
+  target_hours: number;
+  absence_days: number;
+  vacation_days: number;
+  sick_days: number;
+  shifts_count: number;
+  overtime: number;
+  monthly_hours: number[];
+}
+
+export interface YearSummaryTotals {
+  actual_hours: number;
+  target_hours: number;
+  absence_days: number;
+  vacation_days: number;
+  sick_days: number;
+  shifts_count: number;
+  overtime: number;
+}
+
+export interface YearSummaryData {
+  year: number;
+  monthly: YearSummaryMonth[];
+  employees: YearSummaryEmployee[];
+  totals: YearSummaryTotals;
+}
+
 // ─── Schedule Templates ─────────────────────────────────────
 export interface TemplateAssignment {
   employee_id: number;
@@ -1512,7 +1556,7 @@ export const api = {
     fetchJSON<ShiftStatisticsData>(`/api/statistics/shifts?year=${year}&months=${months}${groupId ? `&group_id=${groupId}` : ''}`),
 
   getYearSummary: (year: number, groupId?: number | null) =>
-    fetchJSON<unknown>(`/api/statistics/year-summary?year=${year}${groupId ? `&group_id=${groupId}` : ''}`),
+    fetchJSON<YearSummaryData>(`/api/statistics/year-summary?year=${year}${groupId ? `&group_id=${groupId}` : ''}`),
 
   // ─── Schedule Templates (Schicht-Vorlagen) ─────────────────
   getScheduleTemplates: () =>

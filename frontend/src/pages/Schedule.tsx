@@ -1994,7 +1994,16 @@ export default function Schedule() {
   const [swapDateTo, setSwapDateTo] = useState<string>('');
   const [swapLoading, setSwapLoading] = useState(false);
 
-// Auto-Plan modal state
+// Bulk Group Assignment modal state
+  const [showBulkGroup, setShowBulkGroup] = useState(false);
+  const [bulkGroupId, setBulkGroupId] = useState<number | ''>('');
+  const [bulkGroupShiftId, setBulkGroupShiftId] = useState<number | ''>('');
+  const [bulkGroupDateFrom, setBulkGroupDateFrom] = useState('');
+  const [bulkGroupDateTo, setBulkGroupDateTo] = useState('');
+  const [bulkGroupOverwrite, setBulkGroupOverwrite] = useState(true);
+  const [bulkGroupLoading, setBulkGroupLoading] = useState(false);
+
+  // Auto-Plan modal state
   const [showAutoPlan, setShowAutoPlan] = useState(false);
   const [autoPlanForce, setAutoPlanForce] = useState(false);
   const [autoPlanRespectRestrictions, setAutoPlanRespectRestrictions] = useState(true);
@@ -2743,6 +2752,29 @@ export default function Schedule() {
   };
 
   // ── Bulk operation handlers ─────────────────────────────────
+  const handleBulkGroupAssign = async () => {
+    if (bulkGroupId === '' || bulkGroupShiftId === '' || !bulkGroupDateFrom || !bulkGroupDateTo) return;
+    setBulkGroupLoading(true);
+    try {
+      const result = await api.bulkGroupAssign({
+        group_id: Number(bulkGroupId),
+        shift_id: Number(bulkGroupShiftId),
+        date_from: bulkGroupDateFrom,
+        date_to: bulkGroupDateTo,
+        overwrite: bulkGroupOverwrite,
+      });
+      showToast(
+        `✅ Gruppenzuweisung: ${result.created} erstellt, ${result.updated} aktualisiert (${result.employees} MA × ${result.days} Tage)`,
+        'success',
+      );
+      loadSchedule();
+      setShowBulkGroup(false);
+    } catch (e) {
+      showToast('Fehler: ' + (e as Error).message, 'error');
+    }
+    setBulkGroupLoading(false);
+  };
+
   const handleBulkAssignShift = async (shiftId: number) => {
     const cells = getSelectedCells();
     if (cells.length === 0) return;
@@ -3557,6 +3589,100 @@ export default function Schedule() {
         </div>
       )}
 
+      {/* ── Gruppenzuweisung Modal ─────────────────────────────── */}
+      {showBulkGroup && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn"
+          onClick={e => { if (e.target === e.currentTarget) setShowBulkGroup(false); }}
+        >
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-scaleIn w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">👥 Gruppenzuweisung</h2>
+              <button onClick={() => setShowBulkGroup(false)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+            </div>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+              Eine Schicht auf alle Mitglieder einer Gruppe für einen Zeitraum zuweisen.
+            </p>
+
+            {/* Group select */}
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Gruppe</label>
+            <select
+              value={bulkGroupId}
+              onChange={e => setBulkGroupId(e.target.value ? Number(e.target.value) : '')}
+              className="w-full border rounded px-3 py-2 mb-3 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            >
+              <option value="">— Gruppe wählen —</option>
+              {groups.map(g => (
+                <option key={g.ID} value={g.ID}>{g.NAME} ({g.member_count ?? '?'} MA)</option>
+              ))}
+            </select>
+
+            {/* Shift select */}
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Schicht</label>
+            <select
+              value={bulkGroupShiftId}
+              onChange={e => setBulkGroupShiftId(e.target.value ? Number(e.target.value) : '')}
+              className="w-full border rounded px-3 py-2 mb-3 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            >
+              <option value="">— Schicht wählen —</option>
+              {shifts.map(s => (
+                <option key={s.ID} value={s.ID}>{s.SHORTNAME} – {s.NAME}</option>
+              ))}
+            </select>
+
+            {/* Date range */}
+            <div className="grid grid-cols-2 gap-3 mb-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Von</label>
+                <input
+                  type="date"
+                  value={bulkGroupDateFrom}
+                  onChange={e => setBulkGroupDateFrom(e.target.value)}
+                  className="w-full border rounded px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Bis</label>
+                <input
+                  type="date"
+                  value={bulkGroupDateTo}
+                  onChange={e => setBulkGroupDateTo(e.target.value)}
+                  className="w-full border rounded px-3 py-2 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                />
+              </div>
+            </div>
+
+            {/* Overwrite toggle */}
+            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 mb-4 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={bulkGroupOverwrite}
+                onChange={e => setBulkGroupOverwrite(e.target.checked)}
+                className="rounded"
+              />
+              Bestehende Einträge überschreiben
+            </label>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowBulkGroup(false)}
+                className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleBulkGroupAssign}
+                disabled={bulkGroupLoading || bulkGroupId === '' || bulkGroupShiftId === '' || !bulkGroupDateFrom || !bulkGroupDateTo}
+                className="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white rounded font-medium flex items-center gap-1"
+              >
+                {bulkGroupLoading ? '⏳ Wird zugewiesen...' : '👥 Zuweisen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Wochenvorlagen Modal ──────────────────────────────── */}
       {showWeekTemplates && (
         <WeekTemplateModal
@@ -4282,6 +4408,22 @@ export default function Schedule() {
             title="Wochenmuster als Vorlage speichern und auf diesen Monat anwenden"
           >
             📐 <span className="hidden sm:inline">Vorlagen</span>
+          </button>
+
+          {/* Gruppenzuweisung button */}
+          <button
+            onClick={() => {
+              // Pre-fill date range to current month
+              const pad2 = (n: number) => String(n).padStart(2, '0');
+              const daysInMonth = new Date(year, month, 0).getDate();
+              setBulkGroupDateFrom(`${year}-${pad2(month)}-01`);
+              setBulkGroupDateTo(`${year}-${pad2(month)}-${pad2(daysInMonth)}`);
+              setShowBulkGroup(true);
+            }}
+            className="px-2 sm:px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            title="Schicht für eine ganze Gruppe auf einen Zeitraum zuweisen"
+          >
+            👥 <span className="hidden sm:inline">Gruppenzuweisung</span>
           </button>
 
           {/* Auto-Planen button */}

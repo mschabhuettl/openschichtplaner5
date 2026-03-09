@@ -1020,6 +1020,18 @@ export const api = {
     { entries, overwrite },
   ),
 
+  bulkGroupAssign: (params: {
+    group_id?: number;
+    employee_ids?: number[];
+    shift_id: number;
+    date_from: string;
+    date_to: string;
+    overwrite?: boolean;
+  }) => postJSON<{ created: number; updated: number; skipped: number; employees: number; days: number; total_assignments: number }>(
+    '/api/schedule/bulk-group',
+    params,
+  ),
+
   generateSchedule: (params: {
     year: number;
     month: number;

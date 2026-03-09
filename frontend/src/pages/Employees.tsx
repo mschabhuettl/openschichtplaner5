@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
+import { useSSERefresh } from '../contexts/SSEContext';
 import type { Restriction } from '../api/client';
 import { SkeletonTable } from '../components/Skeleton';
 import type { Employee, ShiftType } from '../types';
@@ -371,6 +372,9 @@ export default function Employees() {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, []); // nur beim Mount ausführen
+
+  // Real-time SSE refresh
+  useSSERefresh(['employee_changed'], load);
 
   // Load groups and group assignments for filter
   useEffect(() => {

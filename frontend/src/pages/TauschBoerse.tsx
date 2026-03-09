@@ -3,6 +3,7 @@ import { api } from '../api/client';
 import type { SwapRequest } from '../api/client';
 import type { Employee, ShiftType } from '../types';
 import { useConfirm } from '../hooks/useConfirm';
+import { useSSERefresh } from '../contexts/SSEContext';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -377,6 +378,9 @@ export default function TauschBoerse() {
   }, [statusFilter]);
 
   useEffect(() => { load(); }, [load]);
+
+  // Real-time SSE refresh
+  useSSERefresh(['swap_changed', 'schedule_changed'], load);
 
   const flash = (msg: string) => {
     setActionMsg(msg);

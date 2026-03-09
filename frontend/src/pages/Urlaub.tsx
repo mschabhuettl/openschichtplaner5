@@ -3,6 +3,7 @@ import { useDebounce } from '../hooks/useDebounce';
 import { api } from '../api/client';
 import type { Employee, LeaveType, Group } from '../types';
 import { useToast } from '../hooks/useToast';
+import { useSSERefresh } from '../contexts/SSEContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -1960,6 +1961,9 @@ export default function Urlaub() {
   }, [showToast]);
 
   useEffect(() => { loadAbsences(); }, [loadAbsences]);
+
+  // Real-time SSE refresh
+  useSSERefresh(['absence_changed', 'employee_changed'], loadAbsences);
 
   const tabs: { id: UrlaubTab; label: string; icon: string }[] = [
     { id: 'antraege', label: 'Anträge', icon: '✅' },

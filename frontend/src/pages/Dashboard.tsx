@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from '../api/client';
 import { useT } from '../i18n/context';
+import { useSSERefresh } from '../contexts/SSEContext';
 import { HelpTooltip } from '../components/HelpTooltip';
 import type {
   DashboardSummary,
@@ -1225,6 +1226,10 @@ export default function Dashboard() {
   useEffect(() => {
     fetchAll(false);
   }, [fetchAll]);
+
+  // Real-time SSE refresh (silent)
+  const silentRefresh = useCallback(() => fetchAll(true), [fetchAll]);
+  useSSERefresh(['schedule_changed', 'absence_changed', 'employee_changed', 'swap_changed', 'notification_changed'], silentRefresh);
 
   // Auto-refresh every 5 minutes
   useEffect(() => {

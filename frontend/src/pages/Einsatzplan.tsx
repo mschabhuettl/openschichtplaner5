@@ -1,6 +1,7 @@
 import { usePermissions } from '../hooks/usePermissions';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { api } from '../api/client';
+import { useSSERefresh } from '../contexts/SSEContext';
 import type { DayEntry, Note, ScheduleTemplate } from '../api/client';
 import type { Group, ShiftType, Workplace } from '../types';
 import { useToast } from '../hooks/useToast';
@@ -1154,6 +1155,9 @@ export default function Einsatzplan() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Real-time SSE refresh
+  useSSERefresh(['schedule_changed', 'absence_changed', 'employee_changed', 'note_added', 'note_updated', 'note_deleted'], loadData);
 
   const reloadDayNotes = () => {
     const dateStr = toIsoDate(selectedDate);

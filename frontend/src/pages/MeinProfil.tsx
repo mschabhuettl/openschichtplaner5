@@ -364,9 +364,25 @@ export default function MeinProfil() {
 
       {/* Upcoming shifts */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-          <span className="text-xl">📅</span>
-          <h2 className="font-semibold text-gray-800">Meine Schichten</h2>
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">📅</span>
+            <h2 className="font-semibold text-gray-800">Meine Schichten</h2>
+          </div>
+          <button
+            onClick={async () => {
+              try {
+                const now = new Date();
+                await api.downloadIcal(now.getFullYear(), now.getMonth() + 1);
+              } catch {
+                // silently fail — download error
+              }
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
+            title="Schichtplan als iCal-Datei herunterladen (für Google Calendar, Apple Calendar, Outlook)"
+          >
+            <span>📥</span> iCal Export
+          </button>
         </div>
         <div className="p-5 space-y-5">
           {monthsData.map(md => (

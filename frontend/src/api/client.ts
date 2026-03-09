@@ -389,6 +389,19 @@ export interface Period {
   description: string;
 }
 
+// ─── Notification Types ───────────────────────────────────
+export interface NotificationItem {
+  id: number;
+  type: string;
+  title: string;
+  message: string;
+  employee_id: number | null;
+  recipient_employee_id: number | null;
+  link: string | null;
+  read: boolean;
+  created_at: string;
+}
+
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 // ─── API Compatibility Check ───────────────────────────────────
@@ -1592,4 +1605,163 @@ export const api = {
     leave_type_id: number;
     note?: string;
   }) => postJSON<{ id: number; employee_id: number; date: string; leave_type_id: number }>('/api/self/absences', body),
+
+  // ─── Notifications ─────────────────────────────────────────
+  getNotifications: (params: { employee_id?: number; unread_only?: boolean } = {}) => {
+    const q = new URLSearchParams();
+    if (params.employee_id != null) q.set('employee_id', String(params.employee_id));
+    if (params.unread_only) q.set('unread_only', 'true');
+    const qs = q.toString();
+    return fetchJSON<{ notifications: NotificationItem[] }>(`/api/notifications${qs ? `?${qs}` : ''}`);
+  },
+  getAllNotifications: (employeeId: number) =>
+    fetchJSON<{ notifications: NotificationItem[] }>(`/api/notifications/all?employee_id=${employeeId}`),
+  markNotificationRead: (id: number) =>
+    patchJSON<{ ok: boolean }>(`/api/notifications/${id}/read`, {}),
+  markAllNotificationsRead: (employeeId?: number) => {
+    const qs = employeeId != null ? `?employee_id=${employeeId}` : '';
+    return patchJSON<{ ok: boolean; updated: number }>(`/api/notifications/read-all${qs}`, {});
+  },
+  deleteNotification: (id: number) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/notifications/${id}`),
+
+  // ─── Warnings ──────────────────────────────────────────────
+  getWarnings: (year: number, month: number) =>
+    fetchJSON<unknown>(`/api/warnings?year=${year}&month=${month}`),
+
+  // ─── Quality Report ────────────────────────────────────────
+  getQualityReport: (year: number, month: number) =>
+    fetchJSON<unknown>(`/api/quality-report?year=${year}&month=${month}`),
+
+  // ─── Fairness Score ────────────────────────────────────────
+  getFairnessScore: (year: number, month?: number, groupId?: number) => {
+    const p = new URLSearchParams({ year: String(year) });
+    if (month != null) p.set('month', String(month));
+    if (groupId != null) p.set('group_id', String(groupId));
+    return fetchJSON<unknown>(`/api/fairness?${p}`);
+  },
+
+  // ─── Capacity Forecast ─────────────────────────────────────
+  getCapacityForecast: (params: Record<string, string>) =>
+    fetchJSON<unknown>(`/api/capacity-forecast?${new URLSearchParams(params)}`),
+  getCapacityYear: (params: Record<string, string>) =>
+    fetchJSON<unknown>(`/api/capacity-year?${new URLSearchParams(params)}`),
+
+  // ─── Skills / Kompetenz Matrix ─────────────────────────────
+  getSkillsMatrix: () => fetchJSON<unknown>('/api/skills/matrix'),
+  getSkills: () => fetchJSON<unknown[]>('/api/skills'),
+  createSkill: (data: { name: string; description?: string; category?: string }) =>
+    postJSON<unknown>('/api/skills', data),
+  updateSkill: (id: string, data: { name?: string; description?: string; category?: string }) =>
+    putJSON<unknown>(`/api/skills/${id}`, data),
+  deleteSkill: (id: string) =>
+    deleteReq<unknown>(`/api/skills/${id}`),
+  createSkillAssignment: (data: { employee_id: number; skill_id: string; level: number }) =>
+    postJSON<unknown>('/api/skills/assignments', data),
+  deleteSkillAssignment: (id: string) =>
+    deleteReq<unknown>(`/api/skills/assignments/${id}`),
+
+  // ─── Simulation ────────────────────────────────────────────
+  runSimulation: (data: unknown) =>
+    postJSON<unknown>('/api/simulation', data),
+
+  // ─── Handover / Übergabe ───────────────────────────────────
+  getHandover: (params: { date?: string; shift_id?: number } = {}) => {
+    const q = new URLSearchParams();
+    if (params.date) q.set('date', params.date);
+    if (params.shift_id != null) q.set('shift_id', String(params.shift_id));
+    const qs = q.toString();
+    return fetchJSON<unknown[]>(`/api/handover${qs ? `?${qs}` : ''}`);
+  },
+  createHandover: (data: { date: string; shift_id: number; text: string; author?: string }) =>
+    postJSON<unknown>('/api/handover', data),
+  updateHandover: (id: number, data: Record<string, unknown>) =>
+    patchJSON<unknown>(`/api/handover/${id}`, data),
+  deleteHandover: (id: number) =>
+    deleteReq<unknown>(`/api/handover/${id}`),
+
+  // ─── Leave Balance ─────────────────────────────────────────
+  getLeaveBalance: (year: number, employeeId: number) =>
+    fetchJSON<unknown>(`/api/leave-balance?year=${year}&employee_id=${employeeId}`),
+  getLeaveBalanceGroup: (year: number, groupId: number) =>
+    fetchJSON<unknown>(`/api/leave-balance/group?year=${year}&group_id=${groupId}`),
+
+  // ─── Holiday Bans Write ────────────────────────────────────
+  createHolidayBan: (data: { group_id: number; start_date: string; end_date: string; restrict?: number; reason?: string }) =>
+    postJSON<unknown>('/api/holiday-bans', data),
+  deleteHolidayBan: (id: number) =>
+    deleteReq<unknown>(`/api/holiday-bans/${id}`),
+
+  // ─── Absence Status ────────────────────────────────────────
+  setAbsenceStatus: (absenceId: number, data: { status: string; reject_reason?: string }) =>
+    putJSON<unknown>(`/api/absences/${absenceId}/status`, data),
+
+  // ─── Leave Entitlements Write ──────────────────────────────
+  createLeaveEntitlement: (data: { employee_id: number; year: number; leave_type_id: number; entitlement: number; carry_forward?: number }) =>
+    postJSON<unknown>('/api/leave-entitlements', data),
+
+  // ─── Admin: Compact / Import ───────────────────────────────
+  compactData: () =>
+    postJSON<unknown>('/api/admin/compact', {}),
+
+  importData: async (endpoint: string, file: File): Promise<unknown> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await safeFetch(`${BASE_URL}${endpoint}`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: formData,
+    });
+    await handleResponseError(res);
+    return res.json();
+  },
+
+  // ─── Druckvorschau (generic fetch for report pages) ────────
+  fetchReportData: <T>(path: string) => fetchJSON<T>(path),
+
+  // ─── Download with auth (for backup downloads etc.) ────────
+  downloadWithAuth: async (url: string): Promise<Blob> => {
+    const res = await safeFetch(url, { headers: authHeaders() });
+    await handleResponseError(res);
+    return res.blob();
+  },
+
+  // ─── Error Reporting ───────────────────────────────────────
+  reportError: (data: { message: string; stack?: string; component?: string }) =>
+    postJSON<unknown>('/api/errors', data),
+
+  // ─── iCal Export ───────────────────────────────────────────
+  downloadIcal: async (year: number, month: number): Promise<void> => {
+    const res = await safeFetch(
+      `${BASE_URL}/api/ical/my-schedule.ics?year=${year}&month=${month}`,
+      { headers: authHeaders() },
+    );
+    await handleResponseError(res);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `schichtplan-${year}-${String(month).padStart(2, '0')}.ics`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
+
+  downloadEmployeeIcal: async (employeeId: number, year: number, month: number): Promise<void> => {
+    const res = await safeFetch(
+      `${BASE_URL}/api/ical/schedule/${employeeId}.ics?year=${year}&month=${month}`,
+      { headers: authHeaders() },
+    );
+    await handleResponseError(res);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `schichtplan-${employeeId}-${year}-${String(month).padStart(2, '0')}.ics`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  },
 };

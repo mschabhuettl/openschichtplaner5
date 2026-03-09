@@ -38,7 +38,7 @@ export function BottomNav() {
             onClick={() => navigate(item.path)}
             aria-current={active ? 'page' : undefined}
             aria-label={item.label}
-            className={`flex-1 flex flex-col items-center justify-center py-2 gap-0.5 min-h-[56px] transition-colors ${
+            className={`relative flex-1 flex flex-col items-center justify-center py-2 gap-0.5 min-h-[56px] transition-colors ${
               active
                 ? 'text-blue-400'
                 : 'text-slate-400 hover:text-slate-200 active:bg-slate-700'

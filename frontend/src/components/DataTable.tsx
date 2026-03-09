@@ -131,14 +131,14 @@ export function DataTable<T>({
               value={query}
               onChange={e => { setQuery(e.target.value); setPage(1); }}
               placeholder={searchPlaceholder}
-              className="border border-gray-300 dark:border-slate-600 rounded px-2 py-1 text-sm flex-1 min-w-[180px] focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-slate-700 dark:text-gray-200 dark:placeholder-gray-400"
+              className="border border-gray-300 dark:border-slate-600 rounded px-3 py-2 text-sm flex-1 min-w-[180px] min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-300 dark:bg-slate-700 dark:text-gray-200 dark:placeholder-gray-400"
             />
           )}
           {paginationEnabled && (
             <select
               value={pageSize}
               onChange={e => { setPageSize(Number(e.target.value)); setPage(1); }}
-              className="border border-gray-300 rounded px-2 py-1 text-sm"
+              className="border border-gray-300 dark:border-slate-600 rounded px-2 py-2 text-sm min-h-[44px] dark:bg-slate-700 dark:text-gray-200"
             >
               {pageSizes.map(s => <option key={s} value={s}>{s} / Seite</option>)}
             </select>
@@ -189,33 +189,33 @@ export function DataTable<T>({
 
       {/* Pagination */}
       {paginationEnabled && totalPages > 1 && (
-        <div className="flex items-center gap-1 justify-end text-sm">
+        <div className="flex items-center gap-1 justify-end text-sm flex-wrap">
           <button
             onClick={() => setPage(1)}
             disabled={safePage === 1}
             aria-label="Erste Seite"
-            className="px-2 py-1 rounded border border-gray-200 disabled:opacity-30 hover:bg-gray-100"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded border border-gray-200 dark:border-slate-600 disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-slate-700 dark:text-gray-300"
           >«</button>
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={safePage === 1}
             aria-label="Vorherige Seite"
-            className="px-2 py-1 rounded border border-gray-200 disabled:opacity-30 hover:bg-gray-100"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded border border-gray-200 dark:border-slate-600 disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-slate-700 dark:text-gray-300"
           >‹</button>
-          <span className="px-3 text-gray-600">
+          <span className="px-3 text-gray-600 dark:text-gray-400 min-h-[44px] flex items-center">
             Seite {safePage} / {totalPages}
           </span>
           <button
             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             disabled={safePage === totalPages}
             aria-label="Nächste Seite"
-            className="px-2 py-1 rounded border border-gray-200 disabled:opacity-30 hover:bg-gray-100"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded border border-gray-200 dark:border-slate-600 disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-slate-700 dark:text-gray-300"
           >›</button>
           <button
             onClick={() => setPage(totalPages)}
             disabled={safePage === totalPages}
             aria-label="Letzte Seite"
-            className="px-2 py-1 rounded border border-gray-200 disabled:opacity-30 hover:bg-gray-100"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded border border-gray-200 dark:border-slate-600 disabled:opacity-30 hover:bg-gray-100 dark:hover:bg-slate-700 dark:text-gray-300"
           >»</button>
         </div>
       )}

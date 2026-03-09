@@ -591,7 +591,7 @@ function AppInner() {
             onClick={() => setSpotlightOpen(true)}
             title="Schnellsuche (Ctrl+K)"
             aria-label="Schnellsuche öffnen"
-            className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors"
+            className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors min-w-[36px] min-h-[36px] md:min-w-0 md:min-h-0 flex items-center justify-center"
           >
             🔍
           </button>
@@ -600,7 +600,7 @@ function AppInner() {
             onClick={() => setShortcutsOpen(true)}
             title="Keyboard-Shortcuts anzeigen (?)"
             aria-label="Keyboard-Shortcuts anzeigen"
-            className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors text-sm font-bold leading-none"
+            className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors text-sm font-bold leading-none min-w-[36px] min-h-[36px] md:min-w-0 md:min-h-0 flex items-center justify-center"
           >
             ?
           </button>
@@ -609,7 +609,7 @@ function AppInner() {
             onClick={() => setQuickHelpOpen(true)}
             title="Erste Schritte anzeigen"
             aria-label="Erste Schritte anzeigen"
-            className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors text-sm leading-none"
+            className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors text-sm leading-none min-w-[36px] min-h-[36px] md:min-w-0 md:min-h-0 flex items-center justify-center"
           >
             📖
           </button>
@@ -618,13 +618,13 @@ function AppInner() {
             onClick={startTour}
             title="Geführte Tour starten"
             aria-label="Geführte Tour starten"
-            className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors text-sm leading-none"
+            className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors text-sm leading-none min-w-[36px] min-h-[36px] md:min-w-0 md:min-h-0 flex items-center justify-center"
           >
             🧭
           </button>
           {/* Close button — only visible on mobile */}
           <button
-            className="md:hidden text-slate-400 hover:text-white p-1"
+            className="md:hidden text-slate-400 hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center rounded hover:bg-slate-700 transition-colors"
             onClick={() => setSidebarOpen(false)}
             aria-label="Menü schließen"
           >

@@ -7,10 +7,13 @@ import { api } from '../api/client';
 interface ChangelogEntry {
   timestamp: string;
   user: string;
+  user_id?: number;
   action: 'CREATE' | 'UPDATE' | 'DELETE' | string;
   entity: string;
   entity_id: number;
   details: string;
+  old_value?: Record<string, unknown> | string | null;
+  new_value?: Record<string, unknown> | string | null;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -88,6 +91,7 @@ export default function AuditLog() {
       const data = await api.getChangelog({
         limit,
         user: filterUser || undefined,
+        entity_type: filterEntity || undefined,
         date_from: dateFrom || undefined,
         date_to: dateTo || undefined,
       });
@@ -97,7 +101,7 @@ export default function AuditLog() {
     } finally {
       setLoading(false);
     }
-  }, [limit, filterUser, dateFrom, dateTo]);
+  }, [limit, filterUser, filterEntity, dateFrom, dateTo]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -374,13 +378,38 @@ export default function AuditLog() {
                 </td>
 
                 {/* Details */}
-                <td style={{ padding: '0.6rem 1rem', color: '#6b7280', maxWidth: '320px' }}>
+                <td style={{ padding: '0.6rem 1rem', color: '#6b7280', maxWidth: '400px' }}>
                   <span title={e.details} style={{
                     display: 'block', overflow: 'hidden',
                     textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
                     {e.details || <em style={{ color: '#d1d5db' }}>–</em>}
                   </span>
+                  {(e.old_value || e.new_value) && (
+                    <details style={{ marginTop: '0.25rem', fontSize: '0.78rem' }}>
+                      <summary style={{ cursor: 'pointer', color: '#3b82f6', userSelect: 'none' }}>
+                        Änderungen anzeigen
+                      </summary>
+                      <div style={{ marginTop: '0.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                        {e.old_value && (
+                          <div style={{ background: '#fef2f2', borderRadius: '6px', padding: '0.3rem 0.5rem', border: '1px solid #fecaca', maxWidth: '180px', overflow: 'auto' }}>
+                            <strong style={{ color: '#dc2626', fontSize: '0.72rem' }}>Vorher:</strong>
+                            <pre style={{ margin: 0, fontSize: '0.72rem', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                              {typeof e.old_value === 'string' ? e.old_value : JSON.stringify(e.old_value, null, 1)}
+                            </pre>
+                          </div>
+                        )}
+                        {e.new_value && (
+                          <div style={{ background: '#f0fdf4', borderRadius: '6px', padding: '0.3rem 0.5rem', border: '1px solid #bbf7d0', maxWidth: '180px', overflow: 'auto' }}>
+                            <strong style={{ color: '#16a34a', fontSize: '0.72rem' }}>Nachher:</strong>
+                            <pre style={{ margin: 0, fontSize: '0.72rem', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                              {typeof e.new_value === 'string' ? e.new_value : JSON.stringify(e.new_value, null, 1)}
+                            </pre>
+                          </div>
+                        )}
+                      </div>
+                    </details>
+                  )}
                 </td>
               </tr>
             ))}

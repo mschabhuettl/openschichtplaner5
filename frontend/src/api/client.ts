@@ -1410,12 +1410,14 @@ export const api = {
   getChangelog: (params: {
     limit?: number;
     user?: string;
+    entity_type?: string;
     date_from?: string;
     date_to?: string;
   } = {}) => {
     const qs = new URLSearchParams();
     if (params.limit) qs.set('limit', String(params.limit));
     if (params.user) qs.set('user', params.user);
+    if (params.entity_type) qs.set('entity_type', params.entity_type);
     if (params.date_from) qs.set('date_from', params.date_from);
     if (params.date_to) qs.set('date_to', params.date_to);
     const q = qs.toString();

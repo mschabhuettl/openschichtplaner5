@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SSEProvider, useSSEContext } from './contexts/SSEContext';
-import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider, useLanguage } from './i18n/context';
 import { ToastProvider } from './contexts/ToastContext';
 import { ToastContainer } from './components/Toast';
@@ -15,6 +15,7 @@ import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
 import { GuidedTour, useTour } from './components/GuidedTour';
 import { ErrorBoundary, PageErrorBoundary } from './components/ErrorBoundary';
 import { InstallBanner } from './components/InstallBanner';
+import { ThemeToggle } from './components/ThemeToggle';
 import { BottomNav } from './components/BottomNav';
 import { api, checkApiCompatibility } from './api/client';
 import { DevRoleSwitcher } from './components/DevRoleSwitcher';
@@ -376,7 +377,7 @@ function AppInner() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, isDevMode, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+
   const { language, setLanguage } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [conflictCount, setConflictCount] = useState(0);
@@ -698,16 +699,7 @@ function AppInner() {
             {language === 'de' ? '🇩🇪' : '🇬🇧'}
           </button>
           {/* Dark Mode Toggle */}
-          <button
-            onClick={toggleTheme}
-            title={isDark ? 'Hell-Modus aktivieren' : 'Dunkel-Modus aktivieren'}
-            aria-label={isDark ? 'Hell-Modus aktivieren' : 'Dunkel-Modus aktivieren'}
-            className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg
-                       text-slate-400 hover:text-white hover:bg-slate-600 transition-colors
-                       text-base leading-none"
-          >
-            {isDark ? '☀️' : '🌙'}
-          </button>
+          <ThemeToggle size="md" />
         </div>
         <button
           onClick={logout}
@@ -848,14 +840,7 @@ function AppInner() {
           >
             🔍
           </button>
-          <button
-            onClick={toggleTheme}
-            title={isDark ? 'Hell-Modus' : 'Dunkel-Modus'}
-            aria-label={isDark ? 'Hell-Modus aktivieren' : 'Dunkel-Modus aktivieren'}
-            className="hidden sm:flex items-center justify-center w-11 h-11 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors text-base flex-shrink-0"
-          >
-            {isDark ? '☀️' : '🌙'}
-          </button>
+          <ThemeToggle size="sm" />
         </header>
 
         <main id="main-content" className="flex-1 overflow-auto pb-14 md:pb-0">

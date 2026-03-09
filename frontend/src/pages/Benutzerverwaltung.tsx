@@ -774,6 +774,20 @@ export default function Benutzerverwaltung() {
     }
   };
 
+  // ── Reset Password (temp password) ──────────────────────────
+  const [resetResult, setResetResult] = useState<{ user: string; tempPw: string; emailSent: boolean } | null>(null);
+
+  const handleResetPassword = async (u: SP5User) => {
+    if (!confirm(`Passwort für "${u.NAME}" zurücksetzen?\n\nEin neues temporäres Passwort wird generiert.`)) return;
+    try {
+      const res = await api.resetUserPassword(u.ID);
+      setResetResult({ user: u.NAME, tempPw: res.temp_password, emailSent: res.email_sent });
+      showToast(`Passwort für ${u.NAME} zurückgesetzt ✓`, 'success');
+    } catch (e) {
+      showToast(`Fehler: ${e instanceof Error ? e.message : String(e)}`, 'error');
+    }
+  };
+
   // ── Permission Summary ──────────────────────────────────────
 
   const permSummary = (u: SP5User): string => {
@@ -919,6 +933,15 @@ export default function Benutzerverwaltung() {
                           title="Passwort ändern"
                         >
                           🔑 Passwort
+                        </button>
+                        )}
+                        {canAdmin && (
+                        <button
+                          onClick={() => handleResetPassword(u)}
+                          className="px-3 py-1.5 text-xs rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 font-medium transition-colors"
+                          title="Temporäres Passwort generieren"
+                        >
+                          🔄 Reset
                         </button>
                         )}
                         {canAdmin && (
@@ -1209,6 +1232,48 @@ export default function Benutzerverwaltung() {
                 className="px-5 py-2 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-white text-sm font-semibold rounded-lg transition-colors shadow"
               >
                 {pwSaving ? 'Speichere…' : '🔑 Passwort ändern'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Password Reset Result Modal ──────────────────────────── */}
+      {resetResult && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="p-6 space-y-4">
+              <h2 className="text-lg font-bold text-slate-800">🔄 Passwort zurückgesetzt</h2>
+              <p className="text-sm text-slate-600">
+                Das Passwort für <strong>{resetResult.user}</strong> wurde zurückgesetzt.
+              </p>
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+                <label className="block text-xs font-semibold text-slate-500 mb-1 uppercase tracking-wide">Temporäres Passwort</label>
+                <div className="flex items-center gap-2">
+                  <code className="text-lg font-mono font-bold text-blue-700 flex-1 select-all">{resetResult.tempPw}</code>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(resetResult.tempPw); showToast('Passwort kopiert', 'success'); }}
+                    className="px-3 py-1.5 text-xs rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium transition-colors"
+                  >
+                    📋 Kopieren
+                  </button>
+                </div>
+              </div>
+              {resetResult.emailSent ? (
+                <p className="text-xs text-green-600">✅ E-Mail mit dem temporären Passwort wurde versendet.</p>
+              ) : (
+                <p className="text-xs text-amber-600">⚠️ Keine E-Mail versendet (SMTP nicht konfiguriert oder keine E-Mail-Adresse hinterlegt). Bitte teilen Sie dem Mitarbeiter das Passwort persönlich mit.</p>
+              )}
+              <p className="text-xs text-slate-500">
+                Der Mitarbeiter sollte das Passwort nach dem nächsten Login unter &quot;Mein Profil&quot; ändern.
+              </p>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-100 flex justify-end bg-slate-50 rounded-b-2xl">
+              <button
+                onClick={() => setResetResult(null)}
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors shadow"
+              >
+                Schließen
               </button>
             </div>
           </div>

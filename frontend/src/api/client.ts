@@ -1363,6 +1363,14 @@ export const api = {
   changePassword: (userId: number, newPassword: string) =>
     postJSON<{ ok: boolean }>(`/api/users/${userId}/change-password`, { new_password: newPassword }),
 
+  // ─── Self-Service Password Change ─────────────────────────
+  changeOwnPassword: (oldPassword: string, newPassword: string) =>
+    postJSON<{ ok: boolean; sessions_revoked: number }>('/api/auth/change-password', { old_password: oldPassword, new_password: newPassword }),
+
+  // ─── Admin Password Reset (generates temp password) ───────
+  resetUserPassword: (userId: number) =>
+    postJSON<{ ok: boolean; temp_password: string; sessions_revoked: number; email_sent: boolean }>(`/api/users/${userId}/reset-password`, {}),
+
   // ─── Holiday Bans ─────────────────────────────────────────
   getHolidayBans: (groupId?: number) =>
     fetchJSON<{ id: number; group_id: number; group_name: string; start_date: string; end_date: string; restrict: number; reason: string }[]>(

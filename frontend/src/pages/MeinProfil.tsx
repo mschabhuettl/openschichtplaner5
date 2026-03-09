@@ -170,6 +170,16 @@ export default function MeinProfil() {
   const [absSubmitting, setAbsSubmitting] = useState(false);
   const [absMsg, setAbsMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
 
+  // Password change
+  const [showPwChange, setShowPwChange] = useState(false);
+  const [oldPw, setOldPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwMsg, setPwMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+  const [showOldPw, setShowOldPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+
   // iCal feed subscription
   const [icalToken, setIcalToken] = useState<string | null>(null);
   const [icalFeedUrl, setIcalFeedUrl] = useState<string | null>(null);
@@ -800,6 +810,99 @@ export default function MeinProfil() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* ── Passwort ändern ─────────────────────────────────────── */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <button
+          onClick={() => { setShowPwChange(v => !v); setPwMsg(null); }}
+          className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🔑</span>
+            <div className="text-left">
+              <h2 className="text-lg font-bold text-slate-800">Passwort ändern</h2>
+              <p className="text-xs text-slate-500">Eigenes Passwort ändern</p>
+            </div>
+          </div>
+          <span className={`text-gray-400 transition-transform ${showPwChange ? 'rotate-180' : ''}`}>▼</span>
+        </button>
+        {showPwChange && (
+          <div className="px-5 pb-5 space-y-4 border-t border-gray-100 pt-4">
+            {pwMsg && (
+              <div className={`p-3 rounded-lg text-sm ${pwMsg.type === 'ok' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                {pwMsg.text}
+              </div>
+            )}
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1 uppercase tracking-wide">Aktuelles Passwort *</label>
+              <div className="relative">
+                <input
+                  type={showOldPw ? 'text' : 'password'}
+                  value={oldPw}
+                  onChange={e => setOldPw(e.target.value)}
+                  placeholder="Aktuelles Passwort"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 pr-10"
+                />
+                <button type="button" onClick={() => setShowOldPw(v => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+                  aria-label={showOldPw ? 'Passwort verbergen' : 'Passwort anzeigen'}
+                >{showOldPw ? '🙈' : '👁️'}</button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1 uppercase tracking-wide">Neues Passwort *</label>
+              <div className="relative">
+                <input
+                  type={showNewPw ? 'text' : 'password'}
+                  value={newPw}
+                  onChange={e => setNewPw(e.target.value)}
+                  placeholder="Neues Passwort (mind. 8 Zeichen, 1 Großbuchstabe, 1 Ziffer)"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 pr-10"
+                />
+                <button type="button" onClick={() => setShowNewPw(v => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm"
+                  aria-label={showNewPw ? 'Passwort verbergen' : 'Passwort anzeigen'}
+                >{showNewPw ? '🙈' : '👁️'}</button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 mb-1 uppercase tracking-wide">Neues Passwort bestätigen *</label>
+              <input
+                type="password"
+                value={confirmPw}
+                onChange={e => setConfirmPw(e.target.value)}
+                placeholder="Neues Passwort wiederholen"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+              />
+              {confirmPw.length > 0 && newPw !== confirmPw && (
+                <p className="text-xs text-red-500 mt-1">Passwörter stimmen nicht überein</p>
+              )}
+            </div>
+            <button
+              disabled={pwSaving || !oldPw || !newPw || newPw !== confirmPw}
+              onClick={async () => {
+                setPwMsg(null);
+                if (newPw.length < 8) { setPwMsg({ type: 'err', text: 'Passwort muss mindestens 8 Zeichen lang sein.' }); return; }
+                if (newPw !== confirmPw) { setPwMsg({ type: 'err', text: 'Passwörter stimmen nicht überein.' }); return; }
+                setPwSaving(true);
+                try {
+                  await api.changeOwnPassword(oldPw, newPw);
+                  setPwMsg({ type: 'ok', text: 'Passwort erfolgreich geändert ✓' });
+                  setOldPw(''); setNewPw(''); setConfirmPw('');
+                } catch (err: unknown) {
+                  const msg = err instanceof Error ? err.message : 'Fehler beim Ändern des Passworts';
+                  setPwMsg({ type: 'err', text: msg });
+                } finally {
+                  setPwSaving(false);
+                }
+              }}
+              className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {pwSaving ? 'Speichere…' : '🔑 Passwort ändern'}
+            </button>
+          </div>
+        )}
       </div>
 
     </div>

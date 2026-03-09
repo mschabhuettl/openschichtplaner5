@@ -170,6 +170,13 @@ export default function MeinProfil() {
   const [absSubmitting, setAbsSubmitting] = useState(false);
   const [absMsg, setAbsMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
 
+  // iCal feed subscription
+  const [icalToken, setIcalToken] = useState<string | null>(null);
+  const [icalFeedUrl, setIcalFeedUrl] = useState<string | null>(null);
+  const [icalWebcalUrl, setIcalWebcalUrl] = useState<string | null>(null);
+  const [icalLoading, setIcalLoading] = useState(false);
+  const [icalCopied, setIcalCopied] = useState(false);
+
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -246,6 +253,14 @@ export default function MeinProfil() {
       try {
         const swaps = await api.getSwapRequests({ employee_id: eid });
         setMySwaps(swaps);
+      } catch { /* optional */ }
+
+      // iCal feed token
+      try {
+        const icalInfo = await api.getIcalToken();
+        setIcalToken(icalInfo.token);
+        setIcalFeedUrl(icalInfo.feed_url);
+        setIcalWebcalUrl(icalInfo.webcal_url);
       } catch { /* optional */ }
 
     } catch (err) {
@@ -401,6 +416,127 @@ export default function MeinProfil() {
               )}
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Kalender abonnieren */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
+          <span className="text-xl">📅</span>
+          <h2 className="font-semibold text-gray-800">Kalender abonnieren</h2>
+        </div>
+        <div className="p-5 space-y-3">
+          <p className="text-sm text-gray-600">
+            Abonniere deinen Schichtplan als Live-Kalender — Änderungen werden automatisch synchronisiert.
+          </p>
+
+          {icalToken && icalWebcalUrl ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={icalWebcalUrl}
+                  className="flex-1 text-xs font-mono bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-gray-700 select-all"
+                  onClick={(e) => (e.target as HTMLInputElement).select()}
+                />
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(icalWebcalUrl).then(() => {
+                      setIcalCopied(true);
+                      setTimeout(() => setIcalCopied(false), 2000);
+                    });
+                  }}
+                  className="px-3 py-2 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors whitespace-nowrap"
+                  title="Link kopieren"
+                >
+                  {icalCopied ? '✅ Kopiert!' : '📋 Kopieren'}
+                </button>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href={icalWebcalUrl}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                >
+                  📅 In Kalender-App öffnen
+                </a>
+                <a
+                  href={`https://calendar.google.com/calendar/r?cid=${encodeURIComponent(icalFeedUrl!)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  🔗 Google Calendar
+                </a>
+              </div>
+
+              <p className="text-xs text-gray-400">
+                Funktioniert mit Google Calendar, Apple Calendar, Outlook und allen Apps die iCal-Feeds unterstützen.
+                Der Feed zeigt automatisch den aktuellen + die nächsten 3 Monate.
+              </p>
+
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  onClick={async () => {
+                    setIcalLoading(true);
+                    try {
+                      const res = await api.createIcalToken();
+                      setIcalToken(res.token);
+                      setIcalFeedUrl(res.feed_url);
+                      setIcalWebcalUrl(res.webcal_url);
+                    } catch { /* ignore */ }
+                    setIcalLoading(false);
+                  }}
+                  disabled={icalLoading}
+                  className="text-xs text-orange-600 hover:text-orange-800 transition-colors"
+                  title="Neuen Link generieren (alter Link wird ungültig!)"
+                >
+                  🔄 Neuen Link generieren
+                </button>
+                <span className="text-xs text-gray-300">|</span>
+                <button
+                  onClick={async () => {
+                    setIcalLoading(true);
+                    try {
+                      await api.revokeIcalToken();
+                      setIcalToken(null);
+                      setIcalFeedUrl(null);
+                      setIcalWebcalUrl(null);
+                    } catch { /* ignore */ }
+                    setIcalLoading(false);
+                  }}
+                  disabled={icalLoading}
+                  className="text-xs text-red-500 hover:text-red-700 transition-colors"
+                  title="Link deaktivieren"
+                >
+                  🗑️ Link widerrufen
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={async () => {
+                setIcalLoading(true);
+                try {
+                  const res = await api.createIcalToken();
+                  setIcalToken(res.token);
+                  setIcalFeedUrl(res.feed_url);
+                  setIcalWebcalUrl(res.webcal_url);
+                } catch { /* ignore */ }
+                setIcalLoading(false);
+              }}
+              disabled={icalLoading}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
+            >
+              {icalLoading ? (
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <span>📅</span>
+              )}
+              Kalender-Abo erstellen
+            </button>
+          )}
         </div>
       </div>
 

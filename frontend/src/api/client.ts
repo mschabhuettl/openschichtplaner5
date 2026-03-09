@@ -1730,7 +1730,31 @@ export const api = {
   reportError: (data: { message: string; stack?: string; component?: string }) =>
     postJSON<unknown>('/api/errors', data),
 
-  // ─── iCal Export ───────────────────────────────────────────
+  // ─── iCal Export & Feed ─────────────────────────────────────
+  getIcalToken: async (): Promise<{ token: string | null; feed_url: string | null; webcal_url: string | null }> => {
+    const res = await safeFetch(`${BASE_URL}/api/ical/token`, { headers: authHeaders() });
+    await handleResponseError(res);
+    return res.json();
+  },
+
+  createIcalToken: async (): Promise<{ token: string; feed_url: string; webcal_url: string }> => {
+    const res = await safeFetch(`${BASE_URL}/api/ical/token`, {
+      method: 'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    });
+    await handleResponseError(res);
+    return res.json();
+  },
+
+  revokeIcalToken: async (): Promise<{ ok: boolean; message: string }> => {
+    const res = await safeFetch(`${BASE_URL}/api/ical/token`, {
+      method: 'DELETE',
+      headers: authHeaders(),
+    });
+    await handleResponseError(res);
+    return res.json();
+  },
+
   downloadIcal: async (year: number, month: number): Promise<void> => {
     const res = await safeFetch(
       `${BASE_URL}/api/ical/my-schedule.ics?year=${year}&month=${month}`,

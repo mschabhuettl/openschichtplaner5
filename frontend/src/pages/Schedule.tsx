@@ -11,6 +11,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { SkeletonGrid } from '../components/Skeleton';
+import ScheduleCalendar from '../components/ScheduleCalendar';
 
 // ── JS weekday → DB weekday (0=Mon..6=Sun) ────────────────────
 function jsWdToDbWd(jsWd: number): number {
@@ -1899,6 +1900,7 @@ export default function Schedule() {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [mobileWeekOffset, setMobileWeekOffset] = useState(0); // 0 = current/first week
   const [forceWeekView, setForceWeekView] = useState(false); // desktop week view toggle
+  const [viewMode, setViewMode] = useState<'table' | 'calendar'>('table'); // table grid vs calendar month overview
 
   // Multi-group selection (empty = all groups)
   const [selectedGroupIds, setSelectedGroupIds] = useState<number[]>(() => {
@@ -4306,17 +4308,46 @@ export default function Schedule() {
           <button aria-label="Nächster Monat" onClick={nextMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] min-w-[44px]">›</button>
         </div>
 
-        {/* Desktop week view toggle */}
+        {/* Desktop view toggle: Tabelle / Woche / Kalender */}
         {!isMobile && (
           <div className="flex items-center gap-1 no-print">
-            <button
-              onClick={() => setForceWeekView(v => !v)}
-              className={`px-2 py-1.5 border rounded shadow-sm text-xs flex items-center gap-1 transition-colors ${forceWeekView ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
-              title={forceWeekView ? 'Zur Monatsansicht wechseln' : 'Zur Wochenansicht wechseln'}
-            >
-              {forceWeekView ? '📅 Woche' : '📆 Monat'}
-            </button>
-            {forceWeekView && (
+            {/* Table / Week / Calendar segmented toggle */}
+            <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden shadow-sm">
+              <button
+                onClick={() => { setViewMode('table'); setForceWeekView(false); }}
+                className={`px-2 py-1.5 text-xs flex items-center gap-1 transition-colors ${
+                  viewMode === 'table' && !forceWeekView
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                }`}
+                title="Monats-Tabelle"
+              >
+                📆 Monat
+              </button>
+              <button
+                onClick={() => { setViewMode('table'); setForceWeekView(true); }}
+                className={`px-2 py-1.5 text-xs flex items-center gap-1 transition-colors border-l border-gray-300 dark:border-gray-600 ${
+                  viewMode === 'table' && forceWeekView
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                }`}
+                title="Wochen-Tabelle"
+              >
+                📅 Woche
+              </button>
+              <button
+                onClick={() => { setViewMode('calendar'); setForceWeekView(false); }}
+                className={`px-2 py-1.5 text-xs flex items-center gap-1 transition-colors border-l border-gray-300 dark:border-gray-600 ${
+                  viewMode === 'calendar'
+                    ? 'bg-teal-600 text-white'
+                    : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                }`}
+                title="Kalender-Übersicht"
+              >
+                🗓️ Kalender
+              </button>
+            </div>
+            {forceWeekView && viewMode === 'table' && (
               <>
                 <button onClick={prevWeek} aria-label="Vorherige Woche" className="px-2 py-1.5 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50 text-xs text-gray-600" title="Vorherige Woche">‹</button>
                 <span className="text-xs text-indigo-700 font-medium px-2 py-1.5 bg-indigo-50 border border-indigo-200 rounded whitespace-nowrap">{mobileWeekData.label}</span>
@@ -4992,7 +5023,23 @@ export default function Schedule() {
         </div>
       )}
 
-      {/* ── Schedule Grid ── */}
+      {/* ── Calendar View ── */}
+      {viewMode === 'calendar' && !isMobile && (
+        <div className="flex-1 overflow-auto">
+          <ScheduleCalendar
+            year={year}
+            month={month}
+            employees={displayEmployees}
+            entryMap={entryMap}
+            holidays={holidays}
+            shifts={shifts}
+            onDayClick={(day, dateStr) => setDayDetailModal({ day, dateStr })}
+          />
+        </div>
+      )}
+
+      {/* ── Schedule Grid (Table View) ── */}
+      {(viewMode === 'table' || isMobile) && (
       <div className="flex-1 overflow-auto bg-white rounded-lg shadow border border-gray-200">
         <table className="border-collapse text-xs" style={isDragging ? { userSelect: 'none' } : undefined}>
           <thead>
@@ -5446,6 +5493,7 @@ export default function Schedule() {
           </tbody>
         </table>
       </div>
+      )}
 
       {/* ── Auslastungsbereich ── */}
       <AuslastungsBereich

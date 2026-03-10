@@ -7,6 +7,13 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const MONTH_NAMES = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 const WEEKDAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+const WEEKDAY_FULL = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+
+// ── Types for skills / availability ──────────────────────────────
+interface Skill { id: string; name: string; description?: string; color?: string; icon?: string; category?: string; }
+interface SkillAssignment { id: string; employee_id: number; skill_id: string; level: number; assigned_at?: string; }
+interface DayAvailability { day: number; available: boolean; time_windows: { start: string; end: string }[]; }
+interface AvailabilityData { employee_id: number; days: DayAvailability[]; updated_at: string | null; }
 
 function calcAge(birthday: string): number {
   const b = new Date(birthday);
@@ -71,9 +78,22 @@ export default function MitarbeiterProfil() {
   const [schedule7, setSchedule7] = useState<ScheduleEntry[]>([]);
   const [changelog, setChangelog] = useState<ChangelogEntry[]>([]);
   const [absences, setAbsences] = useState<{ date: string; leave_type_name: string; leave_type_short: string }[]>([]);
-  const [tab, setTab] = useState<'overview' | 'stats' | 'schedule' | 'log'>('overview');
+  const [tab, setTab] = useState<'overview' | 'stats' | 'schedule' | 'log' | 'profile'>('overview');
   const [loading, setLoading] = useState(true);
   const [year] = useState(new Date().getFullYear());
+
+  // Q039: Skills, Availability, Contract Hours
+  const [allSkills, setAllSkills] = useState<Skill[]>([]);
+  const [empSkillAssignments, setEmpSkillAssignments] = useState<SkillAssignment[]>([]);
+  const [availability, setAvailability] = useState<AvailabilityData | null>(null);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileMsg, setProfileMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+  // Editable copies
+  const [editHrsWeek, setEditHrsWeek] = useState<number>(0);
+  const [editHrsDay, setEditHrsDay] = useState<number>(0);
+  const [editHrsMonth, setEditHrsMonth] = useState<number>(0);
+  const [editAvailDays, setEditAvailDays] = useState<DayAvailability[]>([]);
+  const [editSkillIds, setEditSkillIds] = useState<Set<string>>(new Set());
 
   const employeeId = id ? parseInt(id) : null;
 
@@ -97,13 +117,29 @@ export default function MitarbeiterProfil() {
       if (!emp) { setLoading(false); return; }
       setEmployee(emp);
 
-      // Group name via group assignments
-      const [assignments, stats, absData, clog] = await Promise.all([
+      // Group name via group assignments + Q039 data
+      const [assignments, stats, absData, clog, skillsList, skillAssigns, availData] = await Promise.all([
         api.getGroupAssignments(),
         api.getEmployeeStatsYear(employeeId, year),
         api.getAbsences({ employee_id: employeeId, year }),
         api.getChangelog({ limit: 100 }),
+        api.getSkills() as Promise<Skill[]>,
+        api.getSkillAssignments({ employee_id: employeeId }) as Promise<SkillAssignment[]>,
+        api.getAvailability(employeeId) as Promise<AvailabilityData>,
       ]);
+      setAllSkills(skillsList);
+      setEmpSkillAssignments(skillAssigns);
+      setAvailability(availData);
+      // Init editable state
+      setEditHrsWeek(emp.HRSWEEK);
+      setEditHrsDay(emp.HRSDAY);
+      setEditHrsMonth(emp.HRSMONTH);
+      setEditSkillIds(new Set(skillAssigns.map(a => a.skill_id)));
+      if (availData?.days) {
+        setEditAvailDays(availData.days.map(d => ({ ...d, time_windows: [...d.time_windows] })));
+      } else {
+        setEditAvailDays(Array.from({ length: 7 }, (_, i) => ({ day: i, available: true, time_windows: [] })));
+      }
       const ga = assignments.find(a => a.employee_id === employeeId);
       if (ga) {
         const g = grps.find(g => g.ID === ga.group_id);
@@ -189,11 +225,53 @@ export default function MitarbeiterProfil() {
     .filter(Boolean);
 
   const tabs = [
-    { id: 'overview', label: '📋 Übersicht' },
-    { id: 'stats', label: '📈 Jahres-Statistik' },
-    { id: 'schedule', label: '📅 Nächste 7 Tage' },
-    { id: 'log', label: '🕐 Protokoll' },
-  ] as const;
+    { id: 'overview' as const, label: '📋 Übersicht' },
+    { id: 'profile' as const, label: '🎓 Profil & Qualifikationen' },
+    { id: 'stats' as const, label: '📈 Jahres-Statistik' },
+    { id: 'schedule' as const, label: '📅 Nächste 7 Tage' },
+    { id: 'log' as const, label: '🕐 Protokoll' },
+  ];
+
+  // Q039: Save handler for profile tab
+  const handleProfileSave = async () => {
+    if (!employeeId || !employee) return;
+    setProfileSaving(true);
+    setProfileMsg(null);
+    try {
+      // 1. Update contract hours
+      await api.updateEmployee(employeeId, {
+        HRSWEEK: editHrsWeek,
+        HRSDAY: editHrsDay,
+        HRSMONTH: editHrsMonth,
+      });
+
+      // 2. Update availability
+      await api.setAvailability(employeeId, { days: editAvailDays });
+
+      // 3. Update skill assignments — diff against current
+      const currentSkillIds = new Set(empSkillAssignments.map(a => a.skill_id));
+      // Add new skills
+      for (const sid of editSkillIds) {
+        if (!currentSkillIds.has(sid)) {
+          await api.createSkillAssignment({ employee_id: employeeId, skill_id: sid, level: 1 });
+        }
+      }
+      // Remove deselected skills
+      for (const a of empSkillAssignments) {
+        if (!editSkillIds.has(a.skill_id)) {
+          await api.deleteSkillAssignment(a.id);
+        }
+      }
+
+      setProfileMsg({ type: 'ok', text: 'Profil gespeichert!' });
+      // Reload data
+      await load();
+    } catch (e: unknown) {
+      setProfileMsg({ type: 'err', text: `Fehler: ${e instanceof Error ? e.message : String(e)}` });
+    } finally {
+      setProfileSaving(false);
+    }
+  };
 
   return (
     <div className="p-4 max-w-4xl mx-auto">
@@ -493,6 +571,205 @@ export default function MitarbeiterProfil() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Tab: Profil & Qualifikationen (Q039) */}
+      {tab === 'profile' && (
+        <div className="space-y-4">
+          {/* Feedback */}
+          {profileMsg && (
+            <div className={`rounded-lg p-3 text-sm ${profileMsg.type === 'ok' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+              {profileMsg.text}
+            </div>
+          )}
+
+          {/* Contract Hours */}
+          <div className="border rounded-xl p-4">
+            <h2 className="font-semibold mb-3 text-gray-700">⏱️ Vertragsstunden</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Stunden / Tag</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  max="24"
+                  value={editHrsDay}
+                  onChange={e => setEditHrsDay(parseFloat(e.target.value) || 0)}
+                  className="border rounded-lg px-3 py-2 w-full text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Stunden / Woche</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  max="168"
+                  value={editHrsWeek}
+                  onChange={e => setEditHrsWeek(parseFloat(e.target.value) || 0)}
+                  className="border rounded-lg px-3 py-2 w-full text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-500 mb-1">Stunden / Monat</label>
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  max="744"
+                  value={editHrsMonth}
+                  onChange={e => setEditHrsMonth(parseFloat(e.target.value) || 0)}
+                  className="border rounded-lg px-3 py-2 w-full text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Qualifications / Skills */}
+          <div className="border rounded-xl p-4">
+            <h2 className="font-semibold mb-3 text-gray-700">🎓 Qualifikationen</h2>
+            {allSkills.length === 0 ? (
+              <p className="text-gray-500 text-sm">Keine Qualifikationen definiert. Erstelle welche unter Kompetenz-Matrix.</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                {allSkills.map(skill => {
+                  const active = editSkillIds.has(skill.id);
+                  return (
+                    <label
+                      key={skill.id}
+                      className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-colors ${active ? 'bg-blue-50 border-blue-300' : 'bg-white border-gray-200 hover:bg-gray-50'}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={active}
+                        onChange={() => {
+                          setEditSkillIds(prev => {
+                            const next = new Set(prev);
+                            if (next.has(skill.id)) next.delete(skill.id);
+                            else next.add(skill.id);
+                            return next;
+                          });
+                        }}
+                        className="rounded"
+                      />
+                      <span className="text-lg">{skill.icon || '📌'}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium truncate">{skill.name}</div>
+                        {skill.category && <div className="text-xs text-gray-500">{skill.category}</div>}
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Availability */}
+          <div className="border rounded-xl p-4">
+            <h2 className="font-semibold mb-3 text-gray-700">📅 Verfügbarkeit (Wochenplan)</h2>
+            {availability?.updated_at && (
+              <p className="text-xs text-gray-400 mb-2">Zuletzt aktualisiert: {new Date(availability.updated_at).toLocaleString('de-AT')}</p>
+            )}
+            <div className="space-y-2">
+              {editAvailDays.sort((a, b) => a.day - b.day).map(dayData => (
+                <div key={dayData.day} className={`flex items-center gap-3 p-2 rounded-lg border ${dayData.available ? 'bg-white border-gray-200' : 'bg-gray-50 border-gray-200'}`}>
+                  <label className="flex items-center gap-2 w-32 shrink-0 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={dayData.available}
+                      onChange={() => {
+                        setEditAvailDays(prev => prev.map(d =>
+                          d.day === dayData.day ? { ...d, available: !d.available, time_windows: !d.available ? d.time_windows : [] } : d
+                        ));
+                      }}
+                      className="rounded"
+                    />
+                    <span className={`text-sm font-medium ${dayData.available ? 'text-gray-900' : 'text-gray-400'}`}>
+                      {WEEKDAY_FULL[dayData.day]}
+                    </span>
+                  </label>
+                  {dayData.available && (
+                    <div className="flex-1 flex items-center gap-2 flex-wrap">
+                      {dayData.time_windows.length === 0 ? (
+                        <span className="text-xs text-green-600">Ganztägig verfügbar</span>
+                      ) : (
+                        dayData.time_windows.map((tw, idx) => (
+                          <div key={idx} className="flex items-center gap-1 text-sm">
+                            <input
+                              type="time"
+                              value={tw.start}
+                              onChange={e => {
+                                setEditAvailDays(prev => prev.map(d => {
+                                  if (d.day !== dayData.day) return d;
+                                  const windows = [...d.time_windows];
+                                  windows[idx] = { ...windows[idx], start: e.target.value };
+                                  return { ...d, time_windows: windows };
+                                }));
+                              }}
+                              className="border rounded px-1 py-0.5 text-xs w-20"
+                            />
+                            <span className="text-gray-400">–</span>
+                            <input
+                              type="time"
+                              value={tw.end}
+                              onChange={e => {
+                                setEditAvailDays(prev => prev.map(d => {
+                                  if (d.day !== dayData.day) return d;
+                                  const windows = [...d.time_windows];
+                                  windows[idx] = { ...windows[idx], end: e.target.value };
+                                  return { ...d, time_windows: windows };
+                                }));
+                              }}
+                              className="border rounded px-1 py-0.5 text-xs w-20"
+                            />
+                            <button
+                              onClick={() => {
+                                setEditAvailDays(prev => prev.map(d => {
+                                  if (d.day !== dayData.day) return d;
+                                  return { ...d, time_windows: d.time_windows.filter((_, i) => i !== idx) };
+                                }));
+                              }}
+                              className="text-red-400 hover:text-red-600 text-xs"
+                              title="Zeitfenster entfernen"
+                            >✕</button>
+                          </div>
+                        ))
+                      )}
+                      <button
+                        onClick={() => {
+                          setEditAvailDays(prev => prev.map(d => {
+                            if (d.day !== dayData.day) return d;
+                            return { ...d, time_windows: [...d.time_windows, { start: '08:00', end: '17:00' }] };
+                          }));
+                        }}
+                        className="text-blue-500 hover:text-blue-700 text-xs px-1"
+                        title="Zeitfenster hinzufügen"
+                      >+ Zeitfenster</button>
+                    </div>
+                  )}
+                  {!dayData.available && (
+                    <span className="text-xs text-gray-400">Nicht verfügbar</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Save button */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleProfileSave}
+              disabled={profileSaving}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 font-medium text-sm transition-colors"
+            >
+              {profileSaving ? 'Speichern…' : '💾 Profil speichern'}
+            </button>
+            {profileMsg && profileMsg.type === 'ok' && (
+              <span className="text-green-600 text-sm">✓ {profileMsg.text}</span>
+            )}
+          </div>
         </div>
       )}
 

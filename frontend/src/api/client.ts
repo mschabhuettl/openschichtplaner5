@@ -1747,10 +1747,22 @@ export const api = {
     putJSON<unknown>(`/api/skills/${id}`, data),
   deleteSkill: (id: string) =>
     deleteReq<unknown>(`/api/skills/${id}`),
+  getSkillAssignments: (params?: { employee_id?: number }) => {
+    const q = new URLSearchParams();
+    if (params?.employee_id != null) q.set('employee_id', String(params.employee_id));
+    const qs = q.toString();
+    return fetchJSON<unknown[]>(`/api/skills/assignments${qs ? `?${qs}` : ''}`);
+  },
   createSkillAssignment: (data: { employee_id: number; skill_id: string; level: number }) =>
     postJSON<unknown>('/api/skills/assignments', data),
   deleteSkillAssignment: (id: string) =>
     deleteReq<unknown>(`/api/skills/assignments/${id}`),
+
+  // ─── Availability ──────────────────────────────────────────
+  getAvailability: (empId: number) =>
+    fetchJSON<unknown>(`/api/employees/${empId}/availability`),
+  setAvailability: (empId: number, data: { days: unknown[] }) =>
+    postJSON<unknown>(`/api/employees/${empId}/availability`, data),
 
   // ─── Simulation ────────────────────────────────────────────
   runSimulation: (data: unknown) =>
@@ -1879,4 +1891,11 @@ export const api = {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   },
+
+  // ── 2FA / TOTP ──────────────────────────────────────────────
+  get2FAStatus: () => fetchJSON<{ enabled: boolean }>('/api/auth/2fa/status'),
+  setup2FA: () => postJSON<{ secret: string; qr_code: string; otpauth_uri: string }>('/api/auth/2fa/setup', {}),
+  enable2FA: (code: string) => postJSON<{ ok: boolean; backup_codes: string[] }>('/api/auth/2fa/enable', { code }),
+  disable2FA: (password: string) => postJSON<{ ok: boolean }>('/api/auth/2fa/disable', { password }),
+  adminDisable2FA: (userId: number) => postJSON<{ ok: boolean }>(`/api/auth/2fa/admin-disable/${userId}`, {}),
 };

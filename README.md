@@ -34,27 +34,31 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 <table>
   <tr>
     <td><img src="docs/screenshots/dashboard.png" alt="Dashboard" width="480"/><br/><sub><b>Dashboard mit Live-Charts & Widgets</b></sub></td>
-    <td><img src="docs/screenshots/dienstplan.png" alt="Dienstplan" width="480"/><br/><sub><b>Dienstplan mit Wochenend-Hervorhebung & Feiertagen</b></sub></td>
+    <td><img src="docs/screenshots/dienstplan.png" alt="Dienstplan" width="480"/><br/><sub><b>Dienstplan — Monatsansicht</b></sub></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/statistiken.png" alt="Statistiken" width="480"/><br/><sub><b>Statistiken</b></sub></td>
-    <td><img src="docs/screenshots/jahresuebersicht.png" alt="Jahresübersicht" width="480"/><br/><sub><b>Jahresübersicht — Einzelansicht</b></sub></td>
+    <td><img src="docs/screenshots/dienstplan-kalender.png" alt="Kalender-Ansicht" width="480"/><br/><sub><b>📆 Kalender-Ansicht (neu!)</b></sub></td>
+    <td><img src="docs/screenshots/mitarbeiter.png" alt="Mitarbeiter" width="480"/><br/><sub><b>Mitarbeiterverwaltung</b></sub></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/zeitkonto.png" alt="Zeitkonto" width="480"/><br/><sub><b>Zeitkonto mit Monatsdetails</b></sub></td>
-    <td><img src="docs/screenshots/ueberstunden.png" alt="Überstunden" width="480"/><br/><sub><b>Überstunden-Übersicht</b></sub></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/mitarbeiter.png" alt="Mitarbeiter" width="480"/><br/><sub><b>Mitarbeiterverwaltung mit Sortierung</b></sub></td>
+    <td><img src="docs/screenshots/mitarbeiter-profil.png" alt="Mitarbeiter-Profil" width="480"/><br/><sub><b>🪪 MA-Profil mit Qualifikationen</b></sub></td>
     <td><img src="docs/screenshots/urlaubsverwaltung.png" alt="Urlaubsverwaltung" width="480"/><br/><sub><b>Urlaubsverwaltung</b></sub></td>
   </tr>
   <tr>
+    <td><img src="docs/screenshots/statistiken.png" alt="Statistiken" width="480"/><br/><sub><b>Statistiken — Soll/Ist-Vergleich</b></sub></td>
     <td><img src="docs/screenshots/berichte.png" alt="Berichte" width="480"/><br/><sub><b>Berichte & Reports</b></sub></td>
-    <td><img src="docs/screenshots/protokoll.png" alt="Protokoll" width="480"/><br/><sub><b>Aktivitätsprotokoll</b></sub></td>
   </tr>
   <tr>
+    <td><img src="docs/screenshots/audit-log.png" alt="Audit-Log" width="480"/><br/><sub><b>🔍 Audit-Trail / Protokoll</b></sub></td>
+    <td><img src="docs/screenshots/einstellungen.png" alt="Einstellungen" width="480"/><br/><sub><b>⚙️ Einstellungen</b></sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/zwei-faktor.png" alt="2FA-Setup" width="480"/><br/><sub><b>🔐 Zwei-Faktor-Authentifizierung (neu!)</b></sub></td>
+    <td><img src="docs/screenshots/mein-kalender.png" alt="Mein Kalender" width="480"/><br/><sub><b>📅 Mein Kalender — Self-Service (neu!)</b></sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/backup.png" alt="Backup" width="480"/><br/><sub><b>💾 Backup & Restore (neu!)</b></sub></td>
     <td><img src="docs/screenshots/leitwand.png" alt="Leitwand" width="480"/><br/><sub><b>📺 Leitwand — TV-Modus / Ops-Dashboard</b></sub></td>
-    <td></td>
   </tr>
 </table>
 

@@ -311,6 +311,7 @@ export interface UserUpdate {
 export interface LoginResponse {
   ok: boolean;
   token: string;
+  expires_at: number;
   user: {
     ID: number;
     NAME: string;

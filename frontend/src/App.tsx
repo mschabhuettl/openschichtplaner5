@@ -953,6 +953,20 @@ function GlobalToastContainer() {
   return <ToastContainer toasts={toasts} onRemove={removeToast} />;
 }
 
+/** Bridge: listens for sp5:session-expired-toast window event and shows a toast. */
+function SessionExpiryToastBridge() {
+  const { showToast } = useToast();
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { message?: string } | undefined;
+      showToast(detail?.message ?? 'Sitzung abgelaufen — bitte neu anmelden.', 'warning');
+    };
+    window.addEventListener('sp5:session-expired-toast', handler);
+    return () => window.removeEventListener('sp5:session-expired-toast', handler);
+  }, [showToast]);
+  return null;
+}
+
 export default function App() {
   return (
     <ErrorBoundary>
@@ -968,6 +982,7 @@ export default function App() {
               </AuthProvider>
             </BrowserRouter>
             <GlobalToastContainer />
+            <SessionExpiryToastBridge />
             <InstallBanner />
           </ToastProvider>
         </LanguageProvider>

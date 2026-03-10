@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, useCallback, type ReactNode } from 'react';
 
 // ── Types ────────────────────────────────────────────────────
 export interface CurrentUser {
@@ -139,6 +139,7 @@ interface StoredSession {
   user: CurrentUser;
   devMode: boolean;
   devViewRole?: DevViewRole;
+  expiresAt?: number;  // Unix timestamp (seconds) when session expires
 }
 
 // ── Context ───────────────────────────────────────────────────
@@ -150,6 +151,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [devViewRole, setDevViewRoleState] = useState<DevViewRole>('dev');
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
+  const expiryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /** Clear any running session-expiry timer. */
+  const clearExpiryTimer = useCallback(() => {
+    if (expiryTimerRef.current) {
+      clearTimeout(expiryTimerRef.current);
+      expiryTimerRef.current = null;
+    }
+  }, []);
+
+  /**
+   * Schedule a proactive logout shortly before the session expires.
+   * Fires 60 s before `expiresAt` (or immediately if already past).
+   */
+  const scheduleExpiryTimer = useCallback((expiresAt: number) => {
+    clearExpiryTimer();
+    // Trigger 60 seconds before actual expiry so the user isn't mid-action
+    const BUFFER_MS = 60_000;
+    const msUntilExpiry = expiresAt * 1000 - Date.now() - BUFFER_MS;
+    const delay = Math.max(msUntilExpiry, 0);
+    expiryTimerRef.current = setTimeout(() => {
+      // Dispatch the unauthorized event — same path as a 401 response
+      window.dispatchEvent(new CustomEvent('sp5:unauthorized'));
+    }, delay);
+  }, [clearExpiryTimer]);
 
   // Restore session from localStorage on mount
   useEffect(() => {
@@ -166,6 +192,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Token is managed by HttpOnly cookie; only restore user metadata from localStorage
           setToken(null);
           setUser(applyRoleDefaults(session.user));
+          // Restore proactive expiry timer
+          if (session.expiresAt) {
+            if (session.expiresAt * 1000 <= Date.now()) {
+              // Already expired — log out immediately
+              localStorage.removeItem(SESSION_KEY);
+              sessionStorage.setItem('sp5_session_expired', '1');
+              setUser(null);
+            } else {
+              scheduleExpiryTimer(session.expiresAt);
+            }
+          }
         }
       }
     } catch {
@@ -173,14 +210,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [scheduleExpiryTimer]);
 
-  // Auto-logout when API returns 401
+  // Auto-logout when API returns 401 or proactive expiry timer fires
   useEffect(() => {
     const handler = () => {
+      clearExpiryTimer();
       localStorage.removeItem(SESSION_KEY);
       // Signal to Login page that session expired (not a manual logout)
       sessionStorage.setItem('sp5_session_expired', '1');
+      // Dispatch a toast event so the UI can show a notification
+      window.dispatchEvent(new CustomEvent('sp5:session-expired-toast', {
+        detail: { message: 'Sitzung abgelaufen — bitte neu anmelden.' },
+      }));
       setToken(null);
       setUser(null);
       setIsDevMode(false);
@@ -188,7 +230,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     window.addEventListener('sp5:unauthorized', handler);
     return () => window.removeEventListener('sp5:unauthorized', handler);
-  }, []);
+  }, [clearExpiryTimer]);
 
   const login = async (username: string, password: string): Promise<void> => {
     const BASE = import.meta.env.VITE_API_URL ?? '';
@@ -204,13 +246,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const data = await res.json();
     const resolvedUser = applyRoleDefaults(data.user);
+    const expiresAt: number | undefined = data.expires_at;
     // Store user info only — token is kept in HttpOnly cookie, not localStorage
-    const session: StoredSession = { token: '', user: resolvedUser, devMode: false };
+    const session: StoredSession = { token: '', user: resolvedUser, devMode: false, expiresAt };
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
     setToken(null);  // token managed by HttpOnly cookie
     setUser(resolvedUser);
     setIsDevMode(false);
     setDevViewRoleState('dev');
+    // Schedule proactive logout before session expires
+    if (expiresAt) {
+      scheduleExpiryTimer(expiresAt);
+    }
   };
 
   const loginDev = () => {
@@ -238,6 +285,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
+    clearExpiryTimer();
     const BASE = import.meta.env.VITE_API_URL ?? '';
     const headers: Record<string, string> = {};
     if (token) {

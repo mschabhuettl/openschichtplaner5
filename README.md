@@ -68,160 +68,20 @@ The key differentiator: OpenSchichtplaner5 reads and writes the **original `.DBF
 
 ## Features
 
-### 📅 Planning
-- ✅ **Emergency Plan** 🚨 — Short-notice absence planning: select shift and date, mark sick employee & remove from plan, intelligent replacement suggestions by score (availability, workload, employment level), one-click assignment
-- ✅ **Control Board** 📺 — TV mode / Ops Dashboard: real-time clock, employee cards per shift group with progress bars, active badges, absences, ticker bar, fullscreen button — optimized for wall displays in break rooms
-- ✅ **Weekly View** 🗃️ — Compact Mon–Sun table overview of all employees: colored shift badges, week navigation, group filter, search, compact mode, today highlight, legend
-- ✅ **Calendar View** 📆 — Monthly overview in calendar format with daily details and shift colors
-- ✅ **Schedule** — Monthly view with weekend highlighting 🟦, today highlighted in blue, holidays, tooltips; A-Z quick filter; employee workload bars; shift color legend; shift swap modal; week copy modal; shift recommendation modal
-- ✅ **Undo/Redo** ↩️ — Undo/redo for schedule changes with step counter and keyboard shortcuts (Ctrl+Z / Ctrl+Y)
-- ✅ **Schedule Templates** 📋 — Save, load and apply templates to weeks via backend API
-- ✅ **Day Detail View** 🗓️ — Click on calendar day opens modal with full day overview: all employees with shift assignments, staffing level, absences and open slots
-- ✅ **Deployment Plan** — Daily and weekly view with deviations
-- ✅ **Annual Overview** — Single view as default (like original SP5), 12 months at a glance with colored shift badges
-- ✅ **Birthday Calendar** 🎂 — All employee birthdays grouped by month, calendar and list view
-- ✅ **Staff Table** — Compact tabular planning view
-- ✅ **Statistics** — Target/actual comparison, absences per group/month
-- ✅ **Year in Review** 🏆 — Annual evaluation across all 12 months: monthly bar charts (hours, leave, sick, absences), employee heatmap, top ranking and annual totals
-- ✅ **Leave Management** — Entitlement, balance, blocked days, approval workflow, PDF print; **Annual Timeline Tab** (Gantt view)
-- ✅ **Leave Timeline** 📊 — Standalone Gantt annual overview of all absences with overlap heatmap, group filter, tooltip and statistics tiles
-- ✅ **Shift Preferences & Blocked Days** 💬 — Enter employee preferences and blocked days in calendar and list view
-- ✅ **Shift Swap Exchange** 🔄 — Structured swap workflow: submit request, planner approves/rejects, swap is executed automatically
-- ✅ **Onboarding Wizard** 🧭 — Guided 4-step flow for creating new employees: Personal Data → Work Time Model → Groups → Summary
-- ✅ **Audit Log** 🔍 — Complete change history: who changed what and when — with filter, search and auto-refresh
-- ✅ **Shift Models** — Define recurring shift patterns (weekly/daily rhythm) & assign them
-- ✅ **Staffing Requirements** — Minimum and maximum staffing per shift/day; date-specific special requirements
-- ✅ **Year-End Close** — Automatic carryover calculation and posting
-- ✅ **Time Account** — Target/actual/balance overview with monthly detail modal and year-end close
-- ✅ **Overtime** — Dedicated overtime page: target/actual/difference table with bar visualization, year and group filter
-- ✅ **Account Postings** — Manual postings to time accounts
-- ✅ **Notes** — Day-specific and employee-specific notes
+| Area | Highlights |
+|------|-----------|
+| 📅 **Scheduling** | Weekly & monthly schedule, calendar view, drag & drop, undo/redo, templates, auto-planner |
+| 👥 **Employees** | Full CRUD, groups, skills, availability, contract hours, onboarding wizard |
+| 🏖️ **Leave Management** | Requests, approval workflow, annual timeline (Gantt), entitlements, year-end close |
+| 🔄 **Self-Service** | Shift preferences, swap exchange, personal calendar, profile management |
+| 📊 **Analytics** | Dashboard with live charts, statistics, year in review, burnout radar |
+| 📄 **Reports & Export** | 20+ report types, CSV/Excel download, print stylesheets (A4), iCal feed |
+| 🔔 **Notifications** | Real-time updates (SSE), email (SMTP), in-app notification center |
+| 🔒 **Security** | Role-based access (Admin/Planner/Reader), 2FA (TOTP), bcrypt, JWT, rate limiting, audit log |
+| 🐳 **Operations** | Docker deployment, CI/CD, SQLite backup/restore, health dashboard |
+| 📱 **UX** | Dark mode, mobile-responsive, keyboard navigation, offline indicator |
 
-### 📊 Dashboard
-- ✅ **Live Charts** — Recharts-based diagrams: target/actual bars, absence pie chart
-- ✅ **Morning Briefing Widget** 🌅 — Time-of-day greeting with duty status and quick overview
-- ✅ **Burnout Radar Widget** 🔥 — Detects overload risks (long streaks, high overtime, weekend clustering)
-- ✅ **Widget: Birthdays** — Who has a birthday this week?
-- ✅ **Widget: Holidays** — Upcoming holidays at a glance
-- ✅ **Widget: Absences** — Who is absent today/this week?
-- ✅ **Widget: On Duty Today** — Which employees are working today?
-- ✅ **Staffing Heatmap** — Calendar heatmap with color-coded staffing levels
-- ✅ **Staffing Warnings** — Understaffing warnings for the next 7 days
-
-### 👥 Master Data
-- ✅ **Employees** — Full master data management (personal, contact, calculation data), photo upload, shift restrictions; clickable sort column headers; **SHORTNAME is auto-generated** when empty
-- ✅ **Groups** — Hierarchical department structure with search & sorting
-- ✅ **Shift Types** — Times, colors, abbreviations, weekday-specific shift times
-- ✅ **Absence Types** — Leave, sick, training, special leave …
-- ✅ **Holidays** — Year-based holiday management with import
-- ✅ **Workplaces** — Locations & employee assignment
-- ✅ **Time Surcharges** — Wage surcharges including weekday-specific configuration
-- ✅ **Shift Restrictions** — Prohibited shifts per employee
-
-### 🎯 Auto-Planner & Optimization
-- ✅ **Restrictions-aware Auto-Planner** 🤖 — Automatic shift planning respecting restrictions, blocked days and preferences
-- ✅ **Optimization Report** — Detailed report after auto-planning: applied rules, conflicts, chosen alternatives
-- ✅ **Qualification/Competency Matrix** 📊 — Interactive employee × qualification matrix with gap analysis and check mode
-
-### 👤 Self-Service & Roles
-- ✅ **Employee Self-Service Portal** — Reader role with access to own shifts, leave balance, time account
-- ✅ **Shift Preferences Self-Service** — Preference/blocked day submission directly by employees
-
-### ⚖️ Fairness & Evaluation
-- ✅ **Employee Comparison** ⚖️ — Side-by-side annual comparison of two employees: statistics bar charts, shift type distribution, monthly view
-- ✅ **Fairness Score** — Evaluates equal distribution of weekend, night and holiday shifts with employee ranking and deviation display
-- ✅ **Capacity Forecast** 📊 — Monthly capacity preview: staffing calendar (green/yellow/red), leave conflict detection (>30% team absent), action panel, day detail modal
-
-### 📄 Reports & Export (20+ report types)
-- ✅ **Schedule Report** — Monthly/annual report (CSV, HTML)
-- ✅ **Employee List** — Complete master data (CSV, print view)
-- ✅ **Absence Report** — Total, by type, by employee, timeline
-- ✅ **Leave Report** — Balance, entitlement, group overview
-- ✅ **Shift Report** — Shift distribution, by employee, by group
-- ✅ **Time Account Report** — Balance overview, monthly detail, year-end close preview
-- ✅ **Overtime Report** — Target/actual/delta per employee
-- ✅ **Staffing Requirements Report** — Target/actual staffing per day
-
-### ⬆️ Import (7 import types)
-- ✅ **Employee Import** (CSV)
-- ✅ **Shift Types Import** (CSV)
-- ✅ **Absences Import** (CSV)
-- ✅ **Holidays Import** (CSV)
-- ✅ **Actual Hours Import** (CSV)
-- ✅ **Target Hours Import** (CSV)
-- ✅ **Leave Entitlement Import** (CSV)
-- ✅ **Groups Import** (CSV)
-
-### 🖨️ Printing
-- ✅ **Print button on all 22 pages** — every page can be printed directly
-- ✅ **Clean print CSS** — Sidebar, buttons and non-printable elements are hidden
-- ✅ **Print-optimized** — Tables break correctly, colors are optimized for B/W printing
-
-### ⌨️ UX & Interaction
-- ✅ **Command Palette** 🔍 — `Ctrl+K` opens quick search palette with fuzzy search across all pages, employees and actions
-- ✅ **Keyboard Shortcuts** — Global keyboard shortcuts for quick navigation; `?` opens help overlay
-- ✅ **Keyboard Accessibility** ♿ — Full keyboard navigation in all tables and forms; ARIA labels; focus indicators
-- ✅ **Dark Mode** 🌙 — Animated dark mode toggle, visible on mobile too; persistent preference
-- ✅ **Bulk Operations** — Set/delete multiple shifts at once; selection mode with checkboxes in the schedule; bulk group assignment
-- ✅ **CSV/Excel Export** 📥 — Download buttons on employee and leave pages; XLSX export for absences
-- ✅ **Advanced Filters** — Group filter in employee list; full-text search in activity log
-- ✅ **Toast Notifications** — Non-blocking success/error/info messages
-- ✅ **DE/EN Language Switcher** 🌍 — Fully bilingual user interface; persistent language choice
-
-### 👥 Team & Organization
-- ✅ **Team Overview** 🏢 — Overview of all groups with member count, supervisors and shift models; clickable tiles with quick navigation
-- ✅ **Org Chart** 🌳 — Visual tree diagram of the company hierarchy at a glance
-
-### 📊 Analytics & Visualization
-- ✅ **SVG Multi-Line Chart** 📈 — Time series comparison of multiple employees/groups over months without external chart library
-- ✅ **SVG Donut Chart** 🍩 — Proportional visualization (e.g. shift type distribution) in pure SVG
-
-### 🔍 Error Monitoring & Health
-- ✅ **Error Monitoring** 🚨 — Errors are captured, categorized and displayed in a health dashboard
-- ✅ **Structured JSON Logging** 📋 — All server events as JSON logs for easy processing and log aggregation
-- ✅ **Health Dashboard** — System status, error rate and recent events at a glance
-
-### 🧩 UI Component Library
-- ✅ **StatCard** — Reusable statistics tile with trend indicator
-- ✅ **Badge** — Colored status badges for consistent labeling throughout the app
-- ✅ **PageHeader** — Unified page header with title, breadcrumb and action buttons
-- ✅ **DataTable** — Universal table component with sorting, filtering and pagination
-
-### 📱 Mobile & Performance
-- ✅ **Progressive Web App (PWA)** 📲 — Installable on desktop & mobile; service worker for basic offline functionality
-- ✅ **Offline Detection** 🌐 — `useOnlineStatus` hook shows offline banner on connection loss; automatic reconnect
-- ✅ **SSE Real-Time Updates** 📡 — Server-Sent Events: changes appear live on all open clients without polling (Schedule, Swap, Settings, Notifications)
-- ✅ **Mobile-Friendly** — Responsive design with hamburger menu and touch targets
-- ✅ **Responsive Tables** — Horizontal scrolling on small screens; enlarged touch targets
-- ✅ **Code Splitting** — Lazy loading of all pages (faster startup)
-- ✅ **API Cache** — TTL-based in-memory cache for frequently queried endpoints; master data caching in frontend
-- ✅ **API Pagination** — Opt-in pagination for employee, absence and changelog endpoints (`page` + `page_size` parameters)
-- ✅ **Error Handling & Retry** — Automatic retry on API errors; `useApiData` hook with loading/error states
-- ✅ **Optimized Build** — Vite-based production build
-
-### 🔒 Security
-- ✅ **Security Headers** — HTTP security headers (CSP, X-Frame-Options, HSTS, Permissions-Policy, etc.) active
-- ✅ **CSRF Protection** — Double-submit cookie pattern against cross-site request forgery
-- ✅ **Auth Hardening** — All frontend components send correct bearer tokens; no unprotected endpoints
-- ✅ **Rate Limiting** — API-wide rate limit (100 req/min), login brute-force protection (5 attempts/min + 15-min lockout)
-- ✅ **Two-Factor Authentication (2FA)** 🔐 — TOTP-based 2FA with QR code setup, backup codes, admin enforcement and reset
-- ✅ **Session Management** — Token expiry with auto-logout and session-expired notification; max sessions per user
-- ✅ **Password Policies** — Configurable minimum length, uppercase and digit requirements
-- ✅ **Input Sanitization** — Strict Pydantic validation and input sanitization in backend
-- ✅ **Dev Mode Protection** — Dev token only active in development mode (`SP5_DEV_MODE=true`)
-
-### 🔧 System & Administration
-- ✅ **Activity Log** — Complete change history of all API actions (Created/Modified/Deleted) with filters by date, user, action, object; old/new values in detail
-- ✅ **User Management** — Roles, password change, password reset with email, group- and employee-based access rights
-- ✅ **Email Notifications** 📧 — SMTP integration for password reset, absence notifications and swap requests; admin configuration page with test email
-- ✅ **iCal Feed** 📅 — Subscribable iCal feed (`/api/ical/...`) for shift schedules; token-based authentication for calendar apps (Google Calendar, Outlook, Apple)
-- ✅ **Notifications** 🔔 — In-app notification system with bell icon, dropdown, filter page and read markers
-- ✅ **Backup & Restore** — ZIP backup of all DBF files including restore; automatic pre-restore backup; SQLite export endpoint
-- ✅ **Billing Periods** — Define and manage accounting periods
-- ✅ **Configuration Management** ⚙️ — Central settings page with categorized configuration groups (Planning, Notifications, Display); instant save with validation
-- ✅ **Settings** — System configuration (USETT)
-- ✅ **DB Compaction** — Remove deleted records from DBF files
-
+> Full feature details: [CHANGELOG.md](CHANGELOG.md) · [GitHub Wiki](https://github.com/mschabhuettl/openschichtplaner5/wiki)
 ---
 
 ## Compatibility

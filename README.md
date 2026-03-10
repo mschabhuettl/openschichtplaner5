@@ -16,18 +16,18 @@
 [![React](https://img.shields.io/badge/React-18+-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript&logoColor=white)](https://typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3+-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![Print Ready](https://img.shields.io/badge/🖨️_Print-alle_Seiten-green)](README.md)
+[![Print Ready](https://img.shields.io/badge/🖨️_Print-all_pages-green)](README.md)
 [![Mobile Ready](https://img.shields.io/badge/📱_Mobile-Responsive-orange)](README.md)
 
 </div>
 
 ---
 
-## Was ist OpenSchichtplaner5?
+## What is OpenSchichtplaner5?
 
-OpenSchichtplaner5 ist eine moderne, browserbasierte Anwendung zur Dienstplanung — entwickelt als vollwertiger Open-Source-Ersatz für die proprietäre Windows-Software **Schichtplaner5**.
+OpenSchichtplaner5 is a modern, browser-based shift planning application — developed as a fully-featured open-source replacement for the proprietary Windows software **Schichtplaner5**.
 
-Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Datenbankdateien** direkt im FoxPro-Format. Es ist keine Datenmigration nötig — beide Programme können gleichzeitig auf denselben Daten laufen.
+The key differentiator: OpenSchichtplaner5 reads and writes the **original `.DBF` database files** directly in FoxPro format. No data migration is required — both programs can run simultaneously on the same data.
 
 ---
 
@@ -35,32 +35,32 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 
 <table>
   <tr>
-    <td><img src="docs/screenshots/dashboard.png" alt="Dashboard" width="480"/><br/><sub><b>Dashboard mit Live-Charts & Widgets</b></sub></td>
-    <td><img src="docs/screenshots/dienstplan.png" alt="Dienstplan" width="480"/><br/><sub><b>Dienstplan — Monatsansicht</b></sub></td>
+    <td><img src="docs/screenshots/dashboard.png" alt="Dashboard" width="480"/><br/><sub><b>Dashboard with Live Charts & Widgets</b></sub></td>
+    <td><img src="docs/screenshots/dienstplan.png" alt="Schedule" width="480"/><br/><sub><b>Schedule — Monthly View</b></sub></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/dienstplan-kalender.png" alt="Kalender-Ansicht" width="480"/><br/><sub><b>📆 Kalender-Ansicht (neu!)</b></sub></td>
-    <td><img src="docs/screenshots/mitarbeiter.png" alt="Mitarbeiter" width="480"/><br/><sub><b>Mitarbeiterverwaltung</b></sub></td>
+    <td><img src="docs/screenshots/dienstplan-kalender.png" alt="Calendar View" width="480"/><br/><sub><b>📆 Calendar View (new!)</b></sub></td>
+    <td><img src="docs/screenshots/mitarbeiter.png" alt="Employees" width="480"/><br/><sub><b>Employee Management</b></sub></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/mitarbeiter-profil.png" alt="Mitarbeiter-Profil" width="480"/><br/><sub><b>🪪 MA-Profil mit Qualifikationen</b></sub></td>
-    <td><img src="docs/screenshots/urlaubsverwaltung.png" alt="Urlaubsverwaltung" width="480"/><br/><sub><b>Urlaubsverwaltung</b></sub></td>
+    <td><img src="docs/screenshots/mitarbeiter-profil.png" alt="Employee Profile" width="480"/><br/><sub><b>🪪 Employee Profile with Qualifications</b></sub></td>
+    <td><img src="docs/screenshots/urlaubsverwaltung.png" alt="Leave Management" width="480"/><br/><sub><b>Leave Management</b></sub></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/statistiken.png" alt="Statistiken" width="480"/><br/><sub><b>Statistiken — Soll/Ist-Vergleich</b></sub></td>
-    <td><img src="docs/screenshots/berichte.png" alt="Berichte" width="480"/><br/><sub><b>Berichte & Reports</b></sub></td>
+    <td><img src="docs/screenshots/statistiken.png" alt="Statistics" width="480"/><br/><sub><b>Statistics — Target/Actual Comparison</b></sub></td>
+    <td><img src="docs/screenshots/berichte.png" alt="Reports" width="480"/><br/><sub><b>Reports</b></sub></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/audit-log.png" alt="Audit-Log" width="480"/><br/><sub><b>🔍 Audit-Trail / Protokoll</b></sub></td>
-    <td><img src="docs/screenshots/einstellungen.png" alt="Einstellungen" width="480"/><br/><sub><b>⚙️ Einstellungen</b></sub></td>
+    <td><img src="docs/screenshots/audit-log.png" alt="Audit Log" width="480"/><br/><sub><b>🔍 Audit Trail / Activity Log</b></sub></td>
+    <td><img src="docs/screenshots/einstellungen.png" alt="Settings" width="480"/><br/><sub><b>⚙️ Settings</b></sub></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/zwei-faktor.png" alt="2FA-Setup" width="480"/><br/><sub><b>🔐 Zwei-Faktor-Authentifizierung (neu!)</b></sub></td>
-    <td><img src="docs/screenshots/mein-kalender.png" alt="Mein Kalender" width="480"/><br/><sub><b>📅 Mein Kalender — Self-Service (neu!)</b></sub></td>
+    <td><img src="docs/screenshots/zwei-faktor.png" alt="2FA Setup" width="480"/><br/><sub><b>🔐 Two-Factor Authentication (new!)</b></sub></td>
+    <td><img src="docs/screenshots/mein-kalender.png" alt="My Calendar" width="480"/><br/><sub><b>📅 My Calendar — Self-Service (new!)</b></sub></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/backup.png" alt="Backup" width="480"/><br/><sub><b>💾 Backup & Restore (neu!)</b></sub></td>
-    <td><img src="docs/screenshots/leitwand.png" alt="Leitwand" width="480"/><br/><sub><b>📺 Leitwand — TV-Modus / Ops-Dashboard</b></sub></td>
+    <td><img src="docs/screenshots/backup.png" alt="Backup" width="480"/><br/><sub><b>💾 Backup & Restore (new!)</b></sub></td>
+    <td><img src="docs/screenshots/leitwand.png" alt="Control Board" width="480"/><br/><sub><b>📺 Control Board — TV Mode / Ops Dashboard</b></sub></td>
   </tr>
 </table>
 
@@ -68,201 +68,201 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 
 ## Features
 
-### 📅 Planung
-- ✅ **Notfall-Plan** 🚨 — Kurzfristige Ausfallplanung: Schicht und Datum wählen, kranken MA markieren & aus Plan entfernen, intelligente Einspringer-Vorschläge nach Score (Verfügbarkeit, Auslastung, Beschäftigungsgrad), Ein-Klick-Zuweisung
-- ✅ **Leitwand** 📺 — TV-Modus / Ops-Dashboard: Echtzeit-Uhr, Mitarbeiterkarten pro Schichtgruppe mit Fortschrittsbalken, Aktiv-Badges, Abwesenheiten, Ticker-Leiste, Vollbild-Button — optimiert für Wanddisplays im Aufenthaltsraum
-- ✅ **Wochenansicht** 🗃️ — Kompakte Mo–So Tabellenübersicht aller Mitarbeiter: farbige Schicht-Badges, Wochen-Navigation, Gruppenfilter, Suche, Kompaktmodus, Heute-Hervorhebung, Legende
-- ✅ **Kalender-Ansicht** 📆 — Monatsübersicht im Kalenderformat mit Tages-Details und Schichtfarben
-- ✅ **Dienstplan** — Monatsansicht mit Wochenend-Hervorhebung 🟦, heutiger Tag blau, Feiertage, Tooltips; A-Z Schnellfilter; Mitarbeiter-Auslastungsbalken; Schichtfarben-Legende; Schicht-Tausch Modal; Woche-Kopieren Modal; Schicht-Empfehlungen Modal
-- ✅ **Undo/Redo** ↩️ — Rückgängig/Wiederherstellen für Dienstplan-Änderungen mit Schrittzähler und Tastaturkürzel (Ctrl+Z / Ctrl+Y)
-- ✅ **Dienstplan-Vorlagen** 📋 — Vorlagen via Backend-API speichern, laden und auf Wochen anwenden
-- ✅ **Tages-Detailansicht** 🗓️ — Klick auf Kalendertag öffnet Modal mit vollständiger Tagesübersicht: alle Mitarbeiter mit Schichtzuweisung, Besetzungsgrad, Abwesenheiten und freie Plätze
-- ✅ **Einsatzplan** — Tages- und Wochenansicht mit Abweichungen
-- ✅ **Jahresübersicht** — Einzelansicht als Standard (wie Original SP5), 12 Monate auf einen Blick mit farbigen Schicht-Badges
-- ✅ **Geburtstags-Kalender** 🎂 — Alle Mitarbeitergeburtstage nach Monat gruppiert, Kalender- und Listenansicht
-- ✅ **Personaltabelle** — Kompakte tabellarische Planansicht
-- ✅ **Statistiken** — Soll/Ist-Vergleich, Fehlzeiten pro Gruppe/Monat
-- ✅ **Jahresrückblick** 🏆 — Jahres-Auswertung über alle 12 Monate: Monats-Balkendiagramme (Stunden, Urlaub, Krank, Abwesenheiten), Mitarbeiter-Heatmap, Top-Ranking und Jahrestotals
-- ✅ **Urlaubsverwaltung** — Anspruch, Saldo, Sperrtage, Genehmigungs-Workflow, PDF-Druck; **Jahres-Timeline Tab** (Gantt-Ansicht)
-- ✅ **Urlaubs-Timeline** 📊 — Eigenständige Gantt-Jahresübersicht aller Abwesenheiten mit Überschneidungs-Heatmap, Gruppenfilter, Tooltip und Statistik-Kacheln
-- ✅ **Schichtwünsche & Sperrtage** 💬 — Mitarbeiterwünsche und gesperrte Tage in Kalender- und Listenansicht eintragen
-- ✅ **Schicht-Tauschbörse** 🔄 — Strukturierter Tausch-Workflow: Anfrage stellen, Planer genehmigt/lehnt ab, Tausch wird automatisch ausgeführt
-- ✅ **Onboarding-Wizard** 🧭 — Geführter 4-Schritte-Flow zum Anlegen neuer Mitarbeiter: Persönliche Daten → Arbeitszeitmodell → Gruppen → Zusammenfassung
-- ✅ **Audit-Log** 🔍 — Vollständige Änderungshistorie: wer hat wann was geändert — mit Filter, Suche und Auto-Refresh
-- ✅ **Schichtmodelle** — Wiederkehrende Schichtmuster (Wochen-/Tagesrhythmus) definieren & zuordnen
-- ✅ **Personalbedarf** — Mindest- und Maximalbesetzung pro Schicht/Tag; datumsspezifische Sonderbedarfe
-- ✅ **Jahresabschluss** — Automatische Übertrag-Berechnung und -Buchung
-- ✅ **Zeitkonto** — Soll/Ist/Saldo-Übersicht mit Monatsdetail-Modal und Jahresabschluss
-- ✅ **Überstunden** — Dedizierte Überstunden-Seite: Soll/Ist/Differenz-Tabelle mit Balken-Visualisierung, Jahr- und Gruppenfilter
-- ✅ **Kontobuchungen** — Manuelle Buchungen auf Zeitkonten
-- ✅ **Notizen** — Tages- und mitarbeiterbezogene Notizen
+### 📅 Planning
+- ✅ **Emergency Plan** 🚨 — Short-notice absence planning: select shift and date, mark sick employee & remove from plan, intelligent replacement suggestions by score (availability, workload, employment level), one-click assignment
+- ✅ **Control Board** 📺 — TV mode / Ops Dashboard: real-time clock, employee cards per shift group with progress bars, active badges, absences, ticker bar, fullscreen button — optimized for wall displays in break rooms
+- ✅ **Weekly View** 🗃️ — Compact Mon–Sun table overview of all employees: colored shift badges, week navigation, group filter, search, compact mode, today highlight, legend
+- ✅ **Calendar View** 📆 — Monthly overview in calendar format with daily details and shift colors
+- ✅ **Schedule** — Monthly view with weekend highlighting 🟦, today highlighted in blue, holidays, tooltips; A-Z quick filter; employee workload bars; shift color legend; shift swap modal; week copy modal; shift recommendation modal
+- ✅ **Undo/Redo** ↩️ — Undo/redo for schedule changes with step counter and keyboard shortcuts (Ctrl+Z / Ctrl+Y)
+- ✅ **Schedule Templates** 📋 — Save, load and apply templates to weeks via backend API
+- ✅ **Day Detail View** 🗓️ — Click on calendar day opens modal with full day overview: all employees with shift assignments, staffing level, absences and open slots
+- ✅ **Deployment Plan** — Daily and weekly view with deviations
+- ✅ **Annual Overview** — Single view as default (like original SP5), 12 months at a glance with colored shift badges
+- ✅ **Birthday Calendar** 🎂 — All employee birthdays grouped by month, calendar and list view
+- ✅ **Staff Table** — Compact tabular planning view
+- ✅ **Statistics** — Target/actual comparison, absences per group/month
+- ✅ **Year in Review** 🏆 — Annual evaluation across all 12 months: monthly bar charts (hours, leave, sick, absences), employee heatmap, top ranking and annual totals
+- ✅ **Leave Management** — Entitlement, balance, blocked days, approval workflow, PDF print; **Annual Timeline Tab** (Gantt view)
+- ✅ **Leave Timeline** 📊 — Standalone Gantt annual overview of all absences with overlap heatmap, group filter, tooltip and statistics tiles
+- ✅ **Shift Preferences & Blocked Days** 💬 — Enter employee preferences and blocked days in calendar and list view
+- ✅ **Shift Swap Exchange** 🔄 — Structured swap workflow: submit request, planner approves/rejects, swap is executed automatically
+- ✅ **Onboarding Wizard** 🧭 — Guided 4-step flow for creating new employees: Personal Data → Work Time Model → Groups → Summary
+- ✅ **Audit Log** 🔍 — Complete change history: who changed what and when — with filter, search and auto-refresh
+- ✅ **Shift Models** — Define recurring shift patterns (weekly/daily rhythm) & assign them
+- ✅ **Staffing Requirements** — Minimum and maximum staffing per shift/day; date-specific special requirements
+- ✅ **Year-End Close** — Automatic carryover calculation and posting
+- ✅ **Time Account** — Target/actual/balance overview with monthly detail modal and year-end close
+- ✅ **Overtime** — Dedicated overtime page: target/actual/difference table with bar visualization, year and group filter
+- ✅ **Account Postings** — Manual postings to time accounts
+- ✅ **Notes** — Day-specific and employee-specific notes
 
 ### 📊 Dashboard
-- ✅ **Live-Charts** — Recharts-basierte Diagramme: Soll/Ist-Balken, Abwesenheits-Kreisdiagramm
-- ✅ **Morning-Briefing Widget** 🌅 — Tageszeit-abhängige Begrüßung mit Dienststatus und Schnellüberblick
-- ✅ **Burnout-Radar Widget** 🔥 — Erkennt Überlastungsrisiken (lange Serien, hohe Überstunden, Wochenend-Häufung)
-- ✅ **Widget: Geburtstage** — Wer hat diese Woche Geburtstag?
-- ✅ **Widget: Feiertage** — Nächste Feiertage im Überblick
-- ✅ **Widget: Abwesenheiten** — Wer ist heute/diese Woche abwesend?
-- ✅ **Widget: Heute im Dienst** — Welche Mitarbeiter arbeiten heute?
-- ✅ **Besetzungs-Heatmap** — Kalender-Heatmap mit Farbkodierung des Besetzungsgrades
-- ✅ **Staffing-Warnungen** — Unterbesetzungs-Warnungen für die nächsten 7 Tage
+- ✅ **Live Charts** — Recharts-based diagrams: target/actual bars, absence pie chart
+- ✅ **Morning Briefing Widget** 🌅 — Time-of-day greeting with duty status and quick overview
+- ✅ **Burnout Radar Widget** 🔥 — Detects overload risks (long streaks, high overtime, weekend clustering)
+- ✅ **Widget: Birthdays** — Who has a birthday this week?
+- ✅ **Widget: Holidays** — Upcoming holidays at a glance
+- ✅ **Widget: Absences** — Who is absent today/this week?
+- ✅ **Widget: On Duty Today** — Which employees are working today?
+- ✅ **Staffing Heatmap** — Calendar heatmap with color-coded staffing levels
+- ✅ **Staffing Warnings** — Understaffing warnings for the next 7 days
 
-### 👥 Stammdaten
-- ✅ **Mitarbeiter** — Vollständige Stammdatenverwaltung (Stamm-, Kontakt-, Kalkulationsdaten), Foto-Upload, Schichteinschränkungen; klickbare Sortier-Spaltenköpfe; **SHORTNAME wird automatisch generiert** wenn leer
-- ✅ **Gruppen** — Hierarchische Abteilungsstruktur mit Suchfeld + Sortierung
-- ✅ **Schichtarten** — Zeiten, Farben, Kürzel, wochentags-spezifische Schichtzeiten
-- ✅ **Abwesenheitsarten** — Urlaub, Krank, Fortbildung, Sonderurlaub …
-- ✅ **Feiertage** — Jahresbezogene Feiertagsverwaltung mit Import
-- ✅ **Arbeitsstätten** — Standorte & Mitarbeiterzuordnung
-- ✅ **Zeitzuschläge** — Lohnzuschläge inkl. wochentags-spezifischer Konfiguration
-- ✅ **Schichteinschränkungen** — Verbotene Schichten pro Mitarbeiter
+### 👥 Master Data
+- ✅ **Employees** — Full master data management (personal, contact, calculation data), photo upload, shift restrictions; clickable sort column headers; **SHORTNAME is auto-generated** when empty
+- ✅ **Groups** — Hierarchical department structure with search & sorting
+- ✅ **Shift Types** — Times, colors, abbreviations, weekday-specific shift times
+- ✅ **Absence Types** — Leave, sick, training, special leave …
+- ✅ **Holidays** — Year-based holiday management with import
+- ✅ **Workplaces** — Locations & employee assignment
+- ✅ **Time Surcharges** — Wage surcharges including weekday-specific configuration
+- ✅ **Shift Restrictions** — Prohibited shifts per employee
 
-### 🎯 Auto-Planer & Optimierung
-- ✅ **Restrictions-aware Auto-Planer** 🤖 — Automatische Schichtplanung mit Respektierung von Einschränkungen, Sperrtagen und Wünschen
-- ✅ **Optimierungs-Bericht** — Detaillierter Report nach Auto-Planung: angewandte Regeln, Konflikte, gewählte Alternativen
-- ✅ **Qualifikations-/Kompetenz-Matrix** 📊 — Interaktive Mitarbeiter × Qualifikationen-Matrix mit Gap-Analyse und Check-Modus
+### 🎯 Auto-Planner & Optimization
+- ✅ **Restrictions-aware Auto-Planner** 🤖 — Automatic shift planning respecting restrictions, blocked days and preferences
+- ✅ **Optimization Report** — Detailed report after auto-planning: applied rules, conflicts, chosen alternatives
+- ✅ **Qualification/Competency Matrix** 📊 — Interactive employee × qualification matrix with gap analysis and check mode
 
-### 👤 Self-Service & Rollen
-- ✅ **Mitarbeiter Self-Service Portal** — Leser-Rolle mit Zugriff auf eigene Schichten, Urlaubs-Saldo, Zeitkonto
-- ✅ **Schichtwünsche Self-Service** — Wunsch-/Sperrtag-Einreichung direkt durch Mitarbeiter
+### 👤 Self-Service & Roles
+- ✅ **Employee Self-Service Portal** — Reader role with access to own shifts, leave balance, time account
+- ✅ **Shift Preferences Self-Service** — Preference/blocked day submission directly by employees
 
-### ⚖️ Fairness & Auswertung
-- ✅ **Mitarbeiter-Vergleich** ⚖️ — Zwei Mitarbeiter im Jahresüberblick nebeneinander: Statistik-Balkendiagramme, Schichtarten-Verteilung, Monatsansicht
-- ✅ **Fairness-Score** — Bewertet Gleichverteilung von Wochenend-, Nacht- und Feiertagsschichten mit Mitarbeiter-Ranking und Abweichungsanzeige
-- ✅ **Kapazitäts-Forecast** 📊 — Monatliche Kapazitätsvorschau: Besetzungskalender (grün/gelb/rot), Urlaubskonflikt-Erkennung (>30% Team abwesend), Handlungsbedarf-Panel, Tages-Detail-Modal
+### ⚖️ Fairness & Evaluation
+- ✅ **Employee Comparison** ⚖️ — Side-by-side annual comparison of two employees: statistics bar charts, shift type distribution, monthly view
+- ✅ **Fairness Score** — Evaluates equal distribution of weekend, night and holiday shifts with employee ranking and deviation display
+- ✅ **Capacity Forecast** 📊 — Monthly capacity preview: staffing calendar (green/yellow/red), leave conflict detection (>30% team absent), action panel, day detail modal
 
-### 📄 Berichte & Export (20+ Berichtstypen)
-- ✅ **Dienstplan-Bericht** — Monats-/Jahresbericht (CSV, HTML)
-- ✅ **Mitarbeiterliste** — Vollständige Stammdaten (CSV, Druckansicht)
-- ✅ **Abwesenheitsbericht** — Gesamt, pro Typ, pro Mitarbeiter, Timeline
-- ✅ **Urlaubsbericht** — Saldo, Entitlement, Gruppenübersicht
-- ✅ **Schichtbericht** — Schichtenverteilung, pro Mitarbeiter, pro Gruppe
-- ✅ **Zeitkonto-Bericht** — Saldo-Übersicht, Monatsdetail, Jahresabschluss-Vorschau
-- ✅ **Überstunden-Bericht** — Soll/Ist/Delta pro Mitarbeiter
-- ✅ **Personalbedarf-Bericht** — Soll/Ist Besetzung pro Tag
+### 📄 Reports & Export (20+ report types)
+- ✅ **Schedule Report** — Monthly/annual report (CSV, HTML)
+- ✅ **Employee List** — Complete master data (CSV, print view)
+- ✅ **Absence Report** — Total, by type, by employee, timeline
+- ✅ **Leave Report** — Balance, entitlement, group overview
+- ✅ **Shift Report** — Shift distribution, by employee, by group
+- ✅ **Time Account Report** — Balance overview, monthly detail, year-end close preview
+- ✅ **Overtime Report** — Target/actual/delta per employee
+- ✅ **Staffing Requirements Report** — Target/actual staffing per day
 
-### ⬆️ Import (7 Importtypen)
-- ✅ **Mitarbeiter-Import** (CSV)
-- ✅ **Schichtarten-Import** (CSV)
-- ✅ **Abwesenheiten-Import** (CSV)
-- ✅ **Feiertage-Import** (CSV)
-- ✅ **Ist-Stunden-Import** (CSV)
-- ✅ **Soll-Stunden-Import** (CSV)
-- ✅ **Urlaubsanspruch-Import** (CSV)
-- ✅ **Gruppen-Import** (CSV)
+### ⬆️ Import (7 import types)
+- ✅ **Employee Import** (CSV)
+- ✅ **Shift Types Import** (CSV)
+- ✅ **Absences Import** (CSV)
+- ✅ **Holidays Import** (CSV)
+- ✅ **Actual Hours Import** (CSV)
+- ✅ **Target Hours Import** (CSV)
+- ✅ **Leave Entitlement Import** (CSV)
+- ✅ **Groups Import** (CSV)
 
-### 🖨️ Drucken
-- ✅ **Drucken-Button auf allen 22 Seiten** — jede Seite kann direkt gedruckt werden
-- ✅ **Sauberes Print-CSS** — Sidebar, Buttons und nicht druckbare Elemente werden ausgeblendet
-- ✅ **Druckoptimiert** — Tabellen brechen korrekt um, Farben werden für S/W-Druck optimiert
+### 🖨️ Printing
+- ✅ **Print button on all 22 pages** — every page can be printed directly
+- ✅ **Clean print CSS** — Sidebar, buttons and non-printable elements are hidden
+- ✅ **Print-optimized** — Tables break correctly, colors are optimized for B/W printing
 
-### ⌨️ UX & Bedienung
-- ✅ **Command Palette** 🔍 — `Ctrl+K` öffnet Schnellsuch-Palette mit Fuzzy-Suche zu allen Seiten, Mitarbeitern und Aktionen
-- ✅ **Keyboard Shortcuts** — Globale Tastaturkürzel für Schnellnavigation; `?` öffnet Hilfe-Overlay
-- ✅ **Keyboard Accessibility** ♿ — Vollständige Tastaturnavigation in allen Tabellen und Formularen; ARIA-Labels; Fokus-Indikatoren
-- ✅ **Dark Mode** 🌙 — Animierter Dark-Mode-Toggle, auch auf Mobile sichtbar; persistente Präferenz
-- ✅ **Bulk-Operationen** — Mehrere Schichten gleichzeitig setzen/löschen; Auswahl-Modus mit Checkboxen im Dienstplan; Bulk-Gruppenzuweisung
-- ✅ **CSV/Excel-Export** 📥 — Download-Buttons auf Mitarbeiter- und Urlaubsseite; XLSX-Export für Abwesenheiten
-- ✅ **Erweiterte Filter** — Gruppenfilter in der Mitarbeiterliste; Volltextsuche im Protokoll
-- ✅ **Toast-Benachrichtigungen** — Nicht-blockierende Erfolgs-/Fehler-/Info-Meldungen
-- ✅ **DE/EN Sprachumschalter** 🌍 — Vollständige zweisprachige Benutzeroberfläche; Sprachwahl persistent
+### ⌨️ UX & Interaction
+- ✅ **Command Palette** 🔍 — `Ctrl+K` opens quick search palette with fuzzy search across all pages, employees and actions
+- ✅ **Keyboard Shortcuts** — Global keyboard shortcuts for quick navigation; `?` opens help overlay
+- ✅ **Keyboard Accessibility** ♿ — Full keyboard navigation in all tables and forms; ARIA labels; focus indicators
+- ✅ **Dark Mode** 🌙 — Animated dark mode toggle, visible on mobile too; persistent preference
+- ✅ **Bulk Operations** — Set/delete multiple shifts at once; selection mode with checkboxes in the schedule; bulk group assignment
+- ✅ **CSV/Excel Export** 📥 — Download buttons on employee and leave pages; XLSX export for absences
+- ✅ **Advanced Filters** — Group filter in employee list; full-text search in activity log
+- ✅ **Toast Notifications** — Non-blocking success/error/info messages
+- ✅ **DE/EN Language Switcher** 🌍 — Fully bilingual user interface; persistent language choice
 
-### 👥 Team & Organisation
-- ✅ **Team-Übersicht** 🏢 — Übersicht aller Gruppen mit Mitgliederanzahl, Verantwortlichen und Schichtmodellen; klickbare Kacheln mit Schnellnavigation
-- ✅ **Organigramm** 🌳 — Visuelles Baumdiagramm der Unternehmenshierarchie auf einen Blick
+### 👥 Team & Organization
+- ✅ **Team Overview** 🏢 — Overview of all groups with member count, supervisors and shift models; clickable tiles with quick navigation
+- ✅ **Org Chart** 🌳 — Visual tree diagram of the company hierarchy at a glance
 
-### 📊 Analytics & Visualisierung
-- ✅ **SVG Multi-Line Chart** 📈 — Zeitreihen-Vergleich mehrerer Mitarbeiter/Gruppen über Monate ohne externe Chart-Bibliothek
-- ✅ **SVG Donut Chart** 🍩 — Anteils-Visualisierung (z. B. Schichttypen-Verteilung) in reinem SVG
+### 📊 Analytics & Visualization
+- ✅ **SVG Multi-Line Chart** 📈 — Time series comparison of multiple employees/groups over months without external chart library
+- ✅ **SVG Donut Chart** 🍩 — Proportional visualization (e.g. shift type distribution) in pure SVG
 
 ### 🔍 Error Monitoring & Health
-- ✅ **Error Monitoring** 🚨 — Fehler werden erfasst, kategorisiert und in einem Health-Dashboard angezeigt
-- ✅ **Structured JSON Logging** 📋 — Alle Server-Events als JSON-Logs für einfache Weiterverarbeitung und Log-Aggregation
-- ✅ **Health-Dashboard** — Systemstatus, Fehlerrate und letzte Ereignisse auf einen Blick
+- ✅ **Error Monitoring** 🚨 — Errors are captured, categorized and displayed in a health dashboard
+- ✅ **Structured JSON Logging** 📋 — All server events as JSON logs for easy processing and log aggregation
+- ✅ **Health Dashboard** — System status, error rate and recent events at a glance
 
-### 🧩 UI-Komponenten-Bibliothek
-- ✅ **StatCard** — Wiederverwendbare Statistik-Kachel mit Trend-Indikator
-- ✅ **Badge** — Farbige Status-Badges für konsistente Kennzeichnung in der ganzen App
-- ✅ **PageHeader** — Einheitlicher Seitenkopf mit Titel, Breadcrumb und Aktions-Buttons
-- ✅ **DataTable** — Universelle Tabellen-Komponente mit Sortierung, Filterung und Paginierung
+### 🧩 UI Component Library
+- ✅ **StatCard** — Reusable statistics tile with trend indicator
+- ✅ **Badge** — Colored status badges for consistent labeling throughout the app
+- ✅ **PageHeader** — Unified page header with title, breadcrumb and action buttons
+- ✅ **DataTable** — Universal table component with sorting, filtering and pagination
 
 ### 📱 Mobile & Performance
-- ✅ **Progressive Web App (PWA)** 📲 — Installierbar auf Desktop & Mobile; Service Worker für Offline-Grundfunktion
-- ✅ **Offline-Erkennung** 🌐 — `useOnlineStatus`-Hook zeigt Offline-Banner bei Verbindungsverlust; automatischer Reconnect
-- ✅ **SSE Echtzeit-Updates** 📡 — Server-Sent Events: Änderungen erscheinen live bei allen offenen Clients ohne Polling (Schedule, Swap, Settings, Notifications)
-- ✅ **Mobile-freundlich** — Responsive Design mit Hamburger-Menü und Touch-Targets
-- ✅ **Responsive Tabellen** — Horizontales Scrollen auf kleinen Bildschirmen; vergrößerte Touch-Targets
-- ✅ **Code-Splitting** — Lazy Loading aller Seiten (schnellerer Start)
-- ✅ **API-Cache** — TTL-basierter In-Memory-Cache für häufig abgefragte Endpoints; Stammdaten-Caching im Frontend
-- ✅ **API-Paginierung** — Opt-in Paginierung für Mitarbeiter-, Abwesenheits- und Changelog-Endpoints (`page` + `page_size` Parameter)
-- ✅ **Error Handling & Retry** — Automatische Wiederholungsversuche bei API-Fehlern; `useApiData`-Hook mit Loading/Error-States
-- ✅ **Optimierter Build** — Vite-basierter Production-Build
+- ✅ **Progressive Web App (PWA)** 📲 — Installable on desktop & mobile; service worker for basic offline functionality
+- ✅ **Offline Detection** 🌐 — `useOnlineStatus` hook shows offline banner on connection loss; automatic reconnect
+- ✅ **SSE Real-Time Updates** 📡 — Server-Sent Events: changes appear live on all open clients without polling (Schedule, Swap, Settings, Notifications)
+- ✅ **Mobile-Friendly** — Responsive design with hamburger menu and touch targets
+- ✅ **Responsive Tables** — Horizontal scrolling on small screens; enlarged touch targets
+- ✅ **Code Splitting** — Lazy loading of all pages (faster startup)
+- ✅ **API Cache** — TTL-based in-memory cache for frequently queried endpoints; master data caching in frontend
+- ✅ **API Pagination** — Opt-in pagination for employee, absence and changelog endpoints (`page` + `page_size` parameters)
+- ✅ **Error Handling & Retry** — Automatic retry on API errors; `useApiData` hook with loading/error states
+- ✅ **Optimized Build** — Vite-based production build
 
-### 🔒 Sicherheit
-- ✅ **Security Headers** — HTTP Security Headers (CSP, X-Frame-Options, HSTS, Permissions-Policy u. a.) aktiv
-- ✅ **CSRF-Schutz** — Double-Submit-Cookie-Pattern gegen Cross-Site-Request-Forgery
-- ✅ **Auth-Absicherung** — Alle Frontend-Komponenten senden korrekte Bearer-Token; keine ungeschützten Endpunkte
-- ✅ **Rate Limiting** — API-weites Rate-Limit (100 req/min), Login-Brute-Force-Schutz (5 Versuche/min + 15-min-Lockout)
-- ✅ **2-Faktor-Authentifizierung (2FA)** 🔐 — TOTP-basierte 2FA mit QR-Code-Setup, Backup-Codes, Admin-Erzwingung und -Reset
-- ✅ **Session-Management** — Token-Expiry mit auto-Logout und Session-Expired-Hinweis; max. Sessions pro User
-- ✅ **Passwort-Richtlinien** — Konfigurierbare Mindestlänge, Großbuchstaben- und Ziffern-Pflicht
-- ✅ **Input-Sanitization** — Verschärfte Pydantic-Validierung und Input-Bereinigung im Backend
-- ✅ **Dev-Mode-Schutz** — Dev-Token nur im Entwicklungsmodus aktiv (`SP5_DEV_MODE=true`)
+### 🔒 Security
+- ✅ **Security Headers** — HTTP security headers (CSP, X-Frame-Options, HSTS, Permissions-Policy, etc.) active
+- ✅ **CSRF Protection** — Double-submit cookie pattern against cross-site request forgery
+- ✅ **Auth Hardening** — All frontend components send correct bearer tokens; no unprotected endpoints
+- ✅ **Rate Limiting** — API-wide rate limit (100 req/min), login brute-force protection (5 attempts/min + 15-min lockout)
+- ✅ **Two-Factor Authentication (2FA)** 🔐 — TOTP-based 2FA with QR code setup, backup codes, admin enforcement and reset
+- ✅ **Session Management** — Token expiry with auto-logout and session-expired notification; max sessions per user
+- ✅ **Password Policies** — Configurable minimum length, uppercase and digit requirements
+- ✅ **Input Sanitization** — Strict Pydantic validation and input sanitization in backend
+- ✅ **Dev Mode Protection** — Dev token only active in development mode (`SP5_DEV_MODE=true`)
 
 ### 🔧 System & Administration
-- ✅ **Aktivitätsprotokoll** — Vollständige Änderungshistorie aller API-Aktionen (Erstellt/Geändert/Gelöscht) mit Filtern nach Datum, Benutzer, Aktion, Objekt; alte/neue Werte im Detail
-- ✅ **Benutzerverwaltung** — Rollen, Passwort-Änderung, Passwort-Reset mit E-Mail-Versand, gruppen- und mitarbeiterbezogene Zugriffsrechte
-- ✅ **E-Mail-Benachrichtigungen** 📧 — SMTP-Integration für Passwort-Reset, Abwesenheits-Benachrichtigungen und Tausch-Anfragen; Admin-Konfigurationsseite mit Test-E-Mail
-- ✅ **iCal-Feed** 📅 — Subscribable iCal-Feed (`/api/ical/...`) für Schichtpläne; Token-basierte Authentifizierung für Kalender-Apps (Google Calendar, Outlook, Apple)
-- ✅ **Benachrichtigungen** 🔔 — In-App Benachrichtigungssystem mit Bell-Icon, Dropdown, Filterseite und Gelesen-Markierung
-- ✅ **Backup & Restore** — ZIP-Backup aller DBF-Dateien inkl. Wiederherstellung; automatisches Pre-Restore-Backup; SQLite-Export-Endpoint
-- ✅ **Abrechnungszeiträume** — Perioden definieren und verwalten
-- ✅ **Konfigurationsmanagement** ⚙️ — Zentrale Einstellungsseite mit kategorisierten Konfigurationsgruppen (Planung, Benachrichtigungen, Anzeige); Sofortspeicherung mit Validierung
-- ✅ **Einstellungen** — Systemkonfiguration (USETT)
-- ✅ **DB-Komprimierung** — Gelöschte Datensätze aus DBF-Dateien entfernen
+- ✅ **Activity Log** — Complete change history of all API actions (Created/Modified/Deleted) with filters by date, user, action, object; old/new values in detail
+- ✅ **User Management** — Roles, password change, password reset with email, group- and employee-based access rights
+- ✅ **Email Notifications** 📧 — SMTP integration for password reset, absence notifications and swap requests; admin configuration page with test email
+- ✅ **iCal Feed** 📅 — Subscribable iCal feed (`/api/ical/...`) for shift schedules; token-based authentication for calendar apps (Google Calendar, Outlook, Apple)
+- ✅ **Notifications** 🔔 — In-app notification system with bell icon, dropdown, filter page and read markers
+- ✅ **Backup & Restore** — ZIP backup of all DBF files including restore; automatic pre-restore backup; SQLite export endpoint
+- ✅ **Billing Periods** — Define and manage accounting periods
+- ✅ **Configuration Management** ⚙️ — Central settings page with categorized configuration groups (Planning, Notifications, Display); instant save with validation
+- ✅ **Settings** — System configuration (USETT)
+- ✅ **DB Compaction** — Remove deleted records from DBF files
 
 ---
 
-## Kompatibilität
+## Compatibility
 
-| Eigenschaft | Original SP5 | OpenSchichtplaner5 |
-|-------------|:-----------:|:-----------------:|
-| Betriebssystem | Windows only | 🌐 Plattformunabhängig |
-| Oberfläche | Desktop-App | 🖥️ Moderner Browser |
-| Datenbankformat | DBF/FoxPro | ✅ DBF/FoxPro (kompatibel) |
-| Parallelbetrieb | — | ✅ Beide laufen gleichzeitig |
-| Lizenz | Proprietär | ✅ Open Source (MIT) |
-| Kosten | Kostenpflichtig | ✅ Kostenlos |
-| Drucken | Desktop-Druck | ✅ Browser-Druck (alle Seiten) |
-| Mobile | Nein | ✅ Responsive + Hamburger-Menü |
+| Property | Original SP5 | OpenSchichtplaner5 |
+|----------|:-----------:|:-----------------:|
+| Operating System | Windows only | 🌐 Cross-platform |
+| Interface | Desktop app | 🖥️ Modern browser |
+| Database Format | DBF/FoxPro | ✅ DBF/FoxPro (compatible) |
+| Parallel Operation | — | ✅ Both run simultaneously |
+| License | Proprietary | ✅ Open Source (MIT) |
+| Cost | Paid | ✅ Free |
+| Printing | Desktop print | ✅ Browser print (all pages) |
+| Mobile | No | ✅ Responsive + hamburger menu |
 
-> 💡 OpenSchichtplaner5 und das Original Schichtplaner5 greifen auf **dieselben Datenbankdateien** zu. Kein Export, kein Import, keine Migration.
+> 💡 OpenSchichtplaner5 and the original Schichtplaner5 access **the same database files**. No export, no import, no migration.
 
 ---
 
 ## Installation
 
-### Voraussetzungen
+### Prerequisites
 
 - Python 3.8+
 - Node.js 18+
-- Zugriff auf den SP5-Datenordner (`.DBF`-Dateien)
+- Access to the SP5 data directory (`.DBF` files)
 
-### Backend starten
+### Start the Backend
 
 ```bash
 cd backend
 pip install -r requirements.txt
-SP5_DB_PATH=/pfad/zu/sp5/Daten uvicorn api.main:app --host 0.0.0.0 --port 8000
+SP5_DB_PATH=/path/to/sp5/Data uvicorn api.main:app --host 0.0.0.0 --port 8000
 ```
 
-> ⚠️ **Multi-Worker Hinweis:** Die Session-Verwaltung nutzt einen In-Memory-Store.
-> Bei mehreren Uvicorn-Workers (`--workers N`) werden Tokens nicht zwischen Workers geteilt,
-> was zu zufälligen 401-Fehlern führt. **Verwende `--workers 1`** oder ersetze den Store
-> durch eine Redis-Lösung für Multi-Worker-Deployments.
+> ⚠️ **Multi-Worker Note:** Session management uses an in-memory store.
+> With multiple Uvicorn workers (`--workers N`), tokens are not shared between workers,
+> which leads to random 401 errors. **Use `--workers 1`** or replace the store
+> with a Redis solution for multi-worker deployments.
 
-### Frontend starten
+### Start the Frontend
 
 ```bash
 cd frontend
@@ -270,95 +270,95 @@ npm install
 npm run dev
 ```
 
-Öffne dann [`http://localhost:5173`](http://localhost:5173) im Browser.
+Then open [`http://localhost:5173`](http://localhost:5173) in your browser.
 
-### 🐳 Deployment mit Docker
+### 🐳 Docker Deployment
 
-Docker Images werden automatisch bei jedem Release gebaut und auf der GitHub Container Registry veröffentlicht:
+Docker images are automatically built on every release and published to the GitHub Container Registry:
 
 ```bash
-# Neuestes Release (amd64 + arm64)
+# Latest release (amd64 + arm64)
 docker pull ghcr.io/mschabhuettl/openschichtplaner5:latest
 
-# Spezifische Version
+# Specific version
 docker pull ghcr.io/mschabhuettl/openschichtplaner5:1.0.0-rc3
 ```
 
-#### Schnellstart mit Docker Compose
+#### Quick Start with Docker Compose
 
 ```bash
 git clone https://github.com/mschabhuettl/openschichtplaner5.git
 cd openschichtplaner5
 
-# Konfiguration anpassen (SP5_DB_PATH + SECRET_KEY!)
+# Adjust configuration (SP5_DB_PATH + SECRET_KEY!)
 cp backend/.env.docker backend/.env.docker.local
-nano backend/.env.docker    # SP5_DB_PATH + SECRET_KEY setzen!
+nano backend/.env.docker    # Set SP5_DB_PATH + SECRET_KEY!
 
-# Produktionsmodus starten (detached)
+# Start in production mode (detached)
 make prod
-# oder: docker compose up -d --build
+# or: docker compose up -d --build
 ```
 
-Öffne dann [`http://localhost:8000`](http://localhost:8000) im Browser.
+Then open [`http://localhost:8000`](http://localhost:8000) in your browser.
 
-#### Makefile-Befehle
+#### Makefile Commands
 
-| Befehl | Beschreibung |
-|--------|-------------|
-| `make prod` | Docker-Container im Produktionsmodus starten (detached) |
-| `make docker` | Docker-Container starten (foreground) |
-| `make docker-dev` | Entwicklungsmodus mit Hot-Reload (`--profile dev`) |
-| `make docker-down` | Container stoppen |
-| `make update` | `git pull` + Docker-Neustart (Rolling Update) |
-| `make backup` | Datenbank-Volume → lokales `.tar.gz`-Archiv |
-| `make build` | Frontend-Bundle bauen |
-| `make test` | Backend- und Frontend-Tests ausführen |
-| `make logs` | Live-Logs anzeigen |
+| Command | Description |
+|---------|-------------|
+| `make prod` | Start Docker container in production mode (detached) |
+| `make docker` | Start Docker container (foreground) |
+| `make docker-dev` | Development mode with hot-reload (`--profile dev`) |
+| `make docker-down` | Stop containers |
+| `make update` | `git pull` + Docker restart (rolling update) |
+| `make backup` | Database volume → local `.tar.gz` archive |
+| `make build` | Build frontend bundle |
+| `make test` | Run backend and frontend tests |
+| `make logs` | Show live logs |
 
-#### Konfiguration (`backend/.env.docker`)
+#### Configuration (`backend/.env.docker`)
 
-Alle Umgebungsvariablen mit Erklärungen: → [`backend/.env.example`](backend/.env.example)
+All environment variables with explanations: → [`backend/.env.example`](backend/.env.example)
 
-Wichtigste Pflichtfelder:
+Most important required fields:
 
 ```env
-SP5_DB_PATH=/app/sp5_db/Daten   # Pfad zu den DBF-Dateien im Container
-SECRET_KEY=<openssl rand -hex 32>  # JWT-Schlüssel — UNBEDINGT ändern!
-ALLOWED_ORIGINS=https://meine-domain.de  # Nur eigene Domain erlauben
-SP5_HSTS=true    # HTTPS-Only — nur mit TLS-Reverse-Proxy aktivieren!
-SP5_DEV_MODE=false  # NIEMALS in Produktion auf true setzen!
+SP5_DB_PATH=/app/sp5_db/Daten   # Path to DBF files in the container
+SECRET_KEY=<openssl rand -hex 32>  # JWT secret — MUST be changed!
+ALLOWED_ORIGINS=https://my-domain.com  # Allow only your own domain
+SP5_HSTS=true    # HTTPS-only — only enable with TLS reverse proxy!
+SP5_DEV_MODE=false  # NEVER set to true in production!
 ```
 
 #### Backup & Restore
 
 ```bash
-# Backup erstellen (Volume → lokales Archiv in ./backups/)
+# Create backup (volume → local archive in ./backups/)
 make backup
 
-# Restore (Beispiel)
+# Restore (example)
 docker run --rm \
   -v openschichtplaner5_sp5_data:/data \
   -v $(pwd)/backups:/backup \
   alpine tar xzf /backup/sp5_db_<timestamp>.tar.gz -C /data
 ```
 
-#### Updates einspielen
+#### Applying Updates
 
 ```bash
-make update   # git pull + Docker-Neustart in einem Schritt
+make update   # git pull + Docker restart in one step
 ```
 
-#### Reverse-Proxy (nginx/caddy)
+#### Reverse Proxy (nginx/caddy)
 
-Für Produktionsumgebungen wird ein Reverse-Proxy mit TLS empfohlen:
+For production environments, a reverse proxy with TLS is recommended:
 
 ```nginx
 server {
     listen 443 ssl http2;
-    server_name meine-domain.de;
+    server_name my-domain.com;
 
-    ssl_certificate     /etc/letsencrypt/live/meine-domain.de/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/meine-domain.de/privkey.pem;
+    ssl_certificate     /etc/letsencrypt/live/my-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/my-domain.com/privkey.pem;
     ssl_protocols       TLSv1.2 TLSv1.3;
     ssl_ciphers         HIGH:!aNULL:!MD5;
 
@@ -369,7 +369,7 @@ server {
     add_header X-XSS-Protection          "1; mode=block"                                always;
     add_header Referrer-Policy           "strict-origin-when-cross-origin"              always;
     add_header Permissions-Policy        "camera=(), microphone=(), geolocation=()"     always;
-    # CSP anpassen falls eigene CDN/Fonts verwendet werden:
+    # Adjust CSP if using custom CDN/fonts:
     add_header Content-Security-Policy   "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; frame-ancestors 'none';" always;
     # ─────────────────────────────────────────────────────────────────────────
 
@@ -383,7 +383,7 @@ server {
         proxy_buffering    off;
     }
 
-    # SSE (Server-Sent Events) benötigt keine Pufferung
+    # SSE (Server-Sent Events) requires no buffering
     location /api/sse {
         proxy_pass         http://127.0.0.1:8000;
         proxy_set_header   Host              $host;
@@ -398,307 +398,118 @@ server {
 # HTTP → HTTPS redirect
 server {
     listen 80;
-    server_name meine-domain.de;
+    server_name my-domain.com;
     return 301 https://$host$request_uri;
 }
 ```
 
-Mit Reverse-Proxy dann `SP5_HSTS=true` setzen.
+With a reverse proxy, set `SP5_HSTS=true`.
 
-#### Empfohlener Start auf einem Server
+#### Recommended Server Setup
 
 ```bash
-# 1. .env aus Vorlage erstellen und anpassen
+# 1. Create .env from template and adjust
 cp .env.example .env
-nano .env   # SECRET_KEY, SP5_DB_PATH, ALLOWED_ORIGINS setzen
+nano .env   # Set SECRET_KEY, SP5_DB_PATH, ALLOWED_ORIGINS
 
-# 2. Mit expliziter Prod-Compose starten (bindet nur auf localhost)
+# 2. Start with explicit prod compose (binds only to localhost)
 make prod-secure
-# oder direkt:
+# or directly:
 docker compose -f docker-compose.prod.yml up -d --build
 
-# 3. nginx als Reverse-Proxy vorschalten (siehe Konfiguration oben)
+# 3. Put nginx as reverse proxy in front (see configuration above)
 ```
 
-#### Production-Readiness-Checkliste
+#### Production Readiness Checklist
 
-- [ ] `SECRET_KEY` auf sicheren Zufallswert gesetzt (`openssl rand -hex 32`)
+- [ ] `SECRET_KEY` set to secure random value (`openssl rand -hex 32`)
 - [ ] `DEBUG=false`
 - [ ] `SP5_DEV_MODE=false`
-- [ ] `ALLOWED_ORIGINS` auf eigene Domain beschränkt
-- [ ] `SP5_HSTS=true` (nur mit HTTPS/Reverse-Proxy)
-- [ ] Nginx-Security-Header gesetzt (X-Frame-Options, CSP, HSTS, …)
-- [ ] Port 8000 nur auf `127.0.0.1` gebunden (via `docker-compose.prod.yml`)
-- [ ] Regelmäßige Backups per `make backup` oder Cron eingerichtet
-- [ ] Logs unter `./logs/` überwacht
+- [ ] `ALLOWED_ORIGINS` restricted to own domain
+- [ ] `SP5_HSTS=true` (only with HTTPS/reverse proxy)
+- [ ] Nginx security headers set (X-Frame-Options, CSP, HSTS, …)
+- [ ] Port 8000 bound only to `127.0.0.1` (via `docker-compose.prod.yml`)
+- [ ] Regular backups via `make backup` or cron configured
+- [ ] Logs under `./logs/` monitored
 
-#### Lokaler Betrieb ohne Docker
+#### Local Operation without Docker
 
 ```bash
-bash start.sh          # Normaler Start (Backend + Frontend)
-bash start.sh --build  # Mit erzwungenem Frontend-Rebuild
-bash start.sh --stop   # Backend stoppen
+bash start.sh          # Normal start (backend + frontend)
+bash start.sh --build  # With forced frontend rebuild
+bash start.sh --stop   # Stop backend
 ```
 
 ---
 
-## Benutzerrollen
+## User Roles
 
-| Rolle | Rechte |
-|-------|--------|
-| **Admin** | Vollzugriff: alle Stammdaten, Benutzerverwaltung, Backup, Import, Einstellungen |
-| **Planer** | Dienstplanung (Schedule, Abwesenheiten, Notizen, Übergaben, Wünsche) + Leserechte auf alle Stammdaten |
-| **Leser** | Nur Lesezugriff — alle Schreiboperationen sind gesperrt (403) |
+| Role | Permissions |
+|------|-------------|
+| **Admin** | Full access: all master data, user management, backup, import, settings |
+| **Planner** | Shift planning (schedule, absences, notes, handovers, preferences) + read access to all master data |
+| **Reader** | Read-only access — all write operations are blocked (403) |
 
-Die Rollen werden sowohl im Backend (API-Ebene, HTTP 403) als auch im Frontend (Buttons ausgeblendet) durchgesetzt.
+Roles are enforced both in the backend (API level, HTTP 403) and in the frontend (buttons hidden).
 
-### 🧪 Test-User für Demo
+### 🧪 Test Users for Demo
 
-| Benutzer | Passwort | Rolle |
-|----------|----------|-------|
+| User | Password | Role |
+|------|----------|------|
 | `admin` | `Test1234` | Admin |
-| `planer` | `Test1234` | Planer |
-| `leser` | `Test1234` | Leser |
+| `planer` | `Test1234` | Planner |
+| `leser` | `Test1234` | Reader |
 
 ---
 
-## Projektstruktur
+## Project Structure
 
 ```
 openschichtplaner5/
 ├── backend/
 │   ├── api/
-│   │   └── main.py          # FastAPI REST API (80+ Endpunkte)
+│   │   └── main.py          # FastAPI REST API (80+ endpoints)
 │   ├── data/
-│   │   └── changelog.json   # Aktivitätsprotokoll
+│   │   └── changelog.json   # Activity log
 │   └── sp5lib/
 │       ├── dbf_reader.py    # DBF/FoxPro Reader (UTF-16 LE)
 │       ├── dbf_writer.py    # DBF Writer (append/update/delete)
-│       ├── database.py      # High-level DB access (40+ Methoden)
-│       └── color_utils.py   # BGR→RGB Farbkonvertierung
+│       ├── database.py      # High-level DB access (40+ methods)
+│       └── color_utils.py   # BGR→RGB color conversion
 ├── frontend/
 │   └── src/
-│       ├── App.tsx           # Navigation & Layout (33 Seiten, Lazy Loading)
-│       ├── api/client.ts     # Typisierter API-Client
-│       └── pages/            # Alle Seitenkomponenten (33 Seiten)
+│       ├── App.tsx           # Navigation & Layout (33 pages, lazy loading)
+│       ├── api/client.ts     # Typed API client
+│       └── pages/            # All page components (33 pages)
 └── docs/
-    └── screenshots/          # App-Screenshots (30 Seiten)
+    └── screenshots/          # App screenshots (30 pages)
 ```
 
 ---
 
 ## Tech Stack
 
-| Bereich | Technologie |
-|---------|-------------|
+| Area | Technology |
+|------|------------|
 | Backend | Python, FastAPI, Uvicorn |
-| Datenbank | DBF/FoxPro (direkt, kein ORM) |
+| Database | DBF/FoxPro (direct, no ORM) |
 | Frontend | React 18, TypeScript, Vite |
 | Styling | Tailwind CSS |
 | Charts | Recharts |
-| API | REST (OpenAPI / Swagger unter `/docs`) — 162+ Endpoints vollständig dokumentiert |
-| E-Mail | SMTP (optional) — Benachrichtigungen, Passwort-Reset |
-| Kalender | iCal-Feed (`.ics`) — Token-basierte Schichtplan-Subscription |
-| Echtzeit | SSE (Server-Sent Events) — Live-Updates ohne Polling |
-| Testing | pytest (Backend) + Playwright (E2E) |
+| API | REST (OpenAPI / Swagger at `/docs`) — 162+ endpoints fully documented |
+| Email | SMTP (optional) — notifications, password reset |
+| Calendar | iCal feed (`.ics`) — token-based schedule subscription |
+| Real-time | SSE (Server-Sent Events) — live updates without polling |
+| Testing | pytest (backend) + Playwright (E2E) |
 
 ---
 
-## Dokumentation
+## Documentation
 
-📖 **[GitHub Wiki](https://github.com/mschabhuettl/openschichtplaner5/wiki)** — vollständige Dokumentation orientiert am Original-Schichtplaner5-Handbuch
-
----
-
-## CHANGELOG
-
-### [1.0.0-rc3] — Q-Series (2026-03-10)
-
-#### 🔒 Security & Hardening
-- **Security Headers** — CSP, X-Frame-Options, HSTS, Permissions-Policy, Referrer-Policy
-- **CSRF Protection** — Double-submit cookie pattern gegen Cross-Site-Request-Forgery
-- **Rate Limiting** — 100 req/min global, 5/min auf Login; IP-basiertes Brute-Force-Lockout
-
-#### 📧 Email & iCal
-- **SMTP Email System** — Konfigurierbare E-Mail-Benachrichtigungen für Passwort-Reset, Abwesenheiten, Tausch-Anfragen
-- **iCal-Feed** — Subscribable `.ics`-Feed für Schichtpläne mit Token-basierter Auth
-
-#### 🔄 Schicht-Tauschbörse (Self-Service)
-- **Self-Service Tausch-Workflow** — Mitarbeiter stellen Tausch-Anfrage → Partner akzeptiert/lehnt ab → Planer genehmigt → automatische Ausführung
-- **Auto-Pending & Benachrichtigungen** — Abwesenheits-Anträge erzeugen automatisch Genehmigungsanfragen
-
-#### 📊 Analytics & Berichte
-- **Jahresrückblick** — YoY-Vergleich, Monats-Balkendiagramme, Mitarbeiter-Heatmap, Gruppen-CSV-Export
-- **Fairness-Score** — Gleichverteilungs-Bewertung für Wochenend-/Nacht-/Feiertags-Schichten
-- **Kapazitäts-Forecast** — Monatliche Vorschau mit Unterbesetzungsrisiko-Analyse
-
-#### 🔔 Benachrichtigungen
-- **In-App Notifications** — Bell-Icon mit Dropdown, eigene Filterseite, Gelesen-Markierung
-- **SSE Event-Erweiterung** — Echtzeit-Events für Schedule, Swap, Settings, Notifications
-
-#### ⚡ Performance & API
-- **TTL-Cache** — In-Memory Cache für häufig abgefragte Endpoints
-- **Opt-in Paginierung** — `page` + `page_size` Parameter für Mitarbeiter, Abwesenheiten, Changelog
-- **Input-Validierung** — Verbesserte Fehlermeldungen und Eingabe-Validierung über alle Endpoints
-
-#### ♿ Accessibility & UX
-- **Keyboard Navigation** — ARIA-Labels, Fokus-Indikatoren, vollständige Tastatur-Bedienbarkeit
-- **Dark Mode Toggle** — Animierter Schalter, auch auf Mobile sichtbar
-- **Offline-Erkennung** — Banner bei Verbindungsverlust, automatischer Reconnect
-- **CSV/Excel-Export** — Download-Buttons auf Mitarbeiter- und Urlaubsseite
-- **Audit-Log Enhanced** — Alte/neue Werte, Entity-Type-Filter, User-Tracking
-
-#### 🔐 Auth
-- **Passwort-Reset** — Admin kann temporäres Passwort generieren + optional per E-Mail senden
-- **Session-Expired UX** — Benutzerfreundlicher Hinweis bei abgelaufenem Token
-
-#### 🧪 Testing
-- **E2E Tests** — Playwright End-to-End Tests für kritische Flows
-- **API-Docs** — Vollständige OpenAPI-Dokumentation: alle 162+ Endpoints mit `summary`, `tags`, `description`
+📖 **[GitHub Wiki](https://github.com/mschabhuettl/openschichtplaner5/wiki)** — full documentation based on the original Schichtplaner5 manual
 
 ---
 
-### [Unreleased] — TASK-01 bis TASK-19 (2026-02-22)
-
-#### 🔧 TASK-01 — Bug-Scan & Fixes
-- Fix: WORKDAYS_LIST korrekte Wochentags-Auflösung
-- Fix: SHORTNAME-Kürzel-Generierung bei leeren Feldern
-- Fix: API-Defaults für fehlende Pflichtfelder
-
-#### 📊 TASK-02 — Dashboard mit echten Charts
-- **Recharts-Integration:** Soll/Ist-Balkendiagramm, Abwesenheits-Kreisdiagramm
-- **Widget: Geburtstage** — Mitarbeiter mit Geburtstag diesen Monat
-- **Widget: Feiertage** — Nächste österreichische Feiertage
-- **Widget: Abwesenheiten** — Aktuelle Abwesenheitsübersicht
-- **Widget: Heute im Dienst** — Wer arbeitet heute?
-
-#### ⚡ TASK-03 — Code-Splitting + Lazy Loading
-- Alle 33 Seiten via `React.lazy()` + `Suspense` aufgeteilt
-- Deutlich schnellerer initialer Seitenload
-- Ladeindikator während Chunk-Download
-
-#### 📱 TASK-04 — Mobile UX
-- **Hamburger-Menü** für Smartphone & Tablet
-- **Touch-Targets** vergrößert (min. 44×44px)
-- Overlay-Navigation auf kleinen Bildschirmen
-- Responsive Layouts für alle 33 Seiten
-
-#### 📆 TASK-04b — Jahresübersicht Einzelansicht
-- Jahresübersicht zeigt jetzt standardmäßig **Einzelansicht** (wie Original SP5)
-- Umschalter zw. Einzel- und Gruppenansicht
-
-#### 📅 TASK-05 — Dienstplan-UX
-- **Wochenend-Hervorhebung** — Sa/So visuell abgehoben (hellblau)
-- **Heutiger Tag** — blau hervorgehoben
-- **Feiertage** im Dienstplan sichtbar (Tooltip mit Feiertagsname)
-- **Tooltips** auf Schichtzellen: Schichtname, Zeiten, Abwesenheitsgrund
-
-#### 👤 TASK-06 — SHORTNAME Auto-Generierung
-- SHORTNAME wird automatisch aus Vor- und Nachnamen generiert wenn leer
-- Format: erste Buchstaben Vorname + Nachname (z.B. „Max Mustermann" → „MMU")
-- Kein leerer SHORTNAME mehr möglich
-
-#### 🖨️ TASK-07 — Drucken auf allen Seiten
-- **Drucken-Button** auf allen 22 Frontend-Seiten
-- **Print-CSS** blendet Sidebar, Buttons und UI-Elemente aus
-- Saubere Druckansicht für Tabellen, Kalender, Listen
-- Funktioniert mit Browser-Druckdialog (Strg+P)
-
-#### 🔒 TASK-08 — TypeScript Strict Mode + Code-Qualität
-- `strict: true` in `tsconfig.app.json` + `tsconfig.node.json` (war bereits gesetzt, validiert)
-- 4x `(import.meta as any).env` → `import.meta.env` (unnötige Casts entfernt)
-- 4x `catch (err: any)` → `catch (err: unknown)` mit `instanceof Error` Typwächter
-- Build: 0 Fehler, 0 TypeScript-Errors
-
-#### 🔐 TASK-09 — Auth-System (Login, Rollen, Dev-Mode)
-- **Backend-Auth:** Session-Persistenz + granulare Benutzerrechte (Admin/Planer/Leser)
-- **Frontend-Login:** Login-Seite mit Benutzername/Passwort + Dev-Mode (kein Passwort)
-- **Rollen-System:** Admin (voller Zugriff), Planer (Lesen/Schreiben), Leser (nur Lesen)
-- **Session-Management:** Cookie-basierte Sessions, automatischer Redirect zum Login
-- **Benutzerverwaltung-Seite:** Benutzer anlegen, Passwort ändern, Rollen zuweisen
-
-#### ✏️ TASK-11 — Dienstplan bearbeiten (Write-API + Click-to-Edit)
-- **Click-to-Edit:** Klick auf Zelle öffnet Modal → Schichtart auswählen → Speichern/Löschen
-- **Undo/Redo:** Strg+Z / Strg+Y für unbegrenzte Rückgängig-Aktionen
-- **Copy/Paste:** Schichten kopieren und einfügen
-- **Backend Write-API:** `POST /api/schedule`, `DELETE /api/schedule` direkt in DBF
-- **Abwesenheiten:** Abwesenheitsarten-Auswahl im Edit-Modal
-- **Sonderdienst:** Schicht mit individuellen Start/Endzeiten
-
-#### 📈 TASK-12 — Mitarbeiter-Stundenauswertung mit CSV-Export
-- **Neuer Tab "Mitarbeiter-Auswertung"** in der Statistiken-Seite
-- **Mitarbeiter-Dropdown** mit Namen + Kürzel
-- **8 Summary-Cards:** Soll-Std, Ist-Std, Differenz, Schichten, Wochenende, Nachtschichten, Urlaubstage, Abwesenheit
-- **Monatstabelle:** 12 Monate als Jahresübersicht pro Person
-- **CSV-Export:** Download der persönlichen Stundenübersicht (Excel-kompatibel mit BOM)
-- **Backend:** Neuer Endpoint `GET /api/statistics/employee/{id}?year=&month=`
-
-#### ⚡ TASK-13 — Bulk-Schichtzuweisung (Wochenvorlagen)
-- **Shift gedrückt + mehrere Zellen auswählen** → Massenzuweisung einer Schicht
-- **Drag & Drop:** Schichten per Drag & Drop verschieben (Alt = Kopieren)
-- **Backend:** `POST /api/schedule/bulk` für Zeiträume
-- **Rechtsklick-Menü:** Kontextmenü mit Woche/Monat füllen
-
-#### 👥 TASK-15 — Mitarbeiter vollständige CRUD-UI
-- **„+ Neu" Button:** Neuen Mitarbeiter direkt in der Web-UI anlegen
-- **Edit-Modal:** Alle Stammdaten bearbeiten (Name, Kürzel, Stunden, Wochentage, Farben, Foto)
-- **Soft-Delete:** Mitarbeiter deaktivieren (nicht dauerhaft löschen)
-- **Sortierbare Spalten:** Alle Tabellenköpfe klickbar für Auf-/Absteigend-Sortierung
-
-#### ⚠️ TASK-16 — Konflikte-Bereinigungstool
-- **Neue Seite „Konflikte"** mit Badge-Zähler im Menü
-- **Tabelle:** Mitarbeiter | Datum | Schicht | Abwesenheit | Aktionen
-- **Aktionen:** [Schicht löschen] + [Abwesenheit löschen] direkt aus der Übersicht
-- **Konflikt-Banner im Dienstplan** mit Inline-Löschbuttons pro Konflikt
-- **Backend:** `DELETE /api/schedule-shift/{emp_id}/{date}` + `DELETE /api/absences/{emp_id}/{date}`
-
-#### ⌨️ TASK-17 — Keyboard Power-Mode (Dienstplan per Tastatur)
-- **Pfeiltasten:** Navigation durch alle Zellen (Mitarbeiter × Tag)
-- **Buchstaben-Shortcuts:** Kürzel-Eingabe → direkte Schichtzuweisung (z.B. `F` = Frühschicht)
-- **Del/Backspace:** Schicht löschen
-- **Enter:** Ausgewählte Zelle öffnen (wie Klick)
-- **Escape:** Selektion aufheben / Modal schließen
-- **Visueller Fokus-Indikator:** Blaue Border auf aktiver Zelle
-- **Shortcut-Cheatsheet:** Hilfe-Overlay mit `?`-Button
-
-#### 🚦 TASK-18 — Personalbedarf-Ampel (Live-Besetzungs-Feedback)
-- **Ampel-Punkt** je Spaltenheader im Dienstplan: 🟢 ok / 🟡 knapp / 🔴 zu wenig
-- **Tooltip:** "3/4 Mitarbeiter besetzt"
-- **Backend:** Neuer Endpoint `GET /api/schedule/coverage?year=&month=`
-- **Dashboard-Integration:** Besetzungsampel auch im Dashboard-Widget sichtbar
-
-#### 🤖 TASK-19 — Auto-Planer (Schichtplan aus Schichtmodellen)
-- **„🤖 Auto-Planen" Button** im Dienstplan-Header
-- **2-Schritt-Dialog:** Konfiguration → Preview (was würde generiert?)
-- **Preview-Schritt:** Zeigt neue/übersprungene Einträge BEVOR die Generierung läuft
-- **Optionen:** Monat wählen, Mitarbeiter-Filter, Bestehende-Einträge-Handling
-- **Backend:** `POST /api/schedule/generate` nutzt `generate_schedule_from_cycle()` aus sp5lib
-- **Warnung:** Bei `force=true` wird Hinweis angezeigt (überschreibt bestehende Einträge)
-
----
-
-### 2026-02-22 (d213eb4)
-#### Neu
-- 14 neue Report-Typen (Schichtbericht, Zeitkonto-Bericht, Personalbedarf, Abwesenheits-Timeline, …)
-- 6 neue Import-Typen (Ist-Stunden, Soll-Stunden, Urlaubsanspruch, Abwesenheiten, Gruppen, Feiertage)
-- Berichte-Seite komplett überarbeitet
-
-### 2026-02-21 (2f36238)
-#### Neu
-- Wochentags-spezifische Schichtzeiten (Montag bis Sonntag unterschiedlich)
-- Foto-Upload für Mitarbeiter
-- Urlaubsantrag-Druckansicht
-- Passwort-Ändern in Benutzerverwaltung
-- Anonyme/verdeckte Abwesenheiten
-
-### 2026-02-20 (bf18a0f)
-#### Neu
-- Feiertage-Import (CSV)
-- Maximalbedarf (MAX) in Personalbedarf-Planung
-- Saldo-Übertrag (Jahresabschluss → nächstes Jahr buchen)
-
----
-
-## Lizenz
+## License
 
 MIT © [mschabhuettl](https://github.com/mschabhuettl)

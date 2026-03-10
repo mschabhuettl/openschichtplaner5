@@ -2,31 +2,24 @@
 
 ## [1.0.0-rc3] - 2026-03-10
 
-### Quality Session 2 — 15 Features & Hardening (Q026–Q040)
+### Added
+- **2-Faktor-Authentifizierung (TOTP):** Nutzer können 2FA über eine Authenticator-App aktivieren (QR-Code-Setup, Backup-Codes). Admins können 2FA für gesperrte Accounts zurücksetzen.
+- **Kalender-Ansicht:** Dienstplan jetzt auch als Monatskalender mit farbigen Schicht-Chips pro Tag. Toggle zwischen Wochen- und Kalenderansicht.
+- **Undo/Redo im Dienstplan:** Schichtzuweisungen rückgängig machen (Strg+Z) und wiederherstellen (Strg+Y), bis zu 30 Schritte.
+- **Dienstplan-Vorlagen:** Wochen als Vorlage speichern und auf beliebige Zielwochen anwenden. Vorlagen werden serverseitig gespeichert und sind für alle Planer sichtbar.
+- **Mitarbeiter-Verfügbarkeit:** Pro Mitarbeiter konfigurierbare Verfügbarkeit (Wochentage + Zeitfenster). Der Auto-Planer berücksichtigt diese beim Generieren von Vorschlägen.
+- **Mitarbeiter-Profil erweitert:** Neuer Tab für Qualifikationen, Verfügbarkeit und Vertragsstunden — alles direkt im Profil editierbar.
+- **Druckbares Dienstplan-Layout:** Optimiertes Drucklayout (A4 quer) mit ausgeblendeter Navigation, Seitenwiederholungen und Unterschriftszeile.
+- **Datenbank-Export:** Admins können die SQLite-Datenbank als Download sichern (optional komprimiert). Vor jeder Wiederherstellung wird automatisch ein Backup angelegt.
 
-#### 🔒 Sicherheit
-- **feat(Q040):** TOTP 2-Faktor-Authentifizierung (2FA) — QR-Code-Setup, TOTP-Verifizierung, Backup-Codes, Admin kann 2FA erzwingen/resetten
-- **security(Q026):** SlowAPI Rate-Limiting-Middleware aktiviert + per-Endpoint-Limits (Login Brute-Force-Schutz, Backup-Schutz)
-- **feat(Q027):** Proaktive Token-Expiry-Behandlung mit automatischem Logout und Session-Expired-Hinweis
-- **feat(Q028):** Backend Input-Sanitization & verschärfte Pydantic-Validierung
-
-#### 📅 Planung & Ansichten
-- **feat(Q035):** Kalender-Ansicht für Dienstplan — Monatsübersicht im Kalenderformat mit Tages-Details
-- **feat(Q033):** Dienstplan-Vorlagen via Backend-API (statt localStorage) — Vorlagen speichern, laden und anwenden
-- **feat(Q031):** Undo/Redo für Dienstplan-Änderungen — Schrittzähler, Tastaturkürzel (Ctrl+Z / Ctrl+Y)
-- **feat(Q030):** Verbesserte Konflikterkennung bei Schichtzuweisung
-- **feat(Q038):** Verbesserter Auto-Planer mit Verfügbarkeits-Prüfung, Stundenlimits und Konfliktchecks
-
-#### 👤 Mitarbeiter
-- **feat(Q039):** Mitarbeiter-Profil erweitert — Qualifikationen, Verfügbarkeit, Vertragsstunden
-
-#### 🖨️ Druck & Export
-- **feat(Q029):** Print-Stylesheet für Dienstplan — druckbares Layout mit optimierter Darstellung
-- **feat(Q032):** SQLite-Export-Endpoint + automatisches Pre-Restore-Backup vor Wiederherstellung
-
-#### 🔧 Quality & UX
-- **feat(Q009):** LoadingSpinner konsistent in allen Pages
-- **docs(Q025):** Vollständige OpenAPI-Beschreibungen für alle 162+ Endpoints + README-Update
+### Improved
+- **Konflikterkennung:** Beim Zuweisen von Schichten werden jetzt doppelte Zuweisungen, zeitliche Überschneidungen und Abwesenheiten geprüft (HTTP 409 mit Details).
+- **Auto-Planer:** Berücksichtigt nun Mitarbeiter-Verfügbarkeit, Wochenarbeitszeitlimits und bereits zugewiesene Stunden.
+- **Ladeanimationen:** Einheitliche Ladeanzeige in allen Seiten.
+- **Session-Ablauf:** Automatischer Logout vor JWT-Ablauf mit Hinweis-Toast.
+- **Rate Limiting:** API-Endpoints gegen Brute-Force abgesichert (Login: 5/min, allgemein: 100/min).
+- **Eingabevalidierung:** Verschärfte Backend-Validierung aller Formularfelder (Längen, Formate, Pflichtfelder).
+- **Passwort-Sicherheit:** Passwörter werden mit bcrypt gehasht. Migration von bestehenden Accounts erfolgt automatisch beim nächsten Login.
 
 ---
 

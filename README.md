@@ -9,6 +9,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0--rc3-brightgreen)](CHANGELOG.md)
 [![Tests](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml)
+[![Docker](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml)
+[![GitHub release](https://img.shields.io/github/v/release/mschabhuettl/openschichtplaner5?include_prereleases)](https://github.com/mschabhuettl/openschichtplaner5/releases)
 [![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-18+-61DAFB?logo=react&logoColor=black)](https://react.dev)
@@ -272,10 +274,20 @@ npm run dev
 
 ### 🐳 Deployment mit Docker
 
-#### Schnellstart
+Docker Images werden automatisch bei jedem Release gebaut und auf der GitHub Container Registry veröffentlicht:
 
 ```bash
-git clone https://github.com/your-org/openschichtplaner5.git
+# Neuestes Release (amd64 + arm64)
+docker pull ghcr.io/mschabhuettl/openschichtplaner5:latest
+
+# Spezifische Version
+docker pull ghcr.io/mschabhuettl/openschichtplaner5:1.0.0-rc3
+```
+
+#### Schnellstart mit Docker Compose
+
+```bash
+git clone https://github.com/mschabhuettl/openschichtplaner5.git
 cd openschichtplaner5
 
 # Konfiguration anpassen (SP5_DB_PATH + SECRET_KEY!)

@@ -66,7 +66,10 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 - ✅ **Notfall-Plan** 🚨 — Kurzfristige Ausfallplanung: Schicht und Datum wählen, kranken MA markieren & aus Plan entfernen, intelligente Einspringer-Vorschläge nach Score (Verfügbarkeit, Auslastung, Beschäftigungsgrad), Ein-Klick-Zuweisung
 - ✅ **Leitwand** 📺 — TV-Modus / Ops-Dashboard: Echtzeit-Uhr, Mitarbeiterkarten pro Schichtgruppe mit Fortschrittsbalken, Aktiv-Badges, Abwesenheiten, Ticker-Leiste, Vollbild-Button — optimiert für Wanddisplays im Aufenthaltsraum
 - ✅ **Wochenansicht** 🗃️ — Kompakte Mo–So Tabellenübersicht aller Mitarbeiter: farbige Schicht-Badges, Wochen-Navigation, Gruppenfilter, Suche, Kompaktmodus, Heute-Hervorhebung, Legende
+- ✅ **Kalender-Ansicht** 📆 — Monatsübersicht im Kalenderformat mit Tages-Details und Schichtfarben
 - ✅ **Dienstplan** — Monatsansicht mit Wochenend-Hervorhebung 🟦, heutiger Tag blau, Feiertage, Tooltips; A-Z Schnellfilter; Mitarbeiter-Auslastungsbalken; Schichtfarben-Legende; Schicht-Tausch Modal; Woche-Kopieren Modal; Schicht-Empfehlungen Modal
+- ✅ **Undo/Redo** ↩️ — Rückgängig/Wiederherstellen für Dienstplan-Änderungen mit Schrittzähler und Tastaturkürzel (Ctrl+Z / Ctrl+Y)
+- ✅ **Dienstplan-Vorlagen** 📋 — Vorlagen via Backend-API speichern, laden und auf Wochen anwenden
 - ✅ **Tages-Detailansicht** 🗓️ — Klick auf Kalendertag öffnet Modal mit vollständiger Tagesübersicht: alle Mitarbeiter mit Schichtzuweisung, Besetzungsgrad, Abwesenheiten und freie Plätze
 - ✅ **Einsatzplan** — Tages- und Wochenansicht mit Abweichungen
 - ✅ **Jahresübersicht** — Einzelansicht als Standard (wie Original SP5), 12 Monate auf einen Blick mit farbigen Schicht-Badges
@@ -195,8 +198,10 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 - ✅ **CSRF-Schutz** — Double-Submit-Cookie-Pattern gegen Cross-Site-Request-Forgery
 - ✅ **Auth-Absicherung** — Alle Frontend-Komponenten senden korrekte Bearer-Token; keine ungeschützten Endpunkte
 - ✅ **Rate Limiting** — API-weites Rate-Limit (100 req/min), Login-Brute-Force-Schutz (5 Versuche/min + 15-min-Lockout)
+- ✅ **2-Faktor-Authentifizierung (2FA)** 🔐 — TOTP-basierte 2FA mit QR-Code-Setup, Backup-Codes, Admin-Erzwingung und -Reset
 - ✅ **Session-Management** — Token-Expiry mit auto-Logout und Session-Expired-Hinweis; max. Sessions pro User
 - ✅ **Passwort-Richtlinien** — Konfigurierbare Mindestlänge, Großbuchstaben- und Ziffern-Pflicht
+- ✅ **Input-Sanitization** — Verschärfte Pydantic-Validierung und Input-Bereinigung im Backend
 - ✅ **Dev-Mode-Schutz** — Dev-Token nur im Entwicklungsmodus aktiv (`SP5_DEV_MODE=true`)
 
 ### 🔧 System & Administration
@@ -205,7 +210,7 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 - ✅ **E-Mail-Benachrichtigungen** 📧 — SMTP-Integration für Passwort-Reset, Abwesenheits-Benachrichtigungen und Tausch-Anfragen; Admin-Konfigurationsseite mit Test-E-Mail
 - ✅ **iCal-Feed** 📅 — Subscribable iCal-Feed (`/api/ical/...`) für Schichtpläne; Token-basierte Authentifizierung für Kalender-Apps (Google Calendar, Outlook, Apple)
 - ✅ **Benachrichtigungen** 🔔 — In-App Benachrichtigungssystem mit Bell-Icon, Dropdown, Filterseite und Gelesen-Markierung
-- ✅ **Backup & Restore** — ZIP-Backup aller DBF-Dateien inkl. Wiederherstellung
+- ✅ **Backup & Restore** — ZIP-Backup aller DBF-Dateien inkl. Wiederherstellung; automatisches Pre-Restore-Backup; SQLite-Export-Endpoint
 - ✅ **Abrechnungszeiträume** — Perioden definieren und verwalten
 - ✅ **Konfigurationsmanagement** ⚙️ — Zentrale Einstellungsseite mit kategorisierten Konfigurationsgruppen (Planung, Benachrichtigungen, Anzeige); Sofortspeicherung mit Validierung
 - ✅ **Einstellungen** — Systemkonfiguration (USETT)

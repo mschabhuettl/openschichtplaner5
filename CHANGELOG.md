@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.0.0-rc3] - 2026-03-10
+
+### Quality Session 2 — 15 Features & Hardening (Q026–Q040)
+
+#### 🔒 Sicherheit
+- **feat(Q040):** TOTP 2-Faktor-Authentifizierung (2FA) — QR-Code-Setup, TOTP-Verifizierung, Backup-Codes, Admin kann 2FA erzwingen/resetten
+- **security(Q026):** SlowAPI Rate-Limiting-Middleware aktiviert + per-Endpoint-Limits (Login Brute-Force-Schutz, Backup-Schutz)
+- **feat(Q027):** Proaktive Token-Expiry-Behandlung mit automatischem Logout und Session-Expired-Hinweis
+- **feat(Q028):** Backend Input-Sanitization & verschärfte Pydantic-Validierung
+
+#### 📅 Planung & Ansichten
+- **feat(Q035):** Kalender-Ansicht für Dienstplan — Monatsübersicht im Kalenderformat mit Tages-Details
+- **feat(Q033):** Dienstplan-Vorlagen via Backend-API (statt localStorage) — Vorlagen speichern, laden und anwenden
+- **feat(Q031):** Undo/Redo für Dienstplan-Änderungen — Schrittzähler, Tastaturkürzel (Ctrl+Z / Ctrl+Y)
+- **feat(Q030):** Verbesserte Konflikterkennung bei Schichtzuweisung
+- **feat(Q038):** Verbesserter Auto-Planer mit Verfügbarkeits-Prüfung, Stundenlimits und Konfliktchecks
+
+#### 👤 Mitarbeiter
+- **feat(Q039):** Mitarbeiter-Profil erweitert — Qualifikationen, Verfügbarkeit, Vertragsstunden
+
+#### 🖨️ Druck & Export
+- **feat(Q029):** Print-Stylesheet für Dienstplan — druckbares Layout mit optimierter Darstellung
+- **feat(Q032):** SQLite-Export-Endpoint + automatisches Pre-Restore-Backup vor Wiederherstellung
+
+#### 🔧 Quality & UX
+- **feat(Q009):** LoadingSpinner konsistent in allen Pages
+- **docs(Q025):** Vollständige OpenAPI-Beschreibungen für alle 162+ Endpoints + README-Update
+
+---
+
 ## [1.0.0-rc2] - 2026-03-06
 
 ### Fixed

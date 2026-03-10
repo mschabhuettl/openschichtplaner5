@@ -7,6 +7,7 @@ import { LanguageProvider, useLanguage } from './i18n/context';
 import { ToastProvider } from './contexts/ToastContext';
 import { ToastContainer } from './components/Toast';
 import { useToast } from './hooks/useToast';
+import { useOnlineStatusWithFlash } from './hooks/useOnlineStatus';
 import { trackRecentPage } from './utils/recentPages';
 import WarningsCenter from './components/WarningsCenter';
 import { NotificationBell } from './components/NotificationBell';
@@ -290,32 +291,16 @@ function ApiIncompatibleBanner() {
 }
 
 function OfflineBanner() {
-  const [offline, setOffline] = useState(!navigator.onLine);
-  const [showOnlineFlash, setShowOnlineFlash] = useState(false);
+  const { online, justReconnected } = useOnlineStatusWithFlash();
 
-  useEffect(() => {
-    const onOffline = () => { setOffline(true); setShowOnlineFlash(false); };
-    const onOnline = () => {
-      setOffline(false);
-      setShowOnlineFlash(true);
-      setTimeout(() => setShowOnlineFlash(false), 3000);
-    };
-    window.addEventListener('offline', onOffline);
-    window.addEventListener('online', onOnline);
-    return () => {
-      window.removeEventListener('offline', onOffline);
-      window.removeEventListener('online', onOnline);
-    };
-  }, []);
-
-  if (offline) {
+  if (!online) {
     return (
-      <div className="fixed top-0 left-0 right-0 z-[99999] bg-yellow-400 text-yellow-900 text-sm font-medium text-center py-2 px-4 shadow-md">
-        ⚠️ Keine Verbindung — Daten könnten veraltet sein
+      <div className="fixed top-0 left-0 right-0 z-[99999] bg-yellow-400 text-yellow-900 text-sm font-medium text-center py-2 px-4 shadow-md animate-pulse">
+        ⚠️ Keine Verbindung — Änderungen werden nicht gespeichert
       </div>
     );
   }
-  if (showOnlineFlash) {
+  if (justReconnected) {
     return (
       <div className="fixed top-0 left-0 right-0 z-[99999] bg-green-500 text-white text-sm font-medium text-center py-2 px-4 shadow-md">
         ✓ Verbindung wiederhergestellt

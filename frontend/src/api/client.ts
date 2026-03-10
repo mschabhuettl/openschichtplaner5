@@ -530,13 +530,22 @@ async function handleResponseError(res: Response): Promise<void> {
 }
 
 /** Wrap fetch calls with auto-retry (2 attempts, exponential backoff) on network errors.
- *  Only network-level errors are retried; HTTP 4xx/5xx are NOT retried. */
+ *  Only network-level errors are retried; HTTP 4xx/5xx are NOT retried.
+ *  When the browser is offline, fail immediately with a user-friendly message. */
 async function safeFetch(input: string, init?: RequestInit, _attempt = 0): Promise<Response> {
+  // Fail fast when the browser reports no connectivity
+  if (!navigator.onLine) {
+    throw new Error('Keine Internetverbindung. Bitte Netzwerk prüfen und erneut versuchen.');
+  }
   // Always include credentials so HttpOnly cookies are sent automatically
   const mergedInit: RequestInit = { credentials: 'include', ...init };
   try {
     return await fetch(input, mergedInit);
   } catch (_err) {
+    // Re-check connectivity after a failed fetch
+    if (!navigator.onLine) {
+      throw new Error('Keine Internetverbindung. Bitte Netzwerk prüfen und erneut versuchen.');
+    }
     // TypeError: Failed to fetch — server unreachable or CORS
     if (_attempt < 2) {
       // Exponential backoff: 500ms, 1500ms

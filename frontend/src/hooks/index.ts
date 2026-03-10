@@ -7,3 +7,4 @@ export { useForm } from './useForm';
 export { usePermissions } from './usePermissions';
 export { useSSE } from './useSSE';
 export { useToast } from './useToast';
+export { useOnlineStatus, useOnlineStatusWithFlash } from './useOnlineStatus';

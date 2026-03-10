@@ -7,7 +7,7 @@
 *Reads and writes the original DBF database files directly — no migration needed.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.9.5-brightgreen)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.0--rc3-brightgreen)](CHANGELOG.md)
 [![Tests](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml)
 [![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
@@ -151,7 +151,10 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 ### ⌨️ UX & Bedienung
 - ✅ **Command Palette** 🔍 — `Ctrl+K` öffnet Schnellsuch-Palette mit Fuzzy-Suche zu allen Seiten, Mitarbeitern und Aktionen
 - ✅ **Keyboard Shortcuts** — Globale Tastaturkürzel für Schnellnavigation; `?` öffnet Hilfe-Overlay
-- ✅ **Bulk-Operationen** — Mehrere Schichten gleichzeitig setzen/löschen; Auswahl-Modus mit Checkboxen im Dienstplan
+- ✅ **Keyboard Accessibility** ♿ — Vollständige Tastaturnavigation in allen Tabellen und Formularen; ARIA-Labels; Fokus-Indikatoren
+- ✅ **Dark Mode** 🌙 — Animierter Dark-Mode-Toggle, auch auf Mobile sichtbar; persistente Präferenz
+- ✅ **Bulk-Operationen** — Mehrere Schichten gleichzeitig setzen/löschen; Auswahl-Modus mit Checkboxen im Dienstplan; Bulk-Gruppenzuweisung
+- ✅ **CSV/Excel-Export** 📥 — Download-Buttons auf Mitarbeiter- und Urlaubsseite; XLSX-Export für Abwesenheiten
 - ✅ **Erweiterte Filter** — Gruppenfilter in der Mitarbeiterliste; Volltextsuche im Protokoll
 - ✅ **Toast-Benachrichtigungen** — Nicht-blockierende Erfolgs-/Fehler-/Info-Meldungen
 - ✅ **DE/EN Sprachumschalter** 🌍 — Vollständige zweisprachige Benutzeroberfläche; Sprachwahl persistent
@@ -177,22 +180,31 @@ Das Besondere: OpenSchichtplaner5 liest und schreibt die **originalen `.DBF`-Dat
 
 ### 📱 Mobile & Performance
 - ✅ **Progressive Web App (PWA)** 📲 — Installierbar auf Desktop & Mobile; Service Worker für Offline-Grundfunktion
-- ✅ **SSE Echtzeit-Updates** 📡 — Server-Sent Events: Änderungen erscheinen live bei allen offenen Clients ohne Polling
+- ✅ **Offline-Erkennung** 🌐 — `useOnlineStatus`-Hook zeigt Offline-Banner bei Verbindungsverlust; automatischer Reconnect
+- ✅ **SSE Echtzeit-Updates** 📡 — Server-Sent Events: Änderungen erscheinen live bei allen offenen Clients ohne Polling (Schedule, Swap, Settings, Notifications)
 - ✅ **Mobile-freundlich** — Responsive Design mit Hamburger-Menü und Touch-Targets
 - ✅ **Responsive Tabellen** — Horizontales Scrollen auf kleinen Bildschirmen; vergrößerte Touch-Targets
 - ✅ **Code-Splitting** — Lazy Loading aller Seiten (schnellerer Start)
-- ✅ **API-Cache** — Stammdaten werden gecacht; weniger Serverlast, schnellere Navigation
+- ✅ **API-Cache** — TTL-basierter In-Memory-Cache für häufig abgefragte Endpoints; Stammdaten-Caching im Frontend
+- ✅ **API-Paginierung** — Opt-in Paginierung für Mitarbeiter-, Abwesenheits- und Changelog-Endpoints (`page` + `page_size` Parameter)
 - ✅ **Error Handling & Retry** — Automatische Wiederholungsversuche bei API-Fehlern; `useApiData`-Hook mit Loading/Error-States
 - ✅ **Optimierter Build** — Vite-basierter Production-Build
 
 ### 🔒 Sicherheit
-- ✅ **Security Headers** — HTTP Security Headers (CSP, X-Frame-Options, HSTS u. a.) aktiv
-- ✅ **Auth-Absicherung** — Alle Frontend-Komponenten senden korrekte Bearer-Token; keine ungescützten Endpunkte
+- ✅ **Security Headers** — HTTP Security Headers (CSP, X-Frame-Options, HSTS, Permissions-Policy u. a.) aktiv
+- ✅ **CSRF-Schutz** — Double-Submit-Cookie-Pattern gegen Cross-Site-Request-Forgery
+- ✅ **Auth-Absicherung** — Alle Frontend-Komponenten senden korrekte Bearer-Token; keine ungeschützten Endpunkte
+- ✅ **Rate Limiting** — API-weites Rate-Limit (100 req/min), Login-Brute-Force-Schutz (5 Versuche/min + 15-min-Lockout)
+- ✅ **Session-Management** — Token-Expiry mit auto-Logout und Session-Expired-Hinweis; max. Sessions pro User
+- ✅ **Passwort-Richtlinien** — Konfigurierbare Mindestlänge, Großbuchstaben- und Ziffern-Pflicht
 - ✅ **Dev-Mode-Schutz** — Dev-Token nur im Entwicklungsmodus aktiv (`SP5_DEV_MODE=true`)
 
 ### 🔧 System & Administration
-- ✅ **Aktivitätsprotokoll** — Vollständige Änderungshistorie aller API-Aktionen (Erstellt/Geändert/Gelöscht) mit Filtern nach Datum, Benutzer, Aktion, Objekt
-- ✅ **Benutzerverwaltung** — Rollen, Passwort-Änderung, gruppen- und mitarbeiterbezogene Zugriffsrechte
+- ✅ **Aktivitätsprotokoll** — Vollständige Änderungshistorie aller API-Aktionen (Erstellt/Geändert/Gelöscht) mit Filtern nach Datum, Benutzer, Aktion, Objekt; alte/neue Werte im Detail
+- ✅ **Benutzerverwaltung** — Rollen, Passwort-Änderung, Passwort-Reset mit E-Mail-Versand, gruppen- und mitarbeiterbezogene Zugriffsrechte
+- ✅ **E-Mail-Benachrichtigungen** 📧 — SMTP-Integration für Passwort-Reset, Abwesenheits-Benachrichtigungen und Tausch-Anfragen; Admin-Konfigurationsseite mit Test-E-Mail
+- ✅ **iCal-Feed** 📅 — Subscribable iCal-Feed (`/api/ical/...`) für Schichtpläne; Token-basierte Authentifizierung für Kalender-Apps (Google Calendar, Outlook, Apple)
+- ✅ **Benachrichtigungen** 🔔 — In-App Benachrichtigungssystem mit Bell-Icon, Dropdown, Filterseite und Gelesen-Markierung
 - ✅ **Backup & Restore** — ZIP-Backup aller DBF-Dateien inkl. Wiederherstellung
 - ✅ **Abrechnungszeiträume** — Perioden definieren und verwalten
 - ✅ **Konfigurationsmanagement** ⚙️ — Zentrale Einstellungsseite mit kategorisierten Konfigurationsgruppen (Planung, Benachrichtigungen, Anzeige); Sofortspeicherung mit Validierung
@@ -463,7 +475,11 @@ openschichtplaner5/
 | Frontend | React 18, TypeScript, Vite |
 | Styling | Tailwind CSS |
 | Charts | Recharts |
-| API | REST (OpenAPI / Swagger unter `/docs`) |
+| API | REST (OpenAPI / Swagger unter `/docs`) — 162+ Endpoints vollständig dokumentiert |
+| E-Mail | SMTP (optional) — Benachrichtigungen, Passwort-Reset |
+| Kalender | iCal-Feed (`.ics`) — Token-basierte Schichtplan-Subscription |
+| Echtzeit | SSE (Server-Sent Events) — Live-Updates ohne Polling |
+| Testing | pytest (Backend) + Playwright (E2E) |
 
 ---
 
@@ -474,6 +490,52 @@ openschichtplaner5/
 ---
 
 ## CHANGELOG
+
+### [1.0.0-rc3] — Q-Series (2026-03-10)
+
+#### 🔒 Security & Hardening
+- **Security Headers** — CSP, X-Frame-Options, HSTS, Permissions-Policy, Referrer-Policy
+- **CSRF Protection** — Double-submit cookie pattern gegen Cross-Site-Request-Forgery
+- **Rate Limiting** — 100 req/min global, 5/min auf Login; IP-basiertes Brute-Force-Lockout
+
+#### 📧 Email & iCal
+- **SMTP Email System** — Konfigurierbare E-Mail-Benachrichtigungen für Passwort-Reset, Abwesenheiten, Tausch-Anfragen
+- **iCal-Feed** — Subscribable `.ics`-Feed für Schichtpläne mit Token-basierter Auth
+
+#### 🔄 Schicht-Tauschbörse (Self-Service)
+- **Self-Service Tausch-Workflow** — Mitarbeiter stellen Tausch-Anfrage → Partner akzeptiert/lehnt ab → Planer genehmigt → automatische Ausführung
+- **Auto-Pending & Benachrichtigungen** — Abwesenheits-Anträge erzeugen automatisch Genehmigungsanfragen
+
+#### 📊 Analytics & Berichte
+- **Jahresrückblick** — YoY-Vergleich, Monats-Balkendiagramme, Mitarbeiter-Heatmap, Gruppen-CSV-Export
+- **Fairness-Score** — Gleichverteilungs-Bewertung für Wochenend-/Nacht-/Feiertags-Schichten
+- **Kapazitäts-Forecast** — Monatliche Vorschau mit Unterbesetzungsrisiko-Analyse
+
+#### 🔔 Benachrichtigungen
+- **In-App Notifications** — Bell-Icon mit Dropdown, eigene Filterseite, Gelesen-Markierung
+- **SSE Event-Erweiterung** — Echtzeit-Events für Schedule, Swap, Settings, Notifications
+
+#### ⚡ Performance & API
+- **TTL-Cache** — In-Memory Cache für häufig abgefragte Endpoints
+- **Opt-in Paginierung** — `page` + `page_size` Parameter für Mitarbeiter, Abwesenheiten, Changelog
+- **Input-Validierung** — Verbesserte Fehlermeldungen und Eingabe-Validierung über alle Endpoints
+
+#### ♿ Accessibility & UX
+- **Keyboard Navigation** — ARIA-Labels, Fokus-Indikatoren, vollständige Tastatur-Bedienbarkeit
+- **Dark Mode Toggle** — Animierter Schalter, auch auf Mobile sichtbar
+- **Offline-Erkennung** — Banner bei Verbindungsverlust, automatischer Reconnect
+- **CSV/Excel-Export** — Download-Buttons auf Mitarbeiter- und Urlaubsseite
+- **Audit-Log Enhanced** — Alte/neue Werte, Entity-Type-Filter, User-Tracking
+
+#### 🔐 Auth
+- **Passwort-Reset** — Admin kann temporäres Passwort generieren + optional per E-Mail senden
+- **Session-Expired UX** — Benutzerfreundlicher Hinweis bei abgelaufenem Token
+
+#### 🧪 Testing
+- **E2E Tests** — Playwright End-to-End Tests für kritische Flows
+- **API-Docs** — Vollständige OpenAPI-Dokumentation: alle 162+ Endpoints mit `summary`, `tags`, `description`
+
+---
 
 ### [Unreleased] — TASK-01 bis TASK-19 (2026-02-22)
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -504,9 +505,10 @@ export default function OnboardingWizard() {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ id: number; name: string } | null>(null);
   const [lastnameBlurred, setLastnameBlurred] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.getGroups().then((d) => setGroups(d)).catch(() => {});
+    api.getGroups().then((d) => setGroups(d)).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   const canProceed = () => {
@@ -552,6 +554,16 @@ export default function OnboardingWizard() {
       setSaving(false);
     }
   };
+
+  // ── Loading screen ──────────────────────────────────────────────────────────
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+        <LoadingSpinner message="Lade Onboarding-Wizard…" />
+      </div>
+    );
+  }
 
   // ── Success screen ─────────────────────────────────────────────────────────
 

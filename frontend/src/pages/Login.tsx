@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, useRef, type FormEvent } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage, useT } from '../i18n/context';
 
@@ -13,6 +13,11 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [serverDevMode, setServerDevMode] = useState<boolean | null>(null);
   const [sessionExpired, setSessionExpired] = useState(false);
+
+  // 2FA state
+  const [needs2FA, setNeeds2FA] = useState(false);
+  const [totpCode, setTotpCode] = useState('');
+  const totpInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Check if we were redirected due to an expired session
@@ -30,21 +35,39 @@ export default function Login() {
       .catch(() => setServerDevMode(false));
   }, []);
 
+  // Auto-focus TOTP input when 2FA step appears
+  useEffect(() => {
+    if (needs2FA && totpInputRef.current) {
+      totpInputRef.current.focus();
+    }
+  }, [needs2FA]);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!username.trim()) {
+    if (!needs2FA && !username.trim()) {
       setError(t.login.errorRequired);
       return;
     }
     setError('');
     setLoading(true);
     try {
-      await login(username.trim(), password);
+      await login(username.trim(), password, needs2FA ? totpCode.trim() : undefined);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t.login.errorFailed);
+      if (err instanceof Error && err.message === '2FA_REQUIRED') {
+        setNeeds2FA(true);
+        setError('');
+      } else {
+        setError(err instanceof Error ? err.message : t.login.errorFailed);
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBack = () => {
+    setNeeds2FA(false);
+    setTotpCode('');
+    setError('');
   };
 
   const handleDevMode = () => {
@@ -71,76 +94,112 @@ export default function Login() {
         <div className="w-full max-w-sm">
           {/* Logo / Header */}
           <div className="text-center mb-8">
-            <div className="text-5xl mb-3">🧸</div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">{t.login.title}</h1>
-            <p className="text-slate-300 text-sm mt-1">{t.login.subtitle}</p>
+            <div className="text-5xl mb-3">{needs2FA ? '🔐' : '🧸'}</div>
+            <h1 className="text-2xl font-bold text-white tracking-tight">
+              {needs2FA ? (language === 'de' ? '2-Faktor-Authentifizierung' : 'Two-Factor Authentication') : t.login.title}
+            </h1>
+            <p className="text-slate-300 text-sm mt-1">
+              {needs2FA
+                ? (language === 'de' ? 'Code aus deiner Authenticator-App eingeben' : 'Enter code from your authenticator app')
+                : t.login.subtitle}
+            </p>
           </div>
 
           {/* Card */}
           <div className="bg-slate-800 rounded-2xl shadow-2xl p-8 border border-slate-600">
             <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Username */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                  {t.login.usernameLabel}
-                </label>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  autoFocus
-                  autoComplete="username"
-                  disabled={loading}
-                  placeholder={t.login.usernamePlaceholder}
-                  className="w-full px-4 py-3 rounded-lg bg-slate-700 text-white text-base border border-slate-600
-                             placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500
-                             focus:border-transparent disabled:opacity-50 transition min-h-[44px]"
-                />
-              </div>
+              {!needs2FA ? (
+                <>
+                  {/* Username */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                      {t.login.usernameLabel}
+                    </label>
+                    <input
+                      type="text"
+                      value={username}
+                      onChange={e => setUsername(e.target.value)}
+                      autoFocus
+                      autoComplete="username"
+                      disabled={loading}
+                      placeholder={t.login.usernamePlaceholder}
+                      className="w-full px-4 py-3 rounded-lg bg-slate-700 text-white text-base border border-slate-600
+                                 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500
+                                 focus:border-transparent disabled:opacity-50 transition min-h-[44px]"
+                    />
+                  </div>
 
-              {/* Password */}
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">
-                  {t.login.passwordLabel}
-                </label>
-                <div className="relative">
+                  {/* Password */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                      {t.login.passwordLabel}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        autoComplete="current-password"
+                        disabled={loading}
+                        placeholder={t.login.passwordPlaceholder}
+                        className="w-full px-4 py-3 pr-12 rounded-lg bg-slate-700 text-white text-base border border-slate-600
+                                   placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500
+                                   focus:border-transparent disabled:opacity-50 transition min-h-[44px]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(v => !v)}
+                        tabIndex={-1}
+                        aria-label={showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
+                        className="absolute right-0 top-0 h-full px-3 flex items-center justify-center
+                                   text-slate-400 hover:text-slate-200 transition min-w-[44px]"
+                      >
+                        {showPassword ? (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                          </svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                /* 2FA TOTP Code Input */
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">
+                    {language === 'de' ? '6-stelliger Code' : '6-digit code'}
+                  </label>
                   <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    autoComplete="current-password"
+                    ref={totpInputRef}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9A-Fa-f]*"
+                    maxLength={20}
+                    value={totpCode}
+                    onChange={e => setTotpCode(e.target.value)}
+                    autoComplete="one-time-code"
                     disabled={loading}
-                    placeholder={t.login.passwordPlaceholder}
-                    className="w-full px-4 py-3 pr-12 rounded-lg bg-slate-700 text-white text-base border border-slate-600
+                    placeholder="000000"
+                    className="w-full px-4 py-3 rounded-lg bg-slate-700 text-white text-base border border-slate-600
                                placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500
-                               focus:border-transparent disabled:opacity-50 transition min-h-[44px]"
+                               focus:border-transparent disabled:opacity-50 transition min-h-[44px]
+                               text-center text-2xl tracking-[0.5em] font-mono"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(v => !v)}
-                    tabIndex={-1}
-                    aria-label={showPassword ? 'Passwort verbergen' : 'Passwort anzeigen'}
-                    className="absolute right-0 top-0 h-full px-3 flex items-center justify-center
-                               text-slate-400 hover:text-slate-200 transition min-w-[44px]"
-                  >
-                    {showPassword ? (
-                      /* Eye-off icon */
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                      </svg>
-                    ) : (
-                      /* Eye icon */
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    )}
-                  </button>
+                  <p className="text-xs text-slate-400 mt-2 text-center">
+                    {language === 'de'
+                      ? 'Oder einen Backup-Code eingeben'
+                      : 'Or enter a backup code'}
+                  </p>
                 </div>
-              </div>
+              )}
 
               {/* Error message */}
-              {sessionExpired && !error && (
+              {sessionExpired && !error && !needs2FA && (
                 <div className="bg-amber-900/40 border border-amber-600 text-amber-300 text-sm rounded-lg px-4 py-2.5">
                   🔒 Deine Sitzung ist abgelaufen. Bitte melde dich neu an.
                 </div>
@@ -152,25 +211,43 @@ export default function Login() {
                 </div>
               )}
 
-              {/* Login button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 active:bg-blue-700
-                           text-white font-semibold rounded-lg transition disabled:opacity-50
-                           focus:outline-none focus:ring-2 focus:ring-blue-400 min-h-[44px]"
-              >
-                {loading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    {t.login.loggingIn}
-                  </span>
-                ) : t.login.loginButton}
-              </button>
+              {/* Buttons */}
+              <div className="space-y-3">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-500 active:bg-blue-700
+                             text-white font-semibold rounded-lg transition disabled:opacity-50
+                             focus:outline-none focus:ring-2 focus:ring-blue-400 min-h-[44px]"
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      {needs2FA
+                        ? (language === 'de' ? 'Prüfe...' : 'Verifying...')
+                        : t.login.loggingIn}
+                    </span>
+                  ) : needs2FA
+                    ? (language === 'de' ? 'Bestätigen' : 'Verify')
+                    : t.login.loginButton}
+                </button>
+
+                {needs2FA && (
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    disabled={loading}
+                    className="w-full py-2.5 px-4 text-slate-400 hover:text-white text-sm rounded-lg
+                               transition focus:outline-none focus:ring-2 focus:ring-slate-500 min-h-[44px]"
+                  >
+                    ← {language === 'de' ? 'Zurück zum Login' : 'Back to login'}
+                  </button>
+                )}
+              </div>
             </form>
 
             {/* Divider + Dev Mode button — only when server reports dev mode active */}
-            {serverDevMode === true && (
+            {!needs2FA && serverDevMode === true && (
               <>
                 <div className="my-5 border-t border-slate-700" />
                 <button

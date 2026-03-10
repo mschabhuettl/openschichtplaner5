@@ -12,6 +12,7 @@ import type { Wish, SwapRequest } from '../api/client';
 import { Badge } from '../components/Badge';
 import { EmptyState } from '../components/EmptyState';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import TwoFactorSetup from '../components/TwoFactorSetup';
 
 // ── Helpers ───────────────────────────────────────────────────
 const TODAY = new Date();
@@ -141,7 +142,7 @@ function SwapRow({ req, empId }: { req: SwapRequest; empId: number }) {
 
 // ── Main Page ─────────────────────────────────────────────────
 export default function MeinProfil() {
-  const { user } = useAuth();
+  const { user, isDevMode } = useAuth();
   const navigate = useNavigate();
 
   const [empId, setEmpId] = useState<number | null>(null);
@@ -898,6 +899,11 @@ export default function MeinProfil() {
           </div>
         )}
       </div>
+
+      {/* ── 2FA Setup ──────────────────────────────────────────── */}
+      {!isDevMode && (
+        <TwoFactorSetup />
+      )}
 
     </div>
   );

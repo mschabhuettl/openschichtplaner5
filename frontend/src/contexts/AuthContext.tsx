@@ -38,7 +38,7 @@ export interface AuthContextType {
   setDevViewRole: (role: DevViewRole) => void;
   isLoading: boolean;
   token: string | null;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string, totpCode?: string) => Promise<void>;
   loginDev: () => void;
   logout: () => void;
   // Permission helpers — respect devViewRole in dev mode
@@ -232,19 +232,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('sp5:unauthorized', handler);
   }, [clearExpiryTimer]);
 
-  const login = async (username: string, password: string): Promise<void> => {
+  const login = async (username: string, password: string, totpCode?: string): Promise<void> => {
     const BASE = import.meta.env.VITE_API_URL ?? '';
+    const body: Record<string, string> = { username, password };
+    if (totpCode) body.totp_code = totpCode;
     const res = await fetch(`${BASE}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',  // allow HttpOnly cookie to be set
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify(body),
     });
+    const data = await res.json().catch(() => ({ detail: 'Login fehlgeschlagen' }));
     if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: 'Login fehlgeschlagen' }));
-      throw new Error(err.detail ?? 'Login fehlgeschlagen');
+      throw new Error(data.detail ?? 'Login fehlgeschlagen');
     }
-    const data = await res.json();
+    // Check if 2FA is required
+    if (data.requires_2fa) {
+      const err = new Error('2FA_REQUIRED');
+      (err as Error & { requires2FA: boolean }).requires2FA = true;
+      throw err;
+    }
     const resolvedUser = applyRoleDefaults(data.user);
     const expiresAt: number | undefined = data.expires_at;
     // Store user info only — token is kept in HttpOnly cookie, not localStorage

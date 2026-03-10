@@ -8,3 +8,5 @@ export { usePermissions } from './usePermissions';
 export { useSSE } from './useSSE';
 export { useToast } from './useToast';
 export { useOnlineStatus, useOnlineStatusWithFlash } from './useOnlineStatus';
+export { useUndoRedo } from './useUndoRedo';
+export type { UndoableAction, UndoRedoHandle } from './useUndoRedo';

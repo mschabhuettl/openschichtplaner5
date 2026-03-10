@@ -7,6 +7,9 @@ import type { Group, ShiftType, Workplace } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { useUndoRedo } from '../hooks/useUndoRedo';
+import type { UndoableAction } from '../hooks/useUndoRedo';
+import { UndoRedoStatus } from '../components/UndoRedoStatus';
 
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 const WEEKDAY_ABBR = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
@@ -1058,6 +1061,95 @@ export default function Einsatzplan() {
   const today = new Date();
   const { showToast } = useToast();
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
+
+  // Keep a ref to loadData so undo/redo callbacks can call it
+  const loadDataRef = useRef<() => void>(() => {});
+
+  // ── Undo/Redo ─────────────────────────────────────────────
+  const undoRedo = useUndoRedo({
+    onUndo: async (action: UndoableAction) => {
+      switch (action.type) {
+        case 'create_sonderdienst':
+        case 'create_deviation': {
+          // Undo a create → delete the created record
+          const id = action.undoData.createdId as number;
+          await api.deleteEinsatzplanEntry(id);
+          break;
+        }
+        case 'delete_entry': {
+          // Undo a delete → re-create the entry
+          const d = action.undoData as Record<string, unknown>;
+          if (d.type === 1) {
+            // It was a deviation
+            await api.createDeviation({
+              employee_id: d.employee_id as number,
+              date: d.date as string,
+              name: d.name as string,
+              shortname: d.shortname as string,
+              startend: d.startend as string,
+              duration: d.duration as number,
+            });
+          } else {
+            // Regular Sonderdienst
+            await api.createEinsatzplanEntry({
+              employee_id: d.employee_id as number,
+              date: d.date as string,
+              name: d.name as string,
+              shortname: d.shortname as string,
+              shift_id: d.shift_id as number,
+              workplace_id: d.workplace_id as number,
+              startend: d.startend as string,
+              colorbk: d.colorbk as number,
+              colortext: d.colortext as number,
+            });
+          }
+          break;
+        }
+      }
+      loadDataRef.current();
+    },
+    onRedo: async (action: UndoableAction) => {
+      switch (action.type) {
+        case 'create_sonderdienst': {
+          const d = action.redoData as Record<string, unknown>;
+          const res = await api.createEinsatzplanEntry({
+            employee_id: d.employee_id as number,
+            date: d.date as string,
+            name: d.name as string,
+            shortname: d.shortname as string,
+            shift_id: d.shift_id as number,
+            workplace_id: d.workplace_id as number,
+            startend: d.startend as string,
+            colorbk: d.colorbk as number,
+            colortext: d.colortext as number,
+          });
+          // Update the undoData with the new id
+          action.undoData.createdId = res.record.id;
+          break;
+        }
+        case 'create_deviation': {
+          const d = action.redoData as Record<string, unknown>;
+          const res = await api.createDeviation({
+            employee_id: d.employee_id as number,
+            date: d.date as string,
+            name: d.name as string,
+            shortname: d.shortname as string,
+            startend: d.startend as string,
+            duration: d.duration as number,
+          });
+          action.undoData.createdId = res.record.id;
+          break;
+        }
+        case 'delete_entry': {
+          const id = action.redoData.entryId as number;
+          await api.deleteEinsatzplanEntry(id);
+          break;
+        }
+      }
+      loadDataRef.current();
+    },
+  });
+
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
   const [selectedDate, setSelectedDate] = useState<Date>(today);
   const [groupId, setGroupId] = useState<number | undefined>(undefined);
@@ -1156,6 +1248,9 @@ export default function Einsatzplan() {
     loadData();
   }, [loadData]);
 
+  // Keep loadDataRef in sync
+  loadDataRef.current = loadData;
+
   // Real-time SSE refresh
   useSSERefresh(['schedule_changed', 'absence_changed', 'employee_changed', 'note_added', 'note_updated', 'note_deleted'], loadData);
 
@@ -1207,7 +1302,29 @@ export default function Einsatzplan() {
     if (!entry.spshi_id) return;
     if (!await confirmDialog({ message: `Sonderdienst-Eintrag für ${entry.employee_name} löschen?`, danger: true })) return;
     try {
-      await api.deleteEinsatzplanEntry(entry.spshi_id);
+      const entryId = entry.spshi_id;
+      // Capture data needed to recreate on undo
+      const undoData: Record<string, unknown> = {
+        employee_id: entry.employee_id,
+        date: contextMenu?.date ?? toIsoDate(selectedDate),
+        name: entry.shift_name || entry.display_name || '',
+        shortname: entry.shift_short || entry.display_name || '',
+        shift_id: entry.shift_id ?? 0,
+        workplace_id: entry.workplace_id ?? 0,
+        startend: entry.spshi_startend ?? '',
+        duration: entry.spshi_duration ?? 0,
+        type: entry.spshi_type ?? 0,
+        colorbk: 0,
+        colortext: 0,
+      };
+      await api.deleteEinsatzplanEntry(entryId);
+      undoRedo.push({
+        type: 'delete_entry',
+        label: `${entry.display_name} für ${entry.employee_name} entfernt`,
+        undoData,
+        redoData: { entryId },
+        timestamp: Date.now(),
+      });
       loadData();
       showToast('Eintrag gelöscht', 'success');
     } catch (e: unknown) {
@@ -1226,7 +1343,7 @@ export default function Einsatzplan() {
     colorbk: number;
     colortext: number;
   }) => {
-    await api.createEinsatzplanEntry({
+    const res = await api.createEinsatzplanEntry({
       employee_id: data.employee_id,
       date: data.date,
       name: data.name,
@@ -1236,6 +1353,15 @@ export default function Einsatzplan() {
       startend: data.startend,
       colorbk: data.colorbk,
       colortext: data.colortext,
+    });
+    // Find employee name for label
+    const empName = dayEntries.find(e => e.employee_id === data.employee_id)?.employee_name ?? `MA #${data.employee_id}`;
+    undoRedo.push({
+      type: 'create_sonderdienst',
+      label: `Sonderdienst ${data.shortname} für ${empName}`,
+      undoData: { createdId: res.record.id },
+      redoData: { ...data },
+      timestamp: Date.now(),
     });
     loadData();
     showToast('Sonderdienst gespeichert', 'success');
@@ -1249,13 +1375,21 @@ export default function Einsatzplan() {
     startend: string;
     duration: number;
   }) => {
-    await api.createDeviation({
+    const res = await api.createDeviation({
       employee_id: data.employee_id,
       date: data.date,
       name: data.name,
       shortname: data.shortname,
       startend: data.startend,
       duration: data.duration,
+    });
+    const empName = dayEntries.find(e => e.employee_id === data.employee_id)?.employee_name ?? `MA #${data.employee_id}`;
+    undoRedo.push({
+      type: 'create_deviation',
+      label: `Abweichung ${data.shortname} für ${empName}`,
+      undoData: { createdId: res.record.id },
+      redoData: { ...data },
+      timestamp: Date.now(),
     });
     loadData();
     showToast('Abweichung gespeichert', 'success');
@@ -1467,6 +1601,9 @@ export default function Einsatzplan() {
         >
           📋 Vorlagen {templates.length > 0 && <span className="bg-indigo-600 text-white text-[10px] rounded-full px-1.5 py-0.5 leading-none">{templates.length}</span>}
         </button>
+
+        {/* Undo/Redo buttons */}
+        {canEdit && <UndoRedoStatus handle={undoRedo} />}
 
         {/* Print button */}
         <button

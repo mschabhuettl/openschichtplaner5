@@ -12,6 +12,7 @@ import { trackRecentPage } from './utils/recentPages';
 import WarningsCenter from './components/WarningsCenter';
 import { NotificationBell } from './components/NotificationBell';
 import { useTour } from './components/GuidedTour';
+import { useFirstTimeSetup, FirstTimeSetupWizard } from './components/OnboardingWizard';
 
 // Lazy-load heavy overlay components (only needed on interaction)
 const SpotlightSearch      = lazy(() => import('./components/SpotlightSearch'));
@@ -377,6 +378,10 @@ function AppInner() {
   const [quickHelpOpen, setQuickHelpOpen] = useState(false);
   const { tourOpen, startTour, closeTour } = useTour();
 
+  // First-time setup wizard
+  const isAdmin = user?.ADMIN === true || user?.role === 'Admin' || isDevMode;
+  const [showSetupWizard, dismissSetupWizard] = useFirstTimeSetup(isAdmin);
+
   // "g" prefix navigation: track pending timer via ref (no re-render needed)
   const gTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gPendingRef = useRef(false);
@@ -705,6 +710,10 @@ function AppInner() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-100">
+      {/* First-time setup wizard */}
+      {showSetupWizard && (
+        <FirstTimeSetupWizard onComplete={() => { dismissSetupWizard(); navigate('/schedule'); }} />
+      )}
       {/* API version compatibility banner */}
       <ApiIncompatibleBanner />
       {/* Global offline connectivity banner */}

@@ -55,26 +55,9 @@ const ACTION_ITEMS: ActionItem[] = [
   { title: 'Seite drucken',           subtitle: 'Aktuelle Seite drucken',      icon: '🖨️', action: 'print',          keywords: ['drucken', 'print', 'ausdrucken'] },
 ];
 
-// ── Recent pages ─────────────────────────────────────────────────────────────
-const RECENT_KEY = 'sp5_recent_pages';
-const MAX_RECENT = 5;
-
-interface RecentPage { path: string; title: string; ts: number }
-
-function getRecentPages(): RecentPage[] {
-  try {
-    return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
-  } catch { return []; }
-}
-
-// eslint-disable-next-line react-refresh/only-export-components
-export function trackRecentPage(path: string) {
-  const allNav = NAV_ITEMS.find(n => n.path === path);
-  const title = allNav?.title ?? path;
-  const pages = getRecentPages().filter(p => p.path !== path);
-  pages.unshift({ path, title, ts: Date.now() });
-  localStorage.setItem(RECENT_KEY, JSON.stringify(pages.slice(0, MAX_RECENT)));
-}
+// ── Recent pages (re-exported from shared utility) ──────────────────────────
+import { getRecentPages, trackRecentPage } from '../utils/recentPages';
+export { trackRecentPage };
 
 // ── Fuzzy matching ────────────────────────────────────────────────────────────
 function fuzzyMatch(query: string, target: string): number {

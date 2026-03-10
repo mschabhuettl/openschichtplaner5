@@ -7,12 +7,16 @@ import { LanguageProvider, useLanguage } from './i18n/context';
 import { ToastProvider } from './contexts/ToastContext';
 import { ToastContainer } from './components/Toast';
 import { useToast } from './hooks/useToast';
-import SpotlightSearch, { trackRecentPage } from './components/SpotlightSearch';
+import { trackRecentPage } from './utils/recentPages';
 import WarningsCenter from './components/WarningsCenter';
 import { NotificationBell } from './components/NotificationBell';
-import { NotificationsPage } from './components/NotificationsPage';
-import KeyboardShortcutsModal from './components/KeyboardShortcutsModal';
-import { GuidedTour, useTour } from './components/GuidedTour';
+import { useTour } from './components/GuidedTour';
+
+// Lazy-load heavy overlay components (only needed on interaction)
+const SpotlightSearch      = lazy(() => import('./components/SpotlightSearch'));
+const NotificationsPage    = lazy(() => import('./components/NotificationsPage').then(m => ({ default: m.NotificationsPage })));
+const KeyboardShortcutsModal = lazy(() => import('./components/KeyboardShortcutsModal'));
+const GuidedTour           = lazy(() => import('./components/GuidedTour').then(m => ({ default: m.GuidedTour })));
 import { ErrorBoundary, PageErrorBoundary } from './components/ErrorBoundary';
 import { InstallBanner } from './components/InstallBanner';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -731,11 +735,19 @@ function AppInner() {
         Zum Hauptinhalt springen
       </a>
 
-      {/* Global Spotlight Search Modal */}
-      <SpotlightSearch open={spotlightOpen} onClose={() => setSpotlightOpen(false)} />
+      {/* Global Spotlight Search Modal (lazy-loaded) */}
+      {spotlightOpen && (
+        <Suspense fallback={null}>
+          <SpotlightSearch open={spotlightOpen} onClose={() => setSpotlightOpen(false)} />
+        </Suspense>
+      )}
 
-      {/* Keyboard Shortcuts Help Modal */}
-      <KeyboardShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+      {/* Keyboard Shortcuts Help Modal (lazy-loaded) */}
+      {shortcutsOpen && (
+        <Suspense fallback={null}>
+          <KeyboardShortcutsModal open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
+        </Suspense>
+      )}
 
       {/* Erste Schritte Modal */}
       {quickHelpOpen && (
@@ -793,8 +805,12 @@ function AppInner() {
         </div>
       )}
 
-      {/* Onboarding Tour (auto on first visit + manual via 🧭 button) */}
-      <GuidedTour open={tourOpen} onClose={closeTour} />
+      {/* Onboarding Tour (lazy-loaded, auto on first visit + manual via 🧭 button) */}
+      {tourOpen && (
+        <Suspense fallback={null}>
+          <GuidedTour open={tourOpen} onClose={closeTour} />
+        </Suspense>
+      )}
 
       {/* Mobile overlay backdrop — fade in/out with opacity transition */}
       <div

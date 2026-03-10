@@ -3009,6 +3009,7 @@ export default function Schedule() {
 
   // ── HTML5 Drag & Drop handlers ──────────────────────────────
   const handleDragStart = (e: React.DragEvent, empId: number, day: number) => {
+    if (!canEditSchedule || isLeserView) { e.preventDefault(); return; }
     e.dataTransfer.effectAllowed = 'copyMove';
     e.dataTransfer.setData('text/plain', `${empId}-${day}`);
     setDndSource({ empId, day });
@@ -5185,7 +5186,7 @@ export default function Schedule() {
                       <td
                         key={day}
                         className={`border border-gray-100 p-0 text-center relative group`}
-                        draggable={!!entry}
+                        draggable={!!entry && canEditSchedule && !isLeserView}
                         style={{
                           backgroundColor: isDndTgt
                             ? (isDark ? '#1e3a5f' : '#bfdbfe')

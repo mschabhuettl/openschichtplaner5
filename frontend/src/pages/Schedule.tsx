@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api/client';
-import type { ShiftRequirement, Note, ConflictEntry, CoverageDay } from '../api/client';
+import type { ShiftRequirement, Note, ConflictEntry, CoverageDay, ScheduleTemplate } from '../api/client';
 import type { Employee, Group, ScheduleEntry, ShiftType, LeaveType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useTheme } from '../contexts/ThemeContext';
@@ -1565,28 +1565,7 @@ const HoverTooltip = memo(function HoverTooltip({
   );
 });
 
-// ── Wochenvorlagen (Week Templates) ──────────────────────────
-const TEMPLATES_KEY = 'sp5_week_templates';
-
-interface WeekTemplate {
-  id: string;
-  name: string;
-  createdAt: string;
-  // weekday 0=Mon…6=Sun → employee_id → shift_id
-  entries: Array<{ employee_id: number; weekday: number; shift_id: number }>;
-}
-
-function loadTemplates(): WeekTemplate[] {
-  try {
-    return JSON.parse(localStorage.getItem(TEMPLATES_KEY) || '[]');
-  } catch {
-    return [];
-  }
-}
-
-function saveTemplates(templates: WeekTemplate[]) {
-  localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
-}
+// ── Wochenvorlagen (Week Templates) — Backend-backed ─────────
 
 interface WeekTemplateModalProps {
   onClose: () => void;
@@ -1594,7 +1573,8 @@ interface WeekTemplateModalProps {
   month: number;
   employees: Employee[];
   entryMap: Map<string, import('../types').ScheduleEntry>;
-  onApplyTemplate: (template: WeekTemplate, skipExisting: boolean) => Promise<void>;
+  onApplyTemplate: (templateId: number, targetMonday: string, force: boolean) => Promise<void>;
+  groupId?: number | null;
 }
 
 function WeekTemplateModal({
@@ -1604,70 +1584,102 @@ function WeekTemplateModal({
   employees,
   entryMap,
   onApplyTemplate,
+  groupId,
 }: WeekTemplateModalProps) {
-  const [templates, setTemplates] = useState<WeekTemplate[]>(loadTemplates);
+  const [templates, setTemplates] = useState<ScheduleTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'apply' | 'save'>('apply');
   const [newName, setNewName] = useState('');
+  const [newDesc, setNewDesc] = useState('');
   const [refWeekStart, setRefWeekStart] = useState<string>('');
-  const [applyingId, setApplyingId] = useState<string | null>(null);
+  const [applyingId, setApplyingId] = useState<number | null>(null);
   const [applySkip, setApplySkip] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [applyTargetMonday, setApplyTargetMonday] = useState<string>('');
+
+  // Load templates from backend
+  useEffect(() => {
+    setLoading(true);
+    api.getScheduleTemplates().then(tpls => {
+      setTemplates(tpls);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
 
   // Build list of Mondays in the current month
-  const mondays: string[] = [];
-  const pad = (n: number) => String(n).padStart(2, '0');
+  const pad2 = (n: number) => String(n).padStart(2, '0');
   const daysInMonth = new Date(year, month, 0).getDate();
+  const mondays: string[] = [];
   for (let d = 1; d <= daysInMonth; d++) {
     const dt = new Date(year, month - 1, d);
     if (dt.getDay() === 1) {
-      mondays.push(`${year}-${pad(month)}-${pad(d)}`);
+      mondays.push(`${year}-${pad2(month)}-${pad2(d)}`);
     }
   }
+
+  // Build list of Mondays for applying (current + next month for flexibility)
+  const applyMondays: string[] = [];
+  for (let mOff = 0; mOff < 3; mOff++) {
+    const m = month + mOff;
+    const y = year + Math.floor((m - 1) / 12);
+    const mo = ((m - 1) % 12) + 1;
+    const dim = new Date(y, mo, 0).getDate();
+    for (let d = 1; d <= dim; d++) {
+      const dt = new Date(y, mo - 1, d);
+      if (dt.getDay() === 1) {
+        applyMondays.push(`${y}-${pad2(mo)}-${pad2(d)}`);
+      }
+    }
+  }
+
   // Default to first Monday of month
   useEffect(() => {
     if (!refWeekStart && mondays.length > 0) setRefWeekStart(mondays[0]);
+    if (!applyTargetMonday && mondays.length > 0) setApplyTargetMonday(mondays[0]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!newName.trim() || !refWeekStart) return;
-    // Extract week entries from the chosen reference week (Mon–Sun)
-    const weekEntries: Array<{ employee_id: number; weekday: number; shift_id: number }> = [];
-    const monday = new Date(refWeekStart + 'T00:00:00');
-    for (let wd = 0; wd < 7; wd++) {
-      const dt = new Date(monday);
-      dt.setDate(monday.getDate() + wd);
-      if (dt.getMonth() !== month - 1) continue; // skip days outside month
-      const day = dt.getDate();
-      for (const emp of employees) {
-        const e = entryMap.get(`${emp.ID}-${day}`);
-        if (e && e.kind === 'shift' && e.shift_id) {
-          weekEntries.push({ employee_id: emp.ID, weekday: wd, shift_id: e.shift_id });
-        }
-      }
+    setSaving(true);
+    try {
+      const mondayDate = new Date(refWeekStart + 'T00:00:00');
+      const weekStartDay = mondayDate.getDate();
+      const tpl = await api.captureScheduleTemplate({
+        name: newName.trim(),
+        description: newDesc.trim(),
+        year,
+        month,
+        week_start_day: weekStartDay,
+        group_id: groupId ?? undefined,
+      });
+      setTemplates(prev => [...prev, tpl]);
+      setNewName('');
+      setNewDesc('');
+      setTab('apply');
+    } catch (e) {
+      alert('Fehler beim Speichern: ' + (e as Error).message);
     }
-    if (weekEntries.length === 0) return;
-    const tpl: WeekTemplate = {
-      id: Date.now().toString(),
-      name: newName.trim(),
-      createdAt: new Date().toISOString().slice(0, 10),
-      entries: weekEntries,
-    };
-    const updated = [...templates, tpl];
-    saveTemplates(updated);
-    setTemplates(updated);
-    setNewName('');
-    setTab('apply');
+    setSaving(false);
   };
 
-  const handleDelete = (id: string) => {
-    const updated = templates.filter(t => t.id !== id);
-    saveTemplates(updated);
-    setTemplates(updated);
+  const handleDelete = async (id: number) => {
+    try {
+      await api.deleteScheduleTemplate(id);
+      setTemplates(prev => prev.filter(t => t.id !== id));
+    } catch (e) {
+      alert('Fehler beim Löschen: ' + (e as Error).message);
+    }
   };
 
-  const handleApply = async (tpl: WeekTemplate) => {
+  const handleApply = async (tpl: ScheduleTemplate) => {
+    if (!applyTargetMonday) return;
     setApplyingId(tpl.id);
-    await onApplyTemplate(tpl, applySkip);
+    try {
+      await onApplyTemplate(tpl.id, applyTargetMonday, !applySkip);
+    } catch {
+      // error handled in parent
+    }
     setApplyingId(null);
     onClose();
   };
@@ -1705,31 +1717,54 @@ function WeekTemplateModal({
 
           {tab === 'apply' && (
             <div className="space-y-3">
-              {templates.length === 0 ? (
+              {loading ? (
+                <div className="text-center text-gray-500 py-8 text-sm">Lade Vorlagen…</div>
+              ) : templates.length === 0 ? (
                 <div className="text-center text-gray-600 dark:text-gray-500 py-8 text-sm">
                   Noch keine Vorlagen gespeichert.<br />
                   <button onClick={() => setTab('save')} className="text-blue-500 underline mt-1">Vorlage speichern</button>
                 </div>
               ) : (
                 <>
-                  <div className="flex items-center gap-2 text-sm mb-3">
-                    <label className="flex items-center gap-1.5 text-gray-600 dark:text-gray-300 cursor-pointer">
-                      <input type="checkbox" checked={applySkip} onChange={e => setApplySkip(e.target.checked)} className="rounded" />
-                      Bereits belegte Tage überspringen
-                    </label>
+                  <div className="space-y-2 mb-3">
+                    <div className="flex items-center gap-2 text-sm">
+                      <label className="flex items-center gap-1.5 text-gray-600 dark:text-gray-300 cursor-pointer">
+                        <input type="checkbox" checked={applySkip} onChange={e => setApplySkip(e.target.checked)} className="rounded" />
+                        Bereits belegte Tage überspringen
+                      </label>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Zielwoche (Montag)</label>
+                      <select
+                        value={applyTargetMonday}
+                        onChange={e => setApplyTargetMonday(e.target.value)}
+                        className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      >
+                        {applyMondays.map(m => {
+                          const dt = new Date(m + 'T00:00:00');
+                          const sun = new Date(dt); sun.setDate(dt.getDate() + 6);
+                          return (
+                            <option key={m} value={m}>
+                              {dt.getDate()}.{dt.getMonth() + 1}.{dt.getFullYear()} – {sun.getDate()}.{sun.getMonth() + 1}.{sun.getFullYear()}
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
                   </div>
                   {templates.map(tpl => {
-                    const empCount = new Set(tpl.entries.map(e => e.employee_id)).size;
-                    const wdSet = new Set(tpl.entries.map(e => e.weekday));
+                    const empCount = new Set(tpl.assignments.map(a => a.employee_id)).size;
+                    const wdSet = new Set(tpl.assignments.map(a => a.weekday_offset));
                     const wdLabel = WD_NAMES.filter((_, i) => wdSet.has(i)).join(', ');
                     return (
                       <div key={tpl.id} className="flex items-center gap-3 p-3 border border-gray-200 dark:border-gray-700 rounded-lg">
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-sm dark:text-white truncate">{tpl.name}</div>
+                          {tpl.description && <div className="text-xs text-gray-500 dark:text-gray-400 truncate">{tpl.description}</div>}
                           <div className="text-xs text-gray-500 dark:text-gray-600">
-                            {tpl.createdAt} · {empCount} MA · {wdLabel}
+                            {tpl.created_at?.slice(0, 10)} · {empCount} MA · {wdLabel}
                           </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-500">{tpl.entries.length} Einträge</div>
+                          <div className="text-xs text-gray-600 dark:text-gray-500">{tpl.assignments.length} Einträge</div>
                         </div>
                         <button
                           onClick={() => handleApply(tpl)}
@@ -1756,7 +1791,7 @@ function WeekTemplateModal({
           {tab === 'save' && (
             <div className="space-y-4">
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                Wähle eine Referenzwoche aus dem aktuellen Monat. Die Schichten dieser Woche werden als Muster gespeichert und können auf andere Monate übertragen werden.
+                Wähle eine Referenzwoche aus dem aktuellen Monat. Die Schichten dieser Woche werden serverseitig als Vorlage gespeichert und können auf beliebige Wochen angewandt werden.
               </p>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name der Vorlage</label>
@@ -1765,6 +1800,16 @@ function WeekTemplateModal({
                   value={newName}
                   onChange={e => setNewName(e.target.value)}
                   placeholder="z.B. Standard-Besetzung Sommer"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Beschreibung (optional)</label>
+                <input
+                  type="text"
+                  value={newDesc}
+                  onChange={e => setNewDesc(e.target.value)}
+                  placeholder="z.B. Für Urlaubszeit, reduzierte Besetzung"
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
@@ -1817,10 +1862,10 @@ function WeekTemplateModal({
               })()}
               <button
                 onClick={handleSave}
-                disabled={!newName.trim() || !refWeekStart}
+                disabled={!newName.trim() || !refWeekStart || saving}
                 className="w-full px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white text-sm rounded-lg shadow-sm disabled:opacity-40 disabled:cursor-not-allowed font-medium"
               >
-                💾 Vorlage speichern
+                {saving ? '⏳ Speichern…' : '💾 Vorlage speichern'}
               </button>
             </div>
           )}
@@ -2872,30 +2917,12 @@ export default function Schedule() {
     setBulkContextMenu(null);
   };
 
-  // ── Apply Week Template ─────────────────────────────────────
-  const handleApplyTemplate = async (template: WeekTemplate, skipExisting: boolean) => {
-    const daysInCurMonth = new Date(year, month, 0).getDate();
-    const toAssign: Array<{ employee_id: number; date: string; shift_id: number }> = [];
-    for (let d = 1; d <= daysInCurMonth; d++) {
-      const dt = new Date(year, month - 1, d);
-      // JS weekday: 0=Sun, 1=Mon ... 6=Sat → convert to 0=Mon...6=Sun
-      const jsWd = dt.getDay();
-      const wd = (jsWd + 6) % 7; // 0=Mon...6=Sun
-      const dateStr = `${year}-${pad(month)}-${pad(d)}`;
-      for (const te of template.entries) {
-        if (te.weekday !== wd) continue;
-        if (skipExisting && entryMap.has(`${te.employee_id}-${d}`)) continue;
-        toAssign.push({ employee_id: te.employee_id, date: dateStr, shift_id: te.shift_id });
-      }
-    }
-    if (toAssign.length === 0) {
-      showToast('Keine Schichten zu übertragen (alles belegt?)', 'info');
-      return;
-    }
+  // ── Apply Week Template (backend-backed) ────────────────────
+  const handleApplyTemplate = async (templateId: number, targetMonday: string, force: boolean) => {
     setSaving(true);
     try {
-      const result = await api.bulkSchedule(toAssign, !skipExisting);
-      showToast(`✅ Vorlage angewandt: ${result.created} erstellt, ${result.updated} aktualisiert`, 'success');
+      const result = await api.applyScheduleTemplate(templateId, { target_date: targetMonday, force });
+      showToast(`✅ Vorlage "${result.template_name}" angewandt: ${result.created} erstellt, ${result.updated} aktualisiert, ${result.skipped} übersprungen`, 'success');
       loadSchedule();
     } catch (e) {
       showToast('Fehler beim Anwenden der Vorlage: ' + (e as Error).message, 'error');
@@ -3693,6 +3720,7 @@ export default function Schedule() {
           employees={employees}
           entryMap={entryMap}
           onApplyTemplate={handleApplyTemplate}
+          groupId={selectedGroupIds.length === 1 ? selectedGroupIds[0] : undefined}
         />
       )}
 

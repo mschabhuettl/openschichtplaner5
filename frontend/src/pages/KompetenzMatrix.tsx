@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -448,11 +449,7 @@ export default function KompetenzMatrix() {
 
   // ── Render ────────────────────────────────────────────────────────────────
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-600" />
-    </div>
-  );
+  if (loading) return <LoadingSpinner />;
 
   if (error) return (
     <div className="p-6 text-red-600">Fehler: {error}</div>

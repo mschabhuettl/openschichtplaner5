@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { api } from '../api/client';
 import type { Employee, LeaveType, Group } from '../types';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const BASE_URL = (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? '';
 
@@ -307,11 +308,7 @@ export default function UrlaubsTimeline() {
           ))}
       </div>
 
-      {loading && (
-        <div className="flex items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600" />
-        </div>
-      )}
+      {loading && <LoadingSpinner />}
 
       {error && (
         <div className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 px-4 py-3 rounded">{error}</div>

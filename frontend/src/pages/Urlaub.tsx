@@ -8,6 +8,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useT } from '../i18n';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
@@ -478,7 +479,7 @@ function AbwesenheitenKalender({ employees, leaveTypes, absences, loading }: Abw
 
       {/* Calendar */}
       {loading ? (
-        <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-blue-400 border-t-transparent rounded-full animate-spin" /></div>
+        <LoadingSpinner />
       ) : (
         <div className="bg-white rounded-xl shadow border overflow-hidden">
           {/* Day headers */}
@@ -1750,7 +1751,7 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
     return ids;
   }, [absences]);
 
-  if (loading) return <div className="flex justify-center py-12"><div className="animate-spin text-3xl">⏳</div></div>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="space-y-4">

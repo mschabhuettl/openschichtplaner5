@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '../hooks/useToast';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 // Direct fetch helpers (email endpoints aren't in the main api object yet)
 function authHeaders(extra: Record<string, string> = {}): Record<string, string> {
@@ -83,11 +84,7 @@ export default function EmailSettings() {
   };
 
   if (loading) {
-    return (
-      <div className="p-6 flex items-center justify-center min-h-[200px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-      </div>
-    );
+    return <LoadingSpinner message="E-Mail-Einstellungen laden…" />;
   }
 
   return (

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -265,10 +266,7 @@ export default function SchichtBriefing() {
         {/* Left: Shifts */}
         <div className="lg:col-span-2 space-y-4">
           {loading ? (
-            <div className="bg-white rounded-xl p-8 text-center text-gray-600 shadow-sm border border-gray-200">
-              <div className="text-3xl mb-2">⏳</div>
-              <div>Lade Dienstplan…</div>
-            </div>
+            <LoadingSpinner />
           ) : Object.keys(shiftGroups).length === 0 ? (
             <div className="bg-white rounded-xl p-8 text-center text-gray-600 shadow-sm border border-gray-200">
               <div className="text-3xl mb-2">📭</div>

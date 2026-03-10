@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import type { ChangelogEntry, EmployeeYearStats } from '../api/client';
 import type { Employee, ShiftType, ScheduleEntry } from '../types';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const MONTH_NAMES = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 const WEEKDAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
@@ -162,7 +163,7 @@ export default function MitarbeiterProfil() {
     );
   }
 
-  if (loading) return <div className="p-8 flex justify-center"><div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>;
+  if (loading) return <LoadingSpinner message="Mitarbeiterprofil laden…" />;
   if (!employee) return <div className="p-8 text-center text-red-500">Mitarbeiter nicht gefunden.</div>;
 
   const totals = yearStats?.totals;

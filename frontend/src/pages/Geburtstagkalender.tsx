@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import { api } from '../api/client';
 import type { Employee } from '../types';
 
@@ -180,14 +181,7 @@ export default function Geburtstagkalender() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-48 text-gray-600 text-sm gap-2">
-        <span className="animate-spin text-xl">🔄</span>
-        Lade Mitarbeiterdaten…
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   const totalWithBirthday = entries.length;
   const totalEmployees = employees.filter(e => !e.HIDE || showHidden).length;

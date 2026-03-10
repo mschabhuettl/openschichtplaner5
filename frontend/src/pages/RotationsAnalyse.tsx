@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 // ─── Types ────────────────────────────────────────────────
 interface ScheduleEntry {
@@ -399,11 +400,7 @@ export default function RotationsAnalyse() {
         </div>
       )}
 
-      {loading && (
-        <div className="flex items-center justify-center py-16 text-gray-500">
-          <span className="animate-spin mr-2">⏳</span> Lade Schichtdaten…
-        </div>
-      )}
+      {loading && <LoadingSpinner />}
       {error && <div className="text-red-500 p-4">{error}</div>}
 
       {/* ═══ TABLE VIEW ═══ */}

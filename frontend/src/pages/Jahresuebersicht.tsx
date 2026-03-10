@@ -4,6 +4,7 @@ import type { MonthSummary } from '../api/client';
 import type { Employee, Group, ShiftType, LeaveType } from '../types';
 import { EmptyState, ApiErrorState } from '../components/EmptyState';
 import { PageHeader } from '../components/PageHeader';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 // Map: SHORTNAME → { bk, text }
 type ShiftColorMap = Map<string, { bk: string; text: string }>;
@@ -206,9 +207,7 @@ function SingleEmployeeView({
   }
 
   if (loading) return (
-    <div className="flex justify-center py-12">
-      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-    </div>
+    <LoadingSpinner />
   );
   if (error) return <ApiErrorState message={error} />;
 
@@ -345,9 +344,7 @@ function AllEmployeesView({
   }, [year, filteredEmps.length, groupId]);
 
   if (loading) return (
-    <div className="flex justify-center py-12">
-      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-    </div>
+    <LoadingSpinner />
   );
   if (error) return <ApiErrorState message={error} />;
   if (filteredEmps.length === 0) return (

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import type { Employee, Group, ScheduleEntry, ShiftType } from '../types';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 // ── Constants ─────────────────────────────────────────────
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
@@ -486,11 +487,7 @@ export default function Druckvorschau() {
 
       {/* ── Main: print preview ───────────────────────────── */}
       <main className="flex-1 overflow-auto bg-gray-100 p-4 print:p-0 print:bg-white">
-        {loading && (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-gray-500 text-sm animate-pulse">Lade Daten…</div>
-          </div>
-        )}
+        {loading && <LoadingSpinner />}
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm">
             Fehler: {error}

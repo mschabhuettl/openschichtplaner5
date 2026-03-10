@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useSSERefresh } from '../contexts/SSEContext';
 import { HelpTooltip } from '../components/HelpTooltip';
 import { EmptyState } from '../components/EmptyState';
@@ -472,14 +473,7 @@ export default function Konflikte() {
       )}
 
       {/* Loading State */}
-      {loading && (
-        <div className="flex items-center justify-center py-16 text-gray-600">
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-8 h-8 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
-            <span className="text-sm">{t.konflikte.loading}</span>
-          </div>
-        </div>
-      )}
+      {loading && <LoadingSpinner />}
 
       {/* Bulk Progress */}
       {bulkProgress && (

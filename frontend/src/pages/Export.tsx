@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 
@@ -170,16 +171,7 @@ export default function Export() {
     'border border-gray-300 rounded-lg px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-slate-400';
   const labelCls = 'text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1';
 
-  if (loading) {
-    return (
-      <div className="p-6 flex items-center justify-center min-h-[200px]">
-        <div className="flex flex-col items-center gap-3 text-slate-400">
-          <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-500 rounded-full animate-spin" />
-          <span className="text-sm">Export wird geladen…</span>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="p-2 sm:p-4 lg:p-6 max-w-3xl mx-auto">

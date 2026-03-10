@@ -4,6 +4,7 @@ import type { ShiftRequirement, StaffingRequirements, SpecialStaffingReq } from 
 import type { ShiftType, Group } from '../types';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 // ─── Constants ─────────────────────────────────────────────
 const WEEKDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
@@ -624,9 +625,7 @@ function DateSpecificTab({ shifts, groups }: { shifts: ShiftType[]; groups: Grou
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">⚠️ {error}</div>
       )}
 
-      {loading && (
-        <div className="text-center py-10 text-gray-600">⟳ Lade...</div>
-      )}
+      {loading && <LoadingSpinner />}
 
       {!loading && specialReqs.length === 0 && (
         <div className="text-center py-16 text-gray-600">

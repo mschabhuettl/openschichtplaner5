@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 interface HealthData {
   status: string;
@@ -70,12 +71,7 @@ export default function HealthDashboard() {
   }, [fetchHealth, fetchFrontendErrors]);
 
   if (loading) {
-    return (
-      <div className="p-8 text-center text-slate-500 dark:text-slate-400">
-        <div className="animate-spin text-4xl mb-4">⟳</div>
-        Lade System-Status…
-      </div>
-    );
+    return <LoadingSpinner message="Lade System-Status…" />;
   }
 
   if (error) {

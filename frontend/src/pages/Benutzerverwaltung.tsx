@@ -6,6 +6,7 @@ import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 function getAuthHeaders(): Record<string, string> {
@@ -861,7 +862,7 @@ export default function Benutzerverwaltung() {
 
       {/* Content */}
       {loading ? (
-        <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
+        <LoadingSpinner />
       ) : error ? (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded-lg p-4 text-sm">
           Fehler beim Laden: {error}

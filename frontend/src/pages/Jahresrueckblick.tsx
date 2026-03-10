@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
 import type { Group } from '../types';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 function getAuthHeaders(): Record<string, string> {
   try {
@@ -319,12 +320,7 @@ export default function Jahresrueckblick() {
       )}
 
       {/* Loading */}
-      {loading && (
-        <div className="text-center py-16 text-slate-500 dark:text-slate-400">
-          <div className="text-4xl mb-3 animate-spin">⏳</div>
-          <p>Lade Jahresstatistik…</p>
-        </div>
-      )}
+      {loading && <LoadingSpinner />}
 
       {!loading && data && (
         <>

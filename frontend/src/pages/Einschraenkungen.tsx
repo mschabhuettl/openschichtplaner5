@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 
 
@@ -236,7 +237,7 @@ export default function Einschraenkungen() {
 
       {/* Employee list with restrictions */}
       {loading ? (
-        <div className="flex justify-center py-12"><div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" /></div>
+        <LoadingSpinner />
       ) : (
         <div className="space-y-3">
           {filteredEmps

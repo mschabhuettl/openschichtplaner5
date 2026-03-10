@@ -6,6 +6,7 @@ import { useConfirm } from '../hooks/useConfirm';
 import { useSSERefresh } from '../contexts/SSEContext';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useAuth } from '../contexts/AuthContext';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 // ─── Status helpers ────────────────────────────────────────
 const STATUS_LABEL: Record<string, string> = {
@@ -583,10 +584,7 @@ export default function TauschBoerse() {
 
         {/* Table */}
         {loading ? (
-          <div className="text-center py-16 text-gray-600">
-            <div className="text-4xl mb-3">⏳</div>
-            Lade Anfragen…
-          </div>
+          <LoadingSpinner />
         ) : error ? (
           <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4">{error}</div>
         ) : visibleRequests.length === 0 ? (

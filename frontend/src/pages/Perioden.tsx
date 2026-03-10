@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { Period } from '../api/client';
 import type { Group } from '../types';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useToast } from '../hooks/useToast';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -234,7 +235,7 @@ export default function Perioden() {
 
       {/* Table */}
       {loading ? (
-        <div className="text-center py-20 text-gray-600">⟳ Lade Abrechnungszeiträume…</div>
+        <LoadingSpinner />
       ) : periods.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-lg shadow text-gray-600">
           <div className="text-4xl mb-3">📭</div>

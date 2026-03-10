@@ -3,6 +3,7 @@ import { api } from '../api/client';
 import type { Restriction } from '../api/client';
 import type { Employee, Group, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -1604,9 +1605,7 @@ export default function Berichte() {
 
       {/* Report cards grouped by category */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        </div>
+        <LoadingSpinner />
       ) : (
         <div className="space-y-6">
           {categories.map(cat => (

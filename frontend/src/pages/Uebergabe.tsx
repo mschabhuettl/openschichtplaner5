@@ -4,6 +4,7 @@
  * für eingehende Schicht. Offene Punkte, Hinweise, kritische Ereignisse.
  */
 import { useCallback, useEffect, useState } from 'react';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 function getAuthHeaders(): Record<string, string> {
@@ -336,7 +337,7 @@ export default function Uebergabe() {
 
           {/* Notes */}
           {loading ? (
-            <div className="text-center text-gray-600 py-12">Lade…</div>
+            <LoadingSpinner />
           ) : visibleNotes.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-5xl mb-3">📭</div>

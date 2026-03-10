@@ -15,6 +15,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useAuth } from '../contexts/AuthContext';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 // ── helpers ──────────────────────────────────────────────────
 
@@ -365,9 +366,7 @@ export default function Schichtwuensche() {
         </div>
       )}
 
-      {loading && (
-        <div className="text-center py-8 opacity-60">Lade Wünsche…</div>
-      )}
+      {loading && <LoadingSpinner />}
 
       {/* ── Calendar view ── */}
       {!loading && viewMode === 'calendar' && (

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 interface DayEntry {
   employee_id: number;
@@ -294,9 +295,7 @@ export default function DienstBoard() {
         ))}
       </div>
 
-      {loading && (
-        <div className="text-center py-8 text-gray-600 animate-pulse">Lade Daten…</div>
-      )}
+      {loading && <LoadingSpinner />}
 
       {!loading && entries.length === 0 && (
         <div className="text-center py-12 text-gray-600">

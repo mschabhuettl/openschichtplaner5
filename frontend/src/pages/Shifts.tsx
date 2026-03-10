@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { HelpTooltip } from '../components/HelpTooltip';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 // Convert HTML #RRGGBB to BGR integer (Windows color storage)
 function hexToBGR(hex: string): number {
@@ -266,9 +267,7 @@ export default function Shifts() {
         </div>
       </div>
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-        </div>
+        <LoadingSpinner />
       ) : (
         <>
           {/* Desktop: Table layout */}

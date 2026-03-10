@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { MonthSummary, EmployeeYearStats } from '../api/client';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import type { Employee, Group, ShiftType, LeaveType } from '../types/index';
 
 const MONTH_NAMES = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
@@ -373,12 +374,7 @@ export default function MitarbeiterVergleich() {
           {/* Monthly Side-by-Side Grid */}
           <div className="bg-white border rounded-xl p-5 shadow-sm">
             <h2 className="font-semibold text-gray-700 mb-4">📅 Monatsübersicht {year}</h2>
-            {(loading1 || loading2) && (
-              <div className="text-center py-8 text-gray-600">
-                <div className="animate-spin text-2xl mb-2">⏳</div>
-                <p>Lade Daten…</p>
-              </div>
-            )}
+            {(loading1 || loading2) && <LoadingSpinner />}
             {!loading1 && !loading2 && (
               <div className="space-y-2">
                 {/* Header row */}

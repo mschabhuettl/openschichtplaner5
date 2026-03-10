@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
@@ -216,9 +217,7 @@ export default function QualitaetsBericht() {
         <div className="bg-red-50 border border-red-200 text-red-700 rounded p-3 text-sm">{error}</div>
       )}
 
-      {loading && !report && (
-        <div className="text-center py-12 text-gray-500">⏳ Berechne Qualitätsbericht…</div>
-      )}
+      {loading && !report && <LoadingSpinner />}
 
       {report && gc && (
         <>

@@ -11,6 +11,7 @@ import type { ShiftType, LeaveType, ScheduleEntry } from '../types';
 import type { Wish, SwapRequest } from '../api/client';
 import { Badge } from '../components/Badge';
 import { EmptyState } from '../components/EmptyState';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 // ── Helpers ───────────────────────────────────────────────────
 const TODAY = new Date();
@@ -350,14 +351,7 @@ export default function MeinProfil() {
   const otherTypes = leaveTypes.filter(lt => !lt.ENTITLED && !lt.HIDE);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="text-center">
-          <div className="w-10 h-10 border-4 border-slate-300 border-t-slate-600 rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">Dein Profil wird geladen…</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Dein Profil wird geladen…" />;
   }
 
   if (error) {

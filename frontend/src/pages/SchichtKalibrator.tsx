@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '../hooks/useToast';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 function getAuthHeaders(): Record<string, string> {
@@ -420,12 +421,7 @@ export default function SchichtKalibrator() {
 
       {/* Table */}
       {loading ? (
-        <div className="flex-1 flex items-center justify-center text-gray-600">
-          <div className="text-center">
-            <div className="text-4xl mb-2 animate-spin">⚙️</div>
-            <div>Lade Mitarbeiterdaten…</div>
-          </div>
-        </div>
+        <LoadingSpinner />
       ) : (
         <div className="flex-1 overflow-auto bg-white rounded-xl shadow border border-gray-200">
           <table className="w-full text-sm border-collapse min-w-[800px]">

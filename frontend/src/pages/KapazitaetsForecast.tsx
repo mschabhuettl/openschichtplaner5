@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 // ─── Types ────────────────────────────────────────────────
 interface AbsentEmployee {
@@ -707,12 +708,7 @@ export default function KapazitaetsForecast() {
         </div>
       )}
 
-      {loading && !forecast && (
-        <div className="text-center py-16 text-gray-600">
-          <div className="text-4xl mb-3 animate-pulse">📊</div>
-          <p>Lade Forecast…</p>
-        </div>
-      )}
+      {loading && !forecast && <LoadingSpinner />}
 
       {/* ── Wochentag-Analyse Tab ── */}
       {activeTab === 'wochentag' && (

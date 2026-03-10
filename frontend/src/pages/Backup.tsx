@@ -5,6 +5,7 @@ import type { BackupEntry } from '../api/client';
 import { useConfirm } from '../hooks/useConfirm';
 import { useToast } from '../hooks/useToast';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 function getAuthHeaders(): Record<string, string> {
@@ -106,11 +107,7 @@ function BackupHistorySection({ onRestoreFromServer, refreshKey }: BackupHistory
         Automatisch gespeicherte Backups auf dem Server. Maximal 7 Backups werden aufbewahrt.
       </p>
 
-      {loading && (
-        <div className="flex items-center gap-2 text-sm text-gray-600 py-4">
-          <span className="animate-spin">⏳</span> Lade Backup-Liste…
-        </div>
-      )}
+      {loading && <LoadingSpinner />}
 
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">

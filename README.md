@@ -482,7 +482,7 @@ openschichtplaner5/
 │       ├── api/client.ts     # Typisierter API-Client
 │       └── pages/            # Alle Seitenkomponenten (33 Seiten)
 └── docs/
-    └── screenshots/          # App-Screenshots (33 Seiten)
+    └── screenshots/          # App-Screenshots (30 Seiten)
 ```
 
 ---

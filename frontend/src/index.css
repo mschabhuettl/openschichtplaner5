@@ -319,9 +319,13 @@ a { transition: color 150ms ease; }
     margin: 10mm 8mm;
   }
 
-  /* ── Show print-only header ── */
-  .print-header {
+  /* ── Show print-only header & footer ── */
+  .print-header,
+  .print-footer {
     display: block !important;
+  }
+
+  .print-header {
     padding-bottom: 6px;
     margin-bottom: 8px;
     border-bottom: 2px solid #334155;

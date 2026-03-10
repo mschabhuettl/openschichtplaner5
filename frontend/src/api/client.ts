@@ -1691,6 +1691,12 @@ export const api = {
   deleteSelfWish: (wishId: number) =>
     deleteReq<{ deleted: number }>(`/api/self/wishes/${wishId}`),
 
+  getMySchedule: (year: number, month: number) =>
+    fetchJSON<ScheduleEntry[]>(`/api/self/schedule?year=${year}&month=${month}`),
+
+  getMyWishes: (year: number, month: number) =>
+    fetchJSON<Wish[]>(`/api/self/wishes?year=${year}&month=${month}`),
+
   createSelfAbsence: (body: {
     date: string;
     leave_type_id: number;

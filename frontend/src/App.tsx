@@ -49,6 +49,7 @@ const Fairness          = lazy(() => import('./pages/Fairness'));
 const MitarbeiterVergleich = lazy(() => import('./pages/MitarbeiterVergleich'));
 const MitarbeiterProfil    = lazy(() => import('./pages/MitarbeiterProfil'));
 const MeinProfil           = lazy(() => import('./pages/MeinProfil'));
+const MeinKalender         = lazy(() => import('./pages/MeinKalender'));
 const Teamkalender         = lazy(() => import('./pages/Teamkalender'));
 const UrlaubsTimeline      = lazy(() => import('./pages/UrlaubsTimeline'));
 const Shifts            = lazy(() => import('./pages/Shifts'));
@@ -179,6 +180,7 @@ const navItems: NavItem[] = [
   { id: 'dashboard',  label: 'Dashboard', icon: '📊', path: '/' },
   { id: 'konflikte',  label: 'Konflikte', icon: '⚠️', path: '/konflikte', badge: true },
   { id: 'mein-profil', label: 'Mein Profil', icon: '👤', path: '/mein-profil', roles: ['Leser'] },
+  { id: 'mein-kalender', label: 'Mein Kalender', icon: '📅', path: '/mein-kalender', roles: ['Leser'] },
 
   // ── Planung — Kernplanung ────────────────────────────────────
   { id: 'schedule',         label: 'Dienstplan',       icon: '📅', group: 'Planung', path: '/schedule' },
@@ -872,6 +874,7 @@ function AppInner() {
             <Route path="/mitarbeiter" element={<PB name="MA-Profil"><RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterProfil /></RoleRoute></PB>} />
             <Route path="/mitarbeiter/:id" element={<PB name="MA-Profil"><RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterProfil /></RoleRoute></PB>} />
             <Route path="/mein-profil" element={<PB name="Mein Profil"><MeinProfil /></PB>} />
+            <Route path="/mein-kalender" element={<PB name="Mein Kalender"><MeinKalender /></PB>} />
             <Route path="/teamkalender" element={<PB name="Team-Kalender"><Teamkalender /></PB>} />
             <Route path="/urlaubs-timeline" element={<PB name="Urlaubs-Timeline"><UrlaubsTimeline /></PB>} />
             <Route path="/fairness" element={<PB name="Fairness-Score"><RoleRoute allowedRoles={['Admin', 'Planer']}><Fairness /></RoleRoute></PB>} />

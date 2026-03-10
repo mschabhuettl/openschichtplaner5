@@ -306,19 +306,20 @@ html.dark .border-t.border-gray-200 { border-top-color: var(--color-border) !imp
 button { transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, opacity 150ms ease; }
 a { transition: color 150ms ease; }
 
-/* ── Print Header (only visible when printing) ───────────── */
-.print-header {
+/* ── Print Header / Footer (only visible when printing) ─── */
+.print-header,
+.print-footer {
   display: none;
 }
 
 /* ── Global Print Styles ──────────────────────────────────── */
 @media print {
   @page {
-    size: landscape;
+    size: A4 landscape;
     margin: 10mm 8mm;
   }
 
-  /* Show print-only header */
+  /* ── Show print-only header ── */
   .print-header {
     display: block !important;
     padding-bottom: 6px;
@@ -339,103 +340,231 @@ a { transition: color 150ms ease; }
     margin: 0;
   }
 
-  /* Hide navigation, sidebar, header and interactive controls */
+  /* ── Hide navigation, sidebar, header and interactive controls ── */
   .sidebar,
   .no-print,
   nav,
   aside,
   header,
   [class*="translate-x-"],
-  .fixed.inset-y-0 {
+  .fixed.inset-y-0,
+  /* Mobile overlay backdrop */
+  .fixed.inset-0,
+  /* Modals and overlays */
+  [role="dialog"],
+  /* Toast notifications */
+  .toast,
+  /* Bottom navigation */
+  .bottom-nav,
+  /* Install banner */
+  .install-banner,
+  /* Notification bell area */
+  .notification-bell,
+  /* Context menus / popups */
+  .context-menu,
+  /* Dev role switcher */
+  .dev-role-switcher {
     display: none !important;
   }
 
-  /* Make main content fill the full width */
-  body {
+  /* ── Page layout: reset viewport constraints ── */
+  html, body {
     font-size: 10px;
     background: white !important;
     margin: 0 !important;
     padding: 0 !important;
     color: black !important;
+    overflow: visible !important;
+    height: auto !important;
   }
 
-  /* Content area should use full width */
-  body > #root > div,
+  /* Root and app wrapper: expand fully */
+  #root,
+  #root > div,
+  #root > div > div {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  /* The outermost flex h-screen container (App layout) */
+  .flex.h-screen {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Content area: full width, no clipping */
   .flex-1 {
     max-width: 100% !important;
     width: 100% !important;
     overflow: visible !important;
     height: auto !important;
+    display: block !important;
   }
 
-  main {
+  /* Inner flex-col layout (Schedule page wrapper) */
+  .flex.flex-col {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  main,
+  [id="main-content"] {
     overflow: visible !important;
     height: auto !important;
   }
 
-  /* Preserve shift/leave colors when printing (color mode) */
+  /* ── Schedule grid container: release overflow clipping ── */
+  .overflow-auto,
+  .overflow-x-auto,
+  .overflow-y-auto,
+  .overflow-hidden {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  /* ── Tables: full width, compact, print-friendly ── */
+  table {
+    display: table !important;  /* override mobile block override */
+    font-size: 9px;
+    border-collapse: collapse !important;
+    width: 100% !important;
+    table-layout: auto;
+  }
+
+  thead, tbody, tfoot {
+    display: table-header-group !important;
+  }
+  tbody { display: table-row-group !important; }
+  tfoot { display: table-footer-group !important; }
+
+  th, td {
+    display: table-cell !important;
+    padding: 2px 3px !important;
+  }
+
+  /* ── Sticky positioning off for print ── */
+  .sticky,
+  th.sticky,
+  td.sticky,
+  [class*="sticky"] {
+    position: static !important;
+  }
+
+  /* ── Shadows off for print ── */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* ── Preserve shift/leave colors (color mode) ── */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  /* Force light mode for print */
-  html.dark .bg-white    { background-color: #ffffff !important; }
-  html.dark .bg-gray-100 { background-color: #f3f4f6 !important; }
-  html.dark .text-gray-900 { color: #111827 !important; }
-  html.dark .text-gray-700 { color: #374151 !important; }
-  html.dark th { background-color: #f1f5f9 !important; color: #111827 !important; }
-  html.dark td { background-color: #ffffff !important; color: #111827 !important; }
-  html.dark .bg-slate-800, html.dark .bg-slate-900 { background-color: #334155 !important; }
-
-  /* Compact table for print */
-  table {
-    font-size: 9px;
-    border-collapse: collapse;
-    width: 100%;
-  }
-
-  th, td {
-    padding: 2px 3px !important;
-  }
-
-  /* Avoid page breaks inside table rows */
+  /* ── Avoid page breaks inside table rows ── */
   tr {
     break-inside: avoid;
+    page-break-inside: avoid;
   }
 
-  /* Avoid page breaks inside main containers */
+  /* ── Repeat table header on every printed page ── */
+  thead {
+    display: table-header-group !important;
+  }
+
+  /* ── Print utility classes ── */
   .print-no-break {
     break-inside: avoid;
     page-break-inside: avoid;
   }
 
-  /* Report section: page break before each section */
   .print-section {
     break-inside: avoid;
     page-break-inside: avoid;
     margin-bottom: 8px;
   }
 
-  /* Force page break before element */
   .print-page-break {
     break-before: page;
     page-break-before: always;
   }
 
-  /* Portrait override for portrait pages */
+  /* ── Portrait override for portrait pages ── */
   .print-portrait {
     page: portrait-page;
   }
   @page portrait-page {
-    size: portrait;
+    size: A4 portrait;
     margin: 10mm;
+  }
+
+  /* ── Force light mode for print (dark mode reset) ── */
+  /* Background colors: convert dark to light */
+  html.dark body,
+  html.dark #root,
+  html.dark #root > div {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+  }
+
+  html.dark .bg-white    { background-color: #ffffff !important; }
+  html.dark .bg-gray-50  { background-color: #f9fafb !important; }
+  html.dark .bg-gray-100 { background-color: #f3f4f6 !important; }
+  html.dark .bg-gray-800 { background-color: #f3f4f6 !important; }
+  html.dark .bg-gray-900 { background-color: #ffffff !important; }
+  html.dark .bg-slate-50  { background-color: #f8fafc !important; }
+  html.dark .bg-slate-100 { background-color: #f1f5f9 !important; }
+
+  /* Text: restore readable dark-on-light */
+  html.dark .text-white   { color: #111827 !important; }
+  html.dark .text-gray-900 { color: #111827 !important; }
+  html.dark .text-gray-800 { color: #1f2937 !important; }
+  html.dark .text-gray-700 { color: #374151 !important; }
+  html.dark .text-gray-600 { color: #4b5563 !important; }
+  html.dark .text-slate-100,
+  html.dark .text-slate-200,
+  html.dark .text-slate-300 { color: #374151 !important; }
+
+  /* Table headers: dark bg → print-friendly slate */
+  th,
+  html.dark th {
+    background-color: #334155 !important;
+    color: #ffffff !important;
+  }
+
+  /* Table header for weekend/holiday columns already has inline styles — preserve them */
+  /* Table data cells: white bg, dark text */
+  td,
+  html.dark td {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+  }
+
+  /* Cells with inline background (shift colors): keep their bg, ensure text is readable */
+  td[style*="background"],
+  td > span[style*="color"] {
+    /* inline styles win — no override needed; -webkit-print-color-adjust ensures they print */
+  }
+
+  /* Slate header bar (Schedule table header row) */
+  .bg-slate-700,
+  html.dark .bg-slate-700,
+  html.dark .bg-slate-800,
+  html.dark .bg-slate-900 {
+    background-color: #334155 !important;
+    color: #ffffff !important;
   }
 
   /* ── B&W Print Mode ── */
   body.print-bw th {
     background-color: #e2e8f0 !important;
     color: #1e293b !important;
+    border: 1px solid #94a3b8 !important;
   }
   body.print-bw td {
     background-color: #ffffff !important;
@@ -451,6 +580,19 @@ a { transition: color 150ms ease; }
     border-bottom-color: #000 !important;
   }
   body.print-bw .print-header h1 { color: #000 !important; }
+
+  /* ── Employee name column: keep readable ── */
+  .print-bw td:first-child {
+    background-color: #f1f5f9 !important;
+    color: #000 !important;
+  }
+
+  /* ── Rounded corners / borders off in print ── */
+  .rounded,
+  .rounded-lg,
+  .rounded-xl {
+    border-radius: 0 !important;
+  }
 }
 
 .schedule-grid {

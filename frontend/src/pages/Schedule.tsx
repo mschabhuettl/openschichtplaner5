@@ -5454,12 +5454,21 @@ export default function Schedule() {
               {s.SHORTNAME}
             </span>
           ))}
-          <span className="hidden sm:inline text-xs text-gray-600 ml-2">
+          <span className="hidden sm:inline no-print text-xs text-gray-600 ml-2">
             Hover → Tooltip · Drag &amp; Drop (Alt=Kopieren) · Pfeiltasten → Navigation · Del → Löschen · Enter → Schicht · Ctrl+Z/Y → Undo/Redo
           </span>
         </div>
       )}
 
+
+      {/* ── Print-only footer (signature line + generation info) ── */}
+      <div className="print-footer" style={{ display: 'none' }}>
+        <div style={{ marginTop: '16px', paddingTop: '8px', borderTop: '1px solid #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: '9px', color: '#475569' }}>
+          <span>Unterschrift Leitung: ___________________________</span>
+          <span>OpenSchichtplaner5 · Stand: {new Date().toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' })}</span>
+          <span>Datum: _______________</span>
+        </div>
+      </div>
 
       {/* ── Hover Tooltip ── */}
       {hoverTooltip && (() => {

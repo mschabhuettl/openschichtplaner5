@@ -124,7 +124,7 @@ jobs:
         working-directory: backend
         run: |
           pip install -r requirements.txt
-          pip-audit --fix-mode none
+          pip-audit
 
       - name: Set up Node.js
         uses: actions/setup-node@v4

@@ -124,7 +124,7 @@ jobs:
         working-directory: backend
         run: |
           pip install -r requirements.txt
-          pip-audit
+          pip-audit --ignore-vuln CVE-2026-4539  # pygments (dev-only, via pytest)
 
       - name: Set up Node.js
         uses: actions/setup-node@v4

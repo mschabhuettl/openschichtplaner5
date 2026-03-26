@@ -82,8 +82,6 @@ jobs:
 
       - name: Run backend tests with coverage
         working-directory: backend
-        env:
-          SP5_REAL_DB: ${{ github.workspace }}/sp5_db/Daten
         run: |
           python -m pytest tests/ \
             --cov=sp5lib \

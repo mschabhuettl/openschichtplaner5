@@ -221,14 +221,18 @@ jobs:
       - name: Start backend
         working-directory: backend
         run: |
+          # Copy fixture DBFs to a temp data dir for E2E
+          mkdir -p /tmp/sp5-e2e-data
+          cp tests/fixtures/*.DBF /tmp/sp5-e2e-data/
           uvicorn api.main:app --host 0.0.0.0 --port 8000 &
           # Wait for backend to be ready
           for i in $(seq 1 30); do
-            curl -sf http://localhost:8000/docs >/dev/null 2>&1 && break
+            curl -sf http://localhost:8000/api/health >/dev/null 2>&1 && break
             sleep 1
           done
         env:
           SP5_DEV_MODE: "1"
+          SP5_DB_PATH: "/tmp/sp5-e2e-data"
 
       - name: Start frontend preview
         working-directory: frontend

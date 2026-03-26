@@ -1,32 +1,61 @@
 # OpenSchichtplaner5 — Deployment Guide
 
-This guide covers production deployment with Docker Compose, Nginx reverse proxy, SSL via Let's Encrypt, and first-steps after setup.
+Production deployment with integrated nginx reverse proxy, SSL via Let's Encrypt, and Docker Compose.
 
 ---
 
 ## Table of Contents
 
-1. [Prerequisites](#prerequisites)
-2. [Docker Compose (Production)](#docker-compose-production)
-3. [Nginx Reverse Proxy](#nginx-reverse-proxy)
-4. [SSL with Let's Encrypt](#ssl-with-lets-encrypt)
-5. [First Steps After Deployment](#first-steps-after-deployment)
-6. [Updates](#updates)
-7. [Backup & Restore](#backup--restore)
-8. [Production Checklist](#production-checklist)
+1. [Architecture](#architecture)
+2. [Prerequisites](#prerequisites)
+3. [Quick Start](#quick-start)
+4. [Configuration](#configuration)
+5. [SSL / HTTPS Setup](#ssl--https-setup)
+6. [First Steps After Deployment](#first-steps-after-deployment)
+7. [Updates](#updates)
+8. [Backup & Restore](#backup--restore)
+9. [Monitoring & Troubleshooting](#monitoring--troubleshooting)
+10. [Production Checklist](#production-checklist)
+
+---
+
+## Architecture
+
+```
+                    ┌─────────────┐
+  Internet ────────▶│   nginx     │──── Static files (frontend)
+   :80/:443        │  (reverse   │
+                    │   proxy)    │──── /api/* ──▶ sp5:8000 (uvicorn)
+                    └─────────────┘
+                          │
+                    ┌─────┴─────┐
+                    │ sp5       │
+                    │ (backend) │
+                    │ uvicorn   │
+                    └───────────┘
+                          │
+                    ┌─────┴─────┐
+                    │ sp5_data  │  (SQLite/DBF volume)
+                    └───────────┘
+```
+
+**Services:**
+- **nginx** — Reverse proxy, serves frontend static files, SSL termination, security headers, gzip
+- **sp5** — Python/uvicorn backend API (not exposed to host)
+- **init-frontend** — One-shot container that copies built frontend to shared volume
 
 ---
 
 ## Prerequisites
 
-- A Linux server (Ubuntu 22.04+ recommended)
+- Linux server (Ubuntu 22.04+ recommended)
 - Docker Engine ≥ 24 + Docker Compose v2 (`docker compose`)
-- A domain name pointing to your server (for TLS)
-- Access to the SP5 `.DBF` database files
+- A domain name pointing to your server (for HTTPS)
+- Access to SP5 `.DBF` database files
 
 ---
 
-## Docker Compose (Production)
+## Quick Start
 
 ### 1. Clone the repository
 
@@ -38,173 +67,148 @@ cd openschichtplaner5
 ### 2. Create the environment file
 
 ```bash
-cp backend/.env.example .env
+cp .env.example .env
 nano .env
 ```
 
 Set **at minimum** these values:
 
 ```env
-# Path to your SP5 .DBF files inside the container
-# Mount your host directory to /app/sp5_db/Daten via volumes (see step 3)
-SP5_DB_PATH=/app/sp5_db/Daten
-
-# Generate a secure random key:  openssl rand -hex 32
-SECRET_KEY=<your-secret-key-here>
-
-# Restrict to your own domain (no trailing slash)
+SP5_DB_PATH=/app/data
+SECRET_KEY=<run: openssl rand -hex 32>
 ALLOWED_ORIGINS=https://meine-domain.de
-
-# Security settings
-SP5_HSTS=true          # Only enable with HTTPS/reverse-proxy!
-SP5_DEV_MODE=false     # NEVER true in production
+SP5_DOMAIN=meine-domain.de
+SP5_DEV_MODE=false
 DEBUG=false
-LOG_LEVEL=INFO
 ```
 
 ### 3. Mount your DBF database files
 
-Edit `docker-compose.prod.yml` to add a bind mount for your SP5 data directory:
+Add a bind mount to `docker-compose.prod.yml` in the `sp5` service:
 
 ```yaml
 volumes:
   - sp5_data:/app/data
   - sp5_logs:/app/logs
-  - /pfad/zu/sp5/Daten:/app/sp5_db/Daten:rw   # ← add this line
+  - frontend_dist:/app/frontend/dist:ro
+  - /path/to/sp5/Daten:/app/sp5_db/Daten:rw   # ← your DBF files
 ```
-
-Replace `/pfad/zu/sp5/Daten` with the actual path on your host system.
 
 ### 4. Start the application
 
 ```bash
-# Production start (builds image, runs detached)
 docker compose -f docker-compose.prod.yml up -d --build
+```
 
-# Check status
+The app is now running on `http://your-server:80`.
+
+### 5. Verify
+
+```bash
+# Check services
 docker compose -f docker-compose.prod.yml ps
 
-# View logs
+# Health check
+curl -s http://localhost/api/health
+
+# Logs
 docker compose -f docker-compose.prod.yml logs -f
 ```
 
-Or use the Makefile shortcuts:
+---
 
-```bash
-make prod        # Start production containers (detached)
-make logs        # Follow live logs
-make docker-down # Stop containers
-```
+## Configuration
 
-The application is now running on `http://127.0.0.1:8000` (bound to localhost only).
+All configuration is via environment variables in `.env`. See `.env.example` for all available options.
+
+### Key Production Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `SECRET_KEY` | ✅ | JWT signing key (`openssl rand -hex 32`) |
+| `SP5_DB_PATH` | ✅ | Path to database inside container |
+| `ALLOWED_ORIGINS` | ✅ | Allowed CORS origins (your domain) |
+| `SP5_DOMAIN` | ✅ | Your domain (for nginx/certbot) |
+| `SP5_DEV_MODE` | ✅ | Must be `false` in production |
+| `DEBUG` | ✅ | Must be `false` in production |
+| `SP5_HSTS` | ⬡ | Set `true` after enabling HTTPS |
+| `SP5_HTTP_PORT` | ⬡ | Host HTTP port (default: 80) |
+| `SP5_HTTPS_PORT` | ⬡ | Host HTTPS port (default: 443) |
+| `LOG_LEVEL` | ⬡ | `INFO` recommended for production |
 
 ---
 
-## Nginx Reverse Proxy
+## SSL / HTTPS Setup
 
-Install Nginx:
+### Option A: Let's Encrypt with Certbot (recommended)
 
-```bash
-sudo apt install nginx
-```
-
-Create a configuration file:
+#### 1. Start services in HTTP mode first
 
 ```bash
-sudo nano /etc/nginx/sites-available/openschichtplaner5
+docker compose -f docker-compose.prod.yml up -d --build
 ```
 
-Paste the following (replace `meine-domain.de` with your domain):
-
-```nginx
-server {
-    listen 443 ssl http2;
-    server_name meine-domain.de;
-
-    ssl_certificate     /etc/letsencrypt/live/meine-domain.de/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/meine-domain.de/privkey.pem;
-    ssl_protocols       TLSv1.2 TLSv1.3;
-    ssl_ciphers         HIGH:!aNULL:!MD5;
-    ssl_session_cache   shared:SSL:10m;
-    ssl_session_timeout 1d;
-
-    # Security Headers
-    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
-    add_header X-Frame-Options           "SAMEORIGIN"                                   always;
-    add_header X-Content-Type-Options    "nosniff"                                      always;
-    add_header X-XSS-Protection          "1; mode=block"                                always;
-    add_header Referrer-Policy           "strict-origin-when-cross-origin"              always;
-    add_header Permissions-Policy        "camera=(), microphone=(), geolocation=()"     always;
-    add_header Content-Security-Policy   "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; frame-ancestors 'none';" always;
-
-    # Main application
-    location / {
-        proxy_pass         http://127.0.0.1:8000;
-        proxy_set_header   Host              $host;
-        proxy_set_header   X-Real-IP         $remote_addr;
-        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
-        proxy_set_header   X-Forwarded-Proto $scheme;
-        proxy_read_timeout 60s;
-        proxy_buffering    off;
-    }
-
-    # SSE (Server-Sent Events) — disable buffering and caching
-    location /api/sse {
-        proxy_pass              http://127.0.0.1:8000;
-        proxy_set_header        Host              $host;
-        proxy_set_header        X-Forwarded-Proto $scheme;
-        proxy_read_timeout      3600s;
-        proxy_buffering         off;
-        proxy_cache             off;
-        chunked_transfer_encoding on;
-    }
-}
-
-# Redirect HTTP → HTTPS
-server {
-    listen 80;
-    server_name meine-domain.de;
-    return 301 https://$host$request_uri;
-}
-```
-
-Enable the site:
+#### 2. Obtain SSL certificate
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/openschichtplaner5 /etc/nginx/sites-enabled/
-sudo nginx -t        # test config
-sudo systemctl reload nginx
+# Run certbot against the running nginx
+docker run --rm \
+  -v openschichtplaner5_ssl_certs:/etc/letsencrypt \
+  -v openschichtplaner5_certbot_webroot:/var/www/certbot \
+  certbot/certbot certonly \
+    --webroot \
+    --webroot-path=/var/www/certbot \
+    -d meine-domain.de \
+    --email admin@meine-domain.de \
+    --agree-tos \
+    --no-eff-email
 ```
 
----
+#### 3. Enable HTTPS in nginx config
 
-## SSL with Let's Encrypt
+Edit `nginx/nginx.conf`:
+1. Uncomment the SSL `server` block and HTTPS `listen` directive
+2. Comment out the HTTP `listen 80` in the main block
+3. Uncomment `Strict-Transport-Security` and `Content-Security-Policy` headers
+4. Replace `meine-domain.de` with your actual domain
 
-Install Certbot:
+#### 4. Update .env
+
+```env
+SP5_HSTS=true
+ALLOWED_ORIGINS=https://meine-domain.de
+```
+
+#### 5. Rebuild and restart
 
 ```bash
-sudo apt install certbot python3-certbot-nginx
+docker compose -f docker-compose.prod.yml up -d --build
 ```
 
-Obtain a certificate (Nginx plugin handles config automatically):
+#### 6. Set up auto-renewal (crontab)
 
 ```bash
-sudo certbot --nginx -d meine-domain.de
+# Add to root crontab
+0 3 * * * docker run --rm \
+  -v openschichtplaner5_ssl_certs:/etc/letsencrypt \
+  -v openschichtplaner5_certbot_webroot:/var/www/certbot \
+  certbot/certbot renew --quiet \
+  && docker compose -f /path/to/openschichtplaner5/docker-compose.prod.yml exec nginx nginx -s reload
 ```
 
-Test auto-renewal:
+### Option B: External Reverse Proxy
 
-```bash
-sudo certbot renew --dry-run
-```
+If you already have a reverse proxy (Traefik, Caddy, nginx on host):
 
-Certificates renew automatically via a systemd timer or cron job installed by Certbot.
+1. Change `SP5_HTTP_PORT` to an unused port (e.g., `8080`)
+2. Remove the `443` port mapping from `docker-compose.prod.yml`
+3. Point your existing proxy to `localhost:8080`
 
 ---
 
 ## First Steps After Deployment
 
-### 1. Verify the application is running
+### 1. Verify health
 
 ```bash
 curl -s https://meine-domain.de/api/health
@@ -213,45 +217,30 @@ curl -s https://meine-domain.de/api/health
 
 ### 2. Change the default admin password
 
-Log in with the default credentials:
-- Username: `admin`
-- Password: `Test1234`
+Default credentials: `admin` / `Test1234`
 
-Then immediately change the password via **Settings → Users** in the web UI, or via the API:
+Log in via the web UI and change the password immediately under **Settings → Users**.
+
+Or via API:
 
 ```bash
-# First, log in and save your token
-export TOKEN=$(curl -s -X POST https://meine-domain.de/api/auth/login \
+TOKEN=$(curl -s -X POST https://meine-domain.de/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "Test1234"}' \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])")
 
-# Change the admin password (user ID 1)
 curl -s -X POST https://meine-domain.de/api/users/1/change-password \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"new_password": "MeinSicheresPasswort123!"}'
 ```
 
-### 3. Create additional users
+### 3. Set up backups
 
 ```bash
-curl -s -X POST https://meine-domain.de/api/users \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "NAME": "planer1",
-    "PASSWORD": "SicheresPasswort456!",
-    "ROLE": "planer"
-  }'
-```
-
-### 4. Set up regular backups
-
-```bash
-# Add to crontab (daily at 2 AM)
+# Daily backup at 2 AM
 crontab -e
-# 0 2 * * * cd /pfad/zu/openschichtplaner5 && make backup >> /var/log/sp5-backup.log 2>&1
+0 2 * * * cd /path/to/openschichtplaner5 && make backup >> /var/log/sp5-backup.log 2>&1
 ```
 
 ---
@@ -259,46 +248,96 @@ crontab -e
 ## Updates
 
 ```bash
-# Pull latest code and restart (one step)
-make update
-
-# Or manually:
+cd /path/to/openschichtplaner5
 git pull
 docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Or with Makefile:
+
+```bash
+make update
 ```
 
 ---
 
 ## Backup & Restore
 
-### Create a backup
+### Create backup
 
 ```bash
 make backup
-# Creates: ./backups/sp5_db_<timestamp>.tar.gz
+# → ./backups/sp5_db_<timestamp>.tar.gz
 ```
 
-### Restore from backup
+### Manual volume backup
 
 ```bash
 docker run --rm \
+  -v openschichtplaner5_sp5_data:/data:ro \
+  -v $(pwd)/backups:/backup \
+  alpine tar czf /backup/sp5_data_$(date +%Y%m%d_%H%M%S).tar.gz -C /data .
+```
+
+### Restore
+
+```bash
+docker compose -f docker-compose.prod.yml down
+docker run --rm \
   -v openschichtplaner5_sp5_data:/data \
   -v $(pwd)/backups:/backup \
-  alpine tar xzf /backup/sp5_db_<timestamp>.tar.gz -C /data
+  alpine tar xzf /backup/sp5_data_<timestamp>.tar.gz -C /data
+docker compose -f docker-compose.prod.yml up -d
 ```
+
+---
+
+## Monitoring & Troubleshooting
+
+### View logs
+
+```bash
+# All services
+docker compose -f docker-compose.prod.yml logs -f
+
+# Specific service
+docker compose -f docker-compose.prod.yml logs -f nginx
+docker compose -f docker-compose.prod.yml logs -f sp5
+```
+
+### Health checks
+
+```bash
+# Service status
+docker compose -f docker-compose.prod.yml ps
+
+# Manual health check
+curl -sf http://localhost/api/health && echo "OK" || echo "FAIL"
+```
+
+### Common issues
+
+| Problem | Solution |
+|---|---|
+| nginx returns 502 | Backend not ready yet — check `sp5` logs, wait for healthcheck |
+| Frontend shows blank page | Check `init-frontend` ran: `docker compose logs init-frontend` |
+| SSL certificate errors | Verify cert paths in nginx.conf match volume mounts |
+| Port 80/443 already in use | Change `SP5_HTTP_PORT`/`SP5_HTTPS_PORT` in `.env` |
 
 ---
 
 ## Production Checklist
 
-- [ ] `SECRET_KEY` set to a secure random value (`openssl rand -hex 32`)
+- [ ] `SECRET_KEY` set to secure random value (`openssl rand -hex 32`)
 - [ ] `DEBUG=false`
 - [ ] `SP5_DEV_MODE=false`
-- [ ] `ALLOWED_ORIGINS` restricted to your domain
-- [ ] `SP5_HSTS=true` (only with HTTPS/reverse-proxy)
+- [ ] `ALLOWED_ORIGINS` restricted to your domain only
+- [ ] `SP5_HSTS=true` (only after HTTPS is working)
 - [ ] Default admin password changed
-- [ ] Port 8000 only accessible on localhost (via `docker-compose.prod.yml`)
-- [ ] Nginx security headers configured
-- [ ] SSL certificate installed and auto-renewal tested
+- [ ] Backend port NOT exposed to host (only via nginx)
+- [ ] nginx security headers active
+- [ ] SSL certificate installed and auto-renewal configured
 - [ ] Automated backup schedule configured
-- [ ] Logs monitored (`./logs/` or `docker compose logs`)
+- [ ] Log rotation configured (Docker json-file driver handles this)
+- [ ] Firewall allows only 80/443 inbound
+- [ ] Resource limits set appropriately for your hardware

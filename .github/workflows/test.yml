@@ -60,10 +60,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Cache pip dependencies
         uses: actions/cache@v4
@@ -82,8 +82,6 @@ jobs:
 
       - name: Run backend tests with coverage
         working-directory: backend
-        env:
-          SP5_REAL_DB: ${{ github.workspace }}/sp5_db/Daten
         run: |
           python -m pytest tests/ \
             --cov=sp5lib \
@@ -114,10 +112,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
+      - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install pip-audit
         run: pip install pip-audit
@@ -126,7 +124,7 @@ jobs:
         working-directory: backend
         run: |
           pip install -r requirements.txt
-          pip-audit --requirement requirements.txt --fix-mode none
+          pip-audit --ignore-vuln CVE-2026-4539  # pygments (dev-only, via pytest)
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -190,7 +188,7 @@ jobs:
 
     services:
       backend:
-        image: python:3.11-slim
+        image: python:3.12-slim
         options: --health-cmd "echo ok" --health-interval 5s
 
     steps:

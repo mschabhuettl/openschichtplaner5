@@ -17,6 +17,13 @@ vi.mock('../api/client', () => ({
   },
 }));
 
+// Mock SSEContext
+vi.mock('../contexts/SSEContext', () => ({
+  useSSEContext: () => ({ status: 'disconnected', subscribe: vi.fn(() => vi.fn()) }),
+  useSSERefresh: vi.fn(),
+  SSEProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 // Mock i18n
 vi.mock('../i18n/context', () => ({
   useT: () => ({

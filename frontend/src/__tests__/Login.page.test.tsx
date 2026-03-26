@@ -76,7 +76,7 @@ describe('Login page', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Anmelden' }));
 
     await waitFor(() => {
-      expect(mockLogin).toHaveBeenCalledWith('admin', 'secret');
+      expect(mockLogin).toHaveBeenCalledWith('admin', 'secret', undefined);
     });
   });
 

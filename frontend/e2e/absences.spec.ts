@@ -73,7 +73,7 @@ test.describe('Abwesenheit — Erstellen (Modal)', () => {
     await page.waitForTimeout(1000);
 
     // Modal should open — look for the modal with "Neue Abwesenheit" heading or form fields
-    const modalVisible = await page.locator('text=Mitarbeiter, text=Abwesenheitsart, text=Von, text=Bis, input[type="date"]').first().isVisible({ timeout: 3000 }).catch(() => false);
+    const _modalVisible = await page.locator('text=Mitarbeiter, text=Abwesenheitsart, text=Von, text=Bis, input[type="date"]').first().isVisible({ timeout: 3000 }).catch(() => false);
     // Even if modal doesn't render (no employees in dev-mode), the click should not crash
     const body = await page.textContent('body');
     expect(body!.length).toBeGreaterThan(100);

@@ -403,6 +403,26 @@ export interface NotificationItem {
   created_at: string;
 }
 
+// ─── Webhook Types ─────────────────────────────────────────
+export interface WebhookDeliveryResult {
+  success: boolean;
+  status_code?: number;
+  error?: string;
+  attempt: number;
+  timestamp: string;
+}
+
+export interface WebhookEntry {
+  id: number;
+  url: string;
+  name: string;
+  events: string[];
+  secret: string;
+  active: boolean;
+  created_at: string;
+  last_delivery: WebhookDeliveryResult | null;
+}
+
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 // ─── API Compatibility Check ───────────────────────────────────
@@ -1899,16 +1919,16 @@ export const api = {
   },
 
   // ── Webhooks ──────────────────────────────────────────────────
-  getWebhooks: () => fetchJSON<any[]>('/api/webhooks'),
-  getWebhook: (id: number) => fetchJSON<any>(`/api/webhooks/${id}`),
+  getWebhooks: () => fetchJSON<WebhookEntry[]>('/api/webhooks'),
+  getWebhook: (id: number) => fetchJSON<WebhookEntry>(`/api/webhooks/${id}`),
   createWebhook: (data: { url: string; name: string; events: string[]; active?: boolean }) =>
-    postJSON<{ ok: boolean; record: any }>('/api/webhooks', data),
+    postJSON<{ ok: boolean; record: WebhookEntry }>('/api/webhooks', data),
   updateWebhook: (id: number, data: { url?: string; name?: string; events?: string[]; active?: boolean }) =>
-    putJSON<{ ok: boolean; record: any }>(`/api/webhooks/${id}`, data),
+    putJSON<{ ok: boolean; record: WebhookEntry }>(`/api/webhooks/${id}`, data),
   deleteWebhook: (id: number) =>
     deleteReq<{ ok: boolean; deleted: number }>(`/api/webhooks/${id}`),
   testWebhook: (id: number) =>
-    postJSON<{ ok: boolean; delivery: any }>(`/api/webhooks/${id}/test`, {}),
+    postJSON<{ ok: boolean; delivery: WebhookDeliveryResult }>(`/api/webhooks/${id}/test`, {}),
   getWebhookEvents: () => fetchJSON<{ events: string[] }>('/api/webhooks/events/list'),
 
   // ── Companies (Multi-Tenant) ─────────────────────────────────

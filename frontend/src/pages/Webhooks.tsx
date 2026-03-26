@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { api } from '../api/client';
+import { api, type WebhookEntry } from '../api/client';
 import { useToast } from '../hooks/useToast';
 import { PageHeader } from '../components/PageHeader';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,22 +7,7 @@ import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
-interface Webhook {
-  id: number;
-  url: string;
-  name: string;
-  events: string[];
-  secret: string;
-  active: boolean;
-  created_at: string;
-  last_delivery: {
-    success: boolean;
-    status_code?: number;
-    error?: string;
-    attempt: number;
-    timestamp: string;
-  } | null;
-}
+type Webhook = WebhookEntry;
 
 interface WebhookForm {
   url: string;
@@ -71,8 +56,8 @@ export default function Webhooks() {
       const data = await api.getWebhooks();
       setWebhooks(data);
       setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Fehler beim Laden der Webhooks');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Fehler beim Laden der Webhooks');
     } finally {
       setLoading(false);
     }
@@ -113,8 +98,8 @@ export default function Webhooks() {
       }
       setShowModal(false);
       loadWebhooks();
-    } catch (err: any) {
-      showToast(err.message || 'Fehler beim Speichern', 'error');
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'Fehler beim Speichern', 'error');
     } finally {
       setSaving(false);
     }
@@ -132,8 +117,8 @@ export default function Webhooks() {
       await api.deleteWebhook(webhook.id);
       showToast('Webhook gelöscht', 'success');
       loadWebhooks();
-    } catch (err: any) {
-      showToast(err.message || 'Fehler beim Löschen', 'error');
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'Fehler beim Löschen', 'error');
     }
   };
 
@@ -147,8 +132,8 @@ export default function Webhooks() {
         showToast(`Test fehlgeschlagen: ${result.delivery?.error || 'Unbekannter Fehler'}`, 'error');
       }
       loadWebhooks();
-    } catch (err: any) {
-      showToast(err.message || 'Fehler beim Testen', 'error');
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : 'Fehler beim Testen', 'error');
     } finally {
       setTesting(null);
     }

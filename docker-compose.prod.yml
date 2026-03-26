@@ -1,63 +1,106 @@
 # ==============================================================================
-# OpenSchichtplaner5 — Production Compose
+# OpenSchichtplaner5 — Production Docker Compose
 #
-# Verwendung:
+# Architecture:
+#   nginx (reverse proxy + static frontend) -> sp5 (uvicorn backend API)
+#
+# Usage:
 #   docker compose -f docker-compose.prod.yml up -d --build
 #
-# Voraussetzungen:
-#   1. .env-Datei im Root mit allen Pflicht-Vars (siehe .env.example)
-#   2. SECRET_KEY auf sicheren Zufallswert gesetzt:
-#      openssl rand -hex 32
-#   3. SP5_DB_PATH auf den Pfad zu den .DBF-Dateien gesetzt
-#   4. ALLOWED_ORIGINS auf die eigene Domain beschränkt
-#   5. SP5_DEV_MODE=false (nie in Produktion aktivieren!)
+# Prerequisites:
+#   1. Copy .env.example -> .env and configure all required values
+#   2. Generate SECRET_KEY: openssl rand -hex 32
+#   3. Set SP5_DB_PATH and mount your DBF data directory
+#   4. Set ALLOWED_ORIGINS to your domain
+#   5. SP5_DEV_MODE=false (NEVER enable in production!)
 #
-# Für TLS/HTTPS: Reverse-Proxy (nginx/caddy) vorschalten.
-# Mit Reverse-Proxy dann SP5_HSTS=true setzen.
+# For HTTPS:
+#   1. Set SP5_DOMAIN in .env
+#   2. Run initial certbot (see docs/DEPLOYMENT.md)
+#   3. Uncomment SSL sections in nginx/nginx.conf
+#   4. Set SP5_HSTS=true in .env
 # ==============================================================================
 
 services:
 
   # ----------------------------------------------------------------------------
-  # sp5 — Hauptanwendung (Backend + eingebettetes Frontend)
+  # nginx — Reverse Proxy + Static Frontend
+  # ----------------------------------------------------------------------------
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: sp5-nginx
+    ports:
+      - "${SP5_HTTP_PORT:-80}:80"
+      - "${SP5_HTTPS_PORT:-443}:443"
+    volumes:
+      # Frontend static files from the build stage
+      - frontend_dist:/usr/share/nginx/html:ro
+      # SSL certificates (Let's Encrypt)
+      - ssl_certs:/etc/letsencrypt:ro
+      # Certbot webroot for ACME challenges
+      - certbot_webroot:/var/www/certbot
+    depends_on:
+      sp5:
+        condition: service_healthy
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=64m
+      - /var/run:size=1m
+      - /tmp:size=16m
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.5"
+        reservations:
+          memory: 32M
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ----------------------------------------------------------------------------
+  # sp5 — Backend API (uvicorn)
   # ----------------------------------------------------------------------------
   sp5:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: sp5-backend
     image: openschichtplaner5:latest
-
-    # Produktions-Port: nur auf localhost binden, Reverse-Proxy vorschalten!
-    # Ohne Reverse-Proxy: "8000:8000" (direkt erreichbar)
-    ports:
-      - "127.0.0.1:8000:8000"
-
-    # Persistente Daten via Named-Volumes (keine Dev-Bind-Mounts!)
+    # NOT exposed to host — only accessible via nginx
+    expose:
+      - "8000"
     volumes:
+      # Persistent database storage
       - sp5_data:/app/data
+      # Application logs
       - sp5_logs:/app/logs
-
-    # Alle Env-Vars aus der Root-.env laden
     env_file:
       - .env
-
-    # Produktions-Overrides (überschreiben .env-Defaults falls nötig)
+    # Production overrides
     environment:
       DEBUG: "false"
       LOG_LEVEL: "INFO"
       SP5_DEV_MODE: "false"
-
-    # Container bei Absturz und nach Neustart immer neu starten
     restart: always
-
     security_opt:
       - no-new-privileges:true
-
     read_only: true
     tmpfs:
       - /tmp:size=64m,mode=1777
-
-    # Ressourcen-Limits (an eigene Hardware anpassen)
     deploy:
       resources:
         limits:
@@ -66,22 +109,38 @@ services:
         reservations:
           memory: 128M
           cpus: "0.25"
-
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 20s
-
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "5"
 
+  # ----------------------------------------------------------------------------
+  # init-frontend — One-shot: copy built frontend to shared volume
+  # ----------------------------------------------------------------------------
+  init-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sp5-init-frontend
+    entrypoint: ["/bin/sh", "-c", "cp -r /app/frontend/dist/* /output/ && echo 'Frontend files copied.'"]
+    volumes:
+      - frontend_dist:/output
+    restart: "no"
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: "0.25"
+
 # ------------------------------------------------------------------------------
-# Volumes — Named Volumes für persistente Daten
+# Volumes
 # ------------------------------------------------------------------------------
 volumes:
   sp5_data:
@@ -94,3 +153,18 @@ volumes:
     driver: local
     labels:
       com.openschichtplaner5.volume: "logs"
+
+  frontend_dist:
+    driver: local
+    labels:
+      com.openschichtplaner5.volume: "frontend-static"
+
+  ssl_certs:
+    driver: local
+    labels:
+      com.openschichtplaner5.volume: "ssl-certificates"
+
+  certbot_webroot:
+    driver: local
+    labels:
+      com.openschichtplaner5.volume: "certbot-webroot"

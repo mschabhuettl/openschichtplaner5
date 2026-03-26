@@ -32,10 +32,18 @@ export async function loginViaStorage(page: Page, role: 'admin' | 'planer' | 'le
     },
   };
 
+  // Map role to devViewRole so canAdmin/canWrite permissions render correctly
+  const devViewRoleMap: Record<string, string> = {
+    admin: 'admin',
+    planer: 'planer',
+    leser: 'lese',
+  };
+
   const session = {
     token: '__dev_mode__',
     user: users[role],
     devMode: true,
+    devViewRole: devViewRoleMap[role] ?? 'dev',
   };
 
   // Navigate first to establish the origin, then set localStorage

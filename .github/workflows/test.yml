@@ -1,4 +1,4 @@
-name: Backend CI
+name: CI
 
 on:
   push:
@@ -6,8 +6,7 @@ on:
   pull_request:
     branches: [ main, develop ]
 
-# E2E tests run only on push to main (require running backend + frontend)
-# Triggered separately via the e2e-tests job below.
+# All jobs run on push and PR to main/develop.
 
 jobs:
   lint-python:
@@ -183,17 +182,16 @@ jobs:
   e2e-tests:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
-    # Only on push to main; skipped for PRs and develop branch
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-
-    services:
-      backend:
-        image: python:3.12-slim
-        options: --health-cmd "echo ok" --health-interval 5s
+    needs: [lint-frontend, backend-tests]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -201,6 +199,12 @@ jobs:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -210,28 +214,39 @@ jobs:
         working-directory: frontend
         run: npx playwright install chromium --with-deps
 
-      - name: Install backend dependencies
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Start backend
         working-directory: backend
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Start backend (uvicorn)
-        working-directory: backend
-        run: uvicorn api.main:app --host 0.0.0.0 --port 8000 &
+          # Copy fixture DBFs to a temp data dir for E2E
+          mkdir -p /tmp/sp5-e2e-data
+          cp tests/fixtures/*.DBF /tmp/sp5-e2e-data/
+          uvicorn api.main:app --host 0.0.0.0 --port 8000 &
+          # Wait for backend to be ready
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8000/api/health >/dev/null 2>&1 && break
+            sleep 1
+          done
         env:
           SP5_DEV_MODE: "1"
+          SP5_DB_PATH: "/tmp/sp5-e2e-data"
 
-      - name: Start frontend (vite preview)
+      - name: Start frontend preview
         working-directory: frontend
         run: |
-          npm run build
-          npm run preview -- --port 5173 &
-          sleep 3
+          npx vite preview --port 5173 &
+          # Wait for frontend to be ready
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:5173 >/dev/null 2>&1 && break
+            sleep 1
+          done
 
       - name: Run E2E tests
         working-directory: frontend
-        run: npx playwright test --reporter=list
+        run: npx playwright test --reporter=github
         env:
           CI: true
 
@@ -241,3 +256,17 @@ jobs:
         with:
           name: playwright-report
           path: frontend/playwright-report/
+
+      - name: Upload test screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-screenshots
+          path: frontend/e2e/screenshots/
+
+      - name: Upload test traces
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: frontend/test-results/

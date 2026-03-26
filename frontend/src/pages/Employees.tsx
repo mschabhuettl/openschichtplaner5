@@ -815,6 +815,7 @@ export default function Employees() {
                       <div className="text-xs text-gray-600 mt-0.5">Nr. {emp.NUMBER}</div>
                     )}
                   </div>
+                  {canAdmin && (
                   <div className="flex gap-1 flex-shrink-0">
                     <button
                       onClick={() => openEdit(emp)}
@@ -827,6 +828,7 @@ export default function Employees() {
                       title="Ausblenden"
                     >🗑️</button>
                   </div>
+                  )}
                 </div>
                 <div className="mt-2 flex items-center gap-3 text-sm text-gray-600 flex-wrap">
                   <span>{emp.HRSDAY?.toFixed(1)}h/Tag</span>

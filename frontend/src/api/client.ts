@@ -1898,6 +1898,19 @@ export const api = {
     URL.revokeObjectURL(url);
   },
 
+  // ── Webhooks ──────────────────────────────────────────────────
+  getWebhooks: () => fetchJSON<any[]>('/api/webhooks'),
+  getWebhook: (id: number) => fetchJSON<any>(`/api/webhooks/${id}`),
+  createWebhook: (data: { url: string; name: string; events: string[]; active?: boolean }) =>
+    postJSON<{ ok: boolean; record: any }>('/api/webhooks', data),
+  updateWebhook: (id: number, data: { url?: string; name?: string; events?: string[]; active?: boolean }) =>
+    putJSON<{ ok: boolean; record: any }>(`/api/webhooks/${id}`, data),
+  deleteWebhook: (id: number) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/webhooks/${id}`),
+  testWebhook: (id: number) =>
+    postJSON<{ ok: boolean; delivery: any }>(`/api/webhooks/${id}/test`, {}),
+  getWebhookEvents: () => fetchJSON<{ events: string[] }>('/api/webhooks/events/list'),
+
   // ── Companies (Multi-Tenant) ─────────────────────────────────
   getCompanies: () => fetchJSON<{ id: number; name: string; slug: string; is_active: boolean; employee_count: number; group_count: number }[]>('/api/companies'),
   getCompany: (id: number) => fetchJSON<{ id: number; name: string; slug: string; is_active: boolean; employee_count: number; group_count: number }>(`/api/companies/${id}`),

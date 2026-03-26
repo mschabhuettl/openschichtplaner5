@@ -78,6 +78,7 @@ const KapazitaetsForecast = lazy(() => import('./pages/KapazitaetsForecast'));
 const QualitaetsBericht   = lazy(() => import('./pages/QualitaetsBericht'));
 const SchichtKalibrator   = lazy(() => import('./pages/SchichtKalibrator'));
 const KompetenzMatrix     = lazy(() => import('./pages/KompetenzMatrix'));
+const Webhooks            = lazy(() => import('./pages/Webhooks'));
 const Analytics           = lazy(() => import('./pages/Analytics'));
 const OnboardingWizard    = lazy(() => import('./pages/OnboardingWizard'));
 const SchichtBriefing     = lazy(() => import('./pages/SchichtBriefing'));
@@ -249,6 +250,7 @@ const navItems: NavItem[] = [
   { id: 'schichtbriefing',    label: 'Schicht-Briefing',     icon: '📋', group: 'Planung',         path: '/schichtbriefing' },
   { id: 'onboarding',         label: 'Onboarding-Wizard',    icon: '🧭', group: 'Administration', path: '/onboarding',         roles: ['Admin', 'Planer'] },
   { id: 'companies',          label: 'Firmenverwaltung',     icon: '🏢', group: 'Administration', path: '/companies',          roles: ['Admin'] },
+  { id: 'webhooks',           label: 'Webhooks',             icon: '🔗', group: 'Administration', path: '/webhooks',           roles: ['Admin'] },
   { id: 'benutzerverwaltung', label: 'Benutzerverwaltung',   icon: '👤', group: 'Administration', path: '/benutzerverwaltung', roles: ['Admin'] },
   { id: 'backup',             label: 'Backup & Restore',     icon: '💾', group: 'Administration', path: '/backup',             roles: ['Admin'] },
   { id: 'perioden',           label: 'Abrechnungszeiträume', icon: '📅', group: 'Administration', path: '/perioden',           roles: ['Admin'] },
@@ -907,6 +909,7 @@ function AppInner() {
             <Route path="/einstellungen" element={<PB name="Einstellungen"><RoleRoute allowedRoles={['Admin']}><Einstellungen /></RoleRoute></PB>} />
             <Route path="/email-settings" element={<PB name="E-Mail"><RoleRoute allowedRoles={['Admin']}><EmailSettings /></RoleRoute></PB>} />
             <Route path="/protokoll" element={<PB name="Protokoll"><RoleRoute allowedRoles={['Admin']}><Protokoll /></RoleRoute></PB>} />
+            <Route path="/webhooks" element={<PB name="Webhooks"><RoleRoute allowedRoles={['Admin']}><Webhooks /></RoleRoute></PB>} />
             <Route path="/druckvorschau" element={<PB name="Druckvorschau"><Druckvorschau /></PB>} />
             <Route path="/dienst-board" element={<PB name="Dienst-Board"><RoleRoute allowedRoles={['Admin', 'Planer']}><DienstBoard /></RoleRoute></PB>} />
             <Route path="/wochenansicht" element={<PB name="Wochenansicht"><Wochenansicht /></PB>} />

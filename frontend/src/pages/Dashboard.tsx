@@ -1185,6 +1185,7 @@ export default function Dashboard() {
   const [todayData, setTodayData] = useState<DashboardToday | null>(null);
   const [upcomingData, setUpcomingData] = useState<DashboardUpcoming | null>(null);
   const [statsData, setStatsData] = useState<DashboardStats | null>(null);
+  const [companyName, setCompanyName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
@@ -1226,6 +1227,16 @@ export default function Dashboard() {
   useEffect(() => {
     fetchAll(false);
   }, [fetchAll]);
+
+  // Load company context once on mount
+  useEffect(() => {
+    api.getCompanies()
+      .then((companies) => {
+        const active = companies.find(c => c.is_active) ?? companies[0];
+        if (active) setCompanyName(active.name);
+      })
+      .catch(() => { /* ignore — company context is optional */ });
+  }, []);
 
   // Real-time SSE refresh (silent)
   const silentRefresh = useCallback(() => fetchAll(true), [fetchAll]);
@@ -1278,7 +1289,14 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">📊 {t.dashboard.title}</h1>
-          <p className="text-gray-600 text-sm mt-0.5">{todayLocale}</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="text-gray-600 text-sm">{todayLocale}</p>
+            {companyName && (
+              <span className="text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-2 py-0.5 font-medium">
+                🏢 {companyName}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2">
           {/* Auto-refresh indicator */}

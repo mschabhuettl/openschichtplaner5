@@ -86,6 +86,7 @@ const HealthDashboard     = lazy(() => import('./pages/HealthDashboard'));
 const NotfallPlan         = lazy(() => import('./pages/NotfallPlan'));
 const Leitwand            = lazy(() => import('./pages/Leitwand'));
 const Simulation          = lazy(() => import('./pages/Simulation'));
+const Companies           = lazy(() => import('./pages/Companies'));
 const Uebergabe           = lazy(() => import('./pages/Uebergabe'));
 const DienstBoard         = lazy(() => import('./pages/DienstBoard'));
 const TeamUebersicht      = lazy(() => import('./pages/TeamUebersicht'));
@@ -247,6 +248,7 @@ const navItems: NavItem[] = [
   // ── Administration ───────────────────────────────────────────
   { id: 'schichtbriefing',    label: 'Schicht-Briefing',     icon: '📋', group: 'Planung',         path: '/schichtbriefing' },
   { id: 'onboarding',         label: 'Onboarding-Wizard',    icon: '🧭', group: 'Administration', path: '/onboarding',         roles: ['Admin', 'Planer'] },
+  { id: 'companies',          label: 'Firmenverwaltung',     icon: '🏢', group: 'Administration', path: '/companies',          roles: ['Admin'] },
   { id: 'benutzerverwaltung', label: 'Benutzerverwaltung',   icon: '👤', group: 'Administration', path: '/benutzerverwaltung', roles: ['Admin'] },
   { id: 'backup',             label: 'Backup & Restore',     icon: '💾', group: 'Administration', path: '/backup',             roles: ['Admin'] },
   { id: 'perioden',           label: 'Abrechnungszeiträume', icon: '📅', group: 'Administration', path: '/perioden',           roles: ['Admin'] },
@@ -898,6 +900,7 @@ function AppInner() {
             <Route path="/workplaces" element={<PB name="Arbeitsplätze"><RoleRoute allowedRoles={['Admin', 'Planer']}><Workplaces /></RoleRoute></PB>} />
             <Route path="/extracharges" element={<PB name="Zeitzuschläge"><RoleRoute allowedRoles={['Admin', 'Planer']}><Extracharges /></RoleRoute></PB>} />
             <Route path="/einschraenkungen" element={<PB name="Schichteinschränkungen"><RoleRoute allowedRoles={['Admin', 'Planer']}><Einschraenkungen /></RoleRoute></PB>} />
+            <Route path="/companies" element={<PB name="Firmenverwaltung"><RoleRoute allowedRoles={['Admin']}><Companies /></RoleRoute></PB>} />
             <Route path="/benutzerverwaltung" element={<PB name="Benutzerverwaltung"><RoleRoute allowedRoles={['Admin']}><Benutzerverwaltung /></RoleRoute></PB>} />
             <Route path="/backup" element={<PB name="Backup & Restore"><RoleRoute allowedRoles={['Admin']}><Backup /></RoleRoute></PB>} />
             <Route path="/perioden" element={<PB name="Abrechnungszeiträume"><RoleRoute allowedRoles={['Admin']}><Perioden /></RoleRoute></PB>} />

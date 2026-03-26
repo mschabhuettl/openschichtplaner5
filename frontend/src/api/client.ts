@@ -1898,6 +1898,16 @@ export const api = {
     URL.revokeObjectURL(url);
   },
 
+  // ── Companies (Multi-Tenant) ─────────────────────────────────
+  getCompanies: () => fetchJSON<{ id: number; name: string; slug: string; is_active: boolean; employee_count: number; group_count: number }[]>('/api/companies'),
+  getCompany: (id: number) => fetchJSON<{ id: number; name: string; slug: string; is_active: boolean; employee_count: number; group_count: number }>(`/api/companies/${id}`),
+  createCompany: (data: { name: string; slug?: string }) =>
+    postJSON<{ id: number; name: string; slug: string; is_active: boolean }>('/api/companies', data),
+  updateCompany: (id: number, data: { name?: string; slug?: string; is_active?: boolean }) =>
+    putJSON<{ id: number; name: string; slug: string; is_active: boolean }>(`/api/companies/${id}`, data),
+  deleteCompany: (id: number) =>
+    deleteReq<{ ok: boolean; deactivated: number }>(`/api/companies/${id}`),
+
   // ── 2FA / TOTP ──────────────────────────────────────────────
   get2FAStatus: () => fetchJSON<{ enabled: boolean }>('/api/auth/2fa/status'),
   setup2FA: () => postJSON<{ secret: string; qr_code: string; otpauth_uri: string }>('/api/auth/2fa/setup', {}),

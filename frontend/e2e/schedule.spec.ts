@@ -70,7 +70,7 @@ test.describe('Dienstplan — Anzeige & Navigation', () => {
     // Find and click next month button (usually ► or →)
     const nextBtn = page.locator('button:has-text("►"), button:has-text("→"), button:has-text("❯"), button[aria-label*="nächst"], button[aria-label*="next"]').first();
     if (await nextBtn.isVisible()) {
-      const bodyBefore = await page.textContent('body');
+      const _bodyBefore = await page.textContent('body');
       await nextBtn.click();
       await page.waitForTimeout(500);
       const bodyAfter = await page.textContent('body');
@@ -96,7 +96,7 @@ test.describe('Dienstplan — Zellen-Interaktion', () => {
       await cells.click();
       await page.waitForTimeout(500);
       // Check if a context menu or popup appeared
-      const popup = page.locator('text=Schicht zuweisen, text=Abwesenheit, [class*="menu"], [class*="popup"], [class*="popover"]').first();
+      const _popup = page.locator('text=Schicht zuweisen, text=Abwesenheit, [class*="menu"], [class*="popup"], [class*="popover"]').first();
       // Menu may or may not appear depending on data — just verify no crash
       const body = await page.textContent('body');
       expect(body!.length).toBeGreaterThan(100);
@@ -105,7 +105,7 @@ test.describe('Dienstplan — Zellen-Interaktion', () => {
 
   test('CSV-Export Button ist für Admin sichtbar', async ({ page }) => {
     // Check for export functionality
-    const exportBtn = page.locator('button:has-text("CSV"), button:has-text("Export"), button:has-text("Drucken"), button[aria-label*="export"]').first();
+    const _exportBtn = page.locator('button:has-text("CSV"), button:has-text("Export"), button:has-text("Drucken"), button[aria-label*="export"]').first();
     // Export button might exist — just verify page doesn't crash
     const body = await page.textContent('body');
     expect(body).not.toContain('Cannot GET');

@@ -42,7 +42,7 @@ test.describe('Login — Kritische Flows', () => {
 
     // Should still be on login page (no redirect to dashboard)
     const loginForm = page.locator('input[autocomplete="username"]');
-    const dashboardText = page.locator('text=Dashboard');
+    const _dashboardText = page.locator('text=Dashboard');
     
     // Either login form is still visible OR error message shown
     const stillOnLogin = await loginForm.isVisible();

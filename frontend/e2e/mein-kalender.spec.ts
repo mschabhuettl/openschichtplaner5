@@ -57,7 +57,7 @@ test.describe('Mein Kalender — Persönlicher Kalender', () => {
     // Find the next month button (► or →)
     const nextBtn = page.locator('button:has-text("►"), button:has-text("→"), button:has-text("❯"), button[aria-label*="nächst"], button[aria-label*="next"]').first();
     if (await nextBtn.isVisible()) {
-      const bodyBefore = await page.textContent('body');
+      const _bodyBefore = await page.textContent('body');
       await nextBtn.click();
       await page.waitForTimeout(500);
 

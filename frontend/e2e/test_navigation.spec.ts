@@ -57,7 +57,6 @@ test.describe('Navigation Tests (als admin)', () => {
       expect(body).not.toContain('Cannot GET');
     }
 
-    // eslint-disable-next-line no-console
     if (consoleErrors.length > 0) console.log('NAV_ERRORS:', JSON.stringify(consoleErrors));
     expect(consoleErrors.length).toBe(0);
   });

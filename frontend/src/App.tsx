@@ -181,7 +181,7 @@ const navItems: NavItem[] = [
   // ── Top-level ───────────────────────────────────────────────
   { id: 'dashboard',  label: 'Dashboard', icon: '📊', path: '/' },
   { id: 'konflikte',  label: 'Konflikte', icon: '⚠️', path: '/konflikte', badge: true },
-  { id: 'mein-profil', label: 'Mein Profil', icon: '👤', path: '/mein-profil', roles: ['Leser'] },
+  { id: 'mein-profil', label: 'Mein Profil', icon: '👤', path: '/mein-profil' },
   { id: 'mein-kalender', label: 'Mein Kalender', icon: '📅', path: '/mein-kalender', roles: ['Leser'] },
 
   // ── Planung — Kernplanung ────────────────────────────────────

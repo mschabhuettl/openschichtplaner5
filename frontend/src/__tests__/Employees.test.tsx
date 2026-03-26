@@ -24,6 +24,12 @@ vi.mock('../api/client', () => ({
 }));
 
 // Mock AuthContext
+vi.mock('../contexts/SSEContext', () => ({
+  useSSEContext: () => ({ status: 'disconnected', subscribe: vi.fn(() => vi.fn()) }),
+  useSSERefresh: vi.fn(),
+  SSEProvider: ({ children }: { children: React.ReactNode }) => children,
+}));
+
 vi.mock('../contexts/AuthContext', () => ({
   useAuth: () => ({
     user: { ID: 1, NAME: 'Admin', ADMIN: true, role: 'Admin' },

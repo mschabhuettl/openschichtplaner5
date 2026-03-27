@@ -22,6 +22,7 @@ const KeyboardShortcutsModal = lazy(() => import('./components/KeyboardShortcuts
 const GuidedTour           = lazy(() => import('./components/GuidedTour').then(m => ({ default: m.GuidedTour })));
 import { ErrorBoundary, PageErrorBoundary } from './components/ErrorBoundary';
 import { InstallBanner } from './components/InstallBanner';
+import RateLimitBanner from './components/RateLimitBanner';
 import { ThemeToggle } from './components/ThemeToggle';
 import { BottomNav } from './components/BottomNav';
 import { api, checkApiCompatibility } from './api/client';
@@ -923,6 +924,7 @@ export default function App() {
             <GlobalToastContainer />
             <SessionExpiryToastBridge />
             <InstallBanner />
+            <RateLimitBanner />
           </ToastProvider>
         </LanguageProvider>
       </ThemeProvider>

@@ -539,10 +539,36 @@ async function extractErrorMessage(res: Response): Promise<string> {
   return `Fehler ${res.status}: ${res.statusText || 'Unbekannter Fehler'}`;
 }
 
+/** Fired when any API call returns 429 — RateLimitBanner listens and shows countdown. */
+function dispatchRateLimited(retryAfter: number) {
+  window.dispatchEvent(new CustomEvent('sp5:rate-limited', {
+    detail: { retry_after: retryAfter },
+  }));
+}
+
 async function handleResponseError(res: Response): Promise<void> {
   if (res.status === 401) {
     dispatchUnauthorized();
     throw new Error('Sitzung abgelaufen. Bitte erneut anmelden.');
+  }
+  if (res.status === 429) {
+    // Extract retry_after from JSON body or Retry-After header
+    let retryAfter = 60; // default
+    try {
+      const data = await res.clone().json();
+      if (data?.retry_after && typeof data.retry_after === 'number') {
+        retryAfter = data.retry_after;
+      }
+    } catch {
+      // Try header fallback
+      const headerVal = res.headers.get('Retry-After');
+      if (headerVal) {
+        const parsed = parseInt(headerVal, 10);
+        if (!isNaN(parsed) && parsed > 0) retryAfter = parsed;
+      }
+    }
+    dispatchRateLimited(retryAfter);
+    throw new Error(`Zu viele Anfragen. Bitte ${retryAfter} Sekunden warten.`);
   }
   if (!res.ok) {
     const msg = await extractErrorMessage(res);

@@ -13,6 +13,7 @@ import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { EmptyState } from '../components/EmptyState';
 import { useT } from '../i18n';
+import { EmptyState } from '../components/EmptyState';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
@@ -813,7 +814,17 @@ export default function Employees() {
                     </td>
                   </tr>
                 ))}
-                {filtered.length === 0 && (
+                {filtered.length === 0 && employees.length === 0 && (
+                  <EmptyState
+                    colSpan={canAdmin ? 9 : 8}
+                    icon="👥"
+                    title="Noch keine Mitarbeiter"
+                    description="Legen Sie Ihren ersten Mitarbeiter an, um mit der Dienstplanung zu beginnen."
+                    actionLabel={canAdmin ? "➕ Ersten Mitarbeiter anlegen" : undefined}
+                    onAction={canAdmin ? openCreate : undefined}
+                  />
+                )}
+                {filtered.length === 0 && employees.length > 0 && (
                   <tr><td colSpan={canAdmin ? 9 : 8} className="text-center py-8 text-gray-600">{t.employees.noResults}</td></tr>
                 )}
               </tbody>

@@ -244,19 +244,39 @@ app.add_middleware(SlowAPIMiddleware)
 
 
 def _rate_limit_exceeded_handler(request: Request, exc: RateLimitExceeded):
-    """Custom 429 handler — returns German JSON matching our API error style."""
+    """Custom 429 handler — returns structured JSON with Retry-After header."""
+    import re as _re_mod
+
     _logger.warning(
         "RATE_LIMIT 429 | ip=%s path=%s detail=%s",
         request.client.host if request.client else "unknown",
         request.url.path,
         exc.detail,
     )
+    # Parse retry_after seconds from slowapi's detail string (e.g. "5 per 1 minute")
+    retry_after = 60  # sensible default
+    detail_str = str(exc.detail) if exc.detail else ""
+    m = _re_mod.search(
+        r"(\d+)\s+per\s+(\d+)\s*(second|minute|hour|day)",
+        detail_str,
+        _re_mod.IGNORECASE,
+    )
+    if m:
+        per_value = int(m.group(2))
+        unit = m.group(3).lower()
+        unit_seconds = {"second": 1, "minute": 60, "hour": 3600, "day": 86400}
+        retry_after = per_value * unit_seconds.get(unit, 60)
+
     response = JSONResponse(
         status_code=429,
         content={
-            "detail": f"Zu viele Anfragen. Bitte warte kurz und versuche es erneut. ({exc.detail})"
+            "error": "rate_limited",
+            "retry_after": retry_after,
+            "message": f"Zu viele Anfragen. Bitte {retry_after} Sekunden warten.",
+            "detail": f"Zu viele Anfragen. Bitte warte kurz und versuche es erneut. ({detail_str})",
         },
     )
+    response.headers["Retry-After"] = str(retry_after)
     response = request.app.state.limiter._inject_headers(
         response, request.state.view_rate_limit
     )

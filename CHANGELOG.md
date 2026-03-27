@@ -13,7 +13,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 OpenSchichtplaner5 v1.0.0 — the first stable production release. A fully-featured, open-source web replacement for the proprietary Windows software Schichtplaner5, reading and writing the original DBF database files directly.
 
-### Added (since rc3)
+### Added
 - **Onboarding Checklist (Q085):** Non-blocking checklist card on the Dashboard for new admins. Tracks setup progress (company, shift types, employees, first schedule) with localStorage persistence and dismiss button. Auto-detects completion via API checks.
 - **Qualifikations-Matrix (Q084):** Backend API for employee qualifications/skills matrix with CRUD endpoints. Enables tracking of certifications, training, and skill levels per employee.
 - **Konflikt-Report UI (Q083):** Dedicated conflict report page with summary bar, type filters (overlap, understaffing, rule violations), and CSV/XLSX export.
@@ -63,7 +63,7 @@ OpenSchichtplaner5 v1.0.0 — the first stable production release. A fully-featu
 - Rate limiting on all API endpoints
 - Stricter input validation on all form fields
 
-### Infrastructure
+### Changed
 - Full CI/CD pipeline with pytest, ruff, ESLint, TypeScript checks, and Playwright E2E
 - Docker multi-arch builds (amd64 + arm64)
 - Automated GitHub Container Registry publishing

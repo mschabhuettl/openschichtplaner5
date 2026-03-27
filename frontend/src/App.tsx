@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SSEProvider, useSSEContext } from './contexts/SSEContext';
@@ -9,6 +9,7 @@ import { ToastContainer } from './components/Toast';
 import { useToast } from './hooks/useToast';
 import { useOnlineStatusWithFlash } from './hooks/useOnlineStatus';
 import { trackRecentPage } from './utils/recentPages';
+import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import WarningsCenter from './components/WarningsCenter';
 import { NotificationBell } from './components/NotificationBell';
 import { useTour } from './components/GuidedTour';
@@ -386,95 +387,12 @@ function AppInner() {
   const isAdmin = user?.ADMIN === true || user?.role === 'Admin' || isDevMode;
   const [showSetupWizard, dismissSetupWizard] = useFirstTimeSetup(isAdmin);
 
-  // "g" prefix navigation: track pending timer via ref (no re-render needed)
-  const gTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const gPendingRef = useRef(false);
-
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    // Skip when typing in inputs
-    const tag = (document.activeElement as HTMLElement)?.tagName?.toLowerCase();
-    const isTyping = tag === 'input' || tag === 'textarea' || tag === 'select'
-      || (document.activeElement as HTMLElement)?.isContentEditable;
-
-    // Ctrl+K (all platforms) — Spotlight search (always fires, even in inputs)
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-      e.preventDefault();
-      setSpotlightOpen(prev => !prev);
-      return;
-    }
-
-    if (isTyping) return;
-
-    // "/" key — Spotlight search
-    if (e.key === '/') {
-      e.preventDefault();
-      setSpotlightOpen(true);
-      return;
-    }
-
-    // "?" key — Keyboard shortcuts help
-    if (e.key === '?') {
-      e.preventDefault();
-      setShortcutsOpen(prev => !prev);
-      return;
-    }
-
-    // "g" prefix navigation
-    if (e.key === 'g' && !e.ctrlKey && !e.metaKey && !e.altKey) {
-      e.preventDefault();
-      gPendingRef.current = true;
-      if (gTimerRef.current) clearTimeout(gTimerRef.current);
-      gTimerRef.current = setTimeout(() => { gPendingRef.current = false; }, 1000);
-      return;
-    }
-
-    // Alt+T → Team-Übersicht, Alt+A → Analytics, Alt+H → Health
-    if (e.altKey && !e.ctrlKey && !e.metaKey) {
-      const altMap: Record<string, string> = {
-        t: '/team',
-        a: '/analytics',
-        h: '/health',
-      };
-      const dest = altMap[e.key.toLowerCase()];
-      if (dest) {
-        e.preventDefault();
-        navigate(dest);
-        return;
-      }
-    }
-
-    // Second key after "g"
-    if (gPendingRef.current) {
-      gPendingRef.current = false;
-      if (gTimerRef.current) { clearTimeout(gTimerRef.current); gTimerRef.current = null; }
-      const goMap: Record<string, string> = {
-        d: '/',                 // Dashboard
-        p: '/schedule',         // dienstPlan
-        m: '/employees',        // Mitarbeiter
-        k: '/konflikte',        // Konflikte
-        s: '/statistiken',      // Statistiken
-        u: '/urlaub',           // Urlaub
-        e: '/einsatzplan',      // Einsatzplan
-        w: '/schichtwuensche',  // Wünsche
-        n: '/notizen',          // Notizen
-        a: '/analytics',        // Analytics
-        q: '/kompetenz-matrix', // Kompetenz-Matrix (Q for Qualifikation)
-        t: '/tauschboerse',     // Tauschbörse
-        v: '/team',             // Team-Übersicht (V for Verwaltung)
-        h: '/health',           // Health Dashboard
-      };
-      const dest = goMap[e.key];
-      if (dest) {
-        e.preventDefault();
-        navigate(dest);
-      }
-    }
-  }, [navigate]);
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
+  // Global keyboard shortcuts via extracted hook
+  useKeyboardShortcuts({
+    navigate,
+    onToggleSpotlight: useCallback(() => setSpotlightOpen(prev => !prev), []),
+    onToggleShortcuts: useCallback(() => setShortcutsOpen(prev => !prev), []),
+  });
 
   // Fetch conflict count for current month on load
   useEffect(() => {

@@ -7,28 +7,21 @@ interface ShortcutGroup {
 
 const SHORTCUT_GROUPS: ShortcutGroup[] = [
   {
-    title: 'Navigation',
+    title: 'Allgemein',
     shortcuts: [
-      { keys: ['Ctrl', 'K'], description: 'Globale Suche / Command Palette öffnen' },
-      { keys: ['/'], description: 'Globale Suche öffnen' },
       { keys: ['?'], description: 'Diese Hilfe anzeigen' },
-      { keys: ['Esc'], description: 'Schließen / Abbrechen' },
+      { keys: ['Esc'], description: 'Dialog / Modal schließen' },
+      { keys: ['Ctrl', 'K'], description: 'Globale Suche / Command Palette' },
+      { keys: ['/'], description: 'Globale Suche öffnen' },
     ],
   },
   {
-    title: 'Command Palette (in Suche)',
-    shortcuts: [
-      { keys: ['↑', '↓'], description: 'Element auswählen' },
-      { keys: ['Enter'], description: 'Ausführen / Navigieren' },
-      { keys: ['Esc'], description: 'Schließen' },
-    ],
-  },
-  {
-    title: 'Schnellnavigation (g + …)',
+    title: 'Navigation',
     shortcuts: [
       { keys: ['g', 'd'], description: 'Dashboard' },
       { keys: ['g', 'p'], description: 'Dienstplan' },
       { keys: ['g', 'm'], description: 'Mitarbeiter' },
+      { keys: ['g', 'g'], description: 'Gruppen' },
       { keys: ['g', 'k'], description: 'Konflikte' },
       { keys: ['g', 's'], description: 'Statistiken' },
       { keys: ['g', 'u'], description: 'Urlaub' },
@@ -43,18 +36,19 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
     ],
   },
   {
+    title: 'Aktionen',
+    shortcuts: [
+      { keys: ['n'], description: 'Neues Element (kontextabhängig)' },
+      { keys: ['←'], description: 'Vorheriger Monat / Woche' },
+      { keys: ['→'], description: 'Nächster Monat / Woche' },
+    ],
+  },
+  {
     title: 'Alt-Shortcuts',
     shortcuts: [
       { keys: ['Alt', 'T'], description: 'Team-Übersicht' },
       { keys: ['Alt', 'A'], description: 'Analytics' },
       { keys: ['Alt', 'H'], description: 'Health Dashboard' },
-    ],
-  },
-  {
-    title: 'Monatsnavigation',
-    shortcuts: [
-      { keys: ['←'], description: 'Vorheriger Monat / Woche' },
-      { keys: ['→'], description: 'Nächster Monat / Woche' },
     ],
   },
 ];
@@ -68,7 +62,10 @@ export default function KeyboardShortcutsModal({ open, onClose }: Props) {
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
@@ -91,7 +88,7 @@ export default function KeyboardShortcutsModal({ open, onClose }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
           <h2 id="keyboard-shortcuts-title" className="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            ⌨️ Keyboard-Shortcuts
+            ⌨️ Tastaturkürzel
           </h2>
           <button
             onClick={onClose}

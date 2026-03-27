@@ -5,6 +5,7 @@ import { api } from '../api/client';
 import { useSSERefresh } from '../contexts/SSEContext';
 import type { Restriction } from '../api/client';
 import { SkeletonTable } from '../components/Skeleton';
+import { ResponsiveTable } from '../components/ResponsiveTable';
 import type { Employee, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
@@ -728,8 +729,8 @@ export default function Employees() {
         <SkeletonTable rows={10} cols={6} className="mt-2" />
       ) : (
         <>
-          {/* Desktop: Table layout */}
-          <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
+          {/* Table layout — scrolls horizontally on mobile */}
+          <ResponsiveTable stickyFirstCol={false} minWidth="800px" className="bg-white dark:bg-gray-800 rounded-lg shadow">
             <table className="w-full text-sm">
               <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
                 <tr>
@@ -743,14 +744,14 @@ export default function Employees() {
                       title="Alle auswählen"
                     />
                   </th>}
-                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('number')}>{t.employees.columns.number}{sortIcon('number')}</th>
-                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('name')}>{t.employees.columns.name}{sortIcon('name')}</th>
-                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('firstname')}>{t.employees.columns.firstname}{sortIcon('firstname')}</th>
-                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleEmpSort('shortname')}>{t.employees.columns.shortname}{sortIcon('shortname')}</th>
-                  <th className="px-4 py-2 text-right">{t.employees.columns.hrsDay}</th>
-                  <th className="px-4 py-2 text-center">{t.employees.columns.workdays}</th>
-                  <th className="px-4 py-2 text-center">{t.employees.columns.entry}</th>
-                  <th className="px-4 py-2 text-center">{t.employees.columns.actions}</th>
+                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[60px]" onClick={() => handleEmpSort('number')}>{t.employees.columns.number}{sortIcon('number')}</th>
+                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[120px]" onClick={() => handleEmpSort('name')}>{t.employees.columns.name}{sortIcon('name')}</th>
+                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[100px]" onClick={() => handleEmpSort('firstname')}>{t.employees.columns.firstname}{sortIcon('firstname')}</th>
+                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[70px]" onClick={() => handleEmpSort('shortname')}>{t.employees.columns.shortname}{sortIcon('shortname')}</th>
+                  <th className="px-4 py-2 text-right whitespace-nowrap min-w-[60px]">{t.employees.columns.hrsDay}</th>
+                  <th className="px-4 py-2 text-center whitespace-nowrap min-w-[140px]">{t.employees.columns.workdays}</th>
+                  <th className="px-4 py-2 text-center whitespace-nowrap min-w-[80px]">{t.employees.columns.entry}</th>
+                  <th className="px-4 py-2 text-center whitespace-nowrap min-w-[140px]">{t.employees.columns.actions}</th>
                 </tr>
               </thead>
               <tbody>
@@ -793,78 +794,7 @@ export default function Employees() {
                 )}
               </tbody>
             </table>
-          </div>
-
-          {/* Mobile: Card layout */}
-          <div className="block md:hidden space-y-3">
-            {filtered.map(emp => (
-              <div key={emp.ID} className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 border border-gray-100 dark:border-gray-700">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-base font-bold text-gray-900 truncate">
-                        {emp.NAME} {emp.FIRSTNAME}
-                      </span>
-                      {emp.SHORTNAME && (
-                        <span className="flex-shrink-0 px-2 py-0.5 bg-slate-700 text-white text-xs font-bold rounded">
-                          {emp.SHORTNAME}
-                        </span>
-                      )}
-                    </div>
-                    {emp.NUMBER && (
-                      <div className="text-xs text-gray-600 mt-0.5">Nr. {emp.NUMBER}</div>
-                    )}
-                  </div>
-                  {canAdmin && (
-                  <div className="flex gap-1 flex-shrink-0">
-                    <button
-                      onClick={() => openEdit(emp)}
-                      className="p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-base leading-none"
-                      title="Bearbeiten"
-                    >✏️</button>
-                    <button
-                      onClick={() => handleDelete(emp)}
-                      className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-base leading-none"
-                      title="Ausblenden"
-                    >🗑️</button>
-                  </div>
-                  )}
-                </div>
-                <div className="mt-2 flex items-center gap-3 text-sm text-gray-600 flex-wrap">
-                  <span>{emp.HRSDAY?.toFixed(1)}h/Tag</span>
-                  {emp.HRSWEEK ? <span>{emp.HRSWEEK?.toFixed(1)}h/Woche</span> : null}
-                  {emp.EMPSTART && <span className="text-xs text-gray-600">Eintritt: {fmtDate(emp.EMPSTART)}</span>}
-                </div>
-                <div className="mt-2 flex gap-0.5 flex-wrap">
-                  {(emp.WORKDAYS_LIST || []).slice(0, 7).map((active, idx) => (
-                    <span
-                      key={idx}
-                      className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${active ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}
-                    >
-                      {WEEKDAYS[idx]}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-            {filtered.length === 0 && (
-              employees.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                  <div className="text-5xl mb-4 opacity-60">👤</div>
-                  <h3 className="text-base font-semibold text-slate-700 dark:text-slate-200 mb-1">Noch keine Mitarbeiter angelegt</h3>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs mb-4">Legen Sie Ihren ersten Mitarbeiter an, um mit der Dienstplanung zu beginnen.</p>
-                  <button
-                    onClick={() => { setEditId(null); setShowModal(true); }}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors"
-                  >
-                    ➕ Ersten Mitarbeiter anlegen
-                  </button>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-600">Keine Mitarbeiter gefunden</div>
-              )
-            )}
-          </div>
+          </ResponsiveTable>
         </>
       )}
 

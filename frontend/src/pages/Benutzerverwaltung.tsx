@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { ResponsiveTable } from '../components/ResponsiveTable';
 
 const API_BASE = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 function getAuthHeaders(): Record<string, string> {
@@ -868,14 +869,15 @@ export default function Benutzerverwaltung() {
           Fehler beim Laden: {error}
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow overflow-x-auto border border-slate-200">
-          <table className="w-full text-sm min-w-[480px]">
+        <div>
+        <ResponsiveTable minWidth="650px" className="bg-white rounded-xl shadow border border-slate-200">
+          <table className="w-full text-sm">
             <thead>
               <tr className="bg-slate-800 text-white text-xs uppercase tracking-wide">
                 <th className="text-left px-4 py-3">Benutzername</th>
                 <th className="text-left px-4 py-3">Beschreibung</th>
                 <th className="text-center px-4 py-3">Rolle</th>
-                <th className="text-left px-4 py-3 hidden md:table-cell">Berechtigungen</th>
+                <th className="text-left px-4 py-3 whitespace-nowrap min-w-[120px]">Berechtigungen</th>
                 <th className="text-right px-4 py-3">Aktionen</th>
               </tr>
             </thead>
@@ -909,7 +911,7 @@ export default function Benutzerverwaltung() {
                     <td className="px-4 py-3 text-center">
                       <RoleBadge role={u.role ?? (u.ADMIN ? 'Admin' : 'Leser')} />
                     </td>
-                    <td className="px-4 py-3 text-slate-500 hidden md:table-cell text-xs">
+                    <td className="px-4 py-3 text-slate-500 text-xs">
                       {permSummary(u)}
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -968,6 +970,7 @@ export default function Benutzerverwaltung() {
               )}
             </tbody>
           </table>
+        </ResponsiveTable>
           <div className="px-4 py-2 text-xs text-slate-600 border-t border-slate-100 bg-slate-50">
             {filtered.length} Benutzer {search ? `(gefiltert aus ${users.length})` : ''}
             {selectedUserForAccess && (

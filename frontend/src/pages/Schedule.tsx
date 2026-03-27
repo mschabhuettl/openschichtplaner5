@@ -12,6 +12,7 @@ import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { SkeletonGrid } from '../components/Skeleton';
 import ScheduleCalendar from '../components/ScheduleCalendar';
+import { ResponsiveTable } from '../components/ResponsiveTable';
 
 // ── JS weekday → DB weekday (0=Mon..6=Sun) ────────────────────
 function jsWdToDbWd(jsWd: number): number {
@@ -5040,7 +5041,7 @@ export default function Schedule() {
 
       {/* ── Schedule Grid (Table View) ── */}
       {(viewMode === 'table' || isMobile) && (
-      <div className="flex-1 overflow-auto bg-white rounded-lg shadow border border-gray-200">
+      <ResponsiveTable stickyFirstCol className="flex-1 bg-white rounded-lg shadow border border-gray-200">
         <table className="border-collapse text-xs" style={isDragging ? { userSelect: 'none' } : undefined}>
           <thead>
             <tr className="bg-slate-700 text-white">
@@ -5492,7 +5493,7 @@ export default function Schedule() {
             )}
           </tbody>
         </table>
-      </div>
+      </ResponsiveTable>
       )}
 
       {/* ── Auslastungsbereich ── */}

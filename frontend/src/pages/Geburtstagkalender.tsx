@@ -413,8 +413,8 @@ export default function Geburtstagkalender() {
 
       {/* ── List view ──────────────────────────────────────────────────────── */}
       {viewMode === 'list' && (
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-x-auto">
+          <table className="w-full text-sm min-w-[500px]">
             <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
                 <th className="text-left px-4 py-2 font-semibold text-gray-600 dark:text-gray-300">Mitarbeiter</th>

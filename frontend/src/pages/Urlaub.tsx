@@ -10,6 +10,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useT } from '../i18n';
 import { ResponsiveTable } from '../components/ResponsiveTable';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { EmptyState } from '../components/EmptyState';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
@@ -106,7 +107,7 @@ function DetailModal({ employee, month, year, absences, leaveTypes, onClose }: D
         </div>
         <div className="px-6 py-4">
           {monthAbs.length === 0 ? (
-            <p className="text-gray-600 text-sm text-center py-4">Keine Abwesenheiten</p>
+            <EmptyState icon="📅" title="Keine Abwesenheiten" description="In diesem Monat sind keine Abwesenheiten eingetragen." />
           ) : (
             <div className="space-y-2">
               {monthAbs.map(ab => {
@@ -1648,7 +1649,7 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
             <h3 className="font-semibold text-gray-800 text-sm">Abwesenheiten pro Mitarbeiter {year}</h3>
           </div>
           {sortedEmployees.length === 0 ? (
-            <p className="text-gray-600 text-sm text-center py-6">Keine Abwesenheiten in {year}</p>
+            <EmptyState icon="📊" title="Keine Abwesenheiten" description={`Im Jahr ${year} wurden noch keine Abwesenheiten erfasst.`} />
           ) : (
             <table className="text-sm w-full">
               <thead>

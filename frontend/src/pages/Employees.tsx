@@ -11,6 +11,7 @@ import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { EmptyState } from '../components/EmptyState';
 import { useT } from '../i18n';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
@@ -727,6 +728,14 @@ export default function Employees() {
 
       {loading ? (
         <SkeletonTable rows={10} cols={6} className="mt-2" />
+      ) : employees.length === 0 ? (
+        <EmptyState
+          icon="👥"
+          title="Noch keine Mitarbeiter"
+          description="Legen Sie Ihren ersten Mitarbeiter an, um mit der Dienstplanung zu beginnen."
+          actionLabel={canAdmin ? 'Ersten Mitarbeiter anlegen' : undefined}
+          onAction={canAdmin ? openCreate : undefined}
+        />
       ) : (
         <>
           {/* Table layout — scrolls horizontally on mobile */}

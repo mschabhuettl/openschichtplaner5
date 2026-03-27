@@ -13,6 +13,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { SkeletonGrid } from '../components/Skeleton';
 import ScheduleCalendar from '../components/ScheduleCalendar';
 import { ResponsiveTable } from '../components/ResponsiveTable';
+import { EmptyState } from '../components/EmptyState';
 
 // ── JS weekday → DB weekday (0=Mon..6=Sun) ────────────────────
 function jsWdToDbWd(jsWd: number): number {
@@ -5432,20 +5433,17 @@ export default function Schedule() {
 
             {filteredDisplayRows.filter(r => r.type === 'employee').length === 0 && (
               <tr>
-                <td colSpan={displayedDays.length + 1} className="text-center py-8 text-gray-600">
+                <td colSpan={displayedDays.length + 1}>
                   {loading ? (
                     <SkeletonGrid rows={6} cols={Math.min(displayedDays.length || 7, 31)} className="w-full" />
                   ) : (
-                    <div className="flex flex-col items-center py-4 gap-2">
-                      <span className="text-2xl opacity-50">📋</span>
-                      <span>Keine Mitarbeiter vorhanden</span>
-                      <button
-                        onClick={() => navigate('/employees')}
-                        className="mt-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-medium transition-colors"
-                      >
-                        👤 Mitarbeiter anlegen
-                      </button>
-                    </div>
+                    <EmptyState
+                      icon="📋"
+                      title="Kein Dienstplan für diesen Monat"
+                      description="Es sind noch keine Mitarbeiter vorhanden oder der Filter ist zu restriktiv."
+                      actionLabel="Mitarbeiter anlegen"
+                      onAction={() => navigate('/employees')}
+                    />
                   )}
                 </td>
               </tr>

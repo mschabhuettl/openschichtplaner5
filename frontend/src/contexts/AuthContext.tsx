@@ -236,7 +236,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const BASE = import.meta.env.VITE_API_URL ?? '';
     const body: Record<string, string> = { username, password };
     if (totpCode) body.totp_code = totpCode;
-    const res = await fetch(`${BASE}/api/auth/login`, {
+    const res = await fetch(`${BASE}/api/v1/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',  // allow HttpOnly cookie to be set
@@ -298,7 +298,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (token) {
       headers['X-Auth-Token'] = token;
     }
-    fetch(`${BASE}/api/auth/logout`, {
+    fetch(`${BASE}/api/v1/auth/logout`, {
       method: 'POST',
       headers,
       credentials: 'include',  // send cookie so backend can clear it

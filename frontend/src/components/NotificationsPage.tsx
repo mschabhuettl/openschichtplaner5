@@ -2,6 +2,7 @@
  * NotificationsPage — Full-page view of all notifications with filtering and bulk actions.
  */
 import { useState, useEffect, useCallback } from 'react';
+import { EmptyState } from './EmptyState';
 
 const BASE = import.meta.env.VITE_API_URL ?? '';
 
@@ -81,7 +82,7 @@ export function NotificationsPage() {
     try {
       const headers = getAuthHeaders();
       // Fetch planner-wide notifications (limit 200 for full page)
-      const res = await fetch(`${BASE}/api/notifications?limit=200`, { headers });
+      const res = await fetch(`${BASE}/api/v1/notifications?limit=200`, { headers });
       if (res.ok) {
         const data = await res.json();
         setNotifications(data.notifications ?? []);
@@ -97,7 +98,7 @@ export function NotificationsPage() {
 
   const markRead = async (id: number) => {
     try {
-      await fetch(`${BASE}/api/notifications/${id}/read`, {
+      await fetch(`${BASE}/api/v1/notifications/${id}/read`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
       });
@@ -108,7 +109,7 @@ export function NotificationsPage() {
   const markAllRead = async () => {
     setMarkingAll(true);
     try {
-      await fetch(`${BASE}/api/notifications/read-all`, {
+      await fetch(`${BASE}/api/v1/notifications/read-all`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
       });
@@ -120,7 +121,7 @@ export function NotificationsPage() {
 
   const dismiss = async (id: number) => {
     try {
-      await fetch(`${BASE}/api/notifications/${id}`, {
+      await fetch(`${BASE}/api/v1/notifications/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });
@@ -207,15 +208,11 @@ export function NotificationsPage() {
           <p className="text-sm">Lade Benachrichtigungen…</p>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 text-gray-400 dark:text-gray-500">
-          <div className="text-5xl mb-4">🎉</div>
-          <p className="text-lg font-medium mb-1">
-            {filter === 'unread' ? 'Keine ungelesenen Benachrichtigungen' : 'Keine Benachrichtigungen'}
-          </p>
-          <p className="text-sm">
-            {filter === 'unread' ? 'Du bist auf dem neusten Stand!' : 'Hier erscheinen zukünftige Benachrichtigungen.'}
-          </p>
-        </div>
+        <EmptyState
+          icon="🔔"
+          title={filter === 'unread' ? 'Keine ungelesenen Benachrichtigungen' : 'Keine neuen Benachrichtigungen'}
+          description={filter === 'unread' ? 'Du bist auf dem neuesten Stand!' : 'Hier erscheinen zukünftige Benachrichtigungen.'}
+        />
       ) : (
         <div className="space-y-2">
           {filtered.map(n => (

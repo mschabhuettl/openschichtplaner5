@@ -96,7 +96,7 @@ export default function Simulation() {
   const [empSearch, setEmpSearch] = useState('');
 
   useEffect(() => {
-    fetch(BASE + '/api/employees', { headers: getAuthHeaders() }).then(r => r.json()).then((data: Employee[]) => setEmployees(data)).catch(() => {});
+    fetch(BASE + '/api/v1/employees', { headers: getAuthHeaders() }).then(r => r.json()).then((data: Employee[]) => setEmployees(data)).catch(() => {});
   }, []);
 
   const daysInMonth = new Date(year, month, 0).getDate();
@@ -136,7 +136,7 @@ export default function Simulation() {
     }));
 
     try {
-      const data = await fetch(BASE + '/api/simulation', {
+      const data = await fetch(BASE + '/api/v1/simulation', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },

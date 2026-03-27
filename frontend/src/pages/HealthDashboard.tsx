@@ -40,7 +40,7 @@ export default function HealthDashboard() {
 
   const fetchHealth = useCallback(async () => {
     try {
-      const res = await fetch('/api/health', {
+      const res = await fetch('/api/v1/health', {
         headers: token ? { 'x-auth-token': token } : {},
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -54,7 +54,7 @@ export default function HealthDashboard() {
   const fetchFrontendErrors = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch('/api/admin/frontend-errors', {
+      const res = await fetch('/api/v1/admin/frontend-errors', {
         headers: { 'x-auth-token': token },
       });
       if (!res.ok) return;

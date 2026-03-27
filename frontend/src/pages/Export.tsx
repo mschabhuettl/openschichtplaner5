@@ -144,7 +144,7 @@ export default function Export() {
       format: scheduleFormat,
     });
     if (scheduleGroup) params.set('group_id', scheduleGroup);
-    return `${API}/api/export/schedule?${params}`;
+    return `${API}/api/v1/export/schedule?${params}`;
   })();
 
   const statsUrl = (() => {
@@ -153,16 +153,16 @@ export default function Export() {
       format: statsFormat,
     });
     if (statsGroup) params.set('group_id', statsGroup);
-    return `${API}/api/export/statistics?${params}`;
+    return `${API}/api/v1/export/statistics?${params}`;
   })();
 
-  const employeesUrl = `${API}/api/export/employees?format=${employeesFormat}`;
+  const employeesUrl = `${API}/api/v1/export/employees?format=${employeesFormat}`;
 
   const absUrl = (() => {
     const params = new URLSearchParams({ year: String(absYear) });
     if (absGroup) params.set('group_id', absGroup);
     params.set('format', absFormat);
-    return `${API}/api/export/absences?${params}`;
+    return `${API}/api/v1/export/absences?${params}`;
   })();
 
   const years = Array.from({ length: 6 }, (_, i) => currentYear - 2 + i);

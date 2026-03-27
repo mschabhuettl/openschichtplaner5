@@ -135,7 +135,7 @@ export default function UrlaubsTimeline() {
         const [emps, lts, abs, grps] = await Promise.all([
           api.getEmployees(),
           api.getLeaveTypes(),
-          fetchRaw<Absence[]>(`/api/absences?year=${year}`),
+          fetchRaw<Absence[]>(`/api/v1/absences?year=${year}`),
           api.getGroups(),
         ]);
         setEmployees(emps.filter(e => !e.HIDE));
@@ -148,7 +148,7 @@ export default function UrlaubsTimeline() {
         const map: Record<number, number[]> = {};
         await Promise.all(gdata.map(async (g) => {
           try {
-            const gdetail = await fetchRaw<{ members?: { employee_id: number }[] }>(`/api/groups/${g.ID}`);
+            const gdetail = await fetchRaw<{ members?: { employee_id: number }[] }>(`/api/v1/groups/${g.ID}`);
             if (gdetail.members) {
               gdetail.members.forEach((m: { employee_id: number }) => {
                 if (!map[m.employee_id]) map[m.employee_id] = [];

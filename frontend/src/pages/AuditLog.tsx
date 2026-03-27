@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { StatCard } from '../components/StatCard';
 import { PageHeader } from '../components/PageHeader';
 import { api } from '../api/client';
+import { EmptyState } from '../components/EmptyState';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface ChangelogEntry {
@@ -316,10 +317,18 @@ export default function AuditLog() {
             </tr>
           </thead>
           <tbody>
-            {visible.length === 0 && (
+            {visible.length === 0 && !loading && (
+              <EmptyState
+                colSpan={6}
+                icon="📋"
+                title="Keine Einträge vorhanden"
+                description="Änderungen an Mitarbeitern, Schichten und Abwesenheiten werden hier protokolliert."
+              />
+            )}
+            {visible.length === 0 && loading && (
               <tr>
                 <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: '#9ca3af' }}>
-                  {loading ? '⏳ Lade…' : '📭 Keine Einträge gefunden'}
+                  ⏳ Lade…
                 </td>
               </tr>
             )}

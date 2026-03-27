@@ -3259,8 +3259,19 @@ export default function Schedule() {
       )}
       {/* Print-only header — hidden on screen, visible when printing */}
       <div className="print-header">
-        <h1>📅 Dienstplan — {MONTH_NAMES[month]} {year}</h1>
-        <p>Gedruckt am {new Date().toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' })} · OpenSchichtplaner5</p>
+        <div>
+          <h1>Dienstplan — {MONTH_NAMES[month]} {year}</h1>
+          <p style={{ fontSize: '8pt', color: '#475569', margin: 0 }}>
+            {selectedGroupIds.length === 0
+              ? 'Alle Gruppen'
+              : selectedGroupIds
+                  .map(id => groups.find(g => g.ID === id)?.NAME ?? `Gruppe ${id}`)
+                  .join(', ')
+            }
+            {' · '}{displayEmployees.length} Mitarbeiter · {`01.${String(month).padStart(2, '0')}.${year} – ${String(daysInMonth).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`}
+          </p>
+        </div>
+        <p>Erstellt: {new Date().toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} · OpenSchichtplaner5</p>
       </div>
       {/* Day Detail Modal */}
       {dayDetailModal && (() => {

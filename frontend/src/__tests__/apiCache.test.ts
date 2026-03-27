@@ -41,10 +41,10 @@ describe('invalidateCachePath', () => {
   });
 
   it('does not throw when called with a valid path', () => {
-    expect(() => invalidateCachePath('/api/employees')).not.toThrow();
+    expect(() => invalidateCachePath('/api/v1/employees')).not.toThrow();
   });
 
   it('does not throw when called with unknown path', () => {
-    expect(() => invalidateCachePath('/api/non-existent')).not.toThrow();
+    expect(() => invalidateCachePath('/api/v1/non-existent')).not.toThrow();
   });
 });

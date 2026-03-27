@@ -22,10 +22,12 @@ const KeyboardShortcutsModal = lazy(() => import('./components/KeyboardShortcuts
 const GuidedTour           = lazy(() => import('./components/GuidedTour').then(m => ({ default: m.GuidedTour })));
 import { ErrorBoundary, PageErrorBoundary } from './components/ErrorBoundary';
 import { InstallBanner } from './components/InstallBanner';
+import RateLimitBanner from './components/RateLimitBanner';
 import { ThemeToggle } from './components/ThemeToggle';
 import { BottomNav } from './components/BottomNav';
 import { api, checkApiCompatibility } from './api/client';
 import { DevRoleSwitcher } from './components/DevRoleSwitcher';
+import GlobalSearchBar from './components/GlobalSearchBar';
 
 // Lazy-loaded pages — each page group is a separate chunk
 const Dashboard         = lazy(() => import('./pages/Dashboard'));
@@ -329,7 +331,7 @@ function BackendUnreachableBanner() {
     let cancelled = false;
     const check = async () => {
       try {
-        const res = await fetch('/api/version', { signal: AbortSignal.timeout(5000) });
+        const res = await fetch('/api/v1/version', { signal: AbortSignal.timeout(5000) });
         if (!cancelled && !res.ok && res.status === 0) setUnreachable(true);
       } catch (err) {
         if (!cancelled) {
@@ -554,6 +556,8 @@ function AppInner() {
           </button>
         </div>
       </div>
+      {/* Global search bar */}
+      <GlobalSearchBar />
       <nav aria-label="Hauptnavigation" className="flex-1 py-2 overflow-y-auto">
         {grouped.map(({ group, items }) => {
           if (items.length === 0) return null;
@@ -923,6 +927,7 @@ export default function App() {
             <GlobalToastContainer />
             <SessionExpiryToastBridge />
             <InstallBanner />
+            <RateLimitBanner />
           </ToastProvider>
         </LanguageProvider>
       </ThemeProvider>

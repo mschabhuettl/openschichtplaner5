@@ -33,7 +33,7 @@ const MAX_RETRY_DELAY = 30_000; // 30s cap
 const INITIAL_RETRY_DELAY = 1_000; // 1s
 
 /**
- * useSSE — connects to /api/events and returns connection status.
+ * useSSE — connects to /api/v1/events and returns connection status.
  *
  * Automatically reconnects with exponential backoff (unlimited retries).
  * Uses Page Visibility API to pause/resume when tab is hidden/visible.
@@ -66,7 +66,7 @@ export function useSSE({ token, onEvent, baseUrl }: UseSSEOptions) {
     cleanup();
 
     const base = baseUrl || window.location.origin;
-    const url = `${base}/api/events?token=${encodeURIComponent(currentToken)}`;
+    const url = `${base}/api/v1/events?token=${encodeURIComponent(currentToken)}`;
 
     setStatus('connecting');
     const es = new EventSource(url);

@@ -6,7 +6,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { LanguageProvider } from '../i18n/context';
 
-// Mock fetch for /api/dev/mode (used in useEffect)
+// Mock fetch for /api/v1/dev/mode (used in useEffect)
 const mockFetch = vi.fn();
 globalThis.fetch = mockFetch;
 

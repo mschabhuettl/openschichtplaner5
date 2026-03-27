@@ -18,7 +18,7 @@ window.addEventListener('unhandledrejection', (event) => {
       user_agent: navigator.userAgent,
       timestamp: new Date().toISOString(),
     });
-    fetch('/api/errors', {
+    fetch('/api/v1/errors', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body,

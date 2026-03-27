@@ -59,7 +59,7 @@ export interface DaySchedule {
   entries: DayEntry[];
 }
 
-/** Week view response from /api/schedule/week */
+/** Week view response from /api/v1/schedule/week */
 export interface WeekSchedule {
   week_start: string;
   week_end: string;

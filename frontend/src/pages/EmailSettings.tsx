@@ -51,7 +51,7 @@ export default function EmailSettings() {
 
   const loadConfig = useCallback(async () => {
     try {
-      const resp = await emailFetch<EmailConfigResponse>('/api/email/config');
+      const resp = await emailFetch<EmailConfigResponse>('/api/v1/email/config');
       setConfig(resp);
     } catch {
       toast.showToast('E-Mail-Konfiguration konnte nicht geladen werden.', 'error');
@@ -69,7 +69,7 @@ export default function EmailSettings() {
     if (!testEmail.trim()) return;
     setSending(true);
     try {
-      await emailFetch<{ ok: boolean; message: string }>('/api/email/test', {
+      await emailFetch<{ ok: boolean; message: string }>('/api/v1/email/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' } as Record<string, string>,
         body: JSON.stringify({ to: testEmail.trim() }),

@@ -630,7 +630,7 @@ export default function Benutzerverwaltung() {
     setError(null);
     try {
       const [usersData, empsData, grpsData] = await Promise.all([
-        fetch(`${API_BASE}/api/users`, { headers: getAuthHeaders() }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<SP5User[]>; }),
+        fetch(`${API_BASE}/api/v1/users`, { headers: getAuthHeaders() }).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<SP5User[]>; }),
         api.getEmployees(),
         api.getGroups(),
       ]);
@@ -697,7 +697,7 @@ export default function Benutzerverwaltung() {
         payload.PASSWORD = form.PASSWORD;
       }
 
-      const url = editId !== null ? `${API_BASE}/api/users/${editId}` : `${API_BASE}/api/users`;
+      const url = editId !== null ? `${API_BASE}/api/v1/users/${editId}` : `${API_BASE}/api/v1/users`;
       const method = editId !== null ? 'PUT' : 'POST';
 
       const res = await fetch(url, {
@@ -728,7 +728,7 @@ export default function Benutzerverwaltung() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      const res = await fetch(`${API_BASE}/api/users/${deleteTarget.ID}`, { method: 'DELETE', headers: getAuthHeaders() });
+      const res = await fetch(`${API_BASE}/api/v1/users/${deleteTarget.ID}`, { method: 'DELETE', headers: getAuthHeaders() });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.detail ?? `HTTP ${res.status}`);

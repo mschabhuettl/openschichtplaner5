@@ -29,7 +29,7 @@ export default function Login() {
 
   useEffect(() => {
     const BASE = import.meta.env.VITE_API_URL ?? '';
-    fetch(`${BASE}/api/dev/mode`)
+    fetch(`${BASE}/api/v1/dev/mode`)
       .then(r => r.json())
       .then(d => setServerDevMode(d.dev_mode === true))
       .catch(() => setServerDevMode(false));

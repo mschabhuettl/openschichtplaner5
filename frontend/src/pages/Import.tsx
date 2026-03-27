@@ -158,7 +158,7 @@ const IMPORT_TYPES: ImportType[] = [
     key: 'employees',
     label: 'Mitarbeiter',
     icon: '👥',
-    endpoint: '/api/import/employees',
+    endpoint: '/api/v1/import/employees',
     description: 'Importiert Mitarbeiterstammdaten. Pflichtfeld: NAME (Nachname).',
     columns: 'NAME, FIRSTNAME, SHORTNAME, NUMBER, SEX (0=m/1=w), HRSDAY, HRSWEEK, HRSMONTH, WORKDAYS',
     requiredColumns: ['NAME'],
@@ -172,7 +172,7 @@ Musterfrau,Maria,MF,002,1,6,30,130,1 1 1 0 1 0 0 0
     key: 'shifts',
     label: 'Schichtarten',
     icon: '🕐',
-    endpoint: '/api/import/shifts',
+    endpoint: '/api/v1/import/shifts',
     description: 'Importiert Schichtarten. Pflichtfeld: NAME.',
     columns: 'NAME, KURZZEICHEN (Kürzel), FARBE (#RRGGBB), TEXTFARBE (#RRGGBB), DURATION0 (Stunden)',
     requiredColumns: ['NAME'],
@@ -188,7 +188,7 @@ Tagesdienst,T,#27AE60,#FFFFFF,8
     key: 'absences',
     label: 'Abwesenheiten (per ID)',
     icon: '📋',
-    endpoint: '/api/import/absences',
+    endpoint: '/api/v1/import/absences',
     description: 'Importiert Abwesenheiten über interne IDs. Für komfortablen Import per Personalnummer/Kürzel → "Dienstplan-Abwesenheiten" wählen.',
     columns: 'EMPLOYEE_ID (Mitarbeiter-ID), DATE (JJJJ-MM-TT), LEAVE_TYPE_ID (Abwesenheitsart-ID)',
     requiredColumns: ['EMPLOYEE_ID', 'DATE', 'LEAVE_TYPE_ID'],
@@ -203,7 +203,7 @@ Tagesdienst,T,#27AE60,#FFFFFF,8
     key: 'holidays',
     label: 'Feiertage',
     icon: '🎉',
-    endpoint: '/api/import/holidays',
+    endpoint: '/api/v1/import/holidays',
     description: 'Importiert Feiertage. Pflichtfelder: DATE und NAME. INTERVAL: 0=einmalig, 1=jährlich.',
     columns: 'DATE (JJJJ-MM-TT), NAME, INTERVAL (0=einmalig/1=jährlich), REGION (nur Info)',
     requiredColumns: ['DATE', 'NAME'],
@@ -219,7 +219,7 @@ Tagesdienst,T,#27AE60,#FFFFFF,8
     key: 'bookings-actual',
     label: 'Zeitkonto: Ist-Stunden',
     icon: '⏱️',
-    endpoint: '/api/import/bookings-actual',
+    endpoint: '/api/v1/import/bookings-actual',
     description: 'Importiert Ist-Stunden-Buchungen ins Zeitkonto (TYPE=0). Lookup über Personalnummer.',
     columns: 'Personalnummer, Datum (JJJJ-MM-TT), Stunden (Dezimal), Notiz (optional)',
     requiredColumns: ['PERSONALNUMMER', 'DATUM', 'STUNDEN'],
@@ -234,7 +234,7 @@ Tagesdienst,T,#27AE60,#FFFFFF,8
     key: 'bookings-nominal',
     label: 'Zeitkonto: Soll-Stunden',
     icon: '📊',
-    endpoint: '/api/import/bookings-nominal',
+    endpoint: '/api/v1/import/bookings-nominal',
     description: 'Importiert Soll-Stunden-Buchungen ins Zeitkonto (TYPE=1). Lookup über Personalnummer.',
     columns: 'Personalnummer, Datum (JJJJ-MM-TT), Stunden (Dezimal), Notiz (optional)',
     requiredColumns: ['PERSONALNUMMER', 'DATUM', 'STUNDEN'],
@@ -249,7 +249,7 @@ Tagesdienst,T,#27AE60,#FFFFFF,8
     key: 'entitlements',
     label: 'Urlaubsansprüche',
     icon: '🏖️',
-    endpoint: '/api/import/entitlements',
+    endpoint: '/api/v1/import/entitlements',
     description: 'Importiert Urlaubsansprüche für Mitarbeiter. Lookup über Personalnummer und Abwesenheitsart-Kürzel.',
     columns: 'Personalnummer, Jahr, Abwesenheitsart-Kürzel (z.B. "U"), Tage',
     requiredColumns: ['PERSONALNUMMER', 'JAHR'],
@@ -264,7 +264,7 @@ Tagesdienst,T,#27AE60,#FFFFFF,8
     key: 'absences-csv',
     label: 'Dienstplan-Abwesenheiten',
     icon: '📅',
-    endpoint: '/api/import/absences-csv',
+    endpoint: '/api/v1/import/absences-csv',
     description: 'Importiert Dienstplan-Abwesenheiten per Personalnummer und Abwesenheitsart-Kürzel (kein Wissen der IDs nötig).',
     columns: 'Personalnummer, Datum (JJJJ-MM-TT), Abwesenheitsart-Kürzel (z.B. "U", "K")',
     requiredColumns: ['PERSONALNUMMER', 'DATUM'],
@@ -279,7 +279,7 @@ Tagesdienst,T,#27AE60,#FFFFFF,8
     key: 'groups',
     label: 'Neue Gruppen',
     icon: '🏢',
-    endpoint: '/api/import/groups',
+    endpoint: '/api/v1/import/groups',
     description: 'Importiert neue Gruppen. Pflichtfeld: Name. Optional: Kürzel und übergeordnete Gruppe (Name).',
     columns: 'Name, Kürzel, Übergeordnete-Gruppe-Name (Name der übergeordneten Gruppe, optional)',
     requiredColumns: ['NAME'],
@@ -293,9 +293,9 @@ Team A2,A2,Abteilung A
   },
 ];
 
-// ── Template download ──────────────────────────────────────────────────────
+// ── CSV download helpers ───────────────────────────────────────────────────
 
-function downloadTemplate(filename: string, content: string) {
+function downloadCSV(filename: string, content: string) {
   const BOM = '\uFEFF';
   const blob = new Blob([BOM + content], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -304,6 +304,39 @@ function downloadTemplate(filename: string, content: string) {
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+function downloadTemplate(filename: string, content: string) {
+  downloadCSV(filename, content);
+}
+
+function buildErrorRowsCSV(
+  headers: string[],
+  rows: string[][],
+  validations: RowValidation[],
+): string {
+  const errorRows = validations.filter(v => !v.valid);
+  if (errorRows.length === 0) return '';
+  const csvHeaders = ['Zeile', ...headers, 'Fehler'].map(h => `"${h}"`).join(',');
+  const csvRows = errorRows.map(v => {
+    const row = rows[v.rowIndex] ?? [];
+    const cells = [
+      String(v.rowIndex + 1),
+      ...headers.map((_, ci) => row[ci] ?? ''),
+      v.errors.join('; '),
+    ].map(c => `"${c.replace(/"/g, '""')}"`);
+    return cells.join(',');
+  });
+  return [csvHeaders, ...csvRows].join('\n');
+}
+
+function buildResultErrorsCSV(errors: string[]): string {
+  const csvHeaders = '"Zeile","Fehler"';
+  const csvRows = errors.map((e, i) => {
+    const escaped = e.replace(/"/g, '""');
+    return `"${i + 1}","${escaped}"`;
+  });
+  return [csvHeaders, ...csvRows].join('\n');
 }
 
 // ── Spinner ────────────────────────────────────────────────────────────────
@@ -387,10 +420,10 @@ function DropZone({ onFile, disabled }: DropZoneProps) {
 // ── Validation Preview Table ───────────────────────────────────────────────
 
 function ValidationPreviewTable({
-  headers, rows, validations, showAllRows, onToggleShowAll,
+  headers, rows, validations, showAllRows, onToggleShowAll, onDownloadErrors,
 }: {
   headers: string[]; rows: string[][]; validations: RowValidation[];
-  showAllRows: boolean; onToggleShowAll: () => void;
+  showAllRows: boolean; onToggleShowAll: () => void; onDownloadErrors?: () => void;
 }) {
   if (headers.length === 0) return null;
 
@@ -467,8 +500,16 @@ function ValidationPreviewTable({
 
       {errorCount > 0 && (
         <div className="mt-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-          <div className="text-xs font-semibold text-red-700 dark:text-red-400 mb-1.5">
-            ⚠ {errorCount} Zeile{errorCount !== 1 ? 'n' : ''} mit Fehlern:
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="text-xs font-semibold text-red-700 dark:text-red-400">
+              ⚠ {errorCount} Zeile{errorCount !== 1 ? 'n' : ''} mit Fehlern:
+            </div>
+            {onDownloadErrors && (
+              <button onClick={onDownloadErrors}
+                className="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 border border-red-200 dark:border-red-700 rounded px-2 py-0.5 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors font-medium">
+                ⬇️ Fehler-Zeilen als CSV
+              </button>
+            )}
           </div>
           <ul className="space-y-0.5 max-h-32 overflow-y-auto">
             {validations.filter(v => !v.valid).slice(0, 20).map((v, i) => (
@@ -508,7 +549,7 @@ function ProgressIndicator({ phase, progress }: { phase: ImportPhase; progress: 
 
 // ── Result banner ──────────────────────────────────────────────────────────
 
-function ResultBanner({ result, onReset }: { result: ImportResult; onReset: () => void }) {
+function ResultBanner({ result, onReset, onDownloadErrors }: { result: ImportResult; onReset: () => void; onDownloadErrors?: () => void }) {
   const hasErrors = result.errors.length > 0;
   const allFailed = result.imported === 0 && result.errors.length > 0;
 
@@ -550,7 +591,15 @@ function ResultBanner({ result, onReset }: { result: ImportResult; onReset: () =
 
       {hasErrors && (
         <div className="mt-2">
-          <div className="text-xs font-semibold text-red-700 dark:text-red-400 mb-1">Fehler ({result.errors.length}):</div>
+          <div className="flex items-center justify-between mb-1">
+            <div className="text-xs font-semibold text-red-700 dark:text-red-400">Fehler ({result.errors.length}):</div>
+            {onDownloadErrors && (
+              <button onClick={onDownloadErrors}
+                className="text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 border border-red-200 dark:border-red-700 rounded px-2 py-0.5 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors font-medium">
+                ⬇️ Fehler als CSV
+              </button>
+            )}
+          </div>
           <ul className="space-y-1 max-h-48 overflow-y-auto">
             {result.errors.map((e, i) => (
               <li key={i} className="text-xs text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded px-2 py-1">⚠ {e}</li>
@@ -643,6 +692,18 @@ export default function Import() {
     }
   }, [file, selected.endpoint]);
 
+  const handleDownloadValidationErrors = useCallback(() => {
+    if (!preview) return;
+    const csv = buildErrorRowsCSV(preview.headers, preview.rows, validations);
+    if (csv) downloadCSV('import_fehler_vorschau.csv', csv);
+  }, [preview, validations]);
+
+  const handleDownloadResultErrors = useCallback(() => {
+    if (!result || result.errors.length === 0) return;
+    const csv = buildResultErrorsCSV(result.errors);
+    downloadCSV('import_fehler_bericht.csv', csv);
+  }, [result]);
+
   const isImporting = phase === 'uploading' || phase === 'processing';
 
   return (
@@ -714,7 +775,8 @@ export default function Import() {
         {preview && preview.headers.length > 0 && !result && (
           <ValidationPreviewTable headers={preview.headers} rows={preview.rows}
             validations={validations} showAllRows={showAllRows}
-            onToggleShowAll={() => setShowAllRows(prev => !prev)} />
+            onToggleShowAll={() => setShowAllRows(prev => !prev)}
+            onDownloadErrors={handleDownloadValidationErrors} />
         )}
 
         {preview && preview.headers.length > 0 && !result && !isImporting && (
@@ -746,7 +808,7 @@ export default function Import() {
           </div>
         )}
 
-        {result && <ResultBanner result={result} onReset={handleReset} />}
+        {result && <ResultBanner result={result} onReset={handleReset} onDownloadErrors={handleDownloadResultErrors} />}
       </div>
     </div>
   );

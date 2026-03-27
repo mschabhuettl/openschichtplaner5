@@ -64,9 +64,9 @@ export function NotificationBell({ employeeId }: Props) {
     try {
       // Fetch planner-wide + optionally employee-specific notifications
       const headers = getAuthHeaders();
-      const urls = [`${BASE}/api/notifications`]; // planner-wide (no employee_id = None on server)
+      const urls = [`${BASE}/api/v1/notifications`]; // planner-wide (no employee_id = None on server)
       if (employeeId) {
-        urls.push(`${BASE}/api/notifications?employee_id=${employeeId}`);
+        urls.push(`${BASE}/api/v1/notifications?employee_id=${employeeId}`);
       }
       const results = await Promise.all(
         urls.map(url => fetch(url, { headers }).then(r => r.ok ? r.json() : { notifications: [] }))
@@ -106,7 +106,7 @@ export function NotificationBell({ employeeId }: Props) {
 
   const markRead = async (id: number) => {
     try {
-      await fetch(`${BASE}/api/notifications/${id}/read`, {
+      await fetch(`${BASE}/api/v1/notifications/${id}/read`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
       });
@@ -118,13 +118,13 @@ export function NotificationBell({ employeeId }: Props) {
     setLoading(true);
     try {
       // Mark planner-wide
-      await fetch(`${BASE}/api/notifications/read-all`, {
+      await fetch(`${BASE}/api/v1/notifications/read-all`, {
         method: 'PATCH',
         headers: getAuthHeaders(),
       });
       // Mark employee-specific if needed
       if (employeeId) {
-        await fetch(`${BASE}/api/notifications/read-all?employee_id=${employeeId}`, {
+        await fetch(`${BASE}/api/v1/notifications/read-all?employee_id=${employeeId}`, {
           method: 'PATCH',
           headers: getAuthHeaders(),
         });
@@ -137,7 +137,7 @@ export function NotificationBell({ employeeId }: Props) {
 
   const dismiss = async (id: number) => {
     try {
-      await fetch(`${BASE}/api/notifications/${id}`, {
+      await fetch(`${BASE}/api/v1/notifications/${id}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });

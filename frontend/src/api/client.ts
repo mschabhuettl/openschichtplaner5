@@ -1954,6 +1954,22 @@ export const api = {
   deleteHolidayBan: (id: number) =>
     deleteReq<unknown>(`/api/v1/holiday-bans/${id}`),
 
+  // ─── Absence Statistics (Q074) ────────────────────────────
+  getAbsenceStatsEmployee: (employeeId: number, year: number) =>
+    fetchJSON<import('../pages/AbsenceStats').AbsenceEmployeeStats>(
+      `/api/v1/absences/stats/employee/${employeeId}?year=${year}`
+    ),
+
+  getAbsenceStatsGroup: (groupId: number, year: number) =>
+    fetchJSON<import('../pages/AbsenceStats').AbsenceGroupStats>(
+      `/api/v1/absences/stats/group/${groupId}?year=${year}`
+    ),
+
+  getAbsenceStatsOverview: (year: number) =>
+    fetchJSON<import('../pages/AbsenceStats').AbsenceOverview>(
+      `/api/v1/absences/stats/overview?year=${year}`
+    ),
+
   // ─── Absence Status ────────────────────────────────────────
   setAbsenceStatus: (absenceId: number, data: { status: string; reject_reason?: string }) =>
     putJSON<unknown>(`/api/v1/absences/${absenceId}/status`, data),

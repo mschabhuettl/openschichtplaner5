@@ -87,6 +87,7 @@ const en: TranslationKeys = {
     personalbedarf: 'Staffing Needs',
     urlaub: 'Leave Management',
     'urlaubs-timeline': 'Leave Timeline',
+    'absence-stats': 'Absence Statistics',
     schichtwuensche: 'Shift Requests',
     tauschboerse: 'Shift Exchange',
     zeitkonto: 'Time Account',

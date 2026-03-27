@@ -85,6 +85,7 @@ const de = {
     personalbedarf: 'Personalbedarf',
     urlaub: 'Urlaubsverwaltung',
     'urlaubs-timeline': 'Urlaubs-Timeline',
+    'absence-stats': 'Abwesenheits-Statistiken',
     schichtwuensche: 'Schichtwünsche',
     tauschboerse: 'Tauschbörse',
     zeitkonto: 'Zeitkonto',

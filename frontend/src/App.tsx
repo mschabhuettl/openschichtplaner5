@@ -100,6 +100,7 @@ const TeamUebersicht      = lazy(() => import('./pages/TeamUebersicht'));
 const RecurringShifts   = lazy(() => import('./pages/RecurringShifts'));
 const ExportScheduler   = lazy(() => import('./pages/ExportScheduler'));
 const NotificationSettings = lazy(() => import('./pages/NotificationSettings'));
+const WorkTimeRules     = lazy(() => import('./pages/WorkTimeRules'));
 const Changelog         = lazy(() => import('./pages/Changelog'));
 const Login             = lazy(() => import('./pages/Login'));
 const NotFound          = lazy(() => import('./pages/NotFound'));
@@ -220,6 +221,7 @@ const navItems: NavItem[] = [
   { id: 'overtime-dashboard', label: 'Überstunden-Dashboard', icon: '📊', group: 'Zeitwirtschaft', path: '/overtime-dashboard', roles: ['Admin', 'Planer'] },
   { id: 'kontobuchungen', label: 'Kontobuchungen', icon: '💰', group: 'Zeitwirtschaft', path: '/kontobuchungen', roles: ['Admin', 'Planer'] },
   { id: 'statistiken',    label: 'Statistiken',    icon: '📈', group: 'Zeitwirtschaft', path: '/statistiken', roles: ['Admin', 'Planer'] },
+  { id: 'work-time-rules', label: 'Arbeitszeitregeln', icon: '⚖️', group: 'Zeitwirtschaft', path: '/work-time-rules', roles: ['Admin', 'Planer'] },
 
   // ── Ansichten ────────────────────────────────────────────────
   { id: 'leitwand',          label: 'Leitwand',              icon: '📺', group: 'Ansichten', path: '/leitwand',   roles: ['Admin', 'Planer'] },
@@ -871,6 +873,7 @@ function AppInner() {
             <Route path="/auditlog" element={<PB name="Audit-Log"><RoleRoute allowedRoles={['Admin', 'Planer']}><AuditLog /></RoleRoute></PB>} />
             <Route path="/health" element={<PB name="System Health"><RoleRoute allowedRoles={['Admin']}><HealthDashboard /></RoleRoute></PB>} />
             <Route path="/export-scheduler" element={<PB name="Export-Zeitpläne"><RoleRoute allowedRoles={['Admin']}><ExportScheduler /></RoleRoute></PB>} />
+            <Route path="/work-time-rules" element={<PB name="Arbeitszeitregeln"><RoleRoute allowedRoles={['Admin', 'Planer']}><WorkTimeRules /></RoleRoute></PB>} />
             <Route path="/changelog" element={<PB name="Changelog"><Changelog /></PB>} />
             <Route path="/login" element={<Navigate to="/" replace />} />
             <Route path="*" element={<PB name="404"><NotFound /></PB>} />

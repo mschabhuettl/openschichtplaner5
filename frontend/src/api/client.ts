@@ -2149,7 +2149,53 @@ export const api = {
     fetchJSON<NotificationSettingsResponse>('/api/v1/notifications/settings'),
   updateNotificationSettings: (settings: NotificationSettings) =>
     putJSON<NotificationSettingsResponse>('/api/v1/notifications/settings', settings),
+
+  // ── Work Time Rules (Q079 / Q081) ─────────────────────────────────
+  getWorkTimeRules: () =>
+    fetchJSON<WorkTimeRulesConfig>('/api/v1/work-time-rules'),
+  updateWorkTimeRules: (data: WorkTimeRulesConfig) =>
+    putJSON<WorkTimeRulesConfig>('/api/v1/work-time-rules', data),
+  checkWorkTimeRules: (params: { employee_id: number; date_from: string; date_to: string }) =>
+    postJSON<WorkTimeCheckResult>('/api/v1/work-time-rules/check', params),
+  checkAllWorkTimeRules: (params: { group_id?: number; date_from: string; date_to: string }) =>
+    postJSON<WorkTimeCheckAllResult>('/api/v1/work-time-rules/check-all', params),
 };
+
+// ─── Work Time Rules (Q079 / Q081) ────────────────────────────────
+export interface WorkTimeRulesConfig {
+  max_hours_per_day: number;
+  max_hours_per_week: number;
+  min_rest_hours_between_shifts: number;
+  max_consecutive_days: number;
+  enabled: boolean;
+  updated_at?: string;
+}
+
+export interface WorkTimeViolation {
+  rule_type: string;
+  severity: 'warning' | 'error';
+  date: string;
+  message: string;
+  value?: number;
+  limit?: number;
+}
+
+export interface WorkTimeCheckResult {
+  employee_id: number;
+  employee_name: string;
+  date_from: string;
+  date_to: string;
+  violation_count: number;
+  violations: WorkTimeViolation[];
+}
+
+export interface WorkTimeCheckAllResult {
+  date_from: string;
+  date_to: string;
+  employee_count: number;
+  total_violations: number;
+  results: WorkTimeCheckResult[];
+}
 
 // ─── Notification Settings (Q080) ────────────────────────────────
 export interface NotificationSettings {

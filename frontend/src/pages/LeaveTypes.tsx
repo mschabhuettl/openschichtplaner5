@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { EmptyState } from '../components/EmptyState';
 
 function hexToBGR(hex: string): number {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -201,7 +202,15 @@ export default function LeaveTypes() {
                 </tr>
               ))}
               {leaveTypes.length === 0 && (
-                <tr><td colSpan={6} className="text-center py-8 text-gray-600">Keine Abwesenheitsarten</td></tr>
+                <tr><td colSpan={6}>
+                  <EmptyState
+                    icon="🏖️"
+                    title="Keine Abwesenheiten"
+                    description="Legen Sie Abwesenheitsarten wie Urlaub, Krankenstand oder Zeitausgleich an."
+                    actionLabel="Abwesenheitsart anlegen"
+                    onAction={() => { setEditId(null); setShowModal(true); }}
+                  />
+                </td></tr>
               )}
             </tbody>
           </table>

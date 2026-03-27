@@ -10,6 +10,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useT } from '../i18n';
 import { ResponsiveTable } from '../components/ResponsiveTable';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { EmptyState } from '../components/EmptyState';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 

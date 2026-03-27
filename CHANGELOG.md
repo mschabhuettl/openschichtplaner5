@@ -7,6 +7,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.0-rc7] - 2026-03-27
+
+### Added
+- **Abwesenheits-Statistiken UI (Q076):** New multi-tab absence statistics interface with overview, group, and employee tabs. CSS-based charts display absence distribution by type (vacation, sick leave, other) and monthly trends. Accessible from the Statistics section.
+- **Schicht-Konflikt-Report (Q077):** Automated shift conflict detection covering overlap, double-booking, and understaffed periods. Results are displayed in a conflict report view with severity indicators. Supports CSV and XLSX export for further analysis.
+- **Mitarbeiter-Timeline (Q078):** Horizontal CSS timeline view per employee showing shifts and absences on a unified time axis. Enables at-a-glance review of individual workload and absence patterns across a configurable date range.
+- **Arbeitszeit-Regelwerk (Q079):** Working time rule engine with configurable limits: maximum hours per day, minimum rest between shifts, and maximum consecutive working days. A dedicated checker highlights violations in the schedule and employee views.
+- **Notification-Settings (Q080):** Per-user email notification preferences. Users can independently toggle notifications for each event type (shift assigned, shift changed, swap requested/approved/rejected, vacation approved/rejected, schedule comment added) via the profile settings page.
+
+---
+
 ## [1.0.0-rc6] - 2026-03-27
 
 ### Added

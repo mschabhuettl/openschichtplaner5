@@ -95,6 +95,7 @@ const Companies           = lazy(() => import('./pages/Companies'));
 const Uebergabe           = lazy(() => import('./pages/Uebergabe'));
 const DienstBoard         = lazy(() => import('./pages/DienstBoard'));
 const TeamUebersicht      = lazy(() => import('./pages/TeamUebersicht'));
+const RecurringShifts   = lazy(() => import('./pages/RecurringShifts'));
 const Changelog         = lazy(() => import('./pages/Changelog'));
 const Login             = lazy(() => import('./pages/Login'));
 const NotFound          = lazy(() => import('./pages/NotFound'));
@@ -197,6 +198,7 @@ const navItems: NavItem[] = [
   { id: 'jahresuebersicht', label: 'Jahresübersicht',  icon: '📆', group: 'Planung', path: '/jahresuebersicht' },
   { id: 'personaltabelle',  label: 'Personaltabelle',  icon: '👤', group: 'Planung', path: '/personaltabelle',  roles: ['Admin', 'Planer'] },
   { id: 'schichtmodell',    label: 'Schichtmodelle',   icon: '🔄', group: 'Planung', path: '/schichtmodell',    roles: ['Admin', 'Planer'] },
+  { id: 'recurring-shifts', label: 'Wiederkehrende Schichten', icon: '🔁', group: 'Planung', path: '/recurring-shifts', roles: ['Admin', 'Planer'] },
   { id: 'personalbedarf',   label: 'Personalbedarf',   icon: '👥', group: 'Planung', path: '/personalbedarf',   roles: ['Admin', 'Planer'] },
 
   // ── Abwesenheiten ────────────────────────────────────────────
@@ -800,6 +802,7 @@ function AppInner() {
             <Route path="/statistiken" element={<PB name="Statistiken"><RoleRoute allowedRoles={['Admin', 'Planer']}><Statistiken /></RoleRoute></PB>} />
             <Route path="/urlaub" element={<PB name="Urlaubsverwaltung"><RoleRoute allowedRoles={['Admin', 'Planer']}><Urlaub /></RoleRoute></PB>} />
             <Route path="/schichtmodell" element={<PB name="Schichtmodelle"><RoleRoute allowedRoles={['Admin', 'Planer']}><Schichtmodell /></RoleRoute></PB>} />
+            <Route path="/recurring-shifts" element={<PB name="Wiederkehrende Schichten"><RoleRoute allowedRoles={['Admin', 'Planer']}><RecurringShifts /></RoleRoute></PB>} />
             <Route path="/personalbedarf" element={<PB name="Personalbedarf"><RoleRoute allowedRoles={['Admin', 'Planer']}><Personalbedarf /></RoleRoute></PB>} />
             <Route path="/jahresrueckblick" element={<PB name="Jahresrückblick"><RoleRoute allowedRoles={['Admin', 'Planer']}><Jahresrueckblick /></RoleRoute></PB>} />
             <Route path="/jahresabschluss" element={<PB name="Jahresabschluss"><RoleRoute allowedRoles={['Admin', 'Planer']}><Jahresabschluss /></RoleRoute></PB>} />

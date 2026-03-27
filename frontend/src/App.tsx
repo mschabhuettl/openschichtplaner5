@@ -42,6 +42,7 @@ const Personalbedarf    = lazy(() => import('./pages/Personalbedarf'));
 const Jahresabschluss   = lazy(() => import('./pages/Jahresabschluss'));
 const Zeitkonto         = lazy(() => import('./pages/Zeitkonto'));
 const Ueberstunden      = lazy(() => import('./pages/Ueberstunden'));
+const OvertimeDashboard = lazy(() => import('./pages/OvertimeDashboard'));
 const Kontobuchungen    = lazy(() => import('./pages/Kontobuchungen'));
 const Notizen           = lazy(() => import('./pages/Notizen'));
 const Berichte          = lazy(() => import('./pages/Berichte'));
@@ -207,6 +208,7 @@ const navItems: NavItem[] = [
   // ── Zeitwirtschaft ───────────────────────────────────────────
   { id: 'zeitkonto',      label: 'Zeitkonto',      icon: '⏱️', group: 'Zeitwirtschaft', path: '/zeitkonto' },
   { id: 'ueberstunden',   label: 'Überstunden',    icon: '⏰', group: 'Zeitwirtschaft', path: '/ueberstunden',   roles: ['Admin', 'Planer'] },
+  { id: 'overtime-dashboard', label: 'Überstunden-Dashboard', icon: '📊', group: 'Zeitwirtschaft', path: '/overtime-dashboard', roles: ['Admin', 'Planer'] },
   { id: 'kontobuchungen', label: 'Kontobuchungen', icon: '💰', group: 'Zeitwirtschaft', path: '/kontobuchungen', roles: ['Admin', 'Planer'] },
   { id: 'statistiken',    label: 'Statistiken',    icon: '📈', group: 'Zeitwirtschaft', path: '/statistiken', roles: ['Admin', 'Planer'] },
 
@@ -803,6 +805,7 @@ function AppInner() {
             <Route path="/jahresabschluss" element={<PB name="Jahresabschluss"><RoleRoute allowedRoles={['Admin', 'Planer']}><Jahresabschluss /></RoleRoute></PB>} />
             <Route path="/zeitkonto" element={<PB name="Zeitkonto"><RoleRoute allowedRoles={['Admin', 'Planer']}><Zeitkonto /></RoleRoute></PB>} />
             <Route path="/ueberstunden" element={<PB name="Überstunden"><RoleRoute allowedRoles={['Admin', 'Planer']}><Ueberstunden /></RoleRoute></PB>} />
+            <Route path="/overtime-dashboard" element={<PB name="Überstunden-Dashboard"><RoleRoute allowedRoles={['Admin', 'Planer']}><OvertimeDashboard /></RoleRoute></PB>} />
             <Route path="/kontobuchungen" element={<PB name="Kontobuchungen"><RoleRoute allowedRoles={['Admin', 'Planer']}><Kontobuchungen /></RoleRoute></PB>} />
             <Route path="/notizen" element={<PB name="Notizen"><Notizen /></PB>} />
             <Route path="/benachrichtigungen" element={<PB name="Benachrichtigungen"><NotificationsPage /></PB>} />

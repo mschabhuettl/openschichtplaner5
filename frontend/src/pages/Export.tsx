@@ -119,7 +119,7 @@ export default function Export() {
   // Statistics export state
   const [statsYear, setStatsYear] = useState(currentYear);
   const [statsGroup, setStatsGroup] = useState<string>('');
-  const [statsFormat, setStatsFormat] = useState<'csv' | 'html'>('csv');
+  const [statsFormat, setStatsFormat] = useState<'csv' | 'html' | 'xlsx'>('xlsx');
 
   // Employees export state
   const [employeesFormat, setEmployeesFormat] = useState<'csv' | 'html' | 'xlsx'>('xlsx');
@@ -127,7 +127,7 @@ export default function Export() {
   // Absences export state
   const [absYear, setAbsYear] = useState(currentYear);
   const [absGroup, setAbsGroup] = useState<string>('');
-  const [absFormat, setAbsFormat] = useState<'csv' | 'html'>('csv');
+  const [absFormat, setAbsFormat] = useState<'csv' | 'html' | 'xlsx'>('xlsx');
 
   useEffect(() => {
     setLoading(true);
@@ -276,8 +276,9 @@ export default function Export() {
               <select
                 className={selectCls}
                 value={statsFormat}
-                onChange={(e) => setStatsFormat(e.target.value as 'csv' | 'html')}
+                onChange={(e) => setStatsFormat(e.target.value as 'csv' | 'html' | 'xlsx')}
               >
+                <option value="xlsx">Excel (XLSX)</option>
                 <option value="csv">CSV</option>
                 <option value="html">HTML (druckfertig)</option>
               </select>
@@ -286,7 +287,7 @@ export default function Export() {
           <DownloadButton
             url={statsUrl}
             label={`Statistiken ${statsYear} herunterladen`}
-            icon={statsFormat === 'html' ? '🖨️' : '⬇️'}
+            icon={statsFormat === 'xlsx' ? '📊' : statsFormat === 'html' ? '🖨️' : '⬇️'}
           />
         </ExportCard>
 
@@ -346,8 +347,9 @@ export default function Export() {
               <select
                 className={selectCls}
                 value={absFormat}
-                onChange={(e) => setAbsFormat(e.target.value as 'csv' | 'html')}
+                onChange={(e) => setAbsFormat(e.target.value as 'csv' | 'html' | 'xlsx')}
               >
+                <option value="xlsx">Excel (XLSX)</option>
                 <option value="csv">CSV</option>
                 <option value="html">HTML (druckfertig)</option>
               </select>
@@ -356,7 +358,7 @@ export default function Export() {
           <DownloadButton
             url={absUrl}
             label={`Abwesenheiten ${absYear} als ${absFormat.toUpperCase()} herunterladen`}
-            icon={absFormat === 'html' ? '🖨️' : '⬇️'}
+            icon={absFormat === 'xlsx' ? '📊' : absFormat === 'html' ? '🖨️' : '⬇️'}
           />
         </ExportCard>
       </div>

@@ -7,7 +7,7 @@
 *Reads and writes the original DBF database files directly — no migration needed.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0--rc3-brightgreen)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.0--rc4-brightgreen)](CHANGELOG.md)
 [![Tests](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml)
 [![Docker](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml)
 [![GitHub release](https://img.shields.io/github/v/release/mschabhuettl/openschichtplaner5?include_prereleases)](https://github.com/mschabhuettl/openschichtplaner5/releases)
@@ -71,13 +71,15 @@ The key differentiator: OpenSchichtplaner5 reads and writes the **original `.DBF
 | Area | Highlights |
 |------|-----------|
 | 📅 **Scheduling** | Weekly & monthly schedule, calendar view, drag & drop, undo/redo, templates, auto-planner |
-| 👥 **Employees** | Full CRUD, groups, skills, availability, contract hours, onboarding wizard |
+| 👥 **Employees** | Full CRUD, groups, skills, availability, contract hours, onboarding wizard, CSV bulk import |
 | 🏖️ **Leave Management** | Requests, approval workflow, annual timeline (Gantt), entitlements, year-end close |
 | 🔄 **Self-Service** | Shift preferences, swap exchange, personal calendar, profile management |
-| 📊 **Analytics** | Dashboard with live charts, statistics, year in review, burnout radar |
-| 📄 **Reports & Export** | 20+ report types, CSV/Excel download, print stylesheets (A4), iCal feed |
+| 📊 **Analytics** | Dashboard with live charts, statistics, year in review, burnout radar, performance widget |
+| 📄 **Reports & Export** | 20+ report types, CSV/Excel download, print stylesheets (A4 landscape, improved), iCal feed |
 | 🔔 **Notifications** | Real-time updates (SSE), email (SMTP), in-app notification center |
 | 🔒 **Security** | Role-based access (Admin/Planner/Reader), 2FA (TOTP), bcrypt, JWT, rate limiting, audit log |
+| 🔍 **Search** | Global header search across employees, groups, and shifts (`Ctrl+K`) |
+| 🔌 **API** | Versioned REST API (`/api/v1/`), OpenAPI/Swagger docs, deprecation headers for legacy routes |
 | 🐳 **Operations** | Docker deployment, CI/CD, SQLite backup/restore, health dashboard |
 | 📱 **UX** | Dark mode, mobile-responsive, keyboard navigation, offline indicator |
 

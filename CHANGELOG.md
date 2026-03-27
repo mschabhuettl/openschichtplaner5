@@ -7,6 +7,21 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.0-rc4] - 2026-03-27
+
+### Added
+- **Global Search:** New header search bar that searches employees, groups, and shifts simultaneously. Results appear in a categorized dropdown with keyboard navigation support. Accessible via `Ctrl+K` / `Cmd+K`.
+- **API Versioning:** All endpoints now available under the `/api/v1/` prefix. Legacy `/api/` routes continue to work but return `Deprecation: true` and `X-API-Version: v1` response headers. Clients should migrate to `/api/v1/`.
+- **Improved Print Layout:** Redesigned A4 landscape print stylesheet for the schedule view — cleaner table borders, page headers with company name and date range, repeated table headers across pages, signature line at the bottom. Print via browser `Ctrl+P`.
+- **CSV Employee Import:** New endpoint `POST /api/v1/employees/import-csv` for bulk employee creation from a CSV file. Includes field validation, duplicate detection (by employee number), configurable error threshold (default 20%), and a detailed import result report (created / skipped / errors).
+- **Performance Dashboard Widget:** New widget on the main dashboard showing live system metrics: API response time, database status, service uptime, memory usage, and disk usage. Data sourced from the extended `/api/health` endpoint.
+
+### Improved
+- **Print CSS:** Hides navigation sidebar, header bar, and action buttons during print. Enforces `A4 landscape` page size and avoids page breaks inside table rows.
+- **Health Endpoint:** `/api/health` now exposes structured metrics for memory, disk, and uptime — consumed by the new Performance Widget.
+
+---
+
 ## [1.0.0-rc3] - 2026-03-10
 
 ### Added

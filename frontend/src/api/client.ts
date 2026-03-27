@@ -2143,4 +2143,28 @@ export const api = {
     postJSON<ScheduleComment>('/api/v1/schedule/comments', body),
   deleteScheduleComment: (id: number) =>
     deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/schedule/comments/${id}`),
+
+  // ── Notification Settings (Q080) ────────────────────────────────
+  getNotificationSettings: () =>
+    fetchJSON<NotificationSettingsResponse>('/api/v1/notifications/settings'),
+  updateNotificationSettings: (settings: NotificationSettings) =>
+    putJSON<NotificationSettingsResponse>('/api/v1/notifications/settings', settings),
 };
+
+// ─── Notification Settings (Q080) ────────────────────────────────
+export interface NotificationSettings {
+  shift_assigned: boolean;
+  shift_changed: boolean;
+  swap_requested: boolean;
+  swap_approved: boolean;
+  swap_rejected: boolean;
+  vacation_approved: boolean;
+  vacation_rejected: boolean;
+  schedule_comment_added: boolean;
+}
+
+export interface NotificationSettingsResponse {
+  user_id: number;
+  settings: NotificationSettings;
+  updated?: boolean;
+}

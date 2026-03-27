@@ -99,6 +99,7 @@ const DienstBoard         = lazy(() => import('./pages/DienstBoard'));
 const TeamUebersicht      = lazy(() => import('./pages/TeamUebersicht'));
 const RecurringShifts   = lazy(() => import('./pages/RecurringShifts'));
 const ExportScheduler   = lazy(() => import('./pages/ExportScheduler'));
+const NotificationSettings = lazy(() => import('./pages/NotificationSettings'));
 const Changelog         = lazy(() => import('./pages/Changelog'));
 const Login             = lazy(() => import('./pages/Login'));
 const NotFound          = lazy(() => import('./pages/NotFound'));
@@ -192,6 +193,7 @@ const navItems: NavItem[] = [
   { id: 'dashboard',  label: 'Dashboard', icon: '📊', path: '/' },
   { id: 'konflikte',  label: 'Konflikte', icon: '⚠️', path: '/konflikte', badge: true },
   { id: 'mein-profil', label: 'Mein Profil', icon: '👤', path: '/mein-profil' },
+  { id: 'notification-settings', label: 'Benachrichtigungen', icon: '🔔', path: '/notification-settings' },
   { id: 'mein-kalender', label: 'Mein Kalender', icon: '📅', path: '/mein-kalender', roles: ['Leser'] },
 
   // ── Planung — Kernplanung ────────────────────────────────────
@@ -824,6 +826,7 @@ function AppInner() {
             <Route path="/mitarbeiter" element={<PB name="MA-Profil"><RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterProfil /></RoleRoute></PB>} />
             <Route path="/mitarbeiter/:id" element={<PB name="MA-Profil"><RoleRoute allowedRoles={['Admin', 'Planer']}><MitarbeiterProfil /></RoleRoute></PB>} />
             <Route path="/mein-profil" element={<PB name="Mein Profil"><MeinProfil /></PB>} />
+            <Route path="/notification-settings" element={<PB name="Benachrichtigungen"><NotificationSettings /></PB>} />
             <Route path="/mein-kalender" element={<PB name="Mein Kalender"><MeinKalender /></PB>} />
             <Route path="/teamkalender" element={<PB name="Team-Kalender"><Teamkalender /></PB>} />
             <Route path="/urlaubs-timeline" element={<PB name="Urlaubs-Timeline"><UrlaubsTimeline /></PB>} />

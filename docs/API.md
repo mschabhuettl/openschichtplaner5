@@ -2,7 +2,18 @@
 
 > **Interactive Docs:** The FastAPI backend serves Swagger UI at [`http://localhost:8000/docs`](http://localhost:8000/docs) and ReDoc at [`http://localhost:8000/redoc`](http://localhost:8000/redoc).
 
-All API endpoints are prefixed with `/api/`. Authentication is done via a `Bearer` token in the `Authorization` header.
+## API Versioning
+
+As of **v1.0.0-rc4**, all endpoints are available under the `/api/v1/` prefix. The legacy `/api/` prefix is still supported for backwards compatibility but is **deprecated**:
+
+- Deprecated routes return the response headers:
+  - `Deprecation: true`
+  - `X-API-Version: v1`
+  - `Link: </api/v1/...>; rel="successor-version"`
+- **New integrations should use `/api/v1/` exclusively.**
+- The legacy prefix will be removed in a future major release.
+
+Authentication is done via a `Bearer` token in the `Authorization` header.
 
 ---
 
@@ -10,9 +21,11 @@ All API endpoints are prefixed with `/api/`. Authentication is done via a `Beare
 
 1. [Authentication](#authentication)
 2. [Employees](#employees)
-3. [Schedule](#schedule)
-4. [Reports & Export](#reports--export)
-5. [Shift Wishes](#shift-wishes)
+3. [CSV Employee Import](#csv-employee-import)
+4. [Schedule](#schedule)
+5. [Reports & Export](#reports--export)
+6. [Shift Wishes](#shift-wishes)
+7. [Health & Status](#health--status)
 6. [Health & Status](#health--status)
 
 ---
@@ -228,6 +241,85 @@ curl -s http://localhost:8000/api/employees/1/groups \
 ```bash
 curl -s http://localhost:8000/api/groups \
   -H "Authorization: Bearer $TOKEN"
+```
+
+---
+
+## CSV Employee Import
+
+> **Endpoint:** `POST /api/v1/employees/import-csv`
+
+Bulk-create employees from a CSV file. The file must be uploaded as `multipart/form-data`.
+
+### Required CSV Columns
+
+| Column | Description |
+|--------|-------------|
+| `PERSNR` | Employee number (string, unique — used for deduplication) |
+| `NAME` | Last name |
+| `VORNAME` | First name |
+| `KURZZEICHEN` | Short code / initials |
+| `GRUPPE` | Group name (must match an existing group) |
+
+Additional columns are silently ignored.
+
+### Request
+
+```bash
+curl -s -X POST http://localhost:8000/api/v1/employees/import-csv \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@employees.csv"
+```
+
+### Optional Query Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `error_threshold` | float (0–1) | `0.2` | Maximum fraction of rows allowed to fail before the entire import is aborted (e.g. `0.2` = 20%) |
+| `dry_run` | bool | `false` | Validate and preview without writing to the database |
+
+### Response
+
+```json
+{
+  "created": 42,
+  "skipped": 3,
+  "errors": 1,
+  "error_threshold_exceeded": false,
+  "details": [
+    {
+      "row": 12,
+      "persnr": "E099",
+      "status": "skipped",
+      "reason": "duplicate — employee already exists"
+    },
+    {
+      "row": 27,
+      "persnr": "E103",
+      "status": "error",
+      "reason": "group 'Nachtschicht-X' not found"
+    }
+  ]
+}
+```
+
+### Status Codes
+
+| Code | Meaning |
+|------|---------|
+| `200` | Import completed (check `created`/`skipped`/`errors` for details) |
+| `400` | Invalid CSV format or error threshold exceeded |
+| `401` | Unauthorized |
+| `403` | Insufficient permissions (Admin or Planner role required) |
+| `422` | Validation error in query parameters |
+
+### Example CSV
+
+```csv
+PERSNR,NAME,VORNAME,KURZZEICHEN,GRUPPE
+E001,Muster,Max,MM,Frühschicht
+E002,Beispiel,Erika,EB,Spätschicht
+E003,Neu,Klaus,KN,Nachtschicht
 ```
 
 ---

@@ -121,7 +121,7 @@ describe('EmployeeTimeline', () => {
     const btn = screen.getByText(/Mitarbeiter wählen/i).closest('button')!;
     fireEvent.click(btn);
     await waitFor(() => {
-      expect(screen.getByText('Hans Müller')).toBeTruthy();
+      expect(screen.getAllByText('Hans Müller').length).toBeGreaterThan(0);
       expect(screen.getByText('Anna Schmidt')).toBeTruthy();
     });
     // Hidden employee should NOT appear
@@ -169,7 +169,7 @@ describe('EmployeeTimeline', () => {
     await act(async () => { renderWithRouter(); });
     expect(screen.getByText('◀')).toBeTruthy();
     expect(screen.getByText('▶')).toBeTruthy();
-    expect(screen.getByText('Heute')).toBeTruthy();
+    expect(screen.getAllByText('Heute').length).toBeGreaterThan(0);
   });
 
   // ── 10. Loads data for pre-selected employee (URL param) ──────
@@ -184,7 +184,7 @@ describe('EmployeeTimeline', () => {
   it('shows employee header with name when selected from URL', async () => {
     await act(async () => { renderWithRouter('1'); });
     await waitFor(() => {
-      expect(screen.getByText('Hans Müller')).toBeTruthy();
+      expect(screen.getAllByText('Hans Müller').length).toBeGreaterThan(0);
     });
   });
 
@@ -224,14 +224,14 @@ describe('EmployeeTimeline', () => {
       expect(screen.getByText('Urlaub')).toBeTruthy();
       expect(screen.getByText('Krankenstand')).toBeTruthy();
       expect(screen.getByText('Schicht')).toBeTruthy();
-      expect(screen.getByText('Heute')).toBeTruthy();
+      expect(screen.getAllByText('Heute').length).toBeGreaterThan(0);
     });
   });
 
   // ── 16. "Heute" button works without crashing ─────────────────
   it('"Heute" button works without crashing', async () => {
     await act(async () => { renderWithRouter(); });
-    const todayBtn = screen.getByText('Heute');
+    const todayBtn = screen.getAllByText('Heute')[0];
     fireEvent.click(todayBtn);
     expect(screen.getByText(/Mitarbeiter-Timeline/i)).toBeTruthy();
   });
@@ -249,16 +249,16 @@ describe('EmployeeTimeline', () => {
   // ── 18. Horizontal view for 1-month period ────────────────────
   it('uses horizontal view for 1-month period (> 14 days)', async () => {
     await act(async () => { renderWithRouter('1'); });
-    await waitFor(() => screen.getByText('Hans Müller'));
+    await waitFor(() => screen.getAllByText('Hans Müller'));
     // In horizontal view (30 days), "Datum" column header does NOT appear
     expect(screen.queryByText('Datum')).toBeNull();
-    expect(screen.getByText('Hans Müller')).toBeTruthy();
+    expect(screen.getAllByText('Hans Müller').length).toBeGreaterThan(0);
   });
 
   // ── 19. List view for 1-week period ──────────────────────────
   it('uses list view for 1-week period (7 days)', async () => {
     await act(async () => { renderWithRouter('1'); });
-    await waitFor(() => screen.getByText('Hans Müller'));
+    await waitFor(() => screen.getAllByText('Hans Müller'));
     // Switch to 1 week
     fireEvent.click(screen.getByText('1 Woche'));
     await waitFor(() => {

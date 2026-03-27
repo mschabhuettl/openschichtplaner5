@@ -53,6 +53,23 @@ vi.mock('../components/HelpTooltip', () => ({
   HelpTooltip: () => null,
 }));
 
+// Mock AuthContext (needed by usePermissions)
+vi.mock('../contexts/AuthContext', () => ({
+  useAuth: () => ({
+    user: { WACCEMWND: true, BACKUP: true },
+    isDevMode: false,
+    devViewRole: null,
+    canWriteDuties: true,
+    canWriteAbsences: true,
+    canAdmin: true,
+  }),
+}));
+
+// Mock PerformanceWidget (uses fetch internally)
+vi.mock('../components/PerformanceWidget', () => ({
+  default: () => <div data-testid="performance-widget-mock">Performance</div>,
+}));
+
 import { api } from '../api/client';
 import Dashboard from '../pages/Dashboard';
 

@@ -3,6 +3,8 @@ import { api } from '../api/client';
 import { useT } from '../i18n/context';
 import { useSSERefresh } from '../contexts/SSEContext';
 import { HelpTooltip } from '../components/HelpTooltip';
+import { usePermissions } from '../hooks/usePermissions';
+import PerformanceWidget from '../components/PerformanceWidget';
 import type {
   DashboardSummary,
   DashboardToday,
@@ -1178,6 +1180,7 @@ function UpcomingBirthdaysWidget({ summaryData }: { summaryData: DashboardSummar
 
 export default function Dashboard() {
   const t = useT();
+  const { canSeeAdmin } = usePermissions();
   const { year: todayYear, month: todayMonth } = todayYearMonth();
   const [year, setYear] = useState(todayYear);
   const [month, setMonth] = useState(todayMonth);
@@ -1485,6 +1488,9 @@ export default function Dashboard() {
 
       {/* Burnout-Radar */}
       <BurnoutRadarWidget year={year} month={month} />
+
+      {/* Performance Widget — admin only */}
+      {canSeeAdmin && <PerformanceWidget />}
 
       {/* Absences + Staffing warnings + Zeitkonto */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

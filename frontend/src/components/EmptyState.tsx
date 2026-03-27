@@ -23,7 +23,7 @@ export function EmptyState({
   className = '',
   colSpan,
 }: EmptyStateProps) {
-  return (
+  const content = (
     <div className={`flex flex-col items-center justify-center min-h-[200px] py-16 px-6 text-center ${className}`}>
       <div className="text-[64px] leading-none mb-4 opacity-60">{icon}</div>
       <h3 className="text-base font-semibold text-slate-700 dark:text-slate-200 mb-1">{title}</h3>

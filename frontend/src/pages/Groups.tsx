@@ -10,7 +10,6 @@ import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { EmptyState } from '../components/EmptyState';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-import { EmptyState } from '../components/EmptyState';
 
 interface GroupForm {
   NAME: string;

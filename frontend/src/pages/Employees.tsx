@@ -13,7 +13,6 @@ import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { EmptyState } from '../components/EmptyState';
 import { useT } from '../i18n';
-import { EmptyState } from '../components/EmptyState';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 

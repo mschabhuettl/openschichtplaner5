@@ -7,7 +7,7 @@
 *Reads and writes the original DBF database files directly — no migration needed.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0--rc5-brightgreen)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.0--rc6-brightgreen)](CHANGELOG.md)
 [![Tests](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml)
 [![Docker](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml)
 [![GitHub release](https://img.shields.io/github/v/release/mschabhuettl/openschichtplaner5?include_prereleases)](https://github.com/mschabhuettl/openschichtplaner5/releases)
@@ -70,13 +70,13 @@ The key differentiator: OpenSchichtplaner5 reads and writes the **original `.DBF
 
 | Area | Highlights |
 |------|-----------|
-| 📅 **Scheduling** | Weekly & monthly schedule, calendar view, drag & drop, undo/redo, templates, auto-planner, recurring shifts |
+| 📅 **Scheduling** | Weekly & monthly schedule, calendar view, drag & drop, undo/redo, templates, auto-planner, recurring shifts (🔁 UI) |
 | 👥 **Employees** | Full CRUD, groups, skills, availability, contract hours, onboarding wizard, CSV bulk import, side-by-side comparison view |
-| 🏖️ **Leave Management** | Requests, approval workflow, annual timeline (Gantt), entitlements, year-end close |
-| 🔄 **Self-Service** | Shift preferences, swap exchange, personal calendar, profile management |
-| 📊 **Analytics** | Dashboard with live charts, statistics, year in review, burnout radar, performance widget, overtime tracking |
-| 📄 **Reports & Export** | 20+ report types, CSV/Excel download, print stylesheets (A4 landscape, improved), iCal feed, scheduled email exports |
-| 🔔 **Notifications** | Real-time updates (SSE), email (SMTP), in-app notification center |
+| 🏖️ **Leave Management** | Requests, approval workflow, annual timeline (Gantt), entitlements, year-end close, absence statistics (employee/group/overview) |
+| 🔄 **Self-Service** | Shift preferences, swap exchange (with notifications + auto-expiry), personal calendar, profile management |
+| 📊 **Analytics** | Dashboard with live charts, statistics, year in review, burnout radar, performance widget, overtime tracking (visual bar chart) |
+| 📄 **Reports & Export** | 20+ report types, CSV/Excel download, print stylesheets (A4 landscape, improved), iCal feed, scheduled email exports (CRUD UI) |
+| 🔔 **Notifications** | Real-time updates (SSE), email (SMTP), in-app notification center, swap request status notifications |
 | 🔒 **Security** | Role-based access (Admin/Planner/Reader), 2FA (TOTP), bcrypt, JWT, rate limiting, audit log |
 | 🔍 **Search** | Global header search across employees, groups, and shifts (`Ctrl+K`) |
 | 💬 **Comments** | Day-level schedule notes with 📝 indicator and inline popover editor |

@@ -10,6 +10,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useUndoRedo } from '../hooks/useUndoRedo';
 import type { UndoableAction } from '../hooks/useUndoRedo';
 import { UndoRedoStatus } from '../components/UndoRedoStatus';
+import { ResponsiveTable } from '../components/ResponsiveTable';
 
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 const WEEKDAY_ABBR = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
@@ -676,7 +677,7 @@ function WeekView({
   onContextMenu?: (e: React.MouseEvent, entry: DayEntry, date: string) => void;
 }) {
   return (
-    <div className="overflow-auto">
+    <ResponsiveTable stickyFirstCol minWidth="600px">
       <table className="border-collapse text-xs w-full">
         <thead>
           <tr className="bg-slate-700 text-white">
@@ -799,7 +800,7 @@ function WeekView({
           </tr>
         </tbody>
       </table>
-    </div>
+    </ResponsiveTable>
   );
 }
 

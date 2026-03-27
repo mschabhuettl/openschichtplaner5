@@ -8,6 +8,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useT } from '../i18n';
+import { ResponsiveTable } from '../components/ResponsiveTable';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
@@ -768,7 +769,7 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
         ))}
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-x-auto mb-6">
+      <ResponsiveTable minWidth="700px" className="bg-white rounded-lg shadow mb-6">
         <table className="text-xs w-full">
           <thead>
             <tr className="bg-slate-700 text-white">
@@ -816,7 +817,7 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
             )}
           </tbody>
         </table>
-      </div>
+      </ResponsiveTable>
       </>)}
 
       {/* Modals (immer sichtbar, unabhängig vom View-Mode) */}
@@ -931,7 +932,7 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
         <span className="text-xs text-gray-600">Klicken Sie auf Anspruch-Zahl zum Bearbeiten</span>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-x-auto">
+      <ResponsiveTable minWidth="650px" className="bg-white rounded-lg shadow">
         <table className="text-sm w-full">
           <thead>
             <tr className="bg-slate-700 text-white text-xs">
@@ -1001,7 +1002,7 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
             )}
           </tbody>
         </table>
-      </div>
+      </ResponsiveTable>
 
       {/* Summary cards */}
       {!loading && filtered.length > 0 && (
@@ -1169,7 +1170,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
           <div className="text-xs mt-1">Klicken Sie auf "Urlaubssperre anlegen" um eine neue anzulegen.</div>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <ResponsiveTable minWidth="650px" className="bg-white rounded-lg shadow">
           <table className="text-sm w-full">
             <thead>
               <tr className="bg-slate-700 text-white text-xs">
@@ -1211,7 +1212,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
               })}
             </tbody>
           </table>
-        </div>
+        </ResponsiveTable>
       )}
 
       {/* Info box */}
@@ -1349,7 +1350,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow overflow-x-auto">
+      <ResponsiveTable minWidth="650px" className="bg-white rounded-lg shadow">
         <table className="text-sm w-full">
           <thead>
             <tr className="bg-slate-700 text-white text-xs">
@@ -1435,7 +1436,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
             })}
           </tbody>
         </table>
-      </div>
+      </ResponsiveTable>
 
       {/* Info */}
       <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700 flex items-start gap-2">
@@ -1789,8 +1790,8 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
       </div>
 
       {/* Gantt Grid */}
-      <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
-        <table className="text-xs w-full border-collapse" style={{minWidth: '900px'}}>
+      <ResponsiveTable stickyFirstCol minWidth="900px" className="rounded-xl border border-gray-200 shadow-sm">
+        <table className="text-xs w-full border-collapse">
           <thead>
             <tr className="bg-gray-100 border-b">
               <th className="sticky left-0 z-10 bg-gray-100 text-left px-3 py-2 font-semibold text-gray-700 min-w-[160px] border-r">
@@ -1880,7 +1881,7 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
             )}
           </tbody>
         </table>
-      </div>
+      </ResponsiveTable>
 
       {/* Tooltip */}
       {tooltip && (

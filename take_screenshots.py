@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-Playwright screenshot script for OpenSchichtplaner5.
-Takes screenshots of all app pages and saves them to docs/screenshots/.
+Playwright screenshot script for OpenSchichtplaner5 v1.0.0.
+Takes screenshots of ALL app pages and saves them to docs/screenshots/.
 Bypasses login via localStorage injection (Dev-Mode session).
 
-Routes verified from App.tsx:
-- Routes are the actual React Router paths, NOT the display names
+Routes extracted from frontend/src/App.tsx (v1.0.0).
 """
 
 import os
@@ -41,40 +40,83 @@ DEV_SESSION = {
     }
 }
 
-# PAGES: (filename_base, actual_route_in_app)
-# Routes verified from frontend/src/App.tsx Route declarations
+# ALL pages from App.tsx — (filename_base, route)
+# Skipping: /login (redirect), /mitarbeiter/:id (dynamic), /employees/:id/timeline (dynamic), /* (404)
 PAGES = [
-    ("dashboard",           "/"),
-    ("dienstplan",          "/schedule"),          # Dienstplan = /schedule in React Router
-    ("jahresuebersicht",    "/jahresuebersicht"),
-    ("mitarbeiter",         "/employees"),          # Mitarbeiter = /employees
-    ("schichtarten",        "/shifts"),             # Schichtarten = /shifts
-    ("schichtmodelle",      "/schichtmodell"),      # Schichtmodelle = /schichtmodell (singular)
-    ("arbeitsplaetze",      "/workplaces"),         # Arbeitsplätze = /workplaces
-    ("gruppen",             "/groups"),             # Gruppen = /groups
-    ("abwesenheitsarten",   "/leave-types"),        # Abwesenheitsarten = /leave-types
-    ("personalbedarf",      "/personalbedarf"),
-    ("feiertage",           "/holidays"),           # Feiertage = /holidays
-    ("einschraenkungen",    "/einschraenkungen"),   # Schichteinschränkungen = /einschraenkungen
-    ("perioden",            "/perioden"),
-    ("zeitzuschlaege",      "/extracharges"),       # Zeitzuschläge = /extracharges
-    ("kontobuchungen",      "/kontobuchungen"),
-    ("zeitkonto",           "/zeitkonto"),
-    ("ueberstunden",        "/ueberstunden"),
-    ("urlaub",              "/urlaub"),             # Urlaubsverwaltung = /urlaub
-    ("statistiken",         "/statistiken"),
-    ("berichte",            "/berichte"),
-    ("jahresabschluss",     "/jahresabschluss"),
-    ("einsatzplan",         "/einsatzplan"),
-    ("notizen",             "/notizen"),
-    ("protokoll",           "/protokoll"),
-    ("personaltabelle",     "/personaltabelle"),
-    ("export",              "/export"),
-    ("import",              "/import"),
-    ("backup",              "/backup"),
-    ("einstellungen",       "/einstellungen"),
-    ("benutzerverwaltung",  "/benutzerverwaltung"),
-    ("konflikte",           "/konflikte"),          # Additional: Konflikte page
+    ("dashboard",               "/"),
+    ("konflikte",               "/konflikte"),
+    ("geburtstagkalender",      "/geburtstagkalender"),
+    ("schichtwuensche",         "/schichtwuensche"),
+    ("tauschboerse",            "/tauschboerse"),
+    ("dienstplan",              "/schedule"),
+    ("einsatzplan",             "/einsatzplan"),
+    ("jahresuebersicht",        "/jahresuebersicht"),
+    ("personaltabelle",         "/personaltabelle"),
+    ("statistiken",             "/statistiken"),
+    ("urlaub",                  "/urlaub"),
+    ("absence-stats",           "/absence-stats"),
+    ("schichtmodelle",          "/schichtmodell"),
+    ("recurring-shifts",        "/recurring-shifts"),
+    ("personalbedarf",          "/personalbedarf"),
+    ("jahresrueckblick",        "/jahresrueckblick"),
+    ("jahresabschluss",         "/jahresabschluss"),
+    ("zeitkonto",               "/zeitkonto"),
+    ("ueberstunden",            "/ueberstunden"),
+    ("overtime-dashboard",      "/overtime-dashboard"),
+    ("kontobuchungen",          "/kontobuchungen"),
+    ("notizen",                 "/notizen"),
+    ("benachrichtigungen",      "/benachrichtigungen"),
+    ("mitarbeiter-vergleich",   "/mitarbeiter-vergleich"),
+    ("team-uebersicht",        "/team"),
+    ("mitarbeiter-profil",      "/mitarbeiter"),
+    ("mein-profil",             "/mein-profil"),
+    ("notification-settings",   "/notification-settings"),
+    ("mein-kalender",           "/mein-kalender"),
+    ("teamkalender",            "/teamkalender"),
+    ("urlaubs-timeline",        "/urlaubs-timeline"),
+    ("fairness",                "/fairness"),
+    ("berichte",                "/berichte"),
+    ("export",                  "/export"),
+    ("import",                  "/import"),
+    ("mitarbeiter",             "/employees"),
+    ("employee-timeline",       "/employee-timeline"),
+    ("gruppen",                 "/groups"),
+    ("schichtarten",            "/shifts"),
+    ("abwesenheitsarten",       "/leave-types"),
+    ("feiertage",               "/holidays"),
+    ("arbeitsplaetze",          "/workplaces"),
+    ("zeitzuschlaege",          "/extracharges"),
+    ("einschraenkungen",        "/einschraenkungen"),
+    ("companies",               "/companies"),
+    ("benutzerverwaltung",      "/benutzerverwaltung"),
+    ("backup",                  "/backup"),
+    ("perioden",                "/perioden"),
+    ("einstellungen",           "/einstellungen"),
+    ("email-settings",          "/email-settings"),
+    ("protokoll",               "/protokoll"),
+    ("webhooks",                "/webhooks"),
+    ("druckvorschau",           "/druckvorschau"),
+    ("dienst-board",            "/dienst-board"),
+    ("wochenansicht",           "/wochenansicht"),
+    ("verfuegbarkeits-matrix",  "/verfuegbarkeits-matrix"),
+    ("rotations-analyse",       "/rotations-analyse"),
+    ("kapazitaets-forecast",    "/kapazitaets-forecast"),
+    ("qualitaets-bericht",      "/qualitaets-bericht"),
+    ("conflict-report",         "/conflict-report"),
+    ("schicht-kalibrator",      "/schicht-kalibrator"),
+    ("kompetenz-matrix",        "/kompetenz-matrix"),
+    ("analytics",               "/analytics"),
+    ("simulation",              "/simulation"),
+    ("notfall-plan",            "/notfall-plan"),
+    ("leitwand",                "/leitwand"),
+    ("uebergabe",               "/uebergabe"),
+    ("schichtbriefing",         "/schichtbriefing"),
+    ("onboarding",              "/onboarding"),
+    ("audit-log",               "/auditlog"),
+    ("health",                  "/health"),
+    ("export-scheduler",        "/export-scheduler"),
+    ("work-time-rules",         "/work-time-rules"),
+    ("changelog",               "/changelog"),
 ]
 
 os.makedirs(SCREENSHOT_DIR, exist_ok=True)
@@ -107,6 +149,8 @@ def screenshot_all():
         page.wait_for_timeout(2000)
         print(f"  [→] Session set. Current URL: {page.url}", flush=True)
 
+        success = 0
+        failed = 0
         for name, route in PAGES:
             url = BASE_URL + route
             print(f"[→] {name}: {url}", flush=True)
@@ -124,13 +168,10 @@ def screenshot_all():
                     page.wait_for_load_state("networkidle", timeout=15000)
                     page.wait_for_timeout(2500)
 
-                # Check for route match warnings
-                console_errors = []
-                page.on("console", lambda msg: console_errors.append(msg.text) if "No routes matched" in msg.text else None)
-                
                 out_path = os.path.join(SCREENSHOT_DIR, f"{name}.png")
                 page.screenshot(path=out_path, full_page=False)
                 print(f"  [✓] Saved: {out_path}", flush=True)
+                success += 1
 
             except Exception as e:
                 print(f"  [✗] Error on {name}: {e}", flush=True)
@@ -138,11 +179,13 @@ def screenshot_all():
                     out_path = os.path.join(SCREENSHOT_DIR, f"{name}.png")
                     page.screenshot(path=out_path, full_page=False)
                     print(f"  [✓] Saved fallback: {out_path}", flush=True)
+                    success += 1
                 except Exception as e2:
                     print(f"  [✗] Fallback also failed: {e2}", flush=True)
+                    failed += 1
 
         browser.close()
-    print("\n[✓] All screenshots done!", flush=True)
+    print(f"\n[✓] Done! {success} screenshots saved, {failed} failed.", flush=True)
 
 
 if __name__ == "__main__":

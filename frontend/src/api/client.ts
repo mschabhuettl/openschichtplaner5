@@ -433,6 +433,37 @@ export interface WebhookEntry {
   last_delivery: WebhookDeliveryResult | null;
 }
 
+// ─── Recurring Shift Types (Q066 / Q073) ─────────────────────
+export type RecurringShiftRecurrence = 'weekly' | 'biweekly';
+
+export interface RecurringShift {
+  id: number;
+  employee_id: number;
+  employee_name: string;
+  shift_id: number;
+  shift_name: string;
+  shift_short: string;
+  recurrence: RecurringShiftRecurrence;
+  day_of_week: number; // 0=Mon … 6=Sun
+  valid_from: string;
+  valid_until: string | null;
+}
+
+export interface RecurringShiftCreate {
+  employee_id: number;
+  shift_id: number;
+  recurrence: RecurringShiftRecurrence;
+  day_of_week: number;
+  valid_from: string;
+  valid_until?: string | null;
+}
+
+export interface RecurringShiftGenerateResult {
+  created: number;
+  skipped: number;
+  message?: string;
+}
+
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 // ─── API Compatibility Check ───────────────────────────────────
@@ -2018,6 +2049,21 @@ export const api = {
 
   // ── Release Notes ──────────────────────────────────────────
   getReleaseNotes: () => fetchJSON<{ content: string }>('/api/v1/release-notes'),
+
+  // ── Recurring Shifts (Q066 / Q073) ─────────────────────────
+  getRecurringShifts: (params: { employee_id?: number; group_id?: number } = {}) => {
+    const q = new URLSearchParams();
+    if (params.employee_id != null) q.set('employee_id', String(params.employee_id));
+    if (params.group_id != null) q.set('group_id', String(params.group_id));
+    const qs = q.toString();
+    return fetchJSON<RecurringShift[]>(`/api/shifts/recurring${qs ? `?${qs}` : ''}`);
+  },
+  createRecurringShift: (data: RecurringShiftCreate) =>
+    postJSON<RecurringShift>('/api/shifts/recurring', data),
+  deleteRecurringShift: (id: number) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/shifts/recurring/${id}`),
+  generateRecurringShift: (id: number, fromDate: string, toDate: string) =>
+    postJSON<RecurringShiftGenerateResult>(`/api/shifts/recurring/${id}/generate`, { from_date: fromDate, to_date: toDate }),
 
   // ── Schedule Comments (Q069) ────────────────────────────────
   getScheduleComments: (params: { group_id?: number; from?: string; to?: string }) => {

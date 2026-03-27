@@ -7,7 +7,7 @@
 *Reads and writes the original DBF database files directly — no migration needed.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0--rc7-brightgreen)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.0-brightgreen)](CHANGELOG.md)
 [![Tests](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml)
 [![Docker](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml)
 [![GitHub release](https://img.shields.io/github/v/release/mschabhuettl/openschichtplaner5?include_prereleases)](https://github.com/mschabhuettl/openschichtplaner5/releases)
@@ -71,7 +71,7 @@ The key differentiator: OpenSchichtplaner5 reads and writes the **original `.DBF
 | Area | Highlights |
 |------|-----------|
 | 📅 **Scheduling** | Weekly & monthly schedule, calendar view, drag & drop, undo/redo, templates, auto-planner, recurring shifts (🔁 UI) |
-| 👥 **Employees** | Full CRUD, groups, skills, availability, contract hours, onboarding wizard, CSV bulk import, side-by-side comparison view |
+| 👥 **Employees** | Full CRUD, groups, skills, availability, contract hours, onboarding wizard + checklist, CSV bulk import, side-by-side comparison view, qualification matrix |
 | 🏖️ **Leave Management** | Requests, approval workflow, annual timeline (Gantt), entitlements, year-end close, absence statistics UI (overview/group/employee tabs, CSS charts) |
 | 🔄 **Self-Service** | Shift preferences, swap exchange (with notifications + auto-expiry), personal calendar, profile management |
 | 📊 **Analytics** | Dashboard with live charts, statistics, year in review, burnout radar, performance widget, overtime tracking (visual bar chart), employee timeline (horizontal CSS) |
@@ -145,7 +145,7 @@ Docker images are automatically built on every release and published to the GitH
 docker pull ghcr.io/mschabhuettl/openschichtplaner5:latest
 
 # Specific version
-docker pull ghcr.io/mschabhuettl/openschichtplaner5:1.0.0-rc3
+docker pull ghcr.io/mschabhuettl/openschichtplaner5:1.0.0
 ```
 
 #### Quick Start with Docker Compose

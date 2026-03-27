@@ -5,6 +5,7 @@ import { useSSERefresh } from '../contexts/SSEContext';
 import { HelpTooltip } from '../components/HelpTooltip';
 import { usePermissions } from '../hooks/usePermissions';
 import PerformanceWidget from '../components/PerformanceWidget';
+import { OnboardingChecklist } from '../components/OnboardingChecklist';
 import type {
   DashboardSummary,
   DashboardToday,
@@ -1354,6 +1355,9 @@ export default function Dashboard() {
           loading={loading}
         />
       )}
+
+      {/* Onboarding Checklist — shown for new admins until dismissed */}
+      {canSeeAdmin && <OnboardingChecklist />}
 
       {/* KPI Row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">

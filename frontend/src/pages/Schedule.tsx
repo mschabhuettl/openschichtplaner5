@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api/client';
-import type { ShiftRequirement, Note, ConflictEntry, CoverageDay, ScheduleTemplate } from '../api/client';
+import type { ShiftRequirement, Note, ConflictEntry, CoverageDay, ScheduleTemplate, ScheduleComment } from '../api/client';
 import type { Employee, Group, ScheduleEntry, ShiftType, LeaveType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useTheme } from '../contexts/ThemeContext';
@@ -1950,6 +1950,12 @@ export default function Schedule() {
   // Coverage (Personalbedarf-Ampel)
   const [coverage, setCoverage] = useState<CoverageDay[]>([]);
 
+  // Schedule comments (Q069)
+  const [scheduleComments, setScheduleComments] = useState<ScheduleComment[]>([]);
+  const [commentPopover, setCommentPopover] = useState<{ dateStr: string; groupId: number; x: number; y: number } | null>(null);
+  const [commentText, setCommentText] = useState('');
+  const [commentSaving, setCommentSaving] = useState(false);
+
   // Notes: "empId-dateStr" → Note[]
   const [notesMap, setNotesMap] = useState<Map<string, Note[]>>(new Map());
 
@@ -2178,6 +2184,22 @@ export default function Schedule() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, month]);
 
+  // Load schedule comments (Q069)
+  const loadScheduleComments = () => {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const daysInM = new Date(year, month, 0).getDate();
+    const from = `${year}-${pad(month)}-01`;
+    const to = `${year}-${pad(month)}-${pad(daysInM)}`;
+    api.getScheduleComments({ from, to })
+      .then(setScheduleComments)
+      .catch(() => setScheduleComments([]));
+  };
+
+  useEffect(() => {
+    loadScheduleComments();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [year, month]);
+
   // Load wishes for the month
   useEffect(() => {
     api.getWishes({ year, month }).then(ws => {
@@ -2397,6 +2419,13 @@ export default function Schedule() {
     for (const c of coverage) m.set(c.day, c);
     return m;
   }, [coverage]);
+
+  // Schedule comments lookup: "dateStr-groupId" → ScheduleComment (Q069)
+  const scheduleCommentsMap = useMemo(() => {
+    const m = new Map<string, ScheduleComment>();
+    for (const c of scheduleComments) m.set(`${c.date}-${c.group_id}`, c);
+    return m;
+  }, [scheduleComments]);
 
   // Conflict lookup: "empId_dateStr" → ConflictEntry[]
   const conflictMap = useMemo(() => {
@@ -2653,6 +2682,37 @@ export default function Schedule() {
       loadNotesForMonth();
     } catch (e) {
       alert('Fehler beim Speichern der Notiz: ' + (e as Error).message);
+    }
+  };
+
+  // ── Schedule Comment handlers (Q069) ──────────────────────
+  const handleSaveScheduleComment = async () => {
+    if (!commentPopover || !commentText.trim()) return;
+    setCommentSaving(true);
+    try {
+      await api.createScheduleComment({
+        date: commentPopover.dateStr,
+        group_id: commentPopover.groupId,
+        text: commentText.trim(),
+      });
+      loadScheduleComments();
+      setCommentText('');
+      setCommentPopover(null);
+      showToast('Kommentar gespeichert', 'success');
+    } catch (e) {
+      showToast('Fehler: ' + (e as Error).message, 'error');
+    }
+    setCommentSaving(false);
+  };
+
+  const handleDeleteScheduleComment = async (id: number) => {
+    try {
+      await api.deleteScheduleComment(id);
+      loadScheduleComments();
+      setCommentPopover(null);
+      showToast('Kommentar gelöscht', 'success');
+    } catch (e) {
+      showToast('Fehler: ' + (e as Error).message, 'error');
     }
   };
 
@@ -3241,7 +3301,7 @@ export default function Schedule() {
 
   // ── Render ──────────────────────────────────────────────────
   return (
-    <div className="p-2 sm:p-4 h-full flex flex-col" onClick={() => { setContextMenu(null); setNotePopup(null); setBulkContextMenu(null); }}>
+    <div className="p-2 sm:p-4 h-full flex flex-col" onClick={() => { setContextMenu(null); setNotePopup(null); setBulkContextMenu(null); setCommentPopover(null); }}>
       {/* Error banner — shown when schedule data failed to load */}
       {loadError && (
         <div className="mb-2 flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
@@ -4120,6 +4180,64 @@ export default function Schedule() {
           onEdited={handleNoteEdited}
           onAdd={handleAddNote}
         />
+      )}
+
+      {/* ── Schedule Comment Popover (Q069) ── */}
+      {commentPopover && (
+        <div
+          className="fixed z-50 bg-white dark:bg-gray-800 border border-amber-300 dark:border-amber-600 rounded-lg shadow-xl p-4 w-72"
+          style={{ left: Math.min(commentPopover.x, window.innerWidth - 300), top: Math.min(commentPopover.y + 8, window.innerHeight - 200) }}
+          onClick={e => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-semibold text-sm text-amber-700 dark:text-amber-300">
+              💬 Kommentar – {commentPopover.dateStr}
+            </span>
+            <button
+              className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+              onClick={() => { setCommentPopover(null); setCommentText(''); }}
+            >×</button>
+          </div>
+          {(() => {
+            const activeGroupId = selectedGroupIds.length === 1 ? selectedGroupIds[0] : 0;
+            const existing = scheduleCommentsMap.get(`${commentPopover.dateStr}-${activeGroupId}`)
+              ?? scheduleCommentsMap.get(`${commentPopover.dateStr}-0`);
+            return (
+              <>
+                <textarea
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm dark:bg-gray-700 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  rows={3}
+                  value={commentText}
+                  onChange={e => setCommentText(e.target.value)}
+                  placeholder="Kommentar eingeben..."
+                  autoFocus
+                />
+                {existing?.author && (
+                  <div className="text-[10px] text-gray-400 mt-1">
+                    von {existing.author} · {new Date(existing.created_at).toLocaleDateString('de-AT')}
+                  </div>
+                )}
+                <div className="flex gap-2 mt-2">
+                  <button
+                    className="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-sm rounded px-3 py-1.5 font-medium disabled:opacity-50"
+                    disabled={commentSaving || !commentText.trim()}
+                    onClick={handleSaveScheduleComment}
+                  >
+                    {commentSaving ? '…' : existing ? 'Aktualisieren' : 'Speichern'}
+                  </button>
+                  {existing && (
+                    <button
+                      className="bg-red-100 hover:bg-red-200 text-red-600 text-sm rounded px-3 py-1.5"
+                      onClick={() => handleDeleteScheduleComment(existing.id)}
+                    >
+                      Löschen
+                    </button>
+                  )}
+                </div>
+              </>
+            );
+          })()}
+        </div>
       )}
       {bulkContextMenu && selection && (
         <BulkContextMenu
@@ -5077,9 +5195,14 @@ export default function Schedule() {
                 const coverageTitle = cov
                   ? `${cov.scheduled_count}/${cov.required_count} Mitarbeiter besetzt`
                   : '';
+                // Q069: schedule comment for this day (group-specific or "all groups")
+                const activeGroupId = selectedGroupIds.length === 1 ? selectedGroupIds[0] : 0;
+                const dayComment = scheduleCommentsMap.get(`${dateStr}-${activeGroupId}`)
+                  ?? scheduleCommentsMap.get(`${dateStr}-0`);
                 const thTitle = [
                   isHol ? `Feiertag · ${dateStr}` : isToday ? `Heute · ${dateStr}` : dateStr,
                   coverageTitle,
+                  dayComment ? `💬 ${dayComment.text}` : '',
                 ].filter(Boolean).join(' · ');
                 return (
                   <th
@@ -5105,6 +5228,19 @@ export default function Schedule() {
                           boxShadow: `0 0 3px ${coverageDot.color}`,
                         }}
                       />
+                    )}
+                    {dayComment && (
+                      <div
+                        className="mx-auto mt-0.5 text-[8px] leading-none"
+                        title={dayComment.text}
+                        onClick={e => {
+                          e.stopPropagation();
+                          setCommentText(dayComment.text);
+                          setCommentPopover({ dateStr, groupId: activeGroupId, x: e.clientX, y: e.clientY });
+                        }}
+                      >
+                        💬
+                      </div>
                     )}
                   </th>
                 );
@@ -5150,6 +5286,55 @@ export default function Schedule() {
                 );
               })}
             </tr>
+
+            {/* ── Schichtplan-Kommentare row (Q069) ── */}
+            {!isLeserView && (
+              <tr className="bg-amber-50 border-b border-amber-200">
+                <td className="sticky left-0 z-10 bg-amber-50 px-2 sm:px-3 py-1 border-r border-amber-200 font-semibold text-[11px] text-amber-700 whitespace-nowrap min-w-[90px] sm:min-w-[160px]">
+                  💬 Kommentare
+                </td>
+                {displayedDays.map(day => {
+                  const dateStr = `${year}-${pad(month)}-${pad(day)}`;
+                  const activeGroupId = selectedGroupIds.length === 1 ? selectedGroupIds[0] : 0;
+                  const comment = scheduleCommentsMap.get(`${dateStr}-${activeGroupId}`)
+                    ?? scheduleCommentsMap.get(`${dateStr}-0`);
+                  const wd = getWeekday(year, month, day);
+                  const isWe = wd === 0 || wd === 6;
+                  return (
+                    <td
+                      key={day}
+                      className={`border border-amber-100 text-center py-1 relative ${isWe ? 'bg-amber-100' : ''}`}
+                    >
+                      {comment ? (
+                        <button
+                          className="text-[11px] hover:scale-125 transition-transform cursor-pointer"
+                          title={comment.text + (comment.author ? ` (${comment.author})` : '')}
+                          onClick={e => {
+                            e.stopPropagation();
+                            setCommentText(comment.text);
+                            setCommentPopover({ dateStr, groupId: activeGroupId, x: e.clientX, y: e.clientY });
+                          }}
+                        >
+                          💬
+                        </button>
+                      ) : (
+                        <button
+                          className="text-gray-300 text-[10px] hover:text-amber-400 cursor-pointer transition-colors"
+                          title="Kommentar hinzufügen"
+                          onClick={e => {
+                            e.stopPropagation();
+                            setCommentText('');
+                            setCommentPopover({ dateStr, groupId: activeGroupId, x: e.clientX, y: e.clientY });
+                          }}
+                        >
+                          +
+                        </button>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            )}
 
             {filteredDisplayRows.map((row, idx) => {
               // Group header row

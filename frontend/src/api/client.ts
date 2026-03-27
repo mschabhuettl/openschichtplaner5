@@ -235,6 +235,16 @@ export interface NoteUpdate {
   category?: string;
 }
 
+// ─── Schedule Comments (Q069) ─────────────────────────────
+export interface ScheduleComment {
+  id: number;
+  date: string;
+  group_id: number;
+  text: string;
+  author: string;
+  created_at: string;
+}
+
 // ─── Zeitkonto Types ───────────────────────────────────────
 export interface ZeitkontoRow {
   employee_id: number;
@@ -1979,4 +1989,17 @@ export const api = {
 
   // ── Release Notes ──────────────────────────────────────────
   getReleaseNotes: () => fetchJSON<{ content: string }>('/api/v1/release-notes'),
+
+  // ── Schedule Comments (Q069) ────────────────────────────────
+  getScheduleComments: (params: { group_id?: number; from?: string; to?: string }) => {
+    const q = new URLSearchParams();
+    if (params.group_id !== undefined) q.set('group_id', String(params.group_id));
+    if (params.from) q.set('from', params.from);
+    if (params.to) q.set('to', params.to);
+    return fetchJSON<ScheduleComment[]>(`/api/v1/schedule/comments${q.toString() ? `?${q}` : ''}`);
+  },
+  createScheduleComment: (body: { date: string; group_id: number; text: string }) =>
+    postJSON<ScheduleComment>('/api/v1/schedule/comments', body),
+  deleteScheduleComment: (id: number) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/schedule/comments/${id}`),
 };

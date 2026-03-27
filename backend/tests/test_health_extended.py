@@ -16,6 +16,7 @@ class TestHealthExtended:
             "uptime",
             "uptime_seconds",
             "started_at",
+            "latency_ms",
             "db",
             "disk",
             "memory",
@@ -68,13 +69,29 @@ class TestHealthExtended:
         assert 0 <= disk["used_percent"] <= 100
 
     def test_health_memory_info(self, sync_client):
-        """Memory section must report process RSS."""
+        """Memory section must report process RSS, VMS, and system totals."""
         resp = sync_client.get("/api/health")
         data = resp.json()
         mem = data["memory"]
         assert "rss_mb" in mem
         assert mem["rss_mb"] > 0
+        assert "vms_mb" in mem
+        assert mem["vms_mb"] > 0
+        assert "system_total_mb" in mem
+        assert mem["system_total_mb"] > 0
+        assert "system_available_mb" in mem
         assert "system_used_percent" in mem
+
+    def test_health_db_type_and_table_count(self, sync_client):
+        """DB section should report type and table_count."""
+        resp = sync_client.get("/api/health")
+        data = resp.json()
+        db = data["db"]
+        assert "type" in db
+        assert db["type"] in ("DBF", "SQLite")
+        assert "table_count" in db
+        assert isinstance(db["table_count"], int)
+        assert db["table_count"] >= 0
 
     def test_health_db_last_modified(self, sync_client):
         """DB section should include last_modified timestamp."""
@@ -106,3 +123,11 @@ class TestHealthExtended:
         data = resp.json()
         assert "started_at" in data
         assert "T" in data["started_at"]
+
+    def test_health_latency_present(self, sync_client):
+        """Latency must be reported in milliseconds."""
+        resp = sync_client.get("/api/health")
+        data = resp.json()
+        assert "latency_ms" in data
+        assert isinstance(data["latency_ms"], (int, float))
+        assert data["latency_ms"] >= 0

@@ -304,6 +304,32 @@ async def cache_control_middleware(request: Request, call_next):
     return response
 
 
+_CSP_REPORT_ONLY = os.environ.get("CSP_REPORT_ONLY", "").lower() in (
+    "1",
+    "true",
+    "yes",
+)
+
+
+def _build_csp() -> str:
+    """Build the Content-Security-Policy header value."""
+    directives = [
+        "default-src 'self'",
+        "script-src 'self'",
+        "style-src 'self' 'unsafe-inline'",
+        "img-src 'self' data: blob:",
+        "font-src 'self' data:",
+        "connect-src 'self'",
+        "frame-ancestors 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+    ]
+    return "; ".join(directives)
+
+
+_CSP_VALUE = _build_csp()
+
+
 def _apply_security_headers(response):
     """Apply security headers to a response object.
 
@@ -317,16 +343,13 @@ def _apply_security_headers(response):
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     # Content Security Policy: restrict resource loading to same origin
-    csp = (
-        "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
-        "style-src 'self' 'unsafe-inline'; "
-        "img-src 'self' data:; "
-        "font-src 'self' data:; "
-        "connect-src 'self'; "
-        "frame-ancestors 'none';"
+    # Use Report-Only mode when CSP_REPORT_ONLY=true (for debugging)
+    csp_header = (
+        "Content-Security-Policy-Report-Only"
+        if _CSP_REPORT_ONLY
+        else "Content-Security-Policy"
     )
-    response.headers["Content-Security-Policy"] = csp
+    response.headers[csp_header] = _CSP_VALUE
     # Additional security headers
     response.headers["Permissions-Policy"] = (
         "accelerometer=(), camera=(), geolocation=(), gyroscope=(), "
@@ -705,11 +728,35 @@ def health():
 
     # ── DB check ──
     db_check = "ok"
+    db_type = "DBF"
+    table_count = 0
     try:
         db = get_db()
         db.get_stats()
     except Exception:
         db_check = "error"
+
+    # Count all DBF files for table_count
+    try:
+        all_dbf = [
+            f for f in os.listdir(DB_PATH)
+            if f.upper().endswith(".DBF") and os.path.isfile(os.path.join(DB_PATH, f))
+        ]
+        table_count = len(all_dbf)
+    except OSError:
+        pass
+
+    # Detect SQLite if no DBF files
+    try:
+        sqlite_files = [
+            f for f in os.listdir(DB_PATH)
+            if f.endswith((".sqlite", ".sqlite3", ".db"))
+            and os.path.isfile(os.path.join(DB_PATH, f))
+        ]
+        if sqlite_files and not all_dbf:
+            db_type = "SQLite"
+    except OSError:
+        pass
 
     CRITICAL_TABLES = ["EMPL", "USER", "SHIFT", "MASHI", "ABSEN"]
     dbf_ok_count = 0
@@ -735,6 +782,8 @@ def health():
 
     db_details: dict = {
         "status": db_check,
+        "type": db_type,
+        "table_count": table_count,
         "dbf_ok": dbf_ok_count,
         "dbf_missing": dbf_missing,
     }
@@ -774,11 +823,15 @@ def health():
         mem_info = process.memory_info()
         rss_mb = mem_info.rss / (1024 * 1024)
         memory_details["rss_mb"] = round(rss_mb, 1)
+        memory_details["vms_mb"] = round(mem_info.vms / (1024 * 1024), 1)
         vm = psutil.virtual_memory()
-        memory_details["system_used_percent"] = round(vm.percent, 1)
+        memory_details["system_total_mb"] = round(
+            vm.total / (1024 * 1024), 1
+        )
         memory_details["system_available_mb"] = round(
             vm.available / (1024 * 1024), 1
         )
+        memory_details["system_used_percent"] = round(vm.percent, 1)
         if rss_mb > 512:
             memory_check = "warning"
         if rss_mb > 1024:
@@ -812,6 +865,8 @@ def health():
     else:
         overall = "healthy"
 
+    latency_ms = round((_t.time() - now) * 1000, 1)
+
     return {
         "status": overall,
         "checks": checks,
@@ -819,6 +874,7 @@ def health():
         "uptime": uptime_human,
         "uptime_seconds": uptime_seconds,
         "started_at": started_at,
+        "latency_ms": latency_ms,
         "db": db_details,
         "disk": disk_details,
         "memory": memory_details,

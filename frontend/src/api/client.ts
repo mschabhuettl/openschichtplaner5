@@ -2159,6 +2159,23 @@ export const api = {
     postJSON<WorkTimeCheckResult>('/api/v1/work-time-rules/check', params),
   checkAllWorkTimeRules: (params: { group_id?: number; date_from: string; date_to: string }) =>
     postJSON<WorkTimeCheckAllResult>('/api/v1/work-time-rules/check-all', params),
+
+  // ── Conflict Report (Q083) ─────────────────────────────────────────
+  getConflictReport: (params: { group_id?: number; from: string; to: string }) => {
+    const p = new URLSearchParams();
+    if (params.group_id !== undefined) p.set('group_id', String(params.group_id));
+    p.set('from', params.from);
+    p.set('to', params.to);
+    return fetchJSON<ConflictReportResult>(`/api/v1/reports/conflicts?${p}`);
+  },
+  getConflictReportExportUrl: (params: { group_id?: number; from: string; to: string; format: 'csv' | 'xlsx' }): string => {
+    const p = new URLSearchParams();
+    if (params.group_id !== undefined) p.set('group_id', String(params.group_id));
+    p.set('from', params.from);
+    p.set('to', params.to);
+    p.set('format', params.format);
+    return `${BASE_URL}/api/v1/reports/conflicts/export?${p}`;
+  },
 };
 
 // ─── Work Time Rules (Q079 / Q081) ────────────────────────────────
@@ -2213,4 +2230,33 @@ export interface NotificationSettingsResponse {
   user_id: number;
   settings: NotificationSettings;
   updated?: boolean;
+}
+
+// ─── Conflict Report Types (Q083) ────────────────────────────────
+export type ConflictType = 'overlap' | 'double_booked' | 'understaffed';
+export type ConflictSeverity = 'warning' | 'error';
+
+export interface ConflictReportEntry {
+  type: ConflictType;
+  date: string;
+  employee_id: number | null;
+  employee_name: string | null;
+  group_id: number | null;
+  description: string;
+  severity: ConflictSeverity;
+}
+
+export interface ConflictReportSummary {
+  overlaps: number;
+  double_booked: number;
+  understaffed: number;
+  total: number;
+}
+
+export interface ConflictReportResult {
+  from: string;
+  to: string;
+  group_id: number | null;
+  summary: ConflictReportSummary;
+  conflicts: ConflictReportEntry[];
 }

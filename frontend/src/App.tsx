@@ -82,6 +82,7 @@ const RotationsAnalyse   = lazy(() => import('./pages/RotationsAnalyse'));
 const VerfügbarkeitsMatrix = lazy(() => import('./pages/VerfügbarkeitsMatrix'));
 const KapazitaetsForecast = lazy(() => import('./pages/KapazitaetsForecast'));
 const QualitaetsBericht   = lazy(() => import('./pages/QualitaetsBericht'));
+const ConflictReport      = lazy(() => import('./pages/ConflictReport'));
 const SchichtKalibrator   = lazy(() => import('./pages/SchichtKalibrator'));
 const KompetenzMatrix     = lazy(() => import('./pages/KompetenzMatrix'));
 const Webhooks            = lazy(() => import('./pages/Webhooks'));
@@ -246,6 +247,7 @@ const navItems: NavItem[] = [
   { id: 'rotations-analyse',  label: 'Rotations-Analyse',  icon: '🔄', group: 'Berichte', path: '/rotations-analyse',    roles: ['Admin', 'Planer'] },
   { id: 'kapazitaets-forecast', label: 'Kapazitäts-Forecast', icon: '📊', group: 'Berichte', path: '/kapazitaets-forecast', roles: ['Admin', 'Planer'] },
   { id: 'qualitaets-bericht', label: 'Qualitätsbericht',   icon: '📋', group: 'Berichte', path: '/qualitaets-bericht',   roles: ['Admin', 'Planer'] },
+  { id: 'conflict-report',    label: 'Konflikt-Report',    icon: '⚡', group: 'Berichte', path: '/conflict-report',       roles: ['Admin', 'Planer'] },
   { id: 'schicht-kalibrator', label: 'Schicht-Kalibrator', icon: '⚖️', group: 'Berichte', path: '/schicht-kalibrator',   roles: ['Admin', 'Planer'] },
   { id: 'kompetenz-matrix',   label: 'Kompetenz-Matrix',   icon: '🎓', group: 'Berichte', path: '/kompetenz-matrix',     roles: ['Admin', 'Planer'] },
   { id: 'analytics',          label: 'Analytics & Trends', icon: '📉', group: 'Berichte', path: '/analytics',            roles: ['Admin', 'Planer'] },
@@ -861,6 +863,7 @@ function AppInner() {
             <Route path="/rotations-analyse" element={<PB name="Rotations-Analyse"><RoleRoute allowedRoles={['Admin', 'Planer']}><RotationsAnalyse /></RoleRoute></PB>} />
             <Route path="/kapazitaets-forecast" element={<PB name="Kapazitäts-Forecast"><RoleRoute allowedRoles={['Admin', 'Planer']}><KapazitaetsForecast /></RoleRoute></PB>} />
             <Route path="/qualitaets-bericht" element={<PB name="Qualitätsbericht"><RoleRoute allowedRoles={['Admin', 'Planer']}><QualitaetsBericht /></RoleRoute></PB>} />
+            <Route path="/conflict-report" element={<PB name="Konflikt-Report"><RoleRoute allowedRoles={['Admin', 'Planer']}><ConflictReport /></RoleRoute></PB>} />
             <Route path="/schicht-kalibrator" element={<PB name="Schicht-Kalibrator"><RoleRoute allowedRoles={['Admin', 'Planer']}><SchichtKalibrator /></RoleRoute></PB>} />
             <Route path="/kompetenz-matrix" element={<PB name="Kompetenz-Matrix"><RoleRoute allowedRoles={['Admin', 'Planer']}><KompetenzMatrix /></RoleRoute></PB>} />
             <Route path="/analytics" element={<PB name="Analytics & Trends"><RoleRoute allowedRoles={['Admin', 'Planer']}><Analytics /></RoleRoute></PB>} />

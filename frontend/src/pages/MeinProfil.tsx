@@ -149,6 +149,7 @@ export default function MeinProfil() {
   const [empName, setEmpName] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [noEmployee, setNoEmployee] = useState(false);
 
   const [monthsData, setMonthsData] = useState<MonthData[]>([]);
   const [shifts, setShifts] = useState<ShiftType[]>([]);
@@ -203,8 +204,9 @@ export default function MeinProfil() {
       setLeaveTypes(ltRes);
 
       if (!meRes.employee) {
-        setError('Kein Mitarbeiter-Datensatz für deinen Benutzer gefunden. Bitte wende dich an den Administrator.');
+        // Still show 2FA section even without employee record
         setLoading(false);
+        setNoEmployee(true);
         return;
       }
 
@@ -362,6 +364,17 @@ export default function MeinProfil() {
           <div className="text-4xl mb-3">⚠️</div>
           <p className="text-amber-800 font-medium">{error}</p>
         </div>
+      </div>
+    );
+  }
+
+  if (noEmployee) {
+    return (
+      <div className="max-w-4xl mx-auto p-4 space-y-6">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <p className="text-amber-800 text-sm">⚠️ Kein Mitarbeiter-Datensatz zugeordnet. Einige Funktionen sind eingeschränkt.</p>
+        </div>
+        <TwoFactorSetup />
       </div>
     );
   }

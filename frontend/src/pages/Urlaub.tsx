@@ -10,6 +10,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useT } from '../i18n';
 import { ResponsiveTable } from '../components/ResponsiveTable';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { EmptyState } from '../components/EmptyState';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
@@ -998,7 +999,12 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
               </tr>
             ))}
             {!loading && filtered.length === 0 && (
-              <tr><td colSpan={7} className="text-center py-8 text-gray-600">Keine Einträge gefunden</td></tr>
+              <EmptyState
+                colSpan={7}
+                icon="🏖️"
+                title="Keine Abwesenheiten"
+                description="Es wurden noch keine Abwesenheiten für diesen Zeitraum erfasst."
+              />
             )}
           </tbody>
         </table>
@@ -1366,7 +1372,12 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
               <tr><td colSpan={5} className="text-center py-10 text-gray-600">⟳ Lade...</td></tr>
             )}
             {!loading && !statusLoading && filtered.length === 0 && (
-              <tr><td colSpan={5} className="text-center py-8 text-gray-600">Keine Einträge gefunden</td></tr>
+              <EmptyState
+                colSpan={5}
+                icon="📋"
+                title="Keine Abwesenheiten"
+                description="Noch keine Anträge in diesem Zeitraum vorhanden."
+              />
             )}
             {!loading && !statusLoading && filtered.map((ab, i) => {
               const emp = getEmp(ab.EMPLOYEE_ID);

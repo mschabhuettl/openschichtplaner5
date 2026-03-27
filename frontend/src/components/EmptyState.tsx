@@ -10,6 +10,8 @@ interface EmptyStateProps {
   actionLabel?: string;
   onAction?: () => void;
   className?: string;
+  /** Render as a table row spanning columns (for inside <tbody>) */
+  colSpan?: number;
 }
 
 export function EmptyState({
@@ -19,24 +21,35 @@ export function EmptyState({
   actionLabel,
   onAction,
   className = '',
+  colSpan,
 }: EmptyStateProps) {
-  return (
-    <div className={`flex flex-col items-center justify-center py-16 px-6 text-center ${className}`}>
-      <div className="text-5xl mb-4 opacity-60">{icon}</div>
-      <h3 className="text-base font-semibold text-slate-700 dark:text-slate-200 mb-1">{title}</h3>
+  const content = (
+    <div className={`flex flex-col items-center justify-center py-16 px-6 text-center min-h-[220px] ${className}`}>
+      <div className="text-7xl mb-4 select-none" role="img" aria-hidden>{icon}</div>
+      <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-200 mb-1">{title}</h3>
       {description && (
-        <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs">{description}</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm mt-1">{description}</p>
       )}
       {actionLabel && onAction && (
         <button
           onClick={onAction}
-          className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors"
+          className="mt-5 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors shadow-sm"
         >
           {actionLabel}
         </button>
       )}
     </div>
   );
+
+  if (colSpan) {
+    return (
+      <tr>
+        <td colSpan={colSpan}>{content}</td>
+      </tr>
+    );
+  }
+
+  return content;
 }
 
 interface ApiErrorStateProps {

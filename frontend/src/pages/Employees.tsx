@@ -715,6 +715,15 @@ export default function Employees() {
       {canAdmin && selectedIds.size > 0 && (
         <div className="mb-3 flex flex-wrap items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
           <span className="text-sm font-semibold text-blue-700">{selectedIds.size} {t.employees.selected}</span>
+          {selectedIds.size === 2 && (
+            <button
+              onClick={() => {
+                const [id1, id2] = Array.from(selectedIds);
+                navigate(`/mitarbeiter-vergleich?emp1=${id1}&emp2=${id2}`);
+              }}
+              className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 flex items-center gap-1"
+            >⚖️ Vergleichen</button>
+          )}
           <button
             onClick={() => setShowBulkGroupModal(true)}
             disabled={bulkWorking}

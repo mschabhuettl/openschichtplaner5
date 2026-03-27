@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import type { MonthSummary, EmployeeYearStats } from '../api/client';
 import { LoadingSpinner } from '../components/LoadingSpinner';
@@ -90,13 +91,18 @@ function MonthCell({ data, colorMap, side }: { data?: MonthSummary; colorMap: Sh
 
 export default function MitarbeiterVergleich() {
   const currentYear = new Date().getFullYear();
+  const [searchParams] = useSearchParams();
   const [year, setYear] = useState(currentYear);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [_shifts, setShifts] = useState<ShiftType[]>([]);
   const [_leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
-  const [emp1Id, setEmp1Id] = useState<number | null>(null);
-  const [emp2Id, setEmp2Id] = useState<number | null>(null);
+  const [emp1Id, setEmp1Id] = useState<number | null>(() => {
+    const v = searchParams.get('emp1'); return v ? Number(v) : null;
+  });
+  const [emp2Id, setEmp2Id] = useState<number | null>(() => {
+    const v = searchParams.get('emp2'); return v ? Number(v) : null;
+  });
   const [data1, setData1] = useState<MonthSummary[] | null>(null);
   const [data2, setData2] = useState<MonthSummary[] | null>(null);
   const [stats1, setStats1] = useState<EmployeeYearStats | null>(null);

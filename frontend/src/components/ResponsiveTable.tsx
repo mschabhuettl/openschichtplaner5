@@ -43,12 +43,17 @@ export function ResponsiveTable({
     updateShadows();
 
     el.addEventListener('scroll', updateShadows, { passive: true });
-    const ro = new ResizeObserver(updateShadows);
-    ro.observe(el);
+
+    // ResizeObserver may not be available in test environments (jsdom)
+    let ro: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(updateShadows);
+      ro.observe(el);
+    }
 
     return () => {
       el.removeEventListener('scroll', updateShadows);
-      ro.disconnect();
+      ro?.disconnect();
     };
   }, [updateShadows]);
 

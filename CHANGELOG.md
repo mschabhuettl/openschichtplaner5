@@ -7,6 +7,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.0-rc5] - 2026-03-27
+
+### Added
+- **Recurring Shifts (Q066):** New recurring shift system with weekly and biweekly repeat patterns. Endpoints: `POST /api/shifts/recurring` (create), `GET /api/shifts/recurring` (list), `DELETE /api/shifts/recurring/{id}` (remove), `POST /api/shifts/recurring/{id}/generate` (materialize occurrences for a date range). Supports custom intervals, weekday selection, and end dates.
+- **Mitarbeiter-Vergleichsansicht (Q067):** Side-by-side employee comparison view accessible via URL parameters (`?compare=id1,id2`) or the new "Compare" button on employee pages. Displays scheduled hours, leave days, overtime, and shift distribution for each selected employee simultaneously.
+- **Überstunden-Tracking (Q068):** Dedicated overtime tracking endpoints: `GET /api/v1/employees/{id}/overtime` (per-employee overtime balance with period breakdown) and `GET /api/v1/overtime/summary` (organization-wide summary with top earners and department totals). Overtime is calculated from contract hours vs. actual scheduled hours.
+- **Schichtplan-Kommentare (Q069):** Day-level notes for the schedule view. Planners can attach text comments to any day. A 📝 indicator appears on days with notes; clicking opens a popover with the full comment and edit/delete controls. Notes are stored per planning context (location + date).
+- **Export-Scheduler (Q070):** Automated weekly report delivery via email. Supports full CRUD for scheduled export jobs (`POST/GET/PUT/DELETE /api/v1/export-scheduler`), configurable recipient lists, report type selection, and a manual trigger endpoint (`POST /api/v1/export-scheduler/{id}/trigger`) for immediate on-demand delivery.
+
+---
+
 ## [1.0.0-rc4] - 2026-03-27
 
 ### Added

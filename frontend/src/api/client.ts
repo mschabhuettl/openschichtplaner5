@@ -235,6 +235,40 @@ export interface NoteUpdate {
   category?: string;
 }
 
+// ─── Export Scheduler Types (Q070 / Q075) ─────────────────
+export interface ExportSchedule {
+  id: number;
+  name: string;
+  frequency: 'weekly';
+  day_of_week: number; // 0=Sun … 6=Sat
+  time: string;        // HH:MM
+  format: 'xlsx' | 'csv';
+  group_id: number | null;
+  email_to: string[];
+  enabled: boolean;
+  created_at?: string;
+}
+
+export interface ExportScheduleCreate {
+  name: string;
+  frequency: 'weekly';
+  day_of_week: number;
+  time: string;
+  format: 'xlsx' | 'csv';
+  group_id?: number | null;
+  email_to: string[];
+  enabled: boolean;
+}
+
+export type ExportScheduleUpdate = Partial<ExportScheduleCreate>;
+
+export interface ExportRunResult {
+  ok: boolean;
+  sent_to: number;
+  smtp_not_configured?: boolean;
+  message?: string;
+}
+
 // ─── Schedule Comments (Q069) ─────────────────────────────
 export interface ScheduleComment {
   id: number;
@@ -2064,6 +2098,22 @@ export const api = {
     deleteReq<{ ok: boolean; deleted: number }>(`/api/shifts/recurring/${id}`),
   generateRecurringShift: (id: number, fromDate: string, toDate: string) =>
     postJSON<RecurringShiftGenerateResult>(`/api/shifts/recurring/${id}/generate`, { from_date: fromDate, to_date: toDate }),
+
+  // ─── Export Scheduler (Q070 / Q075) ──────────────────────────
+  getExportSchedules: () =>
+    fetchJSON<ExportSchedule[]>('/api/export-scheduler/schedules'),
+
+  createExportSchedule: (data: ExportScheduleCreate) =>
+    postJSON<ExportSchedule>('/api/export-scheduler/schedules', data),
+
+  updateExportSchedule: (id: number, data: ExportScheduleUpdate) =>
+    putJSON<ExportSchedule>(`/api/export-scheduler/schedules/${id}`, data),
+
+  deleteExportSchedule: (id: number) =>
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/export-scheduler/schedules/${id}`),
+
+  runExportSchedule: (id: number) =>
+    postJSON<ExportRunResult>(`/api/export-scheduler/schedules/${id}/run`, {}),
 
   // ── Schedule Comments (Q069) ────────────────────────────────
   getScheduleComments: (params: { group_id?: number; from?: string; to?: string }) => {

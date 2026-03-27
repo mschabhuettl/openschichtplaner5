@@ -1950,4 +1950,7 @@ export const api = {
   enable2FA: (code: string) => postJSON<{ ok: boolean; backup_codes: string[] }>('/api/auth/2fa/enable', { code }),
   disable2FA: (password: string) => postJSON<{ ok: boolean }>('/api/auth/2fa/disable', { password }),
   adminDisable2FA: (userId: number) => postJSON<{ ok: boolean }>(`/api/auth/2fa/admin-disable/${userId}`, {}),
+
+  // ── Release Notes ──────────────────────────────────────────
+  getReleaseNotes: () => fetchJSON<{ content: string }>('/api/release-notes'),
 };

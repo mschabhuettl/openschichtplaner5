@@ -92,6 +92,7 @@ const Companies           = lazy(() => import('./pages/Companies'));
 const Uebergabe           = lazy(() => import('./pages/Uebergabe'));
 const DienstBoard         = lazy(() => import('./pages/DienstBoard'));
 const TeamUebersicht      = lazy(() => import('./pages/TeamUebersicht'));
+const Changelog         = lazy(() => import('./pages/Changelog'));
 const Login             = lazy(() => import('./pages/Login'));
 const NotFound          = lazy(() => import('./pages/NotFound'));
 
@@ -261,6 +262,7 @@ const navItems: NavItem[] = [
   { id: 'health',             label: 'System Health',        icon: '🩺', group: 'Administration', path: '/health',             roles: ['Admin'] },
   { id: 'protokoll',          label: 'Protokoll',            icon: '📋', group: 'Administration', path: '/protokoll',          roles: ['Admin'] },
   { id: 'druckvorschau',      label: 'Druckvorschau',        icon: '🖨️', group: 'Administration', path: '/druckvorschau' },
+  { id: 'changelog',          label: 'Was ist neu?',         icon: '📋', group: 'Administration', path: '/changelog' },
 ];
 
 /** Global offline banner — shown when the browser loses connectivity */
@@ -846,6 +848,7 @@ function AppInner() {
             <Route path="/onboarding" element={<PB name="Onboarding-Wizard"><OnboardingWizard /></PB>} />
             <Route path="/auditlog" element={<PB name="Audit-Log"><RoleRoute allowedRoles={['Admin', 'Planer']}><AuditLog /></RoleRoute></PB>} />
             <Route path="/health" element={<PB name="System Health"><RoleRoute allowedRoles={['Admin']}><HealthDashboard /></RoleRoute></PB>} />
+            <Route path="/changelog" element={<PB name="Changelog"><Changelog /></PB>} />
             <Route path="/login" element={<Navigate to="/" replace />} />
             <Route path="*" element={<PB name="404"><NotFound /></PB>} />
           </Routes>

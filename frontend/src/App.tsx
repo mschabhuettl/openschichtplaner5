@@ -96,6 +96,7 @@ const Uebergabe           = lazy(() => import('./pages/Uebergabe'));
 const DienstBoard         = lazy(() => import('./pages/DienstBoard'));
 const TeamUebersicht      = lazy(() => import('./pages/TeamUebersicht'));
 const RecurringShifts   = lazy(() => import('./pages/RecurringShifts'));
+const ExportScheduler   = lazy(() => import('./pages/ExportScheduler'));
 const Changelog         = lazy(() => import('./pages/Changelog'));
 const Login             = lazy(() => import('./pages/Login'));
 const NotFound          = lazy(() => import('./pages/NotFound'));
@@ -264,6 +265,7 @@ const navItems: NavItem[] = [
   { id: 'perioden',           label: 'Abrechnungszeiträume', icon: '📅', group: 'Administration', path: '/perioden',           roles: ['Admin'] },
   { id: 'einstellungen',      label: 'Einstellungen',        icon: '⚙️', group: 'Administration', path: '/einstellungen',      roles: ['Admin'] },
   { id: 'email-settings',    label: 'E-Mail',               icon: '📧', group: 'Administration', path: '/email-settings',     roles: ['Admin'] },
+  { id: 'export-scheduler',  label: 'Export-Zeitpläne',     icon: '📤', group: 'Administration', path: '/export-scheduler',   roles: ['Admin'] },
   { id: 'auditlog',           label: 'Audit-Log',            icon: '🔍', group: 'Administration', path: '/auditlog',           roles: ['Admin', 'Planer'] },
   { id: 'health',             label: 'System Health',        icon: '🩺', group: 'Administration', path: '/health',             roles: ['Admin'] },
   { id: 'protokoll',          label: 'Protokoll',            icon: '📋', group: 'Administration', path: '/protokoll',          roles: ['Admin'] },
@@ -858,6 +860,7 @@ function AppInner() {
             <Route path="/onboarding" element={<PB name="Onboarding-Wizard"><OnboardingWizard /></PB>} />
             <Route path="/auditlog" element={<PB name="Audit-Log"><RoleRoute allowedRoles={['Admin', 'Planer']}><AuditLog /></RoleRoute></PB>} />
             <Route path="/health" element={<PB name="System Health"><RoleRoute allowedRoles={['Admin']}><HealthDashboard /></RoleRoute></PB>} />
+            <Route path="/export-scheduler" element={<PB name="Export-Zeitpläne"><RoleRoute allowedRoles={['Admin']}><ExportScheduler /></RoleRoute></PB>} />
             <Route path="/changelog" element={<PB name="Changelog"><Changelog /></PB>} />
             <Route path="/login" element={<Navigate to="/" replace />} />
             <Route path="*" element={<PB name="404"><NotFound /></PB>} />

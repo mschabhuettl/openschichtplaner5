@@ -331,7 +331,7 @@ function BackendUnreachableBanner() {
     let cancelled = false;
     const check = async () => {
       try {
-        const res = await fetch('/api/version', { signal: AbortSignal.timeout(5000) });
+        const res = await fetch('/api/v1/version', { signal: AbortSignal.timeout(5000) });
         if (!cancelled && !res.ok && res.status === 0) setUnreachable(true);
       } catch (err) {
         if (!cancelled) {

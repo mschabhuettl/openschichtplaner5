@@ -69,7 +69,7 @@ export default function Uebergabe() {
 
   // Load shifts
   useEffect(() => {
-    fetch(`${API}/api/shifts`, { headers: getAuthHeaders() })
+    fetch(`${API}/api/v1/shifts`, { headers: getAuthHeaders() })
       .then(r => r.json())
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then((data: any[]) => setShifts(data.map(s => ({ id: s.ID ?? s.id, name: s.NAME ?? s.name, short: s.SHORTNAME ?? s.short ?? '', color: s.COLORBK ?? s.color ?? '' }))))
@@ -83,7 +83,7 @@ export default function Uebergabe() {
     if (filterDate) params.set('date', filterDate);
     if (filterShift) params.set('shift_id', filterShift);
     params.set('limit', '100');
-    fetch(`${API}/api/handover?${params}`, { credentials: 'include', headers: getAuthHeaders() })
+    fetch(`${API}/api/v1/handover?${params}`, { credentials: 'include', headers: getAuthHeaders() })
       .then(r => { if (!r.ok) throw new Error(`Fehler ${r.status}`); return r.json(); })
       .then(data => { setNotes(data); setLoading(false); })
       .catch((e: unknown) => {
@@ -111,7 +111,7 @@ export default function Uebergabe() {
       created_at: new Date().toISOString(),
     };
     try {
-      const res = await fetch(`${API}/api/handover`, {
+      const res = await fetch(`${API}/api/v1/handover`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
@@ -130,7 +130,7 @@ export default function Uebergabe() {
 
   const toggleResolved = async (note: HandoverNote) => {
     try {
-      const res = await fetch(`${API}/api/handover/${note.id}`, {
+      const res = await fetch(`${API}/api/v1/handover/${note.id}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
@@ -145,7 +145,7 @@ export default function Uebergabe() {
 
   const deleteNote = async (id: string) => {
     try {
-      const res = await fetch(`${API}/api/handover/${id}`, {
+      const res = await fetch(`${API}/api/v1/handover/${id}`, {
         method: 'DELETE',
         credentials: 'include',
         headers: getAuthHeaders(),

@@ -12,7 +12,7 @@ interface State {
 
 async function reportErrorToBackend(error: Error, info: ErrorInfo) {
   try {
-    await fetch('/api/errors', {
+    await fetch('/api/v1/errors', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

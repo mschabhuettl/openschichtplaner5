@@ -683,7 +683,7 @@ export default function Employees() {
           </button>
           <button
             onClick={() => {
-              downloadExport(`${API_BASE}/api/export/employees?format=csv`, 'mitarbeiter.csv')
+              downloadExport(`${API_BASE}/api/v1/export/employees?format=csv`, 'mitarbeiter.csv')
                 .then(() => showToast('CSV exportiert ✓', 'success'))
                 .catch((e: Error) => showToast(`Export-Fehler: ${e.message}`, 'error'));
             }}
@@ -694,7 +694,7 @@ export default function Employees() {
           </button>
           <button
             onClick={() => {
-              downloadExport(`${API_BASE}/api/export/employees?format=xlsx`, 'mitarbeiter.xlsx')
+              downloadExport(`${API_BASE}/api/v1/export/employees?format=xlsx`, 'mitarbeiter.xlsx')
                 .then(() => showToast('Excel exportiert ✓', 'success'))
                 .catch((e: Error) => showToast(`Export-Fehler: ${e.message}`, 'error'));
             }}

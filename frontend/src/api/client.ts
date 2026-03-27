@@ -453,7 +453,7 @@ export async function checkApiCompatibility(): Promise<{
   requiredVersion: string;
 }> {
   try {
-    const res = await fetch(`${BASE_URL}/api/version`, { credentials: 'include' });
+    const res = await fetch(`${BASE_URL}/api/v1/version`, { credentials: 'include' });
     if (!res.ok) return { compatible: true, backendVersion: null, requiredVersion: REQUIRED_API_MIN_VERSION };
     const data = await res.json() as { version?: string };
     const backendVersion = data.version ?? '0.0.0';
@@ -482,17 +482,17 @@ const CACHE_TTL_MS = 60_000;
 
 /** Paths that are safe to cache (rarely changing master data). */
 const CACHEABLE_PATHS = new Set([
-  '/api/employees',
-  '/api/groups',
-  '/api/shifts',
-  '/api/leave-types',
-  '/api/workplaces',
-  '/api/holidays',
+  '/api/v1/employees',
+  '/api/v1/groups',
+  '/api/v1/shifts',
+  '/api/v1/leave-types',
+  '/api/v1/workplaces',
+  '/api/v1/holidays',
 ]);
 
 function isCacheable(path: string): boolean {
   // Also cache holidays with year query param
-  if (path.startsWith('/api/holidays')) return true;
+  if (path.startsWith('/api/v1/holidays')) return true;
   return CACHEABLE_PATHS.has(path);
 }
 
@@ -1065,59 +1065,59 @@ export interface SwapRequest {
 
 // ─── API ───────────────────────────────────────────────────
 export const api = {
-  getStats: () => fetchJSON<Stats>('/api/stats'),
+  getStats: () => fetchJSON<Stats>('/api/v1/stats'),
   getDashboardSummary: (year: number, month: number) =>
-    fetchJSON<DashboardSummary>(`/api/dashboard/summary?year=${year}&month=${month}`),
+    fetchJSON<DashboardSummary>(`/api/v1/dashboard/summary?year=${year}&month=${month}`),
   getEmployees: (includeHidden?: boolean) =>
-    fetchJSON<Employee[]>(`/api/employees${includeHidden ? '?include_hidden=true' : ''}`),
-  getGroups: () => fetchJSON<Group[]>('/api/groups'),
-  getShifts: () => fetchJSON<ShiftType[]>('/api/shifts'),
-  getLeaveTypes: () => fetchJSON<LeaveType[]>('/api/leave-types'),
-  getWorkplaces: () => fetchJSON<Workplace[]>('/api/workplaces'),
-  getHolidays: (year?: number) => fetchJSON<Holiday[]>(`/api/holidays${year ? `?year=${year}` : ''}`),
+    fetchJSON<Employee[]>(`/api/v1/employees${includeHidden ? '?include_hidden=true' : ''}`),
+  getGroups: () => fetchJSON<Group[]>('/api/v1/groups'),
+  getShifts: () => fetchJSON<ShiftType[]>('/api/v1/shifts'),
+  getLeaveTypes: () => fetchJSON<LeaveType[]>('/api/v1/leave-types'),
+  getWorkplaces: () => fetchJSON<Workplace[]>('/api/v1/workplaces'),
+  getHolidays: (year?: number) => fetchJSON<Holiday[]>(`/api/v1/holidays${year ? `?year=${year}` : ''}`),
   getSchedule: (year: number, month: number, groupId?: number) =>
-    fetchJSON<ScheduleEntry[]>(`/api/schedule?year=${year}&month=${month}${groupId ? `&group_id=${groupId}` : ''}`),
-  getUsers: () => fetchJSON<User[]>('/api/users'),
+    fetchJSON<ScheduleEntry[]>(`/api/v1/schedule?year=${year}&month=${month}${groupId ? `&group_id=${groupId}` : ''}`),
+  getUsers: () => fetchJSON<User[]>('/api/v1/users'),
 
   // New endpoints
   getScheduleDay: (date: string, groupId?: number) =>
-    fetchJSON<DayEntry[]>(`/api/schedule/day?date=${date}${groupId ? `&group_id=${groupId}` : ''}`),
+    fetchJSON<DayEntry[]>(`/api/v1/schedule/day?date=${date}${groupId ? `&group_id=${groupId}` : ''}`),
 
   getStatistics: (year: number, month: number, groupId?: number) =>
-    fetchJSON<EmployeeStats[]>(`/api/statistics?year=${year}&month=${month}${groupId ? `&group_id=${groupId}` : ''}`),
+    fetchJSON<EmployeeStats[]>(`/api/v1/statistics?year=${year}&month=${month}${groupId ? `&group_id=${groupId}` : ''}`),
 
   getScheduleYear: (year: number, employeeId: number) =>
-    fetchJSON<MonthSummary[]>(`/api/schedule/year?year=${year}&employee_id=${employeeId}`),
+    fetchJSON<MonthSummary[]>(`/api/v1/schedule/year?year=${year}&employee_id=${employeeId}`),
 
   getEmployeeStatsYear: (employeeId: number, year: number) =>
-    fetchJSON<EmployeeYearStats>(`/api/statistics/employee/${employeeId}?year=${year}`),
+    fetchJSON<EmployeeYearStats>(`/api/v1/statistics/employee/${employeeId}?year=${year}`),
 
   getEmployeeStatsMonth: (employeeId: number, year: number, month: number) =>
-    fetchJSON<EmployeeYearStats>(`/api/statistics/employee/${employeeId}?year=${year}&month=${month}`),
+    fetchJSON<EmployeeYearStats>(`/api/v1/statistics/employee/${employeeId}?year=${year}&month=${month}`),
 
   getScheduleWeek: (date: string, groupId?: number) =>
-    fetchJSON<WeekSchedule>(`/api/schedule/week?date=${date}${groupId ? `&group_id=${groupId}` : ''}`),
+    fetchJSON<WeekSchedule>(`/api/v1/schedule/week?date=${date}${groupId ? `&group_id=${groupId}` : ''}`),
 
   getConflicts: (params: { year: number; month: number; group_id?: number }) => {
     const p = new URLSearchParams({ year: String(params.year), month: String(params.month) });
     if (params.group_id != null) p.set('group_id', String(params.group_id));
-    return fetchJSON<ScheduleConflicts>(`/api/schedule/conflicts?${p}`);
+    return fetchJSON<ScheduleConflicts>(`/api/v1/schedule/conflicts?${p}`);
   },
 
   getGroupMembers: (groupId: number) =>
-    fetchJSON<Employee[]>(`/api/groups/${groupId}/members`),
+    fetchJSON<Employee[]>(`/api/v1/groups/${groupId}/members`),
 
   createScheduleEntry: (employee_id: number, date: string, shift_id: number) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/schedule', { employee_id, date, shift_id }),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/schedule', { employee_id, date, shift_id }),
 
   deleteScheduleEntry: (employee_id: number, date: string) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/schedule/${employee_id}/${date}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/schedule/${employee_id}/${date}`),
 
   bulkSchedule: (
     entries: Array<{ employee_id: number; date: string; shift_id: number | null }>,
     overwrite = true,
   ) => postJSON<{ created: number; updated: number; deleted: number }>(
-    '/api/schedule/bulk',
+    '/api/v1/schedule/bulk',
     { entries, overwrite },
   ),
 
@@ -1129,7 +1129,7 @@ export const api = {
     date_to: string;
     overwrite?: boolean;
   }) => postJSON<{ created: number; updated: number; skipped: number; employees: number; days: number; total_assignments: number }>(
-    '/api/schedule/bulk-group',
+    '/api/v1/schedule/bulk-group',
     params,
   ),
 
@@ -1156,44 +1156,44 @@ export const api = {
       };
       message: string;
     }>(
-      '/api/schedule/generate',
+      '/api/v1/schedule/generate',
       params,
     ),
 
   getAbsences: (params?: { year?: number; employee_id?: number; leave_type_id?: number }) => {
     const qs = params ? new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([,v]) => v != null).map(([k,v]) => [k, String(v)]))).toString() : '';
-    return fetchJSON<{ id: number; employee_id: number; date: string; leave_type_id: number; leave_type_name: string; leave_type_short: string }[]>(`/api/absences${qs ? `?${qs}` : ''}`);
+    return fetchJSON<{ id: number; employee_id: number; date: string; leave_type_id: number; leave_type_name: string; leave_type_short: string }[]>(`/api/v1/absences${qs ? `?${qs}` : ''}`);
   },
   createAbsence: (employee_id: number, date: string, leave_type_id: number) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/absences', { employee_id, date, leave_type_id }),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/absences', { employee_id, date, leave_type_id }),
   deleteAbsence: (employee_id: number, date: string) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/absences/${employee_id}/${date}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/absences/${employee_id}/${date}`),
 
   getAbsenceStatuses: () =>
-    fetchJSON<Record<string, { status: string; reject_reason?: string } | string>>('/api/absences/status'),
+    fetchJSON<Record<string, { status: string; reject_reason?: string } | string>>('/api/v1/absences/status'),
 
   getGroupAssignments: () =>
-    fetchJSON<{ employee_id: number; group_id: number }[]>('/api/group-assignments'),
+    fetchJSON<{ employee_id: number; group_id: number }[]>('/api/v1/group-assignments'),
 
   getLeaveEntitlements: (params?: { year?: number; employee_id?: number }) => {
     const qs = params ? new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([,v]) => v != null).map(([k,v]) => [k, String(v)]))).toString() : '';
-    return fetchJSON<{ id: number; employee_id: number; year: number; leave_type_id: number; leave_type_name: string; entitlement: number; carry_forward: number; in_days: boolean }[]>(`/api/leave-entitlements${qs ? `?${qs}` : ''}`);
+    return fetchJSON<{ id: number; employee_id: number; year: number; leave_type_id: number; leave_type_name: string; entitlement: number; carry_forward: number; in_days: boolean }[]>(`/api/v1/leave-entitlements${qs ? `?${qs}` : ''}`);
   },
 
   // ─── Shift Cycles ─────────────────────────────────────────
-  getShiftCycles: () => fetchJSON<ShiftCycle[]>('/api/shift-cycles'),
-  getShiftCycle: (id: number) => fetchJSON<ShiftCycle>(`/api/shift-cycles/${id}`),
-  getCycleAssignments: () => fetchJSON<CycleAssignment[]>('/api/shift-cycles/assign'),
+  getShiftCycles: () => fetchJSON<ShiftCycle[]>('/api/v1/shift-cycles'),
+  getShiftCycle: (id: number) => fetchJSON<ShiftCycle>(`/api/v1/shift-cycles/${id}`),
+  getCycleAssignments: () => fetchJSON<CycleAssignment[]>('/api/v1/shift-cycles/assign'),
   assignCycle: (employee_id: number, cycle_id: number, start_date: string) =>
-    postJSON<{ ok: boolean; record: CycleAssignment }>('/api/shift-cycles/assign', { employee_id, cycle_id, start_date }),
+    postJSON<{ ok: boolean; record: CycleAssignment }>('/api/v1/shift-cycles/assign', { employee_id, cycle_id, start_date }),
   removeCycleAssignment: (employee_id: number) =>
-    deleteReq<{ ok: boolean; removed: number }>(`/api/shift-cycles/assign/${employee_id}`),
+    deleteReq<{ ok: boolean; removed: number }>(`/api/v1/shift-cycles/assign/${employee_id}`),
   createShiftCycle: (name: string, size_weeks: number) =>
-    postJSON<{ ok: boolean; cycle: ShiftCycle }>('/api/shift-cycles', { name, size_weeks }),
+    postJSON<{ ok: boolean; cycle: ShiftCycle }>('/api/v1/shift-cycles', { name, size_weeks }),
   updateShiftCycle: (id: number, name: string, size_weeks: number, entries: { index: number; shift_id: number | null }[]) =>
-    putJSON<{ ok: boolean; cycle: ShiftCycle }>(`/api/shift-cycles/${id}`, { name, size_weeks, entries }),
+    putJSON<{ ok: boolean; cycle: ShiftCycle }>(`/api/v1/shift-cycles/${id}`, { name, size_weeks, entries }),
   deleteShiftCycle: (id: number) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/shift-cycles/${id}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/shift-cycles/${id}`),
 
   // ─── Staffing Requirements ────────────────────────────────
   getStaffingRequirements: (year?: number, month?: number) => {
@@ -1201,7 +1201,7 @@ export const api = {
     if (year) params.set('year', String(year));
     if (month) params.set('month', String(month));
     const qs = params.toString();
-    return fetchJSON<StaffingRequirements>(`/api/staffing-requirements${qs ? `?${qs}` : ''}`);
+    return fetchJSON<StaffingRequirements>(`/api/v1/staffing-requirements${qs ? `?${qs}` : ''}`);
   },
 
   // ─── Notes ────────────────────────────────────────────────
@@ -1213,40 +1213,40 @@ export const api = {
     if (p.year != null) urlParams.set('year', String(p.year));
     if (p.month != null) urlParams.set('month', String(p.month));
     const qs = urlParams.toString();
-    return fetchJSON<Note[]>(`/api/notes${qs ? `?${qs}` : ''}`);
+    return fetchJSON<Note[]>(`/api/v1/notes${qs ? `?${qs}` : ''}`);
   },
   addNote: (date: string, text: string, employee_id?: number, text2?: string, category?: string) =>
-    postJSON<{ ok: boolean; record: Note }>('/api/notes', { date, text, employee_id: employee_id ?? 0, text2: text2 ?? '', category: category ?? '' }),
+    postJSON<{ ok: boolean; record: Note }>('/api/v1/notes', { date, text, employee_id: employee_id ?? 0, text2: text2 ?? '', category: category ?? '' }),
   updateNote: (id: number, data: NoteUpdate) =>
-    putJSON<{ ok: boolean; record: Note }>(`/api/notes/${id}`, data),
+    putJSON<{ ok: boolean; record: Note }>(`/api/v1/notes/${id}`, data),
   deleteNote: (id: number) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/notes/${id}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/notes/${id}`),
 
   // ─── Periods ──────────────────────────────────────────────
   getPeriods: (group_id?: number) =>
-    fetchJSON<Period[]>(`/api/periods${group_id ? `?group_id=${group_id}` : ''}`),
+    fetchJSON<Period[]>(`/api/v1/periods${group_id ? `?group_id=${group_id}` : ''}`),
   createPeriod: (data: { group_id: number; start: string; end: string; description?: string }) =>
-    postJSON<{ ok: boolean; record: Period }>('/api/periods', data),
+    postJSON<{ ok: boolean; record: Period }>('/api/v1/periods', data),
   deletePeriod: (id: number) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/periods/${id}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/periods/${id}`),
 
   // ─── Staffing Requirements Write ──────────────────────────
   setStaffingRequirement: (data: { shift_id: number; weekday: number; min: number; max: number; group_id: number }) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/staffing-requirements', data),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/staffing-requirements', data),
 
   // ─── Zeitkonto ────────────────────────────────────────────
   getZeitkonto: (year: number, groupId?: number, employeeId?: number) => {
     const params = new URLSearchParams({ year: String(year) });
     if (groupId) params.set('group_id', String(groupId));
     if (employeeId) params.set('employee_id', String(employeeId));
-    return fetchJSON<ZeitkontoRow[]>(`/api/zeitkonto?${params}`);
+    return fetchJSON<ZeitkontoRow[]>(`/api/v1/zeitkonto?${params}`);
   },
   getZeitkontoDetail: (year: number, employeeId: number) =>
-    fetchJSON<ZeitkontoDetail>(`/api/zeitkonto/detail?year=${year}&employee_id=${employeeId}`),
+    fetchJSON<ZeitkontoDetail>(`/api/v1/zeitkonto/detail?year=${year}&employee_id=${employeeId}`),
   getZeitkontoSummary: (year: number, groupId?: number) => {
     const params = new URLSearchParams({ year: String(year) });
     if (groupId) params.set('group_id', String(groupId));
-    return fetchJSON<ZeitkontoSummary>(`/api/zeitkonto/summary?${params}`);
+    return fetchJSON<ZeitkontoSummary>(`/api/v1/zeitkonto/summary?${params}`);
   },
   getBookings: (year?: number, month?: number, employeeId?: number) => {
     const params = new URLSearchParams();
@@ -1254,133 +1254,133 @@ export const api = {
     if (month) params.set('month', String(month));
     if (employeeId) params.set('employee_id', String(employeeId));
     const qs = params.toString();
-    return fetchJSON<Booking[]>(`/api/bookings${qs ? `?${qs}` : ''}`);
+    return fetchJSON<Booking[]>(`/api/v1/bookings${qs ? `?${qs}` : ''}`);
   },
   createBooking: (data: { employee_id: number; date: string; type: number; value: number; note?: string }) =>
-    postJSON<{ ok: boolean; record: Booking }>('/api/bookings', data),
+    postJSON<{ ok: boolean; record: Booking }>('/api/v1/bookings', data),
   deleteBooking: (id: number) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/bookings/${id}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/bookings/${id}`),
 
   // ─── CRUD: Employees ──────────────────────────────────────
   createEmployee: (data: Partial<Employee>) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/employees', data),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/employees', data),
   updateEmployee: (id: number, data: Partial<Employee>) =>
-    putJSON<{ ok: boolean; record: unknown }>(`/api/employees/${id}`, data),
+    putJSON<{ ok: boolean; record: unknown }>(`/api/v1/employees/${id}`, data),
   deleteEmployee: (id: number) =>
-    deleteReq<{ ok: boolean; deactivated: number }>(`/api/employees/${id}`),
+    deleteReq<{ ok: boolean; deactivated: number }>(`/api/v1/employees/${id}`),
   activateEmployee: (id: number) =>
-    putJSON<{ ok: boolean; activated: number }>(`/api/employees/${id}/activate`, {}),
+    putJSON<{ ok: boolean; activated: number }>(`/api/v1/employees/${id}/activate`, {}),
 
   // ─── CRUD: Groups ─────────────────────────────────────────
   createGroup: (data: Partial<Group>) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/groups', data),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/groups', data),
   updateGroup: (id: number, data: Partial<Group>) =>
-    putJSON<{ ok: boolean; record: unknown }>(`/api/groups/${id}`, data),
+    putJSON<{ ok: boolean; record: unknown }>(`/api/v1/groups/${id}`, data),
   deleteGroup: (id: number) =>
-    deleteReq<{ ok: boolean; hidden: number }>(`/api/groups/${id}`),
+    deleteReq<{ ok: boolean; hidden: number }>(`/api/v1/groups/${id}`),
   addGroupMember: (groupId: number, employee_id: number) =>
-    postJSON<{ ok: boolean; record: unknown }>(`/api/groups/${groupId}/members`, { employee_id }),
+    postJSON<{ ok: boolean; record: unknown }>(`/api/v1/groups/${groupId}/members`, { employee_id }),
   removeGroupMember: (groupId: number, empId: number) =>
-    deleteReq<{ ok: boolean; removed: number }>(`/api/groups/${groupId}/members/${empId}`),
+    deleteReq<{ ok: boolean; removed: number }>(`/api/v1/groups/${groupId}/members/${empId}`),
 
   // ─── Bulk Employee Operations ─────────────────────────────
   bulkEmployeeAction: (data: { employee_ids: number[]; action: string; group_id?: number }) =>
-    postJSON<{ ok: boolean; affected: number; errors: unknown[] }>('/api/employees/bulk', data),
+    postJSON<{ ok: boolean; affected: number; errors: unknown[] }>('/api/v1/employees/bulk', data),
 
   // ─── Bulk Absence ─────────────────────────────────────────
   bulkCreateAbsence: (data: { date: string; leave_type_id: number; employee_ids?: number[] }) =>
-    postJSON<{ ok: boolean; created: number; skipped: number; errors: unknown[] }>('/api/absences/bulk', data),
+    postJSON<{ ok: boolean; created: number; skipped: number; errors: unknown[] }>('/api/v1/absences/bulk', data),
 
   // ─── CRUD: Shifts ─────────────────────────────────────────
   createShift: (data: Partial<ShiftType>) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/shifts', data),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/shifts', data),
   updateShift: (id: number, data: Partial<ShiftType>) =>
-    putJSON<{ ok: boolean; record: unknown }>(`/api/shifts/${id}`, data),
+    putJSON<{ ok: boolean; record: unknown }>(`/api/v1/shifts/${id}`, data),
   deleteShift: (id: number) =>
-    deleteReq<{ ok: boolean; hidden: number }>(`/api/shifts/${id}`),
+    deleteReq<{ ok: boolean; hidden: number }>(`/api/v1/shifts/${id}`),
 
   // ─── CRUD: Leave Types ────────────────────────────────────
   createLeaveType: (data: Partial<LeaveType>) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/leave-types', data),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/leave-types', data),
   updateLeaveType: (id: number, data: Partial<LeaveType>) =>
-    putJSON<{ ok: boolean; record: unknown }>(`/api/leave-types/${id}`, data),
+    putJSON<{ ok: boolean; record: unknown }>(`/api/v1/leave-types/${id}`, data),
   deleteLeaveType: (id: number) =>
-    deleteReq<{ ok: boolean; hidden: number }>(`/api/leave-types/${id}`),
+    deleteReq<{ ok: boolean; hidden: number }>(`/api/v1/leave-types/${id}`),
 
   // ─── CRUD: Holidays ───────────────────────────────────────
   createHoliday: (data: { DATE: string; NAME: string; INTERVAL?: number }) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/holidays', data),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/holidays', data),
   updateHoliday: (id: number, data: Partial<Holiday>) =>
-    putJSON<{ ok: boolean; record: unknown }>(`/api/holidays/${id}`, data),
+    putJSON<{ ok: boolean; record: unknown }>(`/api/v1/holidays/${id}`, data),
   deleteHoliday: (id: number) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/holidays/${id}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/holidays/${id}`),
 
   // ─── CRUD: Workplaces ─────────────────────────────────────
   createWorkplace: (data: Partial<Workplace>) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/workplaces', data),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/workplaces', data),
   updateWorkplace: (id: number, data: Partial<Workplace>) =>
-    putJSON<{ ok: boolean; record: unknown }>(`/api/workplaces/${id}`, data),
+    putJSON<{ ok: boolean; record: unknown }>(`/api/v1/workplaces/${id}`, data),
   deleteWorkplace: (id: number) =>
-    deleteReq<{ ok: boolean; hidden: number }>(`/api/workplaces/${id}`),
+    deleteReq<{ ok: boolean; hidden: number }>(`/api/v1/workplaces/${id}`),
 
   // ─── Workplace ↔ Employee Assignments ─────────────────────
   getWorkplaceEmployees: (workplaceId: number) =>
-    fetchJSON<WorkplaceEmployee[]>(`/api/workplaces/${workplaceId}/employees`),
+    fetchJSON<WorkplaceEmployee[]>(`/api/v1/workplaces/${workplaceId}/employees`),
   assignEmployeeToWorkplace: (workplaceId: number, employeeId: number) =>
-    postJSON<{ ok: boolean; added: boolean }>(`/api/workplaces/${workplaceId}/employees/${employeeId}`, {}),
+    postJSON<{ ok: boolean; added: boolean }>(`/api/v1/workplaces/${workplaceId}/employees/${employeeId}`, {}),
   removeEmployeeFromWorkplace: (workplaceId: number, employeeId: number) =>
-    deleteReq<{ ok: boolean; removed: boolean }>(`/api/workplaces/${workplaceId}/employees/${employeeId}`),
+    deleteReq<{ ok: boolean; removed: boolean }>(`/api/v1/workplaces/${workplaceId}/employees/${employeeId}`),
 
   // ─── CRUD: Extra Charges ──────────────────────────────────
   getExtraCharges: (include_hidden = false) =>
-    fetchJSON<ExtraCharge[]>(`/api/extracharges${include_hidden ? '?include_hidden=true' : ''}`),
+    fetchJSON<ExtraCharge[]>(`/api/v1/extracharges${include_hidden ? '?include_hidden=true' : ''}`),
   createExtraCharge: (data: Partial<ExtraCharge>) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/extracharges', data),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/extracharges', data),
   updateExtraCharge: (id: number, data: Partial<ExtraCharge>) =>
-    putJSON<{ ok: boolean; record: unknown }>(`/api/extracharges/${id}`, data),
+    putJSON<{ ok: boolean; record: unknown }>(`/api/v1/extracharges/${id}`, data),
   deleteExtraCharge: (id: number) =>
-    deleteReq<{ ok: boolean; hidden: number }>(`/api/extracharges/${id}`),
+    deleteReq<{ ok: boolean; hidden: number }>(`/api/v1/extracharges/${id}`),
   getExtraChargesSummary: (year: number, month: number, employeeId?: number) =>
     fetchJSON<ExtraChargeSummary[]>(
-      `/api/extracharges/summary?year=${year}&month=${month}${employeeId != null ? `&employee_id=${employeeId}` : ''}`
+      `/api/v1/extracharges/summary?year=${year}&month=${month}${employeeId != null ? `&employee_id=${employeeId}` : ''}`
     ),
 
   // ─── Auth ─────────────────────────────────────────────────
   login: (username: string, password: string) =>
-    postJSON<LoginResponse>('/api/auth/login', { username, password }),
+    postJSON<LoginResponse>('/api/v1/auth/login', { username, password }),
 
   // ─── CRUD: Users ──────────────────────────────────────────
   createUser: (data: UserCreate) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/users', data),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/users', data),
   updateUser: (id: number, data: UserUpdate) =>
-    putJSON<{ ok: boolean; record: unknown }>(`/api/users/${id}`, data),
+    putJSON<{ ok: boolean; record: unknown }>(`/api/v1/users/${id}`, data),
   deleteUser: (id: number) =>
-    deleteReq<{ ok: boolean; hidden: number }>(`/api/users/${id}`),
+    deleteReq<{ ok: boolean; hidden: number }>(`/api/v1/users/${id}`),
 
   // ─── Einsatzplan / SPSHI ─────────────────────────────────
   getEinsatzplan: (date: string, groupId?: number) =>
-    fetchJSON<SpshiEntry[]>(`/api/einsatzplan?date=${date}${groupId != null ? `&group_id=${groupId}` : ''}`),
+    fetchJSON<SpshiEntry[]>(`/api/v1/einsatzplan?date=${date}${groupId != null ? `&group_id=${groupId}` : ''}`),
   createEinsatzplanEntry: (data: EinsatzplanEntryCreate) =>
-    postJSON<{ ok: boolean; record: SpshiEntry }>('/api/einsatzplan', data),
+    postJSON<{ ok: boolean; record: SpshiEntry }>('/api/v1/einsatzplan', data),
   updateEinsatzplanEntry: (id: number, data: EinsatzplanEntryUpdate) =>
-    putJSON<{ ok: boolean; record: unknown }>(`/api/einsatzplan/${id}`, data),
+    putJSON<{ ok: boolean; record: unknown }>(`/api/v1/einsatzplan/${id}`, data),
   deleteEinsatzplanEntry: (id: number) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/einsatzplan/${id}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/einsatzplan/${id}`),
   createDeviation: (data: DeviationCreate) =>
-    postJSON<{ ok: boolean; record: SpshiEntry }>('/api/einsatzplan/deviation', data),
+    postJSON<{ ok: boolean; record: SpshiEntry }>('/api/v1/einsatzplan/deviation', data),
 
   // ─── Restrictions ─────────────────────────────────────────
   getRestrictions: (employeeId?: number) =>
-    fetchJSON<Restriction[]>(employeeId != null ? `/api/restrictions?employee_id=${employeeId}` : '/api/restrictions'),
+    fetchJSON<Restriction[]>(employeeId != null ? `/api/v1/restrictions?employee_id=${employeeId}` : '/api/v1/restrictions'),
   addRestriction: (data: { employee_id: number; shift_id: number; reason?: string; weekday?: number }) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/restrictions', data),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/restrictions', data),
   removeRestriction: (employeeId: number, shiftId: number, weekday = 0) =>
-    deleteReq<{ ok: boolean; removed: number }>(`/api/restrictions/${employeeId}/${shiftId}?weekday=${weekday}`),
+    deleteReq<{ ok: boolean; removed: number }>(`/api/v1/restrictions/${employeeId}/${shiftId}?weekday=${weekday}`),
 
   // ─── Settings (USETT) ────────────────────────────────────
-  getSettings: () => fetchJSON<UsettSettings>('/api/settings'),
+  getSettings: () => fetchJSON<UsettSettings>('/api/v1/settings'),
   updateSettings: (data: Partial<UsettSettings>) =>
-    putJSON<{ ok: boolean; record: UsettSettings }>('/api/settings', data),
+    putJSON<{ ok: boolean; record: UsettSettings }>('/api/v1/settings', data),
 
   // ─── Special Staffing Requirements (SPDEM) ───────────────
   getSpecialStaffing: (date?: string, groupId?: number) => {
@@ -1388,69 +1388,69 @@ export const api = {
     if (date) p.set('date', date);
     if (groupId != null) p.set('group_id', String(groupId));
     const qs = p.toString();
-    return fetchJSON<SpecialStaffingReq[]>(`/api/staffing-requirements/special${qs ? `?${qs}` : ''}`);
+    return fetchJSON<SpecialStaffingReq[]>(`/api/v1/staffing-requirements/special${qs ? `?${qs}` : ''}`);
   },
   createSpecialStaffing: (data: {
     group_id: number; date: string; shift_id: number;
     workplace_id?: number; min: number; max: number;
-  }) => postJSON<{ ok: boolean; record: unknown }>('/api/staffing-requirements/special', data),
+  }) => postJSON<{ ok: boolean; record: unknown }>('/api/v1/staffing-requirements/special', data),
   updateSpecialStaffing: (id: number, data: Partial<{
     group_id: number; date: string; shift_id: number;
     workplace_id: number; min: number; max: number;
-  }>) => putJSON<{ ok: boolean; record: unknown }>(`/api/staffing-requirements/special/${id}`, data),
+  }>) => putJSON<{ ok: boolean; record: unknown }>(`/api/v1/staffing-requirements/special/${id}`, data),
   deleteSpecialStaffing: (id: number) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/staffing-requirements/special/${id}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/staffing-requirements/special/${id}`),
 
   // ─── Cycle Exceptions ─────────────────────────────────────
   getCycleExceptions: (params?: { employee_id?: number; cycle_assignment_id?: number }) => {
     const qs = params ? new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([,v]) => v != null).map(([k,v]) => [k, String(v)]))).toString() : '';
     return fetchJSON<{ id: number; employee_id: number; cycle_assignment_id: number; date: string; type: number }[]>(
-      `/api/cycle-exceptions${qs ? `?${qs}` : ''}`);
+      `/api/v1/cycle-exceptions${qs ? `?${qs}` : ''}`);
   },
   setCycleException: (data: { employee_id: number; cycle_assignment_id: number; date: string; type?: number }) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/cycle-exceptions', data),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/cycle-exceptions', data),
   deleteCycleException: (id: number) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/cycle-exceptions/${id}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/cycle-exceptions/${id}`),
 
   // ─── Employee Access ───────────────────────────────────────
   getEmployeeAccess: (user_id?: number) => {
     const qs = user_id != null ? `?user_id=${user_id}` : '';
-    return fetchJSON<{ id: number; user_id: number; employee_id: number; rights: number }[]>(`/api/employee-access${qs}`);
+    return fetchJSON<{ id: number; user_id: number; employee_id: number; rights: number }[]>(`/api/v1/employee-access${qs}`);
   },
   setEmployeeAccess: (data: { user_id: number; employee_id: number; rights: number }) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/employee-access', data),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/employee-access', data),
   deleteEmployeeAccess: (id: number) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/employee-access/${id}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/employee-access/${id}`),
 
   // ─── Group Access ──────────────────────────────────────────
   getGroupAccess: (user_id?: number) => {
     const qs = user_id != null ? `?user_id=${user_id}` : '';
-    return fetchJSON<{ id: number; user_id: number; group_id: number; rights: number }[]>(`/api/group-access${qs}`);
+    return fetchJSON<{ id: number; user_id: number; group_id: number; rights: number }[]>(`/api/v1/group-access${qs}`);
   },
   setGroupAccess: (data: { user_id: number; group_id: number; rights: number }) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/group-access', data),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/group-access', data),
   deleteGroupAccess: (id: number) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/group-access/${id}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/group-access/${id}`),
 
   // ─── Carry Forward (Saldo-Übertrag) ──────────────────────
   getCarryForward: (employeeId: number, year: number) =>
     fetchJSON<{ employee_id: number; year: number; hours: number; booking_id: number | null }>(
-      `/api/bookings/carry-forward?employee_id=${employeeId}&year=${year}`
+      `/api/v1/bookings/carry-forward?employee_id=${employeeId}&year=${year}`
     ),
   setCarryForward: (data: { employee_id: number; year: number; hours: number }) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/bookings/carry-forward', data),
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/bookings/carry-forward', data),
   calculateAnnualStatement: (data: { employee_id: number; year: number }) =>
     postJSON<{ ok: boolean; result: { employee_id: number; year: number; saldo: number; carry_in: number; total_saldo: number; should_carry: boolean; next_year: number } }>(
-      '/api/bookings/annual-statement', data
+      '/api/v1/bookings/annual-statement', data
     ),
 
   // ─── Employee Photo ────────────────────────────────────────
-  getEmployeePhotoUrl: (id: number): string => `${BASE_URL}/api/employees/${id}/photo`,
+  getEmployeePhotoUrl: (id: number): string => `${BASE_URL}/api/v1/employees/${id}/photo`,
 
   uploadEmployeePhoto: async (id: number, file: File): Promise<{ ok: boolean; photo_url: string }> => {
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch(`${BASE_URL}/api/employees/${id}/photo`, {
+    const res = await fetch(`${BASE_URL}/api/v1/employees/${id}/photo`, {
       method: 'POST',
       credentials: 'include',
       body: formData,
@@ -1464,29 +1464,29 @@ export const api = {
 
   // ─── Change Password ───────────────────────────────────────
   changePassword: (userId: number, newPassword: string) =>
-    postJSON<{ ok: boolean }>(`/api/users/${userId}/change-password`, { new_password: newPassword }),
+    postJSON<{ ok: boolean }>(`/api/v1/users/${userId}/change-password`, { new_password: newPassword }),
 
   // ─── Self-Service Password Change ─────────────────────────
   changeOwnPassword: (oldPassword: string, newPassword: string) =>
-    postJSON<{ ok: boolean; sessions_revoked: number }>('/api/auth/change-password', { old_password: oldPassword, new_password: newPassword }),
+    postJSON<{ ok: boolean; sessions_revoked: number }>('/api/v1/auth/change-password', { old_password: oldPassword, new_password: newPassword }),
 
   // ─── Admin Password Reset (generates temp password) ───────
   resetUserPassword: (userId: number) =>
-    postJSON<{ ok: boolean; temp_password: string; sessions_revoked: number; email_sent: boolean }>(`/api/users/${userId}/reset-password`, {}),
+    postJSON<{ ok: boolean; temp_password: string; sessions_revoked: number; email_sent: boolean }>(`/api/v1/users/${userId}/reset-password`, {}),
 
   // ─── Holiday Bans ─────────────────────────────────────────
   getHolidayBans: (groupId?: number) =>
     fetchJSON<{ id: number; group_id: number; group_name: string; start_date: string; end_date: string; restrict: number; reason: string }[]>(
-      `/api/holiday-bans${groupId != null ? `?group_id=${groupId}` : ''}`
+      `/api/v1/holiday-bans${groupId != null ? `?group_id=${groupId}` : ''}`
     ),
 
   // ─── Backup / Restore ─────────────────────────────────────
-  getBackupUrl: (): string => `${BASE_URL}/api/backup/download`,
+  getBackupUrl: (): string => `${BASE_URL}/api/v1/backup/download`,
 
   restoreBackup: async (file: File): Promise<{ restored: number; files: string[] }> => {
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch(`${BASE_URL}/api/backup/restore`, {
+    const res = await fetch(`${BASE_URL}/api/v1/backup/restore`, {
       method: 'POST',
       credentials: 'include',
       body: formData,
@@ -1499,16 +1499,16 @@ export const api = {
   },
 
   listBackups: async (): Promise<{ backups: BackupEntry[]; backup_dir: string | null }> => {
-    const res = await safeFetch(`${BASE_URL}/api/admin/backups`, { headers: authHeaders() });
+    const res = await safeFetch(`${BASE_URL}/api/v1/admin/backups`, { headers: authHeaders() });
     await handleResponseError(res);
     return res.json();
   },
 
   getBackupDownloadUrl: (filename: string): string =>
-    `${BASE_URL}/api/admin/backups/${encodeURIComponent(filename)}/download`,
+    `${BASE_URL}/api/v1/admin/backups/${encodeURIComponent(filename)}/download`,
 
   deleteBackup: async (filename: string): Promise<void> => {
-    const res = await safeFetch(`${BASE_URL}/api/admin/backups/${encodeURIComponent(filename)}`, {
+    const res = await safeFetch(`${BASE_URL}/api/v1/admin/backups/${encodeURIComponent(filename)}`, {
       method: 'DELETE',
       headers: authHeaders(),
     });
@@ -1527,7 +1527,7 @@ export const api = {
     if (params.streak_threshold != null) qs.set('streak_threshold', String(params.streak_threshold));
     if (params.overtime_threshold_pct != null) qs.set('overtime_threshold_pct', String(params.overtime_threshold_pct));
     if (params.group_id != null) qs.set('group_id', String(params.group_id));
-    return fetchJSON<BurnoutRadarEntry[]>(`/api/burnout-radar?${qs.toString()}`);
+    return fetchJSON<BurnoutRadarEntry[]>(`/api/v1/burnout-radar?${qs.toString()}`);
   },
 
 // ─── Changelog / Aktivitätsprotokoll ──────────────────────
@@ -1545,50 +1545,50 @@ export const api = {
     if (params.date_from) qs.set('date_from', params.date_from);
     if (params.date_to) qs.set('date_to', params.date_to);
     const q = qs.toString();
-    return fetchJSON<ChangelogEntry[]>(`/api/changelog${q ? '?' + q : ''}`);
+    return fetchJSON<ChangelogEntry[]>(`/api/v1/changelog${q ? '?' + q : ''}`);
   },
 
   logAction: (data: { user: string; action: string; entity: string; entity_id: number; details?: string }) =>
-    postJSON<ChangelogEntry>('/api/changelog', data),
+    postJSON<ChangelogEntry>('/api/v1/changelog', data),
 
   // ─── Überstunden Summary ───────────────────────────────────
   getOvertimeSummary: (year: number, groupId?: number) => {
     const qs = new URLSearchParams({ year: String(year) });
     if (groupId != null) qs.set('group_id', String(groupId));
     return fetchJSON<{ year: number; group_id: number | null; employees: OvertimeRow[]; summary: OvertimeSummary }>(
-      `/api/overtime-summary?${qs.toString()}`
+      `/api/v1/overtime-summary?${qs.toString()}`
     );
   },
 
   // ─── Dashboard: Today ──────────────────────────────────────
-  getDashboardToday: () => fetchJSON<DashboardToday>('/api/dashboard/today'),
+  getDashboardToday: () => fetchJSON<DashboardToday>('/api/v1/dashboard/today'),
 
   // ─── Dashboard: Upcoming ───────────────────────────────────
-  getDashboardUpcoming: () => fetchJSON<DashboardUpcoming>('/api/dashboard/upcoming'),
+  getDashboardUpcoming: () => fetchJSON<DashboardUpcoming>('/api/v1/dashboard/upcoming'),
 
   // ─── Dashboard: Stats ──────────────────────────────────────
   getDashboardStats: (year?: number, month?: number) =>
-    fetchJSON<DashboardStats>(`/api/dashboard/stats${year && month ? `?year=${year}&month=${month}` : ''}`),
+    fetchJSON<DashboardStats>(`/api/v1/dashboard/stats${year && month ? `?year=${year}&month=${month}` : ''}`),
 
   // ─── Schedule Coverage (Personalbedarf-Ampel) ──────────────
   getCoverage: (year: number, month: number) =>
-    fetchJSON<CoverageDay[]>(`/api/schedule/coverage?year=${year}&month=${month}`),
+    fetchJSON<CoverageDay[]>(`/api/v1/schedule/coverage?year=${year}&month=${month}`),
 
   // ─── Global Search (Spotlight) ─────────────────────────────
   search: (query: string) =>
-    fetchJSON<{ results: SearchResult[]; query: string }>(`/api/search?q=${encodeURIComponent(query)}`),
+    fetchJSON<{ results: SearchResult[]; query: string }>(`/api/v1/search?q=${encodeURIComponent(query)}`),
 
   // ─── Monthly Closing Report (Monatsabschluss) ──────────────
   getMonthlyReportUrl: (year: number, month: number, format: 'csv' | 'pdf', groupId?: number): string => {
     const qs = new URLSearchParams({ year: String(year), month: String(month), format });
     if (groupId != null) qs.set('group_id', String(groupId));
-    return `${BASE_URL}/api/reports/monthly?${qs.toString()}`;
+    return `${BASE_URL}/api/v1/reports/monthly?${qs.toString()}`;
   },
 
   downloadMonthlyReport: async (year: number, month: number, format: 'csv' | 'pdf', groupId?: number): Promise<void> => {
     const qs = new URLSearchParams({ year: String(year), month: String(month), format });
     if (groupId != null) qs.set('group_id', String(groupId));
-    const url = `${BASE_URL}/api/reports/monthly?${qs.toString()}`;
+    const url = `${BASE_URL}/api/v1/reports/monthly?${qs.toString()}`;
     const res = await fetch(url, { credentials: 'include' });
     if (!res.ok) {
       const data = await res.json().catch(() => ({ detail: res.statusText }));
@@ -1609,29 +1609,29 @@ export const api = {
 
   // ─── Sickness/Krankenstand Statistics ─────────────────────
   getSicknessStatistics: (year: number) =>
-    fetchJSON<SicknessStatistics>(`/api/statistics/sickness?year=${year}`),
+    fetchJSON<SicknessStatistics>(`/api/v1/statistics/sickness?year=${year}`),
 
   getShiftStatistics: (year: number, months: number, groupId?: number) =>
-    fetchJSON<ShiftStatisticsData>(`/api/statistics/shifts?year=${year}&months=${months}${groupId ? `&group_id=${groupId}` : ''}`),
+    fetchJSON<ShiftStatisticsData>(`/api/v1/statistics/shifts?year=${year}&months=${months}${groupId ? `&group_id=${groupId}` : ''}`),
 
   getYearSummary: (year: number, groupId?: number | null) =>
-    fetchJSON<YearSummaryData>(`/api/statistics/year-summary?year=${year}${groupId ? `&group_id=${groupId}` : ''}`),
+    fetchJSON<YearSummaryData>(`/api/v1/statistics/year-summary?year=${year}${groupId ? `&group_id=${groupId}` : ''}`),
 
   // ─── Schedule Templates (Schicht-Vorlagen) ─────────────────
   getScheduleTemplates: () =>
-    fetchJSON<ScheduleTemplate[]>('/api/schedule/templates'),
+    fetchJSON<ScheduleTemplate[]>('/api/v1/schedule/templates'),
 
   createScheduleTemplate: (body: TemplateCreate) =>
-    postJSON<ScheduleTemplate>('/api/schedule/templates', body),
+    postJSON<ScheduleTemplate>('/api/v1/schedule/templates', body),
 
   captureScheduleTemplate: (body: TemplateCaptureRequest) =>
-    postJSON<ScheduleTemplate>('/api/schedule/templates/capture', body),
+    postJSON<ScheduleTemplate>('/api/v1/schedule/templates/capture', body),
 
   deleteScheduleTemplate: (templateId: number) =>
-    deleteReq<{ deleted: boolean; id: number }>(`/api/schedule/templates/${templateId}`),
+    deleteReq<{ deleted: boolean; id: number }>(`/api/v1/schedule/templates/${templateId}`),
 
   applyScheduleTemplate: (templateId: number, body: TemplateApplyRequest) =>
-    postJSON<TemplateApplyResult>(`/api/schedule/templates/${templateId}/apply`, body),
+    postJSON<TemplateApplyResult>(`/api/v1/schedule/templates/${templateId}/apply`, body),
 
   // ─── Week Copy (Woche kopieren) ────────────────────────────
   copyWeek: (body: {
@@ -1641,7 +1641,7 @@ export const api = {
     skip_existing: boolean;
   }) =>
     postJSON<{ ok: boolean; created: number; skipped: number; errors: string[]; message: string }>(
-      '/api/schedule/copy-week',
+      '/api/v1/schedule/copy-week',
       body,
     ),
 
@@ -1651,7 +1651,7 @@ export const api = {
     dates: string[];
   }) =>
     postJSON<{ ok: boolean; swapped_days: number; errors: string[]; message: string }>(
-      '/api/schedule/swap',
+      '/api/v1/schedule/swap',
       body,
     ),
 
@@ -1661,7 +1661,7 @@ export const api = {
     if (params.employee_id != null) q.set('employee_id', String(params.employee_id));
     if (params.year != null) q.set('year', String(params.year));
     if (params.month != null) q.set('month', String(params.month));
-    return fetchJSON<Wish[]>(`/api/wishes?${q}`);
+    return fetchJSON<Wish[]>(`/api/v1/wishes?${q}`);
   },
 
   createWish: (body: {
@@ -1670,17 +1670,17 @@ export const api = {
     wish_type: 'WUNSCH' | 'SPERRUNG';
     shift_id?: number | null;
     note?: string;
-  }) => postJSON<Wish>('/api/wishes', body),
+  }) => postJSON<Wish>('/api/v1/wishes', body),
 
   deleteWish: (wishId: number) =>
-    deleteReq<{ deleted: number }>(`/api/wishes/${wishId}`),
+    deleteReq<{ deleted: number }>(`/api/v1/wishes/${wishId}`),
 
   // ─── Schicht-Tauschbörse ─────────────────────────────────
   getSwapRequests: (params: { status?: string; employee_id?: number } = {}) => {
     const q = new URLSearchParams();
     if (params.status) q.set('status', params.status);
     if (params.employee_id != null) q.set('employee_id', String(params.employee_id));
-    return fetchJSON<SwapRequest[]>(`/api/swap-requests?${q}`);
+    return fetchJSON<SwapRequest[]>(`/api/v1/swap-requests?${q}`);
   },
 
   createSwapRequest: (body: {
@@ -1689,16 +1689,16 @@ export const api = {
     partner_id: number;
     partner_date: string;
     note?: string;
-  }) => postJSON<SwapRequest>('/api/swap-requests', body),
+  }) => postJSON<SwapRequest>('/api/v1/swap-requests', body),
 
   resolveSwapRequest: (swapId: number, body: {
     action: 'approve' | 'reject';
     resolved_by?: string;
     reject_reason?: string;
-  }) => patchJSON<SwapRequest>(`/api/swap-requests/${swapId}/resolve`, body),
+  }) => patchJSON<SwapRequest>(`/api/v1/swap-requests/${swapId}/resolve`, body),
 
   deleteSwapRequest: (swapId: number) =>
-    deleteReq<{ ok: boolean }>(`/api/swap-requests/${swapId}`),
+    deleteReq<{ ok: boolean }>(`/api/v1/swap-requests/${swapId}`),
 
   // ─── Self-Service Swap Requests ──────────────────────────
   createSelfSwapRequest: (body: {
@@ -1706,13 +1706,13 @@ export const api = {
     requester_date: string;
     partner_date: string;
     note?: string;
-  }) => postJSON<SwapRequest>('/api/self/swap-requests', body),
+  }) => postJSON<SwapRequest>('/api/v1/self/swap-requests', body),
 
   respondSwapRequest: (swapId: number, accept: boolean) =>
-    patchJSON<SwapRequest>(`/api/self/swap-requests/${swapId}/respond`, { accept }),
+    patchJSON<SwapRequest>(`/api/v1/self/swap-requests/${swapId}/respond`, { accept }),
 
   cancelSelfSwapRequest: (swapId: number) =>
-    deleteReq<{ ok: boolean }>(`/api/self/swap-requests/${swapId}`),
+    deleteReq<{ ok: boolean }>(`/api/v1/self/swap-requests/${swapId}`),
 
   // ─── Annual Close (Jahresabschluss) ──────────────────────
   getAnnualClosePreview: (params: { year: number; max_carry_forward_days: number; group_id?: number }) => {
@@ -1721,36 +1721,36 @@ export const api = {
       max_carry_forward_days: String(params.max_carry_forward_days),
     });
     if (params.group_id != null) p.set('group_id', String(params.group_id));
-    return fetchJSON<unknown>(`/api/annual-close/preview?${p}`);
+    return fetchJSON<unknown>(`/api/v1/annual-close/preview?${p}`);
   },
   runAnnualClose: (data: { year: number; max_carry_forward_days: number; group_id?: number }) =>
-    postJSON<unknown>('/api/annual-close', data),
+    postJSON<unknown>('/api/v1/annual-close', data),
 
   // ─── Self-Service (Leser) ─────────────────────────────────
   getMyEmployee: () =>
-    fetchJSON<{ employee: Record<string, unknown> | null; user_id: number }>('/api/me/employee'),
+    fetchJSON<{ employee: Record<string, unknown> | null; user_id: number }>('/api/v1/me/employee'),
 
   createSelfWish: (body: {
     date: string;
     wish_type: 'WUNSCH' | 'SPERRUNG';
     shift_id?: number | null;
     note?: string;
-  }) => postJSON<Wish>('/api/self/wishes', body),
+  }) => postJSON<Wish>('/api/v1/self/wishes', body),
 
   deleteSelfWish: (wishId: number) =>
-    deleteReq<{ deleted: number }>(`/api/self/wishes/${wishId}`),
+    deleteReq<{ deleted: number }>(`/api/v1/self/wishes/${wishId}`),
 
   getMySchedule: (year: number, month: number) =>
-    fetchJSON<ScheduleEntry[]>(`/api/self/schedule?year=${year}&month=${month}`),
+    fetchJSON<ScheduleEntry[]>(`/api/v1/self/schedule?year=${year}&month=${month}`),
 
   getMyWishes: (year: number, month: number) =>
-    fetchJSON<Wish[]>(`/api/self/wishes?year=${year}&month=${month}`),
+    fetchJSON<Wish[]>(`/api/v1/self/wishes?year=${year}&month=${month}`),
 
   createSelfAbsence: (body: {
     date: string;
     leave_type_id: number;
     note?: string;
-  }) => postJSON<{ id: number; employee_id: number; date: string; leave_type_id: number }>('/api/self/absences', body),
+  }) => postJSON<{ id: number; employee_id: number; date: string; leave_type_id: number }>('/api/v1/self/absences', body),
 
   // ─── Notifications ─────────────────────────────────────────
   getNotifications: (params: { employee_id?: number; unread_only?: boolean } = {}) => {
@@ -1758,70 +1758,70 @@ export const api = {
     if (params.employee_id != null) q.set('employee_id', String(params.employee_id));
     if (params.unread_only) q.set('unread_only', 'true');
     const qs = q.toString();
-    return fetchJSON<{ notifications: NotificationItem[] }>(`/api/notifications${qs ? `?${qs}` : ''}`);
+    return fetchJSON<{ notifications: NotificationItem[] }>(`/api/v1/notifications${qs ? `?${qs}` : ''}`);
   },
   getAllNotifications: (employeeId: number) =>
-    fetchJSON<{ notifications: NotificationItem[] }>(`/api/notifications/all?employee_id=${employeeId}`),
+    fetchJSON<{ notifications: NotificationItem[] }>(`/api/v1/notifications/all?employee_id=${employeeId}`),
   markNotificationRead: (id: number) =>
-    patchJSON<{ ok: boolean }>(`/api/notifications/${id}/read`, {}),
+    patchJSON<{ ok: boolean }>(`/api/v1/notifications/${id}/read`, {}),
   markAllNotificationsRead: (employeeId?: number) => {
     const qs = employeeId != null ? `?employee_id=${employeeId}` : '';
-    return patchJSON<{ ok: boolean; updated: number }>(`/api/notifications/read-all${qs}`, {});
+    return patchJSON<{ ok: boolean; updated: number }>(`/api/v1/notifications/read-all${qs}`, {});
   },
   deleteNotification: (id: number) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/notifications/${id}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/notifications/${id}`),
 
   // ─── Warnings ──────────────────────────────────────────────
   getWarnings: (year: number, month: number) =>
-    fetchJSON<unknown>(`/api/warnings?year=${year}&month=${month}`),
+    fetchJSON<unknown>(`/api/v1/warnings?year=${year}&month=${month}`),
 
   // ─── Quality Report ────────────────────────────────────────
   getQualityReport: (year: number, month: number) =>
-    fetchJSON<unknown>(`/api/quality-report?year=${year}&month=${month}`),
+    fetchJSON<unknown>(`/api/v1/quality-report?year=${year}&month=${month}`),
 
   // ─── Fairness Score ────────────────────────────────────────
   getFairnessScore: (year: number, month?: number, groupId?: number) => {
     const p = new URLSearchParams({ year: String(year) });
     if (month != null) p.set('month', String(month));
     if (groupId != null) p.set('group_id', String(groupId));
-    return fetchJSON<unknown>(`/api/fairness?${p}`);
+    return fetchJSON<unknown>(`/api/v1/fairness?${p}`);
   },
 
   // ─── Capacity Forecast ─────────────────────────────────────
   getCapacityForecast: (params: Record<string, string>) =>
-    fetchJSON<unknown>(`/api/capacity-forecast?${new URLSearchParams(params)}`),
+    fetchJSON<unknown>(`/api/v1/capacity-forecast?${new URLSearchParams(params)}`),
   getCapacityYear: (params: Record<string, string>) =>
-    fetchJSON<unknown>(`/api/capacity-year?${new URLSearchParams(params)}`),
+    fetchJSON<unknown>(`/api/v1/capacity-year?${new URLSearchParams(params)}`),
 
   // ─── Skills / Kompetenz Matrix ─────────────────────────────
-  getSkillsMatrix: () => fetchJSON<unknown>('/api/skills/matrix'),
-  getSkills: () => fetchJSON<unknown[]>('/api/skills'),
+  getSkillsMatrix: () => fetchJSON<unknown>('/api/v1/skills/matrix'),
+  getSkills: () => fetchJSON<unknown[]>('/api/v1/skills'),
   createSkill: (data: { name: string; description?: string; category?: string }) =>
-    postJSON<unknown>('/api/skills', data),
+    postJSON<unknown>('/api/v1/skills', data),
   updateSkill: (id: string, data: { name?: string; description?: string; category?: string }) =>
-    putJSON<unknown>(`/api/skills/${id}`, data),
+    putJSON<unknown>(`/api/v1/skills/${id}`, data),
   deleteSkill: (id: string) =>
-    deleteReq<unknown>(`/api/skills/${id}`),
+    deleteReq<unknown>(`/api/v1/skills/${id}`),
   getSkillAssignments: (params?: { employee_id?: number }) => {
     const q = new URLSearchParams();
     if (params?.employee_id != null) q.set('employee_id', String(params.employee_id));
     const qs = q.toString();
-    return fetchJSON<unknown[]>(`/api/skills/assignments${qs ? `?${qs}` : ''}`);
+    return fetchJSON<unknown[]>(`/api/v1/skills/assignments${qs ? `?${qs}` : ''}`);
   },
   createSkillAssignment: (data: { employee_id: number; skill_id: string; level: number }) =>
-    postJSON<unknown>('/api/skills/assignments', data),
+    postJSON<unknown>('/api/v1/skills/assignments', data),
   deleteSkillAssignment: (id: string) =>
-    deleteReq<unknown>(`/api/skills/assignments/${id}`),
+    deleteReq<unknown>(`/api/v1/skills/assignments/${id}`),
 
   // ─── Availability ──────────────────────────────────────────
   getAvailability: (empId: number) =>
-    fetchJSON<unknown>(`/api/employees/${empId}/availability`),
+    fetchJSON<unknown>(`/api/v1/employees/${empId}/availability`),
   setAvailability: (empId: number, data: { days: unknown[] }) =>
-    postJSON<unknown>(`/api/employees/${empId}/availability`, data),
+    postJSON<unknown>(`/api/v1/employees/${empId}/availability`, data),
 
   // ─── Simulation ────────────────────────────────────────────
   runSimulation: (data: unknown) =>
-    postJSON<unknown>('/api/simulation', data),
+    postJSON<unknown>('/api/v1/simulation', data),
 
   // ─── Handover / Übergabe ───────────────────────────────────
   getHandover: (params: { date?: string; shift_id?: number } = {}) => {
@@ -1829,38 +1829,38 @@ export const api = {
     if (params.date) q.set('date', params.date);
     if (params.shift_id != null) q.set('shift_id', String(params.shift_id));
     const qs = q.toString();
-    return fetchJSON<unknown[]>(`/api/handover${qs ? `?${qs}` : ''}`);
+    return fetchJSON<unknown[]>(`/api/v1/handover${qs ? `?${qs}` : ''}`);
   },
   createHandover: (data: { date: string; shift_id: number; text: string; author?: string }) =>
-    postJSON<unknown>('/api/handover', data),
+    postJSON<unknown>('/api/v1/handover', data),
   updateHandover: (id: number, data: Record<string, unknown>) =>
-    patchJSON<unknown>(`/api/handover/${id}`, data),
+    patchJSON<unknown>(`/api/v1/handover/${id}`, data),
   deleteHandover: (id: number) =>
-    deleteReq<unknown>(`/api/handover/${id}`),
+    deleteReq<unknown>(`/api/v1/handover/${id}`),
 
   // ─── Leave Balance ─────────────────────────────────────────
   getLeaveBalance: (year: number, employeeId: number) =>
-    fetchJSON<unknown>(`/api/leave-balance?year=${year}&employee_id=${employeeId}`),
+    fetchJSON<unknown>(`/api/v1/leave-balance?year=${year}&employee_id=${employeeId}`),
   getLeaveBalanceGroup: (year: number, groupId: number) =>
-    fetchJSON<unknown>(`/api/leave-balance/group?year=${year}&group_id=${groupId}`),
+    fetchJSON<unknown>(`/api/v1/leave-balance/group?year=${year}&group_id=${groupId}`),
 
   // ─── Holiday Bans Write ────────────────────────────────────
   createHolidayBan: (data: { group_id: number; start_date: string; end_date: string; restrict?: number; reason?: string }) =>
-    postJSON<unknown>('/api/holiday-bans', data),
+    postJSON<unknown>('/api/v1/holiday-bans', data),
   deleteHolidayBan: (id: number) =>
-    deleteReq<unknown>(`/api/holiday-bans/${id}`),
+    deleteReq<unknown>(`/api/v1/holiday-bans/${id}`),
 
   // ─── Absence Status ────────────────────────────────────────
   setAbsenceStatus: (absenceId: number, data: { status: string; reject_reason?: string }) =>
-    putJSON<unknown>(`/api/absences/${absenceId}/status`, data),
+    putJSON<unknown>(`/api/v1/absences/${absenceId}/status`, data),
 
   // ─── Leave Entitlements Write ──────────────────────────────
   createLeaveEntitlement: (data: { employee_id: number; year: number; leave_type_id: number; entitlement: number; carry_forward?: number }) =>
-    postJSON<unknown>('/api/leave-entitlements', data),
+    postJSON<unknown>('/api/v1/leave-entitlements', data),
 
   // ─── Admin: Compact / Import ───────────────────────────────
   compactData: () =>
-    postJSON<unknown>('/api/admin/compact', {}),
+    postJSON<unknown>('/api/v1/admin/compact', {}),
 
   importData: async (endpoint: string, file: File): Promise<unknown> => {
     const formData = new FormData();
@@ -1886,17 +1886,17 @@ export const api = {
 
   // ─── Error Reporting ───────────────────────────────────────
   reportError: (data: { message: string; stack?: string; component?: string }) =>
-    postJSON<unknown>('/api/errors', data),
+    postJSON<unknown>('/api/v1/errors', data),
 
   // ─── iCal Export & Feed ─────────────────────────────────────
   getIcalToken: async (): Promise<{ token: string | null; feed_url: string | null; webcal_url: string | null }> => {
-    const res = await safeFetch(`${BASE_URL}/api/ical/token`, { headers: authHeaders() });
+    const res = await safeFetch(`${BASE_URL}/api/v1/ical/token`, { headers: authHeaders() });
     await handleResponseError(res);
     return res.json();
   },
 
   createIcalToken: async (): Promise<{ token: string; feed_url: string; webcal_url: string }> => {
-    const res = await safeFetch(`${BASE_URL}/api/ical/token`, {
+    const res = await safeFetch(`${BASE_URL}/api/v1/ical/token`, {
       method: 'POST',
       headers: { ...authHeaders(), 'Content-Type': 'application/json' },
     });
@@ -1905,7 +1905,7 @@ export const api = {
   },
 
   revokeIcalToken: async (): Promise<{ ok: boolean; message: string }> => {
-    const res = await safeFetch(`${BASE_URL}/api/ical/token`, {
+    const res = await safeFetch(`${BASE_URL}/api/v1/ical/token`, {
       method: 'DELETE',
       headers: authHeaders(),
     });
@@ -1915,7 +1915,7 @@ export const api = {
 
   downloadIcal: async (year: number, month: number): Promise<void> => {
     const res = await safeFetch(
-      `${BASE_URL}/api/ical/my-schedule.ics?year=${year}&month=${month}`,
+      `${BASE_URL}/api/v1/ical/my-schedule.ics?year=${year}&month=${month}`,
       { headers: authHeaders() },
     );
     await handleResponseError(res);
@@ -1932,7 +1932,7 @@ export const api = {
 
   downloadEmployeeIcal: async (employeeId: number, year: number, month: number): Promise<void> => {
     const res = await safeFetch(
-      `${BASE_URL}/api/ical/schedule/${employeeId}.ics?year=${year}&month=${month}`,
+      `${BASE_URL}/api/v1/ical/schedule/${employeeId}.ics?year=${year}&month=${month}`,
       { headers: authHeaders() },
     );
     await handleResponseError(res);
@@ -1948,35 +1948,35 @@ export const api = {
   },
 
   // ── Webhooks ──────────────────────────────────────────────────
-  getWebhooks: () => fetchJSON<WebhookEntry[]>('/api/webhooks'),
-  getWebhook: (id: number) => fetchJSON<WebhookEntry>(`/api/webhooks/${id}`),
+  getWebhooks: () => fetchJSON<WebhookEntry[]>('/api/v1/webhooks'),
+  getWebhook: (id: number) => fetchJSON<WebhookEntry>(`/api/v1/webhooks/${id}`),
   createWebhook: (data: { url: string; name: string; events: string[]; active?: boolean }) =>
-    postJSON<{ ok: boolean; record: WebhookEntry }>('/api/webhooks', data),
+    postJSON<{ ok: boolean; record: WebhookEntry }>('/api/v1/webhooks', data),
   updateWebhook: (id: number, data: { url?: string; name?: string; events?: string[]; active?: boolean }) =>
-    putJSON<{ ok: boolean; record: WebhookEntry }>(`/api/webhooks/${id}`, data),
+    putJSON<{ ok: boolean; record: WebhookEntry }>(`/api/v1/webhooks/${id}`, data),
   deleteWebhook: (id: number) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/webhooks/${id}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/webhooks/${id}`),
   testWebhook: (id: number) =>
-    postJSON<{ ok: boolean; delivery: WebhookDeliveryResult }>(`/api/webhooks/${id}/test`, {}),
-  getWebhookEvents: () => fetchJSON<{ events: string[] }>('/api/webhooks/events/list'),
+    postJSON<{ ok: boolean; delivery: WebhookDeliveryResult }>(`/api/v1/webhooks/${id}/test`, {}),
+  getWebhookEvents: () => fetchJSON<{ events: string[] }>('/api/v1/webhooks/events/list'),
 
   // ── Companies (Multi-Tenant) ─────────────────────────────────
-  getCompanies: () => fetchJSON<{ id: number; name: string; slug: string; is_active: boolean; employee_count: number; group_count: number }[]>('/api/companies'),
-  getCompany: (id: number) => fetchJSON<{ id: number; name: string; slug: string; is_active: boolean; employee_count: number; group_count: number }>(`/api/companies/${id}`),
+  getCompanies: () => fetchJSON<{ id: number; name: string; slug: string; is_active: boolean; employee_count: number; group_count: number }[]>('/api/v1/companies'),
+  getCompany: (id: number) => fetchJSON<{ id: number; name: string; slug: string; is_active: boolean; employee_count: number; group_count: number }>(`/api/v1/companies/${id}`),
   createCompany: (data: { name: string; slug?: string }) =>
-    postJSON<{ id: number; name: string; slug: string; is_active: boolean }>('/api/companies', data),
+    postJSON<{ id: number; name: string; slug: string; is_active: boolean }>('/api/v1/companies', data),
   updateCompany: (id: number, data: { name?: string; slug?: string; is_active?: boolean }) =>
-    putJSON<{ id: number; name: string; slug: string; is_active: boolean }>(`/api/companies/${id}`, data),
+    putJSON<{ id: number; name: string; slug: string; is_active: boolean }>(`/api/v1/companies/${id}`, data),
   deleteCompany: (id: number) =>
-    deleteReq<{ ok: boolean; deactivated: number }>(`/api/companies/${id}`),
+    deleteReq<{ ok: boolean; deactivated: number }>(`/api/v1/companies/${id}`),
 
   // ── 2FA / TOTP ──────────────────────────────────────────────
-  get2FAStatus: () => fetchJSON<{ enabled: boolean }>('/api/auth/2fa/status'),
-  setup2FA: () => postJSON<{ secret: string; qr_code: string; otpauth_uri: string }>('/api/auth/2fa/setup', {}),
-  enable2FA: (code: string) => postJSON<{ ok: boolean; backup_codes: string[] }>('/api/auth/2fa/enable', { code }),
-  disable2FA: (password: string) => postJSON<{ ok: boolean }>('/api/auth/2fa/disable', { password }),
-  adminDisable2FA: (userId: number) => postJSON<{ ok: boolean }>(`/api/auth/2fa/admin-disable/${userId}`, {}),
+  get2FAStatus: () => fetchJSON<{ enabled: boolean }>('/api/v1/auth/2fa/status'),
+  setup2FA: () => postJSON<{ secret: string; qr_code: string; otpauth_uri: string }>('/api/v1/auth/2fa/setup', {}),
+  enable2FA: (code: string) => postJSON<{ ok: boolean; backup_codes: string[] }>('/api/v1/auth/2fa/enable', { code }),
+  disable2FA: (password: string) => postJSON<{ ok: boolean }>('/api/v1/auth/2fa/disable', { password }),
+  adminDisable2FA: (userId: number) => postJSON<{ ok: boolean }>(`/api/v1/auth/2fa/admin-disable/${userId}`, {}),
 
   // ── Release Notes ──────────────────────────────────────────
-  getReleaseNotes: () => fetchJSON<{ content: string }>('/api/release-notes'),
+  getReleaseNotes: () => fetchJSON<{ content: string }>('/api/v1/release-notes'),
 };

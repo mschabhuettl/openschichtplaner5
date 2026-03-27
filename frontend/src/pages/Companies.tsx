@@ -49,7 +49,7 @@ export default function Companies() {
   const fetchCompanies = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${BASE_URL}/api/companies`, {
+      const res = await fetch(`${BASE_URL}/api/v1/companies`, {
         credentials: 'include',
         headers: authHeaders(),
       });
@@ -73,8 +73,8 @@ export default function Companies() {
     setSaving(true);
     try {
       const url = editId
-        ? `${BASE_URL}/api/companies/${editId}`
-        : `${BASE_URL}/api/companies`;
+        ? `${BASE_URL}/api/v1/companies/${editId}`
+        : `${BASE_URL}/api/v1/companies`;
       const method = editId ? 'PUT' : 'POST';
       const res = await fetch(url, {
         method,
@@ -106,7 +106,7 @@ export default function Companies() {
   const handleDeactivate = async (id: number) => {
     if (!confirm('Firma wirklich deaktivieren?')) return;
     try {
-      const res = await fetch(`${BASE_URL}/api/companies/${id}`, {
+      const res = await fetch(`${BASE_URL}/api/v1/companies/${id}`, {
         method: 'DELETE',
         credentials: 'include',
         headers: authHeaders(),

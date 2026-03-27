@@ -242,7 +242,7 @@ export default function Leitwand() {
   const load = useCallback(() => {
     Promise.all([
       api.getDashboardToday() as Promise<unknown>,
-      fetch('/api/warnings', { credentials: 'include' }).then(r => r.json()).catch(() => []),
+      fetch('/api/v1/warnings', { credentials: 'include' }).then(r => r.json()).catch(() => []),
     ]).then(([today, warns]) => {
       setData(today as TodayData);
       setWarnings(Array.isArray(warns) ? warns.slice(0, 5) : []);

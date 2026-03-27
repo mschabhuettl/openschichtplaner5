@@ -228,8 +228,12 @@ app = FastAPI(
     title="OpenSchichtplaner5 API",
     description=(
         "Open-source REST API for Schichtplaner5 databases.\n\n"
+        "## API Versioning\n"
+        "All endpoints are available under `/api/v1/` (recommended) and `/api/` (deprecated).\n"
+        "Unversioned `/api/` routes return `Deprecation: true` and `Sunset` headers.\n"
+        "New clients should use `/api/v1/` exclusively.\n\n"
         "## Authentication\n"
-        "Most endpoints require an `x-auth-token` header obtained from `POST /api/auth/login`.\n\n"
+        "Most endpoints require an `x-auth-token` header obtained from `POST /api/v1/auth/login`.\n\n"
         "## Roles\n"
         "- **Leser** – read-only access\n"
         "- **Planer** – can write schedules and absences\n"
@@ -357,7 +361,7 @@ def _apply_security_headers(response):
     auth_middleware) also get security headers, not only responses that
     pass through the full middleware stack.
     """
-    response.headers["X-API-Version"] = _API_VERSION
+    response.headers["X-API-Version"] = "1"
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
@@ -585,6 +589,38 @@ async def auth_middleware(request: Request, call_next):
             path,
             user_info.get("NAME", "?"),
         )
+    return response
+
+
+# ── API Versioning Middleware ────────────────────────────────────
+# Rewrites /api/v1/... → /api/... so existing routes handle both prefixes.
+# Adds Deprecation + Sunset headers on unversioned /api/ requests.
+
+
+@app.middleware("http")
+async def api_versioning_middleware(request: Request, call_next):
+    """Handle /api/v1/ prefix and add deprecation headers on unversioned /api/ routes."""
+    from datetime import datetime as _dt
+    from datetime import timedelta
+
+    path = request.url.path
+    is_versioned = False
+
+    if path.startswith("/api/v1/") or path == "/api/v1":
+        # Rewrite /api/v1/... → /api/...
+        new_path = "/api" + path[7:]  # strip "/api/v1" prefix, keep rest
+        request.scope["path"] = new_path
+        is_versioned = True
+
+    response = await call_next(request)
+
+    # Add deprecation headers on unversioned /api/ routes (not /api/v1/)
+    if not is_versioned and path.startswith("/api/"):
+        response.headers["Deprecation"] = "true"
+        sunset_date = (_dt.now() + timedelta(days=365)).strftime("%a, %d %b %Y %H:%M:%S GMT")
+        response.headers["Sunset"] = sunset_date
+        response.headers["Link"] = f'</api/v1{path[4:]}>; rel="successor-version"'
+
     return response
 
 

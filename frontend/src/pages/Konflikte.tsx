@@ -193,7 +193,7 @@ export default function Konflikte() {
     setError(null);
     setSelectedKeys(new Set());
     try {
-      const res = await fetch(`${BASE_URL}/api/schedule/conflicts?year=${year}&month=${month}`, { headers: getAuthHeaders() });
+      const res = await fetch(`${BASE_URL}/api/v1/schedule/conflicts?year=${year}&month=${month}`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: ConflictsResponse = await res.json();
       setConflicts(data.conflicts ?? []);
@@ -250,9 +250,9 @@ export default function Konflikte() {
     setActionState(s => ({ ...s, [key]: 'loading' }));
     try {
       if (type === 'shift') {
-        await apiDelete(`/api/schedule-shift/${conflict.employee_id}/${conflict.date}`);
+        await apiDelete(`/api/v1/schedule-shift/${conflict.employee_id}/${conflict.date}`);
       } else {
-        await apiDelete(`/api/absences/${conflict.employee_id}/${conflict.date}`);
+        await apiDelete(`/api/v1/absences/${conflict.employee_id}/${conflict.date}`);
       }
       setActionState(s => ({ ...s, [key]: 'done' }));
       setTimeout(() => fetchConflicts(), 300);
@@ -271,9 +271,9 @@ export default function Konflikte() {
     for (const c of toDelete) {
       try {
         if (deleteType === 'shift') {
-          await apiDelete(`/api/schedule-shift/${c.employee_id}/${c.date}`);
+          await apiDelete(`/api/v1/schedule-shift/${c.employee_id}/${c.date}`);
         } else {
-          await apiDelete(`/api/absences/${c.employee_id}/${c.date}`);
+          await apiDelete(`/api/v1/absences/${c.employee_id}/${c.date}`);
         }
       } catch {
         // continue anyway
@@ -754,7 +754,7 @@ function getAuthHeaders(): Record<string, string> {
 }
 
   try {
-    const res = await fetch(`${BASE}/api/schedule/conflicts?year=${year}&month=${month}`, { headers: getAuthHeaders() });
+    const res = await fetch(`${BASE}/api/v1/schedule/conflicts?year=${year}&month=${month}`, { headers: getAuthHeaders() });
     if (!res.ok) return 0;
     const data = await res.json();
     return (data.conflicts ?? []).length;

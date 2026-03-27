@@ -156,7 +156,7 @@ export default function QualitaetsBericht() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${BASE_URL}/api/quality-report?year=${year}&month=${month}`, { headers: getAuthHeaders() });
+      const res = await fetch(`${BASE_URL}/api/v1/quality-report?year=${year}&month=${month}`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setReport(data);

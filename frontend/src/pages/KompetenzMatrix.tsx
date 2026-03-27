@@ -353,7 +353,7 @@ export default function KompetenzMatrix() {
 
   const load = useCallback(() => {
     setLoading(true);
-    fetch(`${API}/api/skills/matrix`, { headers: getAuthHeaders() })
+    fetch(`${API}/api/v1/skills/matrix`, { headers: getAuthHeaders() })
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -400,7 +400,7 @@ export default function KompetenzMatrix() {
 
   const handleSaveAssignment = async (data: Partial<Assignment>) => {
     if (!modal || !modal.skill || modal.employeeId === undefined) return;
-    await fetch(`${API}/api/skills/assignments`, {
+    await fetch(`${API}/api/v1/skills/assignments`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify({
@@ -417,20 +417,20 @@ export default function KompetenzMatrix() {
 
   const handleDeleteAssignment = async () => {
     if (!modal?.existingAssignment) return;
-    await fetch(`${API}/api/skills/assignments/${modal.existingAssignment.id}`, { method: 'DELETE', headers: getAuthHeaders() });
+    await fetch(`${API}/api/v1/skills/assignments/${modal.existingAssignment.id}`, { method: 'DELETE', headers: getAuthHeaders() });
     setModal(null);
     load();
   };
 
   const handleSaveSkill = async (data: Partial<Skill>) => {
     if (skillModal?.skill) {
-      await fetch(`${API}/api/skills/${skillModal.skill.id}`, {
+      await fetch(`${API}/api/v1/skills/${skillModal.skill.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(data),
       });
     } else {
-      await fetch(`${API}/api/skills`, {
+      await fetch(`${API}/api/v1/skills`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify(data),
@@ -442,7 +442,7 @@ export default function KompetenzMatrix() {
 
   const handleDeleteSkill = async () => {
     if (!skillModal?.skill) return;
-    await fetch(`${API}/api/skills/${skillModal.skill.id}`, { method: 'DELETE', headers: getAuthHeaders() });
+    await fetch(`${API}/api/v1/skills/${skillModal.skill.id}`, { method: 'DELETE', headers: getAuthHeaders() });
     setSkillModal(null);
     load();
   };

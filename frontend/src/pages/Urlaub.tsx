@@ -182,7 +182,7 @@ function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceM
       let firstError: string | null = null;
       await Promise.all(dates.map(async (dateStr) => {
         try {
-          const res = await fetch(`${API}/api/absences`, {
+          const res = await fetch(`${API}/api/v1/absences`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
             body: JSON.stringify({ employee_id: employeeId, date: dateStr, leave_type_id: leaveTypeId }),
@@ -856,7 +856,7 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
     setLoading(true);
     try {
       if (groupId !== null) {
-        const res = await fetch(`${API}/api/leave-balance/group?year=${year}&group_id=${groupId}`, { headers: getAuthHeaders() });
+        const res = await fetch(`${API}/api/v1/leave-balance/group?year=${year}&group_id=${groupId}`, { headers: getAuthHeaders() });
         if (res.ok) { setBalances(await res.json()); return; }
       }
       // Load all employees individually
@@ -864,7 +864,7 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
       const empsToLoad = employees;
       await Promise.all(empsToLoad.map(async emp => {
         try {
-          const res = await fetch(`${API}/api/leave-balance?year=${year}&employee_id=${emp.ID}`, { headers: getAuthHeaders() });
+          const res = await fetch(`${API}/api/v1/leave-balance?year=${year}&employee_id=${emp.ID}`, { headers: getAuthHeaders() });
           if (res.ok) {
             const b = await res.json() as LeaveBalance;
             b.employee_name = `${emp.NAME}, ${emp.FIRSTNAME}`;
@@ -891,7 +891,7 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
     setSaving(true);
     try {
       const balance = balances.find(b => b.employee_id === empId);
-      const res = await fetch(`${API}/api/leave-entitlements`, {
+      const res = await fetch(`${API}/api/v1/leave-entitlements`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({
@@ -1051,8 +1051,8 @@ function SperrenTab({ groups }: SperrenTabProps) {
     setLoading(true);
     try {
       const url = groupId !== null
-        ? `${API}/api/holiday-bans?group_id=${groupId}`
-        : `${API}/api/holiday-bans`;
+        ? `${API}/api/v1/holiday-bans?group_id=${groupId}`
+        : `${API}/api/v1/holiday-bans`;
       const res = await fetch(url, { headers: getAuthHeaders() });
       if (res.ok) setBans(await res.json());
     } catch (e) {
@@ -1070,7 +1070,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch(`${API}/api/holiday-bans`, {
+      const res = await fetch(`${API}/api/v1/holiday-bans`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ ...form, group_id: Number(form.group_id) }),
@@ -1090,7 +1090,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
     if (!await confirmDialog({ message: 'Urlaubssperre wirklich löschen?', danger: true })) return;
     setDeleting(id);
     try {
-      const res = await fetch(`${API}/api/holiday-bans/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+      const res = await fetch(`${API}/api/v1/holiday-bans/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
       if (res.ok) await load();
     } finally {
       setDeleting(null);
@@ -1267,7 +1267,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
   const loadStatus = useCallback(async () => {
     setStatusLoading(true);
     try {
-      const res = await fetch(`${API}/api/absences/status`, { headers: getAuthHeaders() });
+      const res = await fetch(`${API}/api/v1/absences/status`, { headers: getAuthHeaders() });
       if (res.ok) setStatusMap(await res.json());
     } catch { /* ignore */ } finally {
       setStatusLoading(false);
@@ -1283,7 +1283,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
   const updateStatus = async (id: number, status: AbsenceStatus, reject_reason = '') => {
     setUpdatingId(id);
     try {
-      const res = await fetch(`${API}/api/absences/${id}/status`, {
+      const res = await fetch(`${API}/api/v1/absences/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ status, reject_reason }),
@@ -2008,7 +2008,7 @@ export default function Urlaub() {
           </button>
           <button
             onClick={() => {
-              downloadExport(`${API_BASE}/api/export/absences?year=${year}&format=csv`, `abwesenheiten_${year}.csv`)
+              downloadExport(`${API_BASE}/api/v1/export/absences?year=${year}&format=csv`, `abwesenheiten_${year}.csv`)
                 .then(() => showToast('CSV exportiert ✓', 'success'))
                 .catch((e: Error) => showToast(`Export-Fehler: ${e.message}`, 'error'));
             }}
@@ -2019,7 +2019,7 @@ export default function Urlaub() {
           </button>
           <button
             onClick={() => {
-              downloadExport(`${API_BASE}/api/export/absences?year=${year}&format=xlsx`, `abwesenheiten_${year}.xlsx`)
+              downloadExport(`${API_BASE}/api/v1/export/absences?year=${year}&format=xlsx`, `abwesenheiten_${year}.xlsx`)
                 .then(() => showToast('Excel exportiert ✓', 'success'))
                 .catch((e: Error) => showToast(`Export-Fehler: ${e.message}`, 'error'));
             }}

@@ -143,7 +143,7 @@ export default function SchichtBriefing() {
 
   // Load employees once
   useEffect(() => {
-    fetch(`${API}/api/employees`, { headers: getAuthHeaders() })
+    fetch(`${API}/api/v1/employees`, { headers: getAuthHeaders() })
       .then(r => r.json())
       .then(setEmployees)
       .catch(() => {});
@@ -156,8 +156,8 @@ export default function SchichtBriefing() {
     const month = d.getMonth() + 1;
     setLoading(true);
     Promise.all([
-      fetch(`${API}/api/schedule?year=${year}&month=${month}`, { headers: getAuthHeaders() }).then(r => r.json()),
-      fetch(`${API}/api/absences?date_from=${date}&date_to=${date}`, { headers: getAuthHeaders() }).then(r => r.json()),
+      fetch(`${API}/api/v1/schedule?year=${year}&month=${month}`, { headers: getAuthHeaders() }).then(r => r.json()),
+      fetch(`${API}/api/v1/absences?date_from=${date}&date_to=${date}`, { headers: getAuthHeaders() }).then(r => r.json()),
     ]).then(([sched, abs]) => {
       const dayEntries: ScheduleEntry[] = (sched as ScheduleEntry[]).filter(e => e.date === date);
       setSchedule(dayEntries);

@@ -101,7 +101,7 @@ export default function Fairness() {
     setLoadError(null);
     try {
       const res = await fetch(
-        `/api/fairness?year=${year}${groupId ? `&group_id=${groupId}` : ''}`,
+        `/api/v1/fairness?year=${year}${groupId ? `&group_id=${groupId}` : ''}`,
         { headers: getAuthHeaders() }
       );
       if (!res.ok) throw new Error(`Fehler ${res.status}: ${res.statusText}`);

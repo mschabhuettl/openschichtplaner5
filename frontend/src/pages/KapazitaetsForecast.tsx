@@ -560,7 +560,7 @@ export default function KapazitaetsForecast() {
 
   // Load groups
   useEffect(() => {
-    fetch(`${BASE_URL}/api/groups`, { headers: getAuthHeaders() })
+    fetch(`${BASE_URL}/api/v1/groups`, { headers: getAuthHeaders() })
       .then(r => r.json())
       .then(d => setGroups(d))
       .catch(() => {});
@@ -573,7 +573,7 @@ export default function KapazitaetsForecast() {
     try {
       const params = new URLSearchParams({ year: String(year), month: String(month) });
       if (groupId) params.set('group_id', String(groupId));
-      const res = await fetch(`${BASE_URL}/api/capacity-forecast?${params}`, { headers: getAuthHeaders() });
+      const res = await fetch(`${BASE_URL}/api/v1/capacity-forecast?${params}`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setForecast(data);
@@ -592,7 +592,7 @@ export default function KapazitaetsForecast() {
     try {
       const params = new URLSearchParams({ year: String(year) });
       if (groupId) params.set('group_id', String(groupId));
-      const res = await fetch(`${BASE_URL}/api/capacity-year?${params}`, { headers: getAuthHeaders() });
+      const res = await fetch(`${BASE_URL}/api/v1/capacity-year?${params}`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setYearData(data);

@@ -250,8 +250,8 @@ export default function MeinProfil() {
         const headers: Record<string, string> = token ? { 'X-Auth-Token': token } : {};
 
         const [skRes, asRes] = await Promise.all([
-          fetch(`${BASE}/api/skills`, { headers }),
-          fetch(`${BASE}/api/skills/assignments`, { headers }),
+          fetch(`${BASE}/api/v1/skills`, { headers }),
+          fetch(`${BASE}/api/v1/skills/assignments`, { headers }),
         ]);
         if (skRes.ok && asRes.ok) {
           const skillList = await skRes.json() as { id: string; name: string }[];

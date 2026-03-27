@@ -213,7 +213,7 @@ export default function Jahresrueckblick() {
     setLoading(true);
     setError(null);
     try {
-      const url = `/api/statistics/year-summary?year=${year}${groupId ? `&group_id=${groupId}` : ''}`;
+      const url = `/api/v1/statistics/year-summary?year=${year}${groupId ? `&group_id=${groupId}` : ''}`;
       const res = await fetch((import.meta.env.VITE_API_URL || '') + url, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error('Fehler beim Laden');
       const d = await res.json() as YearSummary;

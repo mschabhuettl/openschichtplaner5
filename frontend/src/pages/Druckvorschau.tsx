@@ -241,8 +241,8 @@ export default function Druckvorschau() {
   // Load static data
   useEffect(() => {
     Promise.all([
-      apiFetch<Group[]>('/api/groups'),
-      apiFetch<ShiftType[]>('/api/shifts'),
+      apiFetch<Group[]>('/api/v1/groups'),
+      apiFetch<ShiftType[]>('/api/v1/shifts'),
     ]).then(([g, s]) => {
       setGroups(g);
       setShifts(s);
@@ -255,9 +255,9 @@ export default function Druckvorschau() {
     setError(null);
     const groupParam = groupId ? `&group_id=${groupId}` : '';
     Promise.all([
-      apiFetch<ScheduleEntry[]>(`/api/schedule?year=${year}&month=${month}${groupParam}`),
-      apiFetch<Employee[]>(`/api/employees`),
-      apiFetch<Holiday[]>(`/api/holidays?year=${year}`),
+      apiFetch<ScheduleEntry[]>(`/api/v1/schedule?year=${year}&month=${month}${groupParam}`),
+      apiFetch<Employee[]>(`/api/v1/employees`),
+      apiFetch<Holiday[]>(`/api/v1/holidays?year=${year}`),
     ])
       .then(([sched, emps, hols]) => {
         setScheduleEntries(sched);

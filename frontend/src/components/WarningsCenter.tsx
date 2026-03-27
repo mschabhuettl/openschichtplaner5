@@ -173,7 +173,7 @@ export default function WarningsCenter() {
       const now = new Date();
       const year = now.getFullYear();
       const month = now.getMonth() + 1;
-      const res = await fetch(`${BASE}/api/warnings?year=${year}&month=${month}`, { headers: getAuthHeaders() });
+      const res = await fetch(`${BASE}/api/v1/warnings?year=${year}&month=${month}`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error('Laden fehlgeschlagen');
       const data: WarningsResponse = await res.json();
       setWarnings(data.warnings ?? []);
@@ -185,7 +185,7 @@ export default function WarningsCenter() {
     setActivityLoading(true);
     try {
       const BASE = import.meta.env.VITE_API_URL ?? '';
-      const res = await fetch(`${BASE}/api/changelog?limit=20`, { headers: getAuthHeaders() });
+      const res = await fetch(`${BASE}/api/v1/changelog?limit=20`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error('Laden fehlgeschlagen');
       const data: ChangelogResponse | ActivityEntry[] = await res.json();
       // Handle both array and {entries: [...]} formats

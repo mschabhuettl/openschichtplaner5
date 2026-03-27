@@ -255,8 +255,8 @@ export default function SchichtKalibrator() {
     setLoading(true);
     try {
       const [empRes, grpRes] = await Promise.all([
-        fetch(`${API}/api/employees`, { headers: getAuthHeaders() }),
-        fetch(`${API}/api/groups`, { headers: getAuthHeaders() }),
+        fetch(`${API}/api/v1/employees`, { headers: getAuthHeaders() }),
+        fetch(`${API}/api/v1/groups`, { headers: getAuthHeaders() }),
       ]);
       const emps: Employee[] = await empRes.json();
       const grps: Group[] = await grpRes.json();
@@ -275,7 +275,7 @@ export default function SchichtKalibrator() {
     if (groups.length === 0) return;
     Promise.all(
       groups.map(g =>
-        fetch(`${API}/api/groups/${g.ID}/members`, { headers: getAuthHeaders() })
+        fetch(`${API}/api/v1/groups/${g.ID}/members`, { headers: getAuthHeaders() })
           .then(r => r.json())
           .then((members: { employee_id: number }[]) => ({ gid: g.ID, eids: members.map((m: { employee_id: number }) => m.employee_id) }))
           .catch(() => ({ gid: g.ID, eids: [] }))
@@ -288,7 +288,7 @@ export default function SchichtKalibrator() {
   }, [groups]);
 
   const saveEmployee = async (id: number, data: { HRSDAY: number; HRSWEEK: number; HRSMONTH: number }) => {
-    const res = await fetch(`${API}/api/employees/${id}`, {
+    const res = await fetch(`${API}/api/v1/employees/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
       body: JSON.stringify(data),

@@ -67,7 +67,7 @@ function BackupHistorySection({ onRestoreFromServer, refreshKey }: BackupHistory
     // Must include auth token as query param or use anchor trick with headers
     // Since we can't set headers on anchor, we'll fetch and create blob URL
     const headers = getAuthHeaders();
-    fetch(`${API}/api/admin/backups/${encodeURIComponent(filename)}/download`, { headers })
+    fetch(`${API}/api/v1/admin/backups/${encodeURIComponent(filename)}/download`, { headers })
       .then(r => r.blob())
       .then(blob => {
         const a = document.createElement('a');
@@ -197,7 +197,7 @@ function BackupSection({ onBackupCreated }: BackupSectionProps) {
     setLoading(true);
     try {
       const headers = getAuthHeaders();
-      const res = await fetch(`${API}/api/backup/download`, { headers });
+      const res = await fetch(`${API}/api/v1/backup/download`, { headers });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const blob = await res.blob();
       const cd = res.headers.get('Content-Disposition') ?? '';
@@ -294,7 +294,7 @@ function RestoreSection({ serverRestoreFile, onServerRestoreConsumed, onRestoreD
     try {
       const headers = getAuthHeaders();
       // Download the backup then re-upload as restore
-      const dlRes = await fetch(`${API}/api/admin/backups/${encodeURIComponent(filename)}/download`, { headers });
+      const dlRes = await fetch(`${API}/api/v1/admin/backups/${encodeURIComponent(filename)}/download`, { headers });
       if (!dlRes.ok) throw new Error(`Download fehlgeschlagen: HTTP ${dlRes.status}`);
       const blob = await dlRes.blob();
       const f = new File([blob], filename, { type: 'application/zip' });
@@ -459,7 +459,7 @@ function CompactSection() {
     setResult(null);
     setError(null);
     try {
-      const res = await fetch(`${API}/api/admin/compact`, { method: 'POST', headers: getAuthHeaders() });
+      const res = await fetch(`${API}/api/v1/admin/compact`, { method: 'POST', headers: getAuthHeaders() });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
       setResult(data);

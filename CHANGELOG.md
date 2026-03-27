@@ -7,6 +7,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.0-rc6] - 2026-03-27
+
+### Added
+- **Überstunden-Dashboard (Q071):** Visual bar chart on the overtime dashboard showing per-employee overtime balances at a glance. Color-coded bars (green/yellow/red) indicate healthy, borderline, and critical overtime levels. Integrates with existing `/api/v1/overtime/summary` endpoint.
+- **Schicht-Tausch Erweiterungen (Q072):** Shift swap requests now include in-app and email notifications for both parties on status changes. Full status history log (requested → accepted/rejected → approved/denied) displayed in the swap detail view. Auto-expiry: open swap requests automatically expire after a configurable number of days (default: 7).
+- **Recurring Shifts UI (Q073):** Frontend interface for managing recurring shift templates. Users can create, view, and delete recurring shift rules (weekly/biweekly) directly from the schedule view. A recurring badge (🔁) marks auto-generated shift instances.
+- **Abwesenheits-Statistiken (Q074):** New absence statistics views — per-employee breakdown, group comparison, and organization-wide overview. Charts show absence days by type (vacation, sick leave, other), month-by-month trends, and team absence calendars. Accessible via the Statistics section.
+- **Export-Scheduler UI (Q075):** Full CRUD interface for managing scheduled report exports. Users can create, edit, and delete export jobs with configurable recipient lists, report types, and schedules. A manual trigger button allows immediate on-demand delivery. Integrates with the existing `/api/v1/export-scheduler` backend.
+
+---
+
 ## [1.0.0-rc5] - 2026-03-27
 
 ### Added

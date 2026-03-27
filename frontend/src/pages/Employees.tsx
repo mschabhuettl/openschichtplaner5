@@ -815,6 +815,7 @@ export default function Employees() {
                     <td className="px-4 py-2 text-center">
                       <div className="flex gap-1 justify-center">
                         <button onClick={() => navigate(`/mitarbeiter/${emp.ID}`)} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs hover:bg-purple-200">{t.employees.actions.profile}</button>
+                        <button onClick={() => navigate(`/employees/${emp.ID}/timeline`)} className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs hover:bg-indigo-200">📅 Timeline</button>
                         {canAdmin && <button onClick={() => openEdit(emp)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">{t.employees.actions.edit}</button>}
                         {canAdmin && !emp.HIDE && <button onClick={() => handleDelete(emp)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">{t.employees.actions.deactivate}</button>}
                         {canAdmin && emp.HIDE && <button onClick={() => handleActivate(emp)} className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200">{t.employees.actions.reactivate}</button>}

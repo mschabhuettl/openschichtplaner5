@@ -58,6 +58,7 @@ const MeinProfil           = lazy(() => import('./pages/MeinProfil'));
 const MeinKalender         = lazy(() => import('./pages/MeinKalender'));
 const Teamkalender         = lazy(() => import('./pages/Teamkalender'));
 const UrlaubsTimeline      = lazy(() => import('./pages/UrlaubsTimeline'));
+const EmployeeTimeline     = lazy(() => import('./pages/EmployeeTimeline'));
 const Shifts            = lazy(() => import('./pages/Shifts'));
 const LeaveTypes        = lazy(() => import('./pages/LeaveTypes'));
 const Holidays          = lazy(() => import('./pages/Holidays'));
@@ -207,6 +208,7 @@ const navItems: NavItem[] = [
   { id: 'urlaub',           label: 'Urlaubsverwaltung', icon: '🏖️', group: 'Abwesenheiten', path: '/urlaub',          roles: ['Admin', 'Planer'] },
   { id: 'absence-stats',    label: 'Abwesenheits-Statistiken', icon: '📊', group: 'Abwesenheiten', path: '/absence-stats', roles: ['Admin', 'Planer'] },
   { id: 'urlaubs-timeline', label: 'Urlaubs-Timeline',  icon: '📊', group: 'Abwesenheiten', path: '/urlaubs-timeline' },
+  { id: 'employee-timeline', label: 'Mitarbeiter-Timeline', icon: '📅', group: 'Abwesenheiten', path: '/employee-timeline', roles: ['Admin', 'Planer'] },
   { id: 'schichtwuensche',  label: 'Schichtwünsche',    icon: '💬', group: 'Abwesenheiten', path: '/schichtwuensche' },
   { id: 'tauschboerse',   label: 'Tauschbörse',       icon: '🔄', group: 'Abwesenheiten', path: '/tauschboerse' },
 
@@ -830,6 +832,8 @@ function AppInner() {
             <Route path="/export" element={<PB name="Export"><RoleRoute allowedRoles={['Admin', 'Planer']}><Export /></RoleRoute></PB>} />
             <Route path="/import" element={<PB name="Import"><RoleRoute allowedRoles={['Admin']}><Import /></RoleRoute></PB>} />
             <Route path="/employees" element={<PB name="Mitarbeiter"><RoleRoute allowedRoles={['Admin', 'Planer']}><Employees /></RoleRoute></PB>} />
+            <Route path="/employees/:id/timeline" element={<PB name="MA-Timeline"><RoleRoute allowedRoles={['Admin', 'Planer']}><EmployeeTimeline /></RoleRoute></PB>} />
+            <Route path="/employee-timeline" element={<PB name="MA-Timeline"><RoleRoute allowedRoles={['Admin', 'Planer']}><EmployeeTimeline /></RoleRoute></PB>} />
             <Route path="/groups" element={<PB name="Gruppen"><RoleRoute allowedRoles={['Admin', 'Planer']}><Groups /></RoleRoute></PB>} />
             <Route path="/shifts" element={<PB name="Schichtarten"><RoleRoute allowedRoles={['Admin', 'Planer']}><Shifts /></RoleRoute></PB>} />
             <Route path="/leave-types" element={<PB name="Abwesenheitsarten"><RoleRoute allowedRoles={['Admin', 'Planer']}><LeaveTypes /></RoleRoute></PB>} />

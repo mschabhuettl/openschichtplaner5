@@ -271,8 +271,8 @@ export default function Shifts() {
       ) : (
         <>
           {/* Desktop: Table layout */}
-          <div className="hidden md:block bg-white rounded-lg shadow overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
+            <table className="w-full text-sm min-w-[600px]">
               <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
                 <tr>
                   <th className="px-4 py-2 text-left">Farbe</th>
@@ -334,62 +334,7 @@ export default function Shifts() {
             </table>
           </div>
 
-          {/* Mobile: Card layout */}
-          <div className="block md:hidden space-y-3">
-            {shifts.map(s => {
-              const times = s.TIMES_BY_WEEKDAY || {};
-              const weekdayTime = times['0'] || times['1'] || null;
-              const satTime = times['5'] || null;
-              const sunTime = times['6'] || null;
-              const indiv = hasIndividualTimes(s);
-              return (
-                <div key={s.ID} className="bg-white rounded-lg shadow p-4 border border-gray-100">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div
-                        className="w-14 h-12 rounded-lg border border-gray-200 flex items-center justify-center text-sm font-bold shadow-sm flex-shrink-0"
-                        style={{ backgroundColor: s.COLORBK_HEX, color: s.COLORBK_LIGHT ? '#333' : '#fff' }}
-                      >
-                        {s.SHORTNAME}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="font-bold text-gray-900 truncate">{s.NAME}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">
-                          {s.DURATION0 ? `${s.DURATION0}h` : '—'}
-                          {indiv
-                            ? <span className="ml-2 text-purple-600 font-semibold">Individuelle Zeiten</span>
-                            : weekdayTime && <span className="ml-2 font-mono">{weekdayTime.start}–{weekdayTime.end}</span>
-                          }
-                        </div>
-                        {!indiv && (satTime || sunTime) && (
-                          <div className="text-xs text-gray-600 font-mono">
-                            {satTime && <span>Sa: {satTime.start}–{satTime.end}</span>}
-                            {satTime && sunTime && ' · '}
-                            {sunTime && <span>So: {sunTime.start}–{sunTime.end}</span>}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex gap-1 flex-shrink-0">
-                      <button
-                        onClick={() => openEdit(s)}
-                        className="p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-base leading-none"
-                        title="Bearbeiten"
-                      >✏️</button>
-                      <button
-                        onClick={() => handleDelete(s)}
-                        className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-base leading-none"
-                        title="Ausblenden"
-                      >🗑️</button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-            {shifts.length === 0 && (
-              <div className="text-center py-8 text-gray-600">Keine Schichtarten</div>
-            )}
-          </div>
+          
         </>
       )}
 

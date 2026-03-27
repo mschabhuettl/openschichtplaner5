@@ -17,6 +17,7 @@ export { LoadingSpinner } from './LoadingSpinner';
 export { NotificationBell } from './NotificationBell';
 export { NotificationsPage } from './NotificationsPage';
 export { PageHeader } from './PageHeader';
+export { ResponsiveTable } from './ResponsiveTable';
 export { Skeleton, SkeletonText, SkeletonCard, SkeletonTable, SkeletonGrid } from './Skeleton';
 export { StatCard } from './StatCard';
 export type { StatCardAccent } from './StatCard';

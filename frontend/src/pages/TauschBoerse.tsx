@@ -7,6 +7,7 @@ import { useSSERefresh } from '../contexts/SSEContext';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useAuth } from '../contexts/AuthContext';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { ResponsiveTable } from '../components/ResponsiveTable';
 
 // ─── Status helpers ────────────────────────────────────────
 const STATUS_LABEL: Record<string, string> = {
@@ -634,10 +635,9 @@ export default function TauschBoerse() {
             ))}
           </div>
 
-          {/* Desktop Table */}
-          <div className="hidden sm:block bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+          {/* Table — scrolls horizontally on mobile */}
+          <ResponsiveTable minWidth="800px" className="bg-white rounded-xl border border-gray-200 shadow-sm">
+              <table className="w-full text-sm min-w-[700px]">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">#</th>
@@ -698,8 +698,7 @@ export default function TauschBoerse() {
                   ))}
                 </tbody>
               </table>
-            </div>
-          </div>
+          </ResponsiveTable>
           </>
         )}
       </div>

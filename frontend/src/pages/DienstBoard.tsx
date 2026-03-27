@@ -471,8 +471,8 @@ export default function DienstBoard() {
 
       {/* LIST VIEW */}
       {!loading && viewMode === 'list' && entries.length > 0 && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-x-auto">
+          <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="text-left px-4 py-2.5 font-semibold text-gray-600">Mitarbeiter</th>

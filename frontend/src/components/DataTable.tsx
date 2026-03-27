@@ -2,6 +2,7 @@
  * DataTable — generische Tabelle mit Sortierung, Pagination und Suche
  */
 import { useState, useMemo } from 'react';
+import { ResponsiveTable } from './ResponsiveTable';
 
 export interface Column<T> {
   key: keyof T | string;
@@ -148,7 +149,7 @@ export function DataTable<T>({
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <ResponsiveTable stickyFirstCol minWidth="600px">
         <table className="w-full text-sm border-collapse">
           <thead className="sticky top-0 z-10">
             <tr className="bg-slate-700 text-white">
@@ -185,7 +186,7 @@ export function DataTable<T>({
             ))}
           </tbody>
         </table>
-      </div>
+      </ResponsiveTable>
 
       {/* Pagination */}
       {paginationEnabled && totalPages > 1 && (

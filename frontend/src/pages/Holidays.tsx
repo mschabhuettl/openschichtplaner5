@@ -261,7 +261,7 @@ export default function Holidays() {
         <LoadingSpinner />
       ) : (
         <div className="bg-white rounded-lg shadow overflow-x-auto">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm min-w-[500px]">
             <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
               <tr>
                 <th className="px-4 py-2 text-left">Datum</th>

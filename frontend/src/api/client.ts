@@ -854,6 +854,26 @@ export interface OvertimeSummary {
   employee_count: number;
 }
 
+// ─── Overtime Dashboard Types (Q071) ──────────────────────
+export interface OvertimeDashboardRow {
+  employee_id: number;
+  employee_name: string;
+  employee_short: string;
+  contract_hours: number;
+  expected_hours: number;
+  actual_hours: number;
+  difference: number;
+  shifts_count: number;
+}
+
+export interface OvertimeDashboardResponse {
+  year: number;
+  month: number;
+  group_id: number | null;
+  count: number;
+  employees: OvertimeDashboardRow[];
+}
+
 // ─── Employee Detailed Stats (TASK-12) ────────────────────
 export interface EmployeeMonthStats {
   month: number;
@@ -1567,6 +1587,15 @@ export const api = {
     if (groupId != null) qs.set('group_id', String(groupId));
     return fetchJSON<{ year: number; group_id: number | null; employees: OvertimeRow[]; summary: OvertimeSummary }>(
       `/api/v1/overtime-summary?${qs.toString()}`
+    );
+  },
+
+  // ─── Overtime Dashboard (Q071) ────────────────────────────
+  getOvertimeDashboard: (year: number, month: number, groupId?: number) => {
+    const qs = new URLSearchParams({ year: String(year), month: String(month) });
+    if (groupId != null) qs.set('group_id', String(groupId));
+    return fetchJSON<OvertimeDashboardResponse>(
+      `/api/v1/overtime/summary?${qs.toString()}`
     );
   },
 

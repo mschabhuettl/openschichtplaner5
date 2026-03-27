@@ -7,6 +7,70 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.0.0] - 2026-03-27
+
+### 🎉 Production Release
+
+OpenSchichtplaner5 v1.0.0 — the first stable production release. A fully-featured, open-source web replacement for the proprietary Windows software Schichtplaner5, reading and writing the original DBF database files directly.
+
+### Added (since rc3)
+- **Onboarding Checklist (Q085):** Non-blocking checklist card on the Dashboard for new admins. Tracks setup progress (company, shift types, employees, first schedule) with localStorage persistence and dismiss button. Auto-detects completion via API checks.
+- **Qualifikations-Matrix (Q084):** Backend API for employee qualifications/skills matrix with CRUD endpoints. Enables tracking of certifications, training, and skill levels per employee.
+- **Konflikt-Report UI (Q083):** Dedicated conflict report page with summary bar, type filters (overlap, understaffing, rule violations), and CSV/XLSX export.
+- **Schedule PDF Export (Q082):** Print-optimized HTML-based PDF export endpoint for schedule data.
+- **Arbeitszeit-Regelwerk UI (Q081):** Frontend interface for configuring working time rules (max hours/day, minimum rest, max consecutive days) with violation highlighting in schedule view.
+- **Notification Settings (Q080):** Per-user email notification preferences with toggleable event types (shift changes, swaps, approvals, comments).
+- **Arbeitszeit-Regelwerk Backend (Q079):** Configurable rule engine for working time compliance with automated violation detection.
+- **Mitarbeiter-Timeline (Q078):** Horizontal CSS timeline showing shifts and absences per employee on a unified time axis.
+- **Schicht-Konflikt-Report Backend (Q077):** Automated conflict detection covering overlap, double-booking, and understaffed periods with severity indicators.
+- **Abwesenheits-Statistiken UI (Q076):** Multi-tab absence statistics with overview, group, and employee views. CSS-based charts for type distribution and monthly trends.
+- **Export-Scheduler UI (Q075):** Full CRUD interface for scheduled report exports with recipient management and manual trigger.
+- **Abwesenheits-Statistiken Backend (Q074):** Per-employee breakdown, group comparison, and organization-wide absence statistics.
+- **Recurring Shifts UI (Q073):** Frontend for managing recurring shift templates (weekly/biweekly) with 🔁 badge on auto-generated instances.
+- **Schicht-Tausch Erweiterungen (Q072):** Swap request notifications (in-app + email), full status history log, auto-expiry after configurable days.
+- **Überstunden-Dashboard (Q071):** Visual bar chart with color-coded overtime balances per employee (green/yellow/red).
+- **Export-Scheduler Backend (Q070):** Automated weekly report delivery via email with CRUD and manual trigger endpoints.
+- **Schichtplan-Kommentare (Q069):** Day-level notes with 📝 indicator and inline popover editor.
+- **Überstunden-Tracking (Q068):** Per-employee overtime balance and organization-wide summary endpoints.
+- **Mitarbeiter-Vergleichsansicht (Q067):** Side-by-side employee comparison via URL params or Compare button.
+- **Recurring Shifts Backend (Q066):** Weekly/biweekly repeat patterns with generate endpoint.
+- **Dashboard Performance-Widget (Q065):** Live system metrics (API response time, DB status, memory, disk).
+- **CSV Employee Import (Q064):** Bulk employee creation from CSV with validation and duplicate detection.
+- **Print Layout Improvements (Q063):** Enhanced A4 landscape print stylesheet.
+- **In-App Changelog (Q060):** Changelog page accessible from within the application.
+- **Soft-Delete Employees (Q059):** Active/inactive filter with soft-delete support.
+- **Keyboard Shortcuts (Q058):** Global keyboard shortcuts with help modal.
+- **Structured Logging (Q057):** JSON logging with request IDs for backend.
+- **Empty State Illustrations (Q056):** Friendly empty states for all major list pages.
+- **Content-Security-Policy (Q054):** CSP headers + Subresource Integrity (SRI).
+- **Extended Health Check (Q053):** Structured metrics for monitoring.
+- **Bulk Import UX (Q052):** Drag-and-drop file upload with validation preview.
+- **Excel Export (Q051):** XLSX export for all data endpoints.
+- **Responsive Tables (Q050):** Horizontal scroll on mobile for all data tables.
+- **Webhook System (Q049):** Backend webhook delivery for integration with external systems.
+- **Dashboard Company Context (Q048):** Active company display in dashboard header.
+- **Production Docker Compose (Q047):** Nginx reverse proxy + production-hardened Docker setup.
+- **Playwright E2E in CI (Q046):** End-to-end tests running in GitHub Actions.
+- **Multi-Tenant Companies (Q044):** Company CRUD API with tenant isolation.
+
+### Improved
+- 8 stabilization batches (S003–S012) with comprehensive bug fixes and test coverage
+- API versioning under `/api/v1/` with deprecation headers on legacy routes
+- Global search bar (`Ctrl+K`) across employees, groups, and shifts
+- Enhanced conflict detection with HTTP 409 responses
+- Improved auto-planner considering availability, weekly limits, and assigned hours
+- Consistent loading animations and error states across all pages
+- Rate limiting on all API endpoints
+- Stricter input validation on all form fields
+
+### Infrastructure
+- Full CI/CD pipeline with pytest, ruff, ESLint, TypeScript checks, and Playwright E2E
+- Docker multi-arch builds (amd64 + arm64)
+- Automated GitHub Container Registry publishing
+- SQLite backup/restore with automatic pre-restore backups
+
+---
+
 ## [1.0.0-rc7] - 2026-03-27
 
 ### Added

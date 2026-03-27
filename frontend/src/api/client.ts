@@ -1042,7 +1042,8 @@ export const api = {
   getStats: () => fetchJSON<Stats>('/api/stats'),
   getDashboardSummary: (year: number, month: number) =>
     fetchJSON<DashboardSummary>(`/api/dashboard/summary?year=${year}&month=${month}`),
-  getEmployees: () => fetchJSON<Employee[]>('/api/employees'),
+  getEmployees: (includeHidden?: boolean) =>
+    fetchJSON<Employee[]>(`/api/employees${includeHidden ? '?include_hidden=true' : ''}`),
   getGroups: () => fetchJSON<Group[]>('/api/groups'),
   getShifts: () => fetchJSON<ShiftType[]>('/api/shifts'),
   getLeaveTypes: () => fetchJSON<LeaveType[]>('/api/leave-types'),
@@ -1240,7 +1241,9 @@ export const api = {
   updateEmployee: (id: number, data: Partial<Employee>) =>
     putJSON<{ ok: boolean; record: unknown }>(`/api/employees/${id}`, data),
   deleteEmployee: (id: number) =>
-    deleteReq<{ ok: boolean; hidden: number }>(`/api/employees/${id}`),
+    deleteReq<{ ok: boolean; deactivated: number }>(`/api/employees/${id}`),
+  activateEmployee: (id: number) =>
+    putJSON<{ ok: boolean; activated: number }>(`/api/employees/${id}/activate`, {}),
 
   // ─── CRUD: Groups ─────────────────────────────────────────
   createGroup: (data: Partial<Group>) =>

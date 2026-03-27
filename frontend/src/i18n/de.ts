@@ -230,6 +230,8 @@ const de = {
       profile: '🪪 Profil',
       edit: 'Bearbeiten',
       hide: 'Ausblenden',
+      deactivate: 'Deaktivieren',
+      reactivate: 'Reaktivieren',
     },
     salutation: {
       mr: 'Herr',

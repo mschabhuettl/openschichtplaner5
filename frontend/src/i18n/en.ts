@@ -232,6 +232,8 @@ const en: TranslationKeys = {
       profile: '🪪 Profile',
       edit: 'Edit',
       hide: 'Hide',
+      deactivate: 'Deactivate',
+      reactivate: 'Reactivate',
     },
     salutation: {
       mr: 'Mr.',

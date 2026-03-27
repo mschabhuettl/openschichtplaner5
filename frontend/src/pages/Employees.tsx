@@ -366,7 +366,7 @@ export default function Employees() {
 
   const load = () => {
     setLoading(true);
-    api.getEmployees().then(data => {
+    api.getEmployees(true).then(data => {
       setEmployees(data);
       setLoading(false);
     }).catch((err) => { setLoading(false); showToast('Mitarbeiter konnten nicht geladen werden. ' + String(err), 'error'); });
@@ -572,13 +572,24 @@ export default function Employees() {
   };
 
   const handleDelete = async (emp: Employee) => {
-    if (!await confirmDialog({ message: `Mitarbeiter "${emp.NAME} ${emp.FIRSTNAME}" wirklich ausblenden?`, danger: true })) return;
+    if (!await confirmDialog({ message: `Mitarbeiter "${emp.NAME} ${emp.FIRSTNAME}" wirklich deaktivieren?\n\nHistorische Daten (Schichten, Abwesenheiten) bleiben erhalten.`, danger: true })) return;
     try {
       await api.deleteEmployee(emp.ID);
-      showToast('Mitarbeiter ausgeblendet', 'success');
+      showToast('Mitarbeiter deaktiviert', 'success');
       load();
     } catch (e: unknown) {
-      showToast(e instanceof Error ? e.message : 'Fehler beim Löschen', 'error');
+      showToast(e instanceof Error ? e.message : 'Fehler beim Deaktivieren', 'error');
+    }
+  };
+
+  const handleActivate = async (emp: Employee) => {
+    if (!await confirmDialog({ message: `Mitarbeiter "${emp.NAME} ${emp.FIRSTNAME}" reaktivieren?` })) return;
+    try {
+      await api.activateEmployee(emp.ID);
+      showToast('Mitarbeiter reaktiviert ✓', 'success');
+      load();
+    } catch (e: unknown) {
+      showToast(e instanceof Error ? e.message : 'Fehler beim Reaktivieren', 'error');
     }
   };
 
@@ -765,7 +776,7 @@ export default function Employees() {
               </thead>
               <tbody>
                 {filtered.map((emp, i) => (
-                  <tr key={emp.ID} className={`border-b ${selectedIds.has(emp.ID) ? 'bg-blue-50 dark:bg-blue-900/20' : i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'} hover:bg-blue-50 transition-colors`}>
+                  <tr key={emp.ID} className={`border-b ${emp.HIDE ? 'opacity-60' : ''} ${selectedIds.has(emp.ID) ? 'bg-blue-50 dark:bg-blue-900/20' : i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'} hover:bg-blue-50 transition-colors`}>
                     {canAdmin && <td className="px-3 py-2">
                       <input
                         type="checkbox"
@@ -775,7 +786,10 @@ export default function Employees() {
                       />
                     </td>}
                     <td className="px-4 py-2 text-gray-500">{emp.NUMBER}</td>
-                    <td className="px-4 py-2 font-semibold">{emp.NAME}</td>
+                    <td className="px-4 py-2 font-semibold">
+                      {emp.NAME}
+                      {emp.HIDE && <span className="ml-2 text-[10px] font-semibold px-1.5 py-0.5 bg-gray-300 text-gray-700 rounded-full uppercase">Inaktiv</span>}
+                    </td>
                     <td className="px-4 py-2">{emp.FIRSTNAME}</td>
                     <td className="px-4 py-2 text-gray-500">{emp.SHORTNAME}</td>
                     <td className="px-4 py-2 text-right text-gray-600">{emp.HRSDAY?.toFixed(1)}h</td>
@@ -793,7 +807,8 @@ export default function Employees() {
                       <div className="flex gap-1 justify-center">
                         <button onClick={() => navigate(`/mitarbeiter/${emp.ID}`)} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs hover:bg-purple-200">{t.employees.actions.profile}</button>
                         {canAdmin && <button onClick={() => openEdit(emp)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">{t.employees.actions.edit}</button>}
-                        {canAdmin && <button onClick={() => handleDelete(emp)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">{t.employees.actions.hide}</button>}
+                        {canAdmin && !emp.HIDE && <button onClick={() => handleDelete(emp)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">{t.employees.actions.deactivate}</button>}
+                        {canAdmin && emp.HIDE && <button onClick={() => handleActivate(emp)} className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200">{t.employees.actions.reactivate}</button>}
                       </div>
                     </td>
                   </tr>

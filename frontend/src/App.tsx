@@ -37,6 +37,7 @@ const Jahresuebersicht  = lazy(() => import('./pages/Jahresuebersicht'));
 const Personaltabelle   = lazy(() => import('./pages/Personaltabelle'));
 const Statistiken       = lazy(() => import('./pages/Statistiken'));
 const Urlaub            = lazy(() => import('./pages/Urlaub'));
+const AbsenceStats      = lazy(() => import('./pages/AbsenceStats'));
 const Schichtmodell     = lazy(() => import('./pages/Schichtmodell'));
 const Personalbedarf    = lazy(() => import('./pages/Personalbedarf'));
 const Jahresabschluss   = lazy(() => import('./pages/Jahresabschluss'));
@@ -204,6 +205,7 @@ const navItems: NavItem[] = [
 
   // ── Abwesenheiten ────────────────────────────────────────────
   { id: 'urlaub',           label: 'Urlaubsverwaltung', icon: '🏖️', group: 'Abwesenheiten', path: '/urlaub',          roles: ['Admin', 'Planer'] },
+  { id: 'absence-stats',    label: 'Abwesenheits-Statistiken', icon: '📊', group: 'Abwesenheiten', path: '/absence-stats', roles: ['Admin', 'Planer'] },
   { id: 'urlaubs-timeline', label: 'Urlaubs-Timeline',  icon: '📊', group: 'Abwesenheiten', path: '/urlaubs-timeline' },
   { id: 'schichtwuensche',  label: 'Schichtwünsche',    icon: '💬', group: 'Abwesenheiten', path: '/schichtwuensche' },
   { id: 'tauschboerse',   label: 'Tauschbörse',       icon: '🔄', group: 'Abwesenheiten', path: '/tauschboerse' },
@@ -803,6 +805,7 @@ function AppInner() {
             <Route path="/personaltabelle" element={<PB name="Personaltabelle"><Personaltabelle /></PB>} />
             <Route path="/statistiken" element={<PB name="Statistiken"><RoleRoute allowedRoles={['Admin', 'Planer']}><Statistiken /></RoleRoute></PB>} />
             <Route path="/urlaub" element={<PB name="Urlaubsverwaltung"><RoleRoute allowedRoles={['Admin', 'Planer']}><Urlaub /></RoleRoute></PB>} />
+            <Route path="/absence-stats" element={<PB name="Abwesenheits-Statistiken"><RoleRoute allowedRoles={['Admin', 'Planer']}><AbsenceStats /></RoleRoute></PB>} />
             <Route path="/schichtmodell" element={<PB name="Schichtmodelle"><RoleRoute allowedRoles={['Admin', 'Planer']}><Schichtmodell /></RoleRoute></PB>} />
             <Route path="/recurring-shifts" element={<PB name="Wiederkehrende Schichten"><RoleRoute allowedRoles={['Admin', 'Planer']}><RecurringShifts /></RoleRoute></PB>} />
             <Route path="/personalbedarf" element={<PB name="Personalbedarf"><RoleRoute allowedRoles={['Admin', 'Planer']}><Personalbedarf /></RoleRoute></PB>} />

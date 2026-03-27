@@ -110,7 +110,8 @@ describe('Groups page', () => {
     vi.mocked(api.getGroups).mockResolvedValue([]);
     renderGroups();
     await waitFor(() => {
-      expect(screen.getByText('Noch keine Gruppen angelegt')).toBeTruthy();
+      // EmptyState component is rendered with title "Keine Gruppen vorhanden"
+      expect(screen.getByText('Keine Gruppen vorhanden')).toBeTruthy();
     });
   });
 });

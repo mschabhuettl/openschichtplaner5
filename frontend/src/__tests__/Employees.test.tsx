@@ -166,7 +166,8 @@ describe('Employees', () => {
     await waitFor(() => {
       expect(screen.queryByText('Müller')).toBeNull();
       expect(screen.queryByText('Schmidt')).toBeNull();
-      expect(screen.getByText('Keine Mitarbeiter gefunden')).toBeTruthy();
+      // EmptyState component is rendered with title "Noch keine Mitarbeiter"
+      expect(screen.getByText('Noch keine Mitarbeiter')).toBeTruthy();
     });
   });
 

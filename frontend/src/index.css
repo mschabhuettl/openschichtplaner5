@@ -281,6 +281,26 @@ html.dark .text-emerald-700 { color: #6ee7b7 !important; }
 html.dark .text-cyan-600   { color: #22d3ee !important; }
 html.dark .text-pink-600   { color: #f472b6 !important; }
 html.dark .text-rose-600   { color: #fb7185 !important; }
+html.dark .text-rose-700   { color: #fda4af !important; }
+html.dark .text-sky-600    { color: #38bdf8 !important; }
+html.dark .text-sky-700    { color: #7dd3fc !important; }
+html.dark .text-violet-600 { color: #a78bfa !important; }
+html.dark .text-violet-700 { color: #c4b5fd !important; }
+
+/* ── Dark Mode: Additional tinted backgrounds ────────────────── */
+html.dark .bg-sky-50    { background-color: #0c1929 !important; }
+html.dark .bg-sky-100   { background-color: #0e2d4a !important; }
+html.dark .bg-rose-50   { background-color: #2d0d18 !important; }
+html.dark .bg-rose-100  { background-color: #3d1525 !important; }
+html.dark .bg-violet-50 { background-color: #1a0d2e !important; }
+html.dark .bg-violet-100 { background-color: #2a1845 !important; }
+html.dark .bg-lime-50   { background-color: #1a2200 !important; }
+html.dark .bg-fuchsia-50 { background-color: #2d0d2a !important; }
+
+/* ── Dark Mode: Additional badge overrides ───────────────────── */
+html.dark .bg-sky-100.text-sky-700     { background-color: #0e2d4a !important; color: #7dd3fc !important; }
+html.dark .bg-rose-100.text-rose-700   { background-color: #3d1525 !important; color: #fda4af !important; }
+html.dark .bg-rose-100.text-rose-800   { background-color: #3d1525 !important; color: #fecdd3 !important; }
 
 /* ── Dark Mode: Accent backgrounds (buttons) — keep saturated ── */
 /* Blue, red, green action buttons stay as is */

@@ -2106,30 +2106,30 @@ export const api = {
     if (params.employee_id != null) q.set('employee_id', String(params.employee_id));
     if (params.group_id != null) q.set('group_id', String(params.group_id));
     const qs = q.toString();
-    return fetchJSON<RecurringShift[]>(`/api/shifts/recurring${qs ? `?${qs}` : ''}`);
+    return fetchJSON<RecurringShift[]>(`/api/v1/shifts/recurring${qs ? `?${qs}` : ''}`);
   },
   createRecurringShift: (data: RecurringShiftCreate) =>
-    postJSON<RecurringShift>('/api/shifts/recurring', data),
+    postJSON<RecurringShift>('/api/v1/shifts/recurring', data),
   deleteRecurringShift: (id: number) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/shifts/recurring/${id}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/shifts/recurring/${id}`),
   generateRecurringShift: (id: number, fromDate: string, toDate: string) =>
-    postJSON<RecurringShiftGenerateResult>(`/api/shifts/recurring/${id}/generate`, { from_date: fromDate, to_date: toDate }),
+    postJSON<RecurringShiftGenerateResult>(`/api/v1/shifts/recurring/${id}/generate`, { from_date: fromDate, to_date: toDate }),
 
   // ─── Export Scheduler (Q070 / Q075) ──────────────────────────
   getExportSchedules: () =>
-    fetchJSON<ExportSchedule[]>('/api/export-scheduler/schedules'),
+    fetchJSON<ExportSchedule[]>('/api/v1/export-scheduler/schedules'),
 
   createExportSchedule: (data: ExportScheduleCreate) =>
-    postJSON<ExportSchedule>('/api/export-scheduler/schedules', data),
+    postJSON<ExportSchedule>('/api/v1/export-scheduler/schedules', data),
 
   updateExportSchedule: (id: number, data: ExportScheduleUpdate) =>
-    putJSON<ExportSchedule>(`/api/export-scheduler/schedules/${id}`, data),
+    putJSON<ExportSchedule>(`/api/v1/export-scheduler/schedules/${id}`, data),
 
   deleteExportSchedule: (id: number) =>
-    deleteReq<{ ok: boolean; deleted: number }>(`/api/export-scheduler/schedules/${id}`),
+    deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/export-scheduler/schedules/${id}`),
 
   runExportSchedule: (id: number) =>
-    postJSON<ExportRunResult>(`/api/export-scheduler/schedules/${id}/run`, {}),
+    postJSON<ExportRunResult>(`/api/v1/export-scheduler/schedules/${id}/run`, {}),
 
   // ── Schedule Comments (Q069) ────────────────────────────────
   getScheduleComments: (params: { group_id?: number; from?: string; to?: string }) => {

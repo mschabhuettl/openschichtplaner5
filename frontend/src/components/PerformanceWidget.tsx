@@ -88,7 +88,7 @@ export default function PerformanceWidget() {
     setError(null);
     try {
       const start = performance.now();
-      const res = await fetch('/api/health');
+      const res = await fetch('/api/v1/health');
       const responseTimeMs = Math.round(performance.now() - start);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const health: HealthResponse = await res.json();

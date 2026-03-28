@@ -12,6 +12,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { EmptyState } from '../components/EmptyState';
+import EmployeeAvatar from '../components/EmployeeAvatar';
+import PhotoCropDialog from '../components/PhotoCropDialog';
 import { useT } from '../i18n';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
@@ -363,6 +365,7 @@ export default function Employees() {
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
   const [photoUploading, setPhotoUploading] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -400,12 +403,19 @@ export default function Employees() {
     }
   }, [showModal, editId]);
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || editId === null) return;
+    if (!file) return;
+    setCropFile(file);
+    if (photoInputRef.current) photoInputRef.current.value = '';
+  };
+
+  const handleCropConfirm = async (file: File, crop: { x: number; y: number; width: number; height: number }) => {
+    if (editId === null) return;
+    setCropFile(null);
     setPhotoUploading(true);
     try {
-      await api.uploadEmployeePhoto(editId, file);
+      await api.uploadEmployeePhoto(editId, file, crop);
       const url = api.getEmployeePhotoUrl(editId);
       setPhotoUrl(url + '?t=' + Date.now());
       showToast('Foto hochgeladen ✓', 'success');
@@ -413,7 +423,6 @@ export default function Employees() {
       showToast(err instanceof Error ? err.message : 'Upload fehlgeschlagen', 'error');
     } finally {
       setPhotoUploading(false);
-      if (photoInputRef.current) photoInputRef.current.value = '';
     }
   };
 
@@ -773,6 +782,7 @@ export default function Employees() {
                       title="Alle auswählen"
                     />
                   </th>}
+                  <th className="px-2 py-2 w-10"></th>
                   <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[60px]" onClick={() => handleEmpSort('number')}>{t.employees.columns.number}{sortIcon('number')}</th>
                   <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[120px]" onClick={() => handleEmpSort('name')}>{t.employees.columns.name}{sortIcon('name')}</th>
                   <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[100px]" onClick={() => handleEmpSort('firstname')}>{t.employees.columns.firstname}{sortIcon('firstname')}</th>
@@ -794,6 +804,9 @@ export default function Employees() {
                         className="cursor-pointer"
                       />
                     </td>}
+                    <td className="px-2 py-2 w-10">
+                      <EmployeeAvatar empId={emp.ID} name={emp.NAME} firstname={emp.FIRSTNAME} size={28} />
+                    </td>
                     <td className="px-4 py-2 text-gray-500">{emp.NUMBER}</td>
                     <td className="px-4 py-2 font-semibold">
                       {emp.NAME}
@@ -834,7 +847,7 @@ export default function Employees() {
                   />
                 )}
                 {filtered.length === 0 && employees.length > 0 && (
-                  <tr><td colSpan={canAdmin ? 9 : 8} className="text-center py-8 text-gray-600">{t.employees.noResults}</td></tr>
+                  <tr><td colSpan={canAdmin ? 10 : 9} className="text-center py-8 text-gray-600">{t.employees.noResults}</td></tr>
                 )}
               </tbody>
             </table>
@@ -912,9 +925,9 @@ export default function Employees() {
                     <input
                       ref={photoInputRef}
                       type="file"
-                      accept="image/jpeg,image/png,image/gif"
+                      accept="image/jpeg,image/png,image/gif,image/webp"
                       className="hidden"
-                      onChange={handlePhotoUpload}
+                      onChange={handlePhotoSelect}
                     />
                   </div>
                 )}
@@ -1286,6 +1299,15 @@ export default function Employees() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Photo Crop Dialog */}
+      {cropFile && (
+        <PhotoCropDialog
+          file={cropFile}
+          onConfirm={handleCropConfirm}
+          onCancel={() => setCropFile(null)}
+        />
       )}
     </div>
   );

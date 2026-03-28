@@ -10,6 +10,7 @@ import { useToast } from './hooks/useToast';
 import { useOnlineStatusWithFlash } from './hooks/useOnlineStatus';
 import { trackRecentPage } from './utils/recentPages';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
+import { useFocusOnNavigate } from './hooks/useFocusOnNavigate';
 import WarningsCenter from './components/WarningsCenter';
 import { NotificationBell } from './components/NotificationBell';
 import { useTour } from './components/GuidedTour';
@@ -409,6 +410,9 @@ function AppInner() {
   const isAdmin = user?.ADMIN === true || user?.role === 'Admin' || isDevMode;
   const [showSetupWizard, dismissSetupWizard] = useFirstTimeSetup(isAdmin);
 
+  // Focus management: move focus to main content after route changes
+  useFocusOnNavigate('main-content');
+
   // Global keyboard shortcuts via extracted hook
   useKeyboardShortcuts({
     navigate,
@@ -693,7 +697,7 @@ function AppInner() {
 
       {/* Erste Schritte Modal */}
       {quickHelpOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setQuickHelpOpen(false)} role="dialog" aria-modal="true" aria-labelledby="quick-help-title">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setQuickHelpOpen(false)} onKeyDown={e => { if (e.key === 'Escape') setQuickHelpOpen(false); }} role="dialog" aria-modal="true" aria-labelledby="quick-help-title">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 id="quick-help-title" className="text-lg font-bold text-gray-800 dark:text-gray-100">📖 Erste Schritte</h2>
@@ -801,7 +805,7 @@ function AppInner() {
           <ThemeToggle size="sm" />
         </header>
 
-        <main id="main-content" className="flex-1 overflow-auto pb-14 md:pb-0">
+        <main id="main-content" tabIndex={-1} className="flex-1 overflow-auto pb-14 md:pb-0 outline-none">
           {/* Per-page Suspense + ErrorBoundary via <PB> wrapper */}
           <Routes>
             <Route path="/" element={<PB name="Dashboard"><Dashboard /></PB>} />

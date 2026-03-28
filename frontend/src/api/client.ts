@@ -1542,10 +1542,23 @@ export const api = {
   // ─── Employee Photo ────────────────────────────────────────
   getEmployeePhotoUrl: (id: number): string => `${BASE_URL}/api/v1/employees/${id}/photo`,
 
-  uploadEmployeePhoto: async (id: number, file: File): Promise<{ ok: boolean; photo_url: string }> => {
+  uploadEmployeePhoto: async (
+    id: number,
+    file: File,
+    crop?: { x: number; y: number; width: number; height: number },
+  ): Promise<{ ok: boolean; photo_url: string }> => {
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch(`${BASE_URL}/api/v1/employees/${id}/photo`, {
+    const params = new URLSearchParams();
+    if (crop && crop.width > 0 && crop.height > 0) {
+      params.set('crop_x', String(Math.round(crop.x)));
+      params.set('crop_y', String(Math.round(crop.y)));
+      params.set('crop_w', String(Math.round(crop.width)));
+      params.set('crop_h', String(Math.round(crop.height)));
+    }
+    const qs = params.toString();
+    const url = `${BASE_URL}/api/v1/employees/${id}/photo${qs ? '?' + qs : ''}`;
+    const res = await fetch(url, {
       method: 'POST',
       credentials: 'include',
       body: formData,

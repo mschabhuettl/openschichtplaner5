@@ -29,3 +29,5 @@ export { trackRecentPage } from './SpotlightSearch';
 export { default as KeyboardShortcutsModal } from './KeyboardShortcutsModal';
 export { default as WarningsCenter } from './WarningsCenter';
 export type { Warning } from './WarningsCenter';
+export { default as EmployeeAvatar } from './EmployeeAvatar';
+export { default as PhotoCropDialog } from './PhotoCropDialog';

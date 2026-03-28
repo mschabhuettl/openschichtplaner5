@@ -91,6 +91,7 @@ const OnboardingWizard    = lazy(() => import('./pages/OnboardingWizard'));
 const SchichtBriefing     = lazy(() => import('./pages/SchichtBriefing'));
 const AuditLog            = lazy(() => import('./pages/AuditLog'));
 const HealthDashboard     = lazy(() => import('./pages/HealthDashboard'));
+const RateLimitDashboard  = lazy(() => import('./pages/RateLimitDashboard'));
 const NotfallPlan         = lazy(() => import('./pages/NotfallPlan'));
 const Leitwand            = lazy(() => import('./pages/Leitwand'));
 const Simulation          = lazy(() => import('./pages/Simulation'));
@@ -277,6 +278,7 @@ const navItems: NavItem[] = [
   { id: 'email-settings',    label: 'E-Mail',               icon: '📧', group: 'Administration', path: '/email-settings',     roles: ['Admin'] },
   { id: 'export-scheduler',  label: 'Export-Zeitpläne',     icon: '📤', group: 'Administration', path: '/export-scheduler',   roles: ['Admin'] },
   { id: 'auditlog',           label: 'Audit-Log',            icon: '🔍', group: 'Administration', path: '/auditlog',           roles: ['Admin', 'Planer'] },
+  { id: 'rate-limits',        label: 'Rate-Limits',          icon: '🚦', group: 'Administration', path: '/rate-limits',        roles: ['Admin'] },
   { id: 'health',             label: 'System Health',        icon: '🩺', group: 'Administration', path: '/health',             roles: ['Admin'] },
   { id: 'protokoll',          label: 'Protokoll',            icon: '📋', group: 'Administration', path: '/protokoll',          roles: ['Admin'] },
   { id: 'druckvorschau',      label: 'Druckvorschau',        icon: '🖨️', group: 'Administration', path: '/druckvorschau' },
@@ -874,6 +876,7 @@ function AppInner() {
             <Route path="/schichtbriefing" element={<PB name="Schicht-Briefing"><SchichtBriefing /></PB>} />
             <Route path="/onboarding" element={<PB name="Onboarding-Wizard"><OnboardingWizard /></PB>} />
             <Route path="/auditlog" element={<PB name="Audit-Log"><RoleRoute allowedRoles={['Admin', 'Planer']}><AuditLog /></RoleRoute></PB>} />
+            <Route path="/rate-limits" element={<PB name="Rate-Limits"><RoleRoute allowedRoles={['Admin']}><RateLimitDashboard /></RoleRoute></PB>} />
             <Route path="/health" element={<PB name="System Health"><RoleRoute allowedRoles={['Admin']}><HealthDashboard /></RoleRoute></PB>} />
             <Route path="/export-scheduler" element={<PB name="Export-Zeitpläne"><RoleRoute allowedRoles={['Admin']}><ExportScheduler /></RoleRoute></PB>} />
             <Route path="/work-time-rules" element={<PB name="Arbeitszeitregeln"><RoleRoute allowedRoles={['Admin', 'Planer']}><WorkTimeRules /></RoleRoute></PB>} />

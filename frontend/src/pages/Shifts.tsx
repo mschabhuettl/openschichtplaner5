@@ -248,7 +248,7 @@ export default function Shifts() {
             <button
               onClick={() => setShiftSearch('')}
               className="px-2 py-1.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded border border-red-200"
-              title="Suche zurücksetzen"
+              title="Suche zurücksetzen" aria-label="Suche zurücksetzen"
             >✕</button>
           )}
           <button

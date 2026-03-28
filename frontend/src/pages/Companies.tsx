@@ -139,7 +139,7 @@ export default function Companies() {
       {error && (
         <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-lg text-sm">
           {error}
-          <button onClick={() => setError(null)} className="ml-2 underline">×</button>
+          <button onClick={() => setError(null)} className="ml-2 underline" aria-label="Fehlermeldung schließen">×</button>
         </div>
       )}
 

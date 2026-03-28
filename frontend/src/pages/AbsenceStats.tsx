@@ -577,12 +577,14 @@ export default function AbsenceStats() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 border-b border-gray-200 dark:border-slate-600">
+      <div role="tablist" aria-label="Abwesenheits-Statistik Tabs" className="flex gap-1 mb-6 border-b border-gray-200 dark:border-slate-600"
+        onKeyDown={(e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); const ci = tabs.findIndex(t => t.id === activeTab); const ni = e.key === 'ArrowRight' ? (ci + 1) % tabs.length : (ci - 1 + tabs.length) % tabs.length; setActiveTab(tabs[ni].id); (document.querySelector(`[data-tab="${tabs[ni].id}"]`) as HTMLElement)?.focus(); } }}>
         {tabs.map(tab => (
           <button
             key={tab.id}
             role="tab"
             aria-selected={activeTab === tab.id}
+            tabIndex={activeTab === tab.id ? 0 : -1}
             data-tab={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${

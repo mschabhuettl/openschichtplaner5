@@ -732,7 +732,7 @@ export default function MitarbeiterProfil() {
                                 }));
                               }}
                               className="text-red-400 hover:text-red-600 text-xs"
-                              title="Zeitfenster entfernen"
+                              title="Zeitfenster entfernen" aria-label="Zeitfenster entfernen"
                             >✕</button>
                           </div>
                         ))

@@ -3785,7 +3785,7 @@ export default function Schedule() {
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-scaleIn w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">👥 Gruppenzuweisung</h2>
-              <button onClick={() => setShowBulkGroup(false)} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+              <button onClick={() => setShowBulkGroup(false)} className="text-gray-400 hover:text-gray-600 text-xl" aria-label="Gruppenauswahl schließen">×</button>
             </div>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               Eine Schicht auf alle Mitglieder einer Gruppe für einen Zeitraum zuweisen.

@@ -202,15 +202,19 @@ export default function WarningsCenter() {
     return () => clearInterval(timer);
   }, [fetchWarnings, fetchActivity]);
 
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside or pressing Escape
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setOpen(false);
     }
-    if (open) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === 'Escape') { setOpen(false); dropdownRef.current?.querySelector('button')?.focus(); }
+    }
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscape);
+    }
+    return () => { document.removeEventListener('mousedown', handleClickOutside); document.removeEventListener('keydown', handleEscape); };
   }, [open]);
 
   // When dropdown opens, mark active tab as seen
@@ -379,12 +383,14 @@ export default function WarningsCenter() {
           </div>
 
           {/* Tabs */}
-          <div role="tablist" aria-label="Benachrichtigungs-Tabs" className="flex border-b border-slate-200 dark:border-slate-700 px-2 pt-1">
+          <div role="tablist" aria-label="Benachrichtigungs-Tabs" className="flex border-b border-slate-200 dark:border-slate-700 px-2 pt-1"
+            onKeyDown={(e) => { if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); const next = activeTab === 'warnings' ? 'activity' : 'warnings'; switchTab(next); document.getElementById(`tab-${next}`)?.focus(); } }}>
             <button
               role="tab"
               aria-selected={activeTab === 'warnings'}
               aria-controls="tab-panel-warnings"
               id="tab-warnings"
+              tabIndex={activeTab === 'warnings' ? 0 : -1}
               onClick={() => switchTab('warnings')}
               className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t transition-colors ${
                 activeTab === 'warnings'
@@ -405,6 +411,7 @@ export default function WarningsCenter() {
               aria-selected={activeTab === 'activity'}
               aria-controls="tab-panel-activity"
               id="tab-activity"
+              tabIndex={activeTab === 'activity' ? 0 : -1}
               onClick={() => switchTab('activity')}
               className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t transition-colors ${
                 activeTab === 'activity'

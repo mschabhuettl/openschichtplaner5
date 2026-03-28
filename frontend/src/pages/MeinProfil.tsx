@@ -88,10 +88,10 @@ function WishRow({ wish, onDelete }: { wish: Wish; onDelete: (id: number) => voi
         {wish.wish_type === 'WUNSCH' ? '💚 Wunsch' : '🔴 Sperrung'}
       </Badge>
       {wish.note && <span className="text-gray-500 flex-1 truncate">{wish.note}</span>}
-      <button aria-label="Schließen"
+      <button
         onClick={() => onDelete(wish.id)}
         className="ml-auto text-red-400 hover:text-red-600 transition-colors px-1"
-        title="Wunsch löschen"
+        title="Wunsch löschen" aria-label="Wunsch löschen"
       >✕</button>
     </div>
   );

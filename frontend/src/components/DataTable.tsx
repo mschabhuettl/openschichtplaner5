@@ -1,7 +1,7 @@
 /**
  * DataTable — generische Tabelle mit Sortierung, Pagination und Suche
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, useRef } from 'react';
 import { ResponsiveTable } from './ResponsiveTable';
 
 export interface Column<T> {
@@ -61,6 +61,8 @@ export function DataTable<T>({
   const [sortDir, setSortDir] = useState<SortDir>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
+  const [focusedRow, setFocusedRow] = useState(-1);
+  const tbodyRef = useRef<HTMLTableSectionElement>(null);
 
   const getVal = (row: T, col: Column<T>): string | number | null | undefined => {
     if (col.getValue) return col.getValue(row);
@@ -115,6 +117,35 @@ export function DataTable<T>({
     setPage(1);
   };
 
+  // Arrow key navigation for table rows
+  const handleTableKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (pageData.length === 0) return;
+    const maxRow = pageData.length - 1;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setFocusedRow(prev => {
+        const next = prev < maxRow ? prev + 1 : 0;
+        (tbodyRef.current?.querySelectorAll('tr[data-row]')?.[next] as HTMLElement)?.focus();
+        return next;
+      });
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setFocusedRow(prev => {
+        const next = prev > 0 ? prev - 1 : maxRow;
+        (tbodyRef.current?.querySelectorAll('tr[data-row]')?.[next] as HTMLElement)?.focus();
+        return next;
+      });
+    } else if (e.key === 'Home') {
+      e.preventDefault(); setFocusedRow(0);
+      (tbodyRef.current?.querySelectorAll('tr[data-row]')?.[0] as HTMLElement)?.focus();
+    } else if (e.key === 'End') {
+      e.preventDefault(); setFocusedRow(maxRow);
+      (tbodyRef.current?.querySelectorAll('tr[data-row]')?.[maxRow] as HTMLElement)?.focus();
+    } else if (e.key === 'Enter' && focusedRow >= 0 && onRowClick) {
+      e.preventDefault(); onRowClick(pageData[focusedRow]);
+    }
+  }, [pageData, focusedRow, onRowClick]);
+
   const sortIcon = (col: Column<T>) => {
     if (!col.sortable) return null;
     if (sortKey !== col.key) return <span className="ml-1 text-gray-300">↕</span>;
@@ -157,6 +188,9 @@ export function DataTable<T>({
                 <th
                   key={col.key as string}
                   onClick={() => handleSort(col)}
+                  onKeyDown={col.sortable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSort(col); } } : undefined}
+                  tabIndex={col.sortable ? 0 : undefined}
+                  aria-sort={col.sortable && sortKey === col.key ? (sortDir === 'asc' ? 'ascending' : 'descending') : undefined}
                   className={`text-left px-3 py-2 font-semibold text-xs whitespace-nowrap ${col.sortable ? 'cursor-pointer select-none hover:bg-slate-600' : ''} ${col.headerClassName ?? ''}`}
                 >
                   {col.label}{sortIcon(col)}
@@ -164,7 +198,7 @@ export function DataTable<T>({
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody ref={tbodyRef} onKeyDown={handleTableKeyDown}>
             {pageData.length === 0 ? (
               <tr>
                 <td colSpan={columns.length} className="text-center text-gray-600 italic py-8 text-sm">
@@ -174,8 +208,11 @@ export function DataTable<T>({
             ) : pageData.map((row, i) => (
               <tr
                 key={rowKey(row)}
+                data-row={i}
+                tabIndex={i === focusedRow ? 0 : -1}
                 onClick={() => onRowClick?.(row)}
-                className={`border-b border-gray-100 dark:border-slate-700 ${i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-gray-50 dark:bg-slate-750'} ${onRowClick ? 'cursor-pointer hover:bg-blue-50 dark:hover:bg-slate-700' : 'hover:bg-gray-50 dark:hover:bg-slate-700'} transition-colors`}
+                onFocus={() => setFocusedRow(i)}
+                className={`border-b border-gray-100 dark:border-slate-700 outline-none ${i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-gray-50 dark:bg-slate-750'} ${onRowClick ? 'cursor-pointer hover:bg-blue-50 dark:hover:bg-slate-700' : 'hover:bg-gray-50 dark:hover:bg-slate-700'} ${focusedRow === i ? 'ring-2 ring-inset ring-blue-500' : ''} transition-colors`}
               >
                 {columns.map(col => (
                   <td key={col.key as string} className={`px-3 py-2 ${col.className ?? ''}`}>

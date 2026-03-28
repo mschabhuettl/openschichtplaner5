@@ -7,6 +7,28 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.1.0] - 2026-03-28
+
+### Added
+- **Scheduled Reports (Q094):** Automatic report generation and email delivery on configurable schedules (daily, weekly, monthly). Supports PDF/XLSX formats with recipient management.
+- **Keyboard Navigation (Q093):** Complete keyboard accessibility across all views — arrow keys for schedule navigation, Tab for form controls, Enter/Space for actions, Escape to close modals.
+- **Rate-Limit Dashboard (Q092):** Admin dashboard showing API rate-limit status, top consumers, and throttle statistics with real-time updates.
+- **Employee Photo Upload (Q091):** Profile photo upload with client-side crop/resize. Photos stored efficiently and displayed in employee lists and profiles.
+- **Auto DB Migration (Q090):** Automatic database schema migration on version updates — detects schema changes and applies them safely on startup.
+- **Drag & Drop Calendar (Q089):** Drag & drop shift assignment in the calendar view for intuitive schedule editing.
+- **API Versioning (Q088):** Versioned API routes under `/api/v1/` with OpenAPI docs. Unversioned routes return deprecation headers with sunset dates.
+- **PostgreSQL Support (Q086):** PostgreSQL as an alternative database backend alongside SQLite/DBF. Full feature parity with connection pooling and optimized queries.
+
+### Improved
+- **Dark Mode (Q087):** Improved dark mode consistency across all components — unified color variables, better contrast ratios, and system preference detection.
+- **2FA Screenshots:** Accurate profile screenshots showing 2FA setup section.
+- **Documentation Screenshots:** Fresh screenshots for all 74+ pages.
+
+### Fixed
+- **Post-v1.0.0 Stabilization (S004):** Comprehensive test coverage improvements, resource warning fixes, and edge case handling.
+
+---
+
 ## [1.0.0] - 2026-03-27
 
 ### 🎉 Production Release

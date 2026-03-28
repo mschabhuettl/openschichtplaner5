@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, memo, type CSSProperties } from 'react';
+import { useState, useEffect, useRef, useMemo, memo, useCallback, type CSSProperties } from 'react';
 import { useSSERefresh } from '../contexts/SSEContext';
 import { useNavigate } from 'react-router-dom';
 import { usePermissions } from '../hooks/usePermissions';
@@ -12,6 +12,7 @@ import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { SkeletonGrid } from '../components/Skeleton';
 import ScheduleCalendar from '../components/ScheduleCalendar';
+import type { DndAssignPayload, DndMovePayload } from '../components/ScheduleCalendar';
 import { ResponsiveTable } from '../components/ResponsiveTable';
 import { EmptyState } from '../components/EmptyState';
 
@@ -3062,6 +3063,89 @@ export default function Schedule() {
     showToast('↪ Wiederholt', 'info');
   };
 
+  // ── Calendar DnD handlers ──────────────────────────────────
+
+  /** Assign a shift from the palette to all unassigned employees on a given day */
+  const handleCalendarDndAssign = useCallback(async (payload: DndAssignPayload) => {
+    if (!canEditSchedule || isLeserView) return;
+    const { shiftId, dateStr } = payload;
+    const dayNum = new Date(dateStr).getDate();
+
+    // Find unassigned employees for this day
+    const unassigned = displayEmployees.filter(emp => !entryMap.has(`${emp.ID}-${dayNum}`));
+
+    if (unassigned.length === 0) {
+      showToast('Alle Mitarbeiter sind an diesem Tag bereits eingeteilt', 'info');
+      return;
+    }
+
+    if (unassigned.length === 1) {
+      // Single unassigned employee → assign directly
+      const emp = unassigned[0];
+      const before = entryMap.get(`${emp.ID}-${dayNum}`) ?? null;
+      setSaving(true);
+      try {
+        await api.createScheduleEntry(emp.ID, dateStr, shiftId);
+        pushUndo([{ empId: emp.ID, day: dayNum, before }]);
+        showToast(`✅ Schicht zugewiesen: ${emp.FIRSTNAME} ${emp.NAME}`, 'success');
+        loadSchedule();
+      } catch (e) {
+        showToast('Fehler: ' + (e as Error).message, 'error');
+      }
+      setSaving(false);
+    } else {
+      // Multiple unassigned → bulk assign to all unassigned
+      const beforeCells = unassigned.map(emp => ({
+        empId: emp.ID,
+        day: dayNum,
+        before: entryMap.get(`${emp.ID}-${dayNum}`) ?? null,
+      }));
+      const apiEntries = unassigned.map(emp => ({
+        employee_id: emp.ID,
+        date: dateStr,
+        shift_id: shiftId,
+      }));
+      setSaving(true);
+      try {
+        const result = await api.bulkSchedule(apiEntries, false); // don't overwrite existing
+        pushUndo(beforeCells);
+        showToast(`✅ Schicht zugewiesen: ${result.created} Mitarbeiter`, 'success');
+        loadSchedule();
+      } catch (e) {
+        showToast('Fehler: ' + (e as Error).message, 'error');
+      }
+      setSaving(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canEditSchedule, isLeserView, displayEmployees, entryMap, year, month]);
+
+  /** Move a shift assignment from one day to another */
+  const handleCalendarDndMove = useCallback(async (payload: DndMovePayload) => {
+    if (!canEditSchedule || isLeserView) return;
+    const { employeeId, fromDateStr, toDateStr, shiftId } = payload;
+    const fromDay = new Date(fromDateStr).getDate();
+    const toDay = new Date(toDateStr).getDate();
+
+    const beforeFrom = entryMap.get(`${employeeId}-${fromDay}`) ?? null;
+    const beforeTo = entryMap.get(`${employeeId}-${toDay}`) ?? null;
+
+    setSaving(true);
+    try {
+      await api.deleteScheduleEntry(employeeId, fromDateStr);
+      await api.createScheduleEntry(employeeId, toDateStr, shiftId);
+      pushUndo([
+        { empId: employeeId, day: fromDay, before: beforeFrom },
+        { empId: employeeId, day: toDay, before: beforeTo },
+      ]);
+      showToast(`↔ Schicht verschoben: ${fromDateStr} → ${toDateStr}`, 'success');
+      loadSchedule();
+    } catch (e) {
+      showToast('Fehler beim Verschieben: ' + (e as Error).message, 'error');
+    }
+    setSaving(false);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [canEditSchedule, isLeserView, entryMap]);
+
   // ── Vormonat kopieren ──────────────────────────────────────
   const handleCopyPrevMonth = async () => {
     const prevYear = month === 1 ? year - 1 : year;
@@ -5165,6 +5249,9 @@ export default function Schedule() {
             holidays={holidays}
             shifts={shifts}
             onDayClick={(day, dateStr) => setDayDetailModal({ day, dateStr })}
+            onShiftAssign={handleCalendarDndAssign}
+            onShiftMove={handleCalendarDndMove}
+            readOnly={!canEditSchedule || isLeserView}
           />
         </div>
       )}

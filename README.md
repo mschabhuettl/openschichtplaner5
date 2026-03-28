@@ -7,7 +7,7 @@
 *Reads and writes the original DBF database files directly — no migration needed.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0-brightgreen)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-brightgreen)](CHANGELOG.md)
 [![Tests](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml)
 [![Docker](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml)
 [![GitHub release](https://img.shields.io/github/v/release/mschabhuettl/openschichtplaner5?include_prereleases)](https://github.com/mschabhuettl/openschichtplaner5/releases)
@@ -82,8 +82,9 @@ The key differentiator: OpenSchichtplaner5 reads and writes the **original `.DBF
 | 🔍 **Search** | Global header search across employees, groups, and shifts (`Ctrl+K`) |
 | 💬 **Comments** | Day-level schedule notes with 📝 indicator and inline popover editor |
 | 🔌 **API** | Versioned REST API (`/api/v1/`), OpenAPI/Swagger docs, deprecation headers for legacy routes |
-| 🐳 **Operations** | Docker deployment, CI/CD, SQLite backup/restore, health dashboard |
-| 📱 **UX** | Dark mode, mobile-responsive, keyboard navigation, offline indicator |
+| 🐳 **Operations** | Docker deployment, CI/CD, SQLite backup/restore, health dashboard, auto DB migration on updates |
+| 🗄️ **Database** | SQLite/DBF (default), PostgreSQL (optional) — full feature parity, auto-migration |
+| 📱 **UX** | Dark mode (system preference), mobile-responsive, keyboard navigation, drag & drop, offline indicator |
 
 > Full feature details: [CHANGELOG.md](CHANGELOG.md) · [GitHub Wiki](https://github.com/mschabhuettl/openschichtplaner5/wiki)
 ---
@@ -145,7 +146,7 @@ Docker images are automatically built on every release and published to the GitH
 docker pull ghcr.io/mschabhuettl/openschichtplaner5:latest
 
 # Specific version
-docker pull ghcr.io/mschabhuettl/openschichtplaner5:1.0.0
+docker pull ghcr.io/mschabhuettl/openschichtplaner5:1.1.0
 ```
 
 #### Quick Start with Docker Compose

@@ -57,3 +57,5 @@ backend/data/swap_requests.json
 backend/api/notifications.json
 backend/data/frontend_errors.json
 backend/data/swap_requests.json
+backend/backups/
+backend/data/rate_limit_events.jsonl

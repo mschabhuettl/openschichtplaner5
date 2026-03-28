@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Playwright screenshot script for OpenSchichtplaner5 v1.0.0.
+Playwright screenshot script for OpenSchichtplaner5 v1.1.0.
 Takes screenshots of ALL app pages and saves them to docs/screenshots/.
 Bypasses login via localStorage injection (Dev-Mode session).
 
@@ -115,6 +115,7 @@ PAGES = [
     ("audit-log",               "/auditlog"),
     ("health",                  "/health"),
     ("export-scheduler",        "/export-scheduler"),
+    ("rate-limits",             "/rate-limits"),
     ("work-time-rules",         "/work-time-rules"),
     ("changelog",               "/changelog"),
 ]

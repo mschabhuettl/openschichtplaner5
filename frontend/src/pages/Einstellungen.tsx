@@ -4,6 +4,7 @@ import type { UsettSettings } from '../api/client';
 import { useToast } from '../hooks/useToast';
 import { useT } from '../i18n/context';
 import { useAppSettings } from '../hooks/useAppSettings';
+import { useTheme } from '../contexts/ThemeContext';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
 // ─── Color conversion helpers ──────────────────────────────
@@ -70,6 +71,51 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: 
       </div>
       <span className="text-sm font-medium text-gray-700">{label}</span>
     </label>
+  );
+}
+
+// ─── Theme Preference Section ──────────────────────────────
+function ThemeSection() {
+  const { preference, setPreference, isDark } = useTheme();
+
+  const options: { value: 'light' | 'dark' | 'system'; label: string; icon: string; desc: string }[] = [
+    { value: 'light', label: 'Hell', icon: '☀️', desc: 'Immer heller Modus' },
+    { value: 'dark', label: 'Dunkel', icon: '🌙', desc: 'Immer dunkler Modus' },
+    { value: 'system', label: 'System', icon: '💻', desc: 'Folgt der Betriebssystem-Einstellung' },
+  ];
+
+  return (
+    <div className="bg-white rounded-xl shadow p-6">
+      <h2 className="text-base font-bold text-gray-800 mb-1">🎨 Darstellung</h2>
+      <p className="text-sm text-gray-500 mb-4">
+        Farbschema für die Anwendung. Bei &quot;System&quot; wechselt der Modus automatisch mit Ihrem Betriebssystem.
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {options.map(opt => (
+          <button
+            key={opt.value}
+            onClick={() => setPreference(opt.value)}
+            className={`
+              flex items-center gap-3 p-3 rounded-lg border-2 text-left transition-all
+              ${preference === opt.value
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 dark:border-blue-400'
+                : 'border-gray-200 hover:border-gray-300 dark:border-slate-600 dark:hover:border-slate-500'}
+            `}
+          >
+            <span className="text-2xl flex-shrink-0">{opt.icon}</span>
+            <div>
+              <div className="font-medium text-sm text-gray-800 dark:text-gray-100">{opt.label}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400">{opt.desc}</div>
+            </div>
+          </button>
+        ))}
+      </div>
+      {preference === 'system' && (
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          Aktuell: {isDark ? '🌙 Dunkel' : '☀️ Hell'} (von Ihrem System erkannt)
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -253,6 +299,9 @@ export default function Einstellungen() {
 
       {!loading && (
         <div className="space-y-6">
+
+          {/* ── 0. Darstellung / Theme ────────────────────────────── */}
+          <ThemeSection />
 
           {/* ── 1. Arbeitszeit-Konfiguration ──────────────────────── */}
           <Section

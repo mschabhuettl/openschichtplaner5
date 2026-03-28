@@ -158,7 +158,7 @@ describe('PerformanceWidget', () => {
     render(<PerformanceWidget />);
 
     await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledWith('/api/health');
+      expect(global.fetch).toHaveBeenCalledWith('/api/v1/health');
     });
   });
 

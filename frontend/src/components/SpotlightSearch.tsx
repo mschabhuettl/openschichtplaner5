@@ -137,6 +137,13 @@ export default function SpotlightSearch({ open, onClose }: Props) {
     }
   }, [open]);
 
+  // Clear pending debounce on unmount so we don't setState after teardown
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
   // Debounced API search
   const doSearch = useCallback((q: string) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);

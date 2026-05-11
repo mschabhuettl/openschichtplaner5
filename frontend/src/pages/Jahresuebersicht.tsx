@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { api } from '../api/client';
 import type { MonthSummary } from '../api/client';
 import type { Employee, Group, ShiftType, LeaveType } from '../types';
@@ -325,23 +325,32 @@ function AllEmployeesView({
   const [dataMap, setDataMap] = useState<Map<number, MonthSummary[]>>(new Map());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const reqIdRef = useRef(0);
 
   const filteredEmps = employees; // already filtered by parent
+  const empIdsKey = filteredEmps.map(e => e.ID).join(',');
 
   useEffect(() => {
     if (filteredEmps.length === 0) return;
     setLoading(true);
     setError(null);
+    const reqId = ++reqIdRef.current;
     Promise.all(filteredEmps.map(e => api.getScheduleYear(year, e.ID).then(d => [e.ID, d] as [number, MonthSummary[]])))
       .then(results => {
+        if (reqId !== reqIdRef.current) return; // stale response, ignore
         const map = new Map<number, MonthSummary[]>();
         results.forEach(([id, d]) => map.set(id, d));
         setDataMap(map);
         setLoading(false);
       })
-      .catch(() => { setError('Fehler beim Laden der Jahresübersicht'); setLoading(false); });
+      .catch(() => {
+        if (reqId !== reqIdRef.current) return;
+        setError('Fehler beim Laden der Jahresübersicht');
+        setLoading(false);
+      });
+  // filteredEmps is reconstructed each render; track membership via stable key
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [year, filteredEmps.length, groupId]);
+  }, [year, empIdsKey, groupId]);
 
   if (loading) return (
     <LoadingSpinner />

@@ -20,9 +20,9 @@ psycopg2-binary>=2.9.0
 alembic>=1.13.0
 openpyxl>=3.1.0
 
-# Core library (DBF bridge + ORM/sync), extracted to its own repo and consumed as
-# a dependency. Importable as `sp5lib`. The [postgres] extra pulls psycopg2-binary.
-libopenschichtplaner5[postgres] @ git+https://github.com/mschabhuettl/libopenschichtplaner5.git
+# Core library (DBF bridge + ORM/sync), maintained in its own repo and released to
+# PyPI. Importable as `sp5lib`. The [postgres] extra pulls psycopg2-binary.
+libopenschichtplaner5[postgres]>=1.1.0
 
 pytest>=7.4.0
 pytest-cov>=4.1.0

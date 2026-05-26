@@ -35,6 +35,26 @@ Feature-Branches → `make lint`/`make test` grün → PR → CI → Merge. Trac
   - Library-Auslösung: Dependency via `git+https`, `backend/sp5lib/` entfernt, `SP5_BACKEND_DIR`-Entkopplung.
   - Inkl. Dockerfile-Fix: `git` im Build-Image (für `pip install` der git+https-Dependency), danach entfernt.
 
+### Folgearbeiten (nach Abschlussbericht, auf Wunsch)
+- **#62** `ci: bump GitHub Actions to Node 24 runtime`
+  - 13 Actions auf node24-fähige Majors gebumpt (checkout v5, setup-python v6, setup-node v5,
+    cache v5, upload-artifact v6, docker/build-push v7 + login v4/metadata v6/buildx v4/qemu v4,
+    codecov v5, codeql/upload-sarif v4, gh-release v3). Jede Version gegen ihre `action.yml`
+    als `runs.using=node24` verifiziert (v.a. upload-artifact v5 + build-push v6 waren noch node20).
+    Grund: GitHub erzwingt Node 24 ab 2026-06-02.
+- **#63** `feat: demo-data generator, refreshed screenshots & UI robustness`
+  - UI-Robustheit: `useApiData`-Staleness-Guard (Race-Fix) + sichtbare Fehler-States
+    (Geburtstagkalender/DienstBoard/MitarbeiterVergleich) statt stiller Leer-Seiten; +Tests.
+  - **`scripts/generate_demo_schedule.py`**: generiert einen realistischen rotierenden
+    Dienstplan (aktueller + voriger Monat) → befüllte, aktuelle Demo-Daten.
+  - **`take_screenshots.py`** portabel gemacht (repo-relativ, env-konfigurierbar, erzwingt
+    deutsche UI) und **alle `docs/screenshots/` neu generiert** (befüllte Daten, deutsche Nav,
+    inkl. Dark-Mode-Dashboard, Mobile-Ansicht, echtes Mitarbeiter-Profil).
+
+> Hinweis: #62 & #63 entstanden, während ein **GitHub-Actions/Pages-Incident** lief (Status
+> *investigating → monitoring*). Lokal vollständig grün verifiziert; CI lief nach Erholung des
+> Incidents wieder an. Merge erfolgt nach grüner CI.
+
 ## Neues Library-Repo
 
 **https://github.com/mschabhuettl/libopenschichtplaner5** (öffentlich, MIT)
@@ -72,14 +92,16 @@ Nach allen Merges (`git fetch --prune` + explizites Löschen auf origin & lokal)
 |---|---|---|
 | Backend-Tests | 2234 passed / 6 skip | 2251 passed / 6 skip (mit Lib-Dependency) |
 | Backend-Coverage | 79 % | 84 % |
-| Frontend-Tests | 378 passed | 386 passed |
+| Frontend-Tests | 378 passed | 389 passed (#60 +8, #63 +3) |
 | ruff / eslint / tsc | clean / 0err / clean | clean / 0err / clean |
 | CI-Security-Audit | **rot** (malicious fastapi) | **grün** |
+| CI-Actions-Runtime | Node 20 (Deprecation ab 2026-06-02) | Node 24 (#62) |
+| docs/screenshots | teils leer/veraltet, Nav-Sprach-Mix | neu generiert, befüllt, deutsch (#63) |
 
 ## Offene Punkte & empfohlene nächste Schritte
 1. **Tech-Debt (D009):** `backend/data/schedule_comments.json` und `backend/.coverage` aus dem
    Git-Tracking nehmen (gitignore); verursachen Merge-Konflikte/Dirty-Tree.
-2. **CI-Wartung:** GitHub-Actions auf Node-24-kompatible Versionen bumpen (Node 20 ab 2026-06-02 erzwungen).
+2. ~~**CI-Wartung:** GitHub-Actions auf Node-24 bumpen~~ — ✅ erledigt in **#62**.
 3. **Deployment-Härtung:** Fail-fast wenn `SP5_JWT_SECRET` im Prod-Modus fehlt; In-Memory-Session/
    Rate-Limit-Store für Multi-Worker auf Shared-Store (Redis) umstellen — oder Single-Worker dokumentieren.
 4. **ORM-Parität:** SQLite-`to_dict()` an den DBF-Feldsatz angleichen oder PG-Backend als

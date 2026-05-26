@@ -60,7 +60,7 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [ ] venv-Vereinheitlichung (`.venv` vs `venv`)
 - [x] `schemas.py` `EmployeeResponse`/`GroupResponse` an reale DBF-Keys angleichen → PR #65
 - [ ] ORM `to_dict()` SQLite/Postgres-Divergenz angleichen oder dokumentieren
-- [ ] `backend/data/schedule_comments.json` + `backend/.coverage` aus Git-Tracking nehmen
+- [x] `schedule_comments.json` + `.coverage` aus Git-Tracking genommen → PR #68
 
 ## Run-Log
 <!-- Eine Zeile pro abgeschlossener Iteration: YYYY-MM-DD HH:MM · PR #<nr> · <kurz> -->
@@ -68,3 +68,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-26 16:46 · PR #65 · schemas.py: Employee/GroupResponse-Felder an reale DBF-Keys angeglichen (HIDDEN→HIDE, EMPLOYEENO→NUMBER, Phantom-Felder entfernt) + Regressions-Test; Suite grün (2255)
 - 2026-05-26 16:58 · PR #66 · employees.py Pillow: Image.Resampling.LANCZOS + img-Annotation (api/ mypy 4→1, keine Verhaltensaenderung); Suite gruen (2255)
 - 2026-05-26 17:08 · PR #67 · auth.py change-password user_id None-Guard → mypy api = 0 Fehler; Suite gruen (2255)
+- 2026-05-26 17:20 · PR #68 · generierte Dateien (.coverage, schedule_comments.json) aus Git-Tracking genommen + gitignored; kein Daten-Churn mehr; Suite gruen (2255)

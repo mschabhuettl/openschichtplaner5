@@ -77,3 +77,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-26 18:31 · PR #74 · DEVELOPMENT.md Backend-Setup auf .venv angeglichen (Konsistenz mit #69)
 - 2026-05-26 18:44 · PR #75 · explizite Tests: Passwort-Staerke-Validierung (alle Branches) + change-password 403-Reject
 - 2026-05-26 18:59 · PR #76 · Frontend-Coverage: useUndoRedo-Hook (Undo/Redo-Stack, 8 Tests) — bisher ungetestet
+- 2026-05-26 19:11 · PR #77 · Frontend-Coverage: recentPages-Util (Parse-Fallback, Dedupe, Cap-5; 6 Tests)

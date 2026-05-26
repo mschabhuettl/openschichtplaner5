@@ -10,18 +10,15 @@ RUN cd frontend && npm run build
 FROM python:3.11-slim
 WORKDIR /app
 
-# curl for the Docker HEALTHCHECK; git is needed at build time to install the
-# libopenschichtplaner5 dependency from its git+https URL (removed again afterwards
-# to keep the image small).
-RUN apt-get update && apt-get install -y --no-install-recommends curl git && rm -rf /var/lib/apt/lists/*
+# Install curl for the Docker HEALTHCHECK
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
 RUN groupadd --gid 1001 sp5 && \
     useradd --uid 1001 --gid sp5 --shell /bin/bash --create-home sp5
 
 COPY backend/requirements.txt ./backend/
-RUN pip install --no-cache-dir -r backend/requirements.txt && \
-    apt-get purge -y git && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir -r backend/requirements.txt
 
 COPY backend/ ./backend/
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist

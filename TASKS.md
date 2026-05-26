@@ -106,3 +106,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-27 00:28 · PR #103 · Backend-Coverage: schedule_pdf HTML-Builder 91%→98% (6 Tests)
 - 2026-05-27 00:43 · PR #104 · Backend-Coverage: auth change_own_password Flow 81%→85% (5 Tests; CI-Flake WorkTimeRules-Rerun)
 - 2026-05-27 00:55 · PR #105 · Backend-Coverage: auth reset_user_password E-Mail-Pfad 85%→89% (3 Tests)
+- 2026-05-27 01:05 · PR #106 · Backend-Coverage: auth Login-Security Lockout/2FA/Session-Limit 89%→92% (4 Tests)

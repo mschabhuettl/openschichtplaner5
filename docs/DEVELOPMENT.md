@@ -39,9 +39,9 @@ cd openschichtplaner5/backend
 ### 2. Create a virtual environment
 
 ```bash
-python -m venv venv
-source venv/bin/activate       # Linux/macOS
-# venv\Scripts\activate        # Windows
+python -m venv .venv
+source .venv/bin/activate       # Linux/macOS
+# .venv\Scripts\activate        # Windows
 ```
 
 ### 3. Install dependencies
@@ -125,7 +125,7 @@ ruff check .
 
 ```bash
 cd backend
-source venv/bin/activate
+source .venv/bin/activate
 
 # Run all tests
 python -m pytest tests/ -v

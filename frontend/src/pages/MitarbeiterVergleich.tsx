@@ -112,8 +112,10 @@ export default function MitarbeiterVergleich() {
   const [colorMap, setColorMap] = useState<ShiftColorMap>(new Map());
   const [filterGroup, setFilterGroup] = useState<number | null>(null);
   const [groupMembers, setGroupMembers] = useState<Set<number> | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoadError(null);
     Promise.all([
       api.getEmployees(),
       api.getGroups(),
@@ -125,6 +127,9 @@ export default function MitarbeiterVergleich() {
       setShifts(sh);
       setLeaveTypes(lt);
       setColorMap(buildColorMap(sh, lt));
+    }).catch((e) => {
+      // Previously unhandled: a failed load left the page silently empty.
+      setLoadError(e instanceof Error ? e.message : 'Stammdaten konnten nicht geladen werden');
     });
   }, []);
 
@@ -205,6 +210,12 @@ export default function MitarbeiterVergleich() {
 
   return (
     <div className="p-4 max-w-7xl mx-auto space-y-4">
+      {loadError && (
+        <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-sm text-red-700 dark:text-red-300 flex items-center gap-2">
+          <span>⚠️</span>
+          <span>Stammdaten konnten nicht geladen werden: {loadError}</span>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>

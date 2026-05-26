@@ -31,19 +31,25 @@ export function useApiData<T>(
   // Ref to avoid stale closure in refresh
   const fetchFnRef = useRef(fetchFn);
   fetchFnRef.current = fetchFn;
+  // Monotonic call id: only the most recent invocation may commit its result, so
+  // out-of-order responses from rapid dep changes can't overwrite newer data.
+  const callIdRef = useRef(0);
 
   const run = useCallback(async () => {
+    const callId = ++callIdRef.current;
     setLoading(true);
     setError(null);
     try {
       const result = await fetchFnRef.current();
-      setData(result);
+      if (callId === callIdRef.current) setData(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unbekannter Fehler');
+      if (callId === callIdRef.current) {
+        setError(err instanceof Error ? err.message : 'Unbekannter Fehler');
+      }
     } finally {
-      setLoading(false);
+      if (callId === callIdRef.current) setLoading(false);
     }
-  }, []);  
+  }, []);
 
   useEffect(() => {
     if (!enabled) return;

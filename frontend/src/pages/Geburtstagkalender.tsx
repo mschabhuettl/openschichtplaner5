@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { ApiErrorState } from '../components/EmptyState';
 import { api } from '../api/client';
 import type { Employee } from '../types';
 
@@ -85,6 +86,7 @@ export default function Geburtstagkalender() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [groupId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [showHidden, setShowHidden] = useState(false);
   const [search, setSearch] = useState('');
@@ -97,15 +99,21 @@ export default function Geburtstagkalender() {
   }, []);
   const currentMonth = today.getMonth() + 1; // 1-based
 
+  // Fetch employees once; don't refetch when the expanded month changes.
   useEffect(() => {
     setLoading(true);
-    Promise.all([
-      api.getEmployees(),
-    ]).then(([emps]) => {
-      setEmployees(emps);
-      // Default: expand current month
-      setExpandedMonths(new Set([currentMonth]));
-    }).finally(() => setLoading(false));
+    setError(null);
+    api.getEmployees()
+      .then((emps) => setEmployees(emps))
+      .catch((e) =>
+        setError(e instanceof Error ? e.message : 'Mitarbeiter konnten nicht geladen werden'),
+      )
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Default: expand the current month.
+  useEffect(() => {
+    setExpandedMonths(new Set([currentMonth]));
   }, [currentMonth]);
 
   // ── Build birthday entries ──────────────────────────────────────────────────
@@ -182,6 +190,7 @@ export default function Geburtstagkalender() {
   // ── Render ─────────────────────────────────────────────────────────────────
 
   if (loading) return <LoadingSpinner />;
+  if (error) return <ApiErrorState message={error} onRetry={() => window.location.reload()} />;
 
   const totalWithBirthday = entries.length;
   const totalEmployees = employees.filter(e => !e.HIDE || showHidden).length;

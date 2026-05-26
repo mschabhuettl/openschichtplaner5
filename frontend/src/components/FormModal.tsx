@@ -81,6 +81,8 @@ export function FormModal({
   // Attach keyboard handler & auto-focus first input when opened
   useEffect(() => {
     if (!open) return;
+    // Remember what had focus before the modal opened, to restore it on close.
+    const previouslyFocused = document.activeElement as HTMLElement | null;
     document.addEventListener('keydown', handleKeyDown);
     // Auto-focus: try first input, then first focusable element
     setTimeout(() => {
@@ -95,7 +97,13 @@ export function FormModal({
         firstFocusable?.focus();
       }
     }, 50);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      // Restore focus to the trigger element so keyboard/SR users are not dumped to <body>.
+      if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+        previouslyFocused.focus();
+      }
+    };
   }, [open, handleKeyDown]);
 
   // Prevent body scroll when modal is open

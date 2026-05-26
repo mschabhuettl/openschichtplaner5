@@ -86,4 +86,13 @@ describe('DataTable', () => {
     render(<DataTable data={[data[0]]} columns={cols} rowKey={rowKey} />);
     expect(screen.getByText('ANNA MÜLLER')).toBeTruthy();
   });
+
+  it('marks header cells with scope="col" for screen-reader table navigation', () => {
+    render(<DataTable data={data} columns={columns} rowKey={rowKey} />);
+    const headers = screen.getAllByRole('columnheader');
+    expect(headers.length).toBe(columns.length);
+    for (const th of headers) {
+      expect(th.getAttribute('scope')).toBe('col');
+    }
+  });
 });

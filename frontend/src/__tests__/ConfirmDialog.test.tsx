@@ -86,4 +86,18 @@ describe('ConfirmDialog', () => {
     const confirmBtn = screen.getByText('Bestätigen');
     expect(confirmBtn.className).toContain('red');
   });
+
+  it('restores focus to the trigger element when closed', () => {
+    const trigger = document.createElement('button');
+    document.body.appendChild(trigger);
+    trigger.focus();
+    expect(document.activeElement).toBe(trigger);
+
+    const { rerender } = render(<ConfirmDialog {...baseProps} open={true} />);
+    // Close the dialog → effect cleanup should restore focus to the trigger.
+    rerender(<ConfirmDialog {...baseProps} open={false} />);
+    expect(document.activeElement).toBe(trigger);
+
+    document.body.removeChild(trigger);
+  });
 });

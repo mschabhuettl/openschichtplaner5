@@ -84,3 +84,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-26 19:57 · PR #81 · Frontend-Coverage: useAppSettings (Deep-Merge/Persistenz/Import-Export; 7 Tests)
 - 2026-05-26 20:09 · PR #82 · Frontend-Coverage: useRovingTabindex a11y-Tastaturnavigation (5 Tests)
 - 2026-05-26 20:22 · PR #83 · Frontend-Coverage: useKeyboardShortcuts globale Tastatur-Shortcuts (9 Tests)
+- 2026-05-26 20:33 · PR #84 · Frontend-Coverage: useFocusOnNavigate a11y-Fokus nach Routenwechsel (6 Tests)

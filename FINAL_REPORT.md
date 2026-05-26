@@ -53,7 +53,14 @@ Feature-Branches → `make lint`/`make test` grün → PR → CI → Merge. Trac
 
 > Hinweis: #62 & #63 entstanden, während ein **GitHub-Actions/Pages-Incident** lief (Status
 > *investigating → monitoring*). Lokal vollständig grün verifiziert; CI lief nach Erholung des
-> Incidents wieder an. Merge erfolgt nach grüner CI.
+> Incidents wieder an, beide grün gemergt.
+- **#64** `chore: consume libopenschichtplaner5 from PyPI (>=1.1.0)` — **gemergt**
+  - Library auf **PyPI veröffentlicht** (`libopenschichtplaner5` 1.1.0, sdist+wheel, OIDC Trusted Publishing).
+  - App-Konsum `git+https` → versionierte PyPI-Release; `git`-Build-Dep aus dem Dockerfile entfernt
+    (war nur fürs git-Klonen nötig). Backend-Suite grün (2251), Import-Name bleibt `sp5lib`.
+
+> Ab hier läuft die Weiterentwicklung **24/7 autonom** über `AUTONOMOUS_RUN.md` (via `/loop`):
+> eine Iteration = ein vollständig gemergter Schritt; Run-Log am Ende von `TASKS.md`.
 
 ## Neues Library-Repo
 
@@ -108,4 +115,4 @@ Nach allen Merges (`git fetch --prune` + explizites Löschen auf origin & lokal)
    „reduced-field" dokumentieren (AUDIT.md, Befund ORM).
 5. **schemas.py:** `EmployeeResponse`/`GroupResponse`-Felder an reale DBF-Keys angleichen (OpenAPI-Genauigkeit).
 6. **mypy:** verbleibende 4 nicht-blockierende Typfehler (auth `user_id: Any|None`, `walk_revisions`) bereinigen.
-7. **Library-Reifung:** `libopenschichtplaner5` auf PyPI veröffentlichen + versionierte Releases statt git-Pin.
+7. ~~**Library-Reifung:** `libopenschichtplaner5` auf PyPI veröffentlichen + versionierte Releases statt git-Pin~~ — ✅ erledigt (PyPI 1.1.0; App via #64 auf `>=1.1.0`).

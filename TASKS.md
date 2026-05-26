@@ -50,3 +50,18 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 
 ## Abschluss
 - [x] FINAL_REPORT.md
+
+## Folgearbeiten (24/7-Lauf via AUTONOMOUS_RUN.md)
+- [x] CI-Actions auf Node 24 bumpen → PR #62
+- [x] Demo-Daten-Generator + Screenshots neu + UI-Robustheit → PR #63
+- [x] libopenschichtplaner5 auf PyPI veröffentlicht (1.1.0); App-Konsum auf PyPI umgestellt → PR #64
+- [ ] Phase 5 Web-UI: weitere Empty-/Error-States, Responsiveness, Performance
+- [ ] mypy-Restfehler (auth `user_id: Any|None`, `walk_revisions`) bereinigen
+- [ ] venv-Vereinheitlichung (`.venv` vs `venv`)
+- [ ] `schemas.py` `EmployeeResponse`/`GroupResponse` an reale DBF-Keys angleichen
+- [ ] ORM `to_dict()` SQLite/Postgres-Divergenz angleichen oder dokumentieren
+- [ ] `backend/data/schedule_comments.json` + `backend/.coverage` aus Git-Tracking nehmen
+
+## Run-Log
+<!-- Eine Zeile pro abgeschlossener Iteration: YYYY-MM-DD HH:MM · PR #<nr> · <kurz> -->
+- 2026-05-26 16:17 · PR #64 · App konsumiert libopenschichtplaner5 jetzt aus PyPI (>=1.1.0); git-Build-Dep aus Dockerfile entfernt; Backend-Suite grün (2251)

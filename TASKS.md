@@ -17,17 +17,23 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [-] Keine offenen Issues (siehe D001)
 
 ## Phase 3 — Debugging & Fixes
-- [ ] Bugs aus Phase 0 beheben (failing test → fix wo sinnvoll)
-- [ ] mypy-Fehler beheben (u.a. Image.LANCZOS in employees.py)
-- [ ] SQLite/Postgres-Modelle synchron halten
+- [x] email HTML-Injection + falsche Feldnamen + RBAC → PR #57
+- [x] DBF numerischer Overflow + Datumsvalidierung → PR #58
+- [x] Supply-Chain: malicious fastapi 0.136.3 wegpinnen → PR #59
+- [ ] mypy-Fehler beheben (8, nicht-blockierend; u.a. Pillow-Resampling-Typing)
+- [ ] venv-Vereinheitlichung (.venv vs venv)
 
 ## Phase 4 — API- & Library-Audit
-- [ ] Alle 25 Router systematisch prüfen → AUDIT.md
-- [ ] sp5lib hart prüfen (dbf_reader/writer, ORM, repository, sync)
-- [ ] Lücken mit Tests schließen
+- [x] Alle 25 Router systematisch geprüft → AUDIT.md
+- [x] sp5lib geprüft (dbf_reader/writer, ORM, repository, sync) → AUDIT.md
+- [x] RBAC-Lücken mit Tests geschlossen (PR #57)
+- [ ] schemas.py Feldnamen an reale DBF-Keys angleichen
+- [ ] ORM to_dict() SQLite/PG-Divergenz angleichen oder dokumentieren
 
 ## Phase 5 — Web-UI verbessern
-- [ ] UX/Konsistenz/Empty-States/Responsiveness/A11y/Performance
+- [ ] Dark-Mode: StatCard/Badge/PageHeader
+- [ ] A11y: th scope, role=status, Modal-Fokus-Restore
+- [ ] Robustheit: Staleness-Guards, Error-States
 - [ ] vitest + Playwright absichern
 
 ## Phase 6 — Library herauslösen

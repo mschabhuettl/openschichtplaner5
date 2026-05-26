@@ -34,3 +34,28 @@ committet (keine Code-Änderung, Tests bleiben trivially grün). **Jede Code-Än
 läuft weiterhin strikt über Feature-Branch → `make lint`+`make test` → PR → CI.
 **Begründung:** Hält Feature-PRs fokussiert auf echten Code; vermeidet künstliche
 Doku-Merge-Konflikte; die Doku ist am Ende vollständig auf main reviewbar.
+
+## D003 — RBAC-Rollenwahl für availability-Writes (2026-05-26, PR #57)
+**Kontext:** `POST/PUT /api/employees/{id}/availability` hatten keine Rollenprüfung.
+Optionen: (a) `require_planer`, (b) Self-Service (Mitarbeiter setzt eigene Verfügbarkeit).
+**Entscheidung:** `require_planer` (GET bleibt nur-auth).
+**Begründung:** Konsistent mit allen anderen Write-Endpunkten; Self-Service hätte eine
+verlässliche Session→Employee-Zuordnung gebraucht, die hier nicht etabliert ist. Minimal-
+invasiv und schließt die Privilege-Escalation. Self-Service kann später additiv ergänzt werden.
+
+## D004 — restriction DELETE → require_admin (2026-05-26, PR #57)
+**Entscheidung:** `DELETE /api/restrictions/{emp}/{shift}` erhält `require_admin`,
+symmetrisch zum bereits admin-geschützten POST.
+**Begründung:** Asymmetrische Rechte sind ein klarer Bug; Admin ist die korrekte Schwelle,
+da nur Admin Restriktionen anlegen kann.
+
+## D005 — DBF numerischer Overflow: raise statt truncate (2026-05-26, PR #58)
+**Entscheidung:** `_encode_field` wirft bei zu breitem Numerikwert `ValueError` statt zu schneiden.
+**Begründung:** Stilles Abschneiden ändert die Größenordnung (99999→9999) und korrumpiert die
+kanonische FoxPro-Datei. „Fail loud" ist hier sicherer als „fail silent"; bestehende Tests grün.
+
+## D006 — Malicious fastapi 0.136.3 wegpinnen statt Advisory ignorieren (2026-05-26, PR #59)
+**Kontext:** CI-Security-Audit rot wegen MAL-2026-4750 (fastapi 0.136.3 = manipulierte Release).
+**Entscheidung:** `requirements.txt` auf `!=0.136.3` pinnen (statt `--ignore-vuln`).
+**Begründung:** Eine als manipuliert geflaggte Release zu nutzen ist Supply-Chain-untragbar;
+nur 0.136.3 ist betroffen, also surgisch ausschließen. Reversibel, hält Audit ehrlich.

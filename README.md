@@ -11,7 +11,7 @@
 [![Tests](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml)
 [![Docker](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml)
 [![GitHub release](https://img.shields.io/github/v/release/mschabhuettl/openschichtplaner5?include_prereleases)](https://github.com/mschabhuettl/openschichtplaner5/releases)
-[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white)](https://python.org)
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![React](https://img.shields.io/badge/React-18+-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript&logoColor=white)](https://typescriptlang.org)
@@ -110,8 +110,8 @@ The key differentiator: OpenSchichtplaner5 reads and writes the **original `.DBF
 
 ### Prerequisites
 
-- Python 3.8+
-- Node.js 18+
+- Python 3.10+ (the `libopenschichtplaner5` core requires ≥ 3.10; CI runs on 3.12)
+- Node.js 20+
 - Access to the SP5 data directory (`.DBF` files)
 
 ### Start the Backend

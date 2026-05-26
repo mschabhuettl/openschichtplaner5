@@ -18,8 +18,8 @@ This guide gets you up and running for local development.
 
 | Tool | Minimum Version | Install |
 |------|----------------|---------|
-| Python | 3.8+ | [python.org](https://www.python.org/downloads/) |
-| Node.js | 18+ | [nodejs.org](https://nodejs.org/) |
+| Python | 3.10+ | [python.org](https://www.python.org/downloads/) |
+| Node.js | 20+ | [nodejs.org](https://nodejs.org/) |
 | npm | 9+ | bundled with Node.js |
 | Git | any | [git-scm.com](https://git-scm.com/) |
 

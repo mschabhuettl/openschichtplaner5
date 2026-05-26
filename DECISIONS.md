@@ -59,3 +59,44 @@ kanonische FoxPro-Datei. „Fail loud" ist hier sicherer als „fail silent"; be
 **Entscheidung:** `requirements.txt` auf `!=0.136.3` pinnen (statt `--ignore-vuln`).
 **Begründung:** Eine als manipuliert geflaggte Release zu nutzen ist Supply-Chain-untragbar;
 nur 0.136.3 ist betroffen, also surgisch ausschließen. Reversibel, hält Audit ehrlich.
+
+## D007 — Library-Auslösung: Import-Name `sp5lib` beibehalten (2026-05-26, PR #61 + neues Repo)
+**Kontext:** Phase 6 — `backend/sp5lib/` wird zum eigenständigen Paket `libopenschichtplaner5`.
+**Entscheidung:** Distribution heißt `libopenschichtplaner5`, der **importierbare Paketname
+bleibt `sp5lib`** (wie PyYAML→yaml). Historie via `git subtree split` erhalten (57 Commits).
+**Begründung:** Null Import-Churn in der App (12 Dateien importieren `from sp5lib...`); ein
+Codemod wäre unnötiges Risiko. subtree split bewahrt die echte Datei-Historie statt Copy.
+
+## D008 — `SP5_BACKEND_DIR` zur Entkopplung host-relativer Pfade (2026-05-26, Lib + PR #61)
+**Kontext:** sp5lib löste `backend/data`, `backend/api/data` und das Alembic-Verzeichnis über
+`__file__`-relative Pfade auf — nach Installation in `site-packages` zeigen die ins Leere.
+**Entscheidung:** Neues `sp5lib/_resource_paths.py` honoriert die Env-Var `SP5_BACKEND_DIR`
+(Fallback = Legacy-`__file__`-Verhalten). Die App setzt sie früh in `api/main.py` und in
+`tests/conftest.py`. auto_migrate löst den Backend-Pfad lazy auf (Import-Reihenfolge-robust).
+**Begründung:** Minimale, abwärtskompatible Entkopplung; macht die Lib echt wiederverwendbar,
+ohne das App-Verhalten zu ändern (Env gesetzt → byte-identische Pfade wie zuvor).
+
+## D009 — Tech-Debt beobachtet, bewusst nicht in diesem Lauf gefixt (2026-05-26)
+**Kontext:** Während der Arbeit aufgefallen, aber außerhalb des Scopes der jeweiligen PRs:
+- `backend/data/schedule_comments.json` ist **getrackt** und wird von Tests mutiert →
+  wiederkehrende Merge-Konflikte/Dirty-Tree. Sollte ge-gitignored oder als Fixture-Kopie genutzt werden.
+- `backend/.coverage` ist (entgegen `.gitignore`) **getrackt** — sollte aus dem Tracking entfernt werden.
+- CI-Actions laufen auf Node 20 (ab 2026-06-02 erzwungenes Node 24) — Action-Versionen bumpen.
+- JWT-Secret pro Prozess (ohne `SP5_JWT_SECRET`), In-Memory-Session-Store → Multi-Worker-Doku/Fail-fast.
+**Entscheidung:** In FINAL_REPORT als „empfohlene nächste Schritte" dokumentiert, nicht jetzt gefixt.
+**Begründung:** Jeder Punkt verdient einen eigenen, fokussierten PR; Scope-Disziplin hält die
+aktuellen PRs reviewbar.
+
+## D010 — Docker-Build: git im Build-Image (2026-05-26, PR #61)
+**Kontext:** Nach Eintrag der `git+https`-Dependency schlug der CI-Docker-Build im
+`pip install`-Schritt fehl (python-slim hat kein git zum Klonen).
+**Entscheidung:** `git` im Dockerfile installieren (neben curl), nach dem pip-Install wieder purgen.
+**Begründung:** git ist nur build-time nötig; Purge hält das Image schlank. Minimaler, korrekter Fix.
+
+## D011 — Branch-Cleanup (Phase 7, 2026-05-26)
+**Entscheidung:** Nach allen Merges gelöscht: 5 PR-Branches (auto via gh `--delete-branch`) plus
+`claude/analyze-and-fix-bugs-xD4Ks`, `feature/q093-keyboard-nav`, `feature/q094-scheduled-reports`
+(je 0 unmerged Commits) und `feature/q092-ratelimit-dashboard` (Feature nachweislich via #51 in main —
+verwaiste, überholte Variante). Endstand: nur `main`.
+**Begründung:** Guardrail eingehalten — nur nachweislich gemergte/verwaiste Branches gelöscht;
+`main` nie force-gepusht/gelöscht; alles über PR-Historie reversibel.

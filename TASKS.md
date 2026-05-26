@@ -37,13 +37,16 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [ ] vitest + Playwright absichern
 
 ## Phase 6 — Library herauslösen
-- [ ] git-Historie von backend/sp5lib erhalten (subtree split / filter-repo)
-- [ ] Neues Paket libopenschichtplaner5 (pyproject, README, LICENSE, CI)
-- [ ] Repo erstellen + pushen
-- [ ] OpenSchichtplaner5 auf Dependency umstellen, Tests grün
+- [x] git-Historie von backend/sp5lib erhalten (`git subtree split`, 57 Commits)
+- [x] Neues Paket libopenschichtplaner5 (pyproject, README, LICENSE, CI, Tests, py.typed)
+- [x] Repo erstellt + gepusht (github.com/mschabhuettl/libopenschichtplaner5), CI grün
+- [x] Host-relative Pfade via SP5_BACKEND_DIR entkoppelt (Lib-Commit)
+- [x] OpenSchichtplaner5 auf Dependency umgestellt → PR #61 **gemergt** (CI grün inkl. Docker-Build/E2E)
 
 ## Phase 7 — Branches aufräumen
-- [ ] Gemergte/verwaiste Branches löschen (nach PR-Merges), `git fetch --prune`
+- [x] 5 PR-Branches auto-gelöscht; q093/q094/claude (0 unmerged) + q092 (verwaist) gelöscht
+- [x] `git fetch --prune` — Endstand: nur `main`
+- [x] q092-Branch bewertet (Feature via #51 in main → verwaist, gelöscht)
 
 ## Abschluss
-- [ ] FINAL_REPORT.md
+- [x] FINAL_REPORT.md

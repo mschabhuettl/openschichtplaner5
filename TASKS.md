@@ -70,3 +70,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-26 17:08 · PR #67 · auth.py change-password user_id None-Guard → mypy api = 0 Fehler; Suite gruen (2255)
 - 2026-05-26 17:20 · PR #68 · generierte Dateien (.coverage, schedule_comments.json) aus Git-Tracking genommen + gitignored; kein Daten-Churn mehr; Suite gruen (2255)
 - 2026-05-26 17:33 · PR #69 · venv-Pfad auf .venv vereinheitlicht (Makefile↔start.sh); make lint/test laufen verlaesslich via .venv
+- 2026-05-26 17:47 · PR #70 · Coverage schedule_pdf.py 69%→91% (Unit-Tests _build_schedule_html entries/group + 404); rein additiv

@@ -19,6 +19,11 @@ SQLAlchemy>=2.0.0
 psycopg2-binary>=2.9.0
 alembic>=1.13.0
 openpyxl>=3.1.0
+
+# Core library (DBF bridge + ORM/sync), extracted to its own repo and consumed as
+# a dependency. Importable as `sp5lib`. The [postgres] extra pulls psycopg2-binary.
+libopenschichtplaner5[postgres] @ git+https://github.com/mschabhuettl/libopenschichtplaner5.git
+
 pytest>=7.4.0
 pytest-cov>=4.1.0
 psutil>=5.9.0

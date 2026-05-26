@@ -334,13 +334,11 @@ openschichtplaner5/
 ├── backend/
 │   ├── api/
 │   │   └── main.py          # FastAPI REST API (80+ endpoints)
-│   ├── data/
-│   │   └── changelog.json   # Activity log
-│   └── sp5lib/
-│       ├── dbf_reader.py    # DBF/FoxPro Reader (UTF-16 LE)
-│       ├── dbf_writer.py    # DBF Writer (append/update/delete)
-│       ├── database.py      # High-level DB access (40+ methods)
-│       └── color_utils.py   # BGR→RGB color conversion
+│   └── data/
+│       └── changelog.json   # Activity log
+│   # DBF reader/writer + high-level DB access live in the libopenschichtplaner5
+│   # package (import name: sp5lib), pulled in as a dependency. See:
+│   # https://github.com/mschabhuettl/libopenschichtplaner5
 ├── frontend/
 │   └── src/
 │       ├── App.tsx           # Navigation & Layout (33 pages, lazy loading)

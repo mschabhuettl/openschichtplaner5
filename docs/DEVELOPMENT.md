@@ -203,13 +203,10 @@ openschichtplaner5/
 │   │       ├── schedule.py  # /api/schedule/*, /api/absences/*
 │   │       ├── reports.py   # /api/export/*, /api/statistics/*, /api/import/*
 │   │       └── ...
-│   ├── sp5lib/
-│   │   ├── dbf_reader.py    # Low-level DBF/FoxPro file reader
-│   │   ├── dbf_writer.py    # DBF writer (append / update / delete)
-│   │   ├── database.py      # High-level DB access layer (40+ methods)
-│   │   └── color_utils.py   # BGR ↔ RGB color conversion
+│   # sp5lib (DBF reader/writer + high-level DB access) is now the external
+│   # libopenschichtplaner5 package, listed in requirements.txt and imported as sp5lib.
 │   ├── tests/               # pytest test suite
-│   ├── requirements.txt     # Python dependencies
+│   ├── requirements.txt     # Python dependencies (incl. libopenschichtplaner5)
 │   └── .env.example         # Example environment config
 ├── frontend/
 │   └── src/

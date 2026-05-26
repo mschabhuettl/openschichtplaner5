@@ -80,3 +80,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-26 19:11 · PR #77 · Frontend-Coverage: recentPages-Util (Parse-Fallback, Dedupe, Cap-5; 6 Tests)
 - 2026-05-26 19:22 · PR #78 · Frontend-Coverage: useForm-Hook (State/Validierung/Submit/Reset; 7 Tests)
 - 2026-05-26 19:35 · PR #79 · BUGFIX useOnlineStatusWithFlash: justReconnected klaerte nie (Effect-Re-Run cancelte 3s-Timer); via neuem Test entdeckt, mit useRef behoben
+- 2026-05-26 19:46 · PR #80 · Frontend-Coverage: usePermissions RBAC-Gating-Hook (4 Tests)

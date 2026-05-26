@@ -102,3 +102,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-26 23:27 · PR #99 · Backend-Coverage: dependencies.py Auth/Security-Helper 91%→100% (21 Tests)
 - 2026-05-26 23:44 · PR #100 · Backend-Coverage: conflict_report Detection-Engine + Export 86%→99% (11 Tests)
 - 2026-05-26 23:57 · PR #101 · Backend-Coverage: webhooks Update/Dispatch-Failure 90%→100% (8 Tests)
+- 2026-05-27 00:15 · PR #102 · Backend-Coverage: ical Feed-Generierung + Token-Lifecycle 84%→96% (5 Tests)

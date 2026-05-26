@@ -58,10 +58,11 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [ ] Phase 5 Web-UI: weitere Empty-/Error-States, Responsiveness, Performance
 - [ ] mypy-Restfehler (auth `user_id: Any|None`, `walk_revisions`) bereinigen
 - [ ] venv-Vereinheitlichung (`.venv` vs `venv`)
-- [ ] `schemas.py` `EmployeeResponse`/`GroupResponse` an reale DBF-Keys angleichen
+- [x] `schemas.py` `EmployeeResponse`/`GroupResponse` an reale DBF-Keys angleichen → PR #65
 - [ ] ORM `to_dict()` SQLite/Postgres-Divergenz angleichen oder dokumentieren
 - [ ] `backend/data/schedule_comments.json` + `backend/.coverage` aus Git-Tracking nehmen
 
 ## Run-Log
 <!-- Eine Zeile pro abgeschlossener Iteration: YYYY-MM-DD HH:MM · PR #<nr> · <kurz> -->
 - 2026-05-26 16:17 · PR #64 · App konsumiert libopenschichtplaner5 jetzt aus PyPI (>=1.1.0); git-Build-Dep aus Dockerfile entfernt; Backend-Suite grün (2251)
+- 2026-05-26 16:46 · PR #65 · schemas.py: Employee/GroupResponse-Felder an reale DBF-Keys angeglichen (HIDDEN→HIDE, EMPLOYEENO→NUMBER, Phantom-Felder entfernt) + Regressions-Test; Suite grün (2255)

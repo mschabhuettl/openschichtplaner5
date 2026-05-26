@@ -88,3 +88,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-26 20:43 · PR #85 · Frontend-Coverage: useSSE Event-Stream + Reconnect-Backoff (11 Tests)
 - 2026-05-26 20:53 · PR #86 · Frontend-Coverage: useConfirm Promise-Dialog (4 Tests) — Hook-Lücke geschlossen
 - 2026-05-26 21:04 · PR #87 · Frontend-Coverage: ThemeContext Theme-Resolution + Persistenz (9 Tests)
+- 2026-05-26 21:15 · PR #88 · Frontend-Coverage: ToastContext Queue + Dedup + Auto-Dismiss (8 Tests)

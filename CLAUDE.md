@@ -43,7 +43,7 @@ Backend tests directly: `cd backend && python3 -m pytest tests/ -v` (pytest `asy
 ## Setup gotchas
 
 - **`.env` lives at the repo root** (next to `start.sh`, also consumed by Docker). Copy `.env.example` → `.env`; key vars: `SECRET_KEY`, `ALLOWED_ORIGINS`, `HOST`, `PORT`, `DEBUG`, `TOKEN_EXPIRE_HOURS`, rate-limit + brute-force settings, logging, session limits. The frontend has its own `frontend/.env.example`.
-- **Virtualenv naming is inconsistent:** `start.sh` creates/uses `backend/.venv`, but the `make test`/`make lint` targets `cd backend && . venv/bin/activate`. If `make test` skips activation, point it at the right venv or create `backend/venv`. Worth unifying.
+- **Virtualenv:** standardized on `backend/.venv` — `start.sh` creates/uses it and the `make test`/`make lint` targets activate the same path. (CI installs deps directly and doesn't use a venv.)
 - The DBF read/write path means data-shape assumptions come from FoxPro files — touch `dbf_reader`/`dbf_writer` carefully and keep SQLite (`models.py`) and Postgres (`models_pg.py`) models in sync.
 
 ## Working autonomously here

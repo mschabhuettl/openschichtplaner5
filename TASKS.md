@@ -109,3 +109,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-27 01:05 · PR #106 · Backend-Coverage: auth Login-Security Lockout/2FA/Session-Limit 89%→92% (4 Tests)
 - 2026-05-27 01:20 · PR #107 · FIX: admin rate-limit-Dashboard erreichbar (Route /api/v1→/api) + admin.py 83%→89% (6 Tests)
 - 2026-05-27 01:32 · PR #108 · Backend-Coverage: admin Backup-Helper (zip/rotate/auto-backup) 89%→91% (6 Tests)
+- 2026-05-27 01:47 · PR #109 · Backend-Coverage: absences create_absence Warnungen/Resilienz 82%→85% (6 Tests)

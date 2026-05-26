@@ -1,4 +1,4 @@
-import { useState, useEffect, useSyncExternalStore } from 'react';
+import { useState, useEffect, useRef, useSyncExternalStore } from 'react';
 
 // ─── Shared online/offline subscription (singleton) ────────
 function subscribe(callback: () => void): () => void {
@@ -34,19 +34,23 @@ export function useOnlineStatusWithFlash(): {
 } {
   const online = useOnlineStatus();
   const [justReconnected, setJustReconnected] = useState(false);
-  const [wasOffline, setWasOffline] = useState(!navigator.onLine);
+  // Track the previous offline state in a ref: keeping it in state put it in the
+  // effect deps, so flipping it re-ran the effect and the cleanup cancelled the
+  // 3 s timer before it fired — justReconnected then never cleared. A ref doesn't
+  // re-trigger the effect, so the timer survives.
+  const wasOfflineRef = useRef(!navigator.onLine);
 
   useEffect(() => {
     if (!online) {
-      setWasOffline(true);
+      wasOfflineRef.current = true;
       setJustReconnected(false);
-    } else if (wasOffline) {
-      setWasOffline(false);
+    } else if (wasOfflineRef.current) {
+      wasOfflineRef.current = false;
       setJustReconnected(true);
       const timer = setTimeout(() => setJustReconnected(false), 3000);
       return () => clearTimeout(timer);
     }
-  }, [online, wasOffline]);
+  }, [online]);
 
   return { online, justReconnected };
 }

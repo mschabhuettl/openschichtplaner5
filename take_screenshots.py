@@ -1,18 +1,34 @@
 #!/usr/bin/env python3
 """
-Playwright screenshot script for OpenSchichtplaner5 v1.1.0.
+Playwright screenshot script for OpenSchichtplaner5.
 Takes screenshots of ALL app pages and saves them to docs/screenshots/.
-Bypasses login via localStorage injection (Dev-Mode session).
+Bypasses login via localStorage injection (Dev-Mode session) and forces the
+German UI language so the navigation matches the (German) page content.
 
-Routes extracted from frontend/src/App.tsx (v1.0.0).
+Run the app first (backend serving the built frontend, ideally with demo data
+generated via scripts/generate_demo_schedule.py and SP5_DEV_MODE=true), then:
+
+    python take_screenshots.py
+
+Environment overrides:
+    SP5_SHOT_URL     base URL (default http://localhost:8000)
+    SP5_SHOT_DIR     output directory (default <repo>/docs/screenshots)
+    SP5_SHOT_CHROME  path to a Chrome/Chromium binary (when Playwright's own
+                     browser download is unavailable); launched with --no-sandbox
 """
 
-import os
 import json
+import os
+
 from playwright.sync_api import sync_playwright
 
-BASE_URL = "http://localhost:8000"
-SCREENSHOT_DIR = "/home/claw/.openclaw/workspace/openschichtplaner5/docs/screenshots"
+_REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+BASE_URL = os.environ.get("SP5_SHOT_URL", "http://localhost:8000")
+SCREENSHOT_DIR = os.environ.get(
+    "SP5_SHOT_DIR", os.path.join(_REPO_ROOT, "docs", "screenshots")
+)
+LANG_KEY = "sp5_language"  # matches frontend/src/i18n/index.ts
+_CHROME = os.environ.get("SP5_SHOT_CHROME")  # optional explicit browser binary
 
 # Dev-Mode session payload (matches AuthContext.tsx DEV_USER + SESSION_KEY)
 SESSION_KEY = "sp5_session"
@@ -124,15 +140,20 @@ os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
 
 def inject_devmode_session(page):
-    """Inject Dev-Mode session into localStorage."""
+    """Inject Dev-Mode session + force German UI language into localStorage."""
     page.evaluate(
         f"localStorage.setItem({json.dumps(SESSION_KEY)}, {json.dumps(json.dumps(DEV_SESSION))})"
     )
+    page.evaluate(f"localStorage.setItem({json.dumps(LANG_KEY)}, {json.dumps('de')})")
 
 
 def screenshot_all():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        launch_kwargs = {"headless": True}
+        if _CHROME:
+            launch_kwargs["executable_path"] = _CHROME
+            launch_kwargs["args"] = ["--no-sandbox"]
+        browser = p.chromium.launch(**launch_kwargs)
         context = browser.new_context(
             viewport={"width": 1280, "height": 900},
             locale="de-DE",

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { ApiErrorState } from '../components/EmptyState';
 
 interface DayEntry {
   employee_id: number;
@@ -139,13 +140,17 @@ export default function DienstBoard() {
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [viewMode, setViewMode] = useState<'board' | 'timeline' | 'list'>('board');
   const [showFree, setShowFree] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const data = await api.getScheduleDay(date, groupId ? Number(groupId) : undefined);
       setEntries(data as DayEntry[]);
       setLastRefresh(new Date());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Dienste konnten nicht geladen werden');
     } finally {
       setLoading(false);
     }
@@ -297,8 +302,10 @@ export default function DienstBoard() {
 
       {loading && <LoadingSpinner />}
 
-      {!loading && entries.length === 0 && (
-        <div className="text-center py-12 text-gray-600">
+      {!loading && error && <ApiErrorState message={error} onRetry={load} />}
+
+      {!loading && !error && entries.length === 0 && (
+        <div className="text-center py-12 text-gray-600 dark:text-slate-400">
           <div className="text-4xl mb-2">📭</div>
           <div>Keine Daten für dieses Datum</div>
         </div>

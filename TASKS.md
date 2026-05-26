@@ -93,3 +93,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-26 21:37 · PR #90 · Frontend-Coverage: AuthContext Session/Rollen/Login/Expiry (16 Tests) — alle Contexts abgedeckt
 - 2026-05-26 21:52 · PR #91 · Backend-Coverage: schedule_comments Error-Paths 79%→100% (4 Tests)
 - 2026-05-26 22:03 · PR #92 · Backend-Coverage: rate_limit_store Edge/Failure-Paths 82%→100% (6 Tests)
+- 2026-05-26 22:16 · PR #93 · Backend-Coverage: companies Validation/Conflict/Error-Paths 81%→93% (9 Tests)

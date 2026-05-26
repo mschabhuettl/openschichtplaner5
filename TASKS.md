@@ -101,3 +101,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-26 23:12 · PR #98 · Backend-Coverage: notification_settings Korruptdatei-Fallback 95%→100% (1 Test)
 - 2026-05-26 23:27 · PR #99 · Backend-Coverage: dependencies.py Auth/Security-Helper 91%→100% (21 Tests)
 - 2026-05-26 23:44 · PR #100 · Backend-Coverage: conflict_report Detection-Engine + Export 86%→99% (11 Tests)
+- 2026-05-26 23:57 · PR #101 · Backend-Coverage: webhooks Update/Dispatch-Failure 90%→100% (8 Tests)

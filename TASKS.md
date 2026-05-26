@@ -72,3 +72,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-26 17:33 · PR #69 · venv-Pfad auf .venv vereinheitlicht (Makefile↔start.sh); make lint/test laufen verlaesslich via .venv
 - 2026-05-26 17:47 · PR #70 · Coverage schedule_pdf.py 69%→91% (Unit-Tests _build_schedule_html entries/group + 404); rein additiv
 - 2026-05-26 17:52 · PR #71 · Coverage absences.py 74%→82% (Unit-Tests _classify_leave_type + _build_employee_stats); Gesamt 85%
+- 2026-05-26 18:08 · PR #72 · Coverage overtime.py 80%→97% (Unit-Tests _calc_overtime MASHI/SPSHI-Stundenlogik)

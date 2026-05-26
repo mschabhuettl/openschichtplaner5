@@ -13,11 +13,17 @@ export function LoadingSpinner({ message, size = 'md' }: LoadingSpinnerProps) {
     lg: 'w-12 h-12 border-4',
   };
   return (
-    <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-500 dark:text-slate-400">
+    <div
+      className="flex flex-col items-center justify-center py-20 gap-3 text-slate-500 dark:text-slate-400"
+      role="status"
+      aria-live="polite"
+    >
       <div
         className={`${sizeClasses[size]} border-slate-300 dark:border-slate-600 border-t-blue-500 rounded-full animate-spin`}
+        aria-hidden="true"
       />
-      {message && <span className="text-sm">{message}</span>}
+      {/* Always expose an accessible loading label, even when no visible message is given. */}
+      <span className={message ? 'text-sm' : 'sr-only'}>{message ?? 'Wird geladen …'}</span>
     </div>
   );
 }

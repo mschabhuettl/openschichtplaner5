@@ -503,7 +503,9 @@ export default function ExportScheduler() {
 
       {/* Loading */}
       {loading ? (
-        <div className="flex justify-center py-16" aria-label="Lade Daten" role="status">
+        // LoadingSpinner itself provides role="status" + an accessible label,
+        // so this wrapper stays a plain layout container (no nested live region).
+        <div className="flex justify-center py-16">
           <LoadingSpinner />
         </div>
       ) : schedules.length === 0 && !error ? (

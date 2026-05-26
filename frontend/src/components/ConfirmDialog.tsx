@@ -24,11 +24,16 @@ export function ConfirmDialog({
   const confirmRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  // Focus confirm button when opened
+  // Focus confirm button when opened, and restore focus to the trigger on close.
   useEffect(() => {
-    if (open) {
-      setTimeout(() => confirmRef.current?.focus(), 50);
-    }
+    if (!open) return;
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    setTimeout(() => confirmRef.current?.focus(), 50);
+    return () => {
+      if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
+        previouslyFocused.focus();
+      }
+    };
   }, [open]);
 
   // Focus trap + Escape key

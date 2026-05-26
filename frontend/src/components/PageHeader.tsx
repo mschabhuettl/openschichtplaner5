@@ -14,8 +14,8 @@ export function PageHeader({ title, subtitle, actions, className = '' }: PageHea
   return (
     <div className={`flex items-start justify-between gap-3 mb-4 flex-wrap ${className}`}>
       <div>
-        <h1 className="text-xl font-bold text-gray-800 leading-tight">{title}</h1>
-        {subtitle && <p className="text-sm text-gray-500 mt-0.5">{subtitle}</p>}
+        <h1 className="text-xl font-bold text-gray-800 dark:text-slate-100 leading-tight">{title}</h1>
+        {subtitle && <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">{subtitle}</p>}
       </div>
       {actions && <div className="flex items-center gap-2 flex-wrap">{actions}</div>}
     </div>

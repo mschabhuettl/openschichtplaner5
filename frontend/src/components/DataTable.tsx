@@ -187,6 +187,7 @@ export function DataTable<T>({
               {columns.map(col => (
                 <th
                   key={col.key as string}
+                  scope="col"
                   onClick={() => handleSort(col)}
                   onKeyDown={col.sortable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleSort(col); } } : undefined}
                   tabIndex={col.sortable ? 0 : undefined}

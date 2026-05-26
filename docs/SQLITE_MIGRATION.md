@@ -154,7 +154,7 @@ systemctl restart sp5api
 
 ## 4. PoC — Vorhandener Code
 
-`backend/sp5lib/sqlite_adapter.py` implementiert:
+`sqlite_adapter.py` (im externen Paket `libopenschichtplaner5`, importierbar als `sp5lib.sqlite_adapter`) implementiert:
 - `SP5SQLiteAdapter.init_db()` — Schema für EMPL, GROUP, BOOK erstellen
 - `SP5SQLiteAdapter.sync_from_dbf(daten_path)` — Daten aus DBF in SQLite übertragen
 - Einfache Query-Helper als Demo

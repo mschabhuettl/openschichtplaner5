@@ -21,7 +21,7 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [x] DBF numerischer Overflow + Datumsvalidierung → PR #58
 - [x] Supply-Chain: malicious fastapi 0.136.3 wegpinnen → PR #59
 - [ ] mypy-Fehler beheben (8, nicht-blockierend; u.a. Pillow-Resampling-Typing)
-- [ ] venv-Vereinheitlichung (.venv vs venv)
+- [x] venv-Vereinheitlichung (.venv) → PR #69
 
 ## Phase 4 — API- & Library-Audit
 - [x] Alle 25 Router systematisch geprüft → AUDIT.md
@@ -57,7 +57,7 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [x] libopenschichtplaner5 auf PyPI veröffentlicht (1.1.0); App-Konsum auf PyPI umgestellt → PR #64
 - [ ] Phase 5 Web-UI: weitere Empty-/Error-States, Responsiveness, Performance
 - [x] mypy-Restfehler in api/ behoben (Pillow #66 + auth user_id #67 → mypy api = 0 Fehler)
-- [ ] venv-Vereinheitlichung (`.venv` vs `venv`)
+- [x] venv-Vereinheitlichung (.venv) → PR #69
 - [x] `schemas.py` `EmployeeResponse`/`GroupResponse` an reale DBF-Keys angleichen → PR #65
 - [ ] ORM `to_dict()` SQLite/Postgres-Divergenz angleichen oder dokumentieren
 - [x] `schedule_comments.json` + `.coverage` aus Git-Tracking genommen → PR #68
@@ -69,3 +69,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-26 16:58 · PR #66 · employees.py Pillow: Image.Resampling.LANCZOS + img-Annotation (api/ mypy 4→1, keine Verhaltensaenderung); Suite gruen (2255)
 - 2026-05-26 17:08 · PR #67 · auth.py change-password user_id None-Guard → mypy api = 0 Fehler; Suite gruen (2255)
 - 2026-05-26 17:20 · PR #68 · generierte Dateien (.coverage, schedule_comments.json) aus Git-Tracking genommen + gitignored; kein Daten-Churn mehr; Suite gruen (2255)
+- 2026-05-26 17:33 · PR #69 · venv-Pfad auf .venv vereinheitlicht (Makefile↔start.sh); make lint/test laufen verlaesslich via .venv

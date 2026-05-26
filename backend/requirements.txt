@@ -1,4 +1,6 @@
-fastapi>=0.104.0
+# 0.136.3 is a malicious release (MAL-2026-4750): it tampers with
+# pyproject.toml/PKG-INFO to inject an undocumented 'fastar' dependency. Exclude it.
+fastapi>=0.104.0,!=0.136.3
 uvicorn[standard]>=0.24.0
 pydantic>=2.0.0
 httpx>=0.24.0

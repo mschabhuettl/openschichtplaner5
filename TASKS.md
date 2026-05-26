@@ -100,3 +100,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-26 23:02 · PR #97 · Backend-Coverage: recurring_shifts Validation/Generation 93%→100% (7 Tests)
 - 2026-05-26 23:12 · PR #98 · Backend-Coverage: notification_settings Korruptdatei-Fallback 95%→100% (1 Test)
 - 2026-05-26 23:27 · PR #99 · Backend-Coverage: dependencies.py Auth/Security-Helper 91%→100% (21 Tests)
+- 2026-05-26 23:44 · PR #100 · Backend-Coverage: conflict_report Detection-Engine + Export 86%→99% (11 Tests)

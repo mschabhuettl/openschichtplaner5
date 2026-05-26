@@ -86,3 +86,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-26 20:22 · PR #83 · Frontend-Coverage: useKeyboardShortcuts globale Tastatur-Shortcuts (9 Tests)
 - 2026-05-26 20:33 · PR #84 · Frontend-Coverage: useFocusOnNavigate a11y-Fokus nach Routenwechsel (6 Tests)
 - 2026-05-26 20:43 · PR #85 · Frontend-Coverage: useSSE Event-Stream + Reconnect-Backoff (11 Tests)
+- 2026-05-26 20:53 · PR #86 · Frontend-Coverage: useConfirm Promise-Dialog (4 Tests) — Hook-Lücke geschlossen

@@ -74,3 +74,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-26 17:52 · PR #71 · Coverage absences.py 74%→82% (Unit-Tests _classify_leave_type + _build_employee_stats); Gesamt 85%
 - 2026-05-26 18:08 · PR #72 · Coverage overtime.py 80%→97% (Unit-Tests _calc_overtime MASHI/SPSHI-Stundenlogik)
 - 2026-05-26 18:23 · PR #73 · Doku-Mindestversionen korrigiert (Python 3.8+→3.10+, Node 18+→20+) in README + DEVELOPMENT.md
+- 2026-05-26 18:31 · PR #74 · DEVELOPMENT.md Backend-Setup auf .venv angeglichen (Konsistenz mit #69)

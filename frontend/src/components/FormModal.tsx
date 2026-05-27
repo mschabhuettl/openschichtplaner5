@@ -1,4 +1,5 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect } from 'react';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface FormModalProps {
   open: boolean;
@@ -49,62 +50,13 @@ export function FormModal({
   children,
   size = 'md',
 }: FormModalProps) {
-  const panelRef = useRef<HTMLDivElement>(null);
-
-  // Focus trap: cycle focus within the modal panel
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      onClose();
-      return;
-    }
-    if (e.key === 'Tab' && panelRef.current) {
-      const focusable = panelRef.current.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusable.length === 0) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        }
-      } else {
-        if (document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    }
-  }, [onClose]);
-
-  // Attach keyboard handler & auto-focus first input when opened
-  useEffect(() => {
-    if (!open) return;
-    // Remember what had focus before the modal opened, to restore it on close.
-    const previouslyFocused = document.activeElement as HTMLElement | null;
-    document.addEventListener('keydown', handleKeyDown);
-    // Auto-focus: try first input, then first focusable element
-    setTimeout(() => {
-      if (!panelRef.current) return;
-      const firstInput = panelRef.current.querySelector<HTMLElement>('input, select, textarea');
-      if (firstInput) {
-        firstInput.focus();
-      } else {
-        const firstFocusable = panelRef.current.querySelector<HTMLElement>(
-          'button, [href], [tabindex]:not([tabindex="-1"])'
-        );
-        firstFocusable?.focus();
-      }
-    }, 50);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      // Restore focus to the trigger element so keyboard/SR users are not dumped to <body>.
-      if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
-        previouslyFocused.focus();
-      }
-    };
-  }, [open, handleKeyDown]);
+  // Accessible focus management: trap Tab within the panel (skipping disabled
+  // controls), prefer focusing the first input, close on Escape, and restore
+  // focus to the trigger on close. See useFocusTrap.
+  const panelRef = useFocusTrap<HTMLDivElement>(open, {
+    onEscape: onClose,
+    preferInput: true,
+  });
 
   // Prevent body scroll when modal is open
   useEffect(() => {

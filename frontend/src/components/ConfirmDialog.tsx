@@ -1,4 +1,5 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -22,51 +23,18 @@ export function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   const confirmRef = useRef<HTMLButtonElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
 
-  // Focus confirm button when opened, and restore focus to the trigger on close.
+  // Accessible focus management: trap Tab within the dialog (skipping disabled
+  // controls), close on Escape, and restore focus to the trigger on close.
+  const dialogRef = useFocusTrap<HTMLDivElement>(open, { onEscape: onCancel });
+
+  // This dialog prefers to land initial focus on the confirm button rather than
+  // the leading × button, so override the hook's default once it has armed.
   useEffect(() => {
     if (!open) return;
-    const previouslyFocused = document.activeElement as HTMLElement | null;
-    setTimeout(() => confirmRef.current?.focus(), 50);
-    return () => {
-      if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
-        previouslyFocused.focus();
-      }
-    };
+    const timer = window.setTimeout(() => confirmRef.current?.focus(), 0);
+    return () => window.clearTimeout(timer);
   }, [open]);
-
-  // Focus trap + Escape key
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      onCancel();
-      return;
-    }
-    if (e.key === 'Tab' && dialogRef.current) {
-      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        }
-      } else {
-        if (document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    }
-  }, [onCancel]);
-
-  useEffect(() => {
-    if (!open) return;
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [open, handleKeyDown]);
 
   if (!open) return null;
 

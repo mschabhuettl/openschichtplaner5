@@ -135,6 +135,32 @@ All configuration is via environment variables in `.env`. See `.env.example` for
 | `SP5_HTTP_PORT` | ⬡ | Host HTTP port (default: 80) |
 | `SP5_HTTPS_PORT` | ⬡ | Host HTTPS port (default: 443) |
 | `LOG_LEVEL` | ⬡ | `INFO` recommended for production |
+| `RATE_LIMIT_API` / `RATE_LIMIT_LOGIN` | ⬡ | Per-IP/user rate limits (e.g. `200/minute` / `5/minute`) |
+| `BRUTE_FORCE_MAX_ATTEMPTS` / `BRUTE_FORCE_LOCKOUT_MINUTES` | ⬡ | Login lockout tuning |
+
+---
+
+## Scaling & Workers
+
+The backend keeps two pieces of state **in-process** (per uvicorn worker): the
+server-side **session store** (for token revocation) and the **rate-limit /
+brute-force counters**. There is no shared backing store. This has two
+consequences for production:
+
+1. **Set `SECRET_KEY`** (a long random value, e.g. `openssl rand -hex 32`).
+   It signs the JWTs. If it is left unset the app falls back to a *random
+   per-process* secret — tokens then become invalid on every restart and across
+   workers, and the app logs a warning on startup. `start.sh` generates one
+   automatically; for Docker/manual deploys set it in `.env`.
+2. **Run a single worker** (the default) unless you add a shared store. With
+   multiple uvicorn workers (or replicas), sessions and rate-limit counters are
+   *not* shared: a token revoked on one worker stays valid on another, and rate
+   limits are enforced per-worker. If you need to scale horizontally, terminate
+   sessions via short `TOKEN_EXPIRE_HOURS` and put a rate limiter in the reverse
+   proxy, or introduce a shared (e.g. Redis) backend first.
+
+For most installations a single worker behind the bundled nginx is the intended,
+supported setup and handles typical shift-planning load comfortably.
 
 ---
 

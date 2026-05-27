@@ -1,6 +1,6 @@
 # FINAL REPORT — Autonomer Agent-Run
 
-**Projekt:** OpenSchichtplaner5 · **Datum:** 2026-05-26 · **Branch-Basis:** `main`
+**Projekt:** OpenSchichtplaner5 · **Datum:** 2026-05-26 (Session 1) / 2026-05-27 (Session 2) · **Branch-Basis:** `main`
 
 Vollständiger, autonomer Durchlauf der Phasen 0–7. Alle Code-Änderungen liefen über
 Feature-Branches → `make lint`/`make test` grün → PR → CI → Merge. Tracking in
@@ -93,17 +93,42 @@ Nach allen Merges (`git fetch --prune` + explizites Löschen auf origin & lokal)
 
 `main` wurde nie force-gepusht oder gelöscht; alle Löschungen sind über die PR-Historie/`main` reversibel.
 
+## Session 2 (2026-05-27) — Lib-Roadmap-Konsum, ORM-Mirror & Parallel-Modus
+
+Fortsetzung des 24/7-Laufs unter aktualisiertem Owner-Charter (Substanz vor Coverage;
+Coverage gedeckelt; pro Welle ein Lib-Schritt; **Parallel-Modus** als Team-Lead mit bis zu
+3 worktree-isolierten Teammates pro Welle, sequenzieller Merge). Highlights:
+
+- **Lib-Roadmap komplett durchgezogen & konsumiert:** `libopenschichtplaner5` von 1.1.0 → **1.6.0**
+  getrieben (je from-app-Issue + tmux-Dispatch → `[LIB-DONE]` → App-Konsum). Ergebnis: ein
+  **vollständiger DBF→ORM-Lese-Mirror über alle 19 Tabellen** (Stammdaten, Schedule-Einträge,
+  Kalender, Zeitkonto, Planungsdaten) als Admin-Router `/api/admin/orm/*` (#131/#133/#138/#139/#141).
+- **ORM-Mirror nutzbar gemacht:** `/sync` (via `sync_all`), date-range/Filter-Read-Endpoints je Tabelle,
+  `/status` (Live-Counts ohne Re-Sync, #144), vollständige API-Doku (#142) und eine **Admin-UI**
+  `/orm-mirror` (Status + Sync-Button, #147).
+- **Gefundener/abgefangener Defekt:** floating Lib-Version + verhaltens-gepinnter App-Test
+  (`test_orm_sync.py`) → in #138 mitgefixt; sync_group_assignments-UNIQUE + dangling-super_id als
+  Lib-Defekte zurückgemeldet und in 1.4.0 behoben.
+- **Phase-5 abgeschlossen:** `useFocusTrap`-Hook + Modal-Migration (#132/#136), `scope` auf 499
+  Tabellen-Headern/49 Seiten (#137), `aria-live`/`role=status` Live-Regions (#143); Dark-Mode &
+  Robustheit/Error-States als bereits abgedeckt verifiziert.
+- **Korrektheit/DX:** `ShiftResponse` Phantom-Key `HIDDEN`→`HIDE` (#145, schließt schemas/DBF-Alignment);
+  alle OpenAPI-Tags beschrieben + Guard-Test (#146).
+- **API-Extraktions-Epic P1:** Analyse + ADR `docs/adr/0001-api-extraction.md` (#140).
+- **Charter/Workflow:** Parallel-Modus in AUTONOMOUS_RUN.md verankert (#134).
+
 ## Baseline → Endstand
 
 | Metrik | Baseline | Endstand |
 |---|---|---|
-| Backend-Tests | 2234 passed / 6 skip | 2251 passed / 6 skip (mit Lib-Dependency) |
-| Backend-Coverage | 79 % | 84 % |
-| Frontend-Tests | 378 passed | 389 passed (#60 +8, #63 +3) |
-| ruff / eslint / tsc | clean / 0err / clean | clean / 0err / clean |
+| Backend-Tests | 2234 passed / 6 skip | **2491 passed / 6 skip** |
+| Backend-Coverage | 79 % | ~87 % (api/) |
+| Frontend-Tests | 378 passed | **523 passed** |
+| ruff / eslint / tsc / mypy | clean / 0err / clean | clean / 0err / clean / clean |
 | CI-Security-Audit | **rot** (malicious fastapi) | **grün** |
-| CI-Actions-Runtime | Node 20 (Deprecation ab 2026-06-02) | Node 24 (#62) |
-| docs/screenshots | teils leer/veraltet, Nav-Sprach-Mix | neu generiert, befüllt, deutsch (#63) |
+| libopenschichtplaner5 | git-Pin | **PyPI >=1.6.0** (19-Tabellen-ORM) |
+| ORM-Mirror | — | vollständig (Backend + Doku + Admin-UI) |
+| docs/screenshots | teils leer/veraltet | neu generiert, deutsch (#63) |
 
 ## Offene Punkte & empfohlene nächste Schritte
 1. **Tech-Debt (D009):** `backend/data/schedule_comments.json` und `backend/.coverage` aus dem
@@ -111,8 +136,15 @@ Nach allen Merges (`git fetch --prune` + explizites Löschen auf origin & lokal)
 2. ~~**CI-Wartung:** GitHub-Actions auf Node-24 bumpen~~ — ✅ erledigt in **#62**.
 3. **Deployment-Härtung:** Fail-fast wenn `SP5_JWT_SECRET` im Prod-Modus fehlt; In-Memory-Session/
    Rate-Limit-Store für Multi-Worker auf Shared-Store (Redis) umstellen — oder Single-Worker dokumentieren.
-4. **ORM-Parität:** SQLite-`to_dict()` an den DBF-Feldsatz angleichen oder PG-Backend als
-   „reduced-field" dokumentieren (AUDIT.md, Befund ORM).
-5. **schemas.py:** `EmployeeResponse`/`GroupResponse`-Felder an reale DBF-Keys angleichen (OpenAPI-Genauigkeit).
-6. **mypy:** verbleibende 4 nicht-blockierende Typfehler (auth `user_id: Any|None`, `walk_revisions`) bereinigen.
-7. ~~**Library-Reifung:** `libopenschichtplaner5` auf PyPI veröffentlichen + versionierte Releases statt git-Pin~~ — ✅ erledigt (PyPI 1.1.0; App via #64 auf `>=1.1.0`).
+4. ~~**ORM-Parität:** SQLite-`to_dict()` an den DBF-Feldsatz angleichen~~ — ✅ entfällt: `to_dict()` lebt
+   seit der Lib-Extraktion zentral in `libopenschichtplaner5` (eine Quelle, SQLite=PG).
+5. ~~**schemas.py:** Felder an reale DBF-Keys angleichen~~ — ✅ erledigt (#65 Employee/Group, #145 Shift).
+6. ~~**mypy:** verbleibende Typfehler~~ — ✅ `mypy api` clean (mit `--ignore-missing-imports`).
+7. ~~**Library-Reifung:** PyPI veröffentlichen~~ — ✅ erledigt; mittlerweile **1.6.0** (kompletter ORM-Mirror).
+
+### Auf Owner-Entscheidung wartend (Session 2)
+- **Lib Phase 7 — Write-Back (ORM→DBF):** bewusst NICHT autonom dispatcht — berührt die DBF-Schreib-
+  Kernsicherheit (Risiko echter FoxPro-Datenkorruption). Erst nach Owner-Freigabe.
+- **API-Extraktions-Epic P2–P5:** P1 (ADR) erledigt; P2 erstellt ein neues öffentliches Repo
+  `openschichtplaner5-api` + CI/PyPI — konsequente externe Aktion, daher auf explizite Freigabe wartend.
+- **Deployment-Härtung** (Punkt 3 oben) und **Performance-Profiling** bleiben offen, sobald gewünscht.

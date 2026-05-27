@@ -120,3 +120,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-27 03:26 · PR #117 · FIX: WorkTimeRules vitest-Flake gehärtet (selectEmployeeAndCheck-Helper; behebt #104/#116-Blocker)
 - 2026-05-27 03:40 · PR #118 · Backend-Coverage: scheduled_reports Update-Validatoren + corrupt-load 94%→96% (6 Tests)
 - 2026-05-27 03:53 · PR #119 · Backend-Coverage: reports Warnings-Center-Aggregation 80%→81% (2 Tests)
+- 2026-05-27 04:08 · PR #120 · Backend-Coverage: reports Fairness-Score-Algorithmus 81%→83% (2 Tests)

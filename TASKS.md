@@ -33,7 +33,7 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 ## Phase 5 — Web-UI verbessern
 - [x] Dark-Mode: StatCard/Badge/PageHeader (Audit: bereits vollständig abgedeckt)
 - [x] A11y: `th scope` (#137, 499 Header/49 Dateien) + Modal-Fokus-Restore/Trap (#132 `useFocusTrap`, #136 Migration FormModal/ConfirmDialog)
-- [ ] A11y Rest: `role=status`/`aria-live` Live-Regions für Async-States
+- [x] A11y Rest: `role=status`/`aria-live` Live-Regions für Async-States (#143: EmptyState/ErrorBoundary/Skeleton; Toast/LoadingSpinner waren bereits korrekt)
 - [ ] Robustheit: Staleness-Guards, Error-States
 - [ ] vitest + Playwright absichern
 
@@ -170,3 +170,6 @@ Frontend + Deployment. Jede Phase = eigener PR, App-CI bleibt durchgehend grün.
 - 2026-05-27 12:40 · PR #139 · FEATURE: Lib 1.5.0 konsumiert — requirements >=1.5.0 + ORM-Mirror um Zeitkonto erweitert (`/bookings`,`/overtime` date-range + `/leave-entitlements` year/employee via neue Repos); `sync_all` deckt 14 Tabellen ab; Backend-Suite grün (2485)
 - 2026-05-27 13:05 · PR #140 · EPIC P1 (Teammate): API-Extraktion Analyse + ADR `docs/adr/0001-api-extraction.md` (Kopplungs-Inventar, `ApiSettings`/`create_app(config)`-Vertrag, P2–P5-Plan); Top-Risiko globaler `_sessions`-State
 - 2026-05-27 13:30 · PR #141 · FEATURE: Lib 1.6.0 konsumiert — requirements >=1.6.0 + ORM-Mirror um Planungsdaten erweitert (`/shift-demands`,`/special-demands`,`/cycles`,`/cycle-assignments`,`/restrictions`); `sync_all` deckt 19 Tabellen ab → **Lese-Mirror vollständig**; Backend-Suite grün (2486)
+- 2026-05-27 13:55 · PR #142 · DOCS (Welle, Teammate): ORM-Mirror-API-Referenz in `docs/API.md` vervollständigt (alle 1.4–1.6-Endpoints) + CHANGELOG
+- 2026-05-27 13:58 · PR #143 · A11y (Welle, Teammate): `role=status`/`aria-live` in EmptyState/ErrorBoundary/Skeleton (Toast/LoadingSpinner bereits korrekt); 514 Frontend-Tests grün
+- 2026-05-27 14:20 · PR #144 · FEATURE: ORM-Mirror `/api/admin/orm/status` — Live-Zeilen-Counts aller 19 Tabellen ohne Re-Sync (Mirror-Freshness-Sichtbarkeit); 15 Tests; Backend-Suite grün (2487)

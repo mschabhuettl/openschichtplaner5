@@ -27,6 +27,10 @@ Iteration; der Loop ruft dich erneut auf. Der gesamte Zustand lebt in git +
    herauslösen — app-agnostisch, abhängig von `libopenschichtplaner5`; die App stellt
    danach auf das Paket um (nur Wiring + Frontend + Deployment bleiben). Phasenplan in
    `TASKS.md` (Epic „API-Extraktion"). Jede Phase = eigener PR, App-CI bleibt grün.
+4. **Parallel-Modus (Team-Lead, ab 2026-05-27).** Arbeite nicht mehr seriell, sondern
+   als Lead mit **bis zu 3 parallelen Teammates** pro Welle. Details: Abschnitt
+   „Parallel-Modus". Substanz-vor-Coverage und der Ein-Lib-Schritt-pro-Welle gelten
+   unverändert.
 
 ## Iterations-Schleife (genau so, jedes Mal)
 
@@ -51,6 +55,31 @@ Iteration; der Loop ruft dich erneut auf. Der gesamte Zustand lebt in git +
 Wenn CI **rot** wird: Branch nicht mergen. Ursache fixen (neuer Commit auf dem
 Branch) bis grün; wenn nach 3 ernsthaften Versuchen nicht lösbar, PR als Draft
 markieren, in `TASKS.md` dokumentieren, nächsten Punkt nehmen.
+
+## Parallel-Modus (Team-Lead) — Standard ab 2026-05-27
+
+Statt einen Punkt pro Iteration seriell, arbeite in **Wellen** mit parallelen Teammates:
+
+1. **Welle planen:** Wähle **bis zu 3 GARANTIERT UNABHÄNGIGE** Backlog-Punkte —
+   verschiedene Module/Dateien, **kein Überlapp** (z. B. ein Frontend-A11y-Fix + ein
+   Backend-Router + ein Doku/Refactor). Vermeide es, dass zwei Punkte dieselbe Datei
+   anfassen (häufigster Konflikt: `TASKS.md`-Run-Log — der Lead trägt Run-Log-Zeilen
+   **nach** dem Merge selbst nach, Teammates editieren `TASKS.md` nicht).
+2. **Spawnen:** Pro Punkt ein Teammate via Agent-Tool mit `isolation: "worktree"` (eigener
+   git-Worktree; `node_modules` und `.venv` sind per Settings symlink-geteilt → keine
+   Neuinstallation). Auftrag an jeden Teammate: branch (`<type>/<slug>`), implementieren
+   (kleiner kohärenter Scope), `make lint && make test` grün, Conventional Commit, push,
+   `gh pr create` — **nicht** selbst mergen, PR-Nr zurückmelden.
+3. **Sammeln & sequentiell mergen (Lead):** Warte je auf **grüne CI**, dann
+   `gh pr merge <nr> --squash --delete-branch` **nacheinander**. Nach jedem Merge
+   `git pull --ff-only`. Run-Log-Zeile pro gemergtem PR selbst nachtragen.
+4. **Konflikte:** Mergt ein PR und ein anderer kollidiert (z. B. überlappende Datei),
+   den betroffenen Teammate **rebasen/nachziehen** lassen (`git rebase origin/main`,
+   Konflikt lösen, force-push auf den **Feature-Branch** — nie auf `main`), CI erneut grün.
+5. **Obergrenze & Rückfall:** Max. 3 parallele Teammates (Token-/CI-Last). Bei
+   Konflikt-Häufung oder Flakiness auf **weniger oder seriell** zurückfallen.
+6. **Pro Welle zusätzlich:** genau einen Lib-Schritt dispatchen, falls kein `from-app`
+   offen ist (Controller-Abschnitt). Coverage bleibt gedeckelt.
 
 ## Du steuerst libopenschichtplaner5 (Controller-Rolle)
 

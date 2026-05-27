@@ -15,6 +15,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **ORM-Mirror Calendar Data (#138):** Extended the ORM mirror with calendar endpoints — `GET /api/admin/orm/holidays` (`5HOLID`, with an optional `year` query that also returns recurring holidays) and `/periods` (`5PERIO`). `POST /api/admin/orm/sync` now mirrors all 11 supported tables (adds employees, groups and group assignments alongside holidays and periods); `sync_group_assignments` dedups and skips dangling rows so `sync_all` runs cleanly on dirty DBF data. Bumps the `libopenschichtplaner5` consumption to `>=1.4.0`.
 - **ORM-Mirror Time Accounting (#139):** Extended the ORM mirror with time-accounting endpoints — `GET /api/admin/orm/bookings` (`5BOOK`) and `/overtime` (`5OVER`), each filterable via `date_from`/`date_to` (inclusive ISO dates) and `employee_id`, plus `/leave-entitlements` (`5LEAEN`), filterable via `year` and `employee_id`. Bumps the `libopenschichtplaner5` consumption to `>=1.5.0`.
 - **ORM-Mirror Planning Data (#141):** Completed the read mirror with planning endpoints — `GET /api/admin/orm/shift-demands` (`5SHDEM`, filterable via `shift_id`/`weekday`/`group_id`), `/special-demands` (`5SPDEM`, filterable via `date_from`/`date_to`/`shift_id`), `/cycles` (`5CYCLE`, with `include_hidden`), `/cycle-assignments` (`5CYASS`, filterable via `employee_id`/`cycle_id`) and `/restrictions` (`5RESTR`, filterable via `employee_id`/`shift_id`). `POST /api/admin/orm/sync` now covers **all 19 supported tables**, so the read-only ORM mirror spans the full DBF schema. Bumps the `libopenschichtplaner5` consumption to `>=1.6.0`.
+- **ORM-Mirror status endpoint (#144):** `GET /api/admin/orm/status` reports the live per-table row counts of the mirror (all 19 tables) plus `mirror_db_exists` and `total_rows`, without triggering a re-sync — a cheap freshness check before `POST /sync`.
+- **ORM-Mirror admin UI (#147):** New admin-only **"ORM-Spiegel"** page (`/orm-mirror`) showing the mirror status (per-table counts) with a "Jetzt synchronisieren" button — a usable face for the mirror endpoints.
+
+### Security
+- **JWT secret now honours `SECRET_KEY` (#150):** The signing secret previously read only `SP5_JWT_SECRET`, while `.env.example`, the README, the deployment docs and `start.sh` all use `SECRET_KEY` — so a deployment following the docs silently signed tokens with a random per-process key (sessions broke on every restart and across workers). `SECRET_KEY` is now honoured (`SP5_JWT_SECRET` kept as an alias) and the shipped `change-me…` placeholder is treated as unset.
+- **Startup warning for missing JWT secret (#149):** In production (not dev/debug) the app now logs a prominent warning when no real JWT secret is configured, instead of silently using a random per-process fallback.
+
+### Fixed
+- **Honour documented config env vars (#151, #152, #153):** `LOG_LEVEL`, `LOG_FILE`, `BRUTE_FORCE_MAX_ATTEMPTS`, `BRUTE_FORCE_LOCKOUT_MINUTES`, `RATE_LIMIT_API`, `RATE_LIMIT_LOGIN` and `SESSION_CLEANUP_INTERVAL_MINUTES` were documented in `.env.example` but hardcoded/ignored in code — they now take effect (defaults unchanged, so non-breaking). `LOG_FILE` creates its parent directory and falls back safely to `/tmp` on error.
+- **`ShiftResponse` schema key (#145):** the shift response model declared the phantom `HIDDEN` field; corrected to the real DBF key `HIDE` (+ `POSITION`), so the OpenAPI schema no longer advertises an always-null field.
+
+### Accessibility
+- **Modal focus management (#132, #136):** Added a shared `useFocusTrap` hook (Tab cycling that skips disabled controls, Escape, focus restoration) and migrated `FormModal`/`ConfirmDialog` to it; `PhotoCropDialog` and `KeyboardShortcutsModal` gained proper focus trapping.
+- **Table headers & live regions (#137, #143):** Added `scope` to data-table headers across all pages (WCAG 1.3.1) and `role="status"`/`aria-live` to the empty/loading/error state components so screen readers announce async state changes.
+
+### Improved
+- **Full OpenAPI tag descriptions (#146):** every API tag group is now described in the Swagger UI (Reports, Notifications, ORM Mirror, …), with a regression-guard test.
+- **Deployment docs (#155):** documented the single-worker / in-process-session caveat and the `SECRET_KEY` requirement for production.
 
 ---
 

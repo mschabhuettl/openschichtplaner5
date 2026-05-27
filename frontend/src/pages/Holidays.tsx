@@ -264,11 +264,11 @@ export default function Holidays() {
           <table className="w-full text-sm min-w-[500px]">
             <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
               <tr>
-                <th className="px-4 py-2 text-left">Datum</th>
-                <th className="px-4 py-2 text-left">Wochentag</th>
-                <th className="px-4 py-2 text-left">Name</th>
-                <th className="px-4 py-2 text-center">Typ</th>
-                <th className="px-4 py-2 text-center">Aktionen</th>
+                <th scope="col" className="px-4 py-2 text-left">Datum</th>
+                <th scope="col" className="px-4 py-2 text-left">Wochentag</th>
+                <th scope="col" className="px-4 py-2 text-left">Name</th>
+                <th scope="col" className="px-4 py-2 text-center">Typ</th>
+                <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
               </tr>
             </thead>
             <tbody>

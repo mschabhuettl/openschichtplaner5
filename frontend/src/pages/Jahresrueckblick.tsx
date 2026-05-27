@@ -610,44 +610,44 @@ export default function Jahresrueckblick() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 text-xs">
-                        <th className="text-left px-4 py-3 font-medium">Mitarbeiter</th>
-                        <th
+                        <th scope="col" className="text-left px-4 py-3 font-medium">Mitarbeiter</th>
+                        <th scope="col"
                           className="text-right px-3 py-3 font-medium cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 whitespace-nowrap"
                           onClick={() => sortBy('actual_hours')}
                         >
                           Ist-h <SortIcon k="actual_hours" />
                         </th>
-                        <th
+                        <th scope="col"
                           className="text-right px-3 py-3 font-medium cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 whitespace-nowrap"
                           onClick={() => sortBy('target_hours')}
                         >
                           Soll-h <SortIcon k="target_hours" />
                         </th>
-                        <th
+                        <th scope="col"
                           className="text-right px-3 py-3 font-medium cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 whitespace-nowrap"
                           onClick={() => sortBy('overtime')}
                         >
                           ÜS <SortIcon k="overtime" />
                         </th>
-                        <th
+                        <th scope="col"
                           className="text-right px-3 py-3 font-medium cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 whitespace-nowrap"
                           onClick={() => sortBy('shifts_count')}
                         >
                           Schichten <SortIcon k="shifts_count" />
                         </th>
-                        <th
+                        <th scope="col"
                           className="text-right px-3 py-3 font-medium cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 whitespace-nowrap"
                           onClick={() => sortBy('vacation_days')}
                         >
                           Urlaub <SortIcon k="vacation_days" />
                         </th>
-                        <th
+                        <th scope="col"
                           className="text-right px-3 py-3 font-medium cursor-pointer hover:text-slate-700 dark:hover:text-slate-200 whitespace-nowrap"
                           onClick={() => sortBy('sick_days')}
                         >
                           Krank <SortIcon k="sick_days" />
                         </th>
-                        <th className="px-3 py-3 font-medium text-center">Verlauf</th>
+                        <th scope="col" className="px-3 py-3 font-medium text-center">Verlauf</th>
                       </tr>
                     </thead>
                     <tbody>

@@ -606,11 +606,11 @@ export default function KompetenzMatrix() {
             <table className="text-sm w-full min-w-max">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="sticky left-0 bg-gray-50 px-3 py-3 text-left font-semibold text-gray-600 min-w-[160px] z-10 border-r border-gray-200">
+                  <th scope="col" className="sticky left-0 bg-gray-50 px-3 py-3 text-left font-semibold text-gray-600 min-w-[160px] z-10 border-r border-gray-200">
                     Mitarbeiter
                   </th>
                   {visibleSkills.map(skill => (
-                    <th key={skill.id} className="px-2 py-2 text-center min-w-[80px]">
+                    <th scope="col" key={skill.id} className="px-2 py-2 text-center min-w-[80px]">
                       <button
                         onClick={() => setSkillModal({ skill })}
                         className="flex flex-col items-center gap-0.5 hover:opacity-70 transition-opacity group w-full"
@@ -624,7 +624,7 @@ export default function KompetenzMatrix() {
                       </button>
                     </th>
                   ))}
-                  <th className="px-2 py-2 text-center text-gray-500 text-xs font-semibold min-w-[60px]">
+                  <th scope="col" className="px-2 py-2 text-center text-gray-500 text-xs font-semibold min-w-[60px]">
                     Gesamt
                   </th>
                 </tr>

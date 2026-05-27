@@ -534,13 +534,13 @@ export default function ExportScheduler() {
               <thead>
                 <tr className="bg-gray-50 dark:bg-gray-700/50 text-left text-xs font-semibold
                                text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                  <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3">Häufigkeit</th>
-                  <th className="px-4 py-3">Zeit</th>
-                  <th className="px-4 py-3">Format</th>
-                  <th className="px-4 py-3">Empfänger</th>
-                  <th className="px-4 py-3 text-center">Aktiv</th>
-                  <th className="px-4 py-3 text-right">Aktionen</th>
+                  <th scope="col" className="px-4 py-3">Name</th>
+                  <th scope="col" className="px-4 py-3">Häufigkeit</th>
+                  <th scope="col" className="px-4 py-3">Zeit</th>
+                  <th scope="col" className="px-4 py-3">Format</th>
+                  <th scope="col" className="px-4 py-3">Empfänger</th>
+                  <th scope="col" className="px-4 py-3 text-center">Aktiv</th>
+                  <th scope="col" className="px-4 py-3 text-right">Aktionen</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-700">

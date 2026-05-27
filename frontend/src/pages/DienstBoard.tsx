@@ -482,11 +482,11 @@ export default function DienstBoard() {
           <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="text-left px-4 py-2.5 font-semibold text-gray-600">Mitarbeiter</th>
-                <th className="text-left px-4 py-2.5 font-semibold text-gray-600">Kürzel</th>
-                <th className="text-left px-4 py-2.5 font-semibold text-gray-600">Schicht</th>
-                <th className="text-left px-4 py-2.5 font-semibold text-gray-600">Status</th>
-                <th className="text-left px-4 py-2.5 font-semibold text-gray-600">Zeiten</th>
+                <th scope="col" className="text-left px-4 py-2.5 font-semibold text-gray-600">Mitarbeiter</th>
+                <th scope="col" className="text-left px-4 py-2.5 font-semibold text-gray-600">Kürzel</th>
+                <th scope="col" className="text-left px-4 py-2.5 font-semibold text-gray-600">Schicht</th>
+                <th scope="col" className="text-left px-4 py-2.5 font-semibold text-gray-600">Status</th>
+                <th scope="col" className="text-left px-4 py-2.5 font-semibold text-gray-600">Zeiten</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">

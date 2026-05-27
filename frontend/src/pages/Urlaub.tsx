@@ -774,10 +774,10 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
         <table className="text-xs w-full">
           <thead>
             <tr className="bg-slate-700 text-white">
-              <th className="px-3 py-2 text-left sticky left-0 bg-slate-700 min-w-[160px]">Mitarbeiter</th>
-              {MONTHS.map(m => <th key={m} className="px-2 py-2 text-center min-w-[44px]">{m}</th>)}
-              <th className="px-3 py-2 text-center min-w-[52px]">Σ</th>
-              <th className="px-3 py-2 text-center min-w-[52px]">Rest</th>
+              <th scope="col" className="px-3 py-2 text-left sticky left-0 bg-slate-700 min-w-[160px]">Mitarbeiter</th>
+              {MONTHS.map(m => <th scope="col" key={m} className="px-2 py-2 text-center min-w-[44px]">{m}</th>)}
+              <th scope="col" className="px-3 py-2 text-center min-w-[52px]">Σ</th>
+              <th scope="col" className="px-3 py-2 text-center min-w-[52px]">Rest</th>
             </tr>
           </thead>
           <tbody>
@@ -937,13 +937,13 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
         <table className="text-sm w-full">
           <thead>
             <tr className="bg-slate-700 text-white text-xs">
-              <th className="px-4 py-3 text-left">Mitarbeiter</th>
-              <th className="px-3 py-3 text-center">Anspruch</th>
-              <th className="px-3 py-3 text-center">Übertrag</th>
-              <th className="px-3 py-3 text-center">Gesamt</th>
-              <th className="px-3 py-3 text-center">Genommen</th>
-              <th className="px-3 py-3 text-center">Rest</th>
-              <th className="px-3 py-3 text-center">Verfall bis</th>
+              <th scope="col" className="px-4 py-3 text-left">Mitarbeiter</th>
+              <th scope="col" className="px-3 py-3 text-center">Anspruch</th>
+              <th scope="col" className="px-3 py-3 text-center">Übertrag</th>
+              <th scope="col" className="px-3 py-3 text-center">Gesamt</th>
+              <th scope="col" className="px-3 py-3 text-center">Genommen</th>
+              <th scope="col" className="px-3 py-3 text-center">Rest</th>
+              <th scope="col" className="px-3 py-3 text-center">Verfall bis</th>
             </tr>
           </thead>
           <tbody>
@@ -1180,11 +1180,11 @@ function SperrenTab({ groups }: SperrenTabProps) {
           <table className="text-sm w-full">
             <thead>
               <tr className="bg-slate-700 text-white text-xs">
-                <th className="px-4 py-3 text-left">Zeitraum</th>
-                <th className="px-4 py-3 text-left">Gruppe</th>
-                <th className="px-4 py-3 text-left">Grund</th>
-                <th className="px-4 py-3 text-center">Tage</th>
-                <th className="px-4 py-3 text-center">Aktion</th>
+                <th scope="col" className="px-4 py-3 text-left">Zeitraum</th>
+                <th scope="col" className="px-4 py-3 text-left">Gruppe</th>
+                <th scope="col" className="px-4 py-3 text-left">Grund</th>
+                <th scope="col" className="px-4 py-3 text-center">Tage</th>
+                <th scope="col" className="px-4 py-3 text-center">Aktion</th>
               </tr>
             </thead>
             <tbody>
@@ -1360,11 +1360,11 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
         <table className="text-sm w-full">
           <thead>
             <tr className="bg-slate-700 text-white text-xs">
-              <th className="px-4 py-3 text-left">Mitarbeiter</th>
-              <th className="px-4 py-3 text-left">Datum</th>
-              <th className="px-4 py-3 text-left">Abwesenheitsart</th>
-              <th className="px-4 py-3 text-center">Status</th>
-              <th className="px-4 py-3 text-center">Aktion</th>
+              <th scope="col" className="px-4 py-3 text-left">Mitarbeiter</th>
+              <th scope="col" className="px-4 py-3 text-left">Datum</th>
+              <th scope="col" className="px-4 py-3 text-left">Abwesenheitsart</th>
+              <th scope="col" className="px-4 py-3 text-center">Status</th>
+              <th scope="col" className="px-4 py-3 text-center">Aktion</th>
             </tr>
           </thead>
           <tbody>
@@ -1664,10 +1664,10 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
             <table className="text-sm w-full">
               <thead>
                 <tr className="bg-slate-700 text-white text-xs">
-                  <th className="px-4 py-3 text-left">Mitarbeiter</th>
-                  <th className="px-4 py-3 text-center">Gesamt</th>
+                  <th scope="col" className="px-4 py-3 text-left">Mitarbeiter</th>
+                  <th scope="col" className="px-4 py-3 text-center">Gesamt</th>
                   {leaveTypes.filter(lt => byType.has(lt.ID)).map(lt => (
-                    <th key={lt.ID} className="px-3 py-3 text-center">
+                    <th scope="col" key={lt.ID} className="px-3 py-3 text-center">
                       <span className="inline-flex items-center justify-center w-6 h-6 rounded text-xs font-bold"
                         style={{ backgroundColor: lt.COLORBK_HEX ?? '#e5e7eb', color: lt.COLORBK_LIGHT ? '#333' : '#fff' }}>
                         {lt.SHORTNAME}
@@ -1805,23 +1805,23 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
         <table className="text-xs w-full border-collapse">
           <thead>
             <tr className="bg-gray-100 border-b">
-              <th className="sticky left-0 z-10 bg-gray-100 text-left px-3 py-2 font-semibold text-gray-700 min-w-[160px] border-r">
+              <th scope="col" className="sticky left-0 z-10 bg-gray-100 text-left px-3 py-2 font-semibold text-gray-700 min-w-[160px] border-r">
                 Mitarbeiter
               </th>
               {MONTH_NAMES.map((m, mi) => (
-                <th key={mi} colSpan={MONTH_DAYS[mi]}
+                <th scope="col" key={mi} colSpan={MONTH_DAYS[mi]}
                   className="text-center font-semibold text-gray-600 py-1 border-r border-gray-300"
                   style={{minWidth: `${MONTH_DAYS[mi] * 8}px`}}>
                   {m}
                 </th>
               ))}
-              <th className="text-center px-2 py-2 font-semibold text-gray-700 min-w-[40px]">∑</th>
+              <th scope="col" className="text-center px-2 py-2 font-semibold text-gray-700 min-w-[40px]">∑</th>
             </tr>
             <tr className="bg-gray-50 border-b">
-              <th className="sticky left-0 z-10 bg-gray-50 border-r"></th>
+              <th scope="col" className="sticky left-0 z-10 bg-gray-50 border-r"></th>
               {MONTH_NAMES.map((_, mi) =>
                 Array.from({length: MONTH_DAYS[mi]}, (__, d) => (
-                  <th key={`${mi}-${d}`}
+                  <th scope="col" key={`${mi}-${d}`}
                     className={`text-center font-normal py-0.5 border-r border-gray-100 ${
                       new Date(year, mi, d + 1).getDay() === 0 || new Date(year, mi, d + 1).getDay() === 6
                         ? 'bg-gray-200 text-gray-600' : 'text-gray-300'
@@ -1831,7 +1831,7 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
                   </th>
                 ))
               )}
-              <th className="border-r"></th>
+              <th scope="col" className="border-r"></th>
             </tr>
           </thead>
           <tbody>

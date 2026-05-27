@@ -304,11 +304,11 @@ export default function Wochenansicht() {
             <thead>
               <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                 {/* Employee column */}
-                <th className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-left font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap border-r border-gray-200 dark:border-gray-700 w-40">
+                <th scope="col" className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-left font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap border-r border-gray-200 dark:border-gray-700 w-40">
                   Mitarbeiter
                 </th>
                 {dayHeaders.map(({ day, date, isWeekend, date: d }) => (
-                  <th
+                  <th scope="col"
                     key={d}
                     className={`px-2 py-2 text-center font-semibold whitespace-nowrap min-w-[70px] ${
                       isToday(d)
@@ -323,7 +323,7 @@ export default function Wochenansicht() {
                     {isToday(d) && <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mx-auto mt-0.5" />}
                   </th>
                 ))}
-                <th className="px-2 py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-600 whitespace-nowrap min-w-[60px] border-l border-gray-200 dark:border-gray-700">
+                <th scope="col" className="px-2 py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-600 whitespace-nowrap min-w-[60px] border-l border-gray-200 dark:border-gray-700">
                   Schichten
                 </th>
               </tr>

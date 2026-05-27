@@ -554,11 +554,11 @@ export default function WorkTimeRules({ role: roleProp }: WorkTimeRulesProps = {
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="bg-gray-50 border-b border-gray-200">
-                      <th className="text-left px-3 py-2 font-medium text-gray-600">Mitarbeiter</th>
-                      <th className="text-center px-3 py-2 font-medium text-gray-600">Verstöße</th>
-                      <th className="text-center px-3 py-2 font-medium text-gray-600">Fehler</th>
-                      <th className="text-center px-3 py-2 font-medium text-gray-600">Warnungen</th>
-                      <th className="text-left px-3 py-2 font-medium text-gray-600">Status</th>
+                      <th scope="col" className="text-left px-3 py-2 font-medium text-gray-600">Mitarbeiter</th>
+                      <th scope="col" className="text-center px-3 py-2 font-medium text-gray-600">Verstöße</th>
+                      <th scope="col" className="text-center px-3 py-2 font-medium text-gray-600">Fehler</th>
+                      <th scope="col" className="text-center px-3 py-2 font-medium text-gray-600">Warnungen</th>
+                      <th scope="col" className="text-left px-3 py-2 font-medium text-gray-600">Status</th>
                     </tr>
                   </thead>
                   <tbody>

@@ -409,14 +409,14 @@ export default function RotationsAnalyse() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-xs text-gray-500 dark:text-gray-600">
-                <th className="text-left px-3 py-2 sticky left-0 bg-gray-50 dark:bg-gray-900 z-10">Mitarbeiter</th>
-                <th className="px-3 py-2 text-center">Score</th>
-                <th className="px-3 py-2 text-center">Status</th>
-                <th className="px-3 py-2 text-center">Schichten</th>
-                <th className="px-3 py-2 text-center">Dominant</th>
-                <th className="px-3 py-2 text-center" title="Wochenendschichten">🗓️ WE</th>
+                <th scope="col" className="text-left px-3 py-2 sticky left-0 bg-gray-50 dark:bg-gray-900 z-10">Mitarbeiter</th>
+                <th scope="col" className="px-3 py-2 text-center">Score</th>
+                <th scope="col" className="px-3 py-2 text-center">Status</th>
+                <th scope="col" className="px-3 py-2 text-center">Schichten</th>
+                <th scope="col" className="px-3 py-2 text-center">Dominant</th>
+                <th scope="col" className="px-3 py-2 text-center" title="Wochenendschichten">🗓️ WE</th>
                 {allShiftNames.map(sn => (
-                  <th key={sn} className="px-2 py-2 text-center min-w-[60px]">
+                  <th scope="col" key={sn} className="px-2 py-2 text-center min-w-[60px]">
                     <span
                       className="px-1.5 py-0.5 rounded text-xs font-medium"
                       style={{

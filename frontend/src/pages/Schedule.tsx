@@ -72,14 +72,14 @@ function buildScheduleHTML(
     return `border:1px solid #ddd;padding:2px 3px;font-size:11px;text-align:center;background:${bg};`;
   };
 
-  let headerCells = `<th style="${thStyle}min-width:140px">Mitarbeiter</th>`;
+  let headerCells = `<th scope="col" style="${thStyle}min-width:140px">Mitarbeiter</th>`;
   for (const day of days) {
     const dateStr = `${year}-${pad(month)}-${pad(day)}`;
     const wd = new Date(year, month - 1, day).getDay();
     const isHol = holidays.has(dateStr);
     const isWe = wd === 0 || wd === 6;
     const style = thStyle + (isHol ? 'background:#b91c1c;' : isWe ? 'background:#475569;' : '');
-    headerCells += `<th style="${style}min-width:28px">${day}<br/><span style="font-size:9px;opacity:.8">${WD_ABBR[wd]}</span></th>`;
+    headerCells += `<th scope="col" style="${style}min-width:28px">${day}<br/><span style="font-size:9px;opacity:.8">${WD_ABBR[wd]}</span></th>`;
   }
 
   let bodyRows = '';
@@ -1074,7 +1074,7 @@ const AuslastungsBereich = memo(function AuslastungsBereich({
       <table className="border-collapse text-xs w-full">
         <thead>
           <tr className="bg-slate-100">
-            <th className="sticky left-0 z-20 bg-slate-100 px-3 py-1.5 text-left min-w-[100px] border-r border-gray-200 text-slate-600 font-semibold">
+            <th scope="col" className="sticky left-0 z-20 bg-slate-100 px-3 py-1.5 text-left min-w-[100px] border-r border-gray-200 text-slate-600 font-semibold">
               Schicht
             </th>
             {days.map(day => {
@@ -1082,7 +1082,7 @@ const AuslastungsBereich = memo(function AuslastungsBereich({
               const dateStr = `${year}-${pad(month)}-${pad(day)}`;
               const isWe = jsWd === 0 || jsWd === 6;
               return (
-                <th
+                <th scope="col"
                   key={day}
                   className={`px-0.5 py-1 text-center min-w-[34px] border-r border-gray-200 ${isWe ? 'bg-slate-200' : ''}`}
                   title={dateStr}
@@ -3646,8 +3646,8 @@ export default function Schedule() {
                           <table className="w-full text-xs">
                             <thead>
                               <tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="text-left px-3 py-2 font-medium text-gray-600">Mitarbeiter</th>
-                                <th className="text-center px-2 py-2 font-medium text-gray-600">Einträge</th>
+                                <th scope="col" className="text-left px-3 py-2 font-medium text-gray-600">Mitarbeiter</th>
+                                <th scope="col" className="text-center px-2 py-2 font-medium text-gray-600">Einträge</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -3742,10 +3742,10 @@ export default function Schedule() {
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="bg-gray-50 border-b border-gray-200">
-                          <th className="text-left px-3 py-2 font-medium text-gray-600">Mitarbeiter</th>
-                          <th className="text-center px-2 py-2 font-medium text-gray-600" title="Gesamt">Σ</th>
-                          <th className="text-center px-2 py-2 font-medium text-gray-600" title="Wochenend-Schichten">WE</th>
-                          <th className="text-center px-2 py-2 font-medium text-gray-600" title="Nacht-Schichten">Nacht</th>
+                          <th scope="col" className="text-left px-3 py-2 font-medium text-gray-600">Mitarbeiter</th>
+                          <th scope="col" className="text-center px-2 py-2 font-medium text-gray-600" title="Gesamt">Σ</th>
+                          <th scope="col" className="text-center px-2 py-2 font-medium text-gray-600" title="Wochenend-Schichten">WE</th>
+                          <th scope="col" className="text-center px-2 py-2 font-medium text-gray-600" title="Nacht-Schichten">Nacht</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -5262,7 +5262,7 @@ export default function Schedule() {
         <table className="border-collapse text-xs" style={isDragging ? { userSelect: 'none' } : undefined}>
           <thead>
             <tr className="bg-slate-700 text-white">
-              <th className="sticky left-0 z-20 bg-slate-700 px-3 py-2 text-left min-w-[90px] sm:min-w-[160px] border-r border-slate-600">
+              <th scope="col" className="sticky left-0 z-20 bg-slate-700 px-3 py-2 text-left min-w-[90px] sm:min-w-[160px] border-r border-slate-600">
                 Mitarbeiter
               </th>
               {displayedDays.map(day => {
@@ -5292,7 +5292,7 @@ export default function Schedule() {
                   dayComment ? `💬 ${dayComment.text}` : '',
                 ].filter(Boolean).join(' · ');
                 return (
-                  <th
+                  <th scope="col"
                     key={day}
                     className={`px-0.5 py-1 text-center min-w-[34px] border-r border-slate-600 cursor-pointer hover:brightness-125 transition-[filter] ${
                       isHol ? 'bg-red-700' : isToday ? 'bg-blue-500' : isWe ? 'bg-slate-600' : ''

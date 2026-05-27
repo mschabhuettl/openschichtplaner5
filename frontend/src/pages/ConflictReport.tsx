@@ -448,11 +448,11 @@ export default function ConflictReport() {
               >
                 <thead>
                   <tr style={{ background: '#0f172a', color: '#94a3b8', textAlign: 'left' }}>
-                    <th style={{ padding: '0.6rem 0.75rem' }}>Typ</th>
-                    <th style={{ padding: '0.6rem 0.75rem' }}>Datum</th>
-                    <th style={{ padding: '0.6rem 0.75rem' }}>Mitarbeiter</th>
-                    <th style={{ padding: '0.6rem 0.75rem' }}>Beschreibung</th>
-                    <th style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>Schwere</th>
+                    <th scope="col" style={{ padding: '0.6rem 0.75rem' }}>Typ</th>
+                    <th scope="col" style={{ padding: '0.6rem 0.75rem' }}>Datum</th>
+                    <th scope="col" style={{ padding: '0.6rem 0.75rem' }}>Mitarbeiter</th>
+                    <th scope="col" style={{ padding: '0.6rem 0.75rem' }}>Beschreibung</th>
+                    <th scope="col" style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>Schwere</th>
                   </tr>
                 </thead>
                 <tbody>

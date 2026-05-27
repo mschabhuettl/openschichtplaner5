@@ -671,10 +671,10 @@ export default function Einstellungen() {
               <table className="w-full text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-700 text-white">
-                    <th className="px-3 py-2 text-left font-semibold">Bereich</th>
-                    <th className="px-3 py-2 text-center font-semibold">Admin</th>
-                    <th className="px-3 py-2 text-center font-semibold">Planer</th>
-                    <th className="px-3 py-2 text-center font-semibold">Leser</th>
+                    <th scope="col" className="px-3 py-2 text-left font-semibold">Bereich</th>
+                    <th scope="col" className="px-3 py-2 text-center font-semibold">Admin</th>
+                    <th scope="col" className="px-3 py-2 text-center font-semibold">Planer</th>
+                    <th scope="col" className="px-3 py-2 text-center font-semibold">Leser</th>
                   </tr>
                 </thead>
                 <tbody>

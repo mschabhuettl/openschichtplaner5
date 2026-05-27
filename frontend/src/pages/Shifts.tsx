@@ -275,14 +275,14 @@ export default function Shifts() {
             <table className="w-full text-sm min-w-[600px]">
               <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
                 <tr>
-                  <th className="px-4 py-2 text-left">Farbe</th>
-                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleShiftSort('name')}>Name{shiftSortIcon('name')}</th>
-                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleShiftSort('shortname')}>Kürzel{shiftSortIcon('shortname')}</th>
-                  <th className="px-4 py-2 text-center">Mo–Fr</th>
-                  <th className="px-4 py-2 text-center">Sa</th>
-                  <th className="px-4 py-2 text-center">So</th>
-                  <th className="px-4 py-2 text-right cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleShiftSort('duration')}>Dauer{shiftSortIcon('duration')}</th>
-                  <th className="px-4 py-2 text-center">Aktionen</th>
+                  <th scope="col" className="px-4 py-2 text-left">Farbe</th>
+                  <th scope="col" className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleShiftSort('name')}>Name{shiftSortIcon('name')}</th>
+                  <th scope="col" className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleShiftSort('shortname')}>Kürzel{shiftSortIcon('shortname')}</th>
+                  <th scope="col" className="px-4 py-2 text-center">Mo–Fr</th>
+                  <th scope="col" className="px-4 py-2 text-center">Sa</th>
+                  <th scope="col" className="px-4 py-2 text-center">So</th>
+                  <th scope="col" className="px-4 py-2 text-right cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleShiftSort('duration')}>Dauer{shiftSortIcon('duration')}</th>
+                  <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
                 </tr>
               </thead>
               <tbody>
@@ -463,10 +463,10 @@ export default function Shifts() {
                     <table className="w-full text-xs border-collapse">
                       <thead>
                         <tr className="bg-gray-100">
-                          <th className="text-left px-2 py-1 text-gray-600">Tag</th>
-                          <th className="text-left px-2 py-1 text-gray-600">Startzeit</th>
-                          <th className="text-left px-2 py-1 text-gray-600">Endzeit</th>
-                          <th className="text-left px-2 py-1 text-gray-600">Dauer (h)</th>
+                          <th scope="col" className="text-left px-2 py-1 text-gray-600">Tag</th>
+                          <th scope="col" className="text-left px-2 py-1 text-gray-600">Startzeit</th>
+                          <th scope="col" className="text-left px-2 py-1 text-gray-600">Endzeit</th>
+                          <th scope="col" className="text-left px-2 py-1 text-gray-600">Dauer (h)</th>
                         </tr>
                       </thead>
                       <tbody>

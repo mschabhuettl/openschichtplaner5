@@ -246,7 +246,7 @@ export default function Personaltabelle() {
           <thead className="sticky top-0 bg-slate-100 z-10">
             <tr>
               {COLUMNS.map(col => (
-                <th
+                <th scope="col"
                   key={col.key}
                   onClick={() => handleSort(col.key)}
                   className={`px-3 py-2 font-semibold text-slate-600 cursor-pointer select-none whitespace-nowrap border-b border-slate-200 hover:bg-slate-200 transition ${col.width ?? ''} ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}

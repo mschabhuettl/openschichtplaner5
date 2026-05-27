@@ -190,7 +190,7 @@ export default function OvertimeDashboard() {
   }, [rows, sortKey, sortDir, search]);
 
   const SortTh = ({ label, skey, align = 'right' }: { label: string; skey: SortKey; align?: 'left' | 'right' | 'center' }) => (
-    <th
+    <th scope="col"
       className={`px-3 py-2 text-${align} border border-gray-200 cursor-pointer hover:bg-slate-200 select-none whitespace-nowrap`}
       onClick={() => handleSort(skey)}
     >
@@ -367,12 +367,12 @@ export default function OvertimeDashboard() {
           <thead className="sticky top-0 z-10">
             <tr className="bg-slate-100">
               <SortTh label="Mitarbeiter" skey="name" align="left" />
-              <th className="px-3 py-2 text-left border border-gray-200 text-xs font-semibold text-gray-500">Kürzel</th>
+              <th scope="col" className="px-3 py-2 text-left border border-gray-200 text-xs font-semibold text-gray-500">Kürzel</th>
               <SortTh label="Soll-Std" skey="expected" />
               <SortTh label="Ist-Std" skey="actual" />
               <SortTh label="Differenz" skey="diff" align="center" />
-              <th className="px-3 py-2 text-right border border-gray-200 text-xs font-semibold text-gray-500">Schichten</th>
-              <th className="px-3 py-2 border border-gray-200 text-xs font-semibold text-gray-500">Balken</th>
+              <th scope="col" className="px-3 py-2 text-right border border-gray-200 text-xs font-semibold text-gray-500">Schichten</th>
+              <th scope="col" className="px-3 py-2 border border-gray-200 text-xs font-semibold text-gray-500">Balken</th>
             </tr>
           </thead>
           <tbody>

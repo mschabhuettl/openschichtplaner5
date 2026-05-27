@@ -457,12 +457,12 @@ export default function Kontobuchungen() {
             <table className="w-full text-sm min-w-[600px]">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Datum</th>
-                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Mitarbeiter</th>
-                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Buchungsart</th>
-                  <th className="text-right px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Wert</th>
-                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Kommentar</th>
-                  <th className="px-4 py-2.5 w-12"></th>
+                  <th scope="col" className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Datum</th>
+                  <th scope="col" className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Mitarbeiter</th>
+                  <th scope="col" className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Buchungsart</th>
+                  <th scope="col" className="text-right px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Wert</th>
+                  <th scope="col" className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Kommentar</th>
+                  <th scope="col" className="px-4 py-2.5 w-12"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">

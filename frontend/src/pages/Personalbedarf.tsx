@@ -397,15 +397,15 @@ function WeeklyTab({
           <table className="text-sm border-collapse w-full">
             <thead>
               <tr className="bg-slate-700 text-white">
-                <th className="px-4 py-3 text-left text-xs uppercase tracking-wide font-semibold border-r border-slate-600 min-w-[160px]">
+                <th scope="col" className="px-4 py-3 text-left text-xs uppercase tracking-wide font-semibold border-r border-slate-600 min-w-[160px]">
                   Schicht
                 </th>
                 {WEEKDAY_SHORT.map((d, i) => (
-                  <th key={i} className="px-3 py-3 text-center text-xs uppercase tracking-wide font-semibold w-20">
+                  <th scope="col" key={i} className="px-3 py-3 text-center text-xs uppercase tracking-wide font-semibold w-20">
                     {d}
                   </th>
                 ))}
-                <th className="px-4 py-3 text-center text-xs uppercase tracking-wide font-semibold border-l border-slate-600">
+                <th scope="col" className="px-4 py-3 text-center text-xs uppercase tracking-wide font-semibold border-l border-slate-600">
                   Σ def.
                 </th>
               </tr>
@@ -646,11 +646,11 @@ function DateSpecificTab({ shifts, groups }: { shifts: ShiftType[]; groups: Grou
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-4 py-2 text-left text-xs text-gray-500 font-semibold">Gruppe</th>
-                    <th className="px-4 py-2 text-left text-xs text-gray-500 font-semibold">Schicht</th>
-                    <th className="px-4 py-2 text-center text-xs text-gray-500 font-semibold">Min</th>
-                    <th className="px-4 py-2 text-center text-xs text-gray-500 font-semibold">Max</th>
-                    <th className="px-4 py-2 text-right text-xs text-gray-500 font-semibold">Aktionen</th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs text-gray-500 font-semibold">Gruppe</th>
+                    <th scope="col" className="px-4 py-2 text-left text-xs text-gray-500 font-semibold">Schicht</th>
+                    <th scope="col" className="px-4 py-2 text-center text-xs text-gray-500 font-semibold">Min</th>
+                    <th scope="col" className="px-4 py-2 text-center text-xs text-gray-500 font-semibold">Max</th>
+                    <th scope="col" className="px-4 py-2 text-right text-xs text-gray-500 font-semibold">Aktionen</th>
                   </tr>
                 </thead>
                 <tbody>

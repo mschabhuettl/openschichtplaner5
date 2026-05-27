@@ -268,13 +268,13 @@ export default function Extracharges() {
           <table className="w-full text-sm">
             <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
               <tr>
-                <th className="px-4 py-2 text-left">Name</th>
-                <th className="px-4 py-2 text-center">Von</th>
-                <th className="px-4 py-2 text-center">Bis</th>
-                <th className="px-4 py-2 text-left">Gültige Tage</th>
-                <th className="px-4 py-2 text-left">Feiertagsregel</th>
-                <th className="px-4 py-2 text-center">Status</th>
-                <th className="px-4 py-2 text-center">Aktionen</th>
+                <th scope="col" className="px-4 py-2 text-left">Name</th>
+                <th scope="col" className="px-4 py-2 text-center">Von</th>
+                <th scope="col" className="px-4 py-2 text-center">Bis</th>
+                <th scope="col" className="px-4 py-2 text-left">Gültige Tage</th>
+                <th scope="col" className="px-4 py-2 text-left">Feiertagsregel</th>
+                <th scope="col" className="px-4 py-2 text-center">Status</th>
+                <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
               </tr>
             </thead>
             <tbody>

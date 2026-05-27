@@ -112,3 +112,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-27 01:47 · PR #109 · Backend-Coverage: absences create_absence Warnungen/Resilienz 82%→85% (6 Tests)
 - 2026-05-27 01:58 · PR #110 · Backend-Coverage: absences bulk_create per-Employee-Outcomes →86% (3 Tests)
 - 2026-05-27 02:11 · PR #111 · Backend-Coverage: master_data create_shift Duplikat-409 + Errors 87%→88% (5 Tests)
+- 2026-05-27 02:25 · PR #112 · Backend-Coverage: employees CSV-Import Upload-Validierung →90% (5 Tests)

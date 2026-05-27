@@ -27,7 +27,7 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [x] Alle 25 Router systematisch geprüft → AUDIT.md
 - [x] sp5lib geprüft (dbf_reader/writer, ORM, repository, sync) → AUDIT.md
 - [x] RBAC-Lücken mit Tests geschlossen (PR #57)
-- [ ] schemas.py Feldnamen an reale DBF-Keys angleichen
+- [x] schemas.py Feldnamen an reale DBF-Keys angleichen (#65 Employee/Group; #145 ShiftResponse HIDDEN→HIDE — letzter Phantom-Key)
 - [ ] ORM to_dict() SQLite/PG-Divergenz angleichen oder dokumentieren
 
 ## Phase 5 — Web-UI verbessern
@@ -173,3 +173,4 @@ Frontend + Deployment. Jede Phase = eigener PR, App-CI bleibt durchgehend grün.
 - 2026-05-27 13:55 · PR #142 · DOCS (Welle, Teammate): ORM-Mirror-API-Referenz in `docs/API.md` vervollständigt (alle 1.4–1.6-Endpoints) + CHANGELOG
 - 2026-05-27 13:58 · PR #143 · A11y (Welle, Teammate): `role=status`/`aria-live` in EmptyState/ErrorBoundary/Skeleton (Toast/LoadingSpinner bereits korrekt); 514 Frontend-Tests grün
 - 2026-05-27 14:20 · PR #144 · FEATURE: ORM-Mirror `/api/admin/orm/status` — Live-Zeilen-Counts aller 19 Tabellen ohne Re-Sync (Mirror-Freshness-Sichtbarkeit); 15 Tests; Backend-Suite grün (2487)
+- 2026-05-27 14:45 · PR #145 · FIX: `ShiftResponse` Phantom-Key `HIDDEN`→`HIDE` (reale 5SHIFT.DBF-Spalte; verifiziert gegen Fixture) + `POSITION` ergänzt; Regressions-Test; schließt schemas/DBF-Key-Alignment ab

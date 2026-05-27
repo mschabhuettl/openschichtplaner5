@@ -60,6 +60,13 @@ describe('SkeletonCard', () => {
     const { container } = render(<SkeletonCard className="test-card" />);
     expect((container.firstChild as HTMLElement).className).toContain('test-card');
   });
+
+  it('announces loading via a polite status region', () => {
+    const { getByRole } = render(<SkeletonCard />);
+    const status = getByRole('status');
+    expect(status.getAttribute('aria-live')).toBe('polite');
+    expect(status.textContent).toContain('Lädt');
+  });
 });
 
 describe('SkeletonTable', () => {

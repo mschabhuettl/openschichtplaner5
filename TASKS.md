@@ -73,8 +73,11 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [x] Lib 1.4.0 konsumiert: `requirements.txt` >=1.4.0 + `/sync` nutzt `sync_all` + `/holidays`,`/periods` Endpoints; Defekt-Folge: App-Test `test_orm_sync.py` an neues group_assignments-Verhalten angepasst (#138)
 - [x] Lib-Roadmap Phase 5 dispatcht & geliefert: libopenschichtplaner5#9 (AccountBooking/OvertimeEntry/LeaveEntitlement) → `[LIB-DONE]` v1.5.0; `sync_all` deckt 14 Tabellen ab
 - [x] Lib 1.5.0 konsumiert: `requirements.txt` >=1.5.0 + `/bookings`,`/overtime`,`/leave-entitlements` Endpoints (#139)
-- [ ] Lib-Roadmap Phase 6 dispatchen (nächster Schritt; erst wenn Konsum aufgeholt — derzeit App=Lib=1.5.0, also frei)
+- [x] Lib-Roadmap Phase 6 dispatcht & geliefert: libopenschichtplaner5#11 (Demand 5SHDEM/5SPDEM + Cycles 5CYCLE/5CYASS + Restrictions 5RESTR) → `[LIB-DONE]` v1.6.0; **`sync_all` deckt 19 Tabellen ab — Lese-Mirror VOLLSTÄNDIG**
+- [x] Lib 1.6.0 konsumiert: `requirements.txt` >=1.6.0 + ORM-Mirror um Planungsdaten erweitert (`/shift-demands`,`/special-demands`,`/cycles`,`/cycle-assignments`,`/restrictions`) (#141)
+- [ ] Lib-Roadmap Phase 7 (Write-Back ORM→DBF) — bewusst NICHT autonom dispatcht: berührt die DBF-Schreib-Kernsicherheit; Owner-Entscheidung/Review abwarten. Read-Mirror ist komplett.
 - [x] Parallel-Modus (Team-Lead) verankert: AUTONOMOUS_RUN.md → PR #134
+- [x] API-Extraktions-Epic P1 (Analyse + ADR `create_app(config)`) → PR #140 (Teammate)
 - [ ] Substanz-Backlog (Owner-Prio): Phase-5 UI/A11y, schemas/ORM-Alignment, echte Features/Bugfixes, Performance (mypy = bereits clean mit --ignore-missing-imports)
 
 ## Epic — API-Extraktion (`openschichtplaner5-api`), niedrige Prio, strikt inkrementell
@@ -82,7 +85,7 @@ Ziel: `backend/api` (routers, schemas, dependencies, cache, rate_limit, auth, DB
 Repo `mschabhuettl/openschichtplaner5-api` herauslösen — **app-agnostisch & konfigurierbar** (kein gemountetes Frontend,
 keine App-`.env`), abhängig von `libopenschichtplaner5`. Danach konsumiert die App das Paket und behält nur Wiring +
 Frontend + Deployment. Jede Phase = eigener PR, App-CI bleibt durchgehend grün. Ziel: Lib **und** API von Drittprojekten nutzbar.
-- [ ] **P1 — Analyse/Schnittstelle:** App-Kopplungen in `backend/api` kartieren (App-`.env`, gemountetes Frontend, Pfad-/`__file__`-Annahmen, globaler State `_sessions`). Konfig-Vertrag entwerfen (Settings-Objekt/Factory `create_app(config)`); ADR in Repo.
+- [x] **P1 — Analyse/Schnittstelle:** App-Kopplungen kartiert + Konfig-Vertrag `ApiSettings`/`create_app(config)` entworfen → ADR `docs/adr/0001-api-extraction.md` (PR #140). Top-Risiko: globaler `_sessions`-State.
 - [ ] **P2 — Repo-Bootstrap:** `gh repo create mschabhuettl/openschichtplaner5-api --public` (MIT). `pyproject` (dist `openschichtplaner5-api`, dep `libopenschichtplaner5`), README, LICENSE, CI wie Lib (ruff + pytest-Matrix + PyPI Trusted Publishing). Möglichst mit `git subtree split`/`filter-repo` History von `backend/api`.
 - [ ] **P3 — App-agnostisch machen:** Hardcodierte App-Annahmen hinter Config/DI ziehen (Settings statt `.env`-Direktzugriff, Frontend-Mount optional/aus, Pfade injizierbar). Eigene Tests grün.
 - [ ] **P4 — Erstes Release:** Version + Tag, PyPI-Publish (Trusted Publishing). Smoke-Test: Drittprojekt-Minimal-App via `create_app`.
@@ -165,3 +168,5 @@ Frontend + Deployment. Jede Phase = eigener PR, App-CI bleibt durchgehend grün.
 - 2026-05-27 12:14 · PR #136 · A11y (Welle, Teammate): FormModal/ConfirmDialog auf shared `useFocusTrap` migriert (~80 Zeilen Duplikat entfernt, disabled-Controls-Trap-Bug behoben); 34 Tests grün
 - 2026-05-27 12:16 · PR #137 · A11y (Welle, Teammate): `scope="col"` auf 499 Tabellen-Header in 49 Page-Komponenten (WCAG 1.3.1); Frontend-Suite grün (509)
 - 2026-05-27 12:40 · PR #139 · FEATURE: Lib 1.5.0 konsumiert — requirements >=1.5.0 + ORM-Mirror um Zeitkonto erweitert (`/bookings`,`/overtime` date-range + `/leave-entitlements` year/employee via neue Repos); `sync_all` deckt 14 Tabellen ab; Backend-Suite grün (2485)
+- 2026-05-27 13:05 · PR #140 · EPIC P1 (Teammate): API-Extraktion Analyse + ADR `docs/adr/0001-api-extraction.md` (Kopplungs-Inventar, `ApiSettings`/`create_app(config)`-Vertrag, P2–P5-Plan); Top-Risiko globaler `_sessions`-State
+- 2026-05-27 13:30 · PR #141 · FEATURE: Lib 1.6.0 konsumiert — requirements >=1.6.0 + ORM-Mirror um Planungsdaten erweitert (`/shift-demands`,`/special-demands`,`/cycles`,`/cycle-assignments`,`/restrictions`); `sync_all` deckt 19 Tabellen ab → **Lese-Mirror vollständig**; Backend-Suite grün (2486)

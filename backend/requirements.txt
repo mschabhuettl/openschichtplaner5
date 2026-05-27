@@ -29,9 +29,11 @@ openpyxl>=3.1.0
 # the Holiday (5HOLID) + Period (5PERIO) models with their repositories and
 # sync_holidays/sync_periods; 1.5.0 adds the time-accounting models
 # (AccountBooking/5BOOK, OvertimeEntry/5OVER, LeaveEntitlement/5LEAEN) with
-# repositories and sync (sync_all now covers 14 tables) — all consumed by the
+# repositories and sync; 1.6.0 adds the planning models (ShiftDemand/5SHDEM,
+# SpecialDemand/5SPDEM, Cycle/5CYCLE, CycleAssignment/5CYASS, Restriction/5RESTR)
+# — sync_all now covers the full 19-table read mirror. All consumed by the
 # ORM-mirror admin router.
-libopenschichtplaner5[postgres]>=1.5.0
+libopenschichtplaner5[postgres]>=1.6.0
 
 pytest>=7.4.0
 pytest-cov>=4.1.0

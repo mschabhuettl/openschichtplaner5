@@ -102,6 +102,17 @@ function setup(role: 'Admin' | 'Planer' | 'Leser' = 'Admin') {
   );
 }
 
+// Robust against CI timing: wait for the employee <select> to actually be
+// populated before selecting. Selecting before the async employee load
+// finished left the check with no valid employee, so the result never
+// rendered and the test flaked under load.
+async function selectEmployeeAndCheck() {
+  const select = (await screen.findByLabelText('Mitarbeiter auswählen')) as HTMLSelectElement;
+  await waitFor(() => expect(select.options.length).toBeGreaterThan(1));
+  fireEvent.change(select, { target: { value: '1' } });
+  fireEvent.click(screen.getByLabelText('Mitarbeiter prüfen'));
+}
+
 // ── Tests ─────────────────────────────────────────────────────────────────
 
 describe('WorkTimeRules page', () => {
@@ -172,10 +183,7 @@ describe('WorkTimeRules page', () => {
   it('Prüfen button calls checkWorkTimeRules and renders violations', async () => {
     vi.mocked(api.checkWorkTimeRules).mockResolvedValue(mockCheckResult);
     setup();
-    await waitFor(() => screen.getByLabelText('Mitarbeiter auswählen'));
-
-    fireEvent.change(screen.getByLabelText('Mitarbeiter auswählen'), { target: { value: '1' } });
-    fireEvent.click(screen.getByLabelText('Mitarbeiter prüfen'));
+    await selectEmployeeAndCheck();
 
     await waitFor(() => expect(api.checkWorkTimeRules).toHaveBeenCalledTimes(1));
     await waitFor(() => screen.getByText(/2 Verstoß/));
@@ -186,10 +194,7 @@ describe('WorkTimeRules page', () => {
   it('renders error severity badge for error violations', async () => {
     vi.mocked(api.checkWorkTimeRules).mockResolvedValue(mockCheckResult);
     setup();
-    await waitFor(() => screen.getByLabelText('Mitarbeiter auswählen'));
-
-    fireEvent.change(screen.getByLabelText('Mitarbeiter auswählen'), { target: { value: '1' } });
-    fireEvent.click(screen.getByLabelText('Mitarbeiter prüfen'));
+    await selectEmployeeAndCheck();
 
     await waitFor(() => screen.getByText('⛔ Fehler'));
     expect(screen.getByText('⛔ Fehler')).toBeTruthy();
@@ -199,10 +204,7 @@ describe('WorkTimeRules page', () => {
   it('renders warning severity badge', async () => {
     vi.mocked(api.checkWorkTimeRules).mockResolvedValue(mockCheckResult);
     setup();
-    await waitFor(() => screen.getByLabelText('Mitarbeiter auswählen'));
-
-    fireEvent.change(screen.getByLabelText('Mitarbeiter auswählen'), { target: { value: '1' } });
-    fireEvent.click(screen.getByLabelText('Mitarbeiter prüfen'));
+    await selectEmployeeAndCheck();
 
     await waitFor(() => screen.getByText('⚠️ Warnung'));
     expect(screen.getByText('⚠️ Warnung')).toBeTruthy();
@@ -212,10 +214,7 @@ describe('WorkTimeRules page', () => {
   it('shows violation type in German', async () => {
     vi.mocked(api.checkWorkTimeRules).mockResolvedValue(mockCheckResult);
     setup();
-    await waitFor(() => screen.getByLabelText('Mitarbeiter auswählen'));
-
-    fireEvent.change(screen.getByLabelText('Mitarbeiter auswählen'), { target: { value: '1' } });
-    fireEvent.click(screen.getByLabelText('Mitarbeiter prüfen'));
+    await selectEmployeeAndCheck();
 
     await waitFor(() => screen.getByText('Tägliche Höchstarbeitszeit überschritten'));
     expect(screen.getByText('Tägliche Höchstarbeitszeit überschritten')).toBeTruthy();
@@ -252,10 +251,7 @@ describe('WorkTimeRules page', () => {
       violations: [],
     });
     setup();
-    await waitFor(() => screen.getByLabelText('Mitarbeiter auswählen'));
-
-    fireEvent.change(screen.getByLabelText('Mitarbeiter auswählen'), { target: { value: '1' } });
-    fireEvent.click(screen.getByLabelText('Mitarbeiter prüfen'));
+    await selectEmployeeAndCheck();
 
     await waitFor(() => screen.getByText(/Keine Verstöße gefunden/));
     expect(screen.getByText(/Keine Verstöße gefunden/)).toBeTruthy();

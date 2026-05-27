@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface ShortcutGroup {
   title: string;
@@ -59,17 +59,9 @@ interface Props {
 }
 
 export default function KeyboardShortcutsModal({ open, onClose }: Props) {
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [open, onClose]);
+  // Focus trap + Escape + focus restore (the dialog has no form fields, so the
+  // close button receives initial focus).
+  const panelRef = useFocusTrap<HTMLDivElement>(open, { onEscape: onClose });
 
   if (!open) return null;
 
@@ -82,6 +74,7 @@ export default function KeyboardShortcutsModal({ open, onClose }: Props) {
       aria-labelledby="keyboard-shortcuts-title"
     >
       <div
+        ref={panelRef}
         className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden animate-scaleIn"
         onClick={e => e.stopPropagation()}
       >

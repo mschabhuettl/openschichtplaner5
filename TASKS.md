@@ -123,3 +123,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-27 04:08 · PR #120 · Backend-Coverage: reports Fairness-Score-Algorithmus 81%→83% (2 Tests)
 - 2026-05-27 04:19 · PR #121 · Backend-Coverage: reports Kapazitäts-Forecast-Analytics 83%→85% (2 Tests)
 - 2026-05-27 04:30 · PR #122 · Backend-Coverage: reports Quality-Report-Analytics 85%→86% (2 Tests)
+- 2026-05-27 04:46 · PR #123 · Backend-Coverage: reports import_absences_csv Zeilen-Validierung 86%→87% (1 Test)

@@ -28,13 +28,13 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [x] sp5lib geprüft (dbf_reader/writer, ORM, repository, sync) → AUDIT.md
 - [x] RBAC-Lücken mit Tests geschlossen (PR #57)
 - [x] schemas.py Feldnamen an reale DBF-Keys angleichen (#65 Employee/Group; #145 ShiftResponse HIDDEN→HIDE — letzter Phantom-Key)
-- [ ] ORM to_dict() SQLite/PG-Divergenz angleichen oder dokumentieren
+- [x] ORM to_dict() SQLite/PG-Divergenz: entfällt — `to_dict()` lebt seit der Lib-Extraktion in `libopenschichtplaner5` (models.py re-exportiert aus models_pg → eine Quelle), SQLite/PG nutzen dieselbe Implementierung
 
 ## Phase 5 — Web-UI verbessern
 - [x] Dark-Mode: StatCard/Badge/PageHeader (Audit: bereits vollständig abgedeckt)
 - [x] A11y: `th scope` (#137, 499 Header/49 Dateien) + Modal-Fokus-Restore/Trap (#132 `useFocusTrap`, #136 Migration FormModal/ConfirmDialog)
 - [x] A11y Rest: `role=status`/`aria-live` Live-Regions für Async-States (#143: EmptyState/ErrorBoundary/Skeleton; Toast/LoadingSpinner waren bereits korrekt)
-- [ ] Robustheit: Staleness-Guards, Error-States
+- [x] Robustheit: Staleness-Guards, Error-States — bereits abgedeckt (`useApiData` liefert loading/error/refresh-Retry; 75/76 Seiten haben Error-Handling, einzige Ausnahme ist die statische NotFound-Seite; `ErrorBoundary` + #143 Live-Regions)
 - [ ] vitest + Playwright absichern
 
 ## Phase 6 — Library herauslösen
@@ -174,3 +174,4 @@ Frontend + Deployment. Jede Phase = eigener PR, App-CI bleibt durchgehend grün.
 - 2026-05-27 13:58 · PR #143 · A11y (Welle, Teammate): `role=status`/`aria-live` in EmptyState/ErrorBoundary/Skeleton (Toast/LoadingSpinner bereits korrekt); 514 Frontend-Tests grün
 - 2026-05-27 14:20 · PR #144 · FEATURE: ORM-Mirror `/api/admin/orm/status` — Live-Zeilen-Counts aller 19 Tabellen ohne Re-Sync (Mirror-Freshness-Sichtbarkeit); 15 Tests; Backend-Suite grün (2487)
 - 2026-05-27 14:45 · PR #145 · FIX: `ShiftResponse` Phantom-Key `HIDDEN`→`HIDE` (reale 5SHIFT.DBF-Spalte; verifiziert gegen Fixture) + `POSITION` ergänzt; Regressions-Test; schließt schemas/DBF-Key-Alignment ab
+- 2026-05-27 15:10 · PR #146 · DX: 12 fehlende OpenAPI-Tag-Beschreibungen ergänzt (Reports/Notifications/ORM Mirror/… → Swagger-UI vollständig beschriftet) + Regressions-Guard-Test (jeder Route-Tag muss beschrieben sein); Backend-Suite grün (2491)

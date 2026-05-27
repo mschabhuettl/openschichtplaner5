@@ -5,6 +5,7 @@
  * The user drags a square selection area on the image to define the crop.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 interface CropArea {
   x: number;
@@ -25,6 +26,8 @@ interface PhotoCropDialogProps {
 export default function PhotoCropDialog({ file, onConfirm, onCancel }: PhotoCropDialogProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  // Dialog focus management: trap Tab, close on Escape, restore focus on close.
+  const panelRef = useFocusTrap<HTMLDivElement>(true, { onEscape: onCancel });
   const [imageEl, setImageEl] = useState<HTMLImageElement | null>(null);
   const [crop, setCrop] = useState<CropArea>({ x: 0, y: 0, width: 0, height: 0 });
   const [dragging, setDragging] = useState(false);
@@ -184,12 +187,19 @@ export default function PhotoCropDialog({ file, onConfirm, onCancel }: PhotoCrop
   const previewSize = 80;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onCancel}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+      onClick={onCancel}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="photo-crop-title"
+    >
       <div
+        ref={panelRef}
         className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-lg w-full mx-4 p-4"
         onClick={e => e.stopPropagation()}
       >
-        <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
+        <h3 id="photo-crop-title" className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
           Foto zuschneiden
         </h3>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">

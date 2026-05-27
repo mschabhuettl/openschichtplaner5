@@ -65,4 +65,13 @@ describe('ErrorBoundary', () => {
     );
     expect(screen.getByText('Technische Details')).toBeTruthy();
   });
+
+  it('announces the error fallback via role=alert', () => {
+    render(
+      <ErrorBoundary>
+        <BrokenChild shouldThrow={true} />
+      </ErrorBoundary>
+    );
+    expect(screen.getByRole('alert')).toBeTruthy();
+  });
 });

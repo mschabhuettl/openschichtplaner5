@@ -44,6 +44,13 @@ describe('EmptyState', () => {
     render(<EmptyState title="Test" actionLabel="Add" />);
     expect(screen.queryByText('Add')).toBeNull();
   });
+
+  it('announces itself as a polite status region', () => {
+    render(<EmptyState title="Keine Daten" />);
+    const status = screen.getByRole('status');
+    expect(status.getAttribute('aria-live')).toBe('polite');
+    expect(status.textContent).toContain('Keine Daten');
+  });
 });
 
 describe('ApiErrorState', () => {
@@ -69,6 +76,11 @@ describe('ApiErrorState', () => {
     render(<ApiErrorState />);
     expect(screen.queryByText('🔄 Erneut versuchen')).toBeNull();
   });
+
+  it('announces errors via role=alert', () => {
+    render(<ApiErrorState />);
+    expect(screen.getByRole('alert')).toBeTruthy();
+  });
 });
 
 describe('InlineError', () => {
@@ -88,5 +100,10 @@ describe('InlineError', () => {
   it('does not render retry button without onRetry', () => {
     render(<InlineError message="Error" />);
     expect(screen.queryByText('Wiederholen')).toBeNull();
+  });
+
+  it('announces errors via role=alert', () => {
+    render(<InlineError message="Boom" />);
+    expect(screen.getByRole('alert')).toBeTruthy();
   });
 });

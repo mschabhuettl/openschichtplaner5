@@ -30,7 +30,12 @@ export function SkeletonText({ className = '', width = 'w-full' }: { className?:
 /** Card-shaped skeleton placeholder */
 export function SkeletonCard({ className = '' }: { className?: string }) {
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-xl shadow p-5 flex flex-col gap-3 ${className}`}>
+    <div
+      className={`bg-white dark:bg-gray-800 rounded-xl shadow p-5 flex flex-col gap-3 ${className}`}
+      role="status"
+      aria-live="polite"
+    >
+      <span className="sr-only">Lädt …</span>
       <Skeleton className="h-4 w-36" />
       <Skeleton className="h-3 w-full" />
       <Skeleton className="h-3 w-4/5" />
@@ -48,7 +53,12 @@ interface SkeletonTableProps {
 /** Table skeleton — placeholder rows + cols */
 export function SkeletonTable({ rows = 8, cols = 5, className = '' }: SkeletonTableProps) {
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden ${className}`}>
+    <div
+      className={`bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden ${className}`}
+      role="status"
+      aria-live="polite"
+    >
+      <span className="sr-only">Lädt …</span>
       {/* Header */}
       <div className="bg-slate-700 px-4 py-2 flex gap-4">
         {Array.from({ length: cols }).map((_, i) => (
@@ -83,7 +93,8 @@ interface SkeletonGridProps {
 
 export function SkeletonGrid({ rows = 6, cols = 7, className = '' }: SkeletonGridProps) {
   return (
-    <div className={`overflow-auto ${className}`}>
+    <div className={`overflow-auto ${className}`} role="status" aria-live="polite">
+      <span className="sr-only">Lädt …</span>
       <div
         className="grid gap-0.5"
         style={{ gridTemplateColumns: `120px repeat(${cols}, minmax(36px, 1fr))` }}

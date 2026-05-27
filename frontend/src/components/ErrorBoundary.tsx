@@ -60,8 +60,8 @@ export class PageErrorBoundary extends Component<PageBoundaryProps, PageBoundary
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex flex-col items-center justify-center h-full min-h-[300px] gap-4 p-8 text-center">
-          <div className="text-5xl">⚠️</div>
+        <div className="flex flex-col items-center justify-center h-full min-h-[300px] gap-4 p-8 text-center" role="alert">
+          <div className="text-5xl" aria-hidden="true">⚠️</div>
           <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200">
             Seite konnte nicht geladen werden
           </h2>
@@ -128,8 +128,8 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-          <div className="bg-white rounded-2xl shadow-lg max-w-md w-full p-8 text-center">
-            <div className="text-6xl mb-4">😵</div>
+          <div className="bg-white rounded-2xl shadow-lg max-w-md w-full p-8 text-center" role="alert">
+            <div className="text-6xl mb-4" aria-hidden="true">😵</div>
             <h1 className="text-2xl font-bold text-slate-800 mb-2">Etwas ist schiefgelaufen</h1>
             <p className="text-slate-500 text-sm mb-6">
               Ein unerwarteter Fehler ist aufgetreten. Bitte lade die Seite neu oder gehe zurück zum Dashboard.

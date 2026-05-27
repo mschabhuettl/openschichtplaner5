@@ -127,3 +127,4 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - 2026-05-27 04:57 · PR #124 · Backend-Coverage: reports run_simulation Analytics 87%→88% (1 Test)
 - 2026-05-27 05:10 · PR #125 · Backend-Coverage: reports jährliche Kapazitäts-Übersicht 88%→89% (1 Test)
 - 2026-05-27 05:23 · PR #126 · Backend-Coverage: reports monthly-report Input-Guards + no-data-404 (3 Tests)
+- 2026-05-27 05:40 · PR #127 · Backend-Coverage: main globaler Exception-Handler (sanitisierte 500) 78%→79% (1 Test)

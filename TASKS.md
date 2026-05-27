@@ -149,3 +149,4 @@ Frontend + Deployment. Jede Phase = eigener PR, App-CI bleibt durchgehend grün.
 - 2026-05-27 05:52 · PR #128 · Backend-Coverage: main Dashboard-Endpoints (summary/today/stats/upcoming) 79%→85% (4 Tests)
 - 2026-05-27 06:04 · PR #129 · Backend-Coverage: main dashboard/upcoming recurring-holiday + birthday Branches 85%→87% (letzte Coverage-Mikro-PR)
 - 2026-05-27 09:30 · PR #131 · FEATURE: Lib 1.2.0 konsumiert — requirements >=1.2.0 + ORM-Mirror-Admin-Router (`/api/admin/orm/sync|shifts|leave-types|workplaces`) nutzt neue Shift/LeaveType/Workplace-Models+Repos+sync; Integrationstest gegen DBF-Fixtures (6 Tests); Suite grün (2478)
+- 2026-05-27 10:05 · PR #132 · A11y (Phase 5): wiederverwendbarer `useFocusTrap`-Hook (Tab-Cycling ohne disabled-Controls, Escape, Fokus-Restore) + Einbindung in PhotoCropDialog (vorher 0 Dialog-A11y) & KeyboardShortcutsModal (Trap+Restore ergänzt); 9 Hook-Tests; Frontend-Suite grün (509)

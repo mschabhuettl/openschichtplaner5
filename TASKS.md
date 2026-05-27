@@ -20,7 +20,7 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [x] email HTML-Injection + falsche Feldnamen + RBAC → PR #57
 - [x] DBF numerischer Overflow + Datumsvalidierung → PR #58
 - [x] Supply-Chain: malicious fastapi 0.136.3 wegpinnen → PR #59
-- [ ] mypy-Fehler beheben (8, nicht-blockierend; u.a. Pillow-Resampling-Typing)
+- [x] mypy-Fehler beheben — erledigt via #66/#67 (s. Folgearbeiten); verifiziert clean (`mypy api/ --ignore-missing-imports` → „Success: no issues found in 34 source files"; nur informative `annotation-unchecked`-Notizen)
 - [x] venv-Vereinheitlichung (.venv) → PR #69
 
 ## Phase 4 — API- & Library-Audit
@@ -28,7 +28,7 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [x] sp5lib geprüft (dbf_reader/writer, ORM, repository, sync) → AUDIT.md
 - [x] RBAC-Lücken mit Tests geschlossen (PR #57)
 - [x] schemas.py Feldnamen an reale DBF-Keys angleichen (#65 Employee/Group; #145 ShiftResponse HIDDEN→HIDE — letzter Phantom-Key)
-- [x] ORM to_dict() SQLite/PG-Divergenz: entfällt — `to_dict()` lebt seit der Lib-Extraktion in `libopenschichtplaner5` (models.py re-exportiert aus models_pg → eine Quelle), SQLite/PG nutzen dieselbe Implementierung
+- [x] ORM to_dict() SQLite/PG-Divergenz: entfällt — `to_dict()` lebt seit der Lib-Extraktion in `libopenschichtplaner5`; `models_pg.py` re-exportiert die kanonischen Klassen aus `models.py` (eine Quelle), SQLite/PG nutzen dieselbe Implementierung. Regressions-Guard in der App: `tests/test_orm.py::TestBackendParity` (PR #158) sichert die Klassen-Identität + `to_dict()`-Präsenz für alle 16 Mirror-Entities ab (floating `>=` Lib-Pin)
 
 ## Phase 5 — Web-UI verbessern
 - [x] Dark-Mode: StatCard/Badge/PageHeader (Audit: bereits vollständig abgedeckt)
@@ -60,7 +60,7 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [x] mypy-Restfehler in api/ behoben (Pillow #66 + auth user_id #67 → mypy api = 0 Fehler)
 - [x] venv-Vereinheitlichung (.venv) → PR #69
 - [x] `schemas.py` `EmployeeResponse`/`GroupResponse` an reale DBF-Keys angleichen → PR #65
-- [ ] ORM `to_dict()` SQLite/Postgres-Divergenz angleichen oder dokumentieren
+- [x] ORM `to_dict()` SQLite/Postgres-Divergenz: erledigt — Lib hält `to_dict()` kanonisch in `models.py`, `models_pg.py` re-exportiert (s. Phase 4); App-Guard `TestBackendParity` → PR #158
 - [x] `schedule_comments.json` + `.coverage` aus Git-Tracking genommen → PR #68
 
 ## Owner-Steuerung (2026-05-27)
@@ -186,3 +186,4 @@ Frontend + Deployment. Jede Phase = eigener PR, App-CI bleibt durchgehend grün.
 - 2026-05-27 18:45 · PR #155 · DOCS: DEPLOYMENT.md „Scaling & Workers" ergänzt — In-Process-Session/Rate-Limit-Store ⇒ Single-Worker + `SECRET_KEY`-Pflicht dokumentiert (zweite Hälfte des Deployment-Hardening-Punkts, ergänzt #149/#150); + RATE_LIMIT_/BRUTE_FORCE_-Vars in Config-Tabelle. Schließt Phase-5/Deployment-Doku ab
 - 2026-05-27 19:10 · PR #156 · CHORE: `_CACHEABLE_API_PREFIXES` als Single-Source-of-Truth extrahiert (war dupliziert in Cache-Control-Middleware **und** Metrics-Collector → Drift-Risiko: Header vs. Hit-Rate-Metrik); 3 Guard-Tests; Verhalten unverändert; Suite grün (2531)
 - 2026-05-27 19:35 · PR #157 · DOCS: CHANGELOG `[Unreleased]` vervollständigt — Security (#149/#150 JWT-Secret), Fixed (#145/#151/#152/#153 Config-Vars), Accessibility (#132/#136/#137/#143), Improved (#146/#155) + Admin-UI/Status (#144/#147). Release-Notes spiegeln jetzt die operator-/security-relevanten Änderungen
+- 2026-05-27 20:25 · PR #158 · TEST: SQLite/PG-ORM-Parität abgesichert (`TestBackendParity`, 32 parametrisierte Fälle) — garantiert, dass `models_pg` die kanonischen `models.py`-Klassen re-exportiert (Identität) und alle 16 Mirror-Entities `to_dict()` exponieren; schützt `orm_mirror.py` davor, dass ein floating-`>=` Lib-Release die to_dict()-Shape pro Backend divergieren lässt. Reconciliert stale TASKS-Punkte (mypy clean verifiziert; to_dict-Divergenz war upstream gelöst). Suite grün

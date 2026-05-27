@@ -31,8 +31,9 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [ ] ORM to_dict() SQLite/PG-Divergenz angleichen oder dokumentieren
 
 ## Phase 5 — Web-UI verbessern
-- [ ] Dark-Mode: StatCard/Badge/PageHeader
-- [ ] A11y: th scope, role=status, Modal-Fokus-Restore
+- [x] Dark-Mode: StatCard/Badge/PageHeader (Audit: bereits vollständig abgedeckt)
+- [x] A11y: `th scope` (#137, 499 Header/49 Dateien) + Modal-Fokus-Restore/Trap (#132 `useFocusTrap`, #136 Migration FormModal/ConfirmDialog)
+- [ ] A11y Rest: `role=status`/`aria-live` Live-Regions für Async-States
 - [ ] Robustheit: Staleness-Guards, Error-States
 - [ ] vitest + Playwright absichern
 
@@ -68,7 +69,12 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [x] Lib 1.2.0 konsumiert: `requirements.txt` >=1.2.0 + ORM-Mirror-Admin-Router (`/api/admin/orm/*`) nutzt neue Models/Repos/sync → PR (siehe Run-Log)
 - [x] Lib-Roadmap Phase 3 dispatcht & geliefert: libopenschichtplaner5#5 (Schedule MASHI/SPSHI/ABSEN + date-range Repos + sync, sync_groups-FK-Fix) → `[LIB-DONE]` v1.3.0 auf PyPI
 - [x] Lib 1.3.0 konsumiert: `requirements.txt` >=1.3.0 + ORM-Mirror um Schedule-Entries erweitert (`/shift-assignments|special-shifts|absences` mit date-range) → PR (siehe Run-Log)
-- [ ] Lib-Roadmap Phase 4 dispatcht (nächster Schritt) + Defekt `sync_group_assignments` UNIQUE (5GRASG-IDs nicht eindeutig)
+- [x] Lib-Roadmap Phase 4 dispatcht & geliefert: libopenschichtplaner5#7 (Holiday/Period + Fix `sync_group_assignments` UNIQUE) → `[LIB-DONE]` v1.4.0; `sync_all` läuft jetzt über 11 Tabellen
+- [x] Lib 1.4.0 konsumiert: `requirements.txt` >=1.4.0 + `/sync` nutzt `sync_all` + `/holidays`,`/periods` Endpoints; Defekt-Folge: App-Test `test_orm_sync.py` an neues group_assignments-Verhalten angepasst (#138)
+- [x] Lib-Roadmap Phase 5 dispatcht & geliefert: libopenschichtplaner5#9 (AccountBooking/OvertimeEntry/LeaveEntitlement) → `[LIB-DONE]` v1.5.0; `sync_all` deckt 14 Tabellen ab
+- [x] Lib 1.5.0 konsumiert: `requirements.txt` >=1.5.0 + `/bookings`,`/overtime`,`/leave-entitlements` Endpoints (#139)
+- [ ] Lib-Roadmap Phase 6 dispatchen (nächster Schritt; erst wenn Konsum aufgeholt — derzeit App=Lib=1.5.0, also frei)
+- [x] Parallel-Modus (Team-Lead) verankert: AUTONOMOUS_RUN.md → PR #134
 - [ ] Substanz-Backlog (Owner-Prio): Phase-5 UI/A11y, schemas/ORM-Alignment, echte Features/Bugfixes, Performance (mypy = bereits clean mit --ignore-missing-imports)
 
 ## Epic — API-Extraktion (`openschichtplaner5-api`), niedrige Prio, strikt inkrementell
@@ -153,3 +159,9 @@ Frontend + Deployment. Jede Phase = eigener PR, App-CI bleibt durchgehend grün.
 - 2026-05-27 09:30 · PR #131 · FEATURE: Lib 1.2.0 konsumiert — requirements >=1.2.0 + ORM-Mirror-Admin-Router (`/api/admin/orm/sync|shifts|leave-types|workplaces`) nutzt neue Shift/LeaveType/Workplace-Models+Repos+sync; Integrationstest gegen DBF-Fixtures (6 Tests); Suite grün (2478)
 - 2026-05-27 10:05 · PR #132 · A11y (Phase 5): wiederverwendbarer `useFocusTrap`-Hook (Tab-Cycling ohne disabled-Controls, Escape, Fokus-Restore) + Einbindung in PhotoCropDialog (vorher 0 Dialog-A11y) & KeyboardShortcutsModal (Trap+Restore ergänzt); 9 Hook-Tests; Frontend-Suite grün (509)
 - 2026-05-27 11:20 · PR #133 · FEATURE: Lib 1.3.0 konsumiert — requirements >=1.3.0 + ORM-Mirror um Schedule-Entries erweitert (`/shift-assignments|special-shifts|absences` mit date_from/date_to/employee_id via neue date-range Repos); sync deckt jetzt 6 Tabellen; 4 neue Tests (10 gesamt); Backend-Suite grün (2482)
+- 2026-05-27 11:40 · PR #134 · CHARTER: Parallel-Modus (Team-Lead) in AUTONOMOUS_RUN.md verankert — Wellen aus bis zu 3 unabhängigen Teammates (worktree-isoliert), Lead merged sequentiell, rebase bei Konflikt
+- 2026-05-27 12:10 · PR #138 · FEATURE (Welle): Lib 1.4.0 konsumiert — `/sync` nutzt `sync_all` (11 Tab.) + `/holidays`,`/periods`; Folgefix App-Test `test_orm_sync.py` an 1.4.0-group_assignments-Verhalten angepasst; Suite grün (2484)
+- 2026-05-27 12:12 · PR #135 · DOCS (Welle, Teammate): ORM-Mirror-API in `docs/API.md` + CHANGELOG dokumentiert
+- 2026-05-27 12:14 · PR #136 · A11y (Welle, Teammate): FormModal/ConfirmDialog auf shared `useFocusTrap` migriert (~80 Zeilen Duplikat entfernt, disabled-Controls-Trap-Bug behoben); 34 Tests grün
+- 2026-05-27 12:16 · PR #137 · A11y (Welle, Teammate): `scope="col"` auf 499 Tabellen-Header in 49 Page-Komponenten (WCAG 1.3.1); Frontend-Suite grün (509)
+- 2026-05-27 12:40 · PR #139 · FEATURE: Lib 1.5.0 konsumiert — requirements >=1.5.0 + ORM-Mirror um Zeitkonto erweitert (`/bookings`,`/overtime` date-range + `/leave-entitlements` year/employee via neue Repos); `sync_all` deckt 14 Tabellen ab; Backend-Suite grün (2485)

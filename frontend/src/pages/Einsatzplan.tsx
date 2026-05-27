@@ -681,7 +681,7 @@ function WeekView({
       <table className="border-collapse text-xs w-full">
         <thead>
           <tr className="bg-slate-700 text-white">
-            <th className="px-3 py-2 text-left min-w-[120px] border-r border-slate-600 sticky left-0 z-10 bg-slate-700">
+            <th scope="col" className="px-3 py-2 text-left min-w-[120px] border-r border-slate-600 sticky left-0 z-10 bg-slate-700">
               Schicht
             </th>
             {weekDates.map(d => {
@@ -689,7 +689,7 @@ function WeekView({
               const dow = date.getDay();
               const isWe = dow === 0 || dow === 6;
               return (
-                <th
+                <th scope="col"
                   key={d}
                   className={`px-2 py-1.5 text-center min-w-[120px] border-r border-slate-600 ${isWe ? 'bg-slate-600' : ''}`}
                 >

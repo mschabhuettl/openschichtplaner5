@@ -277,13 +277,13 @@ function DetailPanel({
           <table className="text-sm w-full border-collapse">
             <thead>
               <tr className="bg-slate-100">
-                <th className="text-left px-3 py-2 border border-gray-200 font-semibold">Monat</th>
-                <th className="text-right px-3 py-2 border border-gray-200 font-semibold">Soll-Std</th>
-                <th className="text-right px-3 py-2 border border-gray-200 font-semibold">Ist-Std</th>
-                <th className="text-right px-3 py-2 border border-gray-200 font-semibold">Fehlhd</th>
-                <th className="text-center px-3 py-2 border border-gray-200 font-semibold min-w-[160px]">Differenz</th>
-                <th className="text-right px-3 py-2 border border-gray-200 font-semibold">Anpassg</th>
-                <th className="text-right px-3 py-2 border border-gray-200 font-semibold">Saldo kum.</th>
+                <th scope="col" className="text-left px-3 py-2 border border-gray-200 font-semibold">Monat</th>
+                <th scope="col" className="text-right px-3 py-2 border border-gray-200 font-semibold">Soll-Std</th>
+                <th scope="col" className="text-right px-3 py-2 border border-gray-200 font-semibold">Ist-Std</th>
+                <th scope="col" className="text-right px-3 py-2 border border-gray-200 font-semibold">Fehlhd</th>
+                <th scope="col" className="text-center px-3 py-2 border border-gray-200 font-semibold min-w-[160px]">Differenz</th>
+                <th scope="col" className="text-right px-3 py-2 border border-gray-200 font-semibold">Anpassg</th>
+                <th scope="col" className="text-right px-3 py-2 border border-gray-200 font-semibold">Saldo kum.</th>
               </tr>
             </thead>
             <tbody>
@@ -445,7 +445,7 @@ export default function Zeitkonto() {
   const maxSaldo = Math.max(...rows.map(r => Math.abs(r.total_saldo)), 1);
 
   const SortTh = ({ label, skey, align = 'right' }: { label: string; skey: SortKey; align?: 'left' | 'right' }) => (
-    <th
+    <th scope="col"
       className={`px-3 py-2 text-${align} border border-gray-200 cursor-pointer hover:bg-slate-200 select-none whitespace-nowrap`}
       onClick={() => handleSort(skey)}
     >
@@ -547,7 +547,7 @@ export default function Zeitkonto() {
         <table className="border-collapse text-sm w-full min-w-[700px]">
           <thead className="sticky top-0 z-10">
             <tr className="bg-slate-100">
-              <th
+              <th scope="col"
                 className="px-3 py-2 text-left border border-gray-200 cursor-pointer hover:bg-slate-200 select-none sticky left-0 bg-slate-100 z-10 min-w-[200px]"
                 onClick={() => handleSort('name')}
               >
@@ -556,11 +556,11 @@ export default function Zeitkonto() {
               <SortTh label="Soll-Std" skey="target" />
               <SortTh label="Ist-Std" skey="actual" />
               <SortTh label="Differenz" skey="diff" />
-              <th className="px-3 py-2 text-center border border-gray-200 min-w-[200px] whitespace-nowrap cursor-pointer hover:bg-slate-200 select-none"
+              <th scope="col" className="px-3 py-2 text-center border border-gray-200 min-w-[200px] whitespace-nowrap cursor-pointer hover:bg-slate-200 select-none"
                 onClick={() => handleSort('saldo')}>
                 Überstunden-Saldo {sortKey === 'saldo' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
               </th>
-              <th className="px-3 py-2 text-center border border-gray-200 whitespace-nowrap text-xs">
+              <th scope="col" className="px-3 py-2 text-center border border-gray-200 whitespace-nowrap text-xs">
                 {MONTH_NAMES.slice(1).join(' · ')}
               </th>
             </tr>

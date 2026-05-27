@@ -412,12 +412,12 @@ export default function Schichtwuensche() {
             <table className="w-full text-sm min-w-[600px]">
               <thead className="sticky top-0 z-10">
                 <tr className={isDark ? 'bg-gray-700' : 'bg-gray-50'}>
-                  <th className="text-left px-4 py-2.5 font-semibold">Datum</th>
-                  <th className="text-left px-4 py-2.5 font-semibold">Mitarbeiter</th>
-                  <th className="text-left px-4 py-2.5 font-semibold">Typ</th>
-                  <th className="text-left px-4 py-2.5 font-semibold">Schicht</th>
-                  <th className="text-left px-4 py-2.5 font-semibold">Notiz</th>
-                  <th className="px-4 py-2.5"></th>
+                  <th scope="col" className="text-left px-4 py-2.5 font-semibold">Datum</th>
+                  <th scope="col" className="text-left px-4 py-2.5 font-semibold">Mitarbeiter</th>
+                  <th scope="col" className="text-left px-4 py-2.5 font-semibold">Typ</th>
+                  <th scope="col" className="text-left px-4 py-2.5 font-semibold">Schicht</th>
+                  <th scope="col" className="text-left px-4 py-2.5 font-semibold">Notiz</th>
+                  <th scope="col" className="px-4 py-2.5"></th>
                 </tr>
               </thead>
               <tbody>

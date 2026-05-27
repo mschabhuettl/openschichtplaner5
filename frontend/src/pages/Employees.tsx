@@ -105,14 +105,14 @@ function printEmployeeList(employees: Employee[]) {
 <table>
   <thead>
     <tr>
-      <th style="${thStyle}">Nr.</th>
-      <th style="${thStyle}">Nachname</th>
-      <th style="${thStyle}">Vorname</th>
-      <th style="${thStyle}">Kürzel</th>
-      <th style="${thRStyle}">Std/Tag</th>
-      <th style="${thRStyle}">Std/Woche</th>
-      <th style="${thStyle}text-align:center">Arbeitstage</th>
-      <th style="${thStyle}text-align:center">Eintritt</th>
+      <th scope="col" style="${thStyle}">Nr.</th>
+      <th scope="col" style="${thStyle}">Nachname</th>
+      <th scope="col" style="${thStyle}">Vorname</th>
+      <th scope="col" style="${thStyle}">Kürzel</th>
+      <th scope="col" style="${thRStyle}">Std/Tag</th>
+      <th scope="col" style="${thRStyle}">Std/Woche</th>
+      <th scope="col" style="${thStyle}text-align:center">Arbeitstage</th>
+      <th scope="col" style="${thStyle}text-align:center">Eintritt</th>
     </tr>
   </thead>
   <tbody>${rows}</tbody>
@@ -772,7 +772,7 @@ export default function Employees() {
             <table className="w-full text-sm">
               <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
                 <tr>
-                  {canAdmin && <th className="px-3 py-2 w-8">
+                  {canAdmin && <th scope="col" className="px-3 py-2 w-8">
                     <input
                       type="checkbox"
                       checked={filtered.length > 0 && selectedIds.size === filtered.length}
@@ -782,15 +782,15 @@ export default function Employees() {
                       title="Alle auswählen"
                     />
                   </th>}
-                  <th className="px-2 py-2 w-10"></th>
-                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[60px]" onClick={() => handleEmpSort('number')}>{t.employees.columns.number}{sortIcon('number')}</th>
-                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[120px]" onClick={() => handleEmpSort('name')}>{t.employees.columns.name}{sortIcon('name')}</th>
-                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[100px]" onClick={() => handleEmpSort('firstname')}>{t.employees.columns.firstname}{sortIcon('firstname')}</th>
-                  <th className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[70px]" onClick={() => handleEmpSort('shortname')}>{t.employees.columns.shortname}{sortIcon('shortname')}</th>
-                  <th className="px-4 py-2 text-right whitespace-nowrap min-w-[60px]">{t.employees.columns.hrsDay}</th>
-                  <th className="px-4 py-2 text-center whitespace-nowrap min-w-[140px]">{t.employees.columns.workdays}</th>
-                  <th className="px-4 py-2 text-center whitespace-nowrap min-w-[80px]">{t.employees.columns.entry}</th>
-                  <th className="px-4 py-2 text-center whitespace-nowrap min-w-[140px]">{t.employees.columns.actions}</th>
+                  <th scope="col" className="px-2 py-2 w-10"></th>
+                  <th scope="col" className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[60px]" onClick={() => handleEmpSort('number')}>{t.employees.columns.number}{sortIcon('number')}</th>
+                  <th scope="col" className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[120px]" onClick={() => handleEmpSort('name')}>{t.employees.columns.name}{sortIcon('name')}</th>
+                  <th scope="col" className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[100px]" onClick={() => handleEmpSort('firstname')}>{t.employees.columns.firstname}{sortIcon('firstname')}</th>
+                  <th scope="col" className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[70px]" onClick={() => handleEmpSort('shortname')}>{t.employees.columns.shortname}{sortIcon('shortname')}</th>
+                  <th scope="col" className="px-4 py-2 text-right whitespace-nowrap min-w-[60px]">{t.employees.columns.hrsDay}</th>
+                  <th scope="col" className="px-4 py-2 text-center whitespace-nowrap min-w-[140px]">{t.employees.columns.workdays}</th>
+                  <th scope="col" className="px-4 py-2 text-center whitespace-nowrap min-w-[80px]">{t.employees.columns.entry}</th>
+                  <th scope="col" className="px-4 py-2 text-center whitespace-nowrap min-w-[140px]">{t.employees.columns.actions}</th>
                 </tr>
               </thead>
               <tbody>

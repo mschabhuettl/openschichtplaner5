@@ -163,12 +163,12 @@ export default function LeaveTypes() {
           <table className="w-full text-sm min-w-[600px]">
             <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
               <tr>
-                <th className="px-4 py-2 text-left">Farbe</th>
-                <th className="px-4 py-2 text-left">Name</th>
-                <th className="px-4 py-2 text-left">Kürzel</th>
-                <th className="px-4 py-2 text-center">Urlaubsanspruch</th>
-                <th className="px-4 py-2 text-right">Standard</th>
-                <th className="px-4 py-2 text-center">Aktionen</th>
+                <th scope="col" className="px-4 py-2 text-left">Farbe</th>
+                <th scope="col" className="px-4 py-2 text-left">Name</th>
+                <th scope="col" className="px-4 py-2 text-left">Kürzel</th>
+                <th scope="col" className="px-4 py-2 text-center">Urlaubsanspruch</th>
+                <th scope="col" className="px-4 py-2 text-right">Standard</th>
+                <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
               </tr>
             </thead>
             <tbody>

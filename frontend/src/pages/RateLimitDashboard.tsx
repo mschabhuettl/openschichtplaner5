@@ -250,11 +250,11 @@ export default function RateLimitDashboard() {
               <table className="min-w-full text-sm">
                 <thead className="sticky top-0 bg-gray-50 dark:bg-gray-700">
                   <tr>
-                    <th className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-300">Zeitpunkt</th>
-                    <th className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-300">User</th>
-                    <th className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-300">IP</th>
-                    <th className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-300">Endpoint</th>
-                    <th className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-300">Detail</th>
+                    <th scope="col" className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-300">Zeitpunkt</th>
+                    <th scope="col" className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-300">User</th>
+                    <th scope="col" className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-300">IP</th>
+                    <th scope="col" className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-300">Endpoint</th>
+                    <th scope="col" className="text-left px-3 py-2 font-medium text-gray-600 dark:text-gray-300">Detail</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -461,14 +461,14 @@ export default function MitarbeiterProfil() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-xs text-gray-500 border-b">
-                  <th className="text-left py-1 pr-2">Monat</th>
-                  <th className="text-right py-1 pr-2">Schichten</th>
-                  <th className="text-right py-1 pr-2">Ist-h</th>
-                  <th className="text-right py-1 pr-2">Soll-h</th>
-                  <th className="text-right py-1 pr-2">Diff</th>
-                  <th className="text-right py-1 pr-2">WE</th>
-                  <th className="text-right py-1 pr-2">Nacht</th>
-                  <th className="text-right py-1">Urlaub</th>
+                  <th scope="col" className="text-left py-1 pr-2">Monat</th>
+                  <th scope="col" className="text-right py-1 pr-2">Schichten</th>
+                  <th scope="col" className="text-right py-1 pr-2">Ist-h</th>
+                  <th scope="col" className="text-right py-1 pr-2">Soll-h</th>
+                  <th scope="col" className="text-right py-1 pr-2">Diff</th>
+                  <th scope="col" className="text-right py-1 pr-2">WE</th>
+                  <th scope="col" className="text-right py-1 pr-2">Nacht</th>
+                  <th scope="col" className="text-right py-1">Urlaub</th>
                 </tr>
               </thead>
               <tbody className="divide-y">

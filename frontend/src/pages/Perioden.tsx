@@ -254,11 +254,11 @@ export default function Perioden() {
           <table className="w-full text-sm min-w-[520px]">
             <thead className="bg-slate-700 text-white">
               <tr>
-                <th className="px-4 py-3 text-left text-xs uppercase tracking-wide font-semibold">Bezeichnung</th>
-                <th className="px-4 py-3 text-left text-xs uppercase tracking-wide font-semibold">Gruppe</th>
-                <th className="px-4 py-3 text-left text-xs uppercase tracking-wide font-semibold">Start</th>
-                <th className="px-4 py-3 text-left text-xs uppercase tracking-wide font-semibold">Ende</th>
-                <th className="px-4 py-3 text-center text-xs uppercase tracking-wide font-semibold">Aktionen</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs uppercase tracking-wide font-semibold">Bezeichnung</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs uppercase tracking-wide font-semibold">Gruppe</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs uppercase tracking-wide font-semibold">Start</th>
+                <th scope="col" className="px-4 py-3 text-left text-xs uppercase tracking-wide font-semibold">Ende</th>
+                <th scope="col" className="px-4 py-3 text-center text-xs uppercase tracking-wide font-semibold">Aktionen</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">

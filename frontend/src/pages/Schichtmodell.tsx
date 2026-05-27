@@ -30,9 +30,9 @@ function CycleWeekGrid({ schedule }: { schedule: CycleDay[][] }) {
       <table className="text-xs border-collapse">
         <thead>
           <tr>
-            <th className="px-2 py-1 text-gray-600 font-normal text-right pr-3">Woche</th>
+            <th scope="col" className="px-2 py-1 text-gray-600 font-normal text-right pr-3">Woche</th>
             {WEEKDAYS.map(d => (
-              <th key={d} className="px-2 py-1 text-gray-500 font-semibold text-center w-8">{d}</th>
+              <th scope="col" key={d} className="px-2 py-1 text-gray-500 font-semibold text-center w-8">{d}</th>
             ))}
           </tr>
         </thead>
@@ -258,9 +258,9 @@ function EditCycleModal({ cycle, shifts, onSaved, onClose }: EditCycleModalProps
               <table className="text-sm border-collapse w-full">
                 <thead className="sticky top-0 z-10 bg-white">
                   <tr>
-                    <th className="px-3 py-2 text-left text-xs font-semibold text-gray-500 w-16">Tag</th>
+                    <th scope="col" className="px-3 py-2 text-left text-xs font-semibold text-gray-500 w-16">Tag</th>
                     {Array.from({ length: sizeWeeks }, (_, wi) => (
-                      <th key={wi} className="px-2 py-2 text-center text-xs font-semibold text-gray-500 min-w-[130px]">
+                      <th scope="col" key={wi} className="px-2 py-2 text-center text-xs font-semibold text-gray-500 min-w-[130px]">
                         Woche {wi + 1}
                       </th>
                     ))}
@@ -828,10 +828,10 @@ export default function Schichtmodell() {
               <table className="w-full text-sm">
                 <thead className="bg-slate-50 text-xs uppercase tracking-wide text-gray-500 border-b">
                   <tr>
-                    <th className="px-4 py-2 text-left">Name</th>
-                    <th className="px-4 py-2 text-center">Wochen</th>
-                    <th className="px-4 py-2 text-center">Zugewiesene MAs</th>
-                    <th className="px-4 py-2 text-center">Aktionen</th>
+                    <th scope="col" className="px-4 py-2 text-left">Name</th>
+                    <th scope="col" className="px-4 py-2 text-center">Wochen</th>
+                    <th scope="col" className="px-4 py-2 text-center">Zugewiesene MAs</th>
+                    <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -916,12 +916,12 @@ export default function Schichtmodell() {
           <table className="w-full text-sm">
             <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
               <tr>
-                <th className="px-4 py-2 text-left">Nr.</th>
-                <th className="px-4 py-2 text-left">Mitarbeiter</th>
-                <th className="px-4 py-2 text-left">Gruppe</th>
-                <th className="px-4 py-2 text-left">Aktuelles Modell</th>
-                <th className="px-4 py-2 text-left">Startdatum</th>
-                <th className="px-4 py-2 text-center">Aktionen</th>
+                <th scope="col" className="px-4 py-2 text-left">Nr.</th>
+                <th scope="col" className="px-4 py-2 text-left">Mitarbeiter</th>
+                <th scope="col" className="px-4 py-2 text-left">Gruppe</th>
+                <th scope="col" className="px-4 py-2 text-left">Aktuelles Modell</th>
+                <th scope="col" className="px-4 py-2 text-left">Startdatum</th>
+                <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
               </tr>
             </thead>
             <tbody>
@@ -1013,10 +1013,10 @@ export default function Schichtmodell() {
             <table className="w-full text-sm">
               <thead className="bg-orange-50 text-xs uppercase tracking-wide text-orange-700 border-b border-orange-100">
                 <tr>
-                  <th className="px-4 py-2 text-left">Mitarbeiter</th>
-                  <th className="px-4 py-2 text-center">Datum</th>
-                  <th className="px-4 py-2 text-center">Ausnahme-Schicht</th>
-                  <th className="px-4 py-2 text-center">Aktionen</th>
+                  <th scope="col" className="px-4 py-2 text-left">Mitarbeiter</th>
+                  <th scope="col" className="px-4 py-2 text-center">Datum</th>
+                  <th scope="col" className="px-4 py-2 text-center">Ausnahme-Schicht</th>
+                  <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
                 </tr>
               </thead>
               <tbody>

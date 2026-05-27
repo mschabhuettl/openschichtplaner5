@@ -292,11 +292,11 @@ export default function QualitaetsBericht() {
                 <table className="w-full text-sm border-collapse">
                   <thead className="sticky top-0 z-10">
                     <tr className="bg-gray-100 text-gray-600 text-xs uppercase">
-                      <th className="text-left px-3 py-2 rounded-tl">Mitarbeiter</th>
-                      <th className="text-right px-3 py-2">Soll-Std</th>
-                      <th className="text-right px-3 py-2">Ist-Std</th>
-                      <th className="text-right px-3 py-2">Abw.</th>
-                      <th className="text-right px-3 py-2 rounded-tr">Schichten</th>
+                      <th scope="col" className="text-left px-3 py-2 rounded-tl">Mitarbeiter</th>
+                      <th scope="col" className="text-right px-3 py-2">Soll-Std</th>
+                      <th scope="col" className="text-right px-3 py-2">Ist-Std</th>
+                      <th scope="col" className="text-right px-3 py-2">Abw.</th>
+                      <th scope="col" className="text-right px-3 py-2 rounded-tr">Schichten</th>
                     </tr>
                   </thead>
                   <tbody>

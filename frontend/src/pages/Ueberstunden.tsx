@@ -112,7 +112,7 @@ export default function Ueberstunden() {
   const SortTh = ({
     label, skey, align = 'right',
   }: { label: string; skey: SortKey; align?: 'left' | 'right' | 'center' }) => (
-    <th
+    <th scope="col"
       className={`px-3 py-2 text-${align} border border-gray-200 cursor-pointer hover:bg-slate-200 select-none whitespace-nowrap`}
       onClick={() => handleSort(skey)}
     >
@@ -197,13 +197,13 @@ export default function Ueberstunden() {
         <table className="border-collapse text-sm w-full min-w-[600px]">
           <thead className="sticky top-0 z-10">
             <tr className="bg-slate-100">
-              <th
+              <th scope="col"
                 className="px-3 py-2 text-left border border-gray-200 cursor-pointer hover:bg-slate-200 select-none sticky left-0 bg-slate-100 z-10 min-w-[200px]"
                 onClick={() => handleSort('name')}
               >
                 Mitarbeiter{sortIcon('name')}
               </th>
-              <th className="px-3 py-2 text-left border border-gray-200 font-semibold text-xs">Kürzel</th>
+              <th scope="col" className="px-3 py-2 text-left border border-gray-200 font-semibold text-xs">Kürzel</th>
               <SortTh label="Soll-Std" skey="soll" />
               <SortTh label="Ist-Std" skey="ist" />
               <SortTh label="Differenz" skey="delta" align="center" />

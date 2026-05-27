@@ -104,12 +104,12 @@ function exportStatisticsHTML(
 <table>
   <thead>
     <tr>
-      <th style="${thStyle}min-width:180px">Mitarbeiter</th>
-      <th style="${thRStyle}">Soll-Std</th>
-      <th style="${thRStyle}">Ist-Std</th>
-      <th style="${thRStyle}">Über-/Unterstunden</th>
-      <th style="${thRStyle}">Abwesend (Tage)</th>
-      <th style="${thRStyle}">Urlaub genutzt</th>
+      <th scope="col" style="${thStyle}min-width:180px">Mitarbeiter</th>
+      <th scope="col" style="${thRStyle}">Soll-Std</th>
+      <th scope="col" style="${thRStyle}">Ist-Std</th>
+      <th scope="col" style="${thRStyle}">Über-/Unterstunden</th>
+      <th scope="col" style="${thRStyle}">Abwesend (Tage)</th>
+      <th scope="col" style="${thRStyle}">Urlaub genutzt</th>
     </tr>
   </thead>
   <tbody>${rows}</tbody>
@@ -584,7 +584,7 @@ export default function Statistiken() {
   }, [stats, sortKey, sortDir]);
 
   const SortHeader = ({ label, skey }: { label: string; skey: SortKey }) => (
-    <th
+    <th scope="col"
       className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 select-none whitespace-nowrap dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600"
       onClick={() => handleSort(skey)}
     >
@@ -732,15 +732,15 @@ export default function Statistiken() {
               <table className="border-collapse text-sm w-full">
                 <thead className="sticky top-0 z-10">
                   <tr className="bg-slate-100 dark:bg-slate-700 text-xs">
-                    <th className="px-3 py-2 text-left border border-gray-200 dark:border-slate-600 dark:border-slate-600 font-semibold dark:bg-slate-700 dark:text-slate-200">Monat</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">Soll-Std</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">Ist-Std</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">Differenz</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">Schichten</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">🌅 Wochenende</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">🌙 Nacht</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">🏖️ Urlaub</th>
-                    <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">Abwesend</th>
+                    <th scope="col" className="px-3 py-2 text-left border border-gray-200 dark:border-slate-600 dark:border-slate-600 font-semibold dark:bg-slate-700 dark:text-slate-200">Monat</th>
+                    <th scope="col" className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">Soll-Std</th>
+                    <th scope="col" className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">Ist-Std</th>
+                    <th scope="col" className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">Differenz</th>
+                    <th scope="col" className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">Schichten</th>
+                    <th scope="col" className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">🌅 Wochenende</th>
+                    <th scope="col" className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">🌙 Nacht</th>
+                    <th scope="col" className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">🏖️ Urlaub</th>
+                    <th scope="col" className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:border-slate-600 whitespace-nowrap dark:bg-slate-700 dark:text-slate-200">Abwesend</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -974,7 +974,7 @@ export default function Statistiken() {
         <table className="border-collapse text-sm w-full min-w-[640px]">
           <thead className="sticky top-0 z-10">
             <tr className="bg-slate-100 dark:bg-slate-700">
-              <th
+              <th scope="col"
                 className="px-3 py-2 text-left border border-gray-200 dark:border-slate-600 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-600 select-none sticky left-0 bg-slate-100 dark:bg-slate-700 z-10 min-w-[180px] dark:text-slate-200 dark:border-slate-600"
                 onClick={() => handleSort('name')}
               >
@@ -982,7 +982,7 @@ export default function Statistiken() {
               </th>
               <SortHeader label={t.statistiken.colTargetHrs} skey="target_hours" />
               <SortHeader label={t.statistiken.colActualHrs} skey="actual_hours" />
-              <th className="px-3 py-2 text-center border border-gray-200 dark:border-slate-600 min-w-[180px] whitespace-nowrap cursor-pointer hover:bg-slate-200 select-none" onClick={() => handleSort('overtime')}>
+              <th scope="col" className="px-3 py-2 text-center border border-gray-200 dark:border-slate-600 min-w-[180px] whitespace-nowrap cursor-pointer hover:bg-slate-200 select-none" onClick={() => handleSort('overtime')}>
                 Überstunden {sortKey === 'overtime' ? (sortDir === 'asc' ? '↑' : '↓') : ''}
               </th>
               <SortHeader label={t.statistiken.colAbsent} skey="absences" />
@@ -1274,11 +1274,11 @@ export default function Statistiken() {
                     <table className="w-full text-xs border-collapse">
                       <thead>
                         <tr className="bg-slate-100 dark:bg-slate-700 text-xs">
-                          <th className="px-2 py-1.5 text-left border border-gray-200 dark:border-slate-600 dark:border-slate-600 font-semibold dark:bg-slate-700 dark:text-slate-200">Mitarbeiter</th>
-                          <th className="px-2 py-1.5 text-right border border-gray-200 dark:border-slate-600">Tage</th>
-                          <th className="px-2 py-1.5 text-right border border-gray-200 dark:border-slate-600">Episoden</th>
-                          <th className="px-2 py-1.5 text-right border border-gray-200 dark:border-slate-600">Bradford</th>
-                          <th className="px-2 py-1.5 text-left border border-gray-200 dark:border-slate-600">Risiko</th>
+                          <th scope="col" className="px-2 py-1.5 text-left border border-gray-200 dark:border-slate-600 dark:border-slate-600 font-semibold dark:bg-slate-700 dark:text-slate-200">Mitarbeiter</th>
+                          <th scope="col" className="px-2 py-1.5 text-right border border-gray-200 dark:border-slate-600">Tage</th>
+                          <th scope="col" className="px-2 py-1.5 text-right border border-gray-200 dark:border-slate-600">Episoden</th>
+                          <th scope="col" className="px-2 py-1.5 text-right border border-gray-200 dark:border-slate-600">Bradford</th>
+                          <th scope="col" className="px-2 py-1.5 text-left border border-gray-200 dark:border-slate-600">Risiko</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1447,13 +1447,13 @@ export default function Statistiken() {
                   <table className="text-sm w-full">
                     <thead className="bg-slate-700 text-white">
                       <tr>
-                        <th className="px-3 py-2 text-left border-r border-slate-600">Monat</th>
-                        <th className="px-3 py-2 text-right border-r border-slate-600">MA</th>
-                        <th className="px-3 py-2 text-right border-r border-slate-600">Soll-Std</th>
-                        <th className="px-3 py-2 text-right border-r border-slate-600">Ist-Std</th>
-                        <th className="px-3 py-2 text-right border-r border-slate-600">Über/Unter</th>
-                        <th className="px-3 py-2 text-right border-r border-slate-600">Abwesend</th>
-                        <th className="px-3 py-2 text-right">Urlaub</th>
+                        <th scope="col" className="px-3 py-2 text-left border-r border-slate-600">Monat</th>
+                        <th scope="col" className="px-3 py-2 text-right border-r border-slate-600">MA</th>
+                        <th scope="col" className="px-3 py-2 text-right border-r border-slate-600">Soll-Std</th>
+                        <th scope="col" className="px-3 py-2 text-right border-r border-slate-600">Ist-Std</th>
+                        <th scope="col" className="px-3 py-2 text-right border-r border-slate-600">Über/Unter</th>
+                        <th scope="col" className="px-3 py-2 text-right border-r border-slate-600">Abwesend</th>
+                        <th scope="col" className="px-3 py-2 text-right">Urlaub</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1592,11 +1592,11 @@ export default function Statistiken() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-slate-100 dark:bg-slate-700 text-left">
-                          <th className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300">Schicht</th>
-                          <th className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300">Kategorie</th>
-                          <th className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300 text-right">Gesamt</th>
+                          <th scope="col" className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300">Schicht</th>
+                          <th scope="col" className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300">Kategorie</th>
+                          <th scope="col" className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300 text-right">Gesamt</th>
                           {periods.map(p => (
-                            <th key={`${p.year}-${p.month}`} className="px-2 py-2 font-medium text-gray-500 dark:text-slate-400 text-center text-xs whitespace-nowrap">
+                            <th scope="col" key={`${p.year}-${p.month}`} className="px-2 py-2 font-medium text-gray-500 dark:text-slate-400 text-center text-xs whitespace-nowrap">
                               {p.label}
                             </th>
                           ))}
@@ -1700,12 +1700,12 @@ export default function Statistiken() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-slate-100 dark:bg-slate-700 text-left">
-                          <th className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300">Mitarbeiter</th>
-                          <th className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300 text-right">Gesamt</th>
+                          <th scope="col" className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300">Mitarbeiter</th>
+                          <th scope="col" className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300 text-right">Gesamt</th>
                           {['Früh', 'Spät', 'Nacht', 'Sonstige'].map(cat => (
-                            <th key={cat} className="px-3 py-2 font-medium text-right" style={{ color: catColors[cat] }}>{cat}</th>
+                            <th scope="col" key={cat} className="px-3 py-2 font-medium text-right" style={{ color: catColors[cat] }}>{cat}</th>
                           ))}
-                          <th className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300">Verteilung</th>
+                          <th scope="col" className="px-3 py-2 font-medium text-gray-600 dark:text-slate-300">Verteilung</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -2006,15 +2006,15 @@ export default function Statistiken() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="bg-slate-100 dark:bg-slate-700 text-xs">
-                          <th className="px-3 py-2 text-left border border-gray-200 dark:border-slate-600 font-semibold dark:text-slate-200 sticky left-0 bg-slate-100 dark:bg-slate-700 z-10 min-w-[160px]">Mitarbeiter</th>
-                          <th className="px-3 py-2 text-left border border-gray-200 dark:border-slate-600 dark:text-slate-200">Gruppe</th>
-                          <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Soll</th>
-                          <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Ist</th>
-                          <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Über/Unter</th>
-                          <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Schichten</th>
-                          <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Krank</th>
-                          <th className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Urlaub</th>
-                          <th className="px-3 py-2 text-center border border-gray-200 dark:border-slate-600 dark:text-slate-200 min-w-[240px]">Monats-Verlauf (Ist-Std)</th>
+                          <th scope="col" className="px-3 py-2 text-left border border-gray-200 dark:border-slate-600 font-semibold dark:text-slate-200 sticky left-0 bg-slate-100 dark:bg-slate-700 z-10 min-w-[160px]">Mitarbeiter</th>
+                          <th scope="col" className="px-3 py-2 text-left border border-gray-200 dark:border-slate-600 dark:text-slate-200">Gruppe</th>
+                          <th scope="col" className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Soll</th>
+                          <th scope="col" className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Ist</th>
+                          <th scope="col" className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Über/Unter</th>
+                          <th scope="col" className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Schichten</th>
+                          <th scope="col" className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Krank</th>
+                          <th scope="col" className="px-3 py-2 text-right border border-gray-200 dark:border-slate-600 dark:text-slate-200">Urlaub</th>
+                          <th scope="col" className="px-3 py-2 text-center border border-gray-200 dark:border-slate-600 dark:text-slate-200 min-w-[240px]">Monats-Verlauf (Ist-Std)</th>
                         </tr>
                       </thead>
                       <tbody>

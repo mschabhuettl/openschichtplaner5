@@ -438,9 +438,9 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
                     <table className="w-full text-sm">
                       <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 border-b">
                         <tr>
-                          <th className="px-4 py-2 text-left">Mitarbeiter</th>
-                          <th className="px-4 py-2 text-center">Rechte</th>
-                          <th className="px-4 py-2 text-center">Aktionen</th>
+                          <th scope="col" className="px-4 py-2 text-left">Mitarbeiter</th>
+                          <th scope="col" className="px-4 py-2 text-center">Rechte</th>
+                          <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -498,9 +498,9 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
                     <table className="w-full text-sm">
                       <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 border-b">
                         <tr>
-                          <th className="px-4 py-2 text-left">Gruppe</th>
-                          <th className="px-4 py-2 text-center">Rechte</th>
-                          <th className="px-4 py-2 text-center">Aktionen</th>
+                          <th scope="col" className="px-4 py-2 text-left">Gruppe</th>
+                          <th scope="col" className="px-4 py-2 text-center">Rechte</th>
+                          <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -874,11 +874,11 @@ export default function Benutzerverwaltung() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-slate-800 text-white text-xs uppercase tracking-wide">
-                <th className="text-left px-4 py-3">Benutzername</th>
-                <th className="text-left px-4 py-3">Beschreibung</th>
-                <th className="text-center px-4 py-3">Rolle</th>
-                <th className="text-left px-4 py-3 whitespace-nowrap min-w-[120px]">Berechtigungen</th>
-                <th className="text-right px-4 py-3">Aktionen</th>
+                <th scope="col" className="text-left px-4 py-3">Benutzername</th>
+                <th scope="col" className="text-left px-4 py-3">Beschreibung</th>
+                <th scope="col" className="text-center px-4 py-3">Rolle</th>
+                <th scope="col" className="text-left px-4 py-3 whitespace-nowrap min-w-[120px]">Berechtigungen</th>
+                <th scope="col" className="text-right px-4 py-3">Aktionen</th>
               </tr>
             </thead>
             <tbody>

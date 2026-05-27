@@ -32,11 +32,11 @@ function buildJahresuebersichtHTML(
   const tdNameStyle = 'border:1px solid #ddd;padding:3px 8px;font-size:11px;white-space:nowrap;font-weight:500;';
   const tdStyle = 'border:1px solid #ddd;padding:3px 4px;font-size:10px;text-align:center;min-width:70px;vertical-align:top;';
 
-  let headerCells = `<th style="${thStyle}min-width:160px;text-align:left">Mitarbeiter</th>`;
+  let headerCells = `<th scope="col" style="${thStyle}min-width:160px;text-align:left">Mitarbeiter</th>`;
   for (const m of MONTH_ABBR) {
-    headerCells += `<th style="${thStyle}">${m}</th>`;
+    headerCells += `<th scope="col" style="${thStyle}">${m}</th>`;
   }
-  headerCells += `<th style="${thStyle}background:#1e293b">Gesamt</th>`;
+  headerCells += `<th scope="col" style="${thStyle}background:#1e293b">Gesamt</th>`;
 
   let bodyRows = '';
   for (let i = 0; i < employees.length; i++) {
@@ -240,13 +240,13 @@ function SingleEmployeeView({
         <table className="border-collapse text-sm w-full min-w-[640px]">
           <thead>
             <tr className="bg-slate-100">
-              <th className="px-3 py-2 text-left border border-gray-200">Monat</th>
-              <th className="px-3 py-2 text-right border border-gray-200">Schichten</th>
-              <th className="px-3 py-2 text-right border border-gray-200">Abwesend</th>
-              <th className="px-3 py-2 text-right border border-gray-200">Soll-Std</th>
-              <th className="px-3 py-2 text-right border border-gray-200">Ist-Std</th>
-              <th className="px-3 py-2 text-right border border-gray-200">Über/Unter</th>
-              <th className="px-3 py-2 text-left border border-gray-200">Schichtarten</th>
+              <th scope="col" className="px-3 py-2 text-left border border-gray-200">Monat</th>
+              <th scope="col" className="px-3 py-2 text-right border border-gray-200">Schichten</th>
+              <th scope="col" className="px-3 py-2 text-right border border-gray-200">Abwesend</th>
+              <th scope="col" className="px-3 py-2 text-right border border-gray-200">Soll-Std</th>
+              <th scope="col" className="px-3 py-2 text-right border border-gray-200">Ist-Std</th>
+              <th scope="col" className="px-3 py-2 text-right border border-gray-200">Über/Unter</th>
+              <th scope="col" className="px-3 py-2 text-left border border-gray-200">Schichtarten</th>
             </tr>
           </thead>
           <tbody>
@@ -369,15 +369,15 @@ function AllEmployeesView({
       <table className="border-collapse text-xs min-w-[900px]">
         <thead>
           <tr className="bg-slate-700 text-white">
-            <th className="sticky left-0 z-10 bg-slate-700 px-3 py-2 text-left min-w-[160px] border-r border-slate-600">
+            <th scope="col" className="sticky left-0 z-10 bg-slate-700 px-3 py-2 text-left min-w-[160px] border-r border-slate-600">
               Mitarbeiter
             </th>
             {MONTH_ABBR.map((m, i) => (
-              <th key={i} className="px-1 py-2 text-center min-w-[90px] border-r border-slate-600">
+              <th scope="col" key={i} className="px-1 py-2 text-center min-w-[90px] border-r border-slate-600">
                 {m}
               </th>
             ))}
-            <th className="px-2 py-2 text-center min-w-[80px] border-l border-slate-500 bg-slate-600">
+            <th scope="col" className="px-2 py-2 text-center min-w-[80px] border-l border-slate-500 bg-slate-600">
               Gesamt
             </th>
           </tr>

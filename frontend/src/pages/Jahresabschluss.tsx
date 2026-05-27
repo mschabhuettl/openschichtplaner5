@@ -193,10 +193,10 @@ export default function Jahresabschluss() {
           <div className="max-h-48 overflow-y-auto">
             <table className="text-xs w-full">
               <thead><tr className="bg-green-100">
-                <th className="px-3 py-1.5 text-left">Mitarbeiter</th>
-                <th className="px-3 py-1.5 text-center">Rest</th>
-                <th className="px-3 py-1.5 text-center">Übertrag {result.next_year}</th>
-                <th className="px-3 py-1.5 text-center">Verfall</th>
+                <th scope="col" className="px-3 py-1.5 text-left">Mitarbeiter</th>
+                <th scope="col" className="px-3 py-1.5 text-center">Rest</th>
+                <th scope="col" className="px-3 py-1.5 text-center">Übertrag {result.next_year}</th>
+                <th scope="col" className="px-3 py-1.5 text-center">Verfall</th>
               </tr></thead>
               <tbody>
                 {result.details.map((d, i) => (
@@ -265,14 +265,14 @@ export default function Jahresabschluss() {
             <table className="text-sm w-full">
               <thead>
                 <tr className="bg-slate-700 text-white text-xs">
-                  <th className="px-4 py-3 text-left">Mitarbeiter</th>
-                  <th className="px-3 py-3 text-center">Anspruch {preview.year}</th>
-                  <th className="px-3 py-3 text-center">Übertrag rein</th>
-                  <th className="px-3 py-3 text-center">Gesamt</th>
-                  <th className="px-3 py-3 text-center">Genommen</th>
-                  <th className="px-3 py-3 text-center">Resturlaub</th>
-                  <th className="px-3 py-3 text-center bg-blue-800">Übertrag {preview.next_year}</th>
-                  <th className="px-3 py-3 text-center bg-red-800">Verfall</th>
+                  <th scope="col" className="px-4 py-3 text-left">Mitarbeiter</th>
+                  <th scope="col" className="px-3 py-3 text-center">Anspruch {preview.year}</th>
+                  <th scope="col" className="px-3 py-3 text-center">Übertrag rein</th>
+                  <th scope="col" className="px-3 py-3 text-center">Gesamt</th>
+                  <th scope="col" className="px-3 py-3 text-center">Genommen</th>
+                  <th scope="col" className="px-3 py-3 text-center">Resturlaub</th>
+                  <th scope="col" className="px-3 py-3 text-center bg-blue-800">Übertrag {preview.next_year}</th>
+                  <th scope="col" className="px-3 py-3 text-center bg-red-800">Verfall</th>
                 </tr>
               </thead>
               <tbody>

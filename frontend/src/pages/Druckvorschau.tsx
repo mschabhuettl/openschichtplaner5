@@ -123,7 +123,7 @@ function PrintGrid({
         </colgroup>
         <thead>
           <tr>
-            <th className="border border-gray-400 bg-slate-700 text-white px-1 py-1 text-left font-semibold">
+            <th scope="col" className="border border-gray-400 bg-slate-700 text-white px-1 py-1 text-left font-semibold">
               Mitarbeiter
             </th>
             {visibleDays.map(day => {
@@ -132,7 +132,7 @@ function PrintGrid({
               const isHol = holidays.has(dateStr);
               const isWe = wd === 0 || wd === 6;
               return (
-                <th
+                <th scope="col"
                   key={day}
                   className={`border border-gray-400 text-center font-semibold px-0.5 py-1 ${
                     isHol ? 'bg-red-700 text-white' : isWe ? 'bg-slate-500 text-white' : 'bg-slate-700 text-white'
@@ -146,7 +146,7 @@ function PrintGrid({
               );
             })}
             {config.showSummary && (
-              <th className="border border-gray-400 bg-slate-700 text-white px-1 py-1 text-center font-semibold">
+              <th scope="col" className="border border-gray-400 bg-slate-700 text-white px-1 py-1 text-center font-semibold">
                 Schichten
               </th>
             )}

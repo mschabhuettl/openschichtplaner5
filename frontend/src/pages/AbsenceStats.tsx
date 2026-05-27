@@ -225,11 +225,11 @@ function OverviewTab({ year }: { year: number }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-gray-500 border-b dark:border-slate-600">
-                <th className="pb-2 pr-4">Gruppe</th>
-                <th className="pb-2 pr-4 text-right" style={{ color: COLORS.vacation }}>Urlaub</th>
-                <th className="pb-2 pr-4 text-right" style={{ color: COLORS.sick }}>Krank</th>
-                <th className="pb-2 pr-4 text-right" style={{ color: COLORS.other }}>Sonst.</th>
-                <th className="pb-2 text-right">Gesamt</th>
+                <th scope="col" className="pb-2 pr-4">Gruppe</th>
+                <th scope="col" className="pb-2 pr-4 text-right" style={{ color: COLORS.vacation }}>Urlaub</th>
+                <th scope="col" className="pb-2 pr-4 text-right" style={{ color: COLORS.sick }}>Krank</th>
+                <th scope="col" className="pb-2 pr-4 text-right" style={{ color: COLORS.other }}>Sonst.</th>
+                <th scope="col" className="pb-2 text-right">Gesamt</th>
               </tr>
             </thead>
             <tbody>
@@ -358,12 +358,12 @@ function GroupTab({ year, groups }: { year: number; groups: Group[] }) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-gray-500 border-b dark:border-slate-600">
-                    <th className="pb-2 pr-4">Mitarbeiter</th>
-                    <th className="pb-2 pr-4 text-right" style={{ color: COLORS.vacation }}>Urlaub</th>
-                    <th className="pb-2 pr-4 text-right" style={{ color: COLORS.sick }}>Krank</th>
-                    <th className="pb-2 pr-4 text-right" style={{ color: COLORS.other }}>Sonst.</th>
-                    <th className="pb-2 pr-4 text-right">Gesamt</th>
-                    <th className="pb-2 text-right text-orange-500">Beantragt</th>
+                    <th scope="col" className="pb-2 pr-4">Mitarbeiter</th>
+                    <th scope="col" className="pb-2 pr-4 text-right" style={{ color: COLORS.vacation }}>Urlaub</th>
+                    <th scope="col" className="pb-2 pr-4 text-right" style={{ color: COLORS.sick }}>Krank</th>
+                    <th scope="col" className="pb-2 pr-4 text-right" style={{ color: COLORS.other }}>Sonst.</th>
+                    <th scope="col" className="pb-2 pr-4 text-right">Gesamt</th>
+                    <th scope="col" className="pb-2 text-right text-orange-500">Beantragt</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -491,11 +491,11 @@ function EmployeeTab({ year, employees }: { year: number; employees: Employee[] 
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="text-left text-gray-500 border-b dark:border-slate-600">
-                      <th className="pb-2 pr-4">Monat</th>
-                      <th className="pb-2 pr-3 text-right" style={{ color: COLORS.vacation }}>Urlaub</th>
-                      <th className="pb-2 pr-3 text-right" style={{ color: COLORS.sick }}>Krank</th>
-                      <th className="pb-2 pr-3 text-right" style={{ color: COLORS.other }}>Sonst.</th>
-                      <th className="pb-2 text-right">Gesamt</th>
+                      <th scope="col" className="pb-2 pr-4">Monat</th>
+                      <th scope="col" className="pb-2 pr-3 text-right" style={{ color: COLORS.vacation }}>Urlaub</th>
+                      <th scope="col" className="pb-2 pr-3 text-right" style={{ color: COLORS.sick }}>Krank</th>
+                      <th scope="col" className="pb-2 pr-3 text-right" style={{ color: COLORS.other }}>Sonst.</th>
+                      <th scope="col" className="pb-2 text-right">Gesamt</th>
                     </tr>
                   </thead>
                   <tbody>

@@ -426,11 +426,11 @@ export default function Geburtstagkalender() {
           <table className="w-full text-sm min-w-[500px]">
             <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="text-left px-4 py-2 font-semibold text-gray-600 dark:text-gray-300">Mitarbeiter</th>
-                <th className="text-left px-4 py-2 font-semibold text-gray-600 dark:text-gray-300">Geburtstag</th>
-                <th className="text-left px-4 py-2 font-semibold text-gray-600 dark:text-gray-300">Alter</th>
-                <th className="text-left px-4 py-2 font-semibold text-gray-600 dark:text-gray-300">Nächste Feier</th>
-                <th className="text-left px-4 py-2 font-semibold text-gray-600 dark:text-gray-300"></th>
+                <th scope="col" className="text-left px-4 py-2 font-semibold text-gray-600 dark:text-gray-300">Mitarbeiter</th>
+                <th scope="col" className="text-left px-4 py-2 font-semibold text-gray-600 dark:text-gray-300">Geburtstag</th>
+                <th scope="col" className="text-left px-4 py-2 font-semibold text-gray-600 dark:text-gray-300">Alter</th>
+                <th scope="col" className="text-left px-4 py-2 font-semibold text-gray-600 dark:text-gray-300">Nächste Feier</th>
+                <th scope="col" className="text-left px-4 py-2 font-semibold text-gray-600 dark:text-gray-300"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800">

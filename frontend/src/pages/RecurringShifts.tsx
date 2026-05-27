@@ -582,13 +582,13 @@ export default function RecurringShifts() {
           <table className="w-full text-sm">
             <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400">Mitarbeiter</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400">Schicht</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400">Wiederholung</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400">Wochentag</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400">Gültig ab</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400">Gültig bis</th>
-                <th className="text-right px-4 py-3 font-medium text-slate-600 dark:text-slate-400">Aktionen</th>
+                <th scope="col" className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400">Mitarbeiter</th>
+                <th scope="col" className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400">Schicht</th>
+                <th scope="col" className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400">Wiederholung</th>
+                <th scope="col" className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400">Wochentag</th>
+                <th scope="col" className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400">Gültig ab</th>
+                <th scope="col" className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-400">Gültig bis</th>
+                <th scope="col" className="text-right px-4 py-3 font-medium text-slate-600 dark:text-slate-400">Aktionen</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">

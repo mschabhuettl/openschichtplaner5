@@ -248,12 +248,12 @@ export default function Protokoll() {
           <table className="w-full text-sm border-collapse min-w-[700px]">
             <thead className="sticky top-0 z-10 bg-slate-100">
               <tr>
-                <th className="px-3 py-2 text-left border border-gray-200 font-semibold whitespace-nowrap text-xs">Zeitpunkt</th>
-                <th className="px-3 py-2 text-left border border-gray-200 font-semibold text-xs">Benutzer</th>
-                <th className="px-3 py-2 text-left border border-gray-200 font-semibold text-xs">Aktion</th>
-                <th className="px-3 py-2 text-left border border-gray-200 font-semibold text-xs">Objekt</th>
-                <th className="px-3 py-2 text-right border border-gray-200 font-semibold text-xs">ID</th>
-                <th className="px-3 py-2 text-left border border-gray-200 font-semibold text-xs">Details</th>
+                <th scope="col" className="px-3 py-2 text-left border border-gray-200 font-semibold whitespace-nowrap text-xs">Zeitpunkt</th>
+                <th scope="col" className="px-3 py-2 text-left border border-gray-200 font-semibold text-xs">Benutzer</th>
+                <th scope="col" className="px-3 py-2 text-left border border-gray-200 font-semibold text-xs">Aktion</th>
+                <th scope="col" className="px-3 py-2 text-left border border-gray-200 font-semibold text-xs">Objekt</th>
+                <th scope="col" className="px-3 py-2 text-right border border-gray-200 font-semibold text-xs">ID</th>
+                <th scope="col" className="px-3 py-2 text-left border border-gray-200 font-semibold text-xs">Details</th>
               </tr>
             </thead>
             <tbody>

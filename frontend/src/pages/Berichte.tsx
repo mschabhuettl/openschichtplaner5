@@ -45,9 +45,9 @@ async function reportEmployeeList(employees: Employee[], groups: Group[]) {
 <div class="subtitle">${employees.length} Mitarbeiter &nbsp;|&nbsp; Stand: ${now}</div>
 <table>
 <thead><tr>
-<th>Nr.</th><th>Name</th><th>Vorname</th><th>Kürzel</th>
-<th>Funktion</th><th>Std/Tag</th><th>Std/Woche</th>
-<th>Eintritt</th><th>Austritt</th><th>Gruppen</th>
+<th scope="col">Nr.</th><th scope="col">Name</th><th scope="col">Vorname</th><th scope="col">Kürzel</th>
+<th scope="col">Funktion</th><th scope="col">Std/Tag</th><th scope="col">Std/Woche</th>
+<th scope="col">Eintritt</th><th scope="col">Austritt</th><th scope="col">Gruppen</th>
 </tr></thead><tbody>`;
 
   // Load group memberships
@@ -86,7 +86,7 @@ async function reportGroups(groups: Group[]) {
   let html = `<h1>🏢 Gruppenübersicht</h1>
 <div class="subtitle">${groups.length} Gruppen &nbsp;|&nbsp; Stand: ${now}</div>
 <table>
-<thead><tr><th>Name</th><th>Kürzel</th><th>Übergeordnet</th><th>Mitglieder</th><th>Status</th></tr></thead><tbody>`;
+<thead><tr><th scope="col">Name</th><th scope="col">Kürzel</th><th scope="col">Übergeordnet</th><th scope="col">Mitglieder</th><th scope="col">Status</th></tr></thead><tbody>`;
 
   const groupMap = Object.fromEntries(groups.map(g => [g.ID, g.NAME]));
   for (const g of groups) {
@@ -109,7 +109,7 @@ function reportShifts(shifts: ShiftType[]) {
   let html = `<h1>🕐 Schichtartenliste</h1>
 <div class="subtitle">${shifts.length} Schichtarten &nbsp;|&nbsp; Stand: ${now}</div>
 <table>
-<thead><tr><th>Kürzel</th><th>Name</th><th>Dauer (Mo)</th><th>Farbe</th><th>Status</th></tr></thead><tbody>`;
+<thead><tr><th scope="col">Kürzel</th><th scope="col">Name</th><th scope="col">Dauer (Mo)</th><th scope="col">Farbe</th><th scope="col">Status</th></tr></thead><tbody>`;
 
   for (const s of shifts) {
     const dur = s.DURATION0 ? `${s.DURATION0.toFixed(1)} h` : '—';
@@ -154,13 +154,13 @@ async function reportMonthlySchedule(year: number, month: number, groupId: numbe
   const thStyle = 'background:#334155;color:#fff;padding:2px 4px;font-size:10px;text-align:center;border:1px solid #475569;';
   const nameStyle = 'padding:2px 4px;font-size:10px;font-weight:bold;white-space:nowrap;border:1px solid #ddd;background:#f8fafc;';
 
-  let headerCols = `<th style="${thStyle};text-align:left;min-width:80px">Mitarbeiter</th>`;
+  let headerCols = `<th scope="col" style="${thStyle};text-align:left;min-width:80px">Mitarbeiter</th>`;
   for (const d of days) {
     const date = new Date(year, month - 1, d);
     const isWe = date.getDay() === 0 || date.getDay() === 6;
     const bg = isWe ? '#1e293b' : '#334155';
     const dn = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
-    headerCols += `<th style="${thStyle};background:${bg};min-width:26px">${padZero(d)}<br><span style="font-size:8px">${dn}</span></th>`;
+    headerCols += `<th scope="col" style="${thStyle};background:${bg};min-width:26px">${padZero(d)}<br><span style="font-size:8px">${dn}</span></th>`;
   }
 
   let rows = '';
@@ -223,9 +223,9 @@ async function reportVacation(year: number, employees: Employee[]) {
 <div class="subtitle">Stand: ${now}</div>
 <table>
 <thead><tr>
-<th>Name</th><th>Vorname</th><th>Kürzel</th>
-<th style="text-align:right">Anspruch</th><th style="text-align:right">Genommen</th>
-<th style="text-align:right">Offen</th><th>Status</th>
+<th scope="col">Name</th><th scope="col">Vorname</th><th scope="col">Kürzel</th>
+<th scope="col" style="text-align:right">Anspruch</th><th scope="col" style="text-align:right">Genommen</th>
+<th scope="col" style="text-align:right">Offen</th><th scope="col">Status</th>
 </tr></thead><tbody>`;
 
   for (const emp of emps) {
@@ -255,7 +255,7 @@ async function reportHolidays(year: number) {
   let html = `<h1>🎉 Feiertagsliste ${year}</h1>
 <div class="subtitle">${holidays.length} Feiertage &nbsp;|&nbsp; Stand: ${now}</div>
 <table>
-<thead><tr><th>Datum</th><th>Wochentag</th><th>Name</th><th>Typ</th></tr></thead><tbody>`;
+<thead><tr><th scope="col">Datum</th><th scope="col">Wochentag</th><th scope="col">Name</th><th scope="col">Typ</th></tr></thead><tbody>`;
 
   const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
   for (const h of holidays) {
@@ -369,13 +369,13 @@ async function reportStundenAuswertung(
 <div class="subtitle">Monat: ${monthStr} ${year} &nbsp;|&nbsp; Gruppe: ${groupName} &nbsp;|&nbsp; ${emps.length} Mitarbeiter &nbsp;|&nbsp; Stand: ${now}</div>
 <table>
 <thead><tr>
-<th>Mitarbeiter</th>
-<th>Kürzel</th>
-<th style="text-align:right">Soll-Std.</th>
-<th style="text-align:right">Ist-Std.</th>
-<th style="text-align:right">Differenz</th>
-<th style="text-align:center">Urlaub</th>
-<th style="text-align:center">Krank</th>
+<th scope="col">Mitarbeiter</th>
+<th scope="col">Kürzel</th>
+<th scope="col" style="text-align:right">Soll-Std.</th>
+<th scope="col" style="text-align:right">Ist-Std.</th>
+<th scope="col" style="text-align:right">Differenz</th>
+<th scope="col" style="text-align:center">Urlaub</th>
+<th scope="col" style="text-align:center">Krank</th>
 </tr></thead>
 <tbody>
 ${rows}
@@ -555,12 +555,12 @@ async function reportQuarterSchedule(year: number, quarter: number, groupId: num
     const idx: Record<string, Entry> = {};
     for (const e of entries) idx[`${e.employee_id}::${e.date}`] = e;
 
-    let headerCols = `<th style="${thStyle};text-align:left;min-width:70px">Mitarbeiter</th>`;
+    let headerCols = `<th scope="col" style="${thStyle};text-align:left;min-width:70px">Mitarbeiter</th>`;
     for (const d of days) {
       const date = new Date(year, month - 1, d);
       const isWe = date.getDay() === 0 || date.getDay() === 6;
       const dn = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
-      headerCols += `<th style="${thStyle};background:${isWe ? '#1e293b' : '#334155'};min-width:22px">${padZero(d)}<br><span style="font-size:7px">${dn}</span></th>`;
+      headerCols += `<th scope="col" style="${thStyle};background:${isWe ? '#1e293b' : '#334155'};min-width:22px">${padZero(d)}<br><span style="font-size:7px">${dn}</span></th>`;
     }
 
     let rows = '';
@@ -627,9 +627,9 @@ async function reportYearSchedule(year: number, groupId: number | null, employee
   const thStyle = 'background:#334155;color:#fff;padding:3px 6px;font-size:10px;text-align:center;border:1px solid #475569;';
   const nameStyle = 'padding:2px 6px;font-size:10px;font-weight:bold;white-space:nowrap;border:1px solid #ddd;background:#f8fafc;';
 
-  let headerCols = `<th style="${thStyle};text-align:left;min-width:80px">Mitarbeiter</th>`;
+  let headerCols = `<th scope="col" style="${thStyle};text-align:left;min-width:80px">Mitarbeiter</th>`;
   for (let m = 1; m <= 12; m++) {
-    headerCols += `<th style="${thStyle};min-width:36px">${MONTHS[m-1].substring(0,3)}</th>`;
+    headerCols += `<th scope="col" style="${thStyle};min-width:36px">${MONTHS[m-1].substring(0,3)}</th>`;
   }
 
   let rows = '';
@@ -686,12 +686,12 @@ async function reportAbsenceOverview(year: number, month: number, groupId: numbe
   const thStyle = 'background:#334155;color:#fff;padding:2px 3px;font-size:9px;text-align:center;border:1px solid #475569;';
   const nameStyle = 'padding:2px 4px;font-size:9px;font-weight:bold;white-space:nowrap;border:1px solid #ddd;background:#f8fafc;';
 
-  let headerCols = `<th style="${thStyle};text-align:left;min-width:70px">Mitarbeiter</th>`;
+  let headerCols = `<th scope="col" style="${thStyle};text-align:left;min-width:70px">Mitarbeiter</th>`;
   for (const d of days) {
     const date = new Date(year, month - 1, d);
     const isWe = date.getDay() === 0 || date.getDay() === 6;
     const dn = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
-    headerCols += `<th style="${thStyle};background:${isWe ? '#1e293b' : '#334155'};min-width:22px">${padZero(d)}<br><span style="font-size:7px">${dn}</span></th>`;
+    headerCols += `<th scope="col" style="${thStyle};background:${isWe ? '#1e293b' : '#334155'};min-width:22px">${padZero(d)}<br><span style="font-size:7px">${dn}</span></th>`;
   }
 
   let rows = '';
@@ -731,7 +731,7 @@ async function reportWorkplaces() {
   let html = `<h1>🏭 Arbeitsplätze</h1>
 <div class="subtitle">${workplaces.length} Arbeitsplätze &nbsp;|&nbsp; Stand: ${now}</div>
 <table>
-<thead><tr><th>Kürzel</th><th>Name</th><th>Farbe</th><th>Status</th></tr></thead><tbody>`;
+<thead><tr><th scope="col">Kürzel</th><th scope="col">Name</th><th scope="col">Farbe</th><th scope="col">Status</th></tr></thead><tbody>`;
 
   for (const w of workplaces) {
     html += `<tr>
@@ -762,7 +762,7 @@ async function reportExtracharges() {
   let html = `<h1>💰 Zeitzuschläge</h1>
 <div class="subtitle">${charges.length} Zeitzuschläge &nbsp;|&nbsp; Stand: ${now}</div>
 <table>
-<thead><tr><th>Name</th><th>Von</th><th>Bis</th><th>Gültige Wochentage</th><th>Feiertagsregel</th></tr></thead><tbody>`;
+<thead><tr><th scope="col">Name</th><th scope="col">Von</th><th scope="col">Bis</th><th scope="col">Gültige Wochentage</th><th scope="col">Feiertagsregel</th></tr></thead><tbody>`;
 
   for (const c of charges) {
     const validDays = (c.VALIDDAYS || '0000000').split('').map((v, i) => v === '1' ? dayNames[i] : null).filter(Boolean).join(', ') || '—';
@@ -799,7 +799,7 @@ async function reportBirthdays(employees: Employee[], birthdayMonth: number) {
   let html = `<h1>🎂 Geburtstagsliste</h1>
 <div class="subtitle">${monthLabel} &nbsp;|&nbsp; ${withBd.length} Mitarbeiter mit Geburtstag &nbsp;|&nbsp; Stand: ${now}</div>
 <table>
-<thead><tr><th>Name</th><th>Vorname</th><th>Kürzel</th><th>Geburtstag</th><th>Alter ${thisYear}</th></tr></thead><tbody>`;
+<thead><tr><th scope="col">Name</th><th scope="col">Vorname</th><th scope="col">Kürzel</th><th scope="col">Geburtstag</th><th scope="col">Alter ${thisYear}</th></tr></thead><tbody>`;
 
   for (const { emp, month, day, year } of withBd) {
     const age = thisYear - year;
@@ -822,7 +822,7 @@ async function reportAddresses(employees: Employee[]) {
   let html = `<h1>📬 Mitarbeiter-Adressen</h1>
 <div class="subtitle">${employees.length} Mitarbeiter &nbsp;|&nbsp; Stand: ${now}</div>
 <table>
-<thead><tr><th>Name</th><th>Straße</th><th>PLZ/Ort</th><th>Telefon</th><th>E-Mail</th></tr></thead><tbody>`;
+<thead><tr><th scope="col">Name</th><th scope="col">Straße</th><th scope="col">PLZ/Ort</th><th scope="col">Telefon</th><th scope="col">E-Mail</th></tr></thead><tbody>`;
 
   const sorted = [...employees].sort((a, b) => (a.NAME || '').localeCompare(b.NAME || ''));
   for (const emp of sorted) {
@@ -862,7 +862,7 @@ async function reportRestrictions(employees: Employee[]) {
     html += '<p>Keine Schichtbeschränkungen vorhanden.</p>';
   } else {
     html += `<table>
-<thead><tr><th>Mitarbeiter</th><th>Schicht</th><th>Wochentag</th><th>Typ</th><th>Grund</th></tr></thead><tbody>`;
+<thead><tr><th scope="col">Mitarbeiter</th><th scope="col">Schicht</th><th scope="col">Wochentag</th><th scope="col">Typ</th><th scope="col">Grund</th></tr></thead><tbody>`;
 
     for (const [empIdStr, resList] of Object.entries(byEmp)) {
       const emp = empMap[parseInt(empIdStr)];
@@ -910,7 +910,7 @@ async function reportAbsenceStats(year: number, groupId: number | null, employee
     stats[a.employee_id][ltId] = (stats[a.employee_id][ltId] || 0) + 1;
   }
 
-  const headerCols = '<th>Mitarbeiter</th>' + ltList.map(lt => `<th style="text-align:center">${lt.SHORTNAME}<br><span style="font-size:9px;font-weight:normal">${lt.NAME}</span></th>`).join('') + '<th style="text-align:right">∑</th>';
+  const headerCols = '<th scope="col">Mitarbeiter</th>' + ltList.map(lt => `<th scope="col" style="text-align:center">${lt.SHORTNAME}<br><span style="font-size:9px;font-weight:normal">${lt.NAME}</span></th>`).join('') + '<th scope="col" style="text-align:right">∑</th>';
 
   let rows = '';
   for (const emp of emps) {
@@ -963,7 +963,7 @@ async function reportShiftStats(year: number, month: number, groupId: number | n
     stats[e.employee_id][lbl] = (stats[e.employee_id][lbl] || 0) + 1;
   }
 
-  const headerCols = '<th>Mitarbeiter</th>' + shiftLabels.map(l => `<th style="text-align:center">${l}</th>`).join('') + '<th style="text-align:right">∑</th>';
+  const headerCols = '<th scope="col">Mitarbeiter</th>' + shiftLabels.map(l => `<th scope="col" style="text-align:center">${l}</th>`).join('') + '<th scope="col" style="text-align:right">∑</th>';
 
   let rows = '';
   for (const emp of emps) {
@@ -1024,12 +1024,12 @@ async function reportEntitlementStats(year: number, employees: Employee[]) {
 <div class="subtitle">Jahr: ${year} &nbsp;|&nbsp; Stand: ${now}</div>
 <table>
 <thead><tr>
-<th>Mitarbeiter</th>
-<th style="text-align:right">Anspruch</th>
-<th style="text-align:right">Übertrag</th>
-<th style="text-align:right">Gesamt</th>
-<th style="text-align:right">Verbraucht</th>
-<th style="text-align:right">Rest</th>
+<th scope="col">Mitarbeiter</th>
+<th scope="col" style="text-align:right">Anspruch</th>
+<th scope="col" style="text-align:right">Übertrag</th>
+<th scope="col" style="text-align:right">Gesamt</th>
+<th scope="col" style="text-align:right">Verbraucht</th>
+<th scope="col" style="text-align:right">Rest</th>
 </tr></thead><tbody>`;
 
   for (const empId of empIds) {
@@ -1090,7 +1090,7 @@ async function reportGroupTree(groups: Group[]) {
   const html = `<h1>🌳 Gruppen-Struktur</h1>
 <div class="subtitle">${groups.length} Gruppen &nbsp;|&nbsp; Stand: ${now}</div>
 <table>
-<thead><tr><th>Name</th><th>Kürzel</th><th>Mitglieder</th><th>Status</th></tr></thead>
+<thead><tr><th scope="col">Name</th><th scope="col">Kürzel</th><th scope="col">Mitglieder</th><th scope="col">Status</th></tr></thead>
 <tbody>${rows}</tbody>
 </table>`;
   printHtml(html, 'Gruppen-Struktur');
@@ -1117,7 +1117,7 @@ async function reportGroupMembers(memberGroupId: number | null, employees: Emplo
       html += '<p style="color:#999;font-size:11px">Keine Mitglieder.</p>';
     } else {
       html += `<table style="margin-bottom:0">
-<thead><tr><th>Nr.</th><th>Name</th><th>Vorname</th><th>Kürzel</th><th>Eintritt</th></tr></thead>
+<thead><tr><th scope="col">Nr.</th><th scope="col">Name</th><th scope="col">Vorname</th><th scope="col">Kürzel</th><th scope="col">Eintritt</th></tr></thead>
 <tbody>`;
       for (const m of members) {
         html += `<tr>
@@ -1145,7 +1145,7 @@ async function reportHolidayBans(groups: Group[]) {
   let html = `<h1>🚫 Urlaubssperren</h1>
 <div class="subtitle">${bans.length} Urlaubssperren &nbsp;|&nbsp; Stand: ${now}</div>
 <table>
-<thead><tr><th>Gruppe</th><th>Von</th><th>Bis</th><th>Typ</th><th>Grund</th></tr></thead><tbody>`;
+<thead><tr><th scope="col">Gruppe</th><th scope="col">Von</th><th scope="col">Bis</th><th scope="col">Typ</th><th scope="col">Grund</th></tr></thead><tbody>`;
 
   if (bans.length === 0) {
     html += '<tr><td colspan="5" style="text-align:center;color:#999">Keine Urlaubssperren vorhanden.</td></tr>';

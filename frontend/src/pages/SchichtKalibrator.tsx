@@ -427,18 +427,18 @@ export default function SchichtKalibrator() {
           <table className="w-full text-sm border-collapse min-w-[800px]">
             <thead className="sticky top-0 z-10 bg-slate-50 border-b border-gray-200">
               <tr>
-                {bulkPreset >= 0 && <th className="px-3 py-2 w-8">
+                {bulkPreset >= 0 && <th scope="col" className="px-3 py-2 w-8">
                   <input type="checkbox" className="accent-blue-500"
                     checked={selectedIds.size === filtered.length && filtered.length > 0}
                     onChange={e => setSelectedIds(e.target.checked ? new Set(filtered.map(emp => emp.ID)) : new Set())} />
                 </th>}
-                <th className="px-4 py-2.5 text-left font-semibold text-gray-600 text-xs">Mitarbeiter</th>
-                <th className="px-3 py-2.5 text-left font-semibold text-gray-600 text-xs min-w-[140px]">Beschäftigungsgrad</th>
-                <th className="px-3 py-2.5 text-center font-semibold text-gray-600 text-xs">Std/Tag</th>
-                <th className="px-3 py-2.5 text-center font-semibold text-gray-600 text-xs">Std/Woche</th>
-                <th className="px-3 py-2.5 text-center font-semibold text-gray-600 text-xs">Std/Monat</th>
-                <th className="px-3 py-2.5 text-left font-semibold text-gray-600 text-xs">Arbeitstage</th>
-                <th className="px-3 py-2.5 text-right font-semibold text-gray-600 text-xs w-32">Aktion</th>
+                <th scope="col" className="px-4 py-2.5 text-left font-semibold text-gray-600 text-xs">Mitarbeiter</th>
+                <th scope="col" className="px-3 py-2.5 text-left font-semibold text-gray-600 text-xs min-w-[140px]">Beschäftigungsgrad</th>
+                <th scope="col" className="px-3 py-2.5 text-center font-semibold text-gray-600 text-xs">Std/Tag</th>
+                <th scope="col" className="px-3 py-2.5 text-center font-semibold text-gray-600 text-xs">Std/Woche</th>
+                <th scope="col" className="px-3 py-2.5 text-center font-semibold text-gray-600 text-xs">Std/Monat</th>
+                <th scope="col" className="px-3 py-2.5 text-left font-semibold text-gray-600 text-xs">Arbeitstage</th>
+                <th scope="col" className="px-3 py-2.5 text-right font-semibold text-gray-600 text-xs w-32">Aktion</th>
               </tr>
             </thead>
             <tbody>

@@ -77,15 +77,15 @@ function buildMatrixHTML(
   const tdBase = 'border:1px solid #e2e8f0;padding:2px 3px;font-size:10px;text-align:center;vertical-align:middle;min-width:26px;';
 
   // Day header
-  let dayHeaders = `<th style="${thBase}min-width:140px;text-align:left;background:#1e293b;color:#fff;">Mitarbeiter</th>`;
+  let dayHeaders = `<th scope="col" style="${thBase}min-width:140px;text-align:left;background:#1e293b;color:#fff;">Mitarbeiter</th>`;
   for (let d = 1; d <= numDays; d++) {
     const dow = getDayOfWeek(year, month, d);
     const isHol = holidays.has(d);
     const bg = isHol ? '#fcd34d' : isWeekend(dow) ? '#e0e7ff' : '#334155';
     const color = isHol ? '#000' : isWeekend(dow) ? '#3730a3' : '#fff';
-    dayHeaders += `<th style="${thBase}background:${bg};color:${color};">${d}<br><span style="font-size:8px;">${DAY_ABBR[dow]}</span></th>`;
+    dayHeaders += `<th scope="col" style="${thBase}background:${bg};color:${color};">${d}<br><span style="font-size:8px;">${DAY_ABBR[dow]}</span></th>`;
   }
-  dayHeaders += `<th style="${thBase}background:#0f172a;color:#fff;">Σ</th>`;
+  dayHeaders += `<th scope="col" style="${thBase}background:#0f172a;color:#fff;">Σ</th>`;
 
   let rows = '';
   for (let i = 0; i < employees.length; i++) {
@@ -486,7 +486,7 @@ export default function VerfügbarkeitsMatrix() {
               <thead>
                 <tr>
                   {/* Name column */}
-                  <th
+                  <th scope="col"
                     className="sticky left-0 z-20 bg-slate-800 text-white font-semibold text-left px-3 py-2 border border-slate-600"
                     style={{ minWidth: 160, width: 160 }}
                   >
@@ -504,7 +504,7 @@ export default function VerfügbarkeitsMatrix() {
                       ? 'bg-indigo-500 text-indigo-100'
                       : 'bg-slate-700 text-slate-100';
                     return (
-                      <th
+                      <th scope="col"
                         key={d}
                         className={`border border-slate-600 font-medium ${bgClass}`}
                         style={{ width: 28, minWidth: 28, padding: '2px 1px', textAlign: 'center' }}
@@ -516,7 +516,7 @@ export default function VerfügbarkeitsMatrix() {
                     );
                   })}
                   {/* Summary */}
-                  <th
+                  <th scope="col"
                     className="sticky right-0 z-20 bg-slate-900 text-white font-bold border border-slate-600 text-center"
                     style={{ minWidth: 54, width: 54, padding: '2px 4px' }}
                   >

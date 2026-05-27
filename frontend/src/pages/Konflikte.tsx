@@ -594,7 +594,7 @@ export default function Konflikte() {
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b">
                 <tr>
-                  <th className="px-3 py-3">
+                  <th scope="col" className="px-3 py-3">
                     <input
                       type="checkbox"
                       checked={selectedKeys.size === filteredConflicts.length && filteredConflicts.length > 0}
@@ -602,12 +602,12 @@ export default function Konflikte() {
                       className="rounded text-blue-600"
                     />
                   </th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colEmployee}</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colDate}</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colType}</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colShift}</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colAbsence}</th>
-                  <th className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colActions}</th>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colEmployee}</th>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colDate}</th>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colType}</th>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colShift}</th>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colAbsence}</th>
+                  <th scope="col" className="text-left px-4 py-3 font-semibold text-gray-600">{t.konflikte.colActions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -674,12 +674,12 @@ export default function Konflikte() {
                     <table className="w-full text-sm">
                       <thead className="bg-gray-50 border-b">
                         <tr>
-                          <th className="px-3 py-2"></th>
-                          <th className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">{t.konflikte.colDate}</th>
-                          <th className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">{t.konflikte.colType}</th>
-                          <th className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">{t.konflikte.colShift}</th>
-                          <th className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">{t.konflikte.colAbsence}</th>
-                          <th className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">{t.konflikte.colActions}</th>
+                          <th scope="col" className="px-3 py-2"></th>
+                          <th scope="col" className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">{t.konflikte.colDate}</th>
+                          <th scope="col" className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">{t.konflikte.colType}</th>
+                          <th scope="col" className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">{t.konflikte.colShift}</th>
+                          <th scope="col" className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">{t.konflikte.colAbsence}</th>
+                          <th scope="col" className="text-left px-4 py-2 font-semibold text-gray-600 text-xs">{t.konflikte.colActions}</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">

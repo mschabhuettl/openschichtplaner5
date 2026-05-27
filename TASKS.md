@@ -66,8 +66,10 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [x] Charter aktualisiert: Substanz vor Coverage; Coverage gedeckelt (keine Mikro-PRs); pro Iteration ein Lib-Schritt; Epic API-Extraktion → PR #130
 - [x] Lib-Roadmap Phase 2 dispatcht & geliefert: libopenschichtplaner5#3 (Shift/LeaveType/Workplace ORM + Repos + sync) → `[LIB-DONE]` v1.2.0 auf PyPI
 - [x] Lib 1.2.0 konsumiert: `requirements.txt` >=1.2.0 + ORM-Mirror-Admin-Router (`/api/admin/orm/*`) nutzt neue Models/Repos/sync → PR (siehe Run-Log)
-- [ ] Lib-Roadmap Phase 3 dispatcht: Schedule-Modelle (MASHI/SPSHI/ABSEN) als from-app-Issue
-- [ ] Substanz-Backlog (Owner-Prio): Phase-5 UI/A11y, `mypy`-Rest, schemas/ORM-Alignment, echte Features/Bugfixes, Performance
+- [x] Lib-Roadmap Phase 3 dispatcht & geliefert: libopenschichtplaner5#5 (Schedule MASHI/SPSHI/ABSEN + date-range Repos + sync, sync_groups-FK-Fix) → `[LIB-DONE]` v1.3.0 auf PyPI
+- [x] Lib 1.3.0 konsumiert: `requirements.txt` >=1.3.0 + ORM-Mirror um Schedule-Entries erweitert (`/shift-assignments|special-shifts|absences` mit date-range) → PR (siehe Run-Log)
+- [ ] Lib-Roadmap Phase 4 dispatcht (nächster Schritt) + Defekt `sync_group_assignments` UNIQUE (5GRASG-IDs nicht eindeutig)
+- [ ] Substanz-Backlog (Owner-Prio): Phase-5 UI/A11y, schemas/ORM-Alignment, echte Features/Bugfixes, Performance (mypy = bereits clean mit --ignore-missing-imports)
 
 ## Epic — API-Extraktion (`openschichtplaner5-api`), niedrige Prio, strikt inkrementell
 Ziel: `backend/api` (routers, schemas, dependencies, cache, rate_limit, auth, DB-Wiring) analog zur Lib in ein eigenes
@@ -150,3 +152,4 @@ Frontend + Deployment. Jede Phase = eigener PR, App-CI bleibt durchgehend grün.
 - 2026-05-27 06:04 · PR #129 · Backend-Coverage: main dashboard/upcoming recurring-holiday + birthday Branches 85%→87% (letzte Coverage-Mikro-PR)
 - 2026-05-27 09:30 · PR #131 · FEATURE: Lib 1.2.0 konsumiert — requirements >=1.2.0 + ORM-Mirror-Admin-Router (`/api/admin/orm/sync|shifts|leave-types|workplaces`) nutzt neue Shift/LeaveType/Workplace-Models+Repos+sync; Integrationstest gegen DBF-Fixtures (6 Tests); Suite grün (2478)
 - 2026-05-27 10:05 · PR #132 · A11y (Phase 5): wiederverwendbarer `useFocusTrap`-Hook (Tab-Cycling ohne disabled-Controls, Escape, Fokus-Restore) + Einbindung in PhotoCropDialog (vorher 0 Dialog-A11y) & KeyboardShortcutsModal (Trap+Restore ergänzt); 9 Hook-Tests; Frontend-Suite grün (509)
+- 2026-05-27 11:20 · PR #133 · FEATURE: Lib 1.3.0 konsumiert — requirements >=1.3.0 + ORM-Mirror um Schedule-Entries erweitert (`/shift-assignments|special-shifts|absences` mit date_from/date_to/employee_id via neue date-range Repos); sync deckt jetzt 6 Tabellen; 4 neue Tests (10 gesamt); Backend-Suite grün (2482)

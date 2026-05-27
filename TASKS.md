@@ -62,6 +62,22 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 - [ ] ORM `to_dict()` SQLite/Postgres-Divergenz angleichen oder dokumentieren
 - [x] `schedule_comments.json` + `.coverage` aus Git-Tracking genommen → PR #68
 
+## Owner-Steuerung (2026-05-27)
+- [x] Charter aktualisiert: Substanz vor Coverage; Coverage gedeckelt (keine Mikro-PRs); pro Iteration ein Lib-Schritt; Epic API-Extraktion → PR #130
+- [~] Lib-Roadmap Phase 2 dispatcht: from-app-Issue libopenschichtplaner5#3 (Shift/LeaveType/Workplace ORM + Repos + sync, Release 1.2.0) — wartet auf `[LIB-DONE]`
+- [ ] Substanz-Backlog (Owner-Prio): Phase-5 UI/A11y, `mypy`-Rest, schemas/ORM-Alignment, echte Features/Bugfixes, Performance
+
+## Epic — API-Extraktion (`openschichtplaner5-api`), niedrige Prio, strikt inkrementell
+Ziel: `backend/api` (routers, schemas, dependencies, cache, rate_limit, auth, DB-Wiring) analog zur Lib in ein eigenes
+Repo `mschabhuettl/openschichtplaner5-api` herauslösen — **app-agnostisch & konfigurierbar** (kein gemountetes Frontend,
+keine App-`.env`), abhängig von `libopenschichtplaner5`. Danach konsumiert die App das Paket und behält nur Wiring +
+Frontend + Deployment. Jede Phase = eigener PR, App-CI bleibt durchgehend grün. Ziel: Lib **und** API von Drittprojekten nutzbar.
+- [ ] **P1 — Analyse/Schnittstelle:** App-Kopplungen in `backend/api` kartieren (App-`.env`, gemountetes Frontend, Pfad-/`__file__`-Annahmen, globaler State `_sessions`). Konfig-Vertrag entwerfen (Settings-Objekt/Factory `create_app(config)`); ADR in Repo.
+- [ ] **P2 — Repo-Bootstrap:** `gh repo create mschabhuettl/openschichtplaner5-api --public` (MIT). `pyproject` (dist `openschichtplaner5-api`, dep `libopenschichtplaner5`), README, LICENSE, CI wie Lib (ruff + pytest-Matrix + PyPI Trusted Publishing). Möglichst mit `git subtree split`/`filter-repo` History von `backend/api`.
+- [ ] **P3 — App-agnostisch machen:** Hardcodierte App-Annahmen hinter Config/DI ziehen (Settings statt `.env`-Direktzugriff, Frontend-Mount optional/aus, Pfade injizierbar). Eigene Tests grün.
+- [ ] **P4 — Erstes Release:** Version + Tag, PyPI-Publish (Trusted Publishing). Smoke-Test: Drittprojekt-Minimal-App via `create_app`.
+- [ ] **P5 — App umstellen:** `backend/` konsumiert `openschichtplaner5-api>=…`; lokale `api/`-Kopie entfernen, nur Wiring + Frontend + Deployment behalten. `make test`/CI grün, gut dokumentierter PR.
+
 ## Run-Log
 <!-- Eine Zeile pro abgeschlossener Iteration: YYYY-MM-DD HH:MM · PR #<nr> · <kurz> -->
 - 2026-05-26 16:17 · PR #64 · App konsumiert libopenschichtplaner5 jetzt aus PyPI (>=1.1.0); git-Build-Dep aus Dockerfile entfernt; Backend-Suite grün (2251)

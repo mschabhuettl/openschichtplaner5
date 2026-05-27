@@ -27,8 +27,11 @@ openpyxl>=3.1.0
 # repositories; 1.4.0 fixes sync_group_assignments (DBF ID is no longer the PK;
 # dedup + dangling-skip) so sync_all now runs cleanly on all 11 tables, and adds
 # the Holiday (5HOLID) + Period (5PERIO) models with their repositories and
-# sync_holidays/sync_periods — all consumed by the ORM-mirror admin router.
-libopenschichtplaner5[postgres]>=1.4.0
+# sync_holidays/sync_periods; 1.5.0 adds the time-accounting models
+# (AccountBooking/5BOOK, OvertimeEntry/5OVER, LeaveEntitlement/5LEAEN) with
+# repositories and sync (sync_all now covers 14 tables) — all consumed by the
+# ORM-mirror admin router.
+libopenschichtplaner5[postgres]>=1.5.0
 
 pytest>=7.4.0
 pytest-cov>=4.1.0

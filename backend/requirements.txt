@@ -22,9 +22,11 @@ openpyxl>=3.1.0
 
 # Core library (DBF bridge + ORM/sync), maintained in its own repo and released to
 # PyPI. Importable as `sp5lib`. The [postgres] extra pulls psycopg2-binary.
-# 1.2.0 adds the Shift/LeaveType/Workplace ORM models + repositories and extends
-# sync_all to mirror them — consumed by the ORM-mirror admin router.
-libopenschichtplaner5[postgres]>=1.2.0
+# 1.2.0 adds the Shift/LeaveType/Workplace ORM models + repositories; 1.3.0 adds
+# the schedule-entry models (ShiftAssignment/SpecialShift/Absence) with date-range
+# repositories and makes sync_groups dangling-FK tolerant, so sync_all is now safe
+# on dirty data — all consumed by the ORM-mirror admin router.
+libopenschichtplaner5[postgres]>=1.3.0
 
 pytest>=7.4.0
 pytest-cov>=4.1.0

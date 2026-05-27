@@ -640,13 +640,20 @@ The DBF files remain the **single source of truth** — these endpoints expose a
 mirror that is materialized from the DBF files on demand and stored in its own
 `sp5_orm.db` next to the DBF data directory.
 
-The mirror is backed by the `libopenschichtplaner5` ORM layer (consumed at `>=1.3.0`)
+The mirror is backed by the `libopenschichtplaner5` ORM layer (consumed at `>=1.6.0`)
 and works identically on SQLite and PostgreSQL. It is the gradual **DBF → ORM migration
-path**: additive, never touching the live DBF read/write flows. Two layers are mirrored:
+path**: additive, never touching the live DBF read/write flows. The read mirror now
+covers the **full DBF schema (19 tables)**, exposed across five layers:
 
 - **Master-data definitions** — shifts, leave types, workplaces (lib 1.2.0).
 - **Schedule entries** — shift assignments (`5MASHI`), special shifts (`5SPSHI`) and
   absences (`5ABSEN`) with date-range queries (lib 1.3.0).
+- **Calendar data** — holidays (`5HOLID`) and periods (`5PERIO`) (lib 1.4.0).
+- **Time accounting** — bookings (`5BOOK`), overtime (`5OVER`) and leave entitlements
+  (`5LEAEN`) (lib 1.5.0).
+- **Planning data** — shift/special staffing demand (`5SHDEM`/`5SPDEM`), cycles and
+  cycle assignments (`5CYCLE`/`5CYASS`) and deployment restrictions (`5RESTR`)
+  (lib 1.6.0).
 
 **Authentication:** all endpoints require an **admin** session. Pass the admin session
 token in the `X-Auth-Token` header (the same token issued by `/api/auth/login`).
@@ -663,28 +670,44 @@ export ADMIN_TOKEN="eyJhb..."
 
 ### Sync the ORM mirror
 
-Upserts the DBF master-data definition tables (shifts, leave types, workplaces) **and**
-the schedule-entry tables (shift assignments, special shifts, absences) into the mirror
+Delegates to the library's `sync_all`, which upserts **all 19 supported tables** —
+employees, groups, group assignments, shifts, leave types, workplaces, shift assignments,
+special shifts, absences, holidays, periods, bookings, overtime, leave entitlements, shift
+demands, special demands, cycles, cycle assignments and restrictions — into the mirror
 store, returning per-table row counts. Safe to call repeatedly — the library's sync uses
-upsert semantics keyed by the DBF ID, and rows with invalid dates are skipped.
+upsert semantics keyed by the DBF ID, rows with invalid dates are skipped, and dangling
+group assignments are deduped/skipped, so it runs cleanly on dirty DBF data.
 
 ```bash
 curl -s -X POST http://localhost:8000/api/admin/orm/sync \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
-**Response:**
+**Response (excerpt):**
 
 ```json
 {
   "ok": true,
   "synced": {
+    "employees": 42,
+    "groups": 6,
+    "group_assignments": 58,
     "shifts": 12,
     "leave_types": 8,
     "workplaces": 5,
     "shift_assignments": 1840,
     "special_shifts": 14,
-    "absences": 263
+    "absences": 263,
+    "holidays": 24,
+    "periods": 4,
+    "bookings": 96,
+    "overtime": 31,
+    "leave_entitlements": 42,
+    "shift_demands": 84,
+    "special_demands": 7,
+    "cycles": 3,
+    "cycle_assignments": 18,
+    "restrictions": 9
   }
 }
 ```
@@ -825,6 +848,179 @@ curl -s "http://localhost:8000/api/admin/orm/absences?date_from=2026-03-01&date_
   }
 ]
 ```
+
+---
+
+### List holidays
+
+Public holidays (`5HOLID`).
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/holidays?year=2026" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+| Query parameter | Type | Default | Description |
+|-----------------|------|---------|-------------|
+| `year` | int | — | Restrict to this calendar year, plus all recurring holidays |
+
+Omitting `year` returns every holiday. Returns an array of DBF-shaped holiday dicts.
+
+---
+
+### List periods
+
+Accounting / planning periods (`5PERIO`). Takes no query parameters.
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/periods" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+Returns an array of DBF-shaped period dicts.
+
+---
+
+### List bookings
+
+Manual account / time bookings (`5BOOK`), filterable by date range and/or employee.
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/bookings?date_from=2026-03-01&date_to=2026-03-31&employee_id=1" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+| Query parameter | Type | Default | Description |
+|-----------------|------|---------|-------------|
+| `date_from` | ISO date | — | Inclusive lower bound (`YYYY-MM-DD`) |
+| `date_to` | ISO date | — | Inclusive upper bound (`YYYY-MM-DD`) |
+| `employee_id` | int | — | Filter by employee ID |
+
+All filters are optional; omitting them returns every row.
+
+---
+
+### List overtime
+
+Manual overtime adjustments (`5OVER`), filterable by date range and/or employee. Accepts
+the same `date_from`, `date_to` and `employee_id` query parameters as
+[bookings](#list-bookings).
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/overtime?date_from=2026-03-01&date_to=2026-03-31" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+Returns an array of DBF-shaped overtime dicts.
+
+---
+
+### List leave entitlements
+
+Annual leave entitlements (`5LEAEN`), filterable by year and/or employee.
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/leave-entitlements?year=2026&employee_id=1" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+| Query parameter | Type | Default | Description |
+|-----------------|------|---------|-------------|
+| `year` | int | — | Filter by entitlement year |
+| `employee_id` | int | — | Filter by employee ID |
+
+All filters are optional; omitting them returns every row.
+
+---
+
+### List shift demands
+
+Per-weekday staffing demand (`5SHDEM`), filterable by shift, weekday and/or group.
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/shift-demands?shift_id=5&weekday=0&group_id=2" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+| Query parameter | Type | Default | Description |
+|-----------------|------|---------|-------------|
+| `shift_id` | int | — | Filter by shift ID |
+| `weekday` | int | — | Filter by weekday (`0`=Mon … `6`=Sun) |
+| `group_id` | int | — | Filter by group ID |
+
+All filters are optional; omitting them returns every row.
+
+---
+
+### List special demands
+
+Date-specific staffing demand (`5SPDEM`), filterable by date range and/or shift.
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/special-demands?date_from=2026-03-01&date_to=2026-03-31&shift_id=5" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+| Query parameter | Type | Default | Description |
+|-----------------|------|---------|-------------|
+| `date_from` | ISO date | — | Inclusive lower bound (`YYYY-MM-DD`) |
+| `date_to` | ISO date | — | Inclusive upper bound (`YYYY-MM-DD`) |
+| `shift_id` | int | — | Filter by shift ID |
+
+All filters are optional; omitting them returns every row.
+
+---
+
+### List cycles
+
+Rotation / shift-cycle definitions (`5CYCLE`).
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/cycles" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+| Query parameter | Type | Default | Description |
+|-----------------|------|---------|-------------|
+| `include_hidden` | bool | `false` | Also return rows flagged as hidden |
+
+Returns an array of DBF-shaped cycle dicts.
+
+---
+
+### List cycle assignments
+
+Employee ↔ cycle assignments (`5CYASS`), filterable by employee and/or cycle.
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/cycle-assignments?employee_id=1&cycle_id=2" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+| Query parameter | Type | Default | Description |
+|-----------------|------|---------|-------------|
+| `employee_id` | int | — | Filter by employee ID |
+| `cycle_id` | int | — | Filter by cycle ID |
+
+All filters are optional; omitting them returns every row.
+
+---
+
+### List restrictions
+
+Deployment restrictions (`5RESTR`), filterable by employee and/or shift.
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/restrictions?employee_id=1&shift_id=5" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+| Query parameter | Type | Default | Description |
+|-----------------|------|---------|-------------|
+| `employee_id` | int | — | Filter by employee ID |
+| `shift_id` | int | — | Filter by shift ID |
+
+All filters are optional; omitting them returns every row.
 
 ---
 

@@ -498,6 +498,19 @@ export interface RecurringShiftGenerateResult {
   message?: string;
 }
 
+// ─── ORM Mirror Types (Admin) ──────────────────────────────
+export interface OrmMirrorStatus {
+  mirror_db_exists: boolean;
+  table_count: number;
+  total_rows: number;
+  counts: Record<string, number>;
+}
+
+export interface OrmMirrorSyncResult {
+  ok: boolean;
+  synced: Record<string, number>;
+}
+
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 // ─── API Compatibility Check ───────────────────────────────────
@@ -1990,6 +2003,12 @@ export const api = {
   // ─── Leave Entitlements Write ──────────────────────────────
   createLeaveEntitlement: (data: { employee_id: number; year: number; leave_type_id: number; entitlement: number; carry_forward?: number }) =>
     postJSON<unknown>('/api/v1/leave-entitlements', data),
+
+  // ─── Admin: ORM Mirror ─────────────────────────────────────
+  getOrmMirrorStatus: () =>
+    fetchJSON<OrmMirrorStatus>('/api/admin/orm/status'),
+  syncOrmMirror: () =>
+    postJSON<OrmMirrorSyncResult>('/api/admin/orm/sync', {}),
 
   // ─── Admin: Compact / Import ───────────────────────────────
   compactData: () =>

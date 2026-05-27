@@ -64,7 +64,9 @@ Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] 
 
 ## Owner-Steuerung (2026-05-27)
 - [x] Charter aktualisiert: Substanz vor Coverage; Coverage gedeckelt (keine Mikro-PRs); pro Iteration ein Lib-Schritt; Epic API-Extraktion → PR #130
-- [~] Lib-Roadmap Phase 2 dispatcht: from-app-Issue libopenschichtplaner5#3 (Shift/LeaveType/Workplace ORM + Repos + sync, Release 1.2.0) — wartet auf `[LIB-DONE]`
+- [x] Lib-Roadmap Phase 2 dispatcht & geliefert: libopenschichtplaner5#3 (Shift/LeaveType/Workplace ORM + Repos + sync) → `[LIB-DONE]` v1.2.0 auf PyPI
+- [x] Lib 1.2.0 konsumiert: `requirements.txt` >=1.2.0 + ORM-Mirror-Admin-Router (`/api/admin/orm/*`) nutzt neue Models/Repos/sync → PR (siehe Run-Log)
+- [ ] Lib-Roadmap Phase 3 dispatcht: Schedule-Modelle (MASHI/SPSHI/ABSEN) als from-app-Issue
 - [ ] Substanz-Backlog (Owner-Prio): Phase-5 UI/A11y, `mypy`-Rest, schemas/ORM-Alignment, echte Features/Bugfixes, Performance
 
 ## Epic — API-Extraktion (`openschichtplaner5-api`), niedrige Prio, strikt inkrementell
@@ -146,3 +148,4 @@ Frontend + Deployment. Jede Phase = eigener PR, App-CI bleibt durchgehend grün.
 - 2026-05-27 05:40 · PR #127 · Backend-Coverage: main globaler Exception-Handler (sanitisierte 500) 78%→79% (1 Test)
 - 2026-05-27 05:52 · PR #128 · Backend-Coverage: main Dashboard-Endpoints (summary/today/stats/upcoming) 79%→85% (4 Tests)
 - 2026-05-27 06:04 · PR #129 · Backend-Coverage: main dashboard/upcoming recurring-holiday + birthday Branches 85%→87% (letzte Coverage-Mikro-PR)
+- 2026-05-27 09:30 · PR #131 · FEATURE: Lib 1.2.0 konsumiert — requirements >=1.2.0 + ORM-Mirror-Admin-Router (`/api/admin/orm/sync|shifts|leave-types|workplaces`) nutzt neue Shift/LeaveType/Workplace-Models+Repos+sync; Integrationstest gegen DBF-Fixtures (6 Tests); Suite grün (2478)

@@ -25,8 +25,8 @@ Authentication is done via a `Bearer` token in the `Authorization` header.
 4. [Schedule](#schedule)
 5. [Reports & Export](#reports--export)
 6. [Shift Wishes](#shift-wishes)
-7. [Health & Status](#health--status)
-6. [Health & Status](#health--status)
+7. [ORM Mirror (Admin)](#orm-mirror-admin)
+8. [Health & Status](#health--status)
 
 ---
 
@@ -629,6 +629,201 @@ curl -s -X POST http://localhost:8000/api/self/wishes \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"date": "2026-04-15", "wish_type": "free", "note": "Arzttermin"}'
+```
+
+---
+
+## ORM Mirror (Admin)
+
+A **read-only, admin-only** projection of the DBF data, served under `/api/admin/orm`.
+The DBF files remain the **single source of truth** — these endpoints expose a queryable
+mirror that is materialized from the DBF files on demand and stored in its own
+`sp5_orm.db` next to the DBF data directory.
+
+The mirror is backed by the `libopenschichtplaner5` ORM layer (consumed at `>=1.3.0`)
+and works identically on SQLite and PostgreSQL. It is the gradual **DBF → ORM migration
+path**: additive, never touching the live DBF read/write flows. Two layers are mirrored:
+
+- **Master-data definitions** — shifts, leave types, workplaces (lib 1.2.0).
+- **Schedule entries** — shift assignments (`5MASHI`), special shifts (`5SPSHI`) and
+  absences (`5ABSEN`) with date-range queries (lib 1.3.0).
+
+**Authentication:** all endpoints require an **admin** session. Pass the admin session
+token in the `X-Auth-Token` header (the same token issued by `/api/auth/login`).
+Non-admin or unauthenticated callers receive `401`/`403`.
+
+```bash
+export ADMIN_TOKEN="eyJhb..."
+```
+
+> All list endpoints return DBF-shaped dicts — field names match the FoxPro columns
+> (e.g. `ID`, `NAME`, `SHORTNAME`, `DATE`, `EMPLOYEEID`, `SHIFTID`).
+
+---
+
+### Sync the ORM mirror
+
+Upserts the DBF master-data definition tables (shifts, leave types, workplaces) **and**
+the schedule-entry tables (shift assignments, special shifts, absences) into the mirror
+store, returning per-table row counts. Safe to call repeatedly — the library's sync uses
+upsert semantics keyed by the DBF ID, and rows with invalid dates are skipped.
+
+```bash
+curl -s -X POST http://localhost:8000/api/admin/orm/sync \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "ok": true,
+  "synced": {
+    "shifts": 12,
+    "leave_types": 8,
+    "workplaces": 5,
+    "shift_assignments": 1840,
+    "special_shifts": 14,
+    "absences": 263
+  }
+}
+```
+
+---
+
+### List shifts
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/shifts" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+| Query parameter | Type | Default | Description |
+|-----------------|------|---------|-------------|
+| `include_hidden` | bool | `false` | Also return rows flagged as hidden |
+
+**Response (excerpt):**
+
+```json
+[
+  {
+    "ID": 5,
+    "NAME": "Frühschicht",
+    "SHORTNAME": "F"
+  }
+]
+```
+
+---
+
+### List leave types
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/leave-types" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+| Query parameter | Type | Default | Description |
+|-----------------|------|---------|-------------|
+| `include_hidden` | bool | `false` | Also return rows flagged as hidden |
+
+Returns an array of DBF-shaped leave-type dicts.
+
+---
+
+### List workplaces
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/workplaces" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+| Query parameter | Type | Default | Description |
+|-----------------|------|---------|-------------|
+| `include_hidden` | bool | `false` | Also return rows flagged as hidden |
+
+**Response (excerpt):**
+
+```json
+[
+  {
+    "ID": 1,
+    "NAME": "Empfang",
+    "SHORTNAME": "EMP"
+  }
+]
+```
+
+---
+
+### List shift assignments
+
+Regular schedule entries (`5MASHI`), filterable by date range and/or employee.
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/shift-assignments?date_from=2026-03-01&date_to=2026-03-31&employee_id=1" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+| Query parameter | Type | Default | Description |
+|-----------------|------|---------|-------------|
+| `date_from` | ISO date | — | Inclusive lower bound (`YYYY-MM-DD`) |
+| `date_to` | ISO date | — | Inclusive upper bound (`YYYY-MM-DD`) |
+| `employee_id` | int | — | Filter by employee ID |
+
+All filters are optional; omitting them returns every row.
+
+**Response (excerpt):**
+
+```json
+[
+  {
+    "ID": 101,
+    "DATE": "2026-03-03",
+    "EMPLOYEEID": 1,
+    "SHIFTID": 5
+  }
+]
+```
+
+---
+
+### List special shifts
+
+Special / one-off shifts (`5SPSHI`), filterable by date range and/or employee. Accepts
+the same `date_from`, `date_to` and `employee_id` query parameters as
+[shift assignments](#list-shift-assignments).
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/special-shifts?date_from=2026-03-01&date_to=2026-03-31" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+Returns an array of DBF-shaped special-shift dicts.
+
+---
+
+### List absences
+
+Absence / leave entries (`5ABSEN`), filterable by date range and/or employee. Accepts
+the same `date_from`, `date_to` and `employee_id` query parameters as
+[shift assignments](#list-shift-assignments).
+
+```bash
+curl -s "http://localhost:8000/api/admin/orm/absences?date_from=2026-03-01&date_to=2026-03-31&employee_id=1" \
+  -H "X-Auth-Token: $ADMIN_TOKEN"
+```
+
+**Response (excerpt):**
+
+```json
+[
+  {
+    "ID": 77,
+    "DATE": "2026-03-15",
+    "EMPLOYEEID": 1
+  }
+]
 ```
 
 ---

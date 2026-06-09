@@ -187,7 +187,7 @@ All environment variables with explanations: → [`backend/.env.example`](backen
 Most important required fields:
 
 ```env
-SP5_DB_PATH=/app/sp5_db/Daten   # Path to DBF files in the container
+SP5_DB_PATH=/app/data          # Path to DBF files in the container (default)
 SECRET_KEY=<openssl rand -hex 32>  # JWT secret — MUST be changed!
 ALLOWED_ORIGINS=https://my-domain.com  # Allow only your own domain
 SP5_HSTS=true    # HTTPS-only — only enable with TLS reverse proxy!

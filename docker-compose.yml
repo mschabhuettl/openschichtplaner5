@@ -8,8 +8,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      # Persistenter Named-Volume für Datenbankdaten
-      - sp5_data:/app/sp5_db
+      # Persistenter Named-Volume für Datenbankdaten (SP5_DB_PATH=/app/data,
+      # Default aus dem Image — DBF-Dateien liegen im Volume-Root)
+      - sp5_data:/app/data
       # Logs auf dem Host einsehbar (optional: auskommentieren)
       - ./logs:/app/logs
       # Mutabler Laufzeit-State unter SP5_BACKEND_DIR — das Root-FS ist
@@ -51,7 +52,7 @@ services:
       - "8000:8000"
       - "5173:5173"
     volumes:
-      - sp5_data:/app/sp5_db
+      - sp5_data:/app/data
       - ./logs:/app/logs
       # Quellcode live einbinden für Hot-Reload
       - ./backend:/app/backend

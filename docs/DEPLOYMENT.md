@@ -84,14 +84,15 @@ DEBUG=false
 
 ### 3. Mount your DBF database files
 
-Add a bind mount to `docker-compose.prod.yml` in the `sp5` service:
+Either copy your `.DBF` files into the `sp5_data` volume (mounted at
+`/app/data`, the `SP5_DB_PATH` default), or bind-mount your DBF directory
+**in place of** the `sp5_data` volume in the `sp5` service:
 
 ```yaml
 volumes:
-  - sp5_data:/app/data
+  # - sp5_data:/app/data                  # ← replace this line …
+  - /path/to/sp5/Daten:/app/data:rw       # ← … with your DBF files
   - sp5_logs:/app/logs
-  - frontend_dist:/app/frontend/dist:ro
-  - /path/to/sp5/Daten:/app/sp5_db/Daten:rw   # ← your DBF files
 ```
 
 ### 4. Start the application

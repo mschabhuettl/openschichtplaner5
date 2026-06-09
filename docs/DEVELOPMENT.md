@@ -244,7 +244,7 @@ openschichtplaner5/
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `SP5_DB_PATH` | *(required)* | Absolute path to the directory containing `.DBF` files |
+| `SP5_DB_PATH` | `../sp5_db/Daten` neben dem Repo (Docker: `/app/data`) | Path to the directory containing `.DBF` files |
 | `SECRET_KEY` | *(required in prod)* | JWT signing key — use `openssl rand -hex 32` |
 | `SP5_DEV_MODE` | `false` | `true` enables login without password (dev only!) |
 | `TOKEN_EXPIRE_HOURS` | `8` | Session token lifetime in hours |

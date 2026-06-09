@@ -174,6 +174,13 @@ PORT="${PORT:-8000}"
 HOST="${HOST:-0.0.0.0}"
 DEBUG="${DEBUG:-false}"
 SP5_DB_PATH="${SP5_DB_PATH:-$REPO_DIR/../sp5_db/Daten}"
+# Relative Pfade konsistent zum Repo-Root auflösen (nicht zum cwd des
+# Backends) und exportieren, damit sp5api/sp5lib denselben Pfad sehen
+case "$SP5_DB_PATH" in
+  /*) ;;
+  *) SP5_DB_PATH="$(python3 -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "$REPO_DIR/$SP5_DB_PATH")" ;;
+esac
+export SP5_DB_PATH
 
 info "Port:  $PORT"
 info "Host:  $HOST"

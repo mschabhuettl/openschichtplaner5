@@ -10,6 +10,23 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- **`SP5_DB_PATH` defaults unified.** Four places disagreed about where the DBF
+  database lives: `.env.example` shipped a cwd-relative `../sp5_db/Daten`
+  (which resolved differently under start.sh than its own fallback and was
+  plain broken in Docker), the default compose mounted the data volume at
+  `/app/sp5_db` while the image ENV and the prod compose said `/app/data`, and
+  `docs/DEPLOYMENT.md` advised a bind mount at a path the configured
+  `SP5_DB_PATH` never read. Now: Docker uses **`/app/data`** everywhere (image
+  ENV, both compose files, `.env.docker`, docs — DBF files in the `sp5_data`
+  volume root, working out of the box with no `.env` entry); locally the
+  default is `../sp5_db/Daten` next to the repo, and start.sh resolves
+  relative values against the repo root (cwd-independent) and exports the
+  result. `openschichtplaner5-api` 1.1.3 additionally publishes its default
+  into the environment so `sp5lib.auto_migrate` and the admin backup endpoints
+  always see the same path as the API.
+  **Migration (default compose only):** if your `.env` sets
+  `SP5_DB_PATH=/app/sp5_db/...`, change it to `/app/data/...` — the volume
+  content itself is unchanged.
 - **Docker: runtime state was unwritable.** `/app/backend` was root-owned and both
   compose files run the container with `read_only: true`, so every JSON-state
   write (changelog, notification settings, webhooks, availability …), photo

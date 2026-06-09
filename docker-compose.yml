@@ -12,6 +12,12 @@ services:
       - sp5_data:/app/sp5_db
       # Logs auf dem Host einsehbar (optional: auskommentieren)
       - ./logs:/app/logs
+      # Mutabler Laufzeit-State unter SP5_BACKEND_DIR — das Root-FS ist
+      # read_only, diese Volumes bleiben beschreibbar (JSON-Stores,
+      # Foto-Uploads, Auto-Migrate-Backups)
+      - sp5_state:/app/backend/data
+      - sp5_api_state:/app/backend/api
+      - sp5_backups:/app/backend/backups
     env_file:
       - .env
     restart: unless-stopped
@@ -76,4 +82,10 @@ services:
 # ------------------------------------------------------------------------------
 volumes:
   sp5_data:
+    driver: local
+  sp5_state:
+    driver: local
+  sp5_api_state:
+    driver: local
+  sp5_backups:
     driver: local

@@ -293,7 +293,9 @@ make update
 
 ```bash
 make backup
-# → ./backups/sp5_db_<timestamp>.tar.gz
+# → ./backups/sp5_data_<timestamp>.tar.gz       (DBF/SQLite database)
+# → ./backups/sp5_state_<timestamp>.tar.gz      (JSON runtime state: settings, webhooks, changelog …)
+# → ./backups/sp5_api_state_<timestamp>.tar.gz  (skills/availability + employee photos)
 ```
 
 ### Manual volume backup

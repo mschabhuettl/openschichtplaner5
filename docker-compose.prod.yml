@@ -88,6 +88,12 @@ services:
       - sp5_data:/app/data
       # Application logs
       - sp5_logs:/app/logs
+      # Mutable runtime state under SP5_BACKEND_DIR — the root FS is
+      # read_only, these volumes stay writable (JSON stores, photo
+      # uploads, auto-migrate backups)
+      - sp5_state:/app/backend/data
+      - sp5_api_state:/app/backend/api
+      - sp5_backups:/app/backend/backups
     env_file:
       - .env
     # Production overrides
@@ -153,6 +159,23 @@ volumes:
     driver: local
     labels:
       com.openschichtplaner5.volume: "logs"
+
+  sp5_state:
+    driver: local
+    labels:
+      com.openschichtplaner5.volume: "runtime-state"
+      com.openschichtplaner5.backup: "required"
+
+  sp5_api_state:
+    driver: local
+    labels:
+      com.openschichtplaner5.volume: "runtime-state"
+      com.openschichtplaner5.backup: "required"
+
+  sp5_backups:
+    driver: local
+    labels:
+      com.openschichtplaner5.volume: "migration-backups"
 
   frontend_dist:
     driver: local

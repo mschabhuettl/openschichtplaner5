@@ -7,7 +7,7 @@ COPY frontend/ ./frontend/
 RUN cd frontend && npm run build
 
 # Stage 2: Production image
-FROM python:3.11-slim
+FROM python:3.12-slim
 WORKDIR /app
 
 # Install curl for the Docker HEALTHCHECK
@@ -23,8 +23,12 @@ RUN pip install --no-cache-dir -r backend/requirements.txt
 COPY backend/ ./backend/
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 
-# Mount point für DB — owned by app user
-RUN mkdir -p /app/data /app/logs && chown -R sp5:sp5 /app/data /app/logs
+# Mount point für DB — owned by app user. Ebenso der mutable Laufzeit-State
+# unter SP5_BACKEND_DIR (data/, api/data + api/uploads + api/*.json,
+# backups/ für Auto-Migrate) — die Compose-Dateien mounten dafür Named
+# Volumes, die beim ersten Start mit diesen (sp5-owned) Seeds befüllt werden.
+RUN mkdir -p /app/data /app/logs /app/sp5_db /app/backend/backups && \
+    chown -R sp5:sp5 /app/data /app/logs /app/sp5_db /app/backend/data /app/backend/api /app/backend/backups
 
 VOLUME ["/app/data"]
 ENV SP5_DB_PATH=/app/data

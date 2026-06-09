@@ -9,6 +9,27 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- **Docker: runtime state was unwritable.** `/app/backend` was root-owned and both
+  compose files run the container with `read_only: true`, so every JSON-state
+  write (changelog, notification settings, webhooks, availability …), photo
+  uploads and the auto-migrate backup directory failed with `EACCES`/`EROFS` —
+  mutating endpoints could 500 after the DBF write had already succeeded. The
+  mutable paths under `SP5_BACKEND_DIR` (`backend/data`, `backend/api`,
+  `backend/backups`) are now `sp5`-owned in the image and mounted as named
+  volumes (`sp5_state`, `sp5_api_state`, `sp5_backups`) in both compose files —
+  seeded from the image on first start, persistent across container recreation,
+  while the root FS stays read-only. The DB-volume mountpoint `/app/sp5_db` is
+  now also created `sp5`-owned (the startup auto-backup writes next to the DBF
+  data). `make backup` archives the new state volumes alongside the database.
+- **Docker: image was unstartable on Python 3.11.** The API uses PEP-695
+  generics (`class PaginatedResponse[T]`, since the pagination feature), which
+  need Python 3.12 — the container crashed on import. Base image bumped
+  `python:3.11-slim` → `python:3.12-slim` (matches CI and the ruff target);
+  `openschichtplaner5-api` 1.1.2 declares `requires-python >=3.12`.
+  `backend/.venv` is now dockerignored so local builds don't bake the dev venv
+  into the image.
+
 ### Changed
 - **API extracted into its own repo:** the REST API (formerly `backend/api/`) now
   lives in [openschichtplaner5-api](https://github.com/mschabhuettl/openschichtplaner5-api)

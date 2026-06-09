@@ -100,14 +100,17 @@ update: ## Git pull + Docker-Neustart (Rolling Update)
 	docker compose up -d --build
 	@echo "✓ Update abgeschlossen"
 
-backup: ## Datenbank-Backup erstellen (Volume → lokales Archiv)
+backup: ## Backup erstellen (DB- + State-Volumes → lokale Archive)
 	@BACKUP_DIR="./backups"; \
 	 TIMESTAMP=$$(date +%Y%m%d_%H%M%S); \
-	 BACKUP_FILE="$$BACKUP_DIR/sp5_db_$$TIMESTAMP.tar.gz"; \
 	 mkdir -p "$$BACKUP_DIR"; \
-	 echo "▶ Erstelle Backup → $$BACKUP_FILE"; \
-	 docker run --rm \
-	   -v openschichtplaner5_sp5_data:/data:ro \
-	   -v "$$(pwd)/$$BACKUP_DIR":/backup \
-	   alpine tar czf "/backup/sp5_db_$$TIMESTAMP.tar.gz" -C /data .; \
-	 echo "✓ Backup erstellt: $$BACKUP_FILE"
+	 for VOL in sp5_data sp5_state sp5_api_state; do \
+	   FILE="$$BACKUP_DIR/$${VOL}_$$TIMESTAMP.tar.gz"; \
+	   echo "▶ Erstelle Backup → $$FILE"; \
+	   docker run --rm \
+	     -v openschichtplaner5_$$VOL:/data:ro \
+	     -v "$$(pwd)/$$BACKUP_DIR":/backup \
+	     alpine tar czf "/backup/$${VOL}_$$TIMESTAMP.tar.gz" -C /data . \
+	     || echo "  (Volume openschichtplaner5_$$VOL existiert noch nicht — übersprungen)"; \
+	 done; \
+	 echo "✓ Backups erstellt in $$BACKUP_DIR"

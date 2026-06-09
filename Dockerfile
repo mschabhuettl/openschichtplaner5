@@ -18,9 +18,7 @@ RUN groupadd --gid 1001 sp5 && \
     useradd --uid 1001 --gid sp5 --shell /bin/bash --create-home sp5
 
 COPY backend/requirements.txt ./backend/
-RUN apt-get update && apt-get install -y --no-install-recommends git && \
-    pip install --no-cache-dir -r backend/requirements.txt && \
-    apt-get purge -y git && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
+RUN pip install --no-cache-dir -r backend/requirements.txt
 
 COPY backend/ ./backend/
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist

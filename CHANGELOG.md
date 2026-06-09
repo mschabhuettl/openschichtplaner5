@@ -13,7 +13,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **API extracted into its own repo:** the REST API (formerly `backend/api/`) now
   lives in [openschichtplaner5-api](https://github.com/mschabhuettl/openschichtplaner5-api)
   — extracted with full git history (`git filter-repo`), packaged as
-  `openschichtplaner5-api`, importable as **`sp5api`** (mirroring
+  `openschichtplaner5-api` (on PyPI), importable as **`sp5api`** (mirroring
   `libopenschichtplaner5` → `sp5lib`). The app consumes it via
   `backend/requirements.txt`; the backend test suite moved with it. The ASGI
   entrypoint is now `sp5api.main:app` (start.sh, Dockerfile, CI updated);

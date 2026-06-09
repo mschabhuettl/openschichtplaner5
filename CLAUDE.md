@@ -9,7 +9,7 @@ Three repos; this one is the app shell (frontend + deployment + runtime state):
 - **REST API** = external package [`openschichtplaner5-api`](https://github.com/mschabhuettl/openschichtplaner5-api), importable as **`sp5api`** (`main.py` ASGI entrypoint `sp5api.main:app`, `routers/` one module per domain, `schemas.py`, `dependencies.py`, …). Its pytest suite lives in that repo. Develop locally via `make dev-link`.
 - **Core library** = external package [`libopenschichtplaner5`](https://github.com/mschabhuettl/libopenschichtplaner5), importable as **`sp5lib`** (DBF bridge, DB abstraction, ORM/sync, email, auto-migrate).
 - **`backend/`** — no Python app code anymore; holds what the packages resolve via `SP5_BACKEND_DIR`:
-  - `alembic/` — DB migrations (run by sp5lib auto-migrate). `data/` + `api/data` + `api/uploads` — JSON-backed runtime state. `fixtures/` — DBF fixture data (CI e2e seed). `requirements.txt` — declares both packages (API via git ref, library via PyPI).
+  - `alembic/` — DB migrations (run by sp5lib auto-migrate). `data/` + `api/data` + `api/uploads` — JSON-backed runtime state. `fixtures/` — DBF fixture data (CI e2e seed). `requirements.txt` — declares both packages (PyPI: `openschichtplaner5-api`, `libopenschichtplaner5`).
   - **Dual DB backend:** SQLite (default/dev) or PostgreSQL (prod, via `psycopg2`); `db_factory.py` selects.
   - **Auth/security:** bcrypt password hashing, 2FA, JWT tokens, login rate-limiting and brute-force lockout.
 - **`frontend/`** — React 18 + TypeScript 5 + Vite + Tailwind, with `react-router-dom` and `recharts`.

@@ -10,6 +10,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Fixed
+- **Removed the dead root `tests/test_thread_safety.py`.** It still imported
+  `backend.sp5lib` — broken since the library extraction (#61) — and was
+  referenced by no runner (neither Makefile nor CI). The tests cover sp5lib
+  internals (DBF-cache integrity and lock reentrancy under concurrent load)
+  and now live in the
+  [libopenschichtplaner5](https://github.com/mschabhuettl/libopenschichtplaner5)
+  test suite, rewritten against the installed package and run by that repo's CI.
 - **`SP5_DB_PATH` defaults unified.** Four places disagreed about where the DBF
   database lives: `.env.example` shipped a cwd-relative `../sp5_db/Daten`
   (which resolved differently under start.sh than its own fallback and was

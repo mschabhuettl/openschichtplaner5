@@ -4,12 +4,12 @@ Open-source, browser-based **shift-planning** app — a drop-in replacement for 
 
 ## Architecture
 
-Monorepo with two halves plus Docker orchestration:
+Three repos; this one is the app shell (frontend + deployment + runtime state):
 
-- **`backend/`** — FastAPI + SQLAlchemy 2.0 + Alembic, serves the app on `http://localhost:8000`.
-  - `api/` — FastAPI app: `main.py` (entrypoint, mounts routers + built frontend), `routers/` (one module per domain: `auth`, `employees`, `absences`, `schedule`, `reports`, `notifications`, `availability`, `overtime`, `qualification_matrix`, `recurring_shifts`, `ical`, `webhooks`, …), `schemas.py` (Pydantic), `dependencies.py`, `cache.py`, `rate_limit_store.py`.
-  - `sp5lib/` — core library: `dbf_reader.py` / `dbf_writer.py` (the DBF bridge), `database.py` / `pg_database.py` / `sqlite_adapter.py` / `db_factory.py` (DB abstraction), `orm/` (`models.py` for SQLite, `models_pg.py` for Postgres, `repository.py`, `sync.py`), `email_service.py`, `auto_migrate.py`.
-  - `alembic/` — DB migrations. `data/` — JSON-backed settings (skills, wishes, comments, notification settings).
+- **REST API** = external package [`openschichtplaner5-api`](https://github.com/mschabhuettl/openschichtplaner5-api), importable as **`sp5api`** (`main.py` ASGI entrypoint `sp5api.main:app`, `routers/` one module per domain, `schemas.py`, `dependencies.py`, …). Its pytest suite lives in that repo. Develop locally via `make dev-link`.
+- **Core library** = external package [`libopenschichtplaner5`](https://github.com/mschabhuettl/libopenschichtplaner5), importable as **`sp5lib`** (DBF bridge, DB abstraction, ORM/sync, email, auto-migrate).
+- **`backend/`** — no Python app code anymore; holds what the packages resolve via `SP5_BACKEND_DIR`:
+  - `alembic/` — DB migrations (run by sp5lib auto-migrate). `data/` + `api/data` + `api/uploads` — JSON-backed runtime state. `fixtures/` — DBF fixture data (CI e2e seed). `requirements.txt` — declares both packages (API via git ref, library via PyPI).
   - **Dual DB backend:** SQLite (default/dev) or PostgreSQL (prod, via `psycopg2`); `db_factory.py` selects.
   - **Auth/security:** bcrypt password hashing, 2FA, JWT tokens, login rate-limiting and brute-force lockout.
 - **`frontend/`** — React 18 + TypeScript 5 + Vite + Tailwind, with `react-router-dom` and `recharts`.
@@ -22,19 +22,20 @@ Monorepo with two halves plus Docker orchestration:
 |---|---|
 | `make dev` | Local run via `start.sh` → backend + frontend on `:8000` |
 | `make stop` | Stop the local backend (`start.sh --stop`) |
-| `make test` | Backend `pytest` + frontend `vitest` + Playwright e2e |
+| `make test` | Frontend `vitest` + Playwright e2e (backend pytest lives in the API repo) |
 | `make lint` | `ruff check` + `mypy` (backend) + `eslint` (frontend) |
+| `make dev-link` | Editable installs of `../libopenschichtplaner5` + `../openschichtplaner5-api` into `backend/.venv` |
 | `make build` | Build the frontend bundle |
 | `make logs` | `tail -f` the backend log |
 | `make docker` / `make docker-dev` / `make prod` / `make prod-secure` | Docker variants |
 | `make backup` | Snapshot the DB volume to `./backups` |
 
 Frontend-only (in `frontend/`): `npm run dev`, `npm run lint`, `npm run test`, `npm run test:e2e`, `npm run build`.
-Backend tests directly: `cd backend && python3 -m pytest tests/ -v` (pytest `asyncio_mode = auto`).
+Backend tests: in the API repo — `cd ../openschichtplaner5-api && pytest` (pytest `asyncio_mode = auto`).
 
 ## Conventions
 
-- **Python:** ruff (target `py312`, line-length 100, rules `E,W,F,I,B,UP`) + ruff-format. Pre-commit runs ruff `--fix` + format on `backend/` only. Respect the existing per-file ignores in `pyproject.toml` — don't "fix" `E712` in SQLAlchemy `WHERE` clauses or `B008` in FastAPI `Depends`.
+- **Python:** ruff (target `py312`, line-length 100, rules `E,W,F,I,B,UP`) + ruff-format. Pre-commit runs ruff `--fix` + format on `backend/` only (now just `scripts/` + `alembic/`). API/library code follows the ruff config in its own repo.
 - **Frontend:** ESLint flat config (`frontend/eslint.config.js`); TypeScript strict build via `tsc -b`.
 - **Pre-commit hooks** are configured (`.pre-commit-config.yaml`) — install with `pre-commit install`.
 - **Commits:** Conventional Commits (`fix:`, `fix(frontend):`, `feat:`, …).
@@ -44,7 +45,8 @@ Backend tests directly: `cd backend && python3 -m pytest tests/ -v` (pytest `asy
 
 - **`.env` lives at the repo root** (next to `start.sh`, also consumed by Docker). Copy `.env.example` → `.env`; key vars: `SECRET_KEY`, `ALLOWED_ORIGINS`, `HOST`, `PORT`, `DEBUG`, `TOKEN_EXPIRE_HOURS`, rate-limit + brute-force settings, logging, session limits. The frontend has its own `frontend/.env.example`.
 - **Virtualenv:** standardized on `backend/.venv` — `start.sh` creates/uses it and the `make test`/`make lint` targets activate the same path. (CI installs deps directly and doesn't use a venv.)
-- The DBF read/write path means data-shape assumptions come from FoxPro files — touch `dbf_reader`/`dbf_writer` carefully and keep SQLite (`models.py`) and Postgres (`models_pg.py`) models in sync.
+- The DBF read/write path means data-shape assumptions come from FoxPro files — `dbf_reader`/`dbf_writer` live in the library repo; touch them there.
+- `SP5_BACKEND_DIR` is the resource-root contract between the app and the `sp5api`/`sp5lib` packages — start.sh, Dockerfile and CI set it to `backend/`. The built SPA is found via `SP5_FRONTEND_DIST` (default `SP5_BACKEND_DIR/../frontend/dist`).
 
 ## Working autonomously here
 

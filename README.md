@@ -119,7 +119,7 @@ The key differentiator: OpenSchichtplaner5 reads and writes the **original `.DBF
 ```bash
 cd backend
 pip install -r requirements.txt
-SP5_DB_PATH=/path/to/sp5/Data uvicorn api.main:app --host 0.0.0.0 --port 8000
+SP5_DB_PATH=/path/to/sp5/Data uvicorn sp5api.main:app --host 0.0.0.0 --port 8000
 ```
 
 > ⚠️ **Multi-Worker Note:** Session management uses an in-memory store.
@@ -332,10 +332,13 @@ Roles are enforced both in the backend (API level, HTTP 403) and in the frontend
 ```
 openschichtplaner5/
 ├── backend/
-│   ├── api/
-│   │   └── main.py          # FastAPI REST API (80+ endpoints)
-│   └── data/
-│       └── changelog.json   # Activity log
+│   ├── api/                 # Runtime state (api/data, api/uploads) — the API
+│   │                        # CODE is the external openschichtplaner5-api
+│   │                        # package (import name: sp5api). See:
+│   │                        # https://github.com/mschabhuettl/openschichtplaner5-api
+│   ├── data/
+│   │   └── changelog.json   # Activity log
+│   └── fixtures/            # DBF fixture data (e2e seed)
 │   # DBF reader/writer + high-level DB access live in the libopenschichtplaner5
 │   # package (import name: sp5lib), pulled in as a dependency. See:
 │   # https://github.com/mschabhuettl/libopenschichtplaner5

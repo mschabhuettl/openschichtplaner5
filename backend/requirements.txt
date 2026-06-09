@@ -1,41 +1,16 @@
-# 0.136.3 is a malicious release (MAL-2026-4750): it tampers with
-# pyproject.toml/PKG-INFO to inject an undocumented 'fastar' dependency. Exclude it.
-fastapi>=0.104.0,!=0.136.3
-uvicorn[standard]>=0.24.0
-pydantic>=2.0.0
-httpx>=0.24.0
-starlette>=0.27.0
-anyio>=3.7.0
-python-multipart>=0.0.7
-python-dotenv>=1.0.0
-ruff>=0.1.0
-slowapi>=0.1.9
-fpdf2>=2.7.0
-bcrypt>=4.0.0
-PyJWT>=2.8.0
-pyotp>=2.9.0
-qrcode[pil]>=7.4
-SQLAlchemy>=2.0.0
-psycopg2-binary>=2.9.0
-alembic>=1.13.0
-openpyxl>=3.1.0
+# REST API layer (FastAPI app, routers, auth/2FA, reports/exports), maintained in
+# its own repo and importable as `sp5api`. Extracted from backend/api with full git
+# history. Pulls in fastapi/uvicorn/pydantic etc. as its own dependencies.
+# Git ref until the PyPI release lands; then switch to openschichtplaner5-api>=1.1.0.
+openschichtplaner5-api @ git+https://github.com/mschabhuettl/openschichtplaner5-api.git@main
 
 # Core library (DBF bridge + ORM/sync), maintained in its own repo and released to
-# PyPI. Importable as `sp5lib`. The [postgres] extra pulls psycopg2-binary.
-# 1.2.0 adds the Shift/LeaveType/Workplace ORM models + repositories; 1.3.0 adds
-# the schedule-entry models (ShiftAssignment/SpecialShift/Absence) with date-range
-# repositories; 1.4.0 fixes sync_group_assignments (DBF ID is no longer the PK;
-# dedup + dangling-skip) so sync_all now runs cleanly on all 11 tables, and adds
-# the Holiday (5HOLID) + Period (5PERIO) models with their repositories and
-# sync_holidays/sync_periods; 1.5.0 adds the time-accounting models
-# (AccountBooking/5BOOK, OvertimeEntry/5OVER, LeaveEntitlement/5LEAEN) with
-# repositories and sync; 1.6.0 adds the planning models (ShiftDemand/5SHDEM,
-# SpecialDemand/5SPDEM, Cycle/5CYCLE, CycleAssignment/5CYASS, Restriction/5RESTR)
-# — sync_all now covers the full 19-table read mirror. All consumed by the
-# ORM-mirror admin router.
+# PyPI. Importable as `sp5lib`. Kept as a direct dependency: scripts/ and
+# backend/alembic/env.py import it without going through the API package.
 libopenschichtplaner5[postgres]>=1.6.0
 
-pytest>=7.4.0
-pytest-cov>=4.1.0
-psutil>=5.9.0
-Pillow>=10.0.0
+# Used directly by scripts/seed_demo_data.py
+python-dotenv>=1.0.0
+
+# Lint (make lint runs ruff from backend/.venv)
+ruff>=0.1.0

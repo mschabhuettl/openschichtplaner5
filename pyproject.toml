@@ -19,7 +19,3 @@ ignore = [
     "B904",  # raise-without-from-inside-except — existing codebase, fix incrementally
 ]
 
-[tool.ruff.lint.per-file-ignores]
-"backend/tests/**" = ["B011", "E402"]  # assert False pattern in tests; sys.path manipulation
-"backend/api/main.py" = ["E402"]  # sys.path manipulation requires imports after
-"backend/api/routers/reports.py" = ["B905"]  # zip() without strict= — existing code

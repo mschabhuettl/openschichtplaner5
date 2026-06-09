@@ -12,37 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.12'
-
-      - name: Cache pip dependencies
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install backend dependencies
-        working-directory: backend
-        run: |
-          pip install -r requirements.txt
-          pip install pytest pytest-cov pytest-asyncio httpx
-
-      - name: Run backend tests
-        working-directory: backend
-        env:
-          SP5_REAL_DB: ${{ github.workspace }}/sp5_db/Daten
-        run: |
-          python -m pytest tests/ \
-            --cov=sp5lib \
-            --cov=api \
-            --cov-report=xml:coverage.xml \
-            --cov-fail-under=70 \
-            -q
-
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:

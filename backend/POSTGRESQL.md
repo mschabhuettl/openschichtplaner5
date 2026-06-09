@@ -41,7 +41,7 @@ python3 -m scripts.seed_postgresql
 ```bash
 DB_BACKEND=postgresql \
 DATABASE_URL=postgresql://sp5:sp5@localhost:5432/sp5 \
-python3 -m uvicorn api.main:app --host 0.0.0.0 --port 8000
+python3 -m uvicorn sp5api.main:app --host 0.0.0.0 --port 8000
 ```
 
 ## Configuration

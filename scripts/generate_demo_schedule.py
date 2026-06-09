@@ -2,7 +2,7 @@
 """Generate a realistic demo shift schedule into an SP5 data directory.
 
 Starts from an existing (schema-valid) SP5 ``Daten`` directory — typically a copy
-of ``backend/tests/fixtures`` — and fills the previous + current month with a
+of ``backend/fixtures`` — and fills the previous + current month with a
 rotating shift plan so the UI (dashboard, schedule, statistics, conflicts …) shows
 populated, current data. Useful for demos and for regenerating screenshots.
 

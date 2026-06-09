@@ -257,6 +257,10 @@ header "5/5  Backend starten"
 
 cd "$BACKEND_DIR"
 
+# Ressourcen-Root für sp5api + sp5lib (data/, api/data, alembic) — die Pakete
+# liegen jetzt in site-packages, der Default zeigt sonst dorthin.
+export SP5_BACKEND_DIR="$BACKEND_DIR"
+
 UVICORN_ARGS=(
   "--host" "$HOST"
   "--port" "$PORT"
@@ -288,7 +292,7 @@ if $OPEN_BROWSER; then
 fi
 
 # Backend starten (PID speichern für cleanup)
-python3 -m uvicorn api.main:app "${UVICORN_ARGS[@]}" &
+python3 -m uvicorn sp5api.main:app "${UVICORN_ARGS[@]}" &
 BACKEND_PID=$!
 echo $BACKEND_PID > "$PID_FILE"
 

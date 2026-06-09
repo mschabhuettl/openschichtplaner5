@@ -10,7 +10,8 @@ This guide gets you up and running for local development.
 2. [Backend Setup](#backend-setup)
 3. [Frontend Setup](#frontend-setup)
 4. [Running Tests](#running-tests)
-5. [Common Problems](#common-problems)
+5. [Working on all three repos](#working-on-all-three-repos)
+6. [Common Problems](#common-problems)
 
 ---
 
@@ -68,7 +69,7 @@ export SP5_DB_PATH=/path/to/sp5/Daten  # or a writable temp dir
 ### 5. Start the backend
 
 ```bash
-uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn sp5api.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 > ⚠️ Use `--workers 1` (the default). Multiple workers cause session token issues because sessions are stored in-memory.
@@ -123,24 +124,17 @@ ruff check .
 
 ### Backend (pytest)
 
+The backend test suite lives in the API repo
+([openschichtplaner5-api](https://github.com/mschabhuettl/openschichtplaner5-api)):
+
 ```bash
-cd backend
-source .venv/bin/activate
-
-# Run all tests
-python -m pytest tests/ -v
-
-# With coverage report
-python -m pytest tests/ --cov=api --cov=sp5lib --cov-report=term-missing
-
-# Single test file
-python -m pytest tests/test_smoke.py -v
-
-# Run smoke test directly
-python -m pytest test_smoke.py -v
+cd ../openschichtplaner5-api
+python3 -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+pytest
 ```
 
-Coverage must be ≥ 70% (enforced in CI).
+Coverage must be ≥ 70% (enforced in that repo's CI).
 
 ### Frontend (Vitest)
 
@@ -188,25 +182,49 @@ pre-commit run --all-files
 
 ---
 
+## Working on all three repos
+
+OpenSchichtplaner5 is split across three repositories:
+
+| Repo | Distribution | Import name |
+|---|---|---|
+| [openschichtplaner5](https://github.com/mschabhuettl/openschichtplaner5) | the app (frontend + deployment + runtime state) | — |
+| [openschichtplaner5-api](https://github.com/mschabhuettl/openschichtplaner5-api) | `openschichtplaner5-api` | `sp5api` |
+| [libopenschichtplaner5](https://github.com/mschabhuettl/libopenschichtplaner5) | `libopenschichtplaner5` | `sp5lib` |
+
+The app consumes both packages via `backend/requirements.txt`. To hack on the
+library and/or the API while running the app, clone all three as siblings and
+install the local clones editable into the app's venv:
+
+```bash
+git clone https://github.com/mschabhuettl/openschichtplaner5.git
+git clone https://github.com/mschabhuettl/openschichtplaner5-api.git
+git clone https://github.com/mschabhuettl/libopenschichtplaner5.git
+cd openschichtplaner5
+make dev-link   # pip install -e ../libopenschichtplaner5 -e ../openschichtplaner5-api into backend/.venv
+make dev        # start the app
+```
+
+Edits in either sibling repo are picked up on the next backend restart — no
+reinstall needed (editable installs). To go back to the pinned dependencies:
+`cd backend && .venv/bin/pip install --force-reinstall -r requirements.txt`.
+
+---
+
 ## Project Structure
 
 ```
 openschichtplaner5/
 ├── backend/
-│   ├── api/
-│   │   ├── main.py          # FastAPI app setup, middleware, health endpoints
-│   │   ├── dependencies.py  # Auth dependencies (require_auth, require_admin…)
-│   │   ├── schemas.py       # Shared Pydantic schemas
-│   │   └── routers/         # Route handlers (one file per domain)
-│   │       ├── auth.py      # /api/auth/*, /api/users/*
-│   │       ├── employees.py # /api/employees/*, /api/groups/*
-│   │       ├── schedule.py  # /api/schedule/*, /api/absences/*
-│   │       ├── reports.py   # /api/export/*, /api/statistics/*, /api/import/*
-│   │       └── ...
-│   # sp5lib (DBF reader/writer + high-level DB access) is now the external
-│   # libopenschichtplaner5 package, listed in requirements.txt and imported as sp5lib.
-│   ├── tests/               # pytest test suite
-│   ├── requirements.txt     # Python dependencies (incl. libopenschichtplaner5)
+│   # The REST API (FastAPI app + routers) is the external openschichtplaner5-api
+│   # package, listed in requirements.txt and imported as sp5api. Its test suite
+│   # lives in that repo. sp5lib (DBF reader/writer + high-level DB access) is the
+│   # external libopenschichtplaner5 package, imported as sp5lib.
+│   ├── api/                 # Runtime state: api/data (JSON stores), api/uploads
+│   ├── data/                # Runtime state: JSON document stores
+│   ├── fixtures/            # DBF fixture data (seeds the CI e2e backend)
+│   ├── alembic/             # DB migrations (run by sp5lib auto-migrate)
+│   ├── requirements.txt     # Python dependencies (API + library)
 │   └── .env.example         # Example environment config
 ├── frontend/
 │   └── src/
@@ -241,7 +259,7 @@ Make sure you're running `uvicorn` from inside the `backend/` directory:
 
 ```bash
 cd backend
-uvicorn api.main:app --reload
+uvicorn sp5api.main:app --reload
 ```
 
 ### `401 Unauthorized` on every request (multi-worker issue)
@@ -249,7 +267,7 @@ uvicorn api.main:app --reload
 The in-memory session store does not work across multiple workers. Run with a single worker:
 
 ```bash
-uvicorn api.main:app --workers 1 --reload
+uvicorn sp5api.main:app --workers 1 --reload
 ```
 
 ### Frontend can't reach the backend

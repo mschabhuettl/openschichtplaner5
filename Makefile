@@ -1,7 +1,7 @@
 # ==============================================================================
 # OpenSchichtplaner5 — Makefile
 # ==============================================================================
-.PHONY: dev prod docker docker-dev docker-down update backup test build clean logs stop help
+.PHONY: dev dev-link prod docker docker-dev docker-down update backup test build clean logs stop help
 
 SHELL := /bin/bash
 BACKEND_DIR := backend
@@ -20,6 +20,16 @@ help: ## Diese Hilfe anzeigen
 dev: ## Lokaler Start via start.sh
 	@bash start.sh
 
+dev-link: ## Library + API aus lokalen Schwester-Clones editierbar installieren
+	@test -d ../libopenschichtplaner5 || { echo "✗ ../libopenschichtplaner5 fehlt (git clone https://github.com/mschabhuettl/libopenschichtplaner5.git)"; exit 1; }
+	@test -d ../openschichtplaner5-api || { echo "✗ ../openschichtplaner5-api fehlt (git clone https://github.com/mschabhuettl/openschichtplaner5-api.git)"; exit 1; }
+	@cd $(BACKEND_DIR) && \
+	  { [ -d .venv ] || python3 -m venv .venv; } && \
+	  . .venv/bin/activate && \
+	  pip install -q -r requirements.txt && \
+	  pip install -q -e "../../libopenschichtplaner5[postgres]" -e ../../openschichtplaner5-api && \
+	  echo "✓ libopenschichtplaner5 + openschichtplaner5-api editierbar aus ../ installiert — Änderungen dort wirken ohne Reinstall"
+
 docker: ## Docker-Container starten (Produktionsmodus)
 	docker compose up --build
 
@@ -29,11 +39,8 @@ docker-dev: ## Docker-Container im Dev-Profil starten
 docker-down: ## Docker-Container stoppen
 	docker compose down
 
-test: ## Tests ausführen (pytest + vitest + playwright)
-	@echo "▶ Backend-Tests (pytest)..."
-	@cd $(BACKEND_DIR) && \
-	  . .venv/bin/activate 2>/dev/null || true && \
-	  python3 -m pytest tests/ -v
+test: ## Tests ausführen (vitest + playwright; Backend-Tests leben im API-Repo)
+	@echo "▶ Backend-Tests laufen im API-Repo (openschichtplaner5-api): dort 'pytest'"
 	@echo "▶ Frontend-Unit-Tests (vitest)..."
 	@cd $(FRONTEND_DIR) && npx vitest run 2>/dev/null || \
 	  echo "  (vitest nicht konfiguriert)"
@@ -49,7 +56,7 @@ lint: ## Code-Qualität prüfen (ruff + mypy + eslint)
 	@echo "▶ mypy (Backend)..."
 	@cd $(BACKEND_DIR) && \
 	  . .venv/bin/activate 2>/dev/null || true && \
-	  python3 -m mypy api --ignore-missing-imports 2>/dev/null || true
+	  python3 -m mypy -p sp5api --ignore-missing-imports 2>/dev/null || true
 	@echo "▶ eslint (Frontend)..."
 	@cd $(FRONTEND_DIR) && npx eslint src/ 2>/dev/null || \
 	  echo "  (eslint nicht konfiguriert)"

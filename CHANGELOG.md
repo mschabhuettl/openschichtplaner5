@@ -9,6 +9,21 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- **API extracted into its own repo:** the REST API (formerly `backend/api/`) now
+  lives in [openschichtplaner5-api](https://github.com/mschabhuettl/openschichtplaner5-api)
+  — extracted with full git history (`git filter-repo`), packaged as
+  `openschichtplaner5-api`, importable as **`sp5api`** (mirroring
+  `libopenschichtplaner5` → `sp5lib`). The app consumes it via
+  `backend/requirements.txt`; the backend test suite moved with it. The ASGI
+  entrypoint is now `sp5api.main:app` (start.sh, Dockerfile, CI updated);
+  `SP5_BACKEND_DIR` is set explicitly so the packages find `backend/data`,
+  `backend/api/data` and the Alembic dir; the built SPA path is overridable via
+  `SP5_FRONTEND_DIST`. `backend/api/` keeps only runtime state (`api/data`,
+  `api/uploads`); the e2e fixture DBFs moved to `backend/fixtures/`. New
+  `make dev-link` installs local sibling clones of the library and the API
+  editable into `backend/.venv` for three-repo development.
+
 ### Added
 - **ORM-Mirror Admin API (#131):** New admin-only router under `/api/admin/orm` exposing a read-only ORM projection of the DBF master-data definition tables (shifts, leave types, workplaces). `POST /api/admin/orm/sync` materializes the mirror into its own `sp5_orm.db`; `GET /api/admin/orm/shifts`, `/leave-types`, `/workplaces` list the definitions (with an `include_hidden` query). The DBF files remain the source of truth — this is the gradual DBF → ORM migration path. Consumes `libopenschichtplaner5 >=1.2.0` (Shift/LeaveType/Workplace models + repositories + sync).
 - **ORM-Mirror Schedule Entries (#133):** Extended the ORM mirror with schedule-entry endpoints — `GET /api/admin/orm/shift-assignments` (`5MASHI`), `/special-shifts` (`5SPSHI`) and `/absences` (`5ABSEN`) — each filterable via `date_from`/`date_to` (inclusive ISO dates) and `employee_id` query params. `POST /api/admin/orm/sync` now covers all six tables. Bumps the `libopenschichtplaner5` consumption to `>=1.3.0` (schedule-entry models with date-range repositories; `sync_all` is now dangling-FK tolerant on dirty data).

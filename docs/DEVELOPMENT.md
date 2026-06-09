@@ -69,8 +69,12 @@ export SP5_DB_PATH=/path/to/sp5/Daten  # or a writable temp dir
 ### 5. Start the backend
 
 ```bash
-uvicorn sp5api.main:app --host 0.0.0.0 --port 8000 --reload
+SP5_BACKEND_DIR="$(pwd)" uvicorn sp5api.main:app --host 0.0.0.0 --port 8000 --reload
 ```
+
+(`SP5_BACKEND_DIR` points the installed `sp5api`/`sp5lib` packages at this
+`backend/` directory for runtime state and the Alembic config — `start.sh`,
+Docker and CI set it automatically.)
 
 > ⚠️ Use `--workers 1` (the default). Multiple workers cause session token issues because sessions are stored in-memory.
 
@@ -224,8 +228,8 @@ openschichtplaner5/
 │   ├── data/                # Runtime state: JSON document stores
 │   ├── fixtures/            # DBF fixture data (seeds the CI e2e backend)
 │   ├── alembic/             # DB migrations (run by sp5lib auto-migrate)
-│   ├── requirements.txt     # Python dependencies (API + library)
-│   └── .env.example         # Example environment config
+│   └── requirements.txt     # Python dependencies (API + library)
+├── .env.example             # Example environment config (repo root, used by start.sh + Docker)
 ├── frontend/
 │   └── src/
 │       ├── App.tsx          # Root component: routing, layout, lazy loading
@@ -253,13 +257,15 @@ openschichtplaner5/
 
 ## Common Problems
 
-### `ModuleNotFoundError: No module named 'api'`
+### Runtime state ends up in `site-packages` (missing `SP5_BACKEND_DIR`)
 
-Make sure you're running `uvicorn` from inside the `backend/` directory:
+When starting `uvicorn` by hand, set `SP5_BACKEND_DIR` to the `backend/`
+directory — otherwise the installed packages fall back to their own install
+location for `data/`, `api/data` and the Alembic config:
 
 ```bash
 cd backend
-uvicorn sp5api.main:app --reload
+SP5_BACKEND_DIR="$(pwd)" uvicorn sp5api.main:app --reload
 ```
 
 ### `401 Unauthorized` on every request (multi-worker issue)
@@ -289,11 +295,9 @@ The backend will start but most endpoints return empty results or 500 errors. Po
 
 ### Tests fail: `database not found`
 
-Set the `SP5_REAL_DB` env variable to a directory with DBF files, or run tests without real DB (unit tests only):
-
-```bash
-python -m pytest tests/ -k "not integration"
-```
+(Backend tests live in the openschichtplaner5-api repo.) Set the `SP5_REAL_DB`
+env variable to a directory with DBF files, or rely on the bundled
+`tests/fixtures/` DBF files, which are used automatically.
 
 ### Port 8000 already in use
 

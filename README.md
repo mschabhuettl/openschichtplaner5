@@ -119,7 +119,7 @@ The key differentiator: OpenSchichtplaner5 reads and writes the **original `.DBF
 ```bash
 cd backend
 pip install -r requirements.txt
-SP5_DB_PATH=/path/to/sp5/Data uvicorn sp5api.main:app --host 0.0.0.0 --port 8000
+SP5_DB_PATH=/path/to/sp5/Data SP5_BACKEND_DIR="$(pwd)" uvicorn sp5api.main:app --host 0.0.0.0 --port 8000
 ```
 
 > ⚠️ **Multi-Worker Note:** Session management uses an in-memory store.
@@ -177,7 +177,7 @@ Then open [`http://localhost:8000`](http://localhost:8000) in your browser.
 | `make update` | `git pull` + Docker restart (rolling update) |
 | `make backup` | Database volume → local `.tar.gz` archive |
 | `make build` | Build frontend bundle |
-| `make test` | Run backend and frontend tests |
+| `make test` | Run frontend tests (backend pytest lives in the API repo) |
 | `make logs` | Show live logs |
 
 #### Configuration (`backend/.env.docker`)

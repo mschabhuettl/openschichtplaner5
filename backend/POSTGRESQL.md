@@ -41,6 +41,7 @@ python3 -m scripts.seed_postgresql
 ```bash
 DB_BACKEND=postgresql \
 DATABASE_URL=postgresql://sp5:sp5@localhost:5432/sp5 \
+SP5_BACKEND_DIR="$(pwd)" \
 python3 -m uvicorn sp5api.main:app --host 0.0.0.0 --port 8000
 ```
 
@@ -91,9 +92,12 @@ python3 -m alembic upgrade head
 
 ## Running Tests
 
+The backend test suite lives in the
+[openschichtplaner5-api](https://github.com/mschabhuettl/openschichtplaner5-api) repo:
+
 ```bash
+cd ../openschichtplaner5-api
 # PostgreSQL backend tests (uses SQLite in-memory, no PG required)
-cd backend
 python3 -m pytest tests/test_postgresql_backend.py -v
 
 # All tests (DBF backend remains default)

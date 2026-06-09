@@ -54,5 +54,6 @@ See `memory/sp5-versioning-policy.md` for the full versioning policy.
 
 **Short version:** After every stabilization batch, bump all three version locations:
 1. `frontend/package.json`
-2. `backend/api/main.py` (`_API_VERSION` + FastAPI `version=`)
+2. `sp5api/main.py` (`_API_VERSION` + FastAPI `version=`) — in the
+   [openschichtplaner5-api](https://github.com/mschabhuettl/openschichtplaner5-api) repo
 3. Git tag: `git tag -a vX.Y.Z -m "vX.Y.Z — short description"`

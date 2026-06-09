@@ -44,8 +44,6 @@
     "**/venv": true
   },
 
-  // Testing
-  "python.testing.pytestEnabled": true,
-  "python.testing.pytestArgs": ["backend/tests"],
-  "python.testing.cwd": "${workspaceFolder}/backend"
+  // Testing — the backend pytest suite lives in the openschichtplaner5-api repo
+  "python.testing.pytestEnabled": false
 }

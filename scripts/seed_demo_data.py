@@ -16,11 +16,12 @@ Achtung: Nur für Entwicklung/Demo! Nicht in Produktion verwenden.
 """
 
 import argparse
+import calendar
 import os
 import sys
-import calendar
 from datetime import date
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Backend-Verzeichnis zum Python-Pfad hinzufügen

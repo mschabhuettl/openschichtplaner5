@@ -24,7 +24,7 @@ jobs:
         run: pip install ruff
 
       - name: Run ruff (Python lint)
-        run: ruff check backend/ --output-format=github
+        run: ruff check . --output-format=github
 
   lint-frontend:
     name: Lint Frontend (ESLint + build)

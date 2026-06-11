@@ -41,6 +41,15 @@ backend/logs/
 .DS_Store
 Thumbs.db
 
+# Local notes / tool state / backups
+.claude/
+CLAUDE*.md
+AGENTS.md
+*.bak
+
+# E2E test output
+frontend/e2e/screenshots/
+
 # IDE — settings.json/extensions.json sind bewusst getrackt
 .idea/
 .vscode/*

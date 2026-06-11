@@ -1,7 +1,7 @@
 # ==============================================================================
 # OpenSchichtplaner5 — Makefile
 # ==============================================================================
-.PHONY: dev dev-link prod docker docker-dev docker-down update backup test build clean logs stop help
+.PHONY: dev dev-link prod docker docker-dev docker-down update backup test test-e2e lint build clean logs stop help
 
 SHELL := /bin/bash
 BACKEND_DIR := backend
@@ -39,27 +39,25 @@ docker-dev: ## Docker-Container im Dev-Profil starten
 docker-down: ## Docker-Container stoppen
 	docker compose down
 
-test: ## Tests ausführen (vitest + playwright; Backend-Tests leben im API-Repo)
+test: ## Frontend-Unit-Tests (vitest; Backend-Tests im API-Repo, E2E: make test-e2e)
 	@echo "▶ Backend-Tests laufen im API-Repo (openschichtplaner5-api): dort 'pytest'"
 	@echo "▶ Frontend-Unit-Tests (vitest)..."
-	@cd $(FRONTEND_DIR) && npx vitest run 2>/dev/null || \
-	  echo "  (vitest nicht konfiguriert)"
-	@echo "▶ Frontend-E2E-Tests (playwright)..."
-	@cd $(FRONTEND_DIR) && npx playwright test 2>/dev/null || \
-	  echo "  (Playwright nicht konfiguriert)"
+	@cd $(FRONTEND_DIR) && npx vitest run
 
-lint: ## Code-Qualität prüfen (ruff + mypy + eslint)
-	@echo "▶ ruff (Backend)..."
-	@cd $(BACKEND_DIR) && \
-	  . .venv/bin/activate 2>/dev/null || true && \
-	  python3 -m ruff check . || true
-	@echo "▶ mypy (Backend)..."
-	@cd $(BACKEND_DIR) && \
-	  . .venv/bin/activate 2>/dev/null || true && \
-	  python3 -m mypy -p sp5api --ignore-missing-imports 2>/dev/null || true
+test-e2e: ## Frontend-E2E-Tests (playwright; erwartet laufende App auf :5173)
+	@cd $(FRONTEND_DIR) && npx playwright test
+
+# mypy entfällt bewusst: dieses Repo enthält keinen eigenen Python-App-Code mehr
+# (nur Hilfsskripte + Alembic-Wiring); die typgeprüften Pakete sp5api/sp5lib laufen
+# mypy in ihren eigenen Repos. Das frühere Ziel prüfte nur das *installierte*
+# sp5api-Paket — doppelt und irreführend.
+lint: ## Code-Qualität prüfen (ruff + eslint) — schlägt bei Befunden fehl
+	@echo "▶ ruff (Python-Skripte im Repo, wie CI vom Repo-Root)..."
+	@RUFF="$(BACKEND_DIR)/.venv/bin/ruff"; \
+	  [ -x "$$RUFF" ] || RUFF=ruff; \
+	  "$$RUFF" check .
 	@echo "▶ eslint (Frontend)..."
-	@cd $(FRONTEND_DIR) && npx eslint src/ 2>/dev/null || \
-	  echo "  (eslint nicht konfiguriert)"
+	@cd $(FRONTEND_DIR) && npx eslint src/
 	@echo "✓ Lint abgeschlossen"
 
 build: ## Frontend-Bundle bauen

@@ -177,7 +177,9 @@ Then open [`http://localhost:8000`](http://localhost:8000) in your browser.
 | `make update` | `git pull` + Docker restart (rolling update) |
 | `make backup` | Database volume → local `.tar.gz` archive |
 | `make build` | Build frontend bundle |
-| `make test` | Run frontend tests (backend pytest lives in the API repo) |
+| `make test` | Run frontend unit tests, vitest (backend pytest lives in the API repo) |
+| `make test-e2e` | Run Playwright E2E tests (expects the app running on `:5173`) |
+| `make lint` | ruff + eslint — fails on findings |
 | `make logs` | Show live logs |
 
 #### Configuration (`.env` in the repo root)

@@ -6,19 +6,12 @@ import type { Employee, Group } from '../types';
 import { useT } from '../i18n';
 import { EmptyState } from '../components/EmptyState';
 
-const MONTH_NAMES_DE = [
-  '', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
-  'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
-];
-
 // ── HTML Export helper ─────────────────────────────────────────
 function exportStatisticsHTML(
   stats: EmployeeStats[],
-  year: number,
-  month: number,
+  periodLabel: string,
   groupLabel: string,
 ) {
-  const monthName = MONTH_NAMES_DE[month];
   const now = new Date().toLocaleString('de-AT');
 
   const totalTarget = stats.reduce((a, s) => a + s.target_hours, 0);
@@ -56,7 +49,7 @@ function exportStatisticsHTML(
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Statistiken ${monthName} ${year}</title>
+<title>Statistiken ${periodLabel}</title>
 <style>
   body { font-family: Arial, sans-serif; margin: 16px; }
   h1 { font-size: 16px; margin-bottom: 2px; }
@@ -75,7 +68,7 @@ function exportStatisticsHTML(
 </style>
 </head>
 <body>
-<h1>📈 Statistiken – ${monthName} ${year}</h1>
+<h1>📈 Statistiken – ${periodLabel}</h1>
 <div class="subtitle">Gruppe: ${groupLabel} &nbsp;|&nbsp; ${stats.length} Mitarbeiter &nbsp;|&nbsp; Erstellt: ${now}</div>
 
 <div class="summary">
@@ -195,11 +188,9 @@ function exportEmployeeCSV(data: EmployeeYearStats) {
 // ── CSV Export for group view ──────────────────────────────
 function exportGroupCSV(
   stats: EmployeeStats[],
-  year: number,
-  month: number,
+  periodLabel: string,
   groupLabel: string,
 ) {
-  const monthName = MONTH_NAMES_DE[month];
   const header = [
     'Mitarbeiter', 'Gruppe', 'Soll-Stunden', 'Ist-Stunden',
     'Überstunden', 'Abwesenheitstage', 'Urlaubstage', 'Krankentage',
@@ -232,7 +223,7 @@ function exportGroupCSV(
   ].join(';');
 
   const csv = [
-    `Gruppenauswertung ${monthName} ${year}`,
+    `Gruppenauswertung ${periodLabel}`,
     `Gruppe: ${groupLabel} | ${stats.length} Mitarbeiter`,
     '',
     header,
@@ -245,7 +236,7 @@ function exportGroupCSV(
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `Gruppenauswertung_${monthName}_${year}.csv`;
+  a.download = `Gruppenauswertung_${periodLabel.replace(/[^0-9A-Za-z\u00C4\u00D6\u00DC\u00E4\u00F6\u00FC\u00DF._-]+/g, '_')}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -349,6 +340,14 @@ export default function Statistiken() {
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [groupId, setGroupId] = useState<number | undefined>(undefined);
+  // Zeitraum-Modus: Monat (Default) ⟷ freier Von/Bis-Zeitraum (Spec 3.9.1)
+  const pad2 = (n: number) => String(n).padStart(2, '0');
+  const [periodMode, setPeriodMode] = useState<'month' | 'range'>('month');
+  const [rangeFrom, setRangeFrom] = useState(`${now.getFullYear()}-${pad2(now.getMonth() + 1)}-01`);
+  const [rangeTo, setRangeTo] = useState(
+    `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate())}`
+  );
+  const invalidRange = periodMode === 'range' && (!rangeFrom || !rangeTo || rangeFrom > rangeTo);
 
   const [groups, setGroups] = useState<Group[]>([]);
   const [stats, setStats] = useState<EmployeeStats[]>([]);
@@ -418,14 +417,19 @@ export default function Statistiken() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Load group statistics
+  // Load group statistics (Monatsmodus oder freier Von/Bis-Zeitraum, Spec 3.9.1)
   useEffect(() => {
     if (activeTab !== 'group') return;
+    if (invalidRange) return;
     setLoading(true);
     setError(null);
     Promise.all([
-      api.getStatistics(year, month, groupId),
-      api.getExtraChargesSummary(year, month),
+      periodMode === 'range'
+        ? api.getStatistics({ from: rangeFrom, to: rangeTo, group_id: groupId })
+        : api.getStatistics(year, month, groupId),
+      periodMode === 'range'
+        ? api.getExtraChargesSummary({ from: rangeFrom, to: rangeTo })
+        : api.getExtraChargesSummary(year, month),
     ])
       .then(([statsData, extraData]) => {
         setStats(statsData);
@@ -433,17 +437,18 @@ export default function Statistiken() {
         setLoading(false);
       })
       .catch(e => { setError(e.message); setLoading(false); });
-  }, [year, month, groupId, activeTab]);
+  }, [year, month, groupId, activeTab, periodMode, rangeFrom, rangeTo, invalidRange]);
 
-  // Load previous month stats for comparison (group view)
+  // Load previous month stats for comparison (group view, nur im Monatsmodus)
   useEffect(() => {
     if (activeTab !== 'group') return;
+    if (periodMode !== 'month') { setPrevMonthStats([]); return; }
     const prevY = month === 1 ? year - 1 : year;
     const prevM = month === 1 ? 12 : month - 1;
     api.getStatistics(prevY, prevM, groupId)
       .then(setPrevMonthStats)
       .catch(() => setPrevMonthStats([]));
-  }, [year, month, groupId, activeTab]);
+  }, [year, month, groupId, activeTab, periodMode]);
 
   // Load year review data
   useEffect(() => {
@@ -547,6 +552,10 @@ export default function Statistiken() {
     if (month === 12) { setYear(y => y + 1); setMonth(1); }
     else setMonth(m => m + 1);
   };
+
+  const periodLabel = periodMode === 'month'
+    ? `${t.months[month - 1]} ${year}`
+    : `${rangeFrom} – ${rangeTo}`;
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -848,14 +857,52 @@ export default function Statistiken() {
       {activeTab === 'group' && (<>
       {/* Header */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
-        {/* Month navigation */}
-        <div className="flex items-center gap-2">
-          <button aria-label="Vorheriger Monat" onClick={prevMonth} className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm">‹</button>
-          <span className="font-semibold text-gray-700 dark:text-slate-300 min-w-[150px] text-center">
-            {t.months[month - 1]} {year}
-          </span>
-          <button aria-label="Nächster Monat" onClick={nextMonth} className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm">›</button>
+        {/* Zeitraum-Modus: Monat ⟷ freier Von/Bis-Zeitraum (Spec 3.9.1) */}
+        <div className="flex rounded border dark:border-slate-600 overflow-hidden text-sm shadow-sm">
+          <button
+            onClick={() => setPeriodMode('month')}
+            className={`px-3 py-1 transition-colors ${periodMode === 'month' ? 'bg-slate-700 text-white' : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-600'}`}
+          >
+            {t.statistiken.modeMonth}
+          </button>
+          <button
+            onClick={() => setPeriodMode('range')}
+            className={`px-3 py-1 transition-colors ${periodMode === 'range' ? 'bg-slate-700 text-white' : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-600'}`}
+          >
+            {t.statistiken.modeRange}
+          </button>
         </div>
+
+        {periodMode === 'month' ? (
+          /* Month navigation */
+          <div className="flex items-center gap-2">
+            <button aria-label="Vorheriger Monat" onClick={prevMonth} className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm">‹</button>
+            <span className="font-semibold text-gray-700 dark:text-slate-300 min-w-[150px] text-center">
+              {t.months[month - 1]} {year}
+            </span>
+            <button aria-label="Nächster Monat" onClick={nextMonth} className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm hover:bg-gray-50 dark:hover:bg-slate-600 text-sm">›</button>
+          </div>
+        ) : (
+          /* Free date range */
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-gray-600 dark:text-slate-300">{t.statistiken.from}</label>
+            <input
+              type="date"
+              aria-label={t.statistiken.from}
+              value={rangeFrom}
+              onChange={e => setRangeFrom(e.target.value)}
+              className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm text-sm"
+            />
+            <label className="text-sm text-gray-600 dark:text-slate-300">{t.statistiken.to}</label>
+            <input
+              type="date"
+              aria-label={t.statistiken.to}
+              value={rangeTo}
+              onChange={e => setRangeTo(e.target.value)}
+              className="px-2 py-1 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm text-sm"
+            />
+          </div>
+        )}
 
         {/* Group filter */}
         <select
@@ -869,6 +916,7 @@ export default function Statistiken() {
 
         {loading && <span className="text-sm text-blue-500 animate-pulse">Lade...</span>}
         {error && <span className="text-sm text-red-500">Fehler: {error}</span>}
+        {invalidRange && <span className="text-sm text-amber-600">{t.statistiken.invalidRange}</span>}
 
         <span className="text-sm text-gray-500 dark:text-slate-400">{stats.length} Mitarbeiter</span>
 
@@ -878,7 +926,7 @@ export default function Statistiken() {
             const groupLabel = groupId
               ? (groups.find(g => g.ID === groupId)?.NAME ?? `Gruppe ${groupId}`)
               : 'Alle Mitarbeiter';
-            exportGroupCSV(sorted, year, month, groupLabel);
+            exportGroupCSV(sorted, periodLabel, groupLabel);
             showToast('CSV exportiert ✓', 'success');
           }}
           disabled={sorted.length === 0 || loading}
@@ -892,7 +940,7 @@ export default function Statistiken() {
             const groupLabel = groupId
               ? (groups.find(g => g.ID === groupId)?.NAME ?? `Gruppe ${groupId}`)
               : 'Alle Mitarbeiter';
-            exportStatisticsHTML(sorted, year, month, groupLabel);
+            exportStatisticsHTML(sorted, periodLabel, groupLabel);
           }}
           disabled={sorted.length === 0 || loading}
           className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:opacity-50 text-white text-sm rounded shadow-sm flex items-center gap-1.5"
@@ -1062,7 +1110,7 @@ export default function Statistiken() {
       {extraSummary.length > 0 && (
         <div className="mt-4 bg-white dark:bg-slate-800 rounded-lg shadow border border-gray-200 dark:border-slate-600">
           <div className="px-4 py-2 bg-slate-700 text-white text-sm font-semibold rounded-t-lg flex items-center gap-2">
-            <span>⏱️ Zeitzuschläge – {t.months[month - 1]} {year}</span>
+            <span>⏱️ Zeitzuschläge – {periodLabel}</span>
             <span className="text-slate-300 dark:text-slate-500 font-normal text-xs">(Alle Mitarbeiter)</span>
           </div>
           <div className="flex flex-wrap gap-3 p-4">

@@ -498,6 +498,7 @@ function ShiftBadge({
   const noteTitle = hasNote ? notes.map(n => [n.text1, n.text2].filter(Boolean).join(' ')).join('\n') : '';
   const isSpshi = entry.kind === 'special_shift';
   const isDeviation = isSpshi && entry.spshi_type === 1;
+  const isCycle = entry.source === 'cycle';
 
   return (
     <div
@@ -511,12 +512,16 @@ function ShiftBadge({
             ? '2px dashed rgba(0,0,0,0.35)'
             : '1px solid rgba(0,0,0,0.1)',
         boxShadow: isSpshi ? '0 0 0 1px rgba(255,255,255,0.4) inset' : undefined,
+        backgroundImage: isCycle
+          ? 'repeating-linear-gradient(45deg, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 2px, transparent 2px, transparent 6px)'
+          : undefined,
       }}
-      title={entry.shift_name || entry.leave_name || entry.display_name}
+      title={(entry.shift_name || entry.leave_name || entry.display_name) + (isCycle ? ' · aus Schichtmodell (Zyklus)' : '')}
       onContextMenu={e => { e.preventDefault(); onContextMenu?.(e, entry); }}
     >
       {isDeviation && <span className="text-[9px]">⏱</span>}
       {isSpshi && !isDeviation && <span className="text-[9px]">★</span>}
+      {isCycle && <span className="text-[9px]" aria-hidden="true">↻</span>}
       <span>{entry.display_name || '?'}</span>
       <span className="opacity-70 font-normal">{entry.employee_name}</span>
       {hasNote && (
@@ -718,6 +723,7 @@ function WeekView({
                       {shiftEntries.map(e => {
                         const isSpshi = e.kind === 'special_shift';
                         const isDeviation = isSpshi && e.spshi_type === 1;
+                        const isCycle = e.source === 'cycle';
                         return (
                           <div
                             key={e.employee_id}
@@ -730,12 +736,16 @@ function WeekView({
                                 : isSpshi
                                   ? '2px dashed rgba(0,0,0,0.3)'
                                   : '1px solid rgba(0,0,0,0.1)',
+                              backgroundImage: isCycle
+                                ? 'repeating-linear-gradient(45deg, rgba(255,255,255,0.35) 0px, rgba(255,255,255,0.35) 2px, transparent 2px, transparent 6px)'
+                                : undefined,
                             }}
                             onContextMenu={ev => { ev.preventDefault(); onContextMenu?.(ev, e, d); }}
-                            title={`${e.employee_name}${isSpshi ? ' (Sonderdienst)' : ''}${isDeviation ? ' (Abweichung)' : ''}`}
+                            title={`${e.employee_name}${isSpshi ? ' (Sonderdienst)' : ''}${isDeviation ? ' (Abweichung)' : ''}${isCycle ? ' (aus Schichtmodell/Zyklus)' : ''}`}
                           >
                             {isDeviation && '⏱'}
                             {isSpshi && !isDeviation && '★'}
+                            {isCycle && '↻ '}
                             {e.employee_name}
                           </div>
                         );
@@ -1624,6 +1634,10 @@ export default function Einsatzplan() {
           <span className="flex items-center gap-1">
             <span className="inline-block w-4 h-3 rounded" style={{ border: '2px dashed #F59E0B' }} />
             Abweichung
+          </span>
+          <span className="flex items-center gap-1" title="Generierter Dienst aus dem Schichtmodell — änderbar nur per Überschreiben">
+            <span aria-hidden="true">↻</span>
+            Zyklusdienst (generiert)
           </span>
         </div>
       </div>

@@ -1,7 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
+import type { LeaveForfeitResult } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import type { Group } from '../types';
+
+const API = import.meta.env.VITE_API_URL ?? '';
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (!raw) return {};
+    const session = JSON.parse(raw) as { token?: string; devMode?: boolean };
+    const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
+    return token ? { 'X-Auth-Token': token } : {};
+  } catch { return {}; }
+}
 
 interface EmployeeCloseDetail {
   employee_id: number;
@@ -18,7 +30,6 @@ interface EmployeeCloseDetail {
 interface AnnualClosePreview {
   year: number;
   next_year: number;
-  carry_forward_limit: number;
   employee_count: number;
   total_carry_forward: number;
   total_forfeited: number;
@@ -35,13 +46,185 @@ interface AnnualCloseResult {
   details: { employee_id: number; employee_name: string; remaining: number; carry_forward: number; forfeited: number }[];
 }
 
+// ─── Resturlaub-Verfall zum Stichtag (Spec 5.17, Gaps V-13/APP-INT-3) ────────
+function ForfeitSection({ groups }: { groups: Group[] }) {
+  const thisYear = new Date().getFullYear();
+  const [cutoffDate, setCutoffDate] = useState(`${thisYear}-03-31`);
+  const [groupId, setGroupId] = useState<number | null>(null);
+  const [preview, setPreview] = useState<LeaveForfeitResult | null>(null);
+  const [result, setResult] = useState<LeaveForfeitResult | null>(null);
+  const [working, setWorking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const fmtNum = (n: number) => n.toFixed(n % 1 === 0 ? 0 : 1);
+
+  const loadForfeitPreview = async () => {
+    setWorking(true);
+    setError(null);
+    setResult(null);
+    try {
+      const data = await api.forfeitLeaveEntitlements({
+        cutoff_date: cutoffDate,
+        group_id: groupId ?? undefined,
+        dry_run: true,
+      });
+      setPreview(data);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setWorking(false);
+    }
+  };
+
+  const runForfeit = async () => {
+    setWorking(true);
+    setError(null);
+    setShowConfirm(false);
+    try {
+      const data = await api.forfeitLeaveEntitlements({
+        cutoff_date: cutoffDate,
+        group_id: groupId ?? undefined,
+        dry_run: false,
+      });
+      setResult(data);
+      setPreview(null);
+    } catch (e) {
+      setError(String(e));
+    } finally {
+      setWorking(false);
+    }
+  };
+
+  const cutsTable = (cuts: LeaveForfeitResult['cuts']) => (
+    <div className="bg-white rounded-lg shadow overflow-x-auto mt-3">
+      <table className="text-sm w-full min-w-[600px]">
+        <thead>
+          <tr className="bg-slate-700 text-white text-xs">
+            <th scope="col" className="px-4 py-2 text-left">Mitarbeiter</th>
+            <th scope="col" className="px-3 py-2 text-left">Abwesenheitsart</th>
+            <th scope="col" className="px-3 py-2 text-center">Rest alt</th>
+            <th scope="col" className="px-3 py-2 text-center">Rest neu</th>
+            <th scope="col" className="px-3 py-2 text-center bg-red-800">Verfall</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cuts.map((c, i) => (
+            <tr key={`${c.employee_id}-${c.leave_type_id}`} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+              <td className="px-4 py-2 font-semibold text-gray-800">{c.employee_name}</td>
+              <td className="px-3 py-2 text-gray-600">{c.leave_type_name}</td>
+              <td className="px-3 py-2 text-center text-gray-700">{fmtNum(c.old_rest)}</td>
+              <td className="px-3 py-2 text-center font-semibold text-blue-700">{fmtNum(c.new_rest)}</td>
+              <td className="px-3 py-2 text-center font-bold text-red-600 bg-red-50">{fmtNum(c.forfeited)}</td>
+            </tr>
+          ))}
+          {cuts.length === 0 && (
+            <tr><td colSpan={5} className="text-center py-6 text-gray-600">Keine Kürzungen — nichts zu verfallen.</td></tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+
+  return (
+    <div className="mt-8 bg-white rounded-lg border shadow-sm p-4">
+      <h2 className="text-sm font-bold text-gray-700 mb-1 uppercase tracking-wide">🗓️ Resturlaub verfallen lassen (Stichtag)</h2>
+      <p className="text-xs text-gray-500 mb-3">
+        Kürzt den Übertrag aus dem Vorjahr auf das bis zum Stichtag Verbrauchte
+        (neuer Rest = min(alter Rest, bis Stichtag genommene Tage), Spec 5.17). Nur für Administratoren.
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Stichtag</label>
+          <input type="date" value={cutoffDate} onChange={e => setCutoffDate(e.target.value)}
+            className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-gray-700 mb-1">Gruppe (optional)</label>
+          <select value={groupId ?? ''} onChange={e => setGroupId(e.target.value ? Number(e.target.value) : null)}
+            className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="">Alle Gruppen</option>
+            {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+          </select>
+        </div>
+        <div>
+          <button onClick={loadForfeitPreview} disabled={working || !cutoffDate}
+            className="w-full px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-60 flex items-center justify-center gap-2">
+            {working ? <span className="animate-spin">⟳</span> : '🔍'} Verfall-Vorschau
+          </button>
+        </div>
+        <div>
+          <button onClick={() => setShowConfirm(true)} disabled={working || !preview || preview.cuts.length === 0}
+            className="w-full px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-60 flex items-center justify-center gap-2 font-semibold">
+            ❌ Verfall ausführen
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">⚠️ {error}</div>
+      )}
+
+      {result && (
+        <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="font-bold text-green-800">
+            ✅ Verfall zum {new Date(result.cutoff_date).toLocaleDateString('de-AT')} ausgeführt
+          </div>
+          <div className="text-sm text-green-700">
+            {result.employees_processed} Mitarbeiter verarbeitet · {fmtNum(result.total_forfeited)} Tage verfallen
+          </div>
+          {cutsTable(result.cuts)}
+        </div>
+      )}
+
+      {preview && !result && (
+        <div className="mt-4">
+          <div className="text-sm font-semibold text-gray-800">
+            Vorschau: {preview.cuts.length} Kürzungen · {fmtNum(preview.total_forfeited)} Tage verfallen
+            ({preview.employees_processed} Mitarbeiter geprüft)
+          </div>
+          {cutsTable(preview.cuts)}
+        </div>
+      )}
+
+      {/* Confirmation dialog (destruktiv) */}
+      {showConfirm && preview && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
+          <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-lg font-bold text-gray-800">⚠️ Verfall bestätigen</h2>
+            </div>
+            <div className="px-6 py-5 space-y-3">
+              <p className="text-gray-700 text-sm">
+                Zum Stichtag <strong>{new Date(cutoffDate).toLocaleDateString('de-AT')}</strong> werden{' '}
+                <strong>{fmtNum(preview.total_forfeited)} Resturlaubstage</strong> bei{' '}
+                <strong>{preview.cuts.length} Einträgen</strong> endgültig gekürzt.
+              </p>
+              <p className="text-xs text-red-600 font-semibold">Diese Aktion kann nicht rückgängig gemacht werden.</p>
+            </div>
+            <div className="px-6 py-4 border-t flex justify-end gap-3">
+              <button onClick={() => setShowConfirm(false)} disabled={working}
+                className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50">Abbrechen</button>
+              <button onClick={runForfeit} disabled={working}
+                className="px-5 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60 flex items-center gap-2 font-semibold">
+                {working ? <span className="animate-spin">⟳</span> : '❌'} Verfall ausführen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Jahresabschluss() {
   const { canAdmin } = useAuth();
   const currentYear = new Date().getFullYear() - 1; // default: last year
   const [year, setYear] = useState(currentYear);
   const [groups, setGroups] = useState<Group[]>([]);
   const [groupId, setGroupId] = useState<number | null>(null);
-  const [maxCarryDays, setMaxCarryDays] = useState(10);
+  // "Urlaubsansprüche bleiben im Folgejahr gleich" (R6.8-4, Gap V-17)
+  const [keepEntitlements, setKeepEntitlements] = useState(false);
   const [preview, setPreview] = useState<AnnualClosePreview | null>(null);
   const [result, setResult] = useState<AnnualCloseResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -60,29 +243,40 @@ export default function Jahresabschluss() {
     setError(null);
     setResult(null);
     try {
-      const data = await api.getAnnualClosePreview({
-        year,
-        max_carry_forward_days: maxCarryDays,
-        group_id: groupId ?? undefined,
+      // Direkter Fetch statt api.getAnnualClosePreview: der Wrapper kennt
+      // keep_entitlements (noch) nicht als Query-Parameter (Gap V-17).
+      const p = new URLSearchParams({ year: String(year), keep_entitlements: String(keepEntitlements) });
+      if (groupId != null) p.set('group_id', String(groupId));
+      const res = await fetch(`${API}/api/v1/annual-close/preview?${p}`, {
+        headers: getAuthHeaders(),
+        credentials: 'include',
       });
-      setPreview(data as AnnualClosePreview);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({})) as { detail?: string };
+        throw new Error(err.detail ?? `HTTP ${res.status}`);
+      }
+      setPreview(await res.json() as AnnualClosePreview);
     } catch (e) {
       setError(String(e));
     } finally {
       setLoading(false);
     }
-  }, [year, groupId, maxCarryDays]);
+  }, [year, groupId, keepEntitlements]);
 
   const runAnnualClose = async () => {
     setRunning(true);
     setError(null);
     setShowConfirm(false);
     try {
-      const data = await api.runAnnualClose({
+      // max_carry_forward_days ist Pflichtfeld des Wrappers, wird von der API
+      // aber ignoriert (Übertrag erfolgt artspezifisch über CARRYFWD, ungedeckelt).
+      const payload = {
         year,
-        max_carry_forward_days: maxCarryDays,
+        max_carry_forward_days: 0,
         group_id: groupId ?? undefined,
-      });
+        keep_entitlements: keepEntitlements,
+      };
+      const data = await api.runAnnualClose(payload);
       setResult(data as AnnualCloseResult);
       setPreview(null);
     } catch (e) {
@@ -141,11 +335,14 @@ export default function Jahresabschluss() {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Maximaler Übertrag (Tage)</label>
-            <input type="number" value={maxCarryDays} min="0" max="365" step="1"
-              onChange={e => setMaxCarryDays(Number(e.target.value))}
-              className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <p className="text-xs text-gray-600 mt-0.5">Rest über diesem Wert verfällt.</p>
+            <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer pb-2">
+              <input
+                type="checkbox"
+                checked={keepEntitlements}
+                onChange={e => setKeepEntitlements(e.target.checked)}
+              />
+              Urlaubsansprüche bleiben im Folgejahr gleich
+            </label>
           </div>
           <div>
             <button onClick={loadPreview} disabled={loading}
@@ -154,6 +351,10 @@ export default function Jahresabschluss() {
             </button>
           </div>
         </div>
+        <p className="text-xs text-gray-600 mt-2">
+          Der Übertrag erfolgt artspezifisch: Nur Abwesenheitsarten mit „Resttage übertragen" (CARRYFWD)
+          werden ins Folgejahr übernommen — ungedeckelt wie im Original; der Rest verfällt.
+        </p>
       </div>
 
       {error && (
@@ -225,7 +426,8 @@ export default function Jahresabschluss() {
                 Vorschau Jahresabschluss {preview.year} → {preview.next_year}
               </h2>
               <p className="text-xs text-gray-500">
-                {preview.employee_count} Mitarbeiter · Max. Übertrag: {preview.carry_forward_limit} Tage
+                {preview.employee_count} Mitarbeiter · Übertrag artspezifisch (CARRYFWD)
+                {keepEntitlements ? ' · Ansprüche bleiben gleich' : ''}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -325,7 +527,7 @@ export default function Jahresabschluss() {
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700">
             <strong>ℹ️ Hinweis:</strong> Die blau markierten Überträge werden beim Durchführen des Jahresabschlusses
             als Übertrag {preview.next_year} gespeichert. Der rote Verfall wird dokumentiert aber nicht automatisch abgezogen.
-            Überträge &gt; {preview.carry_forward_limit} Tage werden auf {preview.carry_forward_limit} Tage begrenzt.
+            Übertragen wird je Abwesenheitsart — nur Arten mit „Resttage übertragen" (CARRYFWD), ohne pauschales Limit.
           </div>
         </>
       )}
@@ -338,6 +540,9 @@ export default function Jahresabschluss() {
           <div className="text-sm">Konfigurieren Sie Jahr und Gruppe, dann klicken Sie auf "Vorschau laden".</div>
         </div>
       )}
+
+      {/* Stichtags-Verfall (Spec 5.17) — nur Admin */}
+      {canAdmin && <ForfeitSection groups={groups} />}
 
       {/* Confirmation dialog */}
       {showConfirm && preview && canAdmin && (
@@ -355,7 +560,10 @@ export default function Jahresabschluss() {
                 <div className="font-semibold mb-1">Diese Aktion wird:</div>
                 <ul className="list-disc list-inside space-y-1 text-xs">
                   <li>Für jeden Mitarbeiter den Resturlaub berechnen</li>
-                  <li>Max. <strong>{preview.carry_forward_limit} Tage</strong> als Übertrag {preview.next_year} speichern</li>
+                  <li>Resttage artspezifisch (nur Arten mit „Resttage übertragen") als Übertrag {preview.next_year} speichern</li>
+                  {keepEntitlements && (
+                    <li>Ansprüche {preview.year} unverändert nach {preview.next_year} übernehmen</li>
+                  )}
                   <li><strong>{fmtNum(preview.total_forfeited)} Tage</strong> Gesamtverfall dokumentieren</li>
                   <li>Bestehende {preview.next_year}-Ansprüche werden überschrieben</li>
                 </ul>

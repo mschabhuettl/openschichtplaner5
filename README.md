@@ -156,8 +156,8 @@ git clone https://github.com/mschabhuettl/openschichtplaner5.git
 cd openschichtplaner5
 
 # Adjust configuration (SP5_DB_PATH + SECRET_KEY!)
-cp backend/.env.docker backend/.env.docker.local
-nano backend/.env.docker    # Set SP5_DB_PATH + SECRET_KEY!
+cp .env.example .env
+nano .env    # Set SP5_DB_PATH + SECRET_KEY!
 
 # Start in production mode (detached)
 make prod
@@ -180,9 +180,10 @@ Then open [`http://localhost:8000`](http://localhost:8000) in your browser.
 | `make test` | Run frontend tests (backend pytest lives in the API repo) |
 | `make logs` | Show live logs |
 
-#### Configuration (`backend/.env.docker`)
+#### Configuration (`.env` in the repo root)
 
-All environment variables with explanations: → [`backend/.env.example`](backend/.env.example)
+Both compose files read `env_file: .env` from the repo root. All environment
+variables with explanations: → [`.env.example`](.env.example)
 
 Most important required fields:
 

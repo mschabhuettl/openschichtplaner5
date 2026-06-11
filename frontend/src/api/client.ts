@@ -121,11 +121,33 @@ export interface DashboardStats {
 
 // ─── Dashboard Summary Types ───────────────────────────────
 // ─── Schedule Coverage (Personalbedarf-Ampel) ─────────────────
+/** Tagesstatus der Personalbedarf-Ampel (Spec 3.9.4): 'none' = kein Bedarf definiert. */
+export type CoverageStatus = 'under' | 'ok' | 'over' | 'none';
+
+/** Bedarfszelle Gruppe × Schichtart eines Tages (5SHDEM-Wochenbedarf bzw. 5SPDEM-Tagesbedarf). */
+export interface CoverageCell {
+  group_id: number;
+  shift_id: number;
+  min: number;
+  max: number;
+  assigned: number;
+  status: 'under' | 'ok' | 'over';
+  source: 'SHDEM' | 'SPDEM';
+}
+
 export interface CoverageDay {
   day: number;
+  date: string;
   scheduled_count: number;
-  required_count: number;
-  status: 'ok' | 'low' | 'critical';
+  /** null, wenn für den Tag kein Bedarf definiert ist (status 'none'). */
+  required_count: number | null;
+  required_min: number | null;
+  required_max: number | null;
+  /** Neues API-Vokabular ist CoverageStatus; 'low' | 'critical' werden nicht mehr
+   *  geliefert und bleiben nur übergangsweise im Typ, bis Schedule.tsx (Welle 2)
+   *  auf under/ok/over/none umgestellt ist. */
+  status: CoverageStatus | 'low' | 'critical';
+  cells: CoverageCell[];
 }
 
 export interface DashboardSummary {
@@ -363,6 +385,8 @@ export interface LoginResponse {
     ADMIN: boolean;
     RIGHTS: number;
     role: string;
+    /** Granulare Rechte (z. B. write_duties/write_absences), wie auch /api/auth/me sie liefert. */
+    permissions?: Record<string, boolean>;
   };
 }
 
@@ -842,6 +866,8 @@ export interface DayEntry {
   spshi_type?: number | null;
   spshi_startend?: string;
   spshi_duration?: number;
+  /** 'cycle' = generierter Zyklusdienst (5CYASS-Expansion); fehlt/null bei manuellen Einträgen. */
+  source?: 'cycle' | null;
 }
 
 export interface EmployeeStats {
@@ -877,6 +903,78 @@ export interface ExtraChargeSummary {
   end_time: number;
   validdays: string;
   holrule: number;
+}
+
+// ─── Personaltabelle (GET /api/personnel-table, Spec 3.9.2/3.9.3) ──
+export interface PersonnelTableRow {
+  employee_id: number;
+  employee_name: string;
+  employee_short: string;
+  // Standardspalten (Spec 3.9.2)
+  iststunden: number;
+  sollstunden: number;
+  saldo: number;
+  arbeitszeit: number;
+  abwesenheit_bezahlt: number;
+  sonntag: number;
+  feiertag: number;
+  sonderdienste: number;
+  /** Einteilungen je Schichtart; Schlüssel = Schichtart-ID (JSON-Objektschlüssel sind Strings). */
+  shift_counts: Record<string, number>;
+  /** Fehltage je Abwesenheitsart; Schlüssel = Abwesenheitsart-ID. */
+  absence_days_by_type: Record<string, number>;
+  /** Urlaubs-Doppelwert genommen/verbleibend je anspruchsverbundener Art —
+   *  nur vorhanden, wenn der Zeitraum genau ein Kalenderjahr umfasst (one_year). */
+  leave_accounts?: Record<string, { taken: number; remaining: number }>;
+}
+
+export interface PersonnelTableResponse {
+  date_from: string;
+  date_to: string;
+  group_id: number | null;
+  /** true = Zeitraum umfasst genau ein Kalenderjahr (Spec 3.9.3 Nr. 6). */
+  one_year: boolean;
+  /** Definition der dynamischen Spalten (Reihenfolge/Beschriftung). */
+  columns: {
+    shifts: { id: number; name: string; short: string }[];
+    leave_types: { id: number; name: string; short: string; entitled: boolean }[];
+  };
+  rows: PersonnelTableRow[];
+}
+
+// ─── Stichtags-Verfall (POST /api/leave-entitlements/forfeit, Spec 3.7.3) ──
+export interface LeaveForfeitCut {
+  employee_id: number;
+  employee_name: string;
+  leave_type_id: number;
+  leave_type_name: string;
+  year: number;
+  old_rest: number;
+  new_rest: number;
+  forfeited: number;
+}
+
+export interface LeaveForfeitResult {
+  ok: boolean;
+  cutoff_date: string;
+  year: number;
+  group_id: number | null;
+  dry_run: boolean;
+  employees_processed: number;
+  cuts: LeaveForfeitCut[];
+  total_forfeited: number;
+}
+
+// ─── Teiltags-Abwesenheiten (5ABSEN.INTERVAL, Spec D-54) ───
+/** 0 = ganztägig, 1 = vormittags, 2 = nachmittags, 3 = Zeitraum (start_time/end_time). */
+export type AbsenceInterval = 0 | 1 | 2 | 3;
+
+export interface AbsenceTimeOptions {
+  interval?: AbsenceInterval;
+  /** Nur bei interval=3: Beginn "HH:MM". */
+  start_time?: string;
+  /** Nur bei interval=3: Ende "HH:MM" (darf rechnerisch über Mitternacht gehen). */
+  end_time?: string;
 }
 
 export interface WeekSchedule {
@@ -1191,8 +1289,27 @@ export const api = {
   getScheduleDay: (date: string, groupId?: number) =>
     fetchJSON<DayEntry[]>(`/api/v1/schedule/day?date=${date}${groupId ? `&group_id=${groupId}` : ''}`),
 
-  getStatistics: (year: number, month: number, groupId?: number) =>
-    fetchJSON<EmployeeStats[]>(`/api/v1/statistics?year=${year}&month=${month}${groupId ? `&group_id=${groupId}` : ''}`),
+  /** Monatsmodus: getStatistics(year, month, groupId?) —
+   *  freier Auswertungszeitraum (Spec 3.9.1): getStatistics({ from, to, group_id? }). */
+  getStatistics: (
+    yearOrRange: number | { from: string; to: string; group_id?: number },
+    month?: number,
+    groupId?: number,
+  ) => {
+    if (typeof yearOrRange === 'object') {
+      const p = new URLSearchParams({ from: yearOrRange.from, to: yearOrRange.to });
+      if (yearOrRange.group_id != null) p.set('group_id', String(yearOrRange.group_id));
+      return fetchJSON<EmployeeStats[]>(`/api/v1/statistics?${p}`);
+    }
+    return fetchJSON<EmployeeStats[]>(`/api/v1/statistics?year=${yearOrRange}&month=${month}${groupId ? `&group_id=${groupId}` : ''}`);
+  },
+
+  // ─── Personaltabelle (Spec 3.9.2/3.9.3) ───────────────────
+  getPersonnelTable: (from: string, to: string, groupId?: number) => {
+    const p = new URLSearchParams({ from, to });
+    if (groupId != null) p.set('group_id', String(groupId));
+    return fetchJSON<PersonnelTableResponse>(`/api/v1/personnel-table?${p}`);
+  },
 
   getScheduleYear: (year: number, employeeId: number) =>
     fetchJSON<MonthSummary[]>(`/api/v1/schedule/year?year=${year}&employee_id=${employeeId}`),
@@ -1272,8 +1389,10 @@ export const api = {
     const qs = params ? new URLSearchParams(Object.fromEntries(Object.entries(params).filter(([,v]) => v != null).map(([k,v]) => [k, String(v)]))).toString() : '';
     return fetchJSON<{ id: number; employee_id: number; date: string; leave_type_id: number; leave_type_name: string; leave_type_short: string }[]>(`/api/v1/absences${qs ? `?${qs}` : ''}`);
   },
-  createAbsence: (employee_id: number, date: string, leave_type_id: number) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/v1/absences', { employee_id, date, leave_type_id }),
+  createAbsence: (employee_id: number, date: string, leave_type_id: number, options?: AbsenceTimeOptions) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/absences', { employee_id, date, leave_type_id, ...options }),
+  updateAbsence: (employee_id: number, date: string, data: { leave_type_id?: number } & AbsenceTimeOptions) =>
+    putJSON<{ ok: boolean; record: unknown }>(`/api/v1/absences/${employee_id}/${date}`, data),
   deleteAbsence: (employee_id: number, date: string) =>
     deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/absences/${employee_id}/${date}`),
 
@@ -1416,7 +1535,8 @@ export const api = {
     deleteReq<{ ok: boolean; hidden: number }>(`/api/v1/leave-types/${id}`),
 
   // ─── CRUD: Holidays ───────────────────────────────────────
-  createHoliday: (data: { DATE: string; NAME: string; INTERVAL?: number }) =>
+  /** repeat_years: Feiertag zusätzlich für die nächsten n Jahre anlegen (jahresweise Wiederholung). */
+  createHoliday: (data: { DATE: string; NAME: string; INTERVAL?: number; repeat_years?: number }) =>
     postJSON<{ ok: boolean; record: unknown }>('/api/v1/holidays', data),
   updateHoliday: (id: number, data: Partial<Holiday>) =>
     putJSON<{ ok: boolean; record: unknown }>(`/api/v1/holidays/${id}`, data),
@@ -1448,10 +1568,22 @@ export const api = {
     putJSON<{ ok: boolean; record: unknown }>(`/api/v1/extracharges/${id}`, data),
   deleteExtraCharge: (id: number) =>
     deleteReq<{ ok: boolean; hidden: number }>(`/api/v1/extracharges/${id}`),
-  getExtraChargesSummary: (year: number, month: number, employeeId?: number) =>
-    fetchJSON<ExtraChargeSummary[]>(
-      `/api/v1/extracharges/summary?year=${year}&month=${month}${employeeId != null ? `&employee_id=${employeeId}` : ''}`
-    ),
+  /** Monatsmodus: getExtraChargesSummary(year, month, employeeId?) —
+   *  freier Auswertungszeitraum (Spec 3.9.1): getExtraChargesSummary({ from, to, employee_id? }). */
+  getExtraChargesSummary: (
+    yearOrRange: number | { from: string; to: string; employee_id?: number },
+    month?: number,
+    employeeId?: number,
+  ) => {
+    if (typeof yearOrRange === 'object') {
+      const p = new URLSearchParams({ from: yearOrRange.from, to: yearOrRange.to });
+      if (yearOrRange.employee_id != null) p.set('employee_id', String(yearOrRange.employee_id));
+      return fetchJSON<ExtraChargeSummary[]>(`/api/v1/extracharges/summary?${p}`);
+    }
+    return fetchJSON<ExtraChargeSummary[]>(
+      `/api/v1/extracharges/summary?year=${yearOrRange}&month=${month}${employeeId != null ? `&employee_id=${employeeId}` : ''}`
+    );
+  },
 
   // ─── Auth ─────────────────────────────────────────────────
   login: (username: string, password: string) =>
@@ -1701,8 +1833,8 @@ export const api = {
     fetchJSON<DashboardStats>(`/api/v1/dashboard/stats${year && month ? `?year=${year}&month=${month}` : ''}`),
 
   // ─── Schedule Coverage (Personalbedarf-Ampel) ──────────────
-  getCoverage: (year: number, month: number) =>
-    fetchJSON<CoverageDay[]>(`/api/v1/schedule/coverage?year=${year}&month=${month}`),
+  getCoverage: (year: number, month: number, groupId?: number) =>
+    fetchJSON<CoverageDay[]>(`/api/v1/schedule/coverage?year=${year}&month=${month}${groupId != null ? `&group_id=${groupId}` : ''}`),
 
   // ─── Global Search (Spotlight) ─────────────────────────────
   search: (query: string) =>
@@ -2003,6 +2135,12 @@ export const api = {
   // ─── Leave Entitlements Write ──────────────────────────────
   createLeaveEntitlement: (data: { employee_id: number; year: number; leave_type_id: number; entitlement: number; carry_forward?: number }) =>
     postJSON<unknown>('/api/v1/leave-entitlements', data),
+
+  // ─── Stichtags-Verfall (Spec 3.7.3 / Dialog 5.17) ──────────
+  /** Kürzt je Mitarbeiter den Resturlaub des Stichtagsjahres auf den Verbrauch
+   *  bis einschließlich Stichtag; dry_run=true liefert nur die Vorschau. Admin-Rolle. */
+  forfeitLeaveEntitlements: (data: { cutoff_date: string; group_id?: number; dry_run?: boolean }) =>
+    postJSON<LeaveForfeitResult>('/api/v1/leave-entitlements/forfeit', data),
 
   // ─── Admin: ORM Mirror ─────────────────────────────────────
   getOrmMirrorStatus: () =>

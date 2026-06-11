@@ -11,6 +11,7 @@ export type {
   ShiftType,
   LeaveType,
   Holiday,
+  HolidayInterval,
   Workplace,
   ScheduleEntry,
   User,
@@ -39,6 +40,8 @@ export interface DayEntry {
   kind: 'shift' | 'special_shift' | 'absence' | null;
   leave_name: string;
   display_name: string;
+  /** 'cycle' = generierter Zyklusdienst (5CYASS-Expansion); fehlt/null bei manuellen Einträgen. */
+  source?: 'cycle' | null;
 }
 
 /** Absence record (absence-kind DayEntry with extra metadata) */

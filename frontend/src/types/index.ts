@@ -112,10 +112,16 @@ export interface LeaveType {
   HIDE: boolean;
 }
 
+/** Halbtagsmodus eines Feiertags (5HOLID.INTERVAL): 0 = ganztägig,
+ *  1 = erste Tageshälfte, 2 = zweite Tageshälfte. */
+export type HolidayInterval = 0 | 1 | 2;
+
 export interface Holiday {
   ID: number;
   DATE: string;
   NAME: string;
+  /** Wertebereich HolidayInterval (0|1|2); bewusst breit als number,
+   *  solange Alt-Code (Holidays.tsx-Formular) freie Zahlen schreibt. */
   INTERVAL: number;
 }
 
@@ -141,6 +147,8 @@ export interface ScheduleEntry {
   shift_name?: string;
   leave_name?: string;
   custom_name?: string;
+  /** 'cycle' = generierter Zyklusdienst (5CYASS-Expansion); fehlt/null bei manuellen Einträgen. */
+  source?: 'cycle' | null;
 }
 
 export interface User {
@@ -155,6 +163,8 @@ export interface User {
   WDUTIES?: boolean;
   WABSENCES?: boolean;
   BACKUP?: boolean;
+  /** Granulare Rechte aus /api/auth/me (z. B. write_duties/write_absences). */
+  permissions?: Record<string, boolean>;
 }
 
 export interface Stats {

@@ -49,7 +49,7 @@ Daten:  .DBF-Dateien (kanonisch, Interop mit Original-SP5)
 | `backend/` | **Kein App-Code.** Ressourcen-Root, den `sp5api`/`sp5lib` über `SP5_BACKEND_DIR` auflösen: `alembic/` (PG-Migrationen), `data/` + `api/data` + `api/uploads` (JSON-State-Seeds), `fixtures/` (DBF-Fixtures für CI/E2E), `requirements.txt`, `scripts/` (PG-Migrations-/Seed-Skripte) |
 | `nginx/` | Prod-Reverse-Proxy-Image (`Dockerfile`, `nginx.conf`): statisches Frontend, `/api/`-Proxy, Gzip, Security-Header, SSL-ready (Certbot-Webroot) |
 | `scripts/` | `seed_demo_data.py`, `generate_demo_schedule.py` (Demo-/Screenshot-Daten via `sp5lib`) |
-| `docs/` | `API.md`, `DEPLOYMENT.md`, `DEVELOPMENT.md`, `SQLITE_MIGRATION.md`, `adr/0001-api-extraction.md`, `screenshots/` (81 Dateien) |
+| `docs/` | `API.md`, `DEPLOYMENT.md`, `DEVELOPMENT.md`, `ROADMAP.md`, `adr/0001-api-extraction.md`, `screenshots/` (81 Dateien) |
 | Repo-Root | `Makefile`, `start.sh`, `Dockerfile`, `docker-compose.yml`, `docker-compose.prod.yml`, `.env.example`, `take_screenshots.py`, CI unter `.github/workflows/` |
 
 Das Root-`pyproject.toml` enthält **nur Ruff-Konfiguration** — dieses Repo veröffentlicht
@@ -279,13 +279,13 @@ App → API → Lib (die App wird von keinem der beiden Pakete referenziert). Ba
 lebt im API-Repo (`cd ../openschichtplaner5-api && pytest`), Lib-Tests im Lib-Repo;
 `make test` hier fährt nur vitest + Playwright. `docs/adr/0001-api-extraction.md`
 dokumentiert die Extraktion (Kopplungsinventar, `create_app(config)`-Zielbild, Phasen
-P1–P5); `TASKS.md`/`FINAL_REPORT.md` protokollieren die Durchführung.
+P1–P5).
 
 ---
 
-## 5. Lücken, Altlasten, Auffälligkeiten
+## 5. Known Issues
 
-Ehrliche Befunde mit Pfaden; Reihenfolge ≈ Schwere.
+Bekannte Schwachstellen und Altlasten, mit Pfadangaben; Reihenfolge ≈ Schwere.
 
 1. **SSE-Pfad-Mismatch im Prod-nginx (funktionaler Bug).** Der echte SSE-Endpunkt ist
    `/api/v1/events` (`frontend/src/hooks/useSSE.ts:69`), nginx puffert aber nur
@@ -299,10 +299,10 @@ Ehrliche Befunde mit Pfaden; Reihenfolge ≈ Schwere.
 3. **`backend/.env.docker` ist tote/staubige Konfiguration.** Keine Compose-Datei
    referenziert sie (beide nutzen `env_file: .env`), sie enthält `APP_VERSION=0.9.5`
    (Repo ist 1.1.0) und Frontend-`VITE_*`-Variablen ohne Wirkung. `README.md:158-160`
-   instruiert trotzdem, diese Datei zu editieren — widerspricht `.env.example:6-8` und
-   `CLAUDE.md:46` („.env lebt im Repo-Root“).
+   instruiert trotzdem, diese Datei zu editieren — widerspricht `.env.example:6-8`
+   („.env lebt im Repo-Root“).
 4. **README-/Doku-Drift:**
-   - „React 18“ (`README.md:362`, Badge Z. 16, `CLAUDE.md:15`) vs. tatsächlich
+   - „React 18“ (`README.md:362`, Badge Z. 16) vs. tatsächlich
      `react ^19.2.0` (`frontend/package.json:17`).
    - „33 pages“ (`README.md:347-349`) vs. real 77 Seiten-Komponenten in
      `frontend/src/pages/`; „30 pages“ Screenshots vs. 81 Dateien in `docs/screenshots/`.
@@ -318,27 +318,22 @@ Ehrliche Befunde mit Pfaden; Reihenfolge ≈ Schwere.
 6. **`.vscode/` ist gitignoriert (`.gitignore:45`), aber `settings.json`/`extensions.json`
    sind getrackt** — vor der Ignore-Regel hinzugefügt; Ignore greift für getrackte
    Dateien nicht.
-7. **Agent-Prozess-Doku am Repo-Root:** `ANALYSIS.md`, `AUDIT.md`, `TASKS.md`,
-   `DECISIONS.md`, `FINAL_REPORT.md`, `AUTONOMOUS_RUN.md` sind Protokolle autonomer
-   Läufe, teils inhaltlich überholt (z. B. beschreibt `ANALYSIS.md` noch
-   `backend/api/` + `backend/sp5lib/` als lokale Module). Wertvoll als Historie,
-   irreführend als aktuelle Architektur-Referenz.
-8. **ADR-Status veraltet:** `docs/adr/0001-api-extraction.md:3` steht auf „Proposed“,
+7. **ADR-Status veraltet:** `docs/adr/0001-api-extraction.md:3` steht auf „Proposed“,
    obwohl die Extraktion (P5) abgeschlossen ist und die App das Paket konsumiert.
-9. **Doppelter Laufzeit-State (bekannte, bewusst vertagte Schuld aus ADR 0001 §1c):**
+8. **Doppelter Laufzeit-State (bekannte, bewusst vertagte Schuld aus ADR 0001 §1c):**
    zwei Datenverzeichnisse `backend/data/` **und** `backend/api/data/` —
    `skills.json` existiert in beiden (`backend/data/skills.json`,
    `backend/api/data/skills.json`) —, dadurch zwei Volumes (`sp5_state`,
    `sp5_api_state`) statt eines injizierten `data_dir`. Zudem sind zwei
    Demo-Foto-Uploads als „Seeds“ committed (`backend/api/uploads/photos/40.webp`, `41.webp`).
-10. **In-Memory-Session-Store → Single-Worker-Zwang.** Mehrere uvicorn-Worker erzeugen
-    zufällige 401 (dokumentiert in `README.md:125-128`, `docs/DEVELOPMENT.md`);
-    Redis-Alternative existiert nicht. Betriebs-Einschränkung, kein Bug.
-11. **Frontend-Typen-Doppelstruktur:** `frontend/src/types.ts` re-exportiert
+9. **In-Memory-Session-Store → Single-Worker-Zwang.** Mehrere uvicorn-Worker erzeugen
+   zufällige 401 (dokumentiert in `README.md:125-128`, `docs/DEVELOPMENT.md`);
+   Redis-Alternative existiert nicht. Betriebs-Einschränkung, kein Bug.
+10. **Frontend-Typen-Doppelstruktur:** `frontend/src/types.ts` re-exportiert
     `frontend/src/types/index.ts` (Datei gewinnt bei `'../types'` gegen das
     gleichnamige Verzeichnis) — funktioniert, ist aber fragil benannt; der Großteil der
     Response-Typen lebt zusätzlich direkt in `api/client.ts`.
-12. **Kleinigkeiten:** Dateiname mit Umlaut `frontend/src/pages/VerfügbarkeitsMatrix.tsx`
+11. **Kleinigkeiten:** Dateiname mit Umlaut `frontend/src/pages/VerfügbarkeitsMatrix.tsx`
     (potenzielle Encoding-Stolperfalle auf Fremdsystemen); `Makefile:42-63` schluckt
     Fehler (`2>/dev/null`, `|| true` bei ruff/mypy — Lint kann nie fehlschlagen);
     `make lint` mypy-t das **installierte** `sp5api`-Paket statt Repo-Code; der

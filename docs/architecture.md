@@ -49,7 +49,7 @@ Daten:  .DBF-Dateien (kanonisch, Interop mit Original-SP5)
 | `backend/` | **Kein App-Code.** Ressourcen-Root, den `sp5api`/`sp5lib` über `SP5_BACKEND_DIR` auflösen: `alembic/` (PG-Migrationen), `data/` + `api/data` + `api/uploads` (JSON-State-Seeds), `fixtures/` (DBF-Fixtures für CI/E2E), `requirements.txt`, `scripts/` (PG-Migrations-/Seed-Skripte) |
 | `nginx/` | Prod-Reverse-Proxy-Image (`Dockerfile`, `nginx.conf`): statisches Frontend, `/api/`-Proxy, Gzip, Security-Header, SSL-ready (Certbot-Webroot) |
 | `scripts/` | `seed_demo_data.py`, `generate_demo_schedule.py` (Demo-/Screenshot-Daten via `sp5lib`) |
-| `docs/` | `API.md`, `DEPLOYMENT.md`, `DEVELOPMENT.md`, `ROADMAP.md`, `adr/0001-api-extraction.md`, `screenshots/` (81 Dateien) |
+| `docs/` | `API.md`, `DEPLOYMENT.md`, `DEVELOPMENT.md`, `POSTGRESQL.md`, `ROADMAP.md`, `adr/0001-api-extraction.md`, `screenshots/` (81 Dateien) |
 | Repo-Root | `Makefile`, `start.sh`, `Dockerfile`, `docker-compose.yml`, `docker-compose.prod.yml`, `.env.example`, `take_screenshots.py`, CI unter `.github/workflows/` |
 
 Das Root-`pyproject.toml` enthält **nur Ruff-Konfiguration** — dieses Repo veröffentlicht

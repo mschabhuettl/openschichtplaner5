@@ -130,10 +130,12 @@ PAGES = [
     ("onboarding",              "/onboarding"),
     ("audit-log",               "/auditlog"),
     ("health",                  "/health"),
+    ("orm-mirror",              "/orm-mirror"),
     ("export-scheduler",        "/export-scheduler"),
     ("rate-limits",             "/rate-limits"),
     ("work-time-rules",         "/work-time-rules"),
     ("changelog",               "/changelog"),
+    ("urlaubsverwaltung",       "/urlaub"),  # Alias — wird so im Wiki referenziert
 ]
 
 os.makedirs(SCREENSHOT_DIR, exist_ok=True)
@@ -205,6 +207,55 @@ def screenshot_all():
                 except Exception as e2:
                     print(f"  [✗] Fallback also failed: {e2}", flush=True)
                     failed += 1
+
+        # ── Spezial-Shots (Interaktion/Viewport nötig) ────────────────
+        def special(name, fn):
+            nonlocal success, failed
+            print(f"[→] {name} (Spezial)", flush=True)
+            try:
+                fn()
+                print(f"  [✓] Saved: {name}.png", flush=True)
+                success += 1
+            except Exception as e:
+                print(f"  [✗] Error on {name}: {e}", flush=True)
+                failed += 1
+
+        def shot(p, name):
+            p.screenshot(path=os.path.join(SCREENSHOT_DIR, f"{name}.png"), full_page=False)
+
+        def dienstplan_kalender():
+            page.goto(BASE_URL + "/schedule", timeout=30000)
+            page.wait_for_load_state("networkidle", timeout=15000)
+            page.click('button[title="Kalender-Übersicht"]', timeout=10000)
+            page.wait_for_timeout(2500)
+            shot(page, "dienstplan-kalender")
+
+        def dark_mode_dashboard():
+            page.evaluate("localStorage.setItem('sp5_theme', 'dark')")
+            page.goto(BASE_URL + "/", timeout=30000)
+            page.wait_for_load_state("networkidle", timeout=15000)
+            page.wait_for_timeout(2500)
+            shot(page, "dark-mode-dashboard")
+            page.evaluate("localStorage.setItem('sp5_theme', 'light')")
+
+        def mobile_ansicht():
+            ctx = browser.new_context(
+                viewport={"width": 390, "height": 844}, locale="de-DE",
+                is_mobile=True, device_scale_factor=2,
+            )
+            mpage = ctx.new_page()
+            mpage.goto(BASE_URL + "/", timeout=30000)
+            mpage.wait_for_load_state("domcontentloaded", timeout=10000)
+            inject_devmode_session(mpage)
+            mpage.goto(BASE_URL + "/schedule", timeout=30000)
+            mpage.wait_for_load_state("networkidle", timeout=15000)
+            mpage.wait_for_timeout(2500)
+            shot(mpage, "mobile-ansicht")
+            ctx.close()
+
+        special("dienstplan-kalender", dienstplan_kalender)
+        special("dark-mode-dashboard", dark_mode_dashboard)
+        special("mobile-ansicht", mobile_ansicht)
 
         browser.close()
     print(f"\n[✓] Done! {success} screenshots saved, {failed} failed.", flush=True)

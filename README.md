@@ -7,7 +7,7 @@
 *Reads and writes the original DBF database files directly — no migration needed.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.1.0-brightgreen)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.2.0-brightgreen)](CHANGELOG.md)
 [![Tests](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml)
 [![Docker](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml)
 [![GitHub release](https://img.shields.io/github/v/release/mschabhuettl/openschichtplaner5?include_prereleases)](https://github.com/mschabhuettl/openschichtplaner5/releases)
@@ -146,7 +146,7 @@ Docker images are automatically built on every release and published to the GitH
 docker pull ghcr.io/mschabhuettl/openschichtplaner5:latest
 
 # Specific version
-docker pull ghcr.io/mschabhuettl/openschichtplaner5:1.1.0
+docker pull ghcr.io/mschabhuettl/openschichtplaner5:1.2.0
 ```
 
 #### Quick Start with Docker Compose

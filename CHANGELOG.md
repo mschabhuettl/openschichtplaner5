@@ -7,9 +7,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [Unreleased]
+## [1.2.0] - 2026-06-11
 
 ### Fixed
+- **Nginx-Produktion: SSE lief über den generischen `/api/`-Block.** Der
+  Frontend-Hook `useSSE` verbindet sich mit `/api/v1/events`; der bisherige
+  `location`-Block `/api/sse` griff nie, wodurch Events gepuffert wurden und
+  Verbindungen nach 60 s getrennt wurden. Die SSE-Location zeigt jetzt auf
+  `/api/v1/events` mit `proxy_buffering off` und `proxy_read_timeout 3600s`;
+  das Reverse-Proxy-Beispiel im README ist entsprechend korrigiert.
+- **Makefile: `lint` und `test` schluckten Fehlercodes** (`|| true` und
+  `2>/dev/null` entfernt — Befunde lassen die Targets jetzt fehlschlagen);
+  redundantes `mypy`-Ziel entfernt, Playwright in eigenes Ziel `test-e2e`.
 - **Removed the dead root `tests/test_thread_safety.py`.** It still imported
   `backend.sp5lib` — broken since the library extraction (#61) — and was
   referenced by no runner (neither Makefile nor CI). The tests cover sp5lib
@@ -53,6 +62,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   `openschichtplaner5-api` 1.1.2 declares `requires-python >=3.12`.
   `backend/.venv` is now dockerignored so local builds don't bake the dev venv
   into the image.
+- **Honour documented config env vars (#151, #152, #153):** `LOG_LEVEL`, `LOG_FILE`, `BRUTE_FORCE_MAX_ATTEMPTS`, `BRUTE_FORCE_LOCKOUT_MINUTES`, `RATE_LIMIT_API`, `RATE_LIMIT_LOGIN` and `SESSION_CLEANUP_INTERVAL_MINUTES` were documented in `.env.example` but hardcoded/ignored in code — they now take effect (defaults unchanged, so non-breaking). `LOG_FILE` creates its parent directory and falls back safely to `/tmp` on error.
+- **`ShiftResponse` schema key (#145):** the shift response model declared the phantom `HIDDEN` field; corrected to the real DBF key `HIDE` (+ `POSITION`), so the OpenAPI schema no longer advertises an always-null field.
 
 ### Changed
 - **API extracted into its own repo:** the REST API (formerly `backend/api/`) now
@@ -68,6 +79,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   `api/uploads`); the e2e fixture DBFs moved to `backend/fixtures/`. New
   `make dev-link` installs local sibling clones of the library and the API
   editable into `backend/.venv` for three-repo development.
+- **Repo-Hygiene (Phase-6-Cleanup):** veraltetes `frontend/coverage/`-Artefakt
+  und tote `backend/.env.docker` aus Git entfernt, `.gitignore` konsolidiert
+  (`.vscode/settings.json`/`extensions.json` bleiben bewusst getrackt);
+  Prozess-Protokolle nach `docs/history/` verschoben und Doku-Drift behoben
+  (React 19, 77 Seiten, `/api/v1`-Pfade, ADR-0001 Accepted);
+  `VerfügbarkeitsMatrix.tsx` → ASCII-Dateiname `VerfuegbarkeitsMatrix.tsx`;
+  tote Typ-Duplikate aus `types.ts` und die Übergangs-Union
+  `'low'|'critical'` aus `CoverageDay.status` entfernt.
 
 ### Added
 - **ORM-Mirror Admin API (#131):** New admin-only router under `/api/admin/orm` exposing a read-only ORM projection of the DBF master-data definition tables (shifts, leave types, workplaces). `POST /api/admin/orm/sync` materializes the mirror into its own `sp5_orm.db`; `GET /api/admin/orm/shifts`, `/leave-types`, `/workplaces` list the definitions (with an `include_hidden` query). The DBF files remain the source of truth — this is the gradual DBF → ORM migration path. Consumes `libopenschichtplaner5 >=1.2.0` (Shift/LeaveType/Workplace models + repositories + sync).
@@ -77,14 +96,55 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **ORM-Mirror Planning Data (#141):** Completed the read mirror with planning endpoints — `GET /api/admin/orm/shift-demands` (`5SHDEM`, filterable via `shift_id`/`weekday`/`group_id`), `/special-demands` (`5SPDEM`, filterable via `date_from`/`date_to`/`shift_id`), `/cycles` (`5CYCLE`, with `include_hidden`), `/cycle-assignments` (`5CYASS`, filterable via `employee_id`/`cycle_id`) and `/restrictions` (`5RESTR`, filterable via `employee_id`/`shift_id`). `POST /api/admin/orm/sync` now covers **all 19 supported tables**, so the read-only ORM mirror spans the full DBF schema. Bumps the `libopenschichtplaner5` consumption to `>=1.6.0`.
 - **ORM-Mirror status endpoint (#144):** `GET /api/admin/orm/status` reports the live per-table row counts of the mirror (all 19 tables) plus `mirror_db_exists` and `total_rows`, without triggering a re-sync — a cheap freshness check before `POST /sync`.
 - **ORM-Mirror admin UI (#147):** New admin-only **"ORM-Spiegel"** page (`/orm-mirror`) showing the mirror status (per-table counts) with a "Jetzt synchronisieren" button — a usable face for the mirror endpoints.
+- **Dienstplan-Welle 2 (APP-INT-1/4/6/7, V-1, V-2, V-18):** Das Dienstplan-Grid
+  stapelt jetzt Mehrfacheinträge pro Zelle (Dienst + Abwesenheit) mit
+  Kontextmenü-Aktionen je Eintrag; ein Konfliktdialog
+  „Zusätzlich/Ersetzen/Abbrechen" (Spec 6.7) mit merkbarer Strategie sichert
+  Klick-Eintragung und Drag & Drop in belegte Felder ab; die
+  Personalbedarfs-Ampel zeigt Unter-/Über-/Normalbesetzung je Tag; generierte
+  Zyklusdienste sind im Dienstplan und im Einsatzplan gekennzeichnet (↻,
+  Schraffur) und beim Löschen/Verschieben/Kopieren sicher behandelt;
+  Heute-Button und Datumssprung (Strg+G) ergänzen die Navigation.
+- **Teiltags-Abwesenheiten (V-3):** ganz/vormittags/nachmittags/stundenweise
+  (`5ABSEN.INTERVAL`) in Dienstplan-Picker, Kontextmenü und Urlaub-Erfassung,
+  inkl. Zeitfenster bei stundenweiser Abwesenheit.
+- **Jahresübersicht als Jahres-Tagesraster (V-8):** neues 12×31-Raster je
+  Mitarbeiter mit Dienstplan-Farben, Feiertags-/Wochenend-Markierung und
+  Zyklus-Kennzeichnung; Klick auf eine Zelle öffnet den Monat im Dienstplan.
+  Die bisherige Aggregat-Ansicht bleibt als Modus „Zusammenfassung" erhalten.
+- **Granulares Rechte-Gating (G-1, Spec 9.5.3):** Bedienelemente in Dienstplan,
+  Einsatzplan, Urlaub, Notizen, Tauschbörse und Mitarbeiterverwaltung folgen
+  jetzt den feingranularen Benutzerrechten (`WDUTIES`, `WABSENCES`, `WPAST`,
+  `WNOTES`, `WDEVIATION`, `WSWAPONLY`, `ADDEMPL`) aus `/api/auth/me`.
+- **Stammdaten-Tiefe (V-7, V-10, V-11):** Schichtarten-Dialog mit Zeiten-Tabelle
+  über 8 Tagestypen (Mo–So + Feiertag), bis zu drei Zeiträumen je Tagestyp und
+  Arbeitszeit-Autoberechnung; Personalbedarf mit Feiertagsspalte, „kein
+  Maximum" und besonderem Bedarf über Von/Bis-Zeiträume; mehrere
+  Schichtmodell-Zuordnungen je Mitarbeiter mit Einstiegsposition.
+- **Feiertage & Jahresabschluss (V-12, V-17, V-13/APP-INT-3):** halbe Feiertage
+  (vormittags/nachmittags) und „auch in den folgenden 9 Jahren anlegen";
+  Jahresabschluss-Option „Urlaubsansprüche bleiben im Folgejahr gleich";
+  Admin-Funktion „Resturlaub verfallen lassen (Stichtag)" mit
+  Dry-Run-Vorschau.
+- **Abwesenheitsarten-Anrechnung (V-4):** `CHARGETYP`-Konfiguration
+  (Keine/Abwesenheitszeit/feste Stundenzahl je Tag) im
+  Abwesenheitsarten-Dialog.
+- **Personaltabelle & Berichte (APP-INT-2/5, V-9, R-1, R-2, R-3):**
+  Personaltabelle nutzt `/api/personnel-table` mit frei wählbarem
+  Auswertungszeitraum; neuer Bericht „Dienstplaneinträge (Liste)" mit
+  Druckansicht und CSV-Export (UTF-8 + BOM).
+- **Import-Interop (I-1, I-3):** Importer erkennt UTF-16-Dateien per BOM und
+  Tab/Komma/Semikolon als Trennzeichen (Original-Exporte direkt importierbar),
+  akzeptiert Farbwerte als Dezimal-COLORREF und fragt vor dem Import-Start
+  nach Bestätigung.
+- **Einstellungen: Reset der gemerkten Konflikt-Strategie.** Eine per
+  „merken"-Häkchen gespeicherte Standard-Aktion des Dienstplan-Konfliktdialogs
+  (hinzufügen/ersetzen) lässt sich jetzt auf der Einstellungen-Seite wieder
+  auf „immer fragen" zurücksetzen.
 
 ### Security
 - **JWT secret now honours `SECRET_KEY` (#150):** The signing secret previously read only `SP5_JWT_SECRET`, while `.env.example`, the README, the deployment docs and `start.sh` all use `SECRET_KEY` — so a deployment following the docs silently signed tokens with a random per-process key (sessions broke on every restart and across workers). `SECRET_KEY` is now honoured (`SP5_JWT_SECRET` kept as an alias) and the shipped `change-me…` placeholder is treated as unset.
 - **Startup warning for missing JWT secret (#149):** In production (not dev/debug) the app now logs a prominent warning when no real JWT secret is configured, instead of silently using a random per-process fallback.
-
-### Fixed
-- **Honour documented config env vars (#151, #152, #153):** `LOG_LEVEL`, `LOG_FILE`, `BRUTE_FORCE_MAX_ATTEMPTS`, `BRUTE_FORCE_LOCKOUT_MINUTES`, `RATE_LIMIT_API`, `RATE_LIMIT_LOGIN` and `SESSION_CLEANUP_INTERVAL_MINUTES` were documented in `.env.example` but hardcoded/ignored in code — they now take effect (defaults unchanged, so non-breaking). `LOG_FILE` creates its parent directory and falls back safely to `/tmp` on error.
-- **`ShiftResponse` schema key (#145):** the shift response model declared the phantom `HIDDEN` field; corrected to the real DBF key `HIDE` (+ `POSITION`), so the OpenAPI schema no longer advertises an always-null field.
 
 ### Accessibility
 - **Modal focus management (#132, #136):** Added a shared `useFocusTrap` hook (Tab cycling that skips disabled controls, Escape, focus restoration) and migrated `FormModal`/`ConfirmDialog` to it; `PhotoCropDialog` and `KeyboardShortcutsModal` gained proper focus trapping.

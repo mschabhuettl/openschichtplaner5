@@ -149,6 +149,35 @@ docker pull ghcr.io/mschabhuettl/openschichtplaner5:latest
 docker pull ghcr.io/mschabhuettl/openschichtplaner5:1.2.0
 ```
 
+#### Standalone `docker run`
+
+The image serves SPA + API from a single container on port 8000. Mount the
+directory with the Schichtplaner5 `.DBF` files to `/app/data` and set a
+`SECRET_KEY` (everything else has sane defaults, see [`.env.example`](.env.example)):
+
+```bash
+docker run -d --name openschichtplaner5 -p 8000:8000 \
+  -v /path/to/SP5/Daten:/app/data \
+  -e SECRET_KEY=$(openssl rand -hex 32) \
+  ghcr.io/mschabhuettl/openschichtplaner5:latest
+
+# health check
+curl http://localhost:8000/api/health
+# → {"status":"healthy","checks":{"db":"ok",...},...}
+```
+
+Or build locally instead of pulling from ghcr.io (build args `LIB_SOURCE` /
+`API_SOURCE` default to the PyPI pins; override with any pip requirement, e.g.
+`git+https://…@main`):
+
+```bash
+docker build -t openschichtplaner5 .
+docker run -d --name openschichtplaner5 -p 8000:8000 \
+  -v /path/to/SP5/Daten:/app/data \
+  -e SECRET_KEY=$(openssl rand -hex 32) \
+  openschichtplaner5
+```
+
 #### Quick Start with Docker Compose
 
 ```bash

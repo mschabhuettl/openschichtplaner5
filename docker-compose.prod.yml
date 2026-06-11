@@ -79,7 +79,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        # lib/api aus Git-main (aktuelle Versionen nicht auf PyPI) — überschreibbar
+        # lib/api als PyPI-Pins — überschreibbar (z. B. git+https://…@main)
         LIB_SOURCE: ${LIB_SOURCE:-libopenschichtplaner5[postgres]==1.7.0}
         API_SOURCE: ${API_SOURCE:-openschichtplaner5-api==1.2.0}
     container_name: sp5-backend

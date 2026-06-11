@@ -6,8 +6,8 @@
 #        und proxied /api → api  (Port ${SP5_APP_PORT:-8080})
 #   api  openschichtplaner5-api aus dem GESCHWISTER-CLONE — Build-Context
 #        ../openschichtplaner5-api ist dessen eigenes Git-Repo; die Library
-#        kommt dort via Build-Arg LIB_SOURCE (Default: PyPI-Pin, die aktuellen
-#        Versionen sind nicht auf PyPI)  (direkt: Port ${SP5_API_PORT:-8000})
+#        kommt dort via Build-Arg LIB_SOURCE (Default: PyPI-Pin,
+#        überschreibbar)  (direkt: Port ${SP5_API_PORT:-8000})
 #   postgres  optionales Profil für den PostgreSQL-Spiegel (DB_BACKEND=postgresql)
 #
 # Voraussetzung: die Repos liegen als Geschwister nebeneinander —

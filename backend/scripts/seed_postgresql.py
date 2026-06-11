@@ -20,30 +20,34 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sp5lib.dbf_reader import read_dbf
-from sp5lib.orm.base import Base
-from sp5lib.orm.models import (
+from sp5lib.orm import (
     Absence,
     Booking,
     Cycle,
     CycleAssignment,
-    CycleEntry,
     Employee,
-    ExtraCharge,
     Group,
     GroupAssignment,
     Holiday,
-    HolidayBan,
     LeaveEntitlement,
     LeaveType,
-    Note,
     OvertimeRecord,
     Restriction,
     ScheduleEntry,
-    Settings,
     Shift,
     SpecialShift,
-    User,
     Workplace,
+)
+from sp5lib.orm.base import Base
+
+# PG-only Modelle (JSON-Sidecar-Ersatz) liegen in models_pg
+from sp5lib.orm.models_pg import (
+    CycleEntry,
+    ExtraCharge,
+    HolidayBan,
+    Note,
+    Settings,
+    User,
 )
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
@@ -131,11 +135,16 @@ def seed(database_url: str, daten_path: str):
         _log.info("  groups: %d", count)
 
         # ── Group Assignments ──
+        # Die DBF-ID in 5GRASG ist NICHT eindeutig (laufender Index je Gruppe) —
+        # PK autoincrement lassen, logische Identität ist (employee_id, group_id).
         count = 0
+        seen_pairs = set()
         for r in _read_dbf_safe(daten_path, "GRASG"):
-            if not r.get("ID") or not r.get("EMPLOYEEID") or not r.get("GROUPID"):
+            pair = (r.get("EMPLOYEEID"), r.get("GROUPID"))
+            if not pair[0] or not pair[1] or pair in seen_pairs:
                 continue
-            session.add(GroupAssignment(id=r["ID"], employee_id=r["EMPLOYEEID"], group_id=r["GROUPID"]))
+            seen_pairs.add(pair)
+            session.add(GroupAssignment(employee_id=pair[0], group_id=pair[1]))
             count += 1
         _log.info("  group_assignments: %d", count)
 

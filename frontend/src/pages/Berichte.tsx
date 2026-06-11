@@ -1168,6 +1168,167 @@ async function reportHolidayBans(groups: Group[]) {
   printHtml(html, 'Urlaubssperren');
 }
 
+// ── Report: Dienstplaneinträge (Liste) ────────────────────────
+// R-1 (Spec 7.4.5 Nr. 1): je Mitarbeiter alle Einträge im Zeitraum mit
+// Datum, Art, Kürzel/Name, Uhrzeiten, Arbeitsplatz und Stunden + Summen je MA.
+
+function csvCell(v: string | number): string {
+  const s = String(v);
+  return /[";\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function downloadCSVFile(filename: string, content: string) {
+  const blob = new Blob(['\uFEFF' + content], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+const DAY_SHORT_DE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+async function reportDienstplanEintraege(
+  fromDate: string,
+  toDate: string,
+  groupId: number | null,
+  employees: Employee[],
+  groups: Group[],
+  shifts: ShiftType[],
+  format: 'print' | 'csv',
+) {
+  if (!fromDate || !toDate) { alert('Bitte Zeitraum (Von/Bis) auswählen.'); return; }
+  if (toDate < fromDate) { alert('Von-Datum muss vor Bis-Datum liegen.'); return; }
+  const from = new Date(`${fromDate}T00:00:00`);
+  const to = new Date(`${toDate}T00:00:00`);
+  if ((to.getTime() - from.getTime()) / 86400000 > 366) { alert('Zeitraum zu lang (max. 1 Jahr).'); return; }
+
+  // Monate im Zeitraum + Feiertage der beteiligten Jahre laden
+  const monthKeys: { y: number; m: number }[] = [];
+  for (let y = from.getFullYear(), m = from.getMonth() + 1; y < to.getFullYear() || (y === to.getFullYear() && m <= to.getMonth() + 1);) {
+    monthKeys.push({ y, m });
+    m++; if (m > 12) { m = 1; y++; }
+  }
+  const years = [...new Set(monthKeys.map(k => k.y))];
+  const [workplaces, ...holidayLists] = await Promise.all([
+    api.getWorkplaces(),
+    ...years.map(y => api.getHolidays(y)),
+  ]);
+  const holidayDates = new Set(holidayLists.flat().map(h => h.DATE));
+  const wpMap = Object.fromEntries(workplaces.map(w => [w.ID, w.NAME]));
+  const shiftMap = Object.fromEntries(shifts.map(s => [s.ID, s]));
+
+  const allEntries = (await Promise.all(monthKeys.map(k => api.getSchedule(k.y, k.m, groupId ?? undefined))))
+    .flat()
+    .filter(e => e.date >= fromDate && e.date <= toDate);
+
+  // Tagindex nach Spec D-34: 0=Mo..6=So, 7=Feiertag
+  const dayIndex = (dateStr: string): number => {
+    if (holidayDates.has(dateStr)) return 7;
+    return (new Date(`${dateStr}T00:00:00`).getDay() + 6) % 7;
+  };
+
+  interface ListRow {
+    date: string; art: string; short: string; name: string;
+    times: string; workplace: string; hours: number | null;
+  }
+
+  const byEmp: Record<number, ListRow[]> = {};
+  for (const e of allEntries) {
+    const idx = dayIndex(e.date);
+    const shift = e.shift_id ? shiftMap[e.shift_id] : undefined;
+    let times = '';
+    let hours: number | null = null;
+    if (e.kind !== 'absence' && shift) {
+      const se = shift[`STARTEND${idx}` as keyof ShiftType] as string | undefined;
+      times = (se || '').trim() || (shift.STARTEND0 || '').trim();
+      const dur = shift[`DURATION${idx}` as keyof ShiftType] as number | undefined;
+      hours = dur || shift.DURATION0 || 0;
+    }
+    const art = e.kind === 'shift'
+      ? (e.source === 'cycle' ? 'Dienst (Zyklus)' : 'Dienst')
+      : e.kind === 'special_shift' ? 'Sonderdienst' : 'Abwesenheit';
+    const row: ListRow = {
+      date: e.date,
+      art,
+      short: e.display_name || '',
+      name: e.shift_name || e.leave_name || e.custom_name || '',
+      times,
+      workplace: e.workplace_id ? (wpMap[e.workplace_id] ?? `#${e.workplace_id}`) : '',
+      hours,
+    };
+    (byEmp[e.employee_id] ??= []).push(row);
+  }
+
+  const empMap = Object.fromEntries(employees.map(e => [e.ID, e]));
+  const empIds = Object.keys(byEmp).map(Number)
+    .sort((a, b) => (empMap[a]?.NAME || '').localeCompare(empMap[b]?.NAME || '', 'de'));
+  for (const id of empIds) byEmp[id].sort((a, b) => a.date.localeCompare(b.date));
+
+  const groupName = groupId ? (groups.find(g => g.ID === groupId)?.NAME ?? `Gruppe ${groupId}`) : 'Alle';
+  const fmtDate = (d: string) => `${DAY_SHORT_DE[new Date(`${d}T00:00:00`).getDay()]} ${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(0, 4)}`;
+  const sumHours = (rows: ListRow[]) => rows.reduce((acc, r) => acc + (r.hours ?? 0), 0);
+
+  if (format === 'csv') {
+    const lines = ['Mitarbeiter;Datum;Art;Kürzel;Name;Uhrzeiten;Arbeitsplatz;Stunden'];
+    for (const id of empIds) {
+      const emp = empMap[id];
+      const empName = emp ? `${emp.NAME}, ${emp.FIRSTNAME}` : `MA #${id}`;
+      for (const r of byEmp[id]) {
+        lines.push([empName, r.date, r.art, r.short, r.name, r.times, r.workplace,
+          r.hours != null ? r.hours.toFixed(2) : ''].map(csvCell).join(';'));
+      }
+      lines.push([empName, '', 'Summe', '', `${byEmp[id].length} Einträge`, '', '',
+        sumHours(byEmp[id]).toFixed(2)].map(csvCell).join(';'));
+    }
+    downloadCSVFile(`dienstplaneintraege_${fromDate}_${toDate}.csv`, lines.join('\n'));
+    return;
+  }
+
+  const now = new Date().toLocaleString('de-AT');
+  let html = `<h1>📋 Dienstplaneinträge (Liste)</h1>
+<div class="subtitle">Zeitraum: ${fromDate} bis ${toDate} &nbsp;|&nbsp; Gruppe: ${groupName} &nbsp;|&nbsp; ${empIds.length} Mitarbeiter &nbsp;|&nbsp; Stand: ${now}</div>`;
+
+  if (empIds.length === 0) {
+    html += '<p>Keine Einträge im gewählten Zeitraum.</p>';
+  }
+  for (const id of empIds) {
+    const emp = empMap[id];
+    const rows = byEmp[id];
+    const counts = {
+      dienst: rows.filter(r => r.art.startsWith('Dienst')).length,
+      sonder: rows.filter(r => r.art === 'Sonderdienst').length,
+      abw: rows.filter(r => r.art === 'Abwesenheit').length,
+    };
+    html += `<h2>👤 ${emp ? `${emp.NAME}, ${emp.FIRSTNAME}` : `MA #${id}`}${emp?.NUMBER ? ` (Nr. ${emp.NUMBER})` : ''}</h2>
+<table>
+<thead><tr>
+<th scope="col">Datum</th><th scope="col">Art</th><th scope="col">Kürzel</th><th scope="col">Name</th>
+<th scope="col">Uhrzeiten</th><th scope="col">Arbeitsplatz</th><th scope="col" style="text-align:right">Stunden</th>
+</tr></thead><tbody>`;
+    for (const r of rows) {
+      html += `<tr>
+<td>${fmtDate(r.date)}</td>
+<td>${r.art}</td>
+<td><strong>${r.short}</strong></td>
+<td>${r.name || '—'}</td>
+<td style="font-family:monospace">${r.times || '—'}</td>
+<td>${r.workplace || '—'}</td>
+<td style="text-align:right">${r.hours != null ? r.hours.toFixed(2) + ' h' : '—'}</td>
+</tr>`;
+    }
+    html += `</tbody>
+<tfoot><tr style="background:#f1f5f9;font-weight:bold;border-top:2px solid #334155">
+<td colspan="6">∑ ${rows.length} Einträge — ${counts.dienst} Dienste, ${counts.sonder} Sonderdienste, ${counts.abw} Abwesenheiten</td>
+<td style="text-align:right">${sumHours(rows).toFixed(2)} h</td>
+</tr></tfoot>
+</table>`;
+  }
+
+  printHtml(html, `Dienstplaneinträge ${fromDate} – ${toDate}`);
+}
+
 // ── Main Component ────────────────────────────────────────────
 
 export default function Berichte() {
@@ -1192,6 +1353,15 @@ export default function Berichte() {
   const [urlaubEmpId, setUrlaubEmpId] = useState<number | null>(null);
   const [urlaubFrom, setUrlaubFrom] = useState('');
   const [urlaubTo, setUrlaubTo] = useState('');
+
+  // Dienstplaneinträge-Liste (R-1): Zeitraum + Ausgabeformat
+  const monthPadded = String(now.getMonth() + 1).padStart(2, '0');
+  const [listFrom, setListFrom] = useState(`${now.getFullYear()}-${monthPadded}-01`);
+  const [listTo, setListTo] = useState(
+    `${now.getFullYear()}-${monthPadded}-${String(new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()).padStart(2, '0')}`,
+  );
+  const [listFormat, setListFormat] = useState<'print' | 'csv'>('print');
+
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
 
@@ -1311,6 +1481,14 @@ export default function Berichte() {
       title: 'Jahres-Dienstplan',
       description: `Kompakte Jahresübersicht ${year} — 12 Monate, Schichthäufigkeit pro Mitarbeiter.`,
       action: () => run(() => reportYearSchedule(year, groupId, employees, groups)),
+      color: 'green',
+      category: 'Dienstplan',
+    },
+    {
+      icon: '📋',
+      title: 'Dienstplaneinträge (Liste)',
+      description: `Je Mitarbeiter alle Einträge ${listFrom} bis ${listTo}: Datum, Art (Dienst/Sonderdienst/Abwesenheit), Kürzel, Uhrzeiten, Arbeitsplatz, Stunden — mit Summen je Mitarbeiter (${listFormat === 'csv' ? 'CSV' : 'Druck'}).`,
+      action: () => run(() => reportDienstplanEintraege(listFrom, listTo, groupId, employees, groups, shifts, listFormat)),
       color: 'green',
       category: 'Dienstplan',
     },
@@ -1518,6 +1696,52 @@ export default function Berichte() {
                   onChange={e => setUrlaubTo(e.target.value)}
                   className="px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* Dienstplaneinträge-Liste (R-1) */}
+          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+            <div className="font-semibold text-gray-700 mb-2 text-sm">📋 Dienstplaneinträge (Liste) – Parameter</div>
+            <div className="flex flex-wrap gap-3 items-end">
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Von</label>
+                <input
+                  type="date"
+                  value={listFrom}
+                  onChange={e => setListFrom(e.target.value)}
+                  className="px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Bis</label>
+                <input
+                  type="date"
+                  value={listTo}
+                  min={listFrom}
+                  onChange={e => setListTo(e.target.value)}
+                  className="px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Ausgabe</label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setListFormat('print')}
+                    className={`px-4 py-2 rounded text-sm font-semibold border-2 transition-colors ${listFormat === 'print' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-700 border-gray-300 hover:border-green-400'}`}
+                  >
+                    🖨️ Druck
+                  </button>
+                  <button
+                    onClick={() => setListFormat('csv')}
+                    className={`px-4 py-2 rounded text-sm font-semibold border-2 transition-colors ${listFormat === 'csv' ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-700 border-gray-300 hover:border-green-400'}`}
+                  >
+                    📊 CSV
+                  </button>
+                </div>
+              </div>
+              <div className="text-xs text-gray-500 max-w-xs">
+                Gruppenfilter oben wird berücksichtigt.
               </div>
             </div>
           </div>

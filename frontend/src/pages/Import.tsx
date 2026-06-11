@@ -1,5 +1,14 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
 import type { DragEvent, ChangeEvent } from 'react';
+import { useConfirm } from '../hooks/useConfirm';
+import { ConfirmDialog } from '../components/ConfirmDialog';
+import {
+  decodeImportBuffer,
+  detectSeparator,
+  parseDelimited,
+  toCanonicalCSV,
+  isValidImportColor,
+} from '../utils/importParsing';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 function getAuthHeaders(): Record<string, string> {
@@ -10,37 +19,6 @@ function getAuthHeaders(): Record<string, string> {
     const token = session.devMode ? '__dev_mode__' : (session.token ?? null);
     return token ? { 'X-Auth-Token': token } : {};
   } catch { return {}; }
-}
-
-// ── CSV parsing ────────────────────────────────────────────────────────────
-
-function parseCSV(text: string): { headers: string[]; rows: string[][] } {
-  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-  const nonEmpty = lines.filter(l => l.trim());
-  if (nonEmpty.length === 0) return { headers: [], rows: [] };
-
-  const splitLine = (line: string): string[] => {
-    const result: string[] = [];
-    let cur = '';
-    let inQuote = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') {
-        if (inQuote && line[i + 1] === '"') { cur += '"'; i++; }
-        else { inQuote = !inQuote; }
-      } else if (ch === ',' && !inQuote) {
-        result.push(cur); cur = '';
-      } else {
-        cur += ch;
-      }
-    }
-    result.push(cur);
-    return result.map(v => v.trim());
-  };
-
-  const headers = splitLine(nonEmpty[0]);
-  const rows = nonEmpty.slice(1).map(splitLine);
-  return { headers, rows };
 }
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -107,8 +85,9 @@ function validateRow(
   if (importType.key === 'shifts') {
     for (const colorCol of ['FARBE', 'TEXTFARBE']) {
       const idx = headerMap.get(colorCol);
-      if (idx !== undefined && row[idx] && !/^#[0-9A-Fa-f]{6}$/.test(row[idx])) {
-        errors.push(`${colorCol} muss Format #RRGGBB haben`);
+      // Spec 8.2: #RRGGBB oder Dezimal-COLORREF (0..16777215)
+      if (idx !== undefined && row[idx] && !isValidImportColor(row[idx])) {
+        errors.push(`${colorCol} muss Format #RRGGBB oder Dezimal-COLORREF (0–16777215) haben`);
       }
     }
     const durIdx = headerMap.get('DURATION0');
@@ -174,7 +153,7 @@ Musterfrau,Maria,MF,002,1,6,30,130,1 1 1 0 1 0 0 0
     icon: '🕐',
     endpoint: '/api/v1/import/shifts',
     description: 'Importiert Schichtarten. Pflichtfeld: NAME.',
-    columns: 'NAME, KURZZEICHEN (Kürzel), FARBE (#RRGGBB), TEXTFARBE (#RRGGBB), DURATION0 (Stunden)',
+    columns: 'NAME, KURZZEICHEN (Kürzel), FARBE (#RRGGBB oder Dezimal-COLORREF), TEXTFARBE (#RRGGBB oder Dezimal-COLORREF), DURATION0 (Stunden)',
     requiredColumns: ['NAME'],
     templateFilename: 'schichtarten_vorlage.csv',
     templateContent: `NAME,KURZZEICHEN,FARBE,TEXTFARBE,DURATION0
@@ -409,10 +388,12 @@ function DropZone({ onFile, disabled }: DropZoneProps) {
       )}
       <div className="text-5xl mb-3">📁</div>
       <div className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-        CSV-Datei hierher ziehen oder <span className="text-blue-600 dark:text-blue-400 underline">auswählen</span>
+        CSV/TSV-Datei hierher ziehen oder <span className="text-blue-600 dark:text-blue-400 underline">auswählen</span>
       </div>
-      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">Unterstützt: .csv (UTF-8 oder Latin-1)</div>
-      <input ref={inputRef} type="file" accept=".csv" className="hidden" onChange={handleChange} disabled={disabled} />
+      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
+        Unterstützt: .csv, .tsv, .txt — UTF-8 oder UTF-16 mit BOM (Original-Export); Trennzeichen Tab, Komma oder Semikolon (automatisch erkannt)
+      </div>
+      <input ref={inputRef} type="file" accept=".csv,.tsv,.txt" className="hidden" onChange={handleChange} disabled={disabled} />
     </div>
   );
 }
@@ -621,11 +602,13 @@ export default function Import() {
   const [selectedKey, setSelectedKey] = useState<string>(IMPORT_TYPES[0].key);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<{ headers: string[]; rows: string[][] } | null>(null);
+  const [fileFormat, setFileFormat] = useState<string | null>(null); // z. B. "UTF-16, Tab-getrennt"
   const [phase, setPhase] = useState<ImportPhase>('idle');
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showAllRows, setShowAllRows] = useState(false);
+  const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
   const selected = IMPORT_TYPES.find(t => t.key === selectedKey) ?? IMPORT_TYPES[0];
 
@@ -645,22 +628,45 @@ export default function Import() {
     setFile(f); setResult(null); setError(null); setPhase('idle');
     setProgress(0); setShowAllRows(false);
     const reader = new FileReader();
-    reader.onload = (e) => { setPreview(parseCSV(e.target?.result as string)); };
-    reader.readAsText(f, 'utf-8');
+    reader.onload = (e) => {
+      // I-1: Encoding-Sniffing (BOM → UTF-16/UTF-8) + Trennzeichen-Autodetect
+      const buf = e.target?.result as ArrayBuffer;
+      const bytes = new Uint8Array(buf);
+      const isUtf16 = bytes.length >= 2 && ((bytes[0] === 0xff && bytes[1] === 0xfe) || (bytes[0] === 0xfe && bytes[1] === 0xff));
+      const text = decodeImportBuffer(buf);
+      const sep = detectSeparator(text);
+      const sepLabel = sep === '\t' ? 'Tab-getrennt (TSV)' : sep === ';' ? 'Semikolon-getrennt' : 'Komma-getrennt';
+      setFileFormat(`${isUtf16 ? 'UTF-16' : 'UTF-8'}, ${sepLabel}`);
+      setPreview(parseDelimited(text, sep));
+    };
+    reader.readAsArrayBuffer(f);
   }, []);
 
   const handleReset = useCallback(() => {
-    setFile(null); setPreview(null); setResult(null); setError(null);
+    setFile(null); setPreview(null); setFileFormat(null); setResult(null); setError(null);
     setPhase('idle'); setProgress(0); setShowAllRows(false);
   }, []);
 
   const handleImport = useCallback(async () => {
-    if (!file) return;
+    if (!file || !preview) return;
+
+    // I-3: Sicherheitsabfrage vor Import-Start (Spec 8.3 Nr. 7)
+    const validRows = preview.rows.map((row, idx) => validateRow(row, preview.headers, idx, selected)).filter(v => v.valid).length;
+    const ok = await confirmDialog({
+      title: 'Import starten?',
+      message: `${validRows} von ${preview.rows.length} Zeilen werden als „${selected.label}“ importiert. Die Daten werden direkt in die Datenbank geschrieben. Fortfahren?`,
+      confirmLabel: 'Jetzt importieren',
+    });
+    if (!ok) return;
+
     setPhase('uploading'); setProgress(0); setResult(null); setError(null);
 
     try {
+      // Upload normalisiert als UTF-8-Komma-CSV (Backend parst nur dieses Format)
+      const canonical = toCanonicalCSV(preview.headers, preview.rows);
+      const uploadFile = new File([canonical], file.name.replace(/\.(tsv|txt)$/i, '.csv'), { type: 'text/csv' });
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', uploadFile);
 
       const progressInterval = setInterval(() => {
         setProgress(prev => { if (prev >= 40) { clearInterval(progressInterval); return 40; } return prev + 8; });
@@ -690,7 +696,7 @@ export default function Import() {
       setError(err instanceof Error ? err.message : 'Unbekannter Fehler');
       setPhase('idle'); setProgress(0);
     }
-  }, [file, selected.endpoint]);
+  }, [file, preview, selected, confirmDialog]);
 
   const handleDownloadValidationErrors = useCallback(() => {
     if (!preview) return;
@@ -760,6 +766,7 @@ export default function Import() {
               <div className="font-medium text-gray-700 dark:text-gray-300 truncate">{file.name}</div>
               <div className="text-gray-500 dark:text-gray-400">
                 {(file.size / 1024).toFixed(1)} KB
+                {fileFormat && ` • ${fileFormat}`}
                 {preview && ` • ${preview.rows.length} Zeile${preview.rows.length !== 1 ? 'n' : ''}`}
               </div>
             </div>
@@ -810,6 +817,8 @@ export default function Import() {
 
         {result && <ResultBanner result={result} onReset={handleReset} onDownloadErrors={handleDownloadResultErrors} />}
       </div>
+
+      <ConfirmDialog {...confirmDialogProps} />
     </div>
   );
 }

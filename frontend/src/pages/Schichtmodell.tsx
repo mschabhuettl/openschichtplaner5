@@ -5,6 +5,7 @@ import type { Employee, Group, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { entranceOptions, entranceOffsetDays, effectiveCycleStart } from '../utils/cycleEntrance';
 
 // ─── Types ─────────────────────────────────────────────────
 type CycleExceptionRecord = {
@@ -328,19 +329,24 @@ function EditCycleModal({ cycle, shifts, onSaved, onClose }: EditCycleModalProps
 interface EditModalProps {
   employee: Employee;
   groupName: string;
-  currentAssignment: CycleAssignment | null;
+  /** Bestehende Zuordnungen dieses Mitarbeiters (mehrere möglich, R5.11-24/25). */
+  employeeAssignments: CycleAssignment[];
   cycles: ShiftCycle[];
   onSave: (assignment: CycleAssignment) => void;
   onClose: () => void;
 }
 
-function EditModal({ employee, groupName, currentAssignment, cycles, onSave, onClose }: EditModalProps) {
-  const [cycleId, setCycleId] = useState<number | null>(currentAssignment?.cycle_id ?? null);
-  const [startDate, setStartDate] = useState(currentAssignment?.start ?? new Date().toISOString().slice(0, 10));
+function EditModal({ employee, groupName, employeeAssignments, cycles, onSave, onClose }: EditModalProps) {
+  const [cycleId, setCycleId] = useState<number | null>(null);
+  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
+  const [entrance, setEntrance] = useState(1); // 1 = Zyklusbeginn (R6.3-4/5)
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const selectedCycle = cycles.find(c => c.ID === cycleId);
+  const cycleName = (id: number) => cycles.find(c => c.ID === id)?.name ?? `Zyklus #${id}`;
+  const offsetDays = selectedCycle ? entranceOffsetDays(selectedCycle.unit, entrance) : 0;
+  const effectiveStart = effectiveCycleStart(startDate, offsetDays);
 
   const handleSave = async () => {
     if (!cycleId) {
@@ -350,7 +356,9 @@ function EditModal({ employee, groupName, currentAssignment, cycles, onSave, onC
     setSaving(true);
     setError(null);
     try {
-      const res = await api.assignCycle(employee.ID, cycleId, startDate);
+      // ENTRANCE wird über das zurückgerechnete Startdatum abgebildet (V-7):
+      // Einstieg an Position P am Tag S ≙ Zuordnung mit Start S − P Tage.
+      const res = await api.assignCycle(employee.ID, cycleId, effectiveStart);
       onSave(res.record);
     } catch (e) {
       setError(String(e));
@@ -379,12 +387,35 @@ function EditModal({ employee, groupName, currentAssignment, cycles, onSave, onC
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">⚠️ {error}</div>
           )}
 
+          {/* Bestehende Zuordnungen (mehrere parallel/nacheinander möglich) */}
+          {employeeAssignments.length > 0 && (
+            <div className="bg-gray-50 rounded-lg p-3 border">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                Bestehende Zuordnungen ({employeeAssignments.length})
+              </div>
+              <ul className="space-y-1">
+                {employeeAssignments.map(a => (
+                  <li key={a.id} className="text-xs text-gray-700 flex items-center gap-2">
+                    <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold">{cycleName(a.cycle_id)}</span>
+                    <span className="font-mono">
+                      {a.start ? formatDateDE(a.start) : '—'} – {a.end ? formatDateDE(a.end) : 'offen'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-[11px] text-gray-500 mt-2">
+                Speichern legt eine <strong>zusätzliche</strong> Zuordnung an. Hinweis: Die automatische
+                Plan-Generierung berücksichtigt derzeit nur die zuletzt angelegte Zuordnung je Mitarbeiter.
+              </p>
+            </div>
+          )}
+
           {/* Cycle selector */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Schichtmodell / Zyklus</label>
             <select
               value={cycleId ?? ''}
-              onChange={e => setCycleId(e.target.value ? Number(e.target.value) : null)}
+              onChange={e => { setCycleId(e.target.value ? Number(e.target.value) : null); setEntrance(1); }}
               className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">– Kein Modell –</option>
@@ -407,18 +438,53 @@ function EditModal({ employee, groupName, currentAssignment, cycles, onSave, onC
             </div>
           )}
 
-          {/* Start date */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Startdatum des Zyklus</label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={e => setStartDate(e.target.value)}
-              disabled={!cycleId}
-              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-600"
-            />
-            <p className="text-xs text-gray-600 mt-1">Ab diesem Datum wird der Zyklus auf den Dienstplan angewendet.</p>
+          {/* Start / Einstieg / Ende */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Startdatum</label>
+              <input
+                type="date"
+                value={startDate}
+                onChange={e => setStartDate(e.target.value)}
+                disabled={!cycleId}
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-600"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Einstieg ({selectedCycle?.unit === 1 || !selectedCycle ? 'Woche' : 'Tag'})
+              </label>
+              <select
+                value={entrance}
+                onChange={e => setEntrance(Number(e.target.value))}
+                disabled={!selectedCycle}
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-600"
+              >
+                {(selectedCycle ? entranceOptions(selectedCycle.unit, selectedCycle.weeks) : [{ value: 1, label: 'Woche 1' }]).map(o => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Ende <span className="text-gray-400">(optional)</span></label>
+              <input
+                type="date"
+                value=""
+                disabled
+                title="Zuordnungs-Ende (5CYASS.END) wird von der API noch nicht gespeichert"
+                className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-400 cursor-not-allowed"
+              />
+            </div>
           </div>
+          <p className="text-xs text-gray-600 -mt-1">
+            Ab dem Startdatum wird der Zyklus an der gewählten Einstiegsposition auf den Dienstplan angewendet.
+            {entrance > 1 && (
+              <> Einstieg {selectedCycle?.unit === 1 ? `Woche ${entrance}` : `Tag ${entrance}`} wird als
+              zurückgerechnetes Startdatum <span className="font-mono">{formatDateDE(effectiveStart)}</span> gespeichert
+              (die API kennt kein separates ENTRANCE-Feld).</>
+            )}
+            {' '}Ein Zuordnungs-Ende wird von der API noch nicht unterstützt.
+          </p>
         </div>
 
         {/* Footer */}
@@ -627,8 +693,9 @@ export default function Schichtmodell() {
     return '—';
   };
 
-  const getAssignment = (empId: number): CycleAssignment | null =>
-    assignments.find(a => a.employee_id === empId) ?? null;
+  // Mehrere Zuordnungen je Mitarbeiter möglich (V-7 / R5.11-24)
+  const getAssignments = (empId: number): CycleAssignment[] =>
+    assignments.filter(a => a.employee_id === empId);
 
   const getCycleName = (cycleId: number | null): string => {
     if (!cycleId) return '—';
@@ -668,16 +735,18 @@ export default function Schichtmodell() {
   });
 
   const handleSave = (newAssignment: CycleAssignment) => {
-    setAssignments(prev => {
-      const filtered = prev.filter(a => a.employee_id !== newAssignment.employee_id);
-      return [...filtered, newAssignment];
-    });
+    // Zusätzliche Zuordnung anhängen (mehrere je MA zulässig)
+    setAssignments(prev => [...prev.filter(a => a.id !== newAssignment.id), newAssignment]);
     setEditingEmployee(null);
     showToast('Schichtmodell zugewiesen ✓', 'success');
   };
 
   const handleRemove = async (emp: Employee) => {
-    if (!await confirmDialog({ message: `Zyklus-Zuweisung für ${emp.FIRSTNAME} ${emp.NAME} wirklich entfernen?`, danger: true })) return;
+    const count = getAssignments(emp.ID).length;
+    const msg = count > 1
+      ? `Alle ${count} Zyklus-Zuordnungen für ${emp.FIRSTNAME} ${emp.NAME} wirklich entfernen? (Die API entfernt Zuordnungen nur je Mitarbeiter gesamt.)`
+      : `Zyklus-Zuweisung für ${emp.FIRSTNAME} ${emp.NAME} wirklich entfernen?`;
+    if (!await confirmDialog({ message: msg, danger: true })) return;
     try {
       await api.removeCycleAssignment(emp.ID);
       setAssignments(prev => prev.filter(a => a.employee_id !== emp.ID));
@@ -919,18 +988,17 @@ export default function Schichtmodell() {
                 <th scope="col" className="px-4 py-2 text-left">Nr.</th>
                 <th scope="col" className="px-4 py-2 text-left">Mitarbeiter</th>
                 <th scope="col" className="px-4 py-2 text-left">Gruppe</th>
-                <th scope="col" className="px-4 py-2 text-left">Aktuelles Modell</th>
-                <th scope="col" className="px-4 py-2 text-left">Startdatum</th>
+                <th scope="col" className="px-4 py-2 text-left">Zuordnungen (Modell · Zeitraum)</th>
                 <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
               </tr>
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={6} className="text-center py-10 text-gray-600">⟳ Lade Daten...</td></tr>
+                <tr><td colSpan={5} className="text-center py-10 text-gray-600">⟳ Lade Daten...</td></tr>
               )}
               {!loading && filtered.map((emp, i) => {
-                const asgn = getAssignment(emp.ID);
-                const hasAssignment = !!asgn;
+                const empAsgns = getAssignments(emp.ID);
+                const hasAssignment = empAsgns.length > 0;
                 return (
                   <tr
                     key={emp.ID}
@@ -944,27 +1012,34 @@ export default function Schichtmodell() {
                     <td className="px-4 py-2.5 text-gray-600 text-sm">{getGroupName(emp)}</td>
                     <td className="px-4 py-2.5">
                       {hasAssignment ? (
-                        <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">
-                          {getCycleName(asgn.cycle_id)}
-                        </span>
+                        <ul className="space-y-0.5">
+                          {empAsgns.map(a => (
+                            <li key={a.id} className="flex items-center gap-2">
+                              <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">
+                                {getCycleName(a.cycle_id)}
+                              </span>
+                              <span className="text-gray-500 text-xs font-mono">
+                                {a.start ? formatDateDE(a.start) : '—'} – {a.end ? formatDateDE(a.end) : 'offen'}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
                       ) : (
                         <span className="text-gray-600 text-xs italic">Kein Modell</span>
                       )}
-                    </td>
-                    <td className="px-4 py-2.5 text-gray-500 text-xs font-mono">
-                      {asgn?.start ?? '—'}
                     </td>
                     <td className="px-4 py-2.5 text-center">
                       <button
                         onClick={() => setEditingEmployee(emp)}
                         className="inline-flex items-center gap-1 px-3 py-1 text-xs rounded-lg border border-blue-300 text-blue-600 hover:bg-blue-50 transition-colors"
                       >
-                        ✏️ Bearbeiten
+                        {hasAssignment ? '+ Zuordnung' : '✏️ Zuordnen'}
                       </button>
                       {hasAssignment && (
                         <button
                           onClick={() => handleRemove(emp)}
                           className="ml-2 inline-flex items-center gap-1 px-3 py-1 text-xs rounded-lg border border-red-300 text-red-500 hover:bg-red-50 transition-colors"
+                          title={empAsgns.length > 1 ? 'Entfernt alle Zuordnungen dieses Mitarbeiters' : undefined}
                         >
                           🗑️ Entfernen
                         </button>
@@ -974,7 +1049,7 @@ export default function Schichtmodell() {
                 );
               })}
               {!loading && filtered.length === 0 && (
-                <tr><td colSpan={6} className="text-center py-10 text-gray-600">Keine Mitarbeiter gefunden</td></tr>
+                <tr><td colSpan={5} className="text-center py-10 text-gray-600">Keine Mitarbeiter gefunden</td></tr>
               )}
             </tbody>
           </table>
@@ -1089,7 +1164,7 @@ export default function Schichtmodell() {
         <EditModal
           employee={editingEmployee}
           groupName={getGroupName(editingEmployee)}
-          currentAssignment={getAssignment(editingEmployee.ID)}
+          employeeAssignments={getAssignments(editingEmployee.ID)}
           cycles={cycles}
           onSave={handleSave}
           onClose={() => setEditingEmployee(null)}

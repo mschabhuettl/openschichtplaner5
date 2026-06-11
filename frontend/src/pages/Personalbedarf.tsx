@@ -5,10 +5,12 @@ import type { ShiftType, Group } from '../types';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { expandDateRange, MAX_SPECIAL_RANGE_DAYS } from '../utils/dateRange';
 
 // ─── Constants ─────────────────────────────────────────────
-const WEEKDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
-const WEEKDAY_SHORT = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+// Tagindex 0..7 nach Spec D-34: 0=Montag … 6=Sonntag, 7=Feiertag (V-11)
+const WEEKDAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag', 'Feiertag'];
+const WEEKDAY_SHORT = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So', 'Ft'];
 
 // ─── Cell: Min/Max display ─────────────────────────────────
 interface RequirementCellProps {
@@ -42,14 +44,13 @@ function RequirementCell({ req, onEdit, actual }: RequirementCellProps) {
         title={isOverMax ? `Ist-Besetzung (${actual}) überschreitet Maximum (${max})` : 'Bearbeiten'}
       >
         <span className="block text-xs font-mono">
+          <span className="text-green-700 font-bold">{min}</span>
+          <span className="text-gray-600">–</span>
           {max > 0 ? (
-            <>
-              <span className="text-green-700 font-bold">{min}</span>
-              <span className="text-gray-600">–</span>
-              <span className={`font-bold ${isOverMax ? 'text-red-600' : 'text-blue-700'}`}>{max}</span>
-            </>
+            <span className={`font-bold ${isOverMax ? 'text-red-600' : 'text-blue-700'}`}>{max}</span>
           ) : (
-            <span className="text-green-700 font-bold">{min}</span>
+            // R5.12-7: Max leer/0 = unbegrenzt → „-"
+            <span className="text-gray-600" title="Maximum unbegrenzt">-</span>
           )}
         </span>
         {isOverMax && (
@@ -72,6 +73,8 @@ interface EditModalProps {
 function EditModal({ shiftName, weekdayName, existing, onSave, onClose }: EditModalProps) {
   const [min, setMin] = useState(existing?.min ?? 0);
   const [max, setMax] = useState(existing?.max ?? 0);
+  // R5.12-7: max=0 = unbegrenzt
+  const [noMax, setNoMax] = useState((existing?.max ?? 0) === 0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -79,7 +82,7 @@ function EditModal({ shiftName, weekdayName, existing, onSave, onClose }: EditMo
     setSaving(true);
     setError(null);
     try {
-      await onSave(min, max);
+      await onSave(min, noMax ? 0 : max);
       onClose();
     } catch (e) {
       setError(String(e));
@@ -127,10 +130,20 @@ function EditModal({ shiftName, weekdayName, existing, onSave, onClose }: EditMo
                 type="number"
                 min={0}
                 max={99}
-                value={max}
+                value={noMax ? '' : max}
+                placeholder={noMax ? '-' : undefined}
+                disabled={noMax}
                 onChange={e => setMax(Number(e.target.value))}
-                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400"
               />
+              <label className="mt-1.5 flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={noMax}
+                  onChange={e => { setNoMax(e.target.checked); if (!e.target.checked && max === 0) setMax(Math.max(min, 1)); }}
+                />
+                kein Maximum (unbegrenzt, „-“)
+              </label>
             </div>
           </div>
 
@@ -163,7 +176,7 @@ interface SpecialEditModalProps {
   groups: Group[];
   existing: SpecialStaffingReq | null;
   onSave: (data: {
-    group_id: number; date: string; shift_id: number;
+    group_id: number; dates: string[]; shift_id: number;
     workplace_id: number; min: number; max: number;
   }) => Promise<void>;
   onClose: () => void;
@@ -174,6 +187,8 @@ interface SpecialEditModalProps {
 function SpecialEditModal({ shifts, groups, existing, onSave, onClose, defaultDate, defaultGroupId }: SpecialEditModalProps) {
   const today = new Date().toISOString().slice(0, 10);
   const [date, setDate] = useState(existing?.date || defaultDate || today);
+  // R5.13-3: besonderer Bedarf mit Von/Bis-Zeitraum (nur bei Neuanlage)
+  const [dateTo, setDateTo] = useState('');
   const [groupId, setGroupId] = useState<number>(existing?.group_id || defaultGroupId || (groups[0]?.ID ?? 0));
   const [shiftId, setShiftId] = useState<number>(existing?.shift_id || (shifts[0]?.ID ?? 0));
   const [min, setMin] = useState(existing?.min ?? 1);
@@ -181,14 +196,21 @@ function SpecialEditModal({ shifts, groups, existing, onSave, onClose, defaultDa
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const rangeDates = existing ? (date ? [date] : []) : expandDateRange(date, dateTo);
+
   const handleSubmit = async () => {
     if (!date) { setError('Datum ist Pflichtfeld'); return; }
     if (!groupId) { setError('Gruppe ist Pflichtfeld'); return; }
     if (!shiftId) { setError('Schichtart ist Pflichtfeld'); return; }
+    if (rangeDates.length === 0) { setError('Bis-Datum muss nach dem Von-Datum liegen'); return; }
+    if (rangeDates.length > MAX_SPECIAL_RANGE_DAYS) {
+      setError(`Zeitraum zu lang (max. ${MAX_SPECIAL_RANGE_DAYS} Tage)`);
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
-      await onSave({ group_id: groupId, date, shift_id: shiftId, workplace_id: 0, min, max });
+      await onSave({ group_id: groupId, dates: rangeDates, shift_id: shiftId, workplace_id: 0, min, max });
       onClose();
     } catch (e) {
       setError(String(e));
@@ -217,15 +239,46 @@ function SpecialEditModal({ shifts, groups, existing, onSave, onClose, defaultDa
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Datum</label>
-            <input
-              type="date"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
+          {existing ? (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Datum</label>
+              <input
+                type="date"
+                value={date}
+                onChange={e => setDate(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Von</label>
+                <input
+                  type="date"
+                  value={date}
+                  onChange={e => setDate(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bis <span className="text-gray-400">(optional)</span></label>
+                <input
+                  type="date"
+                  value={dateTo}
+                  min={date}
+                  onChange={e => setDateTo(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+          )}
+
+          {!existing && rangeDates.length > 1 && (
+            <div className="p-2 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700">
+              ℹ️ Der Zeitraum wird als {rangeDates.length} einzelne Tageseinträge (5SPDEM) angelegt —
+              die API kennt je Eintrag nur ein Datum.
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Gruppe</label>
@@ -345,7 +398,7 @@ function WeeklyTab({
 
   const totalDefined = shifts.reduce((acc, sh) =>
     acc + WEEKDAYS.reduce((a2, _, d) => a2 + (getEffective(sh.ID, d) ? 1 : 0), 0), 0);
-  const totalCells = shifts.length * 7;
+  const totalCells = shifts.length * WEEKDAYS.length;
   const editingShift = editing ? shifts.find(s => s.ID === editing.shiftId) : null;
 
   return (
@@ -376,7 +429,7 @@ function WeeklyTab({
           <span className="font-mono text-green-700 font-bold">2</span>
           <span className="text-gray-600">–</span>
           <span className="font-mono text-blue-700 font-bold">4</span>
-          <span>= min–max Mitarbeiter (max=0: nur min)</span>
+          <span>= min–max Mitarbeiter („-“ = Max unbegrenzt) · Ft = Feiertag</span>
         </div>
         <div className="flex items-center gap-1">
           <span className="inline-block w-3 h-3 rounded bg-red-50 border border-red-200" />
@@ -442,8 +495,8 @@ function WeeklyTab({
                       );
                     })}
                     <td className="px-4 py-2 text-center border border-gray-200 border-l border-l-gray-300">
-                      <span className={`text-xs font-semibold ${definedCount === 7 ? 'text-green-600' : definedCount > 0 ? 'text-amber-600' : 'text-gray-300'}`}>
-                        {definedCount}/7
+                      <span className={`text-xs font-semibold ${definedCount === WEEKDAYS.length ? 'text-green-600' : definedCount > 0 ? 'text-amber-600' : 'text-gray-300'}`}>
+                        {definedCount}/{WEEKDAYS.length}
                       </span>
                     </td>
                   </tr>
@@ -531,13 +584,17 @@ function DateSpecificTab({ shifts, groups }: { shifts: ShiftType[]; groups: Grou
   const groupMap = Object.fromEntries(groups.map(g => [g.ID, g]));
 
   const handleSave = async (data: {
-    group_id: number; date: string; shift_id: number;
+    group_id: number; dates: string[]; shift_id: number;
     workplace_id: number; min: number; max: number;
   }) => {
+    const { dates, ...rest } = data;
     if (editingReq) {
-      await api.updateSpecialStaffing(editingReq.id, data);
+      await api.updateSpecialStaffing(editingReq.id, { ...rest, date: dates[0] });
     } else {
-      await api.createSpecialStaffing(data);
+      // Zeitraum → Einzeltage (5SPDEM hat je Eintrag genau ein Datum)
+      for (const date of dates) {
+        await api.createSpecialStaffing({ ...rest, date });
+      }
     }
     await load();
   };

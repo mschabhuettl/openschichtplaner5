@@ -52,23 +52,35 @@ function toISODate(date: Date): string {
 }
 
 // ── Austrian Holidays ─────────────────────────────────────
-function getAustrianHolidays(year: number): { date: string; name: string; interval: number }[] {
+// Alle österreichischen Feiertage sind ganztägig (INTERVAL=0, Spec-Semantik 3.2.1 Nr. 3).
+function getAustrianHolidays(year: number): { date: string; name: string }[] {
   const easter = calculateEaster(year);
   return [
-    { date: `${year}-01-01`, name: 'Neujahr', interval: 1 },
-    { date: `${year}-01-06`, name: 'Heilige Drei Könige', interval: 1 },
-    { date: toISODate(addDays(easter, 1)), name: 'Ostermontag', interval: 0 },
-    { date: `${year}-05-01`, name: 'Staatsfeiertag', interval: 1 },
-    { date: toISODate(addDays(easter, 39)), name: 'Christi Himmelfahrt', interval: 0 },
-    { date: toISODate(addDays(easter, 50)), name: 'Pfingstmontag', interval: 0 },
-    { date: toISODate(addDays(easter, 60)), name: 'Fronleichnam', interval: 0 },
-    { date: `${year}-08-15`, name: 'Mariä Himmelfahrt', interval: 1 },
-    { date: `${year}-10-26`, name: 'Nationalfeiertag', interval: 1 },
-    { date: `${year}-11-01`, name: 'Allerheiligen', interval: 1 },
-    { date: `${year}-12-08`, name: 'Mariä Empfängnis', interval: 1 },
-    { date: `${year}-12-25`, name: 'Christtag', interval: 1 },
-    { date: `${year}-12-26`, name: 'Stefanitag', interval: 1 },
+    { date: `${year}-01-01`, name: 'Neujahr' },
+    { date: `${year}-01-06`, name: 'Heilige Drei Könige' },
+    { date: toISODate(addDays(easter, 1)), name: 'Ostermontag' },
+    { date: `${year}-05-01`, name: 'Staatsfeiertag' },
+    { date: toISODate(addDays(easter, 39)), name: 'Christi Himmelfahrt' },
+    { date: toISODate(addDays(easter, 50)), name: 'Pfingstmontag' },
+    { date: toISODate(addDays(easter, 60)), name: 'Fronleichnam' },
+    { date: `${year}-08-15`, name: 'Mariä Himmelfahrt' },
+    { date: `${year}-10-26`, name: 'Nationalfeiertag' },
+    { date: `${year}-11-01`, name: 'Allerheiligen' },
+    { date: `${year}-12-08`, name: 'Mariä Empfängnis' },
+    { date: `${year}-12-25`, name: 'Christtag' },
+    { date: `${year}-12-26`, name: 'Stefanitag' },
   ];
+}
+
+/** UNSICHER-Hinweis zur Halbtags-Zuordnung (5HOLID.INTERVAL, Spec 3.2.1 Nr. 3). */
+const INTERVAL_UNSURE_HINT =
+  'UNSICHER: Zuordnung 1 = vormittags / 2 = nachmittags ist aus der Original-Disassembly abgeleitet, datenseitig unbestätigt.';
+
+/** Anzeige-Label für 5HOLID.INTERVAL (Spec-Semantik: 0 = ganztägig, 1/2 = halber Feiertag). */
+function intervalLabel(interval: number): string {
+  if (interval === 1) return 'Halbtags (vormittags)';
+  if (interval === 2) return 'Halbtags (nachmittags)';
+  return 'Ganztägig';
 }
 
 export default function Holidays() {
@@ -87,6 +99,8 @@ export default function Holidays() {
   }, []);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState<HolidayForm>(EMPTY_FORM);
+  // "auch in den folgenden 9 Jahren anlegen" (Spec 3.2.1 Nr. 4 / Dialog 5.16, nur beim Anlegen)
+  const [repeatYears, setRepeatYears] = useState(false);
   const [saving, setSaving] = useState(false);
   const [importing, setImporting] = useState(false);
   const { showToast } = useToast();
@@ -148,6 +162,7 @@ export default function Holidays() {
   const openCreate = () => {
     setEditId(null);
     setForm({ ...EMPTY_FORM, DATE: `${year}-01-01` });
+    setRepeatYears(false);
     setError(null);
     setShowModal(true);
   };
@@ -173,8 +188,9 @@ export default function Holidays() {
         await api.updateHoliday(editId, form);
         showToast('Feiertag gespeichert ✓', 'success');
       } else {
-        await api.createHoliday(form);
-        showToast('Feiertag erstellt ✓', 'success');
+        // repeat_years (truthy) legt den Termin zusätzlich für die folgenden 9 Jahre an.
+        await api.createHoliday({ ...form, ...(repeatYears ? { repeat_years: 1 } : {}) });
+        showToast(repeatYears ? 'Feiertag für 10 Jahre erstellt ✓' : 'Feiertag erstellt ✓', 'success');
       }
       setShowModal(false);
       load();
@@ -205,7 +221,7 @@ export default function Holidays() {
       const toImport = atHolidays.filter(h => !existingDates.has(h.date));
       let imported = 0;
       for (const h of toImport) {
-        await api.createHoliday({ DATE: h.date, NAME: h.name, INTERVAL: h.interval });
+        await api.createHoliday({ DATE: h.date, NAME: h.name, INTERVAL: 0 });
         imported++;
       }
       showToast(`${imported} Feiertage importiert (${atHolidays.length - imported} bereits vorhanden)`, 'success');
@@ -267,7 +283,7 @@ export default function Holidays() {
                 <th scope="col" className="px-4 py-2 text-left">Datum</th>
                 <th scope="col" className="px-4 py-2 text-left">Wochentag</th>
                 <th scope="col" className="px-4 py-2 text-left">Name</th>
-                <th scope="col" className="px-4 py-2 text-center">Typ</th>
+                <th scope="col" className="px-4 py-2 text-center">Dauer</th>
                 <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
               </tr>
             </thead>
@@ -278,10 +294,15 @@ export default function Holidays() {
                   <td className="px-4 py-2 text-gray-500">{getWeekday(h.DATE)}</td>
                   <td className="px-4 py-2 font-semibold">{h.NAME}</td>
                   <td className="px-4 py-2 text-center">
-                    {h.INTERVAL === 1 ? (
-                      <span className="inline-block px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs font-semibold">Jährlich</span>
+                    {h.INTERVAL === 1 || h.INTERVAL === 2 ? (
+                      <span
+                        className="inline-block px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-semibold"
+                        title={INTERVAL_UNSURE_HINT}
+                      >
+                        {intervalLabel(h.INTERVAL)}
+                      </span>
                     ) : (
-                      <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs">Einmalig</span>
+                      <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs">Ganztägig</span>
                     )}
                   </td>
                   <td className="px-4 py-2 text-center">
@@ -329,16 +350,30 @@ export default function Holidays() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Typ</label>
+                <label className="block text-xs font-semibold text-gray-600 mb-1" title={INTERVAL_UNSURE_HINT}>
+                  Dauer <span className="cursor-help text-gray-400" aria-label={INTERVAL_UNSURE_HINT}>ⓘ</span>
+                </label>
                 <select
                   value={form.INTERVAL}
                   onChange={e => setForm(f => ({ ...f, INTERVAL: parseInt(e.target.value) || 0 }))}
                   className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  title={INTERVAL_UNSURE_HINT}
                 >
-                  <option value={0}>Einmalig (festes Jahr)</option>
-                  <option value={1}>Jährlich wiederkehrend</option>
+                  <option value={0}>Ganztägig</option>
+                  <option value={1}>Halbtags (vormittags)</option>
+                  <option value={2}>Halbtags (nachmittags)</option>
                 </select>
               </div>
+              {editId === null && (
+                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={repeatYears}
+                    onChange={e => setRepeatYears(e.target.checked)}
+                  />
+                  Auch in den folgenden 9 Jahren anlegen
+                </label>
+              )}
             </div>
             <div className="flex gap-2 mt-5 justify-end">
               <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200">Abbrechen</button>

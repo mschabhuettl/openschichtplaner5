@@ -15,12 +15,29 @@ function hexToBGR(hex: string): number {
   return (b << 16) | (g << 8) | r;
 }
 
+/** 5LEAVT-Anrechnungsfelder (Spec 5.2/5.3, Gap V-4) — noch nicht im gemeinsamen
+ *  LeaveType-Typ; werden von der API als DBF-Felder durchgereicht. */
+interface LeaveTypeCharge {
+  /** Anzurechnende Arbeitszeit: 0 = keine, 1 = Abwesenheitszeit, 2 = feste Stundenzahl je Tag. */
+  CHARGETYP?: number;
+  /** Stundenzahl je Tag (nur bei CHARGETYP=2). */
+  CHARGEHRS?: number;
+  /** Resttage beim Jahresabschluss ins Folgejahr übertragen. */
+  CARRYFWD?: boolean | number;
+  /** Alle Abwesenheitstage zählen (auch arbeitsfreie Tage). */
+  COUNTALL?: boolean | number;
+}
+
 interface LeaveTypeForm {
   NAME: string;
   SHORTNAME: string;
   colorHex: string;
+  CHARGETYP: number;
+  CHARGEHRS: number;
   ENTITLED: boolean;
   STDENTIT: number;
+  CARRYFWD: boolean;
+  COUNTALL: boolean;
   HIDE: boolean;
 }
 
@@ -28,10 +45,20 @@ const EMPTY_FORM: LeaveTypeForm = {
   NAME: '',
   SHORTNAME: '',
   colorHex: '#FFFFFF',
+  CHARGETYP: 0,
+  CHARGEHRS: 0,
   ENTITLED: false,
   STDENTIT: 0,
+  CARRYFWD: false,
+  COUNTALL: false,
   HIDE: false,
 };
+
+const CHARGETYP_OPTIONS: { value: number; label: string }[] = [
+  { value: 0, label: 'Keine' },
+  { value: 1, label: 'Abwesenheitszeit (Sollzeit des Tages)' },
+  { value: 2, label: 'Feste Stundenzahl je Tag' },
+];
 
 export default function LeaveTypes() {
   const { canAdmin } = useAuth();
@@ -72,13 +99,18 @@ export default function LeaveTypes() {
   };
 
   const openEdit = (lt: LeaveType) => {
+    const ltc = lt as LeaveType & LeaveTypeCharge;
     setEditId(lt.ID);
     setForm({
       NAME: lt.NAME || '',
       SHORTNAME: lt.SHORTNAME || '',
       colorHex: lt.COLORBK_HEX || '#FFFFFF',
+      CHARGETYP: ltc.CHARGETYP || 0,
+      CHARGEHRS: ltc.CHARGEHRS || 0,
       ENTITLED: lt.ENTITLED || false,
       STDENTIT: lt.STDENTIT || 0,
+      CARRYFWD: !!ltc.CARRYFWD,
+      COUNTALL: !!ltc.COUNTALL,
       HIDE: lt.HIDE || false,
     });
     setError(null);
@@ -89,13 +121,18 @@ export default function LeaveTypes() {
     setError(null);
     if (!form.NAME.trim()) { setError('Bezeichnung ist ein Pflichtfeld.'); return; }
     if (!form.SHORTNAME.trim()) { setError('Kürzel ist ein Pflichtfeld.'); return; }
+    if (form.CHARGETYP === 2 && form.CHARGEHRS <= 0) { setError('Bitte eine Stundenzahl je Tag angeben.'); return; }
     setSaving(true);
     const payload = {
       NAME: form.NAME,
       SHORTNAME: form.SHORTNAME,
       COLORBK: hexToBGR(form.colorHex),
+      CHARGETYP: form.CHARGETYP,
+      CHARGEHRS: form.CHARGETYP === 2 ? form.CHARGEHRS : 0,
       ENTITLED: form.ENTITLED,
       STDENTIT: form.STDENTIT,
+      CARRYFWD: form.ENTITLED ? form.CARRYFWD : false,
+      COUNTALL: form.COUNTALL,
       HIDE: form.HIDE,
     };
     try {
@@ -262,26 +299,73 @@ export default function LeaveTypes() {
                   </div>
                 </div>
               </div>
+              <fieldset className="border rounded p-2">
+                <legend className="text-xs font-semibold text-gray-600 px-1">Anzurechnende Arbeitszeit</legend>
+                <div className="space-y-1">
+                  {CHARGETYP_OPTIONS.map(opt => (
+                    <label key={opt.value} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="chargetyp"
+                        checked={form.CHARGETYP === opt.value}
+                        onChange={() => setForm(f => ({ ...f, CHARGETYP: opt.value }))}
+                      />
+                      {opt.label}
+                    </label>
+                  ))}
+                </div>
+                {form.CHARGETYP === 2 && (
+                  <div className="mt-2">
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">Stundenzahl je Tag</label>
+                    <input
+                      type="number"
+                      step="0.25"
+                      min="0"
+                      value={form.CHARGEHRS}
+                      onChange={e => setForm(f => ({ ...f, CHARGEHRS: parseFloat(e.target.value) || 0 }))}
+                      className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                )}
+              </fieldset>
               <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={form.ENTITLED}
                   onChange={e => setForm(f => ({ ...f, ENTITLED: e.target.checked }))}
                 />
-                Urlaubsanspruch verbraucht
+                Mit Anspruch verbunden (verbraucht Urlaubsanspruch)
               </label>
               {form.ENTITLED && (
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Standard-Urlaubstage</label>
-                  <input
-                    type="number"
-                    step="1"
-                    value={form.STDENTIT}
-                    onChange={e => setForm(f => ({ ...f, STDENTIT: parseFloat(e.target.value) || 0 }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+                <div className="pl-6 space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">Standardanspruch (Tage)</label>
+                    <input
+                      type="number"
+                      step="1"
+                      value={form.STDENTIT}
+                      onChange={e => setForm(f => ({ ...f, STDENTIT: parseFloat(e.target.value) || 0 }))}
+                      className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.CARRYFWD}
+                      onChange={e => setForm(f => ({ ...f, CARRYFWD: e.target.checked }))}
+                    />
+                    Resttage beim Jahresabschluss ins Folgejahr übertragen
+                  </label>
                 </div>
               )}
+              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={form.COUNTALL}
+                  onChange={e => setForm(f => ({ ...f, COUNTALL: e.target.checked }))}
+                />
+                Alle Abwesenheitstage zählen (auch arbeitsfreie Tage)
+              </label>
               <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                 <input
                   type="checkbox"

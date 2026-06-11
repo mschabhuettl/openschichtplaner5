@@ -4,12 +4,23 @@ import { useNavigate } from 'react-router-dom';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../api/client';
-import type { ShiftRequirement, Note, ConflictEntry, CoverageDay, ScheduleTemplate, ScheduleComment } from '../api/client';
+import type { ShiftRequirement, Note, ConflictEntry, CoverageDay, ScheduleTemplate, ScheduleComment, AbsenceTimeOptions } from '../api/client';
 import type { Employee, Group, ScheduleEntry, ShiftType, LeaveType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useTheme } from '../contexts/ThemeContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { ConflictDialog } from '../components/ConflictDialog';
+import type { ConflictChoice } from '../components/ConflictDialog';
+import { ScheduleCellStack } from '../components/ScheduleCellStack';
+import { AbsenceIntervalPicker } from '../components/AbsenceIntervalPicker';
+import {
+  buildEntryMap, coverageIndicator, coverageTooltip,
+  isCycleEntry, hasDeletableEntry, filterPrevMonthCopyEntries,
+  canAddWithoutReplace, planCellDrop,
+  getConflictStrategy, setConflictStrategy,
+  DEFAULT_ABSENCE_TIME, toAbsenceTimeOptions,
+} from '../components/scheduleGridUtils';
 import { SkeletonGrid } from '../components/Skeleton';
 import ScheduleCalendar from '../components/ScheduleCalendar';
 import type { DndAssignPayload, DndMovePayload } from '../components/ScheduleCalendar';
@@ -26,7 +37,7 @@ function jsWdToDbWd(jsWd: number): number {
 function exportCSV(
   employees: Employee[],
   days: number[],
-  entryMap: Map<string, ScheduleEntry>,
+  entryMap: Map<string, ScheduleEntry[]>,
   year: number,
   month: number,
 ) {
@@ -34,8 +45,8 @@ function exportCSV(
   const header = ['Mitarbeiter', ...days.map(d => `${year}-${pad(month)}-${pad(d)}`)];
   const rows = employees.map(emp => {
     const cells = days.map(day => {
-      const e = entryMap.get(`${emp.ID}-${day}`);
-      return e ? (e.display_name || '') : '';
+      const list = entryMap.get(`${emp.ID}-${day}`) ?? [];
+      return list.map(e => e.display_name || '').filter(Boolean).join(' / ');
     });
     return [`${emp.NAME}, ${emp.FIRSTNAME}`, ...cells];
   });
@@ -54,7 +65,7 @@ function exportCSV(
 function buildScheduleHTML(
   employees: Employee[],
   days: number[],
-  entryMap: Map<string, ScheduleEntry>,
+  entryMap: Map<string, ScheduleEntry[]>,
   holidays: Set<string>,
   year: number,
   month: number,
@@ -97,10 +108,12 @@ function buildScheduleHTML(
       const wd = new Date(year, month - 1, day).getDay();
       const isHol = holidays.has(dateStr);
       const isWe = wd === 0 || wd === 6;
-      const entry = entryMap.get(`${emp.ID}-${day}`);
-      const style = tdStyle(entry?.color_bk, isWe, isHol);
-      const color = entry?.color_text || '#000';
-      cells += `<td style="${style}"><span style="color:${color};font-weight:bold">${entry?.display_name || ''}</span></td>`;
+      const list = entryMap.get(`${emp.ID}-${day}`) ?? [];
+      const first = list[0];
+      const style = tdStyle(first?.color_bk, isWe, isHol);
+      const color = first?.color_text || '#000';
+      const label = list.map(e => e.display_name || '').filter(Boolean).join(' / ');
+      cells += `<td style="${style}"><span style="color:${color};font-weight:bold">${label}</span></td>`;
     }
     bodyRows += `<tr>${cells}</tr>`;
   }
@@ -138,7 +151,7 @@ ${shifts.length > 0 ? `<div class="no-print" style="margin-bottom:8px;display:fl
 function exportHTML(
   employees: Employee[],
   days: number[],
-  entryMap: Map<string, ScheduleEntry>,
+  entryMap: Map<string, ScheduleEntry[]>,
   holidays: Set<string>,
   year: number,
   month: number,
@@ -191,12 +204,13 @@ const ShiftPicker = memo(function ShiftPicker({
   leaveTypes,
 }: {
   onSelect: (shiftId: number) => void;
-  onAbsence: (leaveTypeId: number) => void;
+  onAbsence: (leaveTypeId: number, time?: AbsenceTimeOptions) => void;
   onClose: () => void;
   shifts: ShiftType[];
   leaveTypes: LeaveType[];
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [absTime, setAbsTime] = useState(DEFAULT_ABSENCE_TIME);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -234,10 +248,11 @@ const ShiftPicker = memo(function ShiftPicker({
         <>
           <div className="border-t my-1" />
           <div className="font-semibold text-gray-600 mb-1 px-1">Abwesenheit</div>
+          <AbsenceIntervalPicker value={absTime} onChange={setAbsTime} />
           {leaveTypes.map(lt => (
             <button
               key={lt.ID}
-              onClick={() => { onAbsence(lt.ID); onClose(); }}
+              onClick={() => { onAbsence(lt.ID, toAbsenceTimeOptions(absTime)); onClose(); }}
               className="w-full flex items-center gap-1.5 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
             >
               <span
@@ -453,32 +468,34 @@ interface ContextMenuState {
 }
 
 // ── Full cell context menu (replaces old NoteContextMenu) ─────
-type CellMenuMode = 'menu' | 'shift-select' | 'absence-select' | 'sonderdienst' | 'deviation' | 'note';
+type CellMenuMode = 'menu' | 'shift-select' | 'absence-select' | 'delete-select' | 'sonderdienst' | 'deviation' | 'note';
 
 interface CellContextMenuProps {
   state: ContextMenuState;
-  entry: ScheduleEntry | null;
+  entries: ScheduleEntry[];
   shifts: ShiftType[];
   leaveTypes: LeaveType[];
   hasClipboard: boolean;
   onClose: () => void;
   onAddNote: (empId: number, dateStr: string, text: string) => Promise<void>;
   onAssignShift: (empId: number, day: number, shiftId: number) => void;
-  onAddAbsence: (empId: number, day: number, leaveTypeId: number) => void;
+  onAddAbsence: (empId: number, day: number, leaveTypeId: number, time?: AbsenceTimeOptions) => void;
   onAddSonderdienst: (empId: number, dateStr: string, shiftId: number | null, startTime: string, endTime: string) => Promise<void>;
   onAddDeviation: (empId: number, dateStr: string, startTime: string, endTime: string) => Promise<void>;
   onDelete: (empId: number, day: number) => void;
+  onDeleteEntry: (empId: number, day: number, entry: ScheduleEntry) => void;
   onCopy: (empId: number, day: number) => void;
   onPaste: (empId: number, day: number) => void;
 }
 
 const CellContextMenu = memo(function CellContextMenu({
-  state, entry, shifts, leaveTypes, hasClipboard,
+  state, entries, shifts, leaveTypes, hasClipboard,
   onClose, onAddNote, onAssignShift, onAddAbsence,
-  onAddSonderdienst, onAddDeviation, onDelete, onCopy, onPaste,
+  onAddSonderdienst, onAddDeviation, onDelete, onDeleteEntry, onCopy, onPaste,
 }: CellContextMenuProps) {
   const [mode, setMode] = useState<CellMenuMode>('menu');
   const [noteText, setNoteText] = useState('');
+  const [absTime, setAbsTime] = useState(DEFAULT_ABSENCE_TIME);
   const [sonderdienst, setSonderdienst] = useState({ shiftId: '' as number | '', startTime: '08:00', endTime: '16:00' });
   const [deviation, setDeviation] = useState({ startTime: '08:00', endTime: '16:00' });
   const [saving, setSaving] = useState(false);
@@ -547,7 +564,7 @@ const CellContextMenu = memo(function CellContextMenu({
           >
             ⚡ Sonderdienst...
           </button>
-          {entry?.kind === 'shift' && (
+          {entries.some(en => en.kind === 'shift') && (
             <button
               className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
               onClick={() => setMode('deviation')}
@@ -561,12 +578,21 @@ const CellContextMenu = memo(function CellContextMenu({
           >
             💬 Notiz hinzufügen
           </button>
-          {entry && (
+          {entries.some(en => en.source === 'cycle') && (
+            <div className="px-3 py-1 text-[10px] text-gray-500" title="aus Schichtmodell (Zyklus)">
+              ↻ Zyklusdienst — nur per Überschreiben änderbar
+            </div>
+          )}
+          {entries.length > 0 && (
             <button
               className="w-full px-3 py-1.5 text-left hover:bg-red-50 text-red-600 flex items-center gap-2"
-              onClick={() => { onDelete(state.empId, state.day); onClose(); }}
+              onClick={() => {
+                if (entries.length > 1) { setMode('delete-select'); return; }
+                onDelete(state.empId, state.day);
+                onClose();
+              }}
             >
-              🗑️ Löschen
+              🗑️ Löschen{entries.length > 1 ? '…' : ''}
             </button>
           )}
           <div className="border-t my-1" />
@@ -620,11 +646,12 @@ const CellContextMenu = memo(function CellContextMenu({
       {mode === 'absence-select' && (
         <div className="py-1">
           <div className="px-3 py-1 text-gray-600 text-[10px] font-medium border-b mb-1">Abwesenheitsart wählen</div>
+          <AbsenceIntervalPicker value={absTime} onChange={setAbsTime} />
           <div className="overflow-y-auto max-h-60">
             {leaveTypes.filter(lt => !lt.HIDE).map(lt => (
               <button
                 key={lt.ID}
-                onClick={() => { onAddAbsence(state.empId, state.day, lt.ID); onClose(); }}
+                onClick={() => { onAddAbsence(state.empId, state.day, lt.ID, toAbsenceTimeOptions(absTime)); onClose(); }}
                 className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
               >
                 <span
@@ -638,6 +665,43 @@ const CellContextMenu = memo(function CellContextMenu({
             ))}
           </div>
           <div className="border-t my-1" />
+          <button
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 flex items-center gap-1"
+            onClick={() => setMode('menu')}
+          >
+            ← Zurück
+          </button>
+        </div>
+      )}
+
+      {mode === 'delete-select' && (
+        <div className="py-1">
+          <div className="px-3 py-1 text-gray-600 text-[10px] font-medium border-b mb-1">Welchen Eintrag löschen?</div>
+          {entries.map((en, i) => (
+            <button
+              key={i}
+              onClick={() => { onDeleteEntry(state.empId, state.day, en); onClose(); }}
+              className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-red-50 text-left"
+            >
+              <span
+                className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
+                style={{ backgroundColor: en.color_bk || '#64748b', color: en.color_text || '#fff' }}
+              >
+                {en.display_name?.[0] || '?'}
+              </span>
+              <span>
+                {en.display_name || '?'}
+                {en.source === 'cycle' ? ' (↻ Zyklus)' : en.kind === 'absence' ? ' (Abwesenheit)' : ''}
+              </span>
+            </button>
+          ))}
+          <div className="border-t my-1" />
+          <button
+            className="w-full px-3 py-1.5 text-left hover:bg-red-50 text-red-600 flex items-center gap-2"
+            onClick={() => { onDelete(state.empId, state.day); onClose(); }}
+          >
+            🗑️ Alle Einträge löschen
+          </button>
           <button
             className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 flex items-center gap-1"
             onClick={() => setMode('menu')}
@@ -1344,7 +1408,7 @@ interface DayDetailModalProps {
   isHoliday: boolean;
   isWeekend: boolean;
   employees: Employee[];
-  entryMap: Map<string, ScheduleEntry>;
+  entryMap: Map<string, ScheduleEntry[]>;
   shifts: ShiftType[];
   notesMap: Map<string, Note[]>;
   onClose: () => void;
@@ -1363,13 +1427,15 @@ function DayDetailModal({
   const grouped = new Map<string, { label: string; colorBk: string; colorText: string; employees: Array<{ emp: Employee; entry: ScheduleEntry }> }>();
 
   for (const emp of employees) {
-    const entry = entryMap.get(`${emp.ID}-${day}`);
-    if (!entry) { noEntryEmps.push(emp); continue; }
-    const key = entry.display_name || '?';
-    if (!grouped.has(key)) {
-      grouped.set(key, { label: entry.shift_name || entry.leave_name || entry.display_name || key, colorBk: entry.color_bk || '#64748b', colorText: entry.color_text || '#fff', employees: [] });
+    const cellEntries = entryMap.get(`${emp.ID}-${day}`) ?? [];
+    if (cellEntries.length === 0) { noEntryEmps.push(emp); continue; }
+    for (const entry of cellEntries) {
+      const key = entry.display_name || '?';
+      if (!grouped.has(key)) {
+        grouped.set(key, { label: entry.shift_name || entry.leave_name || entry.display_name || key, colorBk: entry.color_bk || '#64748b', colorText: entry.color_text || '#fff', employees: [] });
+      }
+      grouped.get(key)!.employees.push({ emp, entry });
     }
-    grouped.get(key)!.employees.push({ emp, entry });
   }
   grouped.forEach(g => groups.push(g));
   groups.sort((a, b) => b.employees.length - a.employees.length);
@@ -1576,7 +1642,7 @@ interface WeekTemplateModalProps {
   year: number;
   month: number;
   employees: Employee[];
-  entryMap: Map<string, import('../types').ScheduleEntry>;
+  entryMap: Map<string, import('../types').ScheduleEntry[]>;
   onApplyTemplate: (templateId: number, targetMonday: string, force: boolean) => Promise<void>;
   groupId?: number | null;
 }
@@ -1843,10 +1909,9 @@ function WeekTemplateModal({
                   const dt = new Date(monday); dt.setDate(monday.getDate() + wd);
                   if (dt.getMonth() !== month - 1) continue;
                   const day = dt.getDate();
-                  const count = employees.filter(emp => {
-                    const e = entryMap.get(`${emp.ID}-${day}`);
-                    return e && e.kind === 'shift' && e.shift_id;
-                  }).length;
+                  const count = employees.filter(emp =>
+                    (entryMap.get(`${emp.ID}-${day}`) ?? []).some(e => e.kind === 'shift' && !!e.shift_id)
+                  ).length;
                   preview.push({ wd, count });
                 }
                 const total = preview.reduce((s, p) => s + p.count, 0);
@@ -2012,8 +2077,21 @@ export default function Schedule() {
   const [bulkShiftId, setBulkShiftId] = useState<number | ''>('');
 
   // ── Undo/Redo ──────────────────────────────────────────────
-  const [undoStack, setUndoStack] = useState<Array<{ cells: Array<{ empId: number; day: number; before: ScheduleEntry | null }> }>>([]);
-  const [redoStack, setRedoStack] = useState<Array<{ cells: Array<{ empId: number; day: number; before: ScheduleEntry | null }> }>>([]);
+  // before = ALLE Zelleinträge vor der Aktion (leer = Zelle war frei)
+  const [undoStack, setUndoStack] = useState<Array<{ cells: Array<{ empId: number; day: number; before: ScheduleEntry[] }> }>>([]);
+  const [redoStack, setRedoStack] = useState<Array<{ cells: Array<{ empId: number; day: number; before: ScheduleEntry[] }> }>>([]);
+
+  // ── Konflikt-Dialog (V-2, Spec 6.7) ────────────────────────
+  const [conflictPrompt, setConflictPrompt] = useState<{
+    existingLabels: string[];
+    incomingLabel: string;
+    allowAdd: boolean;
+    resolve: (choice: ConflictChoice) => void;
+  } | null>(null);
+
+  // ── Datumssprung (V-18, Strg+G) ────────────────────────────
+  const [showDateJump, setShowDateJump] = useState(false);
+  const [dateJumpValue, setDateJumpValue] = useState('');
 
   // ── Keyboard cursor (single selected cell for nav) ─────────
   const [selectedCell, setSelectedCell] = useState<{ empId: number; day: number } | null>(null);
@@ -2154,12 +2232,13 @@ export default function Schedule() {
       .catch(() => setStaffingReqs([]));
   }, [year, month]);
 
-  // Load coverage (Personalbedarf-Ampel) when year/month changes
+  // Load coverage (Personalbedarf-Ampel) when year/month/group changes (APP-INT-1)
   useEffect(() => {
-    api.getCoverage(year, month)
+    const covGroupId = selectedGroupIds.length === 1 ? selectedGroupIds[0] : undefined;
+    api.getCoverage(year, month, covGroupId)
       .then(setCoverage)
       .catch(() => setCoverage([]));
-  }, [year, month]);
+  }, [year, month, selectedGroupIds]);
 
   // Helper: build noteMap from array of notes
   const buildNotesMap = (notes: Note[]): Map<string, Note[]> => {
@@ -2370,15 +2449,15 @@ export default function Schedule() {
   // Displayed days: 7-day week on mobile, full month on desktop
   const displayedDays = (isMobile || forceWeekView) ? mobileWeekData.weekDaysInMonth : days;
 
-  // Entry lookup: "empId-day" → entry
-  const entryMap = useMemo(() => {
+  // Entry lookup: "empId-day" → ALLE Einträge des Tages (V-1, Spec 6.7)
+  const entryMap = useMemo(() => buildEntryMap(entries), [entries]);
+
+  // Primär-Eintrag je Zelle (für Komponenten, die genau einen Eintrag erwarten)
+  const primaryEntryMap = useMemo(() => {
     const m = new Map<string, ScheduleEntry>();
-    for (const e of entries) {
-      const day = parseInt(e.date.split('-')[2]);
-      m.set(`${e.employee_id}-${day}`, e);
-    }
+    entryMap.forEach((list, key) => { if (list[0]) m.set(key, list[0]); });
     return m;
-  }, [entries]);
+  }, [entryMap]);
 
   // Workload map: employeeId → { actual, target } hours for the visible month
   const workloadMap = useMemo(() => {
@@ -2388,15 +2467,16 @@ export default function Schedule() {
       // Count actual hours from entries
       let actual = 0;
       for (let d = 1; d <= daysInMonth; d++) {
-        const entry = entryMap.get(`${emp.ID}-${d}`);
-        if (!entry || !entry.shift_id) continue;
-        const sh = shiftsById.get(entry.shift_id);
-        if (!sh) continue;
-        // Use weekday-specific duration if available, else DURATION0
-        const wd = new Date(year, month - 1, d).getDay(); // 0=Sun
-        const wdKey = wd === 0 ? 7 : wd; // DB: 1=Mo..7=So
-        const dur = (sh as unknown as Record<string, unknown>)[`DURATION${wdKey}`] as number | undefined;
-        actual += typeof dur === 'number' && dur > 0 ? dur : (sh.DURATION0 || 0);
+        for (const entry of entryMap.get(`${emp.ID}-${d}`) ?? []) {
+          if (!entry.shift_id) continue;
+          const sh = shiftsById.get(entry.shift_id);
+          if (!sh) continue;
+          // Use weekday-specific duration if available, else DURATION0
+          const wd = new Date(year, month - 1, d).getDay(); // 0=Sun
+          const wdKey = wd === 0 ? 7 : wd; // DB: 1=Mo..7=So
+          const dur = (sh as unknown as Record<string, unknown>)[`DURATION${wdKey}`] as number | undefined;
+          actual += typeof dur === 'number' && dur > 0 ? dur : (sh.DURATION0 || 0);
+        }
       }
       // Target: prefer HRSMONTH, else HRSDAY * working days in month
       let target = emp.HRSMONTH || 0;
@@ -2531,10 +2611,10 @@ export default function Schedule() {
       const emp = row.employee!;
       // Check if this employee has the selected shift or leave type in any day
       for (let d = 1; d <= daysInMonth; d++) {
-        const entry = entryMap.get(`${emp.ID}-${d}`);
-        if (!entry) continue;
-        if (filterShiftId && entry.shift_id === filterShiftId) return true;
-        if (filterLeaveId && entry.leave_type_id === filterLeaveId) return true;
+        for (const entry of entryMap.get(`${emp.ID}-${d}`) ?? []) {
+          if (filterShiftId && entry.shift_id === filterShiftId) return true;
+          if (filterLeaveId && entry.leave_type_id === filterLeaveId) return true;
+        }
       }
       return false;
     });
@@ -2629,20 +2709,104 @@ export default function Schedule() {
   const prevWeek = () => setMobileWeekOffset(o => o - 1);
   const nextWeek = () => setMobileWeekOffset(o => o + 1);
 
+  // Heute-Button (V-18): zum aktuellen Monat springen
+  const goToToday = () => {
+    const n = new Date();
+    setYear(n.getFullYear());
+    setMonth(n.getMonth() + 1);
+    setMobileWeekOffset(0);
+  };
+
+  // Datumssprung (V-18, Strg+G)
+  const openDateJump = () => {
+    const n = new Date();
+    const isCurrent = n.getFullYear() === year && n.getMonth() + 1 === month;
+    setDateJumpValue(`${year}-${pad(month)}-${pad(isCurrent ? n.getDate() : 1)}`);
+    setShowDateJump(true);
+  };
+  const jumpToDate = () => {
+    const m = /^(\d{4})-(\d{2})-\d{2}$/.exec(dateJumpValue);
+    if (!m) return;
+    setYear(Number(m[1]));
+    setMonth(Number(m[2]));
+    setMobileWeekOffset(0);
+    setShowDateJump(false);
+  };
+
+  // ── Konflikt-Auflösung (V-2): gespeicherte Strategie oder Dialog ──
+  const resolveConflict = (
+    existing: ScheduleEntry[],
+    incomingLabel: string,
+    allowAdd: boolean,
+  ): Promise<ConflictChoice> => {
+    const stored = getConflictStrategy();
+    if (stored === 'replace') return Promise.resolve('replace');
+    if (stored === 'add' && allowAdd) return Promise.resolve('add');
+    return new Promise(resolve => {
+      setConflictPrompt({
+        existingLabels: existing.map(e => e.display_name || e.shift_name || e.leave_name || '?'),
+        incomingLabel,
+        allowAdd,
+        resolve,
+      });
+    });
+  };
+
+  // ── Zyklus-Guard (APP-INT-4): Hinweis statt Löschen ───────
+  const promptCycleOverwrite = async (empId: number, day: number) => {
+    const overwrite = await confirmDialog({
+      title: '↻ Zyklusdienst',
+      message: 'Dieser Dienst stammt aus einem Schichtmodell (Zyklus) und kann nur per Ausnahme/Überschreiben geändert werden. Eigenen Eintrag setzen?',
+      confirmLabel: 'Überschreiben…',
+      cancelLabel: 'Abbrechen',
+    });
+    if (overwrite) setActivePicker({ empId, day });
+  };
+
+  /**
+   * Entfernt EINEN Eintrag aus einer Zelle. Die Delete-API löscht alle
+   * DB-Einträge des Tages — koexistierende Abwesenheiten werden danach
+   * wiederhergestellt (ganztägig; Teiltags-Info ist im Grid nicht verfügbar).
+   */
+  const removeSingleEntry = async (
+    empId: number, dateStr: string,
+    entry: ScheduleEntry, cellEntries: ScheduleEntry[],
+  ) => {
+    if (isCycleEntry(entry)) return;
+    if (entry.kind === 'absence') {
+      await api.deleteAbsence(empId, dateStr);
+      return;
+    }
+    await api.deleteScheduleEntry(empId, dateStr);
+    for (const other of cellEntries) {
+      if (other === entry || isCycleEntry(other)) continue;
+      if (other.kind === 'absence' && other.leave_type_id) {
+        await api.createAbsence(empId, dateStr, other.leave_type_id);
+      }
+    }
+  };
+
   // ── Handlers ────────────────────────────────────────────────
   const handleAddShift = async (empId: number, day: number, shiftId: number) => {
     const dateStr = `${year}-${pad(month)}-${pad(day)}`;
-    // Client-side warning: check if employee already has an absence on this day
-    const existingEntry = entryMap.get(`${empId}-${day}`);
-    if (existingEntry?.kind === 'absence') {
-      showToast(
-        `⚠️ Achtung: Mitarbeiter hat an diesem Tag bereits eine Abwesenheit (${existingEntry.display_name || 'Urlaub/Abwesenheit'})! Schicht wird trotzdem eingetragen.`,
-        'warning',
+    const existing = entryMap.get(`${empId}-${day}`) ?? [];
+    let choice: ConflictChoice = 'add';
+    if (existing.length > 0) {
+      const shift = shifts.find(s => s.ID === shiftId);
+      choice = await resolveConflict(
+        existing,
+        shift ? `${shift.SHORTNAME} – ${shift.NAME}` : 'Schicht',
+        canAddWithoutReplace(existing, 'shift'),
       );
+      if (choice === 'cancel') return;
     }
     setSaving(true);
     try {
+      if (choice === 'replace' && hasDeletableEntry(existing)) {
+        await api.deleteScheduleEntry(empId, dateStr);
+      }
       await api.createScheduleEntry(empId, dateStr, shiftId);
+      if (existing.length > 0) pushUndo([{ empId, day, before: existing }]);
       loadSchedule();
     } catch (e) {
       showToast('Fehler beim Speichern: ' + (e as Error).message, 'error');
@@ -2650,11 +2814,26 @@ export default function Schedule() {
     setSaving(false);
   };
 
-  const handleAddAbsence = async (empId: number, day: number, leaveTypeId: number) => {
+  const handleAddAbsence = async (empId: number, day: number, leaveTypeId: number, time?: AbsenceTimeOptions) => {
     const dateStr = `${year}-${pad(month)}-${pad(day)}`;
+    const existing = entryMap.get(`${empId}-${day}`) ?? [];
+    let choice: ConflictChoice = 'add';
+    if (existing.length > 0) {
+      const lt = leaveTypes.find(l => l.ID === leaveTypeId);
+      choice = await resolveConflict(
+        existing,
+        lt ? `${lt.SHORTNAME} – ${lt.NAME}` : 'Abwesenheit',
+        canAddWithoutReplace(existing, 'absence'),
+      );
+      if (choice === 'cancel') return;
+    }
     setSaving(true);
     try {
-      await api.createAbsence(empId, dateStr, leaveTypeId);
+      if (choice === 'replace' && hasDeletableEntry(existing)) {
+        await api.deleteScheduleEntry(empId, dateStr);
+      }
+      await api.createAbsence(empId, dateStr, leaveTypeId, time);
+      if (existing.length > 0) pushUndo([{ empId, day, before: existing }]);
       loadSchedule();
     } catch (e) {
       showToast('Fehler beim Speichern: ' + (e as Error).message, 'error');
@@ -2662,14 +2841,43 @@ export default function Schedule() {
     setSaving(false);
   };
 
+  /** Löscht ALLE Einträge einer Zelle (Hover-×, Entf-Taste, „Alle löschen"). */
   const handleDeleteEntry = async (empId: number, day: number, silent = false) => {
     const dateStr = `${year}-${pad(month)}-${pad(day)}`;
-    const before = entryMap.get(`${empId}-${day}`) ?? null;
-    if (!silent && !confirm('Eintrag löschen?')) return;
+    const cellEntries = entryMap.get(`${empId}-${day}`) ?? [];
+    if (cellEntries.length === 0) return;
+    if (!hasDeletableEntry(cellEntries)) {
+      // Nur Zyklusdienst(e): es gibt keinen DB-Eintrag zu löschen (APP-INT-4)
+      await promptCycleOverwrite(empId, day);
+      return;
+    }
+    if (!silent && !confirm(cellEntries.length > 1 ? `${cellEntries.length} Einträge löschen?` : 'Eintrag löschen?')) return;
     setSaving(true);
     try {
       await api.deleteScheduleEntry(empId, dateStr);
-      pushUndo([{ empId, day, before }]);
+      pushUndo([{ empId, day, before: cellEntries }]);
+      if (cellEntries.some(isCycleEntry)) {
+        showToast('↻ Zyklusdienst bleibt bestehen (aus Schichtmodell)', 'info');
+      }
+      loadSchedule();
+    } catch (e) {
+      showToast('Fehler beim Löschen: ' + (e as Error).message, 'error');
+    }
+    setSaving(false);
+  };
+
+  /** Löscht EINEN Eintrag einer Mehrfach-Zelle (Kontextmenü-Auswahl, V-1). */
+  const handleDeleteSingleEntry = async (empId: number, day: number, entry: ScheduleEntry) => {
+    const dateStr = `${year}-${pad(month)}-${pad(day)}`;
+    const cellEntries = entryMap.get(`${empId}-${day}`) ?? [];
+    if (isCycleEntry(entry)) {
+      await promptCycleOverwrite(empId, day);
+      return;
+    }
+    setSaving(true);
+    try {
+      await removeSingleEntry(empId, dateStr, entry, cellEntries);
+      pushUndo([{ empId, day, before: cellEntries }]);
       loadSchedule();
     } catch (e) {
       showToast('Fehler beim Löschen: ' + (e as Error).message, 'error');
@@ -2767,7 +2975,7 @@ export default function Schedule() {
   // ── Single-cell copy/paste ─────────────────────────────────
   const handleSingleCellCopy = (empId: number, day: number) => {
     const empIdx = empIndexMap.get(empId) ?? 0;
-    const entry = entryMap.get(`${empId}-${day}`);
+    const entry = (entryMap.get(`${empId}-${day}`) ?? []).find(e => e.shift_id);
     setClipboard({
       entries: [{ relEmpIdx: 0, relDay: 0, shiftId: entry?.shift_id ?? null }],
       anchorEmpIdx: empIdx,
@@ -2837,8 +3045,8 @@ export default function Schedule() {
     }
     setSelection(null);
     // Only set multi-select anchor for empty cells; cells with entries use HTML5 DnD
-    const entry = entryMap.get(`${empId}-${day}`);
-    if (!entry) {
+    const hasEntries = (entryMap.get(`${empId}-${day}`)?.length ?? 0) > 0;
+    if (!hasEntries) {
       dragAnchorRef.current = { empId, day };
     } else {
       dragAnchorRef.current = null;
@@ -2889,7 +3097,7 @@ export default function Schedule() {
     const cells = getSelectedCells();
     if (cells.length === 0) return;
     const beforeCells = cells.map(({ empId, day }) => ({
-      empId, day, before: entryMap.get(`${empId}-${day}`) ?? null,
+      empId, day, before: entryMap.get(`${empId}-${day}`) ?? [],
     }));
     const apiEntries = cells.map(({ empId, day }) => ({
       employee_id: empId,
@@ -2914,7 +3122,7 @@ export default function Schedule() {
     if (cells.length === 0) return;
     if (!await confirmDialog({ message: `${cells.length} Einträge löschen?`, danger: true })) return;
     const beforeCells = cells.map(({ empId, day }) => ({
-      empId, day, before: entryMap.get(`${empId}-${day}`) ?? null,
+      empId, day, before: entryMap.get(`${empId}-${day}`) ?? [],
     }));
     const apiEntries = cells.map(({ empId, day }) => ({
       employee_id: empId,
@@ -2944,7 +3152,7 @@ export default function Schedule() {
     const cells = getSelectedCells();
     const clipEntries = cells.map(({ empId, day }) => {
       const empIdx = empIndexMap.get(empId) ?? 0;
-      const entry = entryMap.get(`${empId}-${day}`);
+      const entry = (entryMap.get(`${empId}-${day}`) ?? []).find(e => e.shift_id);
       return {
         relEmpIdx: empIdx - anchorEmpIdx,
         relDay: day - anchorDay,
@@ -2998,7 +3206,7 @@ export default function Schedule() {
   // ── Undo/Redo helpers ───────────────────────────────────────
   const UNDO_LIMIT = 20;
 
-  const pushUndo = (cells: Array<{ empId: number; day: number; before: ScheduleEntry | null }>) => {
+  const pushUndo = (cells: Array<{ empId: number; day: number; before: ScheduleEntry[] }>) => {
     setUndoStack(s => {
       const next = [...s, { cells }];
       return next.length > UNDO_LIMIT ? next.slice(next.length - UNDO_LIMIT) : next;
@@ -3006,17 +3214,20 @@ export default function Schedule() {
     setRedoStack([]); // clear redo on new action
   };
 
-  const restoreCell = async (empId: number, day: number, target: ScheduleEntry | null) => {
+  const restoreCell = async (empId: number, day: number, target: ScheduleEntry[]) => {
     const dateStr = `${year}-${pad(month)}-${pad(day)}`;
-    try {
-      if (target === null) {
-        await api.deleteScheduleEntry(empId, dateStr);
-      } else if (target.kind === 'shift' || target.kind === 'special_shift') {
-        if (target.shift_id) await api.createScheduleEntry(empId, dateStr, target.shift_id);
-      } else if (target.kind === 'absence') {
-        if (target.leave_type_id) await api.createAbsence(empId, dateStr, target.leave_type_id);
-      }
-    } catch { /* ignore errors during undo/redo */ }
+    // Zelle leeren, dann Zielzustand wiederherstellen (Zyklusdienste haben keinen DB-Eintrag)
+    try { await api.deleteScheduleEntry(empId, dateStr); } catch { /* Zelle war leer */ }
+    for (const e of target) {
+      if (isCycleEntry(e)) continue;
+      try {
+        if ((e.kind === 'shift' || e.kind === 'special_shift') && e.shift_id) {
+          await api.createScheduleEntry(empId, dateStr, e.shift_id);
+        } else if (e.kind === 'absence' && e.leave_type_id) {
+          await api.createAbsence(empId, dateStr, e.leave_type_id);
+        }
+      } catch { /* ignore errors during undo/redo */ }
+    }
   };
 
   const handleUndo = async () => {
@@ -3027,7 +3238,7 @@ export default function Schedule() {
       cells: record.cells.map(c => ({
         empId: c.empId,
         day: c.day,
-        before: entryMap.get(`${c.empId}-${c.day}`) ?? null,
+        before: entryMap.get(`${c.empId}-${c.day}`) ?? [],
       })),
     };
     setSaving(true);
@@ -3049,7 +3260,7 @@ export default function Schedule() {
       cells: record.cells.map(c => ({
         empId: c.empId,
         day: c.day,
-        before: entryMap.get(`${c.empId}-${c.day}`) ?? null,
+        before: entryMap.get(`${c.empId}-${c.day}`) ?? [],
       })),
     };
     setSaving(true);
@@ -3082,7 +3293,7 @@ export default function Schedule() {
     if (unassigned.length === 1) {
       // Single unassigned employee → assign directly
       const emp = unassigned[0];
-      const before = entryMap.get(`${emp.ID}-${dayNum}`) ?? null;
+      const before = entryMap.get(`${emp.ID}-${dayNum}`) ?? [];
       setSaving(true);
       try {
         await api.createScheduleEntry(emp.ID, dateStr, shiftId);
@@ -3098,7 +3309,7 @@ export default function Schedule() {
       const beforeCells = unassigned.map(emp => ({
         empId: emp.ID,
         day: dayNum,
-        before: entryMap.get(`${emp.ID}-${dayNum}`) ?? null,
+        before: entryMap.get(`${emp.ID}-${dayNum}`) ?? [],
       }));
       const apiEntries = unassigned.map(emp => ({
         employee_id: emp.ID,
@@ -3126,18 +3337,28 @@ export default function Schedule() {
     const fromDay = new Date(fromDateStr).getDate();
     const toDay = new Date(toDateStr).getDate();
 
-    const beforeFrom = entryMap.get(`${employeeId}-${fromDay}`) ?? null;
-    const beforeTo = entryMap.get(`${employeeId}-${toDay}`) ?? null;
+    const beforeFrom = entryMap.get(`${employeeId}-${fromDay}`) ?? [];
+    const beforeTo = entryMap.get(`${employeeId}-${toDay}`) ?? [];
+    // Zyklus-Quelle (APP-INT-4): kein DB-Eintrag löschbar → Move wird zur Kopie
+    const cycleSource = beforeFrom.length > 0 && !hasDeletableEntry(beforeFrom);
 
     setSaving(true);
     try {
-      await api.deleteScheduleEntry(employeeId, fromDateStr);
+      // Erst Ziel anlegen, dann Quelle löschen — vermeidet halbe Moves
       await api.createScheduleEntry(employeeId, toDateStr, shiftId);
+      if (!cycleSource) {
+        await api.deleteScheduleEntry(employeeId, fromDateStr);
+      }
       pushUndo([
         { empId: employeeId, day: fromDay, before: beforeFrom },
         { empId: employeeId, day: toDay, before: beforeTo },
       ]);
-      showToast(`↔ Schicht verschoben: ${fromDateStr} → ${toDateStr}`, 'success');
+      showToast(
+        cycleSource
+          ? `↻ Zyklusdienst kopiert: ${toDateStr} (Quelle bleibt im Schichtmodell)`
+          : `↔ Schicht verschoben: ${fromDateStr} → ${toDateStr}`,
+        cycleSource ? 'info' : 'success',
+      );
       loadSchedule();
     } catch (e) {
       showToast('Fehler beim Verschieben: ' + (e as Error).message, 'error');
@@ -3158,14 +3379,14 @@ export default function Schedule() {
       // Map by same day-of-month: day 1..N of prev month → day 1..N of cur month (up to min of both)
       const maxDays = Math.min(daysInPrevMonth, daysInCurMonth);
       const toAssign: Array<{ employee_id: number; date: string; shift_id: number | null }> = [];
-      for (const e of prevEntries) {
-        if (e.kind !== 'shift' || !e.shift_id) continue;
+      // Zyklusdienste (source==='cycle') nicht mit-materialisieren (APP-INT-4)
+      for (const e of filterPrevMonthCopyEntries(prevEntries)) {
         const prevDay = new Date(e.date).getDate();
         if (prevDay > maxDays) continue;
         // Skip if target already has an entry (if skip=true)
         if (copyPrevMonthSkip && entryMap.has(`${e.employee_id}-${prevDay}`)) continue;
         const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(prevDay).padStart(2,'0')}`;
-        toAssign.push({ employee_id: e.employee_id, date: dateStr, shift_id: e.shift_id });
+        toAssign.push({ employee_id: e.employee_id, date: dateStr, shift_id: e.shift_id ?? null });
       }
       if (toAssign.length === 0) {
         showToast('Keine Schichten zu kopieren (alles bereits belegt?)', 'info');
@@ -3211,24 +3432,36 @@ export default function Schedule() {
     e.preventDefault();
     if (!dndSource) return;
     const { empId: srcEmpId, day: srcDay } = dndSource;
-    // Don't drop onto same cell
-    if (srcEmpId === targetEmpId && srcDay === targetDay) {
-      setDndSource(null);
-      setDndTarget(null);
-      return;
-    }
-    const srcEntry = entryMap.get(`${srcEmpId}-${srcDay}`);
-    if (!srcEntry) { setDndSource(null); setDndTarget(null); return; }
-
     const isCopy = e.altKey;
-    const beforeTarget = entryMap.get(`${targetEmpId}-${targetDay}`) ?? null;
+    const clearDnd = () => { setDndSource(null); setDndTarget(null); };
+    // Don't drop onto same cell
+    if (srcEmpId === targetEmpId && srcDay === targetDay) { clearDnd(); return; }
+    const srcEntries = entryMap.get(`${srcEmpId}-${srcDay}`) ?? [];
+    const srcEntry = srcEntries[0];
+    if (!srcEntry) { clearDnd(); return; }
+
+    const targetEntries = entryMap.get(`${targetEmpId}-${targetDay}`) ?? [];
     const srcDateStr = `${year}-${pad(month)}-${pad(srcDay)}`;
     const targetDateStr = `${year}-${pad(month)}-${pad(targetDay)}`;
 
+    // Belegtes Ziel → Konflikt-Dialog (V-2): zusätzlich / ersetzen / abbrechen
+    let choice: 'add' | 'replace' = 'replace';
+    if (targetEntries.length > 0) {
+      const incomingKind = srcEntry.kind === 'absence' ? 'absence' : 'shift';
+      const resolved = await resolveConflict(
+        targetEntries,
+        srcEntry.display_name || srcEntry.shift_name || srcEntry.leave_name || '?',
+        canAddWithoutReplace(targetEntries, incomingKind),
+      );
+      if (resolved === 'cancel') { clearDnd(); return; }
+      choice = resolved;
+    }
+    // Zyklus-Guards (APP-INT-4): Quelle nicht löschen, Zyklus-Ziel ohne Delete überschreiben
+    const plan = planCellDrop({ sourceEntry: srcEntry, targetEntries, isCopy, choice });
+
     setSaving(true);
     try {
-      // If target cell already has an entry, delete it first (we have undo to recover)
-      if (beforeTarget !== null) {
+      if (plan.clearTarget) {
         await api.deleteScheduleEntry(targetEmpId, targetDateStr);
       }
       // Write to target cell
@@ -3237,26 +3470,30 @@ export default function Schedule() {
       } else if (srcEntry.kind === 'absence') {
         if (srcEntry.leave_type_id) await api.createAbsence(targetEmpId, targetDateStr, srcEntry.leave_type_id);
       }
-      // Move: delete source
-      if (!isCopy) {
-        await api.deleteScheduleEntry(srcEmpId, srcDateStr);
+      // Move: Quelle erst nach erfolgreichem Anlegen löschen (halbe Moves vermeiden)
+      if (plan.deleteSource) {
+        await removeSingleEntry(srcEmpId, srcDateStr, srcEntry, srcEntries);
       }
-      // Record undo: restore target to beforeTarget, and (if move) restore source to srcEntry
-      const undoCells: Array<{ empId: number; day: number; before: ScheduleEntry | null }> = [
-        { empId: targetEmpId, day: targetDay, before: beforeTarget },
+      // Record undo: restore target, and (if move) restore source
+      const undoCells: Array<{ empId: number; day: number; before: ScheduleEntry[] }> = [
+        { empId: targetEmpId, day: targetDay, before: targetEntries },
       ];
-      if (!isCopy) {
-        undoCells.push({ empId: srcEmpId, day: srcDay, before: srcEntry });
+      if (plan.deleteSource) {
+        undoCells.push({ empId: srcEmpId, day: srcDay, before: srcEntries });
       }
       pushUndo(undoCells);
-      showToast(isCopy ? '📋 Schicht kopiert' : '✂️ Schicht verschoben', 'success');
+      showToast(
+        plan.cycleSourceKept
+          ? '↻ Zyklusdienst kopiert (Quelle bleibt im Schichtmodell)'
+          : isCopy ? '📋 Schicht kopiert' : '✂️ Schicht verschoben',
+        plan.cycleSourceKept ? 'info' : 'success',
+      );
       loadSchedule();
     } catch (err) {
       showToast('Fehler: ' + (err as Error).message, 'error');
     }
     setSaving(false);
-    setDndSource(null);
-    setDndTarget(null);
+    clearDnd();
   };
 
   const handleDragEnd = () => {
@@ -3277,6 +3514,12 @@ export default function Schedule() {
         searchInputRef.current?.select();
         return;
       }
+    }
+    // Ctrl+G / Cmd+G → Datumssprung (V-18)
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'g' || e.key === 'G')) {
+      e.preventDefault();
+      openDateJump();
+      return;
     }
     // Ctrl+Z / Cmd+Z → Undo
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key === 'z') {
@@ -3317,6 +3560,7 @@ export default function Schedule() {
     // Escape → clear all UI state
     if (e.key === 'Escape') {
       if (showKbHelp) { setShowKbHelp(false); return; }
+      if (showDateJump) { setShowDateJump(false); return; }
       setSelection(null);
       setBulkContextMenu(null);
       setSelectedCell(null);
@@ -3328,8 +3572,7 @@ export default function Schedule() {
     const { empId, day } = selectedCell;
 
     if (e.key === 'Delete' || e.key === 'Backspace') {
-      const entry = entryMap.get(`${empId}-${day}`);
-      if (entry) {
+      if ((entryMap.get(`${empId}-${day}`)?.length ?? 0) > 0) {
         e.preventDefault();
         handleDeleteEntry(empId, day, true);
       }
@@ -3443,7 +3686,7 @@ export default function Schedule() {
       {contextMenu && (
         <CellContextMenu
           state={contextMenu}
-          entry={entryMap.get(`${contextMenu.empId}-${contextMenu.day}`) ?? null}
+          entries={entryMap.get(`${contextMenu.empId}-${contextMenu.day}`) ?? []}
           shifts={shifts}
           leaveTypes={leaveTypes}
           hasClipboard={!!clipboard}
@@ -3454,9 +3697,57 @@ export default function Schedule() {
           onAddSonderdienst={handleAddSonderdienst}
           onAddDeviation={handleAddDeviation}
           onDelete={handleDeleteEntry}
+          onDeleteEntry={handleDeleteSingleEntry}
           onCopy={handleSingleCellCopy}
           onPaste={(empId, day) => handleBulkPaste(empId, day)}
         />
+      )}
+
+      {/* ── Konflikt-Dialog (V-2, Spec 6.7) ── */}
+      {conflictPrompt && (
+        <ConflictDialog
+          open
+          existingLabels={conflictPrompt.existingLabels}
+          incomingLabel={conflictPrompt.incomingLabel}
+          allowAdd={conflictPrompt.allowAdd}
+          onChoose={(choice, remember) => {
+            if (remember && choice !== 'cancel') setConflictStrategy(choice);
+            conflictPrompt.resolve(choice);
+            setConflictPrompt(null);
+          }}
+        />
+      )}
+
+      {/* ── Datumssprung-Modal (V-18, Strg+G) ── */}
+      {showDateJump && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40" onClick={() => setShowDateJump(false)}>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-5 w-full max-w-xs mx-4" onClick={e => e.stopPropagation()}>
+            <h3 className="font-bold text-gray-800 dark:text-gray-100 text-sm mb-3">📅 Gehe zu Datum (Strg+G)</h3>
+            <input
+              type="date"
+              autoFocus
+              aria-label="Datum"
+              value={dateJumpValue}
+              onChange={e => setDateJumpValue(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') jumpToDate(); }}
+              className="w-full border rounded px-2 py-1.5 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100"
+            />
+            <div className="flex gap-2 justify-end mt-3">
+              <button
+                onClick={() => setShowDateJump(false)}
+                className="px-3 py-1.5 text-sm rounded border hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={jumpToDate}
+                className="px-3 py-1.5 text-sm rounded bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Springen
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       {/* Auto-Planen Modal */}
       {showAutoPlan && (
@@ -3955,7 +4246,7 @@ export default function Schedule() {
             const [wy, wm] = d.split('-').map(Number);
             return wy === year && wm === month;
           })
-          .map(d => entryMap.get(`${copyWeekSource}-${new Date(d).getDate()}`))
+          .map(d => (entryMap.get(`${copyWeekSource}-${new Date(d).getDate()}`) ?? [])[0])
           .filter(Boolean);
 
         const closeCopyWeek = () => {
@@ -4037,7 +4328,7 @@ export default function Schedule() {
                       const dt = new Date(d);
                       const dayNum = dt.getDate();
                       const inMonth = dt.getFullYear() === year && dt.getMonth() + 1 === month;
-                      const entry = inMonth ? entryMap.get(`${copyWeekSource}-${dayNum}`) : undefined;
+                      const entry = inMonth ? (entryMap.get(`${copyWeekSource}-${dayNum}`) ?? [])[0] : undefined;
                       const wdIdx = dt.getDay() === 0 ? 6 : dt.getDay() - 1;
                       const wd = ['Mo','Di','Mi','Do','Fr','Sa','So'][wdIdx];
                       return (
@@ -4351,10 +4642,11 @@ export default function Schedule() {
           let count = 0;
           const shiftIds: number[] = [];
           for (const day of allDays) {
-            const entry = entryMap.get(`${emp.ID}-${day}`);
-            if (entry?.kind === 'shift' && entry.shift_id) {
-              count++;
-              shiftIds.push(entry.shift_id);
+            for (const entry of entryMap.get(`${emp.ID}-${day}`) ?? []) {
+              if (entry.kind === 'shift' && entry.shift_id) {
+                count++;
+                shiftIds.push(entry.shift_id);
+              }
             }
           }
           empShiftCount.set(emp.ID, count);
@@ -4396,8 +4688,7 @@ export default function Schedule() {
           const suggestedDays: number[] = [];
           for (const day of allDays) {
             if (suggestedDays.length >= 3) break;
-            const entry = entryMap.get(`${emp.ID}-${day}`);
-            if (!entry) {
+            if ((entryMap.get(`${emp.ID}-${day}`)?.length ?? 0) === 0) {
               const wd = getWeekday(year, month, day);
               if (wd !== 0 && wd !== 6) suggestedDays.push(day);
             }
@@ -4521,6 +4812,21 @@ export default function Schedule() {
             {MONTH_NAMES[month]} {year}
           </span>
           <button aria-label="Nächster Monat" onClick={nextMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] min-w-[44px]">›</button>
+          <button
+            onClick={goToToday}
+            className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] text-blue-600 font-medium"
+            title="Zum aktuellen Monat springen"
+          >
+            Heute
+          </button>
+          <button
+            aria-label="Gehe zu Datum"
+            onClick={openDateJump}
+            className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] min-w-[44px]"
+            title="Gehe zu Datum (Strg+G)"
+          >
+            🗓
+          </button>
         </div>
 
         {/* Desktop view toggle: Tabelle / Woche / Kalender */}
@@ -5127,6 +5433,7 @@ export default function Schedule() {
                   {[
                     ['↑ ↓ ← →', 'Zwischen Zellen navigieren'],
                     ['PageUp / PageDown', 'Voriger / nächster Monat'],
+                    ['Ctrl+G', 'Gehe zu Datum (Datumssprung)'],
                     ['Escape', 'Auswahl aufheben / Overlays schließen'],
                     ['Ctrl+F', 'Mitarbeiter-Suche fokussieren'],
                   ].map(([key, desc]) => (
@@ -5245,7 +5552,7 @@ export default function Schedule() {
             year={year}
             month={month}
             employees={displayEmployees}
-            entryMap={entryMap}
+            entryMap={primaryEntryMap}
             holidays={holidays}
             shifts={shifts}
             onDayClick={(day, dateStr) => setDayDetailModal({ day, dateStr })}
@@ -5272,16 +5579,9 @@ export default function Schedule() {
                 const isWe = wd === 0 || wd === 6;
                 const isToday = day === todayDay;
                 const cov = coverageMap.get(day);
-                const coverageDot = cov
-                  ? cov.status === 'ok'
-                    ? { color: '#4ade80', label: '🟢' }
-                    : cov.status === 'low'
-                    ? { color: '#fbbf24', label: '🟡' }
-                    : { color: '#f87171', label: '🔴' }
-                  : null;
-                const coverageTitle = cov
-                  ? `${cov.scheduled_count}/${cov.required_count} Mitarbeiter besetzt`
-                  : '';
+                // APP-INT-1: under=rot, ok=grün, over=orange, none=kein Indikator
+                const coverageDot = coverageIndicator(cov);
+                const coverageTitle = cov ? coverageTooltip(cov) : '';
                 // Q069: schedule comment for this day (group-specific or "all groups")
                 const activeGroupId = selectedGroupIds.length === 1 ? selectedGroupIds[0] : 0;
                 const dayComment = scheduleCommentsMap.get(`${dateStr}-${activeGroupId}`)
@@ -5507,7 +5807,8 @@ export default function Schedule() {
                     })()}
                   </td>
                   {displayedDays.map(day => {
-                    const entry = entryMap.get(`${emp.ID}-${day}`);
+                    const cellEntries = entryMap.get(`${emp.ID}-${day}`) ?? [];
+                    const entry = cellEntries[0]; // Primär-Eintrag (Dienste vor Abwesenheiten)
                     const dateStr = `${year}-${pad(month)}-${pad(day)}`;
                     const isHol = holidays.has(dateStr);
                     const wd = getWeekday(year, month, day);
@@ -5530,10 +5831,10 @@ export default function Schedule() {
                       ? cellConflicts.map(c => c.message).join('\n')
                       : '';
 
-                    // Highlight if entry matches active filter
-                    const isFilterMatch =
-                      (filterShiftId !== '' && entry?.shift_id === filterShiftId) ||
-                      (filterLeaveId !== '' && entry?.leave_type_id === filterLeaveId);
+                    // Highlight if any cell entry matches active filter
+                    const isFilterMatch = cellEntries.some(en =>
+                      (filterShiftId !== '' && en.shift_id === filterShiftId) ||
+                      (filterLeaveId !== '' && en.leave_type_id === filterLeaveId));
 
                     const isSelected = isCellSelected(emp.ID, day);
                     const isCursor = selectedCell?.empId === emp.ID && selectedCell?.day === day;
@@ -5546,13 +5847,13 @@ export default function Schedule() {
                       <td
                         key={day}
                         className={`border border-gray-100 p-0 text-center relative group`}
-                        draggable={!!entry && canEditSchedule && !isLeserView}
+                        draggable={cellEntries.length > 0 && canEditSchedule && !isLeserView}
                         style={{
                           backgroundColor: isDndTgt
                             ? (isDark ? '#1e3a5f' : '#bfdbfe')
                             : isSelected
                             ? (isDark ? '#1e3060' : '#dbeafe')
-                            : (entry?.color_bk || (isHol
+                            : ((cellEntries.length === 1 ? entry?.color_bk : undefined) || (isHol
                                 ? (isDark ? '#2d1212' : '#fef2f2')
                                 : isToday
                                 ? (isDark ? '#0d1f3c' : '#eff6ff')
@@ -5567,14 +5868,14 @@ export default function Schedule() {
                             ? '2px solid #1d4ed8'
                             : isSelected
                             ? '2px solid #2563eb'
-                            : isEmpHighlighted && entry
+                            : isEmpHighlighted && cellEntries.length > 0
                             ? '2px solid #0ea5e9'
                             : isToday && !hasConflict && !isFilterMatch
                             ? '2px solid #93c5fd'
                             : (hasConflict ? '2px solid #ef4444' : isFilterMatch ? '2px solid #3b82f6' : undefined),
                           outlineOffset: '-2px',
                           opacity: isDndSrc ? 0.5 : isOtherEmpDimmed ? 0.35 : 1,
-                          cursor: entry ? 'grab' : 'default',
+                          cursor: cellEntries.length > 0 ? 'grab' : 'default',
                         }}
                         onMouseDown={e => handleCellMouseDown(e, emp.ID, day)}
                         onMouseEnter={e => {
@@ -5600,14 +5901,10 @@ export default function Schedule() {
                         onDrop={e => handleDrop(e, emp.ID, day)}
                         onContextMenu={e => handleContextMenu(e, emp.ID, day)}
                       >
-                        {entry ? (
+                        {cellEntries.length > 0 ? (
                           <div className="relative">
-                            <span
-                              className="block px-0.5 py-1.5 sm:py-0.5 font-bold text-[11px] min-h-[34px] sm:min-h-0 flex items-center justify-center"
-                              style={{ color: entry.color_text }}
-                            >
-                              {entry.display_name || '?'}
-                            </span>
+                            {/* V-1: alle Einträge der Zelle gestapelt; ↻ = Zyklusdienst */}
+                            <ScheduleCellStack entries={cellEntries} />
                             {/* Conflict warning icon */}
                             {hasConflict && (
                               <span
@@ -5644,7 +5941,7 @@ export default function Schedule() {
                               onClick={() => handleDeleteEntry(emp.ID, day)}
                               onMouseDown={e => e.stopPropagation()}
                               className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white rounded-full text-[8px] leading-none items-center justify-center hidden group-hover:flex z-10"
-                              title="Eintrag löschen"
+                              title={cellEntries.length > 1 ? 'Alle Einträge löschen' : 'Eintrag löschen'}
                             >
                               ×
                             </button>
@@ -5703,7 +6000,7 @@ export default function Schedule() {
                             shifts={shifts}
                             leaveTypes={leaveTypes}
                             onSelect={shiftId => { handleAddShift(emp.ID, day, shiftId); setActivePicker(null); }}
-                            onAbsence={leaveTypeId => { handleAddAbsence(emp.ID, day, leaveTypeId); setActivePicker(null); }}
+                            onAbsence={(leaveTypeId, time) => { handleAddAbsence(emp.ID, day, leaveTypeId, time); setActivePicker(null); }}
                             onClose={() => setActivePicker(null)}
                           />
                         )}
@@ -5797,6 +6094,8 @@ export default function Schedule() {
         <span className="text-xs px-2 py-0.5 text-green-600 bg-green-50 rounded">■ ≥80%</span>
         <span className="text-xs px-2 py-0.5 text-amber-600 bg-amber-50 rounded">■ 50–79%</span>
         <span className="text-xs px-2 py-0.5 text-red-600 bg-red-50 rounded">■ &lt;50%</span>
+        <span className="text-xs px-2 py-0.5 bg-gray-100 rounded" title="Generierter Dienst aus dem Schichtmodell — änderbar nur per Überschreiben">↻ Zyklusdienst</span>
+        <span className="text-xs px-2 py-0.5 bg-gray-100 rounded" title="Personalbedarf-Ampel in der Kopfzeile">Ampel: 🔴 unter · 🟢 ok · 🟠 über Soll</span>
       </div>
       {/* ── Shift Color Legend ── */}
       {shifts.filter(s => !s.HIDE).length > 0 && (
@@ -5830,7 +6129,7 @@ export default function Schedule() {
 
       {/* ── Hover Tooltip ── */}
       {hoverTooltip && (() => {
-        const tooltipEntry = entryMap.get(`${hoverTooltip.empId}-${hoverTooltip.day}`) ?? null;
+        const tooltipEntry = (entryMap.get(`${hoverTooltip.empId}-${hoverTooltip.day}`) ?? [])[0] ?? null;
         const tooltipShift = tooltipEntry?.shift_id
           ? (shifts.find(s => s.ID === tooltipEntry.shift_id) ?? null)
           : null;

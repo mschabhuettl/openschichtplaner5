@@ -9,9 +9,10 @@ This guide gets you up and running for local development.
 1. [Prerequisites](#prerequisites)
 2. [Backend Setup](#backend-setup)
 3. [Frontend Setup](#frontend-setup)
-4. [Running Tests](#running-tests)
-5. [Working on all three repos](#working-on-all-three-repos)
-6. [Common Problems](#common-problems)
+4. [Makefile Reference](#makefile-reference)
+5. [Running Tests](#running-tests)
+6. [Working on all three repos](#working-on-all-three-repos)
+7. [Common Problems](#common-problems)
 
 ---
 
@@ -45,6 +46,11 @@ source .venv/bin/activate       # Linux/macOS
 # .venv\Scripts\activate        # Windows
 ```
 
+The project standardizes on **`backend/.venv`**: `start.sh` (and therefore
+`make dev`) creates and uses it automatically, and the `make test` / `make lint`
+targets activate the same path. (CI installs dependencies directly and does not
+use a venv.)
+
 ### 3. Install dependencies
 
 ```bash
@@ -53,11 +59,19 @@ pip install -r requirements.txt
 
 ### 4. Configure environment
 
+The **`.env` lives at the repo root** (next to `start.sh`) — it is read by
+`start.sh` and by both Docker compose files:
+
 ```bash
-# Copy example env file
+# From the repo root: copy the example env file
 cp .env.example .env
 # Edit as needed (SP5_DB_PATH, SECRET_KEY, etc.)
 ```
+
+Key variables: `SECRET_KEY`, `ALLOWED_ORIGINS`, `HOST`, `PORT`, `DEBUG`,
+`TOKEN_EXPIRE_HOURS`, plus rate-limit, brute-force, logging and session-limit
+settings — see `.env.example` for the full list. The frontend has its own
+`frontend/.env.example`.
 
 For development without real DBF files, enable dev mode:
 
@@ -121,6 +135,27 @@ npm run lint
 cd ../backend
 ruff check .
 ```
+
+---
+
+## Makefile Reference
+
+Most day-to-day tasks are wrapped in `make` targets (run from the repo root):
+
+| Command | What it does |
+|---|---|
+| `make dev` | Local run via `start.sh` → backend + frontend on `:8000` |
+| `make stop` | Stop the local backend (`start.sh --stop`) |
+| `make test` | Frontend `vitest` (backend pytest lives in the API repo); e2e: `make test-e2e` |
+| `make lint` | `ruff check` (backend) + `eslint` (frontend) |
+| `make dev-link` | Editable installs of `../libopenschichtplaner5` + `../openschichtplaner5-api` into `backend/.venv` |
+| `make build` | Build the frontend bundle |
+| `make logs` | `tail -f` the backend log |
+| `make docker` / `make prod` / `make prod-secure` | Docker variants (see `docs/DEPLOYMENT.md`) |
+| `make backup` | Snapshot the DB and state volumes to `./backups` |
+
+`make help` lists all targets. Frontend-only commands (in `frontend/`):
+`npm run dev`, `npm run lint`, `npm run test`, `npm run test:e2e`, `npm run build`.
 
 ---
 

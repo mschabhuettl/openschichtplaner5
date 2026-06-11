@@ -21,15 +21,12 @@ const COVERAGE_COLORS: Record<CoverageDotStatus, string> = {
 /**
  * Mapping CoverageDay.status → Ampelpunkt.
  * 'none' (kein Bedarf definiert) → kein Indikator (null).
- * Übergangsweise gelieferte Alt-Werte 'low'/'critical' werden wie 'under' behandelt.
  */
 export function coverageIndicator(
   cov: CoverageDay | undefined | null,
 ): { status: CoverageDotStatus; color: string } | null {
   if (!cov || cov.status === 'none') return null;
-  const status: CoverageDotStatus =
-    cov.status === 'ok' || cov.status === 'over' ? cov.status : 'under';
-  return { status, color: COVERAGE_COLORS[status] };
+  return { status: cov.status, color: COVERAGE_COLORS[cov.status] };
 }
 
 /** Tooltip-Text der Ampel; required_count=null ⇒ „kein Bedarf definiert" (nie „x/null"). */

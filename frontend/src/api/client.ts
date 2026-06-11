@@ -143,10 +143,7 @@ export interface CoverageDay {
   required_count: number | null;
   required_min: number | null;
   required_max: number | null;
-  /** Neues API-Vokabular ist CoverageStatus; 'low' | 'critical' werden nicht mehr
-   *  geliefert und bleiben nur übergangsweise im Typ, bis Schedule.tsx (Welle 2)
-   *  auf under/ok/over/none umgestellt ist. */
-  status: CoverageStatus | 'low' | 'critical';
+  status: CoverageStatus;
   cells: CoverageCell[];
 }
 

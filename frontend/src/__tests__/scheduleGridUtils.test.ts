@@ -1,6 +1,6 @@
 /**
  * Tests für die Dienstplan-Grid-Logik (APP-INT-1/4/7, V-1):
- * - Coverage-Status-Mapping under|ok|over|none (+ Alt-Vokabular, required_count:null)
+ * - Coverage-Status-Mapping under|ok|over|none (required_count:null)
  * - Multi-Entry-Zellen (mehrere Einträge pro MA/Tag)
  * - Zyklus-Guards (Vormonat-Kopie, Lösch-/Drop-Planung)
  */
@@ -65,10 +65,6 @@ describe('coverageIndicator', () => {
   it('fehlende Daten → kein Indikator', () => {
     expect(coverageIndicator(undefined)).toBeNull();
     expect(coverageIndicator(null)).toBeNull();
-  });
-  it('Alt-Vokabular low/critical wird wie under behandelt', () => {
-    expect(coverageIndicator(cov({ status: 'low' }))?.status).toBe('under');
-    expect(coverageIndicator(cov({ status: 'critical' as CoverageDay['status'] }))?.status).toBe('under');
   });
 });
 

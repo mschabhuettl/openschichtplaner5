@@ -1,10 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import type { MonthSummary } from '../api/client';
-import type { Employee, Group, ShiftType, LeaveType } from '../types';
+import type { Employee, Group, ShiftType, LeaveType, ScheduleEntry } from '../types';
 import { EmptyState, ApiErrorState } from '../components/EmptyState';
 import { PageHeader } from '../components/PageHeader';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { JahresRaster } from '../components/JahresRaster';
+import { buildDayMap, daysInMonth, toDateStr, MONTH_ABBR } from '../components/jahresRasterUtils';
 
 // Map: SHORTNAME → { bk, text }
 type ShiftColorMap = Map<string, { bk: string; text: string }>;
@@ -20,7 +23,69 @@ function buildShiftColorMap(shifts: ShiftType[], leaveTypes: LeaveType[]): Shift
   return m;
 }
 
-const MONTH_ABBR = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+// ── Print helper: Jahresraster (V-8, Spec 4.4) ─────────────────
+function buildJahresrasterHTML(
+  emp: Employee,
+  year: number,
+  dayMap: Map<string, ScheduleEntry[]>,
+  holidays: Set<string>,
+): string {
+  const thStyle = 'border:1px solid #aaa;padding:2px 3px;background:#334155;color:#fff;font-size:10px;text-align:center;';
+  let headerCells = `<th scope="col" style="${thStyle}text-align:left;min-width:42px">Monat</th>`;
+  for (let d = 1; d <= 31; d++) headerCells += `<th scope="col" style="${thStyle}min-width:22px">${d}</th>`;
+
+  let bodyRows = '';
+  for (let m = 1; m <= 12; m++) {
+    const dim = daysInMonth(year, m);
+    let cells = `<th scope="row" style="border:1px solid #ddd;padding:2px 6px;background:#f1f5f9;font-size:10px;text-align:left">${MONTH_ABBR[m - 1]}</th>`;
+    for (let d = 1; d <= 31; d++) {
+      if (d > dim) { cells += '<td style="border:1px solid #eee;background:#e2e8f0"></td>'; continue; }
+      const dateStr = toDateStr(year, m, d);
+      const entries = dayMap.get(dateStr) ?? [];
+      const wd = new Date(year, m - 1, d).getDay();
+      const tint = holidays.has(dateStr) ? '#fef2f2' : (wd === 0 || wd === 6) ? '#f1f5f9' : '#fff';
+      if (entries.length === 0) {
+        cells += `<td style="border:1px solid #ddd;background:${tint}"></td>`;
+      } else {
+        const bk = (entries.length === 1 && entries[0].color_bk) || tint;
+        const text = (entries.length === 1 && entries[0].color_text) || '#000';
+        const label = entries
+          .map(e => `${e.source === 'cycle' ? '↻' : ''}${e.display_name || '?'}`)
+          .join(' ');
+        cells += `<td style="border:1px solid #ddd;background:${bk};color:${text};font-size:9px;font-weight:bold;text-align:center;padding:1px 2px">${label}</td>`;
+      }
+    }
+    bodyRows += `<tr>${cells}</tr>`;
+  }
+
+  return `<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Jahresübersicht ${year} — ${emp.NAME}, ${emp.FIRSTNAME}</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 12px; }
+  h1 { font-size: 15px; margin-bottom: 2px; }
+  .subtitle { font-size: 11px; color: #555; margin-bottom: 10px; }
+  table { border-collapse: collapse; }
+  @media print {
+    @page { size: landscape; margin: 6mm; }
+    body { margin: 0; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  }
+</style>
+</head>
+<body>
+<h1>Jahresübersicht ${year} — ${emp.NAME}, ${emp.FIRSTNAME}</h1>
+<div class="subtitle">Tagesraster (↻ = aus Schichtmodell) &nbsp;|&nbsp; Erstellt: ${new Date().toLocaleString('de-AT')}</div>
+<table>
+  <thead><tr>${headerCells}</tr></thead>
+  <tbody>${bodyRows}</tbody>
+</table>
+</body>
+</html>`;
+}
+
 // ── Print helper ───────────────────────────────────────────────
 function buildJahresuebersichtHTML(
   employees: Employee[],
@@ -417,9 +482,79 @@ function AllEmployeesView({
   );
 }
 
+// ── Jahres-Tagesraster eines Mitarbeiters (V-8, Spec 4.4) ──────
+function JahresRasterView({
+  employee,
+  year,
+  onMonthClick,
+}: {
+  employee: Employee;
+  year: number;
+  onMonthClick: (month: number) => void;
+}) {
+  const [yearEntries, setYearEntries] = useState<ScheduleEntry[]>([]);
+  const [holidays, setHolidays] = useState<Set<string>>(new Set());
+  // true von Anfang an: der Lade-Effekt läuft direkt beim Mount —
+  // so erscheint nie ein leeres Raster vor den Daten
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const reqIdRef = useRef(0);
+
+  // Der Jahres-Endpoint (getScheduleYear) liefert nur Monats-Aggregate —
+  // die Tageseinträge inkl. generierter Zyklusdienste (source==='cycle')
+  // kommen aus dem Monats-Endpoint getSchedule, 12× parallel (Parity V-8).
+  // Geladen wird einmal pro Jahr (alle MA); der MA-Wechsel filtert lokal.
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    const reqId = ++reqIdRef.current;
+    Promise.all([
+      Promise.all(Array.from({ length: 12 }, (_, i) => api.getSchedule(year, i + 1))),
+      api.getHolidays(year),
+    ])
+      .then(([months, hols]) => {
+        if (reqId !== reqIdRef.current) return; // stale response, ignore
+        setYearEntries(months.flat());
+        setHolidays(new Set(hols.map(h => h.DATE)));
+        setLoading(false);
+      })
+      .catch(() => {
+        if (reqId !== reqIdRef.current) return;
+        setError('Fehler beim Laden des Jahresrasters');
+        setLoading(false);
+      });
+  }, [year]);
+
+  const empEntries = useMemo(
+    () => yearEntries.filter(e => e.employee_id === employee.ID),
+    [yearEntries, employee.ID],
+  );
+  const dayMap = useMemo(() => buildDayMap(empEntries), [empEntries]);
+  const hasCycle = empEntries.some(e => e.source === 'cycle');
+
+  if (loading) return <LoadingSpinner />;
+  if (error) return <ApiErrorState message={error} />;
+
+  return (
+    <div className="space-y-2">
+      <JahresRaster year={year} dayMap={dayMap} holidays={holidays} onMonthClick={onMonthClick} />
+      <div className="text-[11px] text-gray-500 flex flex-wrap gap-x-4 gap-y-1">
+        <span><span className="inline-block w-3 h-3 align-[-2px] rounded-sm border border-slate-300" style={{ backgroundColor: '#f1f5f9' }} /> Wochenende</span>
+        <span><span className="inline-block w-3 h-3 align-[-2px] rounded-sm border border-red-200" style={{ backgroundColor: '#fef2f2' }} /> Feiertag</span>
+        {hasCycle && <span>↻ = aus Schichtmodell (Zyklus)</span>}
+        <span>Klick auf einen Tag öffnet den Dienstplan des Monats.</span>
+      </div>
+    </div>
+  );
+}
+
 export default function Jahresuebersicht() {
   const now = new Date();
+  const navigate = useNavigate();
   const [year, setYear] = useState(now.getFullYear());
+  // 'raster' = Jahres-Tagesraster (Original-Verhalten, Spec 4.4);
+  // 'summary' = bisherige Aggregat-Ansicht (Zusammenfassung, kein Feature-Verlust)
+  const [mode, setMode] = useState<'raster' | 'summary'>('raster');
   const [viewMode, setViewMode] = useState<'single' | 'all'>('single');
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | undefined>(undefined);
   const [groupId, setGroupId] = useState<number | undefined>(undefined);
@@ -458,9 +593,37 @@ export default function Jahresuebersicht() {
 
   const selectedEmployee = employees.find(e => e.ID === selectedEmployeeId);
 
+  // MA-Vor/Zurück im Jahresraster (Spec 4.4: ein MA pro Ansicht)
+  const empIdx = filteredEmployees.findIndex(e => e.ID === selectedEmployeeId);
+  const stepEmployee = (delta: number) => {
+    if (filteredEmployees.length === 0) return;
+    const next = empIdx === -1 ? 0 : Math.min(Math.max(empIdx + delta, 0), filteredEmployees.length - 1);
+    setSelectedEmployeeId(filteredEmployees[next].ID);
+  };
+
+  // Bewusste Web-Abweichung zum Original (Spec R6.1-1): Eintragen/Löschen
+  // direkt im Jahresraster gibt es nicht — Klick auf eine Zelle wechselt in
+  // den Dienstplan des Monats. Schedule.tsx liest Jahr/Monat beim Mount aus
+  // sessionStorage (bestehender Persistenz-Mechanismus der Dienstplan-Seite).
+  const openDienstplan = (month: number) => {
+    sessionStorage.setItem('schedule-year', String(year));
+    sessionStorage.setItem('schedule-month', String(month));
+    navigate('/schedule');
+  };
+
   const handlePrint = async () => {
     setPrintLoading(true);
     try {
+      if (mode === 'raster') {
+        if (!selectedEmployee) return;
+        const [months, hols] = await Promise.all([
+          Promise.all(Array.from({ length: 12 }, (_, i) => api.getSchedule(year, i + 1))),
+          api.getHolidays(year),
+        ]);
+        const dayMap = buildDayMap(months.flat().filter(e => e.employee_id === selectedEmployee.ID));
+        openPrintWindowJ(buildJahresrasterHTML(selectedEmployee, year, dayMap, new Set(hols.map(h => h.DATE))));
+        return;
+      }
       const emps = filteredEmployees.length > 0 ? filteredEmployees : employees;
       const results = await Promise.all(
         emps.map(e => api.getScheduleYear(year, e.ID).then(d => [e.ID, d] as [number, MonthSummary[]])),
@@ -496,7 +659,7 @@ export default function Jahresuebersicht() {
       {/* Header */}
       <PageHeader
         title="📆 Jahresübersicht"
-        subtitle="Schichten und Stunden pro Mitarbeiter im Jahresüberblick"
+        subtitle="Jahres-Tagesraster eines Mitarbeiters (Spec 4.4) und Zusammenfassung"
         actions={
           <div className="flex flex-wrap items-center gap-2">
             {/* Year navigation */}
@@ -506,21 +669,39 @@ export default function Jahresuebersicht() {
               <button onClick={() => setYear(y => y + 1)} aria-label="Folgejahr" className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm" title="Folgejahr">›</button>
             </div>
 
-            {/* View mode */}
+            {/* Modus: Tagesraster (Spec 4.4) vs. Zusammenfassung (Aggregat) */}
             <div className="flex rounded overflow-hidden border border-gray-300 text-sm">
               <button
-                onClick={() => setViewMode('all')}
-                className={`px-3 py-1.5 ${viewMode === 'all' ? 'bg-slate-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                onClick={() => setMode('raster')}
+                className={`px-3 py-1.5 ${mode === 'raster' ? 'bg-slate-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
               >
-                Alle MA
+                Jahresraster
               </button>
               <button
-                onClick={() => setViewMode('single')}
-                className={`px-3 py-1.5 border-l ${viewMode === 'single' ? 'bg-slate-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                onClick={() => setMode('summary')}
+                className={`px-3 py-1.5 border-l ${mode === 'summary' ? 'bg-slate-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
               >
-                Einzelansicht
+                Zusammenfassung
               </button>
             </div>
+
+            {/* View mode (nur Zusammenfassung) */}
+            {mode === 'summary' && (
+              <div className="flex rounded overflow-hidden border border-gray-300 text-sm">
+                <button
+                  onClick={() => setViewMode('all')}
+                  className={`px-3 py-1.5 ${viewMode === 'all' ? 'bg-slate-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                >
+                  Alle MA
+                </button>
+                <button
+                  onClick={() => setViewMode('single')}
+                  className={`px-3 py-1.5 border-l ${viewMode === 'single' ? 'bg-slate-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                >
+                  Einzelansicht
+                </button>
+              </div>
+            )}
 
             {/* Group filter */}
             <select
@@ -532,17 +713,37 @@ export default function Jahresuebersicht() {
               {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
             </select>
 
-            {/* Employee selector */}
-            {viewMode === 'single' && (
-              <select
-                value={selectedEmployeeId ?? ''}
-                onChange={e => setSelectedEmployeeId(Number(e.target.value))}
-                className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm min-w-[200px]"
-              >
-                {filteredEmployees.map(e => (
-                  <option key={e.ID} value={e.ID}>{e.NAME}, {e.FIRSTNAME}</option>
-                ))}
-              </select>
+            {/* Employee selector (Raster immer; Zusammenfassung nur Einzelansicht) */}
+            {(mode === 'raster' || viewMode === 'single') && (
+              <div className="flex items-center gap-1">
+                {mode === 'raster' && (
+                  <button
+                    onClick={() => stepEmployee(-1)}
+                    disabled={empIdx <= 0}
+                    aria-label="Vorheriger Mitarbeiter"
+                    title="Vorheriger Mitarbeiter"
+                    className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 disabled:opacity-40 text-sm"
+                  >‹</button>
+                )}
+                <select
+                  value={selectedEmployeeId ?? ''}
+                  onChange={e => setSelectedEmployeeId(Number(e.target.value))}
+                  className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm min-w-[200px]"
+                >
+                  {filteredEmployees.map(e => (
+                    <option key={e.ID} value={e.ID}>{e.NAME}, {e.FIRSTNAME}</option>
+                  ))}
+                </select>
+                {mode === 'raster' && (
+                  <button
+                    onClick={() => stepEmployee(1)}
+                    disabled={empIdx === filteredEmployees.length - 1}
+                    aria-label="Nächster Mitarbeiter"
+                    title="Nächster Mitarbeiter"
+                    className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 disabled:opacity-40 text-sm"
+                  >›</button>
+                )}
+              </div>
             )}
 
             {/* Print button */}
@@ -560,7 +761,22 @@ export default function Jahresuebersicht() {
 
       {/* Content */}
       <div className="flex-1 overflow-auto bg-white rounded-lg shadow border border-gray-200 p-4">
-        {viewMode === 'single' && selectedEmployee ? (
+        {mode === 'raster' ? (
+          selectedEmployee ? (
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                {selectedEmployee.NAME}, {selectedEmployee.FIRSTNAME} — Jahresraster {year}
+              </h2>
+              <JahresRasterView employee={selectedEmployee} year={year} onMonthClick={openDienstplan} />
+            </div>
+          ) : (
+            <EmptyState
+              icon="👤"
+              title="Kein Mitarbeiter ausgewählt"
+              description="Bitte einen Mitarbeiter auswählen, um das Jahresraster anzuzeigen."
+            />
+          )
+        ) : viewMode === 'single' && selectedEmployee ? (
           <div>
             <h2 className="text-lg font-semibold text-gray-800 mb-4">
               {selectedEmployee.NAME}, {selectedEmployee.FIRSTNAME} — {year}

@@ -1,3 +1,8 @@
+> **Hinweis (2026-06):** Historisches Prozess-Protokoll autonomer Arbeitsläufe —
+> beschreibt teils überholte Zustände (z. B. lokale `backend/api`-Module vor der
+> API-Extraktion). Nicht als aktuelle Architektur-Referenz verwenden;
+> siehe stattdessen `docs/architecture.md`.
+
 # AUTONOMOUS_RUN — openschichtplaner5 (24/7 Self-Development Charter)
 
 Du bist der **autonome Maintainer** von `openschichtplaner5`. Du arbeitest 24/7

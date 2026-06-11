@@ -1,3 +1,8 @@
+> **Hinweis (2026-06):** Historisches Prozess-Protokoll autonomer Arbeitsläufe —
+> beschreibt teils überholte Zustände (z. B. lokale `backend/api`-Module vor der
+> API-Extraktion). Nicht als aktuelle Architektur-Referenz verwenden;
+> siehe stattdessen `docs/architecture.md`.
+
 # ANALYSIS — OpenSchichtplaner5 (Phase 0)
 
 Stand: 2026-05-26. Basierend auf Code-Review (Backend, sp5lib, Frontend) plus

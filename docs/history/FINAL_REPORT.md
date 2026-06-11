@@ -1,3 +1,8 @@
+> **Hinweis (2026-06):** Historisches Prozess-Protokoll autonomer Arbeitsläufe —
+> beschreibt teils überholte Zustände (z. B. lokale `backend/api`-Module vor der
+> API-Extraktion). Nicht als aktuelle Architektur-Referenz verwenden;
+> siehe stattdessen `docs/architecture.md`.
+
 # FINAL REPORT — Autonomer Agent-Run
 
 **Projekt:** OpenSchichtplaner5 · **Datum:** 2026-05-26 (Session 1) / 2026-05-27 (Session 2) · **Branch-Basis:** `main`

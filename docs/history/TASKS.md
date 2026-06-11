@@ -1,3 +1,8 @@
+> **Hinweis (2026-06):** Historisches Prozess-Protokoll autonomer Arbeitsläufe —
+> beschreibt teils überholte Zustände (z. B. lokale `backend/api`-Module vor der
+> API-Extraktion). Nicht als aktuelle Architektur-Referenz verwenden;
+> siehe stattdessen `docs/architecture.md`.
+
 # TASKS — Autonomer Agent-Run
 
 Laufend aktualisierte Aufgabenliste. Legende: [ ] offen · [~] in Arbeit · [x] erledigt · [-] entfällt

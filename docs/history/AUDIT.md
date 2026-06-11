@@ -1,3 +1,8 @@
+> **Hinweis (2026-06):** Historisches Prozess-Protokoll autonomer Arbeitsläufe —
+> beschreibt teils überholte Zustände (z. B. lokale `backend/api`-Module vor der
+> API-Extraktion). Nicht als aktuelle Architektur-Referenz verwenden;
+> siehe stattdessen `docs/architecture.md`.
+
 # AUDIT — API & sp5lib (Phase 4)
 
 Stand: 2026-05-26. Systematische Prüfung der 25 Router unter `backend/api/routers/`

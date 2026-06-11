@@ -2,7 +2,7 @@
 
 - **Status:** Accepted (umgesetzt; die App konsumiert das extrahierte Paket)
 - **Date:** 2026-05-27
-- **Epic:** API-Extraktion (`openschichtplaner5-api`), Phase **P1** (analysis + config contract). See `TASKS.md` → "Epic — API-Extraktion".
+- **Epic:** API-Extraktion (`openschichtplaner5-api`), Phase **P1** (analysis + config contract). See `docs/history/TASKS.md` → "Epic — API-Extraktion".
 - **Scope:** Docs-only. No application code changes in this phase.
 
 ---

@@ -1,6 +1,8 @@
 # OpenSchichtplaner5 — API Reference
 
-> **Interactive Docs:** The FastAPI backend serves Swagger UI at [`http://localhost:8000/api/v1/docs`](http://localhost:8000/api/v1/docs) and ReDoc at [`http://localhost:8000/api/v1/redoc`](http://localhost:8000/api/v1/redoc).
+> 📖 Full documentation and guides: [GitHub Wiki](https://github.com/mschabhuettl/openschichtplaner5/wiki)
+
+> **Interactive Docs:** The FastAPI backend serves Swagger UI at [`http://localhost:8000/api/v1/docs`](http://localhost:8000/api/v1/docs) and ReDoc at [`http://localhost:8000/api/v1/redoc`](http://localhost:8000/api/v1/redoc). This file shows curl examples for the most common endpoint families — the OpenAPI docs cover all 300+ endpoints.
 
 ## API Versioning
 
@@ -24,9 +26,10 @@ Authentication is done via a `Bearer` token in the `Authorization` header.
 3. [CSV Employee Import](#csv-employee-import)
 4. [Schedule](#schedule)
 5. [Reports & Export](#reports--export)
-6. [Shift Wishes](#shift-wishes)
-7. [ORM Mirror (Admin)](#orm-mirror-admin)
-8. [Health & Status](#health--status)
+6. [Leave Entitlements](#leave-entitlements)
+7. [Shift Wishes](#shift-wishes)
+8. [ORM Mirror (Admin)](#orm-mirror-admin)
+9. [Health & Status](#health--status)
 
 ---
 
@@ -266,7 +269,7 @@ Additional columns are silently ignored.
 ### Request
 
 ```bash
-curl -s -X POST http://localhost:8000/api/v1/__KEEP__/employees/import-csv \
+curl -s -X POST http://localhost:8000/api/v1/employees/import-csv \
   -H "Authorization: Bearer $TOKEN" \
   -F "file=@employees.csv"
 ```
@@ -556,12 +559,49 @@ curl -s "http://localhost:8000/api/v1/statistics?year=2026&month=3" \
 
 ---
 
+### Statistics over a free date range
+
+Instead of `year`/`month`, the statistics endpoint also accepts a free
+evaluation period — `from` and `to` must be given together (inclusive ISO dates):
+
+```bash
+curl -s "http://localhost:8000/api/v1/statistics?from=2026-01-15&to=2026-03-14&group_id=2" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+| Query parameter | Type | Description |
+|-----------------|------|-------------|
+| `from` / `to` | ISO date | Evaluation period (`YYYY-MM-DD`, inclusive) — takes precedence over `year`/`month` |
+| `group_id` | int | Optional group filter |
+
+---
+
 ### Per-employee statistics
 
 ```bash
 curl -s "http://localhost:8000/api/v1/statistics/employee/1?year=2026&month=3" \
   -H "Authorization: Bearer $TOKEN"
 ```
+
+---
+
+### Personnel table (Personaltabelle)
+
+Per-employee evaluation over a free period: actual/target hours, balance,
+working time, paid absence, Sunday/holiday duty days and special shifts, plus
+dynamic columns (assignments per shift type, absence days per leave type). If
+the period covers exactly one calendar year, entitled leave types additionally
+report taken/remaining days.
+
+```bash
+curl -s "http://localhost:8000/api/v1/personnel-table?from=2026-01-01&to=2026-12-31" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+| Query parameter | Type | Description |
+|-----------------|------|-------------|
+| `from` / `to` | ISO date | **Required.** Evaluation period (`YYYY-MM-DD`, inclusive) |
+| `group_id` | int | Optional group filter |
 
 ---
 
@@ -574,11 +614,53 @@ curl -s "http://localhost:8000/api/v1/reports/monthly?year=2026&month=3" \
 
 ---
 
-### Overtime report
+## Leave Entitlements
+
+### Forfeit remaining leave at a cutoff date
+
+> **Endpoint:** `POST /api/v1/leave-entitlements/forfeit` — requires `admin` role.
+
+Reduces the remaining leave (`REST`) of the cutoff year per employee and
+entitlement-linked leave type down to what was already used up to and including
+the cutoff date (never increases it). With `dry_run: true` the cuts are only
+returned as a preview, nothing is written.
 
 ```bash
-curl -s "http://localhost:8000/api/v1/statistics?year=2026" \
-  -H "Authorization: Bearer $TOKEN"
+curl -s -X POST http://localhost:8000/api/v1/leave-entitlements/forfeit \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"cutoff_date": "2026-03-31", "dry_run": true}'
+```
+
+| Body field | Type | Default | Description |
+|------------|------|---------|-------------|
+| `cutoff_date` | ISO date | — | **Required.** Cutoff date (`YYYY-MM-DD`); its year is the affected entitlement year |
+| `group_id` | int | — | Optional: restrict to one group |
+| `dry_run` | bool | `false` | Preview only — no changes are written |
+
+**Response (excerpt):**
+
+```json
+{
+  "ok": true,
+  "cutoff_date": "2026-03-31",
+  "year": 2026,
+  "dry_run": true,
+  "employees_processed": 42,
+  "cuts": [
+    {
+      "employee_id": 1,
+      "employee_name": "Max Mustermann",
+      "leave_type_id": 2,
+      "leave_type_name": "Urlaub",
+      "year": 2026,
+      "old_rest": 30.0,
+      "new_rest": 6.0,
+      "forfeited": 24.0
+    }
+  ],
+  "total_forfeited": 24.0
+}
 ```
 
 ---
@@ -1032,10 +1114,17 @@ All filters are optional; omitting them returns every row.
 curl -s http://localhost:8000/api/v1/health
 ```
 
-**Response:**
+**Response (excerpt):**
 
 ```json
-{"status": "ok", "db": "connected"}
+{
+  "status": "healthy",
+  "checks": {"db": "ok", "disk": "ok", "memory": "ok"},
+  "version": "1.2.0",
+  "uptime_seconds": 43200.0,
+  "db": {"status": "ok", "dbf_ok": 5},
+  "sessions": {"active": 3}
+}
 ```
 
 ---
@@ -1093,10 +1182,10 @@ No authentication required.
 
 ```json
 {
-  "version": "0.9.5",
+  "version": "1.2.0",
   "service": "OpenSchichtplaner5 API",
-  "python_version": "3.11.0",
-  "build_date": "2026-03-06",
+  "python_version": "3.12.3",
+  "build_date": "2026-06-11",
   "min_compatible_frontend": "0.4.0"
 }
 ```

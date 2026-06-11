@@ -80,7 +80,7 @@ const Jahresrueckblick   = lazy(() => import('./pages/Jahresrueckblick'));
 const Druckvorschau      = lazy(() => import('./pages/Druckvorschau'));
 const Wochenansicht      = lazy(() => import('./pages/Wochenansicht'));
 const RotationsAnalyse   = lazy(() => import('./pages/RotationsAnalyse'));
-const VerfügbarkeitsMatrix = lazy(() => import('./pages/VerfügbarkeitsMatrix'));
+const VerfuegbarkeitsMatrix = lazy(() => import('./pages/VerfuegbarkeitsMatrix'));
 const KapazitaetsForecast = lazy(() => import('./pages/KapazitaetsForecast'));
 const QualitaetsBericht   = lazy(() => import('./pages/QualitaetsBericht'));
 const ConflictReport      = lazy(() => import('./pages/ConflictReport'));
@@ -867,7 +867,7 @@ function AppInner() {
             <Route path="/druckvorschau" element={<PB name="Druckvorschau"><Druckvorschau /></PB>} />
             <Route path="/dienst-board" element={<PB name="Dienst-Board"><RoleRoute allowedRoles={['Admin', 'Planer']}><DienstBoard /></RoleRoute></PB>} />
             <Route path="/wochenansicht" element={<PB name="Wochenansicht"><Wochenansicht /></PB>} />
-            <Route path="/verfuegbarkeits-matrix" element={<PB name="Verfügbarkeits-Matrix"><RoleRoute allowedRoles={['Admin', 'Planer']}><VerfügbarkeitsMatrix /></RoleRoute></PB>} />
+            <Route path="/verfuegbarkeits-matrix" element={<PB name="Verfügbarkeits-Matrix"><RoleRoute allowedRoles={['Admin', 'Planer']}><VerfuegbarkeitsMatrix /></RoleRoute></PB>} />
             <Route path="/rotations-analyse" element={<PB name="Rotations-Analyse"><RoleRoute allowedRoles={['Admin', 'Planer']}><RotationsAnalyse /></RoleRoute></PB>} />
             <Route path="/kapazitaets-forecast" element={<PB name="Kapazitäts-Forecast"><RoleRoute allowedRoles={['Admin', 'Planer']}><KapazitaetsForecast /></RoleRoute></PB>} />
             <Route path="/qualitaets-bericht" element={<PB name="Qualitätsbericht"><RoleRoute allowedRoles={['Admin', 'Planer']}><QualitaetsBericht /></RoleRoute></PB>} />

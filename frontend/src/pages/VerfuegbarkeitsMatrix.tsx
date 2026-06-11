@@ -205,7 +205,7 @@ function MatrixCell({
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
-export default function VerfügbarkeitsMatrix() {
+export default function VerfuegbarkeitsMatrix() {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);

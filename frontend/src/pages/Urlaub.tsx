@@ -137,18 +137,29 @@ function DetailModal({ employee, month, year, absences, leaveTypes, onClose }: D
 }
 
 // ─── Shared: New Absence Modal ────────────────────────────
+/** "HH:MM" → Minuten ab Mitternacht (5ABSEN.START/END, Spec D-54). */
+function timeToMinutes(hhmm: string): number {
+  const [h, m] = hhmm.split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+
 interface NewAbsenceModalProps {
   employees: Employee[];
   leaveTypes: LeaveType[];
   onSave: (a: Omit<Absence, 'ID'>) => void;
   onClose: () => void;
 }
-function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceModalProps) {
+// export: auch direkt in Tests gerendert
+export function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceModalProps) {
   const today = new Date().toISOString().slice(0, 10);
   const [employeeId, setEmployeeId] = useState(employees[0]?.ID ?? 0);
   const [fromDate, setFromDate] = useState(today);
   const [toDate, setToDate] = useState(today);
   const [leaveTypeId, setLeaveTypeId] = useState(leaveTypes[0]?.ID ?? 0);
+  // Tageszeit (5ABSEN.INTERVAL, Spec 3.5.2/D-54): 0=ganz, 1=vorm., 2=nachm., 3=stundenweise
+  const [interval, setInterval] = useState<0 | 1 | 2 | 3>(0);
+  const [startTime, setStartTime] = useState('08:00');
+  const [endTime, setEndTime] = useState('12:00');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
@@ -160,6 +171,10 @@ function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceM
     if (toDate < fromDate) { setError('Bis-Datum muss >= Von-Datum sein.'); return; }
     if (!employeeId) { setError('Bitte einen Mitarbeiter auswählen.'); return; }
     if (!leaveTypeId) { setError('Bitte eine Abwesenheitsart auswählen.'); return; }
+    if (interval === 3 && timeToMinutes(startTime) === timeToMinutes(endTime)) {
+      setError('Bei stundenweiser Abwesenheit müssen Beginn und Ende unterschiedlich sein.');
+      return;
+    }
 
     // Limit range to max 1 year to prevent accidental large entries
     const diffDays = (new Date(toDate).getTime() - new Date(fromDate).getTime()) / 86400000;
@@ -185,7 +200,16 @@ function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceM
           const res = await fetch(`${API}/api/v1/absences`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-            body: JSON.stringify({ employee_id: employeeId, date: dateStr, leave_type_id: leaveTypeId }),
+            body: JSON.stringify({
+              employee_id: employeeId,
+              date: dateStr,
+              leave_type_id: leaveTypeId,
+              interval,
+              // start/end nur bei stundenweise (interval=3), als Minuten ab Mitternacht
+              ...(interval === 3
+                ? { start_time: timeToMinutes(startTime), end_time: timeToMinutes(endTime) }
+                : {}),
+            }),
           });
           if (res.ok) {
             const data = await res.json();
@@ -272,6 +296,31 @@ function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewAbsenceM
               {leaveTypes.map(lt => <option key={lt.ID} value={lt.ID}>{lt.NAME} ({lt.SHORTNAME})</option>)}
             </select>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Tageszeit</label>
+            <select value={interval} onChange={e => setInterval(Number(e.target.value) as 0 | 1 | 2 | 3)}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value={0}>Ganztägig</option>
+              <option value={1}>Vormittags (halber Tag)</option>
+              <option value={2}>Nachmittags (halber Tag)</option>
+              <option value={3}>Stundenweise</option>
+            </select>
+          </div>
+          {interval === 3 && (
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Von (Uhrzeit)</label>
+                <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Bis (Uhrzeit)</label>
+                <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <p className="text-xs text-gray-500 mt-0.5">Ende vor Beginn = über Mitternacht.</p>
+              </div>
+            </div>
+          )}
         </div>
         <div className="px-6 py-4 border-t flex justify-end gap-3">
           <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50">

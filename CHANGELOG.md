@@ -7,6 +7,43 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [Unreleased]
+
+### Added
+- **Gesamt-Stack-Compose `docker-compose.stack.yml`:** fährt App und API als
+  getrennte Container — nginx (Stage `frontend-static`) served das SPA und
+  proxied `/api` an den API-Container, der aus dem Geschwister-Repo
+  `../openschichtplaner5-api` gebaut wird; optionales `postgres`-Profil für den
+  PostgreSQL-Betrieb inkl. dokumentiertem einmaligem DBF→PG-Seed-Schritt.
+
+### Changed
+- **Docker-Builds installieren Library und API standardmäßig von PyPI:** die
+  Build-Args `LIB_SOURCE`/`API_SOURCE` defaulten auf die Pins
+  `libopenschichtplaner5[postgres]==1.7.0` / `openschichtplaner5-api==1.2.0`
+  und bleiben mit beliebigen pip-Requirements (z. B. `git+https://…@main`)
+  überschreibbar; `backend/requirements.txt` hebt die Untergrenzen auf
+  `>=1.7.0` / `>=1.2.0`.
+- **Doku konsolidiert:** README verschlankt (Kern-Infos + Verweis auf das
+  [GitHub-Wiki](https://github.com/mschabhuettl/openschichtplaner5/wiki));
+  PostgreSQL-Anleitung von `backend/` nach `docs/POSTGRESQL.md` verschoben;
+  Entwickler-Setup in `docs/DEVELOPMENT.md` zusammengeführt; `docs/API.md` um
+  Personaltabelle, Resturlaub-Verfall und den freien Statistik-Zeitraum
+  (`from`/`to`) ergänzt; veraltete Planungsdokumente entfernt;
+  Architektur-Dokument auf Stand 1.2.0 gehoben.
+
+### Fixed
+- **PostgreSQL-Seed-Skript an die aktuelle ORM-Modellstruktur angepasst:**
+  `scripts/seed_postgresql.py` importierte Modelle aus einem nicht mehr
+  existierenden Modul (ImportError mit Library 1.7.0) und scheiterte beim
+  Befüllen der Gruppenzuordnungen an nicht-eindeutigen DBF-IDs — Importe
+  repariert, Gruppenzuordnungen werden wie in der Library über das Paar
+  (Mitarbeiter, Gruppe) dedupliziert.
+- **nginx-Stage-Healthcheck:** prüft `127.0.0.1` statt `localhost` —
+  busybox-wget löste `localhost` nach `::1` auf, nginx lauscht im Container
+  aber nur auf IPv4; der Healthcheck schlug dadurch dauerhaft fehl.
+
+---
+
 ## [1.2.0] - 2026-06-11
 
 ### Fixed

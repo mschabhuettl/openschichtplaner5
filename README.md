@@ -172,7 +172,6 @@ Then open [`http://localhost:8000`](http://localhost:8000) in your browser.
 |---------|-------------|
 | `make prod` | Start Docker container in production mode (detached) |
 | `make docker` | Start Docker container (foreground) |
-| `make docker-dev` | Development mode with hot-reload (`--profile dev`) |
 | `make docker-down` | Stop containers |
 | `make update` | `git pull` + Docker restart (rolling update) |
 | `make backup` | Database volume → local `.tar.gz` archive |

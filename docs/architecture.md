@@ -165,7 +165,7 @@ Swagger/ReDoc unter `/docs` bzw. `/redoc` (vom API-Paket geliefert).
 
 ### 2.3 CLI-/Betriebsoberfläche
 
-**Makefile** (Repo-Root): `dev`, `dev-link`, `docker`, `docker-dev`, `docker-down`,
+**Makefile** (Repo-Root): `dev`, `dev-link`, `docker`, `docker-down`,
 `test`, `lint`, `build`, `clean`, `logs`, `stop`, `prod`, `prod-secure`, `update`,
 `backup`, `help`.
 
@@ -294,9 +294,8 @@ Ehrliche Befunde mit Pfaden; Reihenfolge ≈ Schwere.
    (`nginx/nginx.conf:103-113`) → SSE hinter dem Prod-Proxy verzögert/zwangsgetrennt.
    Dasselbe falsche `location /api/sse`-Beispiel steht in `README.md:252-260`.
 2. **`make docker-dev` / `sp5-dev`-Profil ist seit der API-Extraktion ein toter Pfad.**
-   `docker-compose.yml:48-79` mountet `./backend` für „Hot-Reload“ und mappt Port 5173 —
-   aber der Python-Code liegt jetzt in site-packages (Mount wirkungslos), die
-   Container-CMD hat kein `--reload`, und nichts startet einen Vite-Dev-Server auf 5173.
+   *Behoben (Phase 7):* Profil, Makefile-Target und README-Zeile entfernt — lokale
+   Entwicklung läuft über `start.sh`/`make dev`, Docker ist reiner Produktionspfad.
 3. **`backend/.env.docker` ist tote/staubige Konfiguration.** Keine Compose-Datei
    referenziert sie (beide nutzen `env_file: .env`), sie enthält `APP_VERSION=0.9.5`
    (Repo ist 1.1.0) und Frontend-`VITE_*`-Variablen ohne Wirkung. `README.md:158-160`

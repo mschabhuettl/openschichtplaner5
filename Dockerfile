@@ -1,3 +1,19 @@
+# ==============================================================================
+# OpenSchichtplaner5 — Multi-Stage-Build
+#
+#   frontend-build   Node baut frontend/dist
+#   backend-build    venv mit openschichtplaner5-api + libopenschichtplaner5
+#   frontend-static  (nur für docker-compose.stack.yml) nginx mit der SPA,
+#                    proxied /api → Service "api"; via --target frontend-static
+#   <final>          Produktions-Image: slim Python-Runtime, non-root,
+#                    served SPA + API aus einem Container
+#
+# Build-Args (die aktuellen Versionen lib 1.7.0/api 1.2.0 sind NICHT auf PyPI,
+# Default ist daher der Git-main-Stand; jedes pip-Requirement ist erlaubt):
+#   LIB_SOURCE  Default git+https://github.com/mschabhuettl/libopenschichtplaner5.git@main
+#   API_SOURCE  Default git+https://github.com/mschabhuettl/openschichtplaner5-api.git@main
+# ==============================================================================
+
 # Stage 1: Build Frontend
 FROM node:20-alpine AS frontend-build
 WORKDIR /app
@@ -6,7 +22,33 @@ RUN cd frontend && npm ci
 COPY frontend/ ./frontend/
 RUN cd frontend && npm run build
 
-# Stage 2: Production image
+# Stage 2: Build Backend-venv (git nur hier, nie im Runtime-Image)
+FROM python:3.12-slim AS backend-build
+RUN apt-get update && apt-get install -y --no-install-recommends git && \
+    rm -rf /var/lib/apt/lists/*
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+ARG LIB_SOURCE=git+https://github.com/mschabhuettl/libopenschichtplaner5.git@main
+ARG API_SOURCE=git+https://github.com/mschabhuettl/openschichtplaner5-api.git@main
+
+# Library + API aus den Build-Args (statt veraltetem PyPI-Stand); danach die
+# restlichen requirements — deren lib/api-Constraints sind bereits erfüllt,
+# ruff (reines Lint-Tool) bleibt aus dem Runtime-venv draußen.
+COPY backend/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir "${LIB_SOURCE}" "${API_SOURCE}" && \
+    grep -v '^ruff' /tmp/requirements.txt | pip install --no-cache-dir -r /dev/stdin
+
+# Stage 3 (optional, nur Stack): nginx served die SPA, /api geht an Service "api"
+FROM nginx:1.27-alpine AS frontend-static
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx/stack.conf /etc/nginx/conf.d/default.conf
+COPY --from=frontend-build /app/frontend/dist /usr/share/nginx/html
+EXPOSE 80
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD wget -qO- http://localhost/ >/dev/null || exit 1
+
+# Stage 4 (Default-Target): Produktions-Image — SPA + API aus einem Container
 FROM python:3.12-slim
 WORKDIR /app
 
@@ -17,8 +59,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf 
 RUN groupadd --gid 1001 sp5 && \
     useradd --uid 1001 --gid sp5 --shell /bin/bash --create-home sp5
 
-COPY backend/requirements.txt ./backend/
-RUN pip install --no-cache-dir -r backend/requirements.txt
+COPY --from=backend-build /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 COPY backend/ ./backend/
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist

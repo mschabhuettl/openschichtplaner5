@@ -66,5 +66,6 @@ Dockerfile*
 docker-compose*.yml
 .dockerignore
 
-# Lokales venv nie ins Image kopieren
+# Lokale venvs nie ins Image kopieren
 backend/.venv/
+**/.venv

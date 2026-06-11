@@ -1,7 +1,7 @@
 # ==============================================================================
 # OpenSchichtplaner5 — Makefile
 # ==============================================================================
-.PHONY: dev dev-link prod docker docker-dev docker-down update backup test test-e2e lint build clean logs stop help
+.PHONY: dev dev-link prod docker docker-down update backup test test-e2e lint build clean logs stop help
 
 SHELL := /bin/bash
 BACKEND_DIR := backend
@@ -32,9 +32,6 @@ dev-link: ## Library + API aus lokalen Schwester-Clones editierbar installieren
 
 docker: ## Docker-Container starten (Produktionsmodus)
 	docker compose up --build
-
-docker-dev: ## Docker-Container im Dev-Profil starten
-	docker compose --profile dev up --build
 
 docker-down: ## Docker-Container stoppen
 	docker compose down

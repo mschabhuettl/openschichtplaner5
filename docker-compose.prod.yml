@@ -78,6 +78,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # lib/api aus Git-main (aktuelle Versionen nicht auf PyPI) — überschreibbar
+        LIB_SOURCE: ${LIB_SOURCE:-git+https://github.com/mschabhuettl/libopenschichtplaner5.git@main}
+        API_SOURCE: ${API_SOURCE:-git+https://github.com/mschabhuettl/openschichtplaner5-api.git@main}
     container_name: sp5-backend
     image: openschichtplaner5:latest
     # NOT exposed to host — only accessible via nginx
@@ -134,6 +138,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        LIB_SOURCE: ${LIB_SOURCE:-git+https://github.com/mschabhuettl/libopenschichtplaner5.git@main}
+        API_SOURCE: ${API_SOURCE:-git+https://github.com/mschabhuettl/openschichtplaner5-api.git@main}
     container_name: sp5-init-frontend
     entrypoint: ["/bin/sh", "-c", "cp -r /app/frontend/dist/* /output/ && echo 'Frontend files copied.'"]
     volumes:

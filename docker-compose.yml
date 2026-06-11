@@ -4,7 +4,14 @@ services:
   # sp5 — Hauptanwendung (Backend + eingebettetes Frontend)
   # ----------------------------------------------------------------------------
   sp5:
-    build: .
+    build:
+      context: .
+      args:
+        # lib/api kommen aus Git-main (die aktuellen Versionen sind nicht auf
+        # PyPI) — per .env/Umgebung überschreibbar, z.B. auf einen Tag oder
+        # später einen PyPI-Stand.
+        LIB_SOURCE: ${LIB_SOURCE:-git+https://github.com/mschabhuettl/libopenschichtplaner5.git@main}
+        API_SOURCE: ${API_SOURCE:-git+https://github.com/mschabhuettl/openschichtplaner5-api.git@main}
     ports:
       - "8000:8000"
     volumes:
@@ -40,43 +47,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 15s
-
-  # ----------------------------------------------------------------------------
-  # sp5-dev — Entwicklungsmodus mit Hot-Reload (nur mit --profile dev starten)
-  # Verwendung: docker compose --profile dev up
-  # ----------------------------------------------------------------------------
-  sp5-dev:
-    build: .
-    profiles: ["dev"]
-    ports:
-      - "8000:8000"
-      - "5173:5173"
-    volumes:
-      - sp5_data:/app/data
-      - ./logs:/app/logs
-      # Quellcode live einbinden für Hot-Reload
-      - ./backend:/app/backend
-      - ./frontend:/app/frontend
-    env_file:
-      - .env
-    environment:
-      # Debug-Modus im Dev-Profil überschreiben
-      DEBUG: "true"
-      LOG_LEVEL: "DEBUG"
-    restart: "no"
-    security_opt:
-      - no-new-privileges:true
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-          cpus: "2.0"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
 
 # ------------------------------------------------------------------------------
 # Volumes

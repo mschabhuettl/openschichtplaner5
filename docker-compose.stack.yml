@@ -1,0 +1,95 @@
+# ==============================================================================
+# OpenSchichtplaner5 — Gesamt-Stack über alle drei Repos
+#
+# Architektur (bewusst schlank — genau EIN Backend-Prozess):
+#   app  nginx (Stage "frontend-static" dieses Repos): served die gebaute SPA
+#        und proxied /api → api  (Port ${SP5_APP_PORT:-8080})
+#   api  openschichtplaner5-api aus dem GESCHWISTER-CLONE — Build-Context
+#        ../openschichtplaner5-api ist dessen eigenes Git-Repo; die Library
+#        kommt dort via Build-Arg LIB_SOURCE (Default: Git-main, die aktuellen
+#        Versionen sind nicht auf PyPI)  (direkt: Port ${SP5_API_PORT:-8000})
+#   postgres  optionales Profil für den PostgreSQL-Spiegel (DB_BACKEND=postgresql)
+#
+# Voraussetzung: die Repos liegen als Geschwister nebeneinander —
+#   ../libopenschichtplaner5  ../openschichtplaner5-api  ./openschichtplaner5
+# (nur ../openschichtplaner5-api wird als Build-Context gebraucht; die Library
+# wird im api-Build aus LIB_SOURCE installiert).
+#
+# Start:
+#   docker compose -f docker-compose.stack.yml up -d --build
+#   # DBF-Daten: Host-Verzeichnis statt leerem Named Volume:
+#   SP5_DBF_DIR=/pfad/zu/SP5/Daten docker compose -f docker-compose.stack.yml up -d --build
+#   # mit PostgreSQL-Spiegel (zusätzlich DB_BACKEND=postgresql in .env setzen):
+#   docker compose -f docker-compose.stack.yml --profile postgres up -d --build
+# Stop:
+#   docker compose -f docker-compose.stack.yml [--profile postgres] down
+# ==============================================================================
+services:
+
+  api:
+    build:
+      context: ../openschichtplaner5-api
+      args:
+        LIB_SOURCE: ${LIB_SOURCE:-git+https://github.com/mschabhuettl/libopenschichtplaner5.git@main}
+    image: openschichtplaner5-api:latest
+    ports:
+      - "${SP5_API_PORT:-8000}:8000"
+    volumes:
+      # Gemeinsames DBF-Daten-Volume: Host-Pfad via SP5_DBF_DIR, sonst Named Volume
+      - ${SP5_DBF_DIR:-sp5_dbf}:/app/data
+      # Mutabler Laufzeit-State (JSON-Stores, Uploads, Auto-Migrate-Backups)
+      - api_state:/app/backend/data
+      - api_api_state:/app/backend/api
+      - api_backups:/app/backend/backups
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # SPA läuft auf dem app-Port — direkten API-Zugriff (8000) mit abdecken
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080,http://localhost:8000}
+      # PostgreSQL-Spiegel: DB_BACKEND=postgresql (in .env) + --profile postgres
+      DB_BACKEND: ${DB_BACKEND:-dbf}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://sp5:${POSTGRES_PASSWORD:-sp5}@postgres:5432/sp5}
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  app:
+    build:
+      context: .
+      target: frontend-static
+    image: openschichtplaner5-frontend:latest
+    ports:
+      - "${SP5_APP_PORT:-8080}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+  postgres:
+    image: postgres:16
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_DB: sp5
+      POSTGRES_USER: sp5
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sp5}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sp5 -d sp5"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  sp5_dbf:
+  api_state:
+  api_api_state:
+  api_backups:
+  pg_data:

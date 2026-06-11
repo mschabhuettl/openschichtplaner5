@@ -21,6 +21,12 @@ export interface CurrentUser {
   BACKUP: boolean;
   SHOWSTATS: boolean;
   ACCADMWND: boolean;
+  /**
+   * Granulare 5USER-Rechte aus /api/auth/me (G-1, Spec 9.5.3/9.6) —
+   * Schlüssel: wduties/wabsences/wovertimes/wnotes/wdeviation/wcycleass/
+   * wswaponly/wpast/addempl/showabs/shownotes/showstats/backup.
+   */
+  permissions?: Record<string, boolean>;
 }
 
 /** The roles available in the dev view-role simulator. */
@@ -48,6 +54,14 @@ export interface AuthContextType {
   canWriteOvertimes: boolean;
   canAdmin: boolean;
   canBackup: boolean;
+  /**
+   * Granulares Rechte-Gating (G-1): prüft ein 5USER-Flag aus
+   * user.permissions (z. B. 'wduties'). Verhalten wie die api:
+   * Admin ⇒ immer true, fehlende permissions/fehlender Schlüssel ⇒ true —
+   * nur ein explizit gesetztes false sperrt. Im Dev-Mode wird der
+   * gewählte devViewRole simuliert.
+   */
+  can: (perm: string) => boolean;
 }
 
 // ── Default role permissions ─────────────────────────────────
@@ -74,6 +88,7 @@ function applyRoleDefaults(user: Partial<CurrentUser>): CurrentUser {
     BACKUP: user.BACKUP ?? isAdmin,
     SHOWSTATS: user.SHOWSTATS ?? (isAdmin || isPlaner),
     ACCADMWND: user.ACCADMWND ?? isAdmin,
+    permissions: user.permissions,
   };
 }
 
@@ -131,6 +146,23 @@ function devViewPermissions(role: DevViewRole) {
   }
 }
 
+/**
+ * Simulierte granulare Rechte je devViewRole (G-1, nur UI-Rendering).
+ * Spiegelt die api-Rollen-Defaults: Planer hat die W*-Schreibflags,
+ * aber nicht die Opt-ins (wswaponly/addempl/backup); Leser nur die
+ * Anzeige-Flags (showabs/shownotes/showstats).
+ */
+function devViewCan(role: DevViewRole, perm: string): boolean {
+  switch (role) {
+    case 'lese':
+      return perm === 'showabs' || perm === 'shownotes' || perm === 'showstats';
+    case 'planer':
+      return perm !== 'wswaponly' && perm !== 'addempl' && perm !== 'backup';
+    default: // 'dev' und 'admin': Vollzugriff
+      return true;
+  }
+}
+
 // ── Session persistence key ───────────────────────────────────
 const SESSION_KEY = 'sp5_session';
 
@@ -177,6 +209,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, delay);
   }, [clearExpiryTimer]);
 
+  /**
+   * G-1: Granulare Rechte von /api/auth/me holen (Server ist Quelle der
+   * Wahrheit). Liefert null bei Fehlern — dann bleibt das bisherige
+   * permissions-Objekt (bzw. die Rollen-Defaults) in Kraft.
+   */
+  const fetchPermissions = useCallback(async (): Promise<Record<string, boolean> | null> => {
+    try {
+      const BASE = import.meta.env.VITE_API_URL ?? '';
+      const res = await fetch(`${BASE}/api/v1/auth/me`, { credentials: 'include' });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data && typeof data.permissions === 'object' && data.permissions !== null
+        ? data.permissions as Record<string, boolean>
+        : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  /** permissions in State + persistierter Session aktualisieren. */
+  const applyPermissions = useCallback((perms: Record<string, boolean>) => {
+    setUser(u => (u ? { ...u, permissions: perms } : u));
+    try {
+      const raw = localStorage.getItem(SESSION_KEY);
+      if (raw) {
+        const session: StoredSession = JSON.parse(raw);
+        if (!session.devMode && session.user) {
+          session.user = { ...session.user, permissions: perms };
+          localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        }
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   // Restore session from localStorage on mount
   useEffect(() => {
     try {
@@ -193,15 +259,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setToken(null);
           setUser(applyRoleDefaults(session.user));
           // Restore proactive expiry timer
-          if (session.expiresAt) {
-            if (session.expiresAt * 1000 <= Date.now()) {
-              // Already expired — log out immediately
-              localStorage.removeItem(SESSION_KEY);
-              sessionStorage.setItem('sp5_session_expired', '1');
-              setUser(null);
-            } else {
+          if (session.expiresAt && session.expiresAt * 1000 <= Date.now()) {
+            // Already expired — log out immediately
+            localStorage.removeItem(SESSION_KEY);
+            sessionStorage.setItem('sp5_session_expired', '1');
+            setUser(null);
+          } else {
+            if (session.expiresAt) {
               scheduleExpiryTimer(session.expiresAt);
             }
+            // G-1: permissions im Hintergrund auffrischen
+            fetchPermissions().then(perms => {
+              if (perms) applyPermissions(perms);
+            });
           }
         }
       }
@@ -210,7 +280,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [scheduleExpiryTimer]);
+  }, [scheduleExpiryTimer, fetchPermissions, applyPermissions]);
 
   // Auto-logout when API returns 401 or proactive expiry timer fires
   useEffect(() => {
@@ -252,7 +322,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (err as Error & { requires2FA: boolean }).requires2FA = true;
       throw err;
     }
-    const resolvedUser = applyRoleDefaults(data.user);
+    // G-1: granulare permissions aus /api/auth/me übernehmen (Login-Antwort
+    // enthält sie nicht; das Session-Cookie ist hier bereits gesetzt)
+    const perms = await fetchPermissions();
+    const resolvedUser = applyRoleDefaults(
+      perms ? { ...data.user, permissions: perms } : data.user,
+    );
     const expiresAt: number | undefined = data.expires_at;
     // Store user info only — token is kept in HttpOnly cookie, not localStorage
     const session: StoredSession = { token: '', user: resolvedUser, devMode: false, expiresAt };
@@ -322,6 +397,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const canAdmin = simPerms ? simPerms.canAdmin : !!(user?.ACCADMWND);
   const canBackup = simPerms ? simPerms.canBackup : !!(user?.BACKUP);
 
+  // G-1: granulares Flag-Gating — nur explizit false sperrt (wie die api)
+  const can = useCallback((perm: string): boolean => {
+    if (isDevMode) return devViewCan(devViewRole, perm);
+    if (!user) return false;
+    if (user.role === 'Admin' || user.ADMIN) return true;
+    return user.permissions?.[perm] !== false;
+  }, [isDevMode, devViewRole, user]);
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -339,6 +422,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       canWriteOvertimes,
       canAdmin,
       canBackup,
+      can,
     }}>
       {children}
     </AuthContext.Provider>

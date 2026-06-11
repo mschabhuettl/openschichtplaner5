@@ -3,6 +3,7 @@ import { useSSERefresh } from '../contexts/SSEContext';
 import { useNavigate } from 'react-router-dom';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../contexts/AuthContext';
+import { useGridPermissions, cellWriteState, isPastDate, type CellWriteState } from '../hooks/useGridPermissions';
 import { api } from '../api/client';
 import type { ShiftRequirement, Note, ConflictEntry, CoverageDay, ScheduleTemplate, ScheduleComment, AbsenceTimeOptions } from '../api/client';
 import type { Employee, Group, ScheduleEntry, ShiftType, LeaveType } from '../types';
@@ -228,7 +229,9 @@ const ShiftPicker = memo(function ShiftPicker({
       className="absolute z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 p-2 min-w-[160px] text-xs dark:text-gray-200"
       style={{ top: '100%', left: 0 }}
     >
-      <div className="font-semibold text-gray-600 mb-1 px-1">Schicht wählen</div>
+      {shifts.length > 0 && (
+        <div className="font-semibold text-gray-600 mb-1 px-1">Schicht wählen</div>
+      )}
       {shifts.map(s => (
         <button
           key={s.ID}
@@ -476,6 +479,12 @@ interface CellContextMenuProps {
   shifts: ShiftType[];
   leaveTypes: LeaveType[];
   hasClipboard: boolean;
+  /** G-1: granulares Schreib-Gating der Zelle (WDUTIES/WABSENCES/WPAST). */
+  writeState: CellWriteState;
+  /** G-1: Notizen schreiben (WNOTES). */
+  canNotes: boolean;
+  /** G-1: Arbeitszeitabweichungen erfassen (WDEVIATION). */
+  canDeviation: boolean;
   onClose: () => void;
   onAddNote: (empId: number, dateStr: string, text: string) => Promise<void>;
   onAssignShift: (empId: number, day: number, shiftId: number) => void;
@@ -490,6 +499,7 @@ interface CellContextMenuProps {
 
 const CellContextMenu = memo(function CellContextMenu({
   state, entries, shifts, leaveTypes, hasClipboard,
+  writeState, canNotes, canDeviation,
   onClose, onAddNote, onAssignShift, onAddAbsence,
   onAddSonderdienst, onAddDeviation, onDelete, onDeleteEntry, onCopy, onPaste,
 }: CellContextMenuProps) {
@@ -546,25 +556,37 @@ const CellContextMenu = memo(function CellContextMenu({
           <div className="px-3 py-1 text-gray-600 text-[10px] font-medium border-b mb-1">
             {state.dateStr}
           </div>
-          <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
-            onClick={() => setMode('shift-select')}
-          >
-            📋 Schicht zuweisen...
-          </button>
-          <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
-            onClick={() => setMode('absence-select')}
-          >
-            🏖️ Abwesenheit eintragen...
-          </button>
-          <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
-            onClick={() => setMode('sonderdienst')}
-          >
-            ⚡ Sonderdienst...
-          </button>
-          {entries.some(en => en.kind === 'shift') && (
+          {/* G-1: Menüpunkte nur mit dem jeweiligen Schreibrecht */}
+          {writeState.pastLocked && (
+            <div className="px-3 py-1 text-[10px] text-gray-500">
+              🔒 Vergangenheit gesperrt (WPAST)
+            </div>
+          )}
+          {writeState.canAddShift && (
+            <button
+              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              onClick={() => setMode('shift-select')}
+            >
+              📋 Schicht zuweisen...
+            </button>
+          )}
+          {writeState.canAddAbsence && (
+            <button
+              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              onClick={() => setMode('absence-select')}
+            >
+              🏖️ Abwesenheit eintragen...
+            </button>
+          )}
+          {writeState.canAddShift && (
+            <button
+              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              onClick={() => setMode('sonderdienst')}
+            >
+              ⚡ Sonderdienst...
+            </button>
+          )}
+          {entries.some(en => en.kind === 'shift') && canDeviation && !writeState.pastLocked && (
             <button
               className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
               onClick={() => setMode('deviation')}
@@ -572,18 +594,20 @@ const CellContextMenu = memo(function CellContextMenu({
               ⏱️ Arbeitszeitabweichung...
             </button>
           )}
-          <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
-            onClick={() => setMode('note')}
-          >
-            💬 Notiz hinzufügen
-          </button>
+          {canNotes && (
+            <button
+              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              onClick={() => setMode('note')}
+            >
+              💬 Notiz hinzufügen
+            </button>
+          )}
           {entries.some(en => en.source === 'cycle') && (
             <div className="px-3 py-1 text-[10px] text-gray-500" title="aus Schichtmodell (Zyklus)">
               ↻ Zyklusdienst — nur per Überschreiben änderbar
             </div>
           )}
-          {entries.length > 0 && (
+          {entries.length > 0 && writeState.canDelete && (
             <button
               className="w-full px-3 py-1.5 text-left hover:bg-red-50 text-red-600 flex items-center gap-2"
               onClick={() => {
@@ -602,7 +626,7 @@ const CellContextMenu = memo(function CellContextMenu({
           >
             📄 Kopieren
           </button>
-          {hasClipboard && (
+          {hasClipboard && writeState.canAddShift && (
             <button
               className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
               onClick={() => { onPaste(state.empId, state.day); onClose(); }}
@@ -1950,8 +1974,12 @@ export default function Schedule() {
   const navigate = useNavigate();
   const { canEditSchedule } = usePermissions();
   const { devViewRole, user } = useAuth();
+  // G-1: granulare 5USER-Schreibrechte (WDUTIES/WABSENCES/WNOTES/WDEVIATION/WPAST)
+  const grid = useGridPermissions();
   // Leser view: read-only mode (devViewRole 'lese' or real Leser role)
   const isLeserView = devViewRole === 'lese' || user?.role === 'Leser';
+  // Heutiges Datum (ISO) für das WPAST-Gating von Vergangenheits-Edits
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   const [year, setYear] = useState(() => {
     const v = sessionStorage.getItem('schedule-year');
     return v ? Number(v) : now.getFullYear();
@@ -2787,8 +2815,20 @@ export default function Schedule() {
   };
 
   // ── Handlers ────────────────────────────────────────────────
+
+  /** G-1: WPAST-Guard — blockt Schreibaktionen auf Tage vor heute. */
+  const guardPast = (dateStr: string): boolean => {
+    if (isPastDate(dateStr, todayStr) && !grid.past) {
+      showToast('Änderungen in der Vergangenheit sind gesperrt (WPAST)', 'error');
+      return false;
+    }
+    return true;
+  };
+
   const handleAddShift = async (empId: number, day: number, shiftId: number) => {
     const dateStr = `${year}-${pad(month)}-${pad(day)}`;
+    if (!grid.duties) { showToast('Keine Schreibberechtigung für Dienste (WDUTIES)', 'error'); return; }
+    if (!guardPast(dateStr)) return;
     const existing = entryMap.get(`${empId}-${day}`) ?? [];
     let choice: ConflictChoice = 'add';
     if (existing.length > 0) {
@@ -2816,6 +2856,8 @@ export default function Schedule() {
 
   const handleAddAbsence = async (empId: number, day: number, leaveTypeId: number, time?: AbsenceTimeOptions) => {
     const dateStr = `${year}-${pad(month)}-${pad(day)}`;
+    if (!grid.absences) { showToast('Keine Schreibberechtigung für Abwesenheiten (WABSENCES)', 'error'); return; }
+    if (!guardPast(dateStr)) return;
     const existing = entryMap.get(`${empId}-${day}`) ?? [];
     let choice: ConflictChoice = 'add';
     if (existing.length > 0) {
@@ -2846,6 +2888,11 @@ export default function Schedule() {
     const dateStr = `${year}-${pad(month)}-${pad(day)}`;
     const cellEntries = entryMap.get(`${empId}-${day}`) ?? [];
     if (cellEntries.length === 0) return;
+    const cellPerm = cellWriteState(grid, dateStr, todayStr, cellEntries);
+    if (!cellPerm.canDelete) {
+      showToast(cellPerm.readOnlyReason ?? 'Keine Schreibberechtigung für Abwesenheiten (WABSENCES)', 'error');
+      return;
+    }
     if (!hasDeletableEntry(cellEntries)) {
       // Nur Zyklusdienst(e): es gibt keinen DB-Eintrag zu löschen (APP-INT-4)
       await promptCycleOverwrite(empId, day);
@@ -2870,6 +2917,13 @@ export default function Schedule() {
   const handleDeleteSingleEntry = async (empId: number, day: number, entry: ScheduleEntry) => {
     const dateStr = `${year}-${pad(month)}-${pad(day)}`;
     const cellEntries = entryMap.get(`${empId}-${day}`) ?? [];
+    if (entry.kind === 'absence' ? !grid.absences : !grid.duties) {
+      showToast(entry.kind === 'absence'
+        ? 'Keine Schreibberechtigung für Abwesenheiten (WABSENCES)'
+        : 'Keine Schreibberechtigung für Dienste (WDUTIES)', 'error');
+      return;
+    }
+    if (!guardPast(dateStr)) return;
     if (isCycleEntry(entry)) {
       await promptCycleOverwrite(empId, day);
       return;
@@ -2886,6 +2940,7 @@ export default function Schedule() {
   };
 
   const handleAddNote = async (empId: number, dateStr: string, text: string) => {
+    if (!grid.notes) { showToast('Keine Schreibberechtigung für Notizen (WNOTES)', 'error'); return; }
     try {
       await api.addNote(dateStr, text, empId);
       loadNotesForMonth();
@@ -2897,6 +2952,7 @@ export default function Schedule() {
   // ── Schedule Comment handlers (Q069) ──────────────────────
   const handleSaveScheduleComment = async () => {
     if (!commentPopover || !commentText.trim()) return;
+    if (!grid.notes) { showToast('Keine Schreibberechtigung für Kommentare (WNOTES)', 'error'); return; }
     setCommentSaving(true);
     try {
       await api.createScheduleComment({
@@ -2915,6 +2971,7 @@ export default function Schedule() {
   };
 
   const handleDeleteScheduleComment = async (id: number) => {
+    if (!grid.notes) { showToast('Keine Schreibberechtigung für Kommentare (WNOTES)', 'error'); return; }
     try {
       await api.deleteScheduleComment(id);
       loadScheduleComments();
@@ -2930,6 +2987,8 @@ export default function Schedule() {
     empId: number, dateStr: string,
     shiftId: number | null, startTime: string, endTime: string,
   ) => {
+    if (!grid.duties) { showToast('Keine Schreibberechtigung für Dienste (WDUTIES)', 'error'); return; }
+    if (!guardPast(dateStr)) return;
     const startend = `${startTime}-${endTime}`;
     const shift = shiftId ? shifts.find(s => s.ID === shiftId) : null;
     setSaving(true);
@@ -2954,6 +3013,8 @@ export default function Schedule() {
   const handleAddDeviation = async (
     empId: number, dateStr: string, startTime: string, endTime: string,
   ) => {
+    if (!grid.deviation) { showToast('Keine Schreibberechtigung für Arbeitszeitabweichungen (WDEVIATION)', 'error'); return; }
+    if (!guardPast(dateStr)) return;
     const startend = `${startTime}-${endTime}`;
     setSaving(true);
     try {
@@ -2985,6 +3046,7 @@ export default function Schedule() {
   };
 
   const handleNoteEdited = async (noteId: number, newText: string) => {
+    if (!grid.notes) { showToast('Keine Schreibberechtigung für Notizen (WNOTES)', 'error'); return; }
     try {
       await api.updateNote(noteId, { text: newText });
       loadNotesForMonth();
@@ -2994,6 +3056,7 @@ export default function Schedule() {
   };
 
   const handleNoteDeleted = async (noteId: number) => {
+    if (!grid.notes) { showToast('Keine Schreibberechtigung für Notizen (WNOTES)', 'error'); return; }
     try {
       await api.deleteNote(noteId);
       loadNotesForMonth();
@@ -3094,6 +3157,7 @@ export default function Schedule() {
   };
 
   const handleBulkAssignShift = async (shiftId: number) => {
+    if (!grid.duties) { showToast('Keine Schreibberechtigung für Dienste (WDUTIES)', 'error'); return; }
     const cells = getSelectedCells();
     if (cells.length === 0) return;
     const beforeCells = cells.map(({ empId, day }) => ({
@@ -3118,6 +3182,7 @@ export default function Schedule() {
   };
 
   const handleBulkDelete = async () => {
+    if (!grid.duties) { showToast('Keine Schreibberechtigung für Dienste (WDUTIES)', 'error'); return; }
     const cells = getSelectedCells();
     if (cells.length === 0) return;
     if (!await confirmDialog({ message: `${cells.length} Einträge löschen?`, danger: true })) return;
@@ -3164,6 +3229,7 @@ export default function Schedule() {
   };
 
   const handleBulkPaste = async (targetEmpId: number, targetDay: number) => {
+    if (!grid.duties) { showToast('Keine Schreibberechtigung für Dienste (WDUTIES)', 'error'); return; }
     if (!clipboard) return;
     const targetEmpIdx = empIndexMap.get(targetEmpId) ?? 0;
     const entries = clipboard.entries
@@ -3278,8 +3344,12 @@ export default function Schedule() {
 
   /** Assign a shift from the palette to all unassigned employees on a given day */
   const handleCalendarDndAssign = useCallback(async (payload: DndAssignPayload) => {
-    if (!canEditSchedule || isLeserView) return;
+    if (!canEditSchedule || isLeserView || !grid.duties) return;
     const { shiftId, dateStr } = payload;
+    if (isPastDate(dateStr, todayStr) && !grid.past) {
+      showToast('Änderungen in der Vergangenheit sind gesperrt (WPAST)', 'error');
+      return;
+    }
     const dayNum = new Date(dateStr).getDate();
 
     // Find unassigned employees for this day
@@ -3328,12 +3398,16 @@ export default function Schedule() {
       setSaving(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canEditSchedule, isLeserView, displayEmployees, entryMap, year, month]);
+  }, [canEditSchedule, isLeserView, grid.duties, grid.past, todayStr, displayEmployees, entryMap, year, month]);
 
   /** Move a shift assignment from one day to another */
   const handleCalendarDndMove = useCallback(async (payload: DndMovePayload) => {
-    if (!canEditSchedule || isLeserView) return;
+    if (!canEditSchedule || isLeserView || !grid.duties) return;
     const { employeeId, fromDateStr, toDateStr, shiftId } = payload;
+    if ((isPastDate(fromDateStr, todayStr) || isPastDate(toDateStr, todayStr)) && !grid.past) {
+      showToast('Änderungen in der Vergangenheit sind gesperrt (WPAST)', 'error');
+      return;
+    }
     const fromDay = new Date(fromDateStr).getDate();
     const toDay = new Date(toDateStr).getDate();
 
@@ -3365,7 +3439,7 @@ export default function Schedule() {
     }
     setSaving(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canEditSchedule, isLeserView, entryMap]);
+  }, [canEditSchedule, isLeserView, grid.duties, grid.past, todayStr, entryMap]);
 
   // ── Vormonat kopieren ──────────────────────────────────────
   const handleCopyPrevMonth = async () => {
@@ -3406,6 +3480,10 @@ export default function Schedule() {
   // ── HTML5 Drag & Drop handlers ──────────────────────────────
   const handleDragStart = (e: React.DragEvent, empId: number, day: number) => {
     if (!canEditSchedule || isLeserView) { e.preventDefault(); return; }
+    // G-1: DnD nur mit WDUTIES (bzw. WABSENCES für Abwesenheiten) und WPAST-Gating
+    const dateStr = `${year}-${pad(month)}-${pad(day)}`;
+    const cellEntries = entryMap.get(`${empId}-${day}`) ?? [];
+    if (!cellWriteState(grid, dateStr, todayStr, cellEntries).canDrag) { e.preventDefault(); return; }
     e.dataTransfer.effectAllowed = 'copyMove';
     e.dataTransfer.setData('text/plain', `${empId}-${day}`);
     setDndSource({ empId, day });
@@ -3443,6 +3521,20 @@ export default function Schedule() {
     const targetEntries = entryMap.get(`${targetEmpId}-${targetDay}`) ?? [];
     const srcDateStr = `${year}-${pad(month)}-${pad(srcDay)}`;
     const targetDateStr = `${year}-${pad(month)}-${pad(targetDay)}`;
+
+    // G-1: Ziel-Berechtigung (Quelle ist bereits beim DragStart geprüft)
+    if (srcEntry.kind === 'absence' ? !grid.absences : !grid.duties) {
+      showToast(srcEntry.kind === 'absence'
+        ? 'Keine Schreibberechtigung für Abwesenheiten (WABSENCES)'
+        : 'Keine Schreibberechtigung für Dienste (WDUTIES)', 'error');
+      clearDnd();
+      return;
+    }
+    if (isPastDate(targetDateStr, todayStr) && !grid.past) {
+      showToast('Änderungen in der Vergangenheit sind gesperrt (WPAST)', 'error');
+      clearDnd();
+      return;
+    }
 
     // Belegtes Ziel → Konflikt-Dialog (V-2): zusätzlich / ersetzen / abbrechen
     let choice: 'add' | 'replace' = 'replace';
@@ -3690,6 +3782,10 @@ export default function Schedule() {
           shifts={shifts}
           leaveTypes={leaveTypes}
           hasClipboard={!!clipboard}
+          writeState={cellWriteState(grid, contextMenu.dateStr, todayStr,
+            entryMap.get(`${contextMenu.empId}-${contextMenu.day}`) ?? [])}
+          canNotes={grid.notes}
+          canDeviation={grid.deviation}
           onClose={() => setContextMenu(null)}
           onAddNote={handleAddNote}
           onAssignShift={handleAddShift}
@@ -4580,11 +4676,13 @@ export default function Schedule() {
             return (
               <>
                 <textarea
-                  className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm dark:bg-gray-700 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  className="w-full border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm dark:bg-gray-700 dark:text-white resize-none focus:outline-none focus:ring-2 focus:ring-amber-400 read-only:opacity-60"
                   rows={3}
                   value={commentText}
                   onChange={e => setCommentText(e.target.value)}
                   placeholder="Kommentar eingeben..."
+                  readOnly={!grid.notes}
+                  title={grid.notes ? undefined : 'Keine Schreibberechtigung für Kommentare (WNOTES)'}
                   autoFocus
                 />
                 {existing?.author && (
@@ -4592,6 +4690,8 @@ export default function Schedule() {
                     von {existing.author} · {new Date(existing.created_at).toLocaleDateString('de-AT')}
                   </div>
                 )}
+                {/* G-1: Kommentar-Editor nur mit WNOTES (sonst nur Lesen) */}
+                {grid.notes && (
                 <div className="flex gap-2 mt-2">
                   <button
                     className="flex-1 bg-amber-500 hover:bg-amber-600 text-white text-sm rounded px-3 py-1.5 font-medium disabled:opacity-50"
@@ -4609,6 +4709,7 @@ export default function Schedule() {
                     </button>
                   )}
                 </div>
+                )}
               </>
             );
           })()}
@@ -5558,7 +5659,7 @@ export default function Schedule() {
             onDayClick={(day, dateStr) => setDayDetailModal({ day, dateStr })}
             onShiftAssign={handleCalendarDndAssign}
             onShiftMove={handleCalendarDndMove}
-            readOnly={!canEditSchedule || isLeserView}
+            readOnly={!grid.duties || isLeserView}
           />
         </div>
       )}
@@ -5704,7 +5805,7 @@ export default function Schedule() {
                         >
                           💬
                         </button>
-                      ) : (
+                      ) : grid.notes ? (
                         <button
                           className="text-gray-300 text-[10px] hover:text-amber-400 cursor-pointer transition-colors"
                           title="Kommentar hinzufügen"
@@ -5716,6 +5817,12 @@ export default function Schedule() {
                         >
                           +
                         </button>
+                      ) : (
+                        /* G-1: Kommentar-Editor nur mit WNOTES */
+                        <span
+                          className="text-gray-200 text-[10px] cursor-default select-none"
+                          title="Keine Schreibberechtigung für Kommentare (WNOTES)"
+                        >·</span>
                       )}
                     </td>
                   );
@@ -5843,11 +5950,14 @@ export default function Schedule() {
                     const isToday = day === todayDay;
                     const isEmpHighlighted = highlightedEmpId !== null && highlightedEmpId === emp.ID;
                     const isOtherEmpDimmed = highlightedEmpId !== null && highlightedEmpId !== emp.ID;
+                    // G-1: granulares Schreib-Gating der Zelle (WDUTIES/WABSENCES/WPAST)
+                    const cellPerm = cellWriteState(grid, dateStr, todayStr, cellEntries);
                     return (
                       <td
                         key={day}
                         className={`border border-gray-100 p-0 text-center relative group`}
-                        draggable={cellEntries.length > 0 && canEditSchedule && !isLeserView}
+                        title={!isLeserView ? (cellPerm.readOnlyReason ?? undefined) : undefined}
+                        draggable={cellPerm.canDrag && !isLeserView}
                         style={{
                           backgroundColor: isDndTgt
                             ? (isDark ? '#1e3a5f' : '#bfdbfe')
@@ -5875,7 +5985,10 @@ export default function Schedule() {
                             : (hasConflict ? '2px solid #ef4444' : isFilterMatch ? '2px solid #3b82f6' : undefined),
                           outlineOffset: '-2px',
                           opacity: isDndSrc ? 0.5 : isOtherEmpDimmed ? 0.35 : 1,
-                          cursor: cellEntries.length > 0 ? 'grab' : 'default',
+                          // G-1: Read-only-Cursor, wenn Ziehen/Bearbeiten der Zelle gesperrt ist
+                          cursor: cellEntries.length > 0
+                            ? (cellPerm.canDrag && !isLeserView ? 'grab' : 'not-allowed')
+                            : (cellPerm.pastLocked ? 'not-allowed' : 'default'),
                         }}
                         onMouseDown={e => handleCellMouseDown(e, emp.ID, day)}
                         onMouseEnter={e => {
@@ -5936,7 +6049,8 @@ export default function Schedule() {
                                 {wishType === 'WUNSCH' ? '🟢' : '🔴'}
                               </span>
                             )}
-                            {/* Delete button on hover */}
+                            {/* Delete button on hover — nur mit Schreibrecht (G-1) */}
+                            {cellPerm.canDelete && (
                             <button
                               onClick={() => handleDeleteEntry(emp.ID, day)}
                               onMouseDown={e => e.stopPropagation()}
@@ -5945,6 +6059,7 @@ export default function Schedule() {
                             >
                               ×
                             </button>
+                            )}
                           </div>
                         ) : (
                           <div className="relative h-[34px] sm:h-6">
@@ -5979,7 +6094,7 @@ export default function Schedule() {
                                 {wishType === 'WUNSCH' ? '🟢' : '🔴'}
                               </span>
                             )}
-                            {canEditSchedule && (
+                            {(cellPerm.canAddShift || cellPerm.canAddAbsence) && (
                             <button
                               onClick={() => setActivePicker(p =>
                                 p?.empId === emp.ID && p?.day === day ? null : { empId: emp.ID, day }
@@ -5994,11 +6109,11 @@ export default function Schedule() {
                           </div>
                         )}
 
-                        {/* Shift picker popup — only for users who can edit */}
-                        {isPickerOpen && canEditSchedule && (
+                        {/* Shift picker popup — only for users who can edit (G-1: je Eintragsart) */}
+                        {isPickerOpen && (cellPerm.canAddShift || cellPerm.canAddAbsence) && (
                           <ShiftPicker
-                            shifts={shifts}
-                            leaveTypes={leaveTypes}
+                            shifts={cellPerm.canAddShift ? shifts : []}
+                            leaveTypes={cellPerm.canAddAbsence ? leaveTypes : []}
                             onSelect={shiftId => { handleAddShift(emp.ID, day, shiftId); setActivePicker(null); }}
                             onAbsence={(leaveTypeId, time) => { handleAddAbsence(emp.ID, day, leaveTypeId, time); setActivePicker(null); }}
                             onClose={() => setActivePicker(null)}

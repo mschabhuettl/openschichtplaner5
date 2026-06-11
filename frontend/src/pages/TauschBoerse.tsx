@@ -6,6 +6,7 @@ import { useConfirm } from '../hooks/useConfirm';
 import { useSSERefresh } from '../contexts/SSEContext';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useAuth } from '../contexts/AuthContext';
+import { useCan } from '../hooks/useCan';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ResponsiveTable } from '../components/ResponsiveTable';
 
@@ -335,8 +336,12 @@ function RejectDialog({
 export default function TauschBoerse() {
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const { user, devViewRole } = useAuth();
+  const can = useCan();
   const isPlanner = user?.role === 'Admin' || user?.role === 'Planer';
   const isLeserView = devViewRole === 'lese' || user?.role === 'Leser';
+  // G-1: Tausch-Aktionen (anlegen/genehmigen/löschen) mit WDUTIES ODER WSWAPONLY
+  // (Spec 9.6; Selbstservice — anbieten/annehmen/stornieren — bleibt ungegated)
+  const canSwapActions = isPlanner && !isLeserView && (can('wduties') || can('wswaponly'));
 
   const [requests, setRequests] = useState<SwapRequest[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -390,6 +395,7 @@ export default function TauschBoerse() {
   };
 
   const handleApprove = async (id: number) => {
+    if (!canSwapActions) return;
     try {
       await api.resolveSwapRequest(id, { action: 'approve' });
       flash('✅ Tausch genehmigt und ausgeführt!');
@@ -400,6 +406,7 @@ export default function TauschBoerse() {
   };
 
   const handleDelete = async (id: number) => {
+    if (!canSwapActions) return;
     if (!await confirmDialog({ message: 'Anfrage löschen?', danger: true })) return;
     try {
       await api.deleteSwapRequest(id);
@@ -473,8 +480,8 @@ export default function TauschBoerse() {
       );
     }
 
-    // Planner actions
-    if (isPlanner && !isLeserView) {
+    // Planner actions — G-1: nur mit WDUTIES oder WSWAPONLY
+    if (canSwapActions) {
       if (req.status === 'pending') {
         actions.push(
           <button key="approve" onClick={() => handleApprove(req.id)}
@@ -521,7 +528,7 @@ export default function TauschBoerse() {
                 + Tausch anbieten
               </button>
             )}
-            {isPlanner && !isLeserView && (
+            {canSwapActions && (
               <button
                 onClick={() => setShowNew(true)}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 shadow-sm"

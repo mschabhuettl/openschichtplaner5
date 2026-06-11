@@ -4,7 +4,8 @@ import { api } from '../api/client';
 import type { Note } from '../api/client';
 import type { Employee, Group } from '../types';
 import { useToast } from '../hooks/useToast';
-import { usePermissions } from '../hooks/usePermissions';
+import { useAuth } from '../contexts/AuthContext';
+import { useCan } from '../hooks/useCan';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 
@@ -273,7 +274,10 @@ function NoteCard({ note, employeeName, onEdit, onDelete, canEdit = true }: Note
 // ─── Main Page ─────────────────────────────────────────────────
 export default function Notizen() {
   const today = new Date();
-  const { canEditSchedule: canEdit } = usePermissions();
+  // G-1: Notizen schreiben nur mit WNOTES (Spec 9.5.3/9.6)
+  const { canWrite } = useAuth();
+  const can = useCan();
+  const canEdit = canWrite && can('wnotes');
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
   const [notes, setNotes] = useState<Note[]>([]);

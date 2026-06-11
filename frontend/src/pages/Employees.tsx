@@ -9,6 +9,7 @@ import { ResponsiveTable } from '../components/ResponsiveTable';
 import type { Employee, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useAuth } from '../contexts/AuthContext';
+import { useCan } from '../hooks/useCan';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { EmptyState } from '../components/EmptyState';
@@ -230,7 +231,11 @@ function listToWorkdays(list: boolean[]): string {
 
 export default function Employees() {
   const t = useT();
-  const { canAdmin } = useAuth();
+  const { canAdmin, user } = useAuth();
+  const can = useCan();
+  // G-1: 'Neuer Mitarbeiter' nur für Admin oder Planer mit ADDEMPL-Opt-in
+  // (Spec 9.5.3 Nr. 2.1); Löschen/Bearbeiten bleibt Admin-gebunden.
+  const canAddEmployee = canAdmin || (user?.role === 'Planer' && can('addempl'));
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -712,7 +717,7 @@ export default function Employees() {
           >
             📊 Excel
           </button>
-          {canAdmin && <button
+          {canAddEmployee && <button
             onClick={openCreate}
             className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
           >
@@ -762,8 +767,8 @@ export default function Employees() {
           icon="👥"
           title="Noch keine Mitarbeiter"
           description="Legen Sie Ihren ersten Mitarbeiter an, um mit der Dienstplanung zu beginnen."
-          actionLabel={canAdmin ? 'Ersten Mitarbeiter anlegen' : undefined}
-          onAction={canAdmin ? openCreate : undefined}
+          actionLabel={canAddEmployee ? 'Ersten Mitarbeiter anlegen' : undefined}
+          onAction={canAddEmployee ? openCreate : undefined}
         />
       ) : (
         <>
@@ -842,8 +847,8 @@ export default function Employees() {
                     icon="👥"
                     title="Noch keine Mitarbeiter"
                     description="Legen Sie Ihren ersten Mitarbeiter an, um mit der Dienstplanung zu beginnen."
-                    actionLabel={canAdmin ? "➕ Ersten Mitarbeiter anlegen" : undefined}
-                    onAction={canAdmin ? openCreate : undefined}
+                    actionLabel={canAddEmployee ? "➕ Ersten Mitarbeiter anlegen" : undefined}
+                    onAction={canAddEmployee ? openCreate : undefined}
                   />
                 )}
                 {filtered.length === 0 && employees.length > 0 && (

@@ -1,4 +1,5 @@
 import { usePermissions } from '../hooks/usePermissions';
+import { useGridPermissions, isPastDate } from '../hooks/useGridPermissions';
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { api } from '../api/client';
 import { useSSERefresh } from '../contexts/SSEContext';
@@ -37,13 +38,17 @@ interface ContextMenuProps {
   y: number;
   entry: DayEntry;
   date: string;
+  /** G-1: Sonderdienste eintragen/löschen (WDUTIES). */
+  canDuties: boolean;
+  /** G-1: Arbeitszeitabweichungen erfassen (WDEVIATION). */
+  canDeviation: boolean;
   onClose: () => void;
   onAddSonderdienst: (entry: DayEntry) => void;
   onAddAbweichung: (entry: DayEntry) => void;
   onDelete: (entry: DayEntry) => void;
 }
 
-function ContextMenu({ x, y, entry, onClose, onAddSonderdienst, onAddAbweichung, onDelete }: ContextMenuProps) {
+function ContextMenu({ x, y, entry, canDuties, canDeviation, onClose, onAddSonderdienst, onAddAbweichung, onDelete }: ContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   const hasSpshi = entry.kind === 'special_shift' && entry.spshi_id != null;
 
@@ -75,19 +80,24 @@ function ContextMenu({ x, y, entry, onClose, onAddSonderdienst, onAddAbweichung,
       <div className="px-3 py-1.5 text-[11px] font-semibold text-gray-600 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700 mb-1">
         {entry.employee_name}
       </div>
-      <button
-        className="w-full text-left px-3 py-1.5 text-sm hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2"
-        onClick={() => { onAddSonderdienst(entry); onClose(); }}
-      >
-        <span>🔷</span> Sonderdienst eintragen
-      </button>
-      <button
-        className="w-full text-left px-3 py-1.5 text-sm hover:bg-amber-50 hover:text-amber-700 flex items-center gap-2"
-        onClick={() => { onAddAbweichung(entry); onClose(); }}
-      >
-        <span>⏱️</span> Arbeitszeitabweichung erfassen
-      </button>
-      {hasSpshi && (
+      {/* G-1: Menüpunkte nur mit dem jeweiligen Schreibrecht */}
+      {canDuties && (
+        <button
+          className="w-full text-left px-3 py-1.5 text-sm hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2"
+          onClick={() => { onAddSonderdienst(entry); onClose(); }}
+        >
+          <span>🔷</span> Sonderdienst eintragen
+        </button>
+      )}
+      {canDeviation && (
+        <button
+          className="w-full text-left px-3 py-1.5 text-sm hover:bg-amber-50 hover:text-amber-700 flex items-center gap-2"
+          onClick={() => { onAddAbweichung(entry); onClose(); }}
+        >
+          <span>⏱️</span> Arbeitszeitabweichung erfassen
+        </button>
+      )}
+      {hasSpshi && canDuties && (
         <>
           <div className="border-t border-gray-100 my-1" />
           <button
@@ -1069,7 +1079,10 @@ function TemplatesPanel({
 
 export default function Einsatzplan() {
   const { canEditSchedule: canEdit } = usePermissions();
+  // G-1: granulare 5USER-Schreibrechte (WDUTIES/WDEVIATION/WPAST)
+  const grid = useGridPermissions();
   const today = new Date();
+  const todayStr = toIsoDate(today);
   const { showToast } = useToast();
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
@@ -1279,11 +1292,13 @@ export default function Einsatzplan() {
   };
 
   const handleEinsatzplanNoteEdited = async (id: number, text: string) => {
+    if (!grid.notes) { showToast('Keine Schreibberechtigung für Notizen (WNOTES)', 'error'); return; }
     await api.updateNote(id, { text });
     reloadDayNotes();
   };
 
   const handleEinsatzplanNoteDeleted = async (id: number) => {
+    if (!grid.notes) { showToast('Keine Schreibberechtigung für Notizen (WNOTES)', 'error'); return; }
     await api.deleteNote(id);
     reloadDayNotes();
   };
@@ -1293,13 +1308,20 @@ export default function Einsatzplan() {
     e.preventDefault();
     e.stopPropagation();
     if (!canEdit) return; // Leser: no context menu
+    // G-1: ohne jegliches Schreibrecht kein Menü; WPAST sperrt Vergangenheit
+    if (!grid.duties && !grid.deviation) return;
+    const menuDate = date ?? toIsoDate(selectedDate);
+    if (isPastDate(menuDate, todayStr) && !grid.past) {
+      showToast('Änderungen in der Vergangenheit sind gesperrt (WPAST)', 'error');
+      return;
+    }
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
       entry,
-      date: date ?? toIsoDate(selectedDate),
+      date: menuDate,
     });
-  }, [selectedDate, canEdit]);
+  }, [selectedDate, canEdit, grid.duties, grid.deviation, grid.past, todayStr, showToast]);
 
   const handleSonderdienste = (entry: DayEntry) => {
     setSonderdiensteModal({ entry, date: contextMenu?.date ?? toIsoDate(selectedDate) });
@@ -1311,6 +1333,12 @@ export default function Einsatzplan() {
 
   const handleDeleteSpshi = async (entry: DayEntry) => {
     if (!entry.spshi_id) return;
+    if (!grid.duties) { showToast('Keine Schreibberechtigung für Dienste (WDUTIES)', 'error'); return; }
+    const delDate = contextMenu?.date ?? toIsoDate(selectedDate);
+    if (isPastDate(delDate, todayStr) && !grid.past) {
+      showToast('Änderungen in der Vergangenheit sind gesperrt (WPAST)', 'error');
+      return;
+    }
     if (!await confirmDialog({ message: `Sonderdienst-Eintrag für ${entry.employee_name} löschen?`, danger: true })) return;
     try {
       const entryId = entry.spshi_id;
@@ -1354,6 +1382,10 @@ export default function Einsatzplan() {
     colorbk: number;
     colortext: number;
   }) => {
+    if (!grid.duties) throw new Error('Keine Schreibberechtigung für Dienste (WDUTIES)');
+    if (isPastDate(data.date, todayStr) && !grid.past) {
+      throw new Error('Änderungen in der Vergangenheit sind gesperrt (WPAST)');
+    }
     const res = await api.createEinsatzplanEntry({
       employee_id: data.employee_id,
       date: data.date,
@@ -1386,6 +1418,10 @@ export default function Einsatzplan() {
     startend: string;
     duration: number;
   }) => {
+    if (!grid.deviation) throw new Error('Keine Schreibberechtigung für Arbeitszeitabweichungen (WDEVIATION)');
+    if (isPastDate(data.date, todayStr) && !grid.past) {
+      throw new Error('Änderungen in der Vergangenheit sind gesperrt (WPAST)');
+    }
     const res = await api.createDeviation({
       employee_id: data.employee_id,
       date: data.date,
@@ -1422,6 +1458,7 @@ export default function Einsatzplan() {
   };
 
   const handleApplyTemplate = async (templateId: number, targetDate: string, force: boolean) => {
+    if (!grid.duties) throw new Error('Keine Schreibberechtigung für Dienste (WDUTIES)');
     const result = await api.applyScheduleTemplate(templateId, { target_date: targetDate, force });
     loadData();
     showToast('Vorlage angewendet', 'success');
@@ -1649,6 +1686,8 @@ export default function Einsatzplan() {
           y={contextMenu.y}
           entry={contextMenu.entry}
           date={contextMenu.date}
+          canDuties={grid.duties}
+          canDeviation={grid.deviation}
           onClose={() => setContextMenu(null)}
           onAddSonderdienst={handleSonderdienste}
           onAddAbweichung={handleAbweichung}

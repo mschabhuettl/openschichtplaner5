@@ -5,6 +5,7 @@ import type { Employee, LeaveType, Group } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useSSERefresh } from '../contexts/SSEContext';
 import { usePermissions } from '../hooks/usePermissions';
+import { useCan } from '../hooks/useCan';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useT } from '../i18n';
@@ -642,6 +643,10 @@ interface AbwesenheitenTabProps {
   loading: boolean;
 }
 function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, loading }: AbwesenheitenTabProps) {
+  const { canEditAbsences } = usePermissions();
+  const can = useCan();
+  // G-1: direkte Verwaltungs-Erfassung nur mit WABSENCES (Spec 9.5.3)
+  const canManageAbsences = canEditAbsences && can('wabsences');
   const [search, setSearch] = useState('');
   const [showNewModal, setShowNewModal] = useState(false);
   const [detailTarget, setDetailTarget] = useState<{ employee: Employee; month: number } | null>(null);
@@ -738,10 +743,12 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
             ⚙️ Filter {hasAdvFilters && <span className="px-1.5 py-0.5 text-[10px] font-bold bg-blue-500 text-white rounded-full">{[filterVon, filterBis, filterLeaveTypeIds.length > 0 ? 1 : 0].filter(Boolean).length}</span>}
             <span className="text-xs">{showAdvFilters ? '▲' : '▼'}</span>
           </button>
-          <button onClick={() => setShowNewModal(true)}
-            className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 flex items-center gap-1.5">
-            ＋ <span className="hidden sm:inline">Abwesenheit</span>
-          </button>
+          {canManageAbsences && (
+            <button onClick={() => setShowNewModal(true)}
+              className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 flex items-center gap-1.5">
+              ＋ <span className="hidden sm:inline">Abwesenheit</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -875,7 +882,7 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
         <DetailModal employee={detailTarget.employee} month={detailTarget.month} year={year}
           absences={absences} leaveTypes={leaveTypes} onClose={() => setDetailTarget(null)} />
       )}
-      {showNewModal && (
+      {showNewModal && canManageAbsences && (
         <NewAbsenceModal employees={employees} leaveTypes={leaveTypes}
           onSave={a => { setAbsences(prev => [...prev, { ...a, ID: Date.now() }]); setShowNewModal(false); }}
           onClose={() => setShowNewModal(false)} />
@@ -892,7 +899,10 @@ interface AnsprüecheTabProps {
 }
 function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
   const t = useT();
-  const { canEditAbsences } = usePermissions();
+  const { canEditAbsences: canEditAbsencesBase } = usePermissions();
+  const can = useCan();
+  // G-1: Ansprüche pflegen nur mit WABSENCES
+  const canEditAbsences = canEditAbsencesBase && can('wabsences');
   const [groupId, setGroupId] = useState<number | null>(null);
   const [balances, setBalances] = useState<LeaveBalance[]>([]);
   const [loading, setLoading] = useState(false);
@@ -1085,7 +1095,10 @@ interface SperrenTabProps {
 }
 function SperrenTab({ groups }: SperrenTabProps) {
   const t = useT();
-  const { canEditAbsences } = usePermissions();
+  const { canEditAbsences: canEditAbsencesBase } = usePermissions();
+  const can = useCan();
+  // G-1: Urlaubssperren pflegen nur mit WABSENCES
+  const canEditAbsences = canEditAbsencesBase && can('wabsences');
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [groupId, setGroupId] = useState<number | null>(null);
   const [bans, setBans] = useState<HolidayBan[]>([]);
@@ -1296,6 +1309,10 @@ interface AbsenceStatusEntry { status: AbsenceStatus; reject_reason: string; }
 
 function AntraegeTab({ year, employees, leaveTypes, absences, loading }: AntraegeTabProps) {
   const t = useT();
+  const { canEditAbsences } = usePermissions();
+  const can = useCan();
+  // G-1: Genehmigen/Ablehnen nur mit WABSENCES (Spec 9.5.3)
+  const canApprove = canEditAbsences && can('wabsences');
   const [statusMap, setStatusMap] = useState<Record<string, AbsenceStatusEntry>>({});
   const [statusLoading, setStatusLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
@@ -1330,6 +1347,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
   const getStatus = (id: number): AbsenceStatus => getStatusEntry(id).status;
 
   const updateStatus = async (id: number, status: AbsenceStatus, reject_reason = '') => {
+    if (!canApprove) return;
     setUpdatingId(id);
     try {
       const res = await fetch(`${API}/api/v1/absences/${id}/status`, {
@@ -1461,7 +1479,13 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
                     {statusBadge(statusEntry)}
                   </td>
                   <td className="px-4 py-2.5 text-center">
-                    {status === 'pending' ? (
+                    {/* G-1: Genehmigen/Ablehnen nur mit WABSENCES */}
+                    {!canApprove ? (
+                      <span
+                        className="text-xs text-gray-400"
+                        title="Keine Schreibberechtigung für Abwesenheiten (WABSENCES)"
+                      >—</span>
+                    ) : status === 'pending' ? (
                       <div className="flex items-center justify-center gap-1.5">
                         <button
                           onClick={() => updateStatus(ab.ID, 'approved')}

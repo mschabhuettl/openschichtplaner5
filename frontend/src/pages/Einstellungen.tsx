@@ -6,6 +6,7 @@ import { useT } from '../i18n/context';
 import { useAppSettings } from '../hooks/useAppSettings';
 import { useTheme } from '../contexts/ThemeContext';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { getConflictStrategy, setConflictStrategy, type ConflictStrategy } from '../components/scheduleGridUtils';
 
 // ─── Color conversion helpers ──────────────────────────────
 function bgrToHex(bgr: number): string {
@@ -154,6 +155,9 @@ export default function Einstellungen() {
   // ── Unsaved-changes tracking ───────────────────────────────
   const [isDirty, setIsDirty] = useState(false);
 
+  // ── Dienstplan-Konfliktdialog: gemerkte Strategie (localStorage) ──
+  const [conflictStrategy, setConflictStrategyUI] = useState<ConflictStrategy>(getConflictStrategy);
+
   // ── Import/Export UI state ─────────────────────────────────
   const [importText, setImportText] = useState('');
   const [importError, setImportError] = useState<string | null>(null);
@@ -276,6 +280,12 @@ export default function Einstellungen() {
       resetApp();
       showToast('Einstellungen zurückgesetzt', 'success');
     }
+  };
+
+  const handleResetConflictStrategy = () => {
+    setConflictStrategy('ask');
+    setConflictStrategyUI('ask');
+    showToast('Konflikt-Strategie zurückgesetzt — der Dienstplan fragt wieder nach', 'success');
   };
 
   const previewBg = bgrToHex(anoacrbk);
@@ -446,6 +456,30 @@ export default function Einstellungen() {
             <p className="text-xs text-gray-600 mt-3">
               Änderungen werden sofort übernommen und lokal gespeichert.
             </p>
+          </Section>
+
+          {/* ── 3b. Dienstplan: Konfliktdialog bei belegten Feldern ── */}
+          <Section
+            title="🧩 Dienstplan: Belegte Felder"
+            subtitle="Gemerkte Standard-Aktion des Konfliktdialogs beim Eintragen in bereits belegte Felder (lokal im Browser gespeichert)."
+          >
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm text-gray-700">
+                Aktuelle Strategie:{' '}
+                <strong>
+                  {conflictStrategy === 'add' && 'Immer hinzufügen'}
+                  {conflictStrategy === 'replace' && 'Immer ersetzen'}
+                  {conflictStrategy === 'ask' && 'Immer fragen (Standard)'}
+                </strong>
+              </span>
+              <button
+                onClick={handleResetConflictStrategy}
+                disabled={conflictStrategy === 'ask'}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                🔄 Zurücksetzen (wieder fragen)
+              </button>
+            </div>
           </Section>
 
           {/* ── 4. Konfigurations-Export / Import ───────────────────── */}

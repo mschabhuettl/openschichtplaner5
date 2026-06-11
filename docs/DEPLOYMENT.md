@@ -1,6 +1,14 @@
 # OpenSchichtplaner5 — Deployment Guide
 
+> 📖 Full documentation and guides: [GitHub Wiki](https://github.com/mschabhuettl/openschichtplaner5/wiki)
+
 Production deployment with integrated nginx reverse proxy, SSL via Let's Encrypt, and Docker Compose.
+
+This guide covers `docker-compose.prod.yml`. For the simple single-container
+setup see the [README](../README.md); `docker-compose.stack.yml` additionally
+provides a three-service stack (nginx-served SPA + API container built from the
+sibling repo + optional PostgreSQL profile) — usage is documented in the file
+header.
 
 ---
 
@@ -239,7 +247,7 @@ If you already have a reverse proxy (Traefik, Caddy, nginx on host):
 
 ```bash
 curl -s https://meine-domain.de/api/health
-# → {"status": "ok", "db": "connected"}
+# → {"status":"healthy","checks":{"db":"ok","disk":"ok","memory":"ok"},...}
 ```
 
 ### 2. Change the default admin password
@@ -251,12 +259,12 @@ Log in via the web UI and change the password immediately under **Settings → U
 Or via API:
 
 ```bash
-TOKEN=$(curl -s -X POST https://meine-domain.de/api/auth/login \
+TOKEN=$(curl -s -X POST https://meine-domain.de/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "Test1234"}' \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])")
 
-curl -s -X POST https://meine-domain.de/api/users/1/change-password \
+curl -s -X POST https://meine-domain.de/api/v1/users/1/change-password \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"new_password": "MeinSicheresPasswort123!"}'

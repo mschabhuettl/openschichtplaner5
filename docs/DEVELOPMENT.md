@@ -1,5 +1,7 @@
 # OpenSchichtplaner5 — Development Setup
 
+> 📖 Full documentation and guides: [GitHub Wiki](https://github.com/mschabhuettl/openschichtplaner5/wiki)
+
 This guide gets you up and running for local development.
 
 ---
@@ -20,7 +22,7 @@ This guide gets you up and running for local development.
 
 | Tool | Minimum Version | Install |
 |------|----------------|---------|
-| Python | 3.10+ | [python.org](https://www.python.org/downloads/) |
+| Python | 3.12+ (required by `openschichtplaner5-api`) | [python.org](https://www.python.org/downloads/) |
 | Node.js | 20+ | [nodejs.org](https://nodejs.org/) |
 | npm | 9+ | bundled with Node.js |
 | Git | any | [git-scm.com](https://git-scm.com/) |
@@ -201,7 +203,7 @@ make test
 
 ```bash
 cd frontend
-npx tsc --noEmit
+npx tsc -b --noEmit
 ```
 
 ### Pre-commit hooks
@@ -345,8 +347,8 @@ lsof -ti :8000 | xargs kill -9
 
 ```bash
 cd frontend
-npx tsc --noEmit    # shows all type errors
-npm run lint        # shows ESLint issues
+npx tsc -b --noEmit  # shows all type errors
+npm run lint         # shows ESLint issues
 ```
 
 ---

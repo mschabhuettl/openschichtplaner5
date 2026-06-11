@@ -1,5 +1,7 @@
 # PostgreSQL Support
 
+> 📖 Full documentation and guides: [GitHub Wiki](https://github.com/mschabhuettl/openschichtplaner5/wiki)
+
 OpenSchichtplaner5 supports PostgreSQL as an alternative database backend alongside the legacy DBF files.
 
 ## Quick Start
@@ -44,6 +46,19 @@ DATABASE_URL=postgresql://sp5:sp5@localhost:5432/sp5 \
 SP5_BACKEND_DIR="$(pwd)" \
 python3 -m uvicorn sp5api.main:app --host 0.0.0.0 --port 8000
 ```
+
+## Docker (Stack-Compose)
+
+`docker-compose.stack.yml` ships an optional `postgres` profile that starts a
+PostgreSQL 16 container alongside app and API (set `DB_BACKEND=postgresql` in
+`.env`):
+
+```bash
+docker compose -f docker-compose.stack.yml --profile postgres up -d --build
+```
+
+The one-time DBF → PostgreSQL seed via the app image is documented in the
+header comment of `docker-compose.stack.yml`.
 
 ## Configuration
 

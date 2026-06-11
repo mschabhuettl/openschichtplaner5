@@ -1,15 +1,13 @@
 # ROADMAP — OpenSchichtplaner5
 
-Priorisierte Weiterentwicklung nach dem Paritäts-Run (2026-06). Quelle der
-Paritätsbewertung: Cross-Repo-Analyse (original-spec + Parity-Matrizen, intern).
+Priorisierte Weiterentwicklung nach dem 1.2.0-Release (Stand: Juni 2026).
 
 ## A. Offene Paritäts-Verfeinerungen (Original-Features, bewusst vertagt)
 
 Priorität 1 (fachlich relevant, klar umrissen):
 1. **Soll-/Istplan-Modus** (Original 4.12): erfordert vorab die Klärung der
-   `TYPE`-Enum-Kodierung in 5MASHI/5SPSHI an einer Live-DB mit Sollplan-Daten
-   (im Dekompilat nicht abschließend belegbar). Danach: Plan-Umschalter in
-   Dienstplan + "Unterschiede"-Zeile.
+   `TYPE`-Enum-Kodierung in 5MASHI/5SPSHI an einer Live-DB mit Sollplan-Daten.
+   Danach: Plan-Umschalter in Dienstplan + "Unterschiede"-Zeile.
 2. **Abwesenheits-Anonymisierung** (SHOWABS + 5USETT ANOA*): Render-Pfad in
    Dienstplan/Einsatzplan/Berichten, api-seitige Filterung für Benutzer mit
    eingeschränktem SHOWABS.

@@ -80,8 +80,8 @@ Docker and CI set it automatically.)
 
 The API is now available at:
 - **API:** `http://localhost:8000/api/`
-- **Swagger UI:** `http://localhost:8000/docs`
-- **ReDoc:** `http://localhost:8000/redoc`
+- **Swagger UI:** `http://localhost:8000/api/v1/docs`
+- **ReDoc:** `http://localhost:8000/api/v1/redoc`
 
 ---
 
@@ -234,7 +234,7 @@ openschichtplaner5/
 │   └── src/
 │       ├── App.tsx          # Root component: routing, layout, lazy loading
 │       ├── api/client.ts    # Typed API client (fetch wrapper)
-│       └── pages/           # One component per page (33 pages)
+│       └── pages/           # One component per page (77 pages)
 └── docs/                    # Documentation (you are here)
 ```
 

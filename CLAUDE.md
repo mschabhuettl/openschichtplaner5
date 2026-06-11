@@ -12,7 +12,7 @@ Three repos; this one is the app shell (frontend + deployment + runtime state):
   - `alembic/` — DB migrations (run by sp5lib auto-migrate). `data/` + `api/data` + `api/uploads` — JSON-backed runtime state. `fixtures/` — DBF fixture data (CI e2e seed). `requirements.txt` — declares both packages (PyPI: `openschichtplaner5-api`, `libopenschichtplaner5`).
   - **Dual DB backend:** SQLite (default/dev) or PostgreSQL (prod, via `psycopg2`); `db_factory.py` selects.
   - **Auth/security:** bcrypt password hashing, 2FA, JWT tokens, login rate-limiting and brute-force lockout.
-- **`frontend/`** — React 18 + TypeScript 5 + Vite + Tailwind, with `react-router-dom` and `recharts`.
+- **`frontend/`** — React 19 + TypeScript 5 + Vite + Tailwind, with `react-router-dom` and `recharts`.
   - Unit tests: **vitest**. E2E: **Playwright** in `frontend/e2e/`. `build` runs `tsc -b && vite build` then injects SRI hashes.
 - **Docker:** `docker-compose.yml` (dev/default), `docker-compose.prod.yml` (prod, localhost-only — put a reverse proxy in front), `Dockerfile`.
 

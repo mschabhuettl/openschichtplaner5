@@ -1,6 +1,6 @@
 # OpenSchichtplaner5 — API Reference
 
-> **Interactive Docs:** The FastAPI backend serves Swagger UI at [`http://localhost:8000/docs`](http://localhost:8000/docs) and ReDoc at [`http://localhost:8000/redoc`](http://localhost:8000/redoc).
+> **Interactive Docs:** The FastAPI backend serves Swagger UI at [`http://localhost:8000/api/v1/docs`](http://localhost:8000/api/v1/docs) and ReDoc at [`http://localhost:8000/api/v1/redoc`](http://localhost:8000/api/v1/redoc).
 
 ## API Versioning
 
@@ -35,7 +35,7 @@ Authentication is done via a `Bearer` token in the `Authorization` header.
 ### Login
 
 ```bash
-curl -s -X POST http://localhost:8000/api/auth/login \
+curl -s -X POST http://localhost:8000/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "Test1234"}'
 ```
@@ -64,7 +64,7 @@ export TOKEN="eyJhb..."
 ### Current User Info
 
 ```bash
-curl -s http://localhost:8000/api/auth/me \
+curl -s http://localhost:8000/api/v1/auth/me \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -83,7 +83,7 @@ curl -s http://localhost:8000/api/auth/me \
 ### Logout
 
 ```bash
-curl -s -X POST http://localhost:8000/api/auth/logout \
+curl -s -X POST http://localhost:8000/api/v1/auth/logout \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -118,7 +118,7 @@ curl -s -X POST http://localhost:8000/api/auth/logout \
 ### List all employees
 
 ```bash
-curl -s http://localhost:8000/api/employees \
+curl -s http://localhost:8000/api/v1/employees \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -145,7 +145,7 @@ curl -s http://localhost:8000/api/employees \
 ### Get single employee
 
 ```bash
-curl -s http://localhost:8000/api/employees/1 \
+curl -s http://localhost:8000/api/v1/employees/1 \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -156,7 +156,7 @@ curl -s http://localhost:8000/api/employees/1 \
 Requires `planer` or `admin` role.
 
 ```bash
-curl -s -X POST http://localhost:8000/api/employees \
+curl -s -X POST http://localhost:8000/api/v1/employees \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -191,7 +191,7 @@ curl -s -X POST http://localhost:8000/api/employees \
 Requires `planer` or `admin` role.
 
 ```bash
-curl -s -X PUT http://localhost:8000/api/employees/42 \
+curl -s -X PUT http://localhost:8000/api/v1/employees/42 \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -213,7 +213,7 @@ curl -s -X PUT http://localhost:8000/api/employees/42 \
 Requires `admin` role.
 
 ```bash
-curl -s -X DELETE http://localhost:8000/api/employees/42 \
+curl -s -X DELETE http://localhost:8000/api/v1/employees/42 \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -230,7 +230,7 @@ curl -s -X DELETE http://localhost:8000/api/employees/42 \
 ### Get employee groups
 
 ```bash
-curl -s http://localhost:8000/api/employees/1/groups \
+curl -s http://localhost:8000/api/v1/employees/1/groups \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -239,7 +239,7 @@ curl -s http://localhost:8000/api/employees/1/groups \
 ### List groups
 
 ```bash
-curl -s http://localhost:8000/api/groups \
+curl -s http://localhost:8000/api/v1/groups \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -266,7 +266,7 @@ Additional columns are silently ignored.
 ### Request
 
 ```bash
-curl -s -X POST http://localhost:8000/api/v1/employees/import-csv \
+curl -s -X POST http://localhost:8000/api/v1/__KEEP__/employees/import-csv \
   -H "Authorization: Bearer $TOKEN" \
   -F "file=@employees.csv"
 ```
@@ -331,7 +331,7 @@ E003,Neu,Klaus,KN,Nachtschicht
 Returns shift assignments for all employees for a given month.
 
 ```bash
-curl -s "http://localhost:8000/api/schedule?year=2026&month=3" \
+curl -s "http://localhost:8000/api/v1/schedule?year=2026&month=3" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -355,7 +355,7 @@ curl -s "http://localhost:8000/api/schedule?year=2026&month=3" \
 ### Get weekly schedule
 
 ```bash
-curl -s "http://localhost:8000/api/schedule/week?year=2026&week=10" \
+curl -s "http://localhost:8000/api/v1/schedule/week?year=2026&week=10" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -364,7 +364,7 @@ curl -s "http://localhost:8000/api/schedule/week?year=2026&week=10" \
 ### Get daily schedule
 
 ```bash
-curl -s "http://localhost:8000/api/schedule/day?date=2026-03-06" \
+curl -s "http://localhost:8000/api/v1/schedule/day?date=2026-03-06" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -375,7 +375,7 @@ curl -s "http://localhost:8000/api/schedule/day?date=2026-03-06" \
 Requires `planer` role.
 
 ```bash
-curl -s -X POST http://localhost:8000/api/schedule \
+curl -s -X POST http://localhost:8000/api/v1/schedule \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -407,7 +407,7 @@ Requires `planer` role.
 
 ```bash
 curl -s -X DELETE \
-  "http://localhost:8000/api/schedule/1/2026-03-10" \
+  "http://localhost:8000/api/v1/schedule/1/2026-03-10" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -424,7 +424,7 @@ curl -s -X DELETE \
 Assign the same shift to one employee over a date range.
 
 ```bash
-curl -s -X POST http://localhost:8000/api/schedule/bulk \
+curl -s -X POST http://localhost:8000/api/v1/schedule/bulk \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -441,7 +441,7 @@ curl -s -X POST http://localhost:8000/api/schedule/bulk \
 Returns schedule conflicts (employee has both a shift and an absence on the same day).
 
 ```bash
-curl -s "http://localhost:8000/api/schedule/conflicts?year=2026&month=3" \
+curl -s "http://localhost:8000/api/v1/schedule/conflicts?year=2026&month=3" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -463,7 +463,7 @@ curl -s "http://localhost:8000/api/schedule/conflicts?year=2026&month=3" \
 ### Schedule coverage (staffing levels)
 
 ```bash
-curl -s "http://localhost:8000/api/schedule/coverage?year=2026&month=3" \
+curl -s "http://localhost:8000/api/v1/schedule/coverage?year=2026&month=3" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -474,7 +474,7 @@ curl -s "http://localhost:8000/api/schedule/coverage?year=2026&month=3" \
 Requires `planer` role. Generates a shift plan based on employee shift cycles.
 
 ```bash
-curl -s -X POST http://localhost:8000/api/schedule/generate \
+curl -s -X POST http://localhost:8000/api/v1/schedule/generate \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -494,7 +494,7 @@ curl -s -X POST http://localhost:8000/api/schedule/generate \
 ### Schedule report (CSV)
 
 ```bash
-curl -s "http://localhost:8000/api/export/schedule?year=2026&month=3&format=csv" \
+curl -s "http://localhost:8000/api/v1/export/schedule?year=2026&month=3&format=csv" \
   -H "Authorization: Bearer $TOKEN" \
   -o schedule_march2026.csv
 ```
@@ -502,7 +502,7 @@ curl -s "http://localhost:8000/api/export/schedule?year=2026&month=3&format=csv"
 ### Schedule report (HTML)
 
 ```bash
-curl -s "http://localhost:8000/api/export/schedule?year=2026&month=3&format=html" \
+curl -s "http://localhost:8000/api/v1/export/schedule?year=2026&month=3&format=html" \
   -H "Authorization: Bearer $TOKEN" \
   -o schedule_march2026.html
 ```
@@ -512,7 +512,7 @@ curl -s "http://localhost:8000/api/export/schedule?year=2026&month=3&format=html
 ### Employee list export (CSV)
 
 ```bash
-curl -s "http://localhost:8000/api/export/employees?format=csv" \
+curl -s "http://localhost:8000/api/v1/export/employees?format=csv" \
   -H "Authorization: Bearer $TOKEN" \
   -o employees.csv
 ```
@@ -522,7 +522,7 @@ curl -s "http://localhost:8000/api/export/employees?format=csv" \
 ### Absence report
 
 ```bash
-curl -s "http://localhost:8000/api/export/absences?year=2026&format=csv" \
+curl -s "http://localhost:8000/api/v1/export/absences?year=2026&format=csv" \
   -H "Authorization: Bearer $TOKEN" \
   -o absences_2026.csv
 ```
@@ -532,7 +532,7 @@ curl -s "http://localhost:8000/api/export/absences?year=2026&format=csv" \
 ### Statistics (monthly summary)
 
 ```bash
-curl -s "http://localhost:8000/api/statistics?year=2026&month=3" \
+curl -s "http://localhost:8000/api/v1/statistics?year=2026&month=3" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -559,7 +559,7 @@ curl -s "http://localhost:8000/api/statistics?year=2026&month=3" \
 ### Per-employee statistics
 
 ```bash
-curl -s "http://localhost:8000/api/statistics/employee/1?year=2026&month=3" \
+curl -s "http://localhost:8000/api/v1/statistics/employee/1?year=2026&month=3" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -568,7 +568,7 @@ curl -s "http://localhost:8000/api/statistics/employee/1?year=2026&month=3" \
 ### Monthly report (PDF-ready HTML)
 
 ```bash
-curl -s "http://localhost:8000/api/reports/monthly?year=2026&month=3" \
+curl -s "http://localhost:8000/api/v1/reports/monthly?year=2026&month=3" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -577,7 +577,7 @@ curl -s "http://localhost:8000/api/reports/monthly?year=2026&month=3" \
 ### Overtime report
 
 ```bash
-curl -s "http://localhost:8000/api/statistics?year=2026" \
+curl -s "http://localhost:8000/api/v1/statistics?year=2026" \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -588,7 +588,7 @@ curl -s "http://localhost:8000/api/statistics?year=2026" \
 ### List wishes (admin)
 
 ```bash
-curl -s http://localhost:8000/api/wishes \
+curl -s http://localhost:8000/api/v1/wishes \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -599,7 +599,7 @@ curl -s http://localhost:8000/api/wishes \
 ### Create wish (admin)
 
 ```bash
-curl -s -X POST http://localhost:8000/api/wishes \
+curl -s -X POST http://localhost:8000/api/v1/wishes \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"employee_id": 1, "date": "2026-04-01", "wish_type": "free"}'
@@ -610,7 +610,7 @@ curl -s -X POST http://localhost:8000/api/wishes \
 ### Approve / reject wish
 
 ```bash
-curl -s -X POST http://localhost:8000/api/wishes/42/approve \
+curl -s -X POST http://localhost:8000/api/v1/wishes/42/approve \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"action": "approve"}'
@@ -625,7 +625,7 @@ curl -s -X POST http://localhost:8000/api/wishes/42/approve \
 Employees can submit their own wishes without admin role:
 
 ```bash
-curl -s -X POST http://localhost:8000/api/self/wishes \
+curl -s -X POST http://localhost:8000/api/v1/self/wishes \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"date": "2026-04-15", "wish_type": "free", "note": "Arzttermin"}'
@@ -635,7 +635,7 @@ curl -s -X POST http://localhost:8000/api/self/wishes \
 
 ## ORM Mirror (Admin)
 
-A **read-only, admin-only** projection of the DBF data, served under `/api/admin/orm`.
+A **read-only, admin-only** projection of the DBF data, served under `/api/v1/admin/orm`.
 The DBF files remain the **single source of truth** — these endpoints expose a queryable
 mirror that is materialized from the DBF files on demand and stored in its own
 `sp5_orm.db` next to the DBF data directory.
@@ -656,7 +656,7 @@ covers the **full DBF schema (19 tables)**, exposed across five layers:
   (lib 1.6.0).
 
 **Authentication:** all endpoints require an **admin** session. Pass the admin session
-token in the `X-Auth-Token` header (the same token issued by `/api/auth/login`).
+token in the `X-Auth-Token` header (the same token issued by `/api/v1/auth/login`).
 Non-admin or unauthenticated callers receive `401`/`403`.
 
 ```bash
@@ -679,7 +679,7 @@ upsert semantics keyed by the DBF ID, rows with invalid dates are skipped, and d
 group assignments are deduped/skipped, so it runs cleanly on dirty DBF data.
 
 ```bash
-curl -s -X POST http://localhost:8000/api/admin/orm/sync \
+curl -s -X POST http://localhost:8000/api/v1/admin/orm/sync \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -717,7 +717,7 @@ curl -s -X POST http://localhost:8000/api/admin/orm/sync \
 ### List shifts
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/shifts" \
+curl -s "http://localhost:8000/api/v1/admin/orm/shifts" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -742,7 +742,7 @@ curl -s "http://localhost:8000/api/admin/orm/shifts" \
 ### List leave types
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/leave-types" \
+curl -s "http://localhost:8000/api/v1/admin/orm/leave-types" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -757,7 +757,7 @@ Returns an array of DBF-shaped leave-type dicts.
 ### List workplaces
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/workplaces" \
+curl -s "http://localhost:8000/api/v1/admin/orm/workplaces" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -784,7 +784,7 @@ curl -s "http://localhost:8000/api/admin/orm/workplaces" \
 Regular schedule entries (`5MASHI`), filterable by date range and/or employee.
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/shift-assignments?date_from=2026-03-01&date_to=2026-03-31&employee_id=1" \
+curl -s "http://localhost:8000/api/v1/admin/orm/shift-assignments?date_from=2026-03-01&date_to=2026-03-31&employee_id=1" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -818,7 +818,7 @@ the same `date_from`, `date_to` and `employee_id` query parameters as
 [shift assignments](#list-shift-assignments).
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/special-shifts?date_from=2026-03-01&date_to=2026-03-31" \
+curl -s "http://localhost:8000/api/v1/admin/orm/special-shifts?date_from=2026-03-01&date_to=2026-03-31" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -833,7 +833,7 @@ the same `date_from`, `date_to` and `employee_id` query parameters as
 [shift assignments](#list-shift-assignments).
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/absences?date_from=2026-03-01&date_to=2026-03-31&employee_id=1" \
+curl -s "http://localhost:8000/api/v1/admin/orm/absences?date_from=2026-03-01&date_to=2026-03-31&employee_id=1" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -856,7 +856,7 @@ curl -s "http://localhost:8000/api/admin/orm/absences?date_from=2026-03-01&date_
 Public holidays (`5HOLID`).
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/holidays?year=2026" \
+curl -s "http://localhost:8000/api/v1/admin/orm/holidays?year=2026" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -873,7 +873,7 @@ Omitting `year` returns every holiday. Returns an array of DBF-shaped holiday di
 Accounting / planning periods (`5PERIO`). Takes no query parameters.
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/periods" \
+curl -s "http://localhost:8000/api/v1/admin/orm/periods" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -886,7 +886,7 @@ Returns an array of DBF-shaped period dicts.
 Manual account / time bookings (`5BOOK`), filterable by date range and/or employee.
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/bookings?date_from=2026-03-01&date_to=2026-03-31&employee_id=1" \
+curl -s "http://localhost:8000/api/v1/admin/orm/bookings?date_from=2026-03-01&date_to=2026-03-31&employee_id=1" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -907,7 +907,7 @@ the same `date_from`, `date_to` and `employee_id` query parameters as
 [bookings](#list-bookings).
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/overtime?date_from=2026-03-01&date_to=2026-03-31" \
+curl -s "http://localhost:8000/api/v1/admin/orm/overtime?date_from=2026-03-01&date_to=2026-03-31" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -920,7 +920,7 @@ Returns an array of DBF-shaped overtime dicts.
 Annual leave entitlements (`5LEAEN`), filterable by year and/or employee.
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/leave-entitlements?year=2026&employee_id=1" \
+curl -s "http://localhost:8000/api/v1/admin/orm/leave-entitlements?year=2026&employee_id=1" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -938,7 +938,7 @@ All filters are optional; omitting them returns every row.
 Per-weekday staffing demand (`5SHDEM`), filterable by shift, weekday and/or group.
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/shift-demands?shift_id=5&weekday=0&group_id=2" \
+curl -s "http://localhost:8000/api/v1/admin/orm/shift-demands?shift_id=5&weekday=0&group_id=2" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -957,7 +957,7 @@ All filters are optional; omitting them returns every row.
 Date-specific staffing demand (`5SPDEM`), filterable by date range and/or shift.
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/special-demands?date_from=2026-03-01&date_to=2026-03-31&shift_id=5" \
+curl -s "http://localhost:8000/api/v1/admin/orm/special-demands?date_from=2026-03-01&date_to=2026-03-31&shift_id=5" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -976,7 +976,7 @@ All filters are optional; omitting them returns every row.
 Rotation / shift-cycle definitions (`5CYCLE`).
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/cycles" \
+curl -s "http://localhost:8000/api/v1/admin/orm/cycles" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -993,7 +993,7 @@ Returns an array of DBF-shaped cycle dicts.
 Employee ↔ cycle assignments (`5CYASS`), filterable by employee and/or cycle.
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/cycle-assignments?employee_id=1&cycle_id=2" \
+curl -s "http://localhost:8000/api/v1/admin/orm/cycle-assignments?employee_id=1&cycle_id=2" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -1011,7 +1011,7 @@ All filters are optional; omitting them returns every row.
 Deployment restrictions (`5RESTR`), filterable by employee and/or shift.
 
 ```bash
-curl -s "http://localhost:8000/api/admin/orm/restrictions?employee_id=1&shift_id=5" \
+curl -s "http://localhost:8000/api/v1/admin/orm/restrictions?employee_id=1&shift_id=5" \
   -H "X-Auth-Token: $ADMIN_TOKEN"
 ```
 
@@ -1029,7 +1029,7 @@ All filters are optional; omitting them returns every row.
 ### Health check
 
 ```bash
-curl -s http://localhost:8000/api/health
+curl -s http://localhost:8000/api/v1/health
 ```
 
 **Response:**
@@ -1043,7 +1043,7 @@ curl -s http://localhost:8000/api/health
 ### Database statistics
 
 ```bash
-curl -s http://localhost:8000/api/stats \
+curl -s http://localhost:8000/api/v1/stats \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -1052,7 +1052,7 @@ curl -s http://localhost:8000/api/stats \
 ### Dashboard summary
 
 ```bash
-curl -s http://localhost:8000/api/dashboard/summary \
+curl -s http://localhost:8000/api/v1/dashboard/summary \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -1061,7 +1061,7 @@ curl -s http://localhost:8000/api/dashboard/summary \
 ### Runtime metrics
 
 ```bash
-curl -s http://localhost:8000/api/metrics
+curl -s http://localhost:8000/api/v1/metrics
 ```
 
 No authentication required when called from localhost. Returns request count, error rate, cache hit rate, average DB-read latency, uptime, and active session count.
@@ -1084,7 +1084,7 @@ No authentication required when called from localhost. Returns request count, er
 ### API version
 
 ```bash
-curl -s http://localhost:8000/api/version
+curl -s http://localhost:8000/api/v1/version
 ```
 
 No authentication required.

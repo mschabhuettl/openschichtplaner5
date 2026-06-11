@@ -13,7 +13,7 @@
 [![GitHub release](https://img.shields.io/github/v/release/mschabhuettl/openschichtplaner5?include_prereleases)](https://github.com/mschabhuettl/openschichtplaner5/releases)
 [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![React](https://img.shields.io/badge/React-18+-61DAFB?logo=react&logoColor=black)](https://react.dev)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript&logoColor=white)](https://typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3+-06B6D4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Print Ready](https://img.shields.io/badge/🖨️_Print-all_pages-green)](README.md)
@@ -345,11 +345,11 @@ openschichtplaner5/
 │   # https://github.com/mschabhuettl/libopenschichtplaner5
 ├── frontend/
 │   └── src/
-│       ├── App.tsx           # Navigation & Layout (33 pages, lazy loading)
+│       ├── App.tsx           # Navigation & Layout (77 pages, lazy loading)
 │       ├── api/client.ts     # Typed API client
-│       └── pages/            # All page components (33 pages)
+│       └── pages/            # All page components (77 pages)
 └── docs/
-    └── screenshots/          # App screenshots (30 pages)
+    └── screenshots/          # App screenshots
 ```
 
 ---
@@ -360,14 +360,14 @@ openschichtplaner5/
 |------|------------|
 | Backend | Python, FastAPI, Uvicorn |
 | Database | DBF/FoxPro (direct, no ORM) |
-| Frontend | React 18, TypeScript, Vite |
+| Frontend | React 19, TypeScript, Vite |
 | Styling | Tailwind CSS |
 | Charts | Recharts |
-| API | REST (OpenAPI / Swagger at `/docs`) — 162+ endpoints fully documented |
+| API | REST (OpenAPI / Swagger at `/api/v1/docs`) — 162+ endpoints fully documented |
 | Email | SMTP (optional) — notifications, password reset |
 | Calendar | iCal feed (`.ics`) — token-based schedule subscription |
 | Real-time | SSE (Server-Sent Events) — live updates without polling |
-| Testing | pytest (backend) + Playwright (E2E) |
+| Testing | vitest (frontend) + Playwright (E2E); backend pytest lives in the [API repo](https://github.com/mschabhuettl/openschichtplaner5-api) |
 
 ---
 

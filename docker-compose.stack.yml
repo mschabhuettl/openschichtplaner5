@@ -21,6 +21,11 @@
 #   SP5_DBF_DIR=/pfad/zu/SP5/Daten docker compose -f docker-compose.stack.yml up -d --build
 #   # mit PostgreSQL-Spiegel (zusätzlich DB_BACKEND=postgresql in .env setzen):
 #   docker compose -f docker-compose.stack.yml --profile postgres up -d --build
+#   # PostgreSQL einmalig aus den DBF-Daten befüllen (Seed-Skript des App-Images):
+#   docker run --rm --network openschichtplaner5_default \
+#     -v /pfad/zu/SP5/Daten:/app/data -e SP5_DB_PATH=/app/data \
+#     -e DATABASE_URL=postgresql://sp5:sp5@postgres:5432/sp5 \
+#     -w /app/backend openschichtplaner5 python -m scripts.seed_postgresql
 # Stop:
 #   docker compose -f docker-compose.stack.yml [--profile postgres] down
 # ==============================================================================

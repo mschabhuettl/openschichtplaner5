@@ -7,8 +7,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
+import type { DayEntry } from '../api/client';
 import type { Employee, Group } from '../types';
-import type { DayEntry } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { EmptyState } from '../components/EmptyState';
 

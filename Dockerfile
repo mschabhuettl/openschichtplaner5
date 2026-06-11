@@ -45,8 +45,10 @@ RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx/stack.conf /etc/nginx/conf.d/default.conf
 COPY --from=frontend-build /app/frontend/dist /usr/share/nginx/html
 EXPOSE 80
+# 127.0.0.1 statt localhost: busybox-wget löst localhost nach ::1 auf,
+# nginx lauscht aber nur auf IPv4
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD wget -qO- http://localhost/ >/dev/null || exit 1
+  CMD wget -qO- http://127.0.0.1/ >/dev/null || exit 1
 
 # Stage 4 (Default-Target): Produktions-Image — SPA + API aus einem Container
 FROM python:3.12-slim

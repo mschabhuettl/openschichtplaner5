@@ -1,14 +1,20 @@
 name: Release
 
+# Läuft auf Versions-Tags — entweder direkt gepusht oder per
+# workflow_dispatch auf dem Tag-Ref gestartet (prepare-release.yml nutzt das,
+# weil Tag-Pushes mit dem GITHUB_TOKEN keine Workflows auslösen).
 on:
   push:
     tags:
       - 'v*.*.*'
+  workflow_dispatch:
 
 jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    # Nur auf Tag-Refs releasen; die Folge-Jobs hängen über needs daran.
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v6
 

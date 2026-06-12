@@ -43,7 +43,7 @@ function CreateModal({ groups, onSave, onClose }: CreateModalProps) {
       <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-800">📅 Neuer Abrechnungszeitraum</h2>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
         </div>
 
         <div className="px-6 py-4 space-y-4">

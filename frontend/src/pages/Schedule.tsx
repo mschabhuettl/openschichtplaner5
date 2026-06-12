@@ -944,7 +944,7 @@ function NoteDetailPopup({
     >
       <div className="px-3 py-1.5 bg-indigo-50 border-b text-[10px] text-indigo-600 font-semibold rounded-t-lg flex justify-between items-center">
         <span>📝 Notizen · {state.dateStr}</span>
-        <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xs leading-none ml-2">×</button>
+        <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xs leading-none ml-2">×</button>
       </div>
       {state.notes.map(note => (
         <div key={note.id} className="p-2 border-b last:border-b-0">
@@ -1361,7 +1361,7 @@ function BulkContextMenu({
     >
       <div className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/40 border-b dark:border-gray-600 text-[10px] text-blue-700 dark:text-blue-300 font-semibold rounded-t-lg flex items-center justify-between">
         <span>✅ {selectionInfo.cells} Zellen ({selectionInfo.employees} MA × {selectionInfo.days} Tage)</span>
-        <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 ml-2">×</button>
+        <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 ml-2">×</button>
       </div>
       {mode === 'menu' ? (
         <div className="py-1">
@@ -1788,7 +1788,7 @@ function WeekTemplateModal({
           <h2 className="text-base font-semibold flex items-center gap-2 dark:text-white">
             📐 Wochenvorlagen
           </h2>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl leading-none">×</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
         </div>
 
         {/* Tabs */}
@@ -4378,7 +4378,7 @@ export default function Schedule() {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg p-6" onClick={e => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-lg font-bold text-gray-800">📋 Woche kopieren</h2>
-                <button aria-label="Schließen" onClick={closeCopyWeek} className="text-gray-600 hover:text-gray-600 text-xl leading-none">×</button>
+                <button aria-label="Schließen" onClick={closeCopyWeek} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
               </div>
 
               {/* Source employee */}
@@ -4554,7 +4554,7 @@ export default function Schedule() {
             <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-bold text-gray-800">🔄 Schicht-Tausch</h2>
-                <button aria-label="Schließen" onClick={closeSwap} className="text-gray-600 hover:text-gray-600 text-xl leading-none">×</button>
+                <button aria-label="Schließen" onClick={closeSwap} className="text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
               </div>
 
               <p className="text-sm text-gray-500 mb-4">
@@ -4817,7 +4817,7 @@ export default function Schedule() {
                 <button
                   aria-label="Schließen"
                   onClick={() => setShowRecommendations(false)}
-                  className="text-gray-600 hover:text-gray-600 text-xl leading-none"
+                  className="text-gray-400 hover:text-gray-600 text-xl leading-none"
                 >×</button>
               </div>
               <div className="overflow-y-auto flex-1 p-4">
@@ -5281,7 +5281,7 @@ export default function Schedule() {
                     onKeyDown={e => { if (e.key === 'Escape') { setEmployeeSearch(''); e.currentTarget.blur(); } }}
                   />
                   {employeeSearch && (
-                    <button aria-label="Suche löschen" className="text-xs text-gray-600 hover:text-gray-600" onClick={() => setEmployeeSearch('')} title="Suche löschen">×</button>
+                    <button aria-label="Suche löschen" className="text-xs text-gray-400 hover:text-gray-600" onClick={() => setEmployeeSearch('')} title="Suche löschen">×</button>
                   )}
                 </div>
 
@@ -5411,7 +5411,7 @@ export default function Schedule() {
             <div className="flex items-center justify-between mb-3">
               <h2 className="font-bold text-gray-800 text-base">⚠️ Dienstplan-Konflikte</h2>
               <button
-                className="text-gray-600 hover:text-gray-600 text-lg leading-none"
+                className="text-gray-400 hover:text-gray-600 text-lg leading-none"
                 onClick={() => setShowConflictModal(false)}
               >
                 ×
@@ -5525,7 +5525,7 @@ export default function Schedule() {
               <h2 className="font-bold text-gray-800 text-base flex items-center gap-2">
                 ⌨️ Tastaturkürzel — Keyboard Power-Mode
               </h2>
-              <button aria-label="Schließen" className="text-gray-600 hover:text-gray-600 text-xl leading-none" onClick={() => setShowKbHelp(false)}>×</button>
+              <button aria-label="Schließen" className="text-gray-400 hover:text-gray-600 text-xl leading-none" onClick={() => setShowKbHelp(false)}>×</button>
             </div>
             <div className="space-y-4 text-sm">
               <div>

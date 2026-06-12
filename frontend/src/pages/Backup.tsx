@@ -170,7 +170,7 @@ function BackupHistorySection({ onRestoreFromServer, refreshKey }: BackupHistory
       <button
         onClick={load}
         disabled={loading}
-        className="mt-3 text-xs text-gray-600 hover:text-gray-600 flex items-center gap-1 transition-colors"
+        className="mt-3 text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors"
       >
         🔄 Aktualisieren
       </button>

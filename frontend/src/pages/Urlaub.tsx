@@ -104,7 +104,7 @@ function DetailModal({ employee, month, year, absences, leaveTypes, onClose }: D
             <h2 className="text-lg font-bold text-gray-800">{employee.FIRSTNAME} {employee.NAME}</h2>
             <p className="text-sm text-gray-500">{MONTHS[month]} {year}</p>
           </div>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
         </div>
         <div className="px-6 py-4">
           {monthAbs.length === 0 ? (
@@ -250,7 +250,7 @@ export function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewA
       <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg">
         <div className="px-6 py-4 border-b flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-800">Abwesenheit beantragen</h2>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
         </div>
         {error && (
           <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-sm text-red-700">
@@ -367,7 +367,7 @@ function AbsenceKalenderDetail({ entries, dateLabel, onClose }: AbsenceKalenderD
             <h2 className="text-lg font-bold text-gray-800">🗓️ Abwesenheiten</h2>
             <p className="text-sm text-gray-500">{dateLabel}</p>
           </div>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
         </div>
         <div className="px-6 py-4 overflow-y-auto space-y-2">
           {entries.map((entry, i) => {
@@ -1031,7 +1031,7 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
                       />
                       <button onClick={() => saveEntitlement(b.employee_id, Number(editValue))} disabled={saving}
                         className="text-green-600 hover:text-green-800 text-xs font-bold">✓</button>
-                      <button aria-label="Schließen" onClick={() => setEditingId(null)} className="text-gray-600 hover:text-gray-600 text-xs">✕</button>
+                      <button aria-label="Schließen" onClick={() => setEditingId(null)} className="text-gray-400 hover:text-gray-600 text-xs">✕</button>
                     </div>
                   ) : canEditAbsences ? (
                     <button
@@ -1537,7 +1537,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
           <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
             <div className="px-6 py-4 border-b flex items-center justify-between">
               <h2 className="text-base font-bold text-gray-800">❌ Antrag ablehnen</h2>
-              <button aria-label="Schließen" onClick={() => setRejectModal(null)} className="text-gray-600 hover:text-gray-600 text-xl">✕</button>
+              <button aria-label="Schließen" onClick={() => setRejectModal(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
             </div>
             <div className="px-6 py-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">Begründung (optional)</label>

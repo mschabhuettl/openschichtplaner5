@@ -208,7 +208,7 @@ export function GuidedTour({ open, onClose }: GuidedTourProps) {
             </span>
             <button
               onClick={dismiss}
-              className="text-gray-600 hover:text-gray-600 text-xl leading-none"
+              className="text-gray-400 hover:text-gray-600 text-xl leading-none"
               aria-label="Tour schließen"
             >
               ✕
@@ -255,7 +255,7 @@ export function GuidedTour({ open, onClose }: GuidedTourProps) {
             <div className="flex-1" />
             <button
               onClick={dismiss}
-              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-600 transition"
+              className="px-4 py-2 text-sm text-gray-400 hover:text-gray-600 transition"
             >
               Tour überspringen
             </button>

@@ -72,7 +72,7 @@ export function FormModal({
 
   const content = (
     <div
-      className={`bg-white dark:bg-slate-800 rounded-xl shadow-2xl animate-scaleIn w-full ${SIZE_MAP[size]} mx-4 p-6 ${className}`}
+      className={`bg-white dark:bg-slate-800 rounded-xl shadow-2xl animate-scaleIn w-full ${SIZE_MAP[size]} mx-4 p-6 max-h-[90vh] overflow-y-auto ${className}`}
       ref={panelRef}
       role="dialog"
       aria-modal="true"
@@ -133,7 +133,7 @@ export function FormModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-backdropIn"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn"
       onClick={onClose}
     >
       {content}

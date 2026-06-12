@@ -1037,7 +1037,7 @@ function TemplatesPanel({
         <h3 className="font-bold text-indigo-900 flex items-center gap-2">
           <span>📋</span> Gespeicherte Vorlagen
         </h3>
-        <button aria-label="Schließen" onClick={onClose} className="text-gray-600 hover:text-gray-600 text-lg leading-none">×</button>
+        <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-lg leading-none">×</button>
       </div>
       <div className="overflow-y-auto flex-1 p-3 space-y-2">
         {loading && <p className="text-sm text-gray-600 text-center py-4">Lade…</p>}
@@ -1612,7 +1612,7 @@ export default function Einsatzplan() {
           {employeeSearch && (
             <button
               onClick={() => setEmployeeSearch('')}
-              className="text-gray-600 hover:text-gray-600 text-xs leading-none"
+              className="text-gray-400 hover:text-gray-600 text-xs leading-none"
               title="Suche zurücksetzen"
             >
               ×

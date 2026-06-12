@@ -725,7 +725,7 @@ export default function KompetenzMatrix() {
                   </div>
                   <button
                     onClick={() => setSkillModal({ skill })}
-                    className="text-gray-600 hover:text-gray-600 text-sm"
+                    className="text-gray-400 hover:text-gray-600 text-sm"
                     title="Bearbeiten"
                   >
                     ✎

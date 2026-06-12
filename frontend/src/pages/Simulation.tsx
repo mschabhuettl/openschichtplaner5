@@ -530,7 +530,7 @@ export default function Simulation() {
                 </span>
               </div>
               <button aria-label="Schließen"
-                className="text-gray-600 hover:text-gray-600 text-2xl"
+                className="text-gray-400 hover:text-gray-600 text-2xl"
                 onClick={() => setActiveDay(null)}
               >×</button>
             </div>

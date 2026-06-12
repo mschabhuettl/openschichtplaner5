@@ -9,6 +9,23 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+- **Anmeldung wieder funktionsfähig:** Demo-Konten (`admin`/`planer`/`leser`,
+  `Test1234`) und vom Original angelegte Konten melden sich wieder an und
+  bleiben angemeldet (Folge-Requests autorisiert).
+- **Seitenleiste:** Navigations-Icons können nicht mehr über den Rand
+  hinausragen (Icon/Badge `flex-shrink-0`, Label `truncate`).
+- **Dialoge:** sichtbares Hover-/Fokus-Feedback an Schließen-/Zurück-Schaltern;
+  hohe Formular-Modals scrollen statt überzulaufen.
+- **Einschränkungen:** Wochentag-Auswahl nutzt den Original-Tagindex
+  (Mo..So = 0..6, Feiertag = 7) statt „0=alle".
+
+### Changed
+- **Dev-Modus-Umschalter:** die zu Admin redundante „dev"-Stufe entfernt — der
+  Umschalter dient nur noch dem Testen niedrigerer Stufen (Planer/Leser).
+- **Notfallplan:** die Ersatzsuche bietet nur noch geeignete Mitarbeiter an
+  (Bereich/Verfügbarkeit/Restriktionen).
+
 ### Added
 - **Release-Vorbereitung per Workflow (`prepare-release.yml`):** hebt die
   Version (`frontend/package.json` + Lockfile, README-Badge) an, schneidet die

@@ -11,6 +11,11 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Einsatzplan: **Sonderdienst bearbeiten** — bestehende Sonderdienste lassen sich
+  jetzt nachträglich ändern (Kontextmenü „Sonderdienst bearbeiten", `PUT`), nicht
+  mehr nur löschen+neu. Zudem **freier Name/Kürzel** je Sonderdienst (abweichend
+  von der Schichtbezeichnung). (Freie Farben/getrennte Arbeitsstunden/Mehrtages-
+  Erfassung bleiben offen — ROADMAP §A.6.)
 - Einstellungen: konfigurierbare **Startseite** — die Seite, die beim Öffnen/
   Anmelden direkt erscheint (Dashboard, Dienstplan, Einsatzplan, Wochenansicht,
   Mein Kalender). Planer können so direkt im Dienstplan starten; spätere Klicks

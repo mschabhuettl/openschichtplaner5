@@ -45,11 +45,12 @@ interface ContextMenuProps {
   canDeviation: boolean;
   onClose: () => void;
   onAddSonderdienst: (entry: DayEntry) => void;
+  onEditSonderdienst: (entry: DayEntry) => void;
   onAddAbweichung: (entry: DayEntry) => void;
   onDelete: (entry: DayEntry) => void;
 }
 
-function ContextMenu({ x, y, entry, canDuties, canDeviation, onClose, onAddSonderdienst, onAddAbweichung, onDelete }: ContextMenuProps) {
+function ContextMenu({ x, y, entry, canDuties, canDeviation, onClose, onAddSonderdienst, onEditSonderdienst, onAddAbweichung, onDelete }: ContextMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   const hasSpshi = entry.kind === 'special_shift' && entry.spshi_id != null;
 
@@ -102,6 +103,12 @@ function ContextMenu({ x, y, entry, canDuties, canDeviation, onClose, onAddSonde
         <>
           <div className="border-t border-gray-100 my-1" />
           <button
+            className="w-full text-left px-3 py-1.5 text-sm hover:bg-blue-50 hover:text-blue-700 flex items-center gap-2"
+            onClick={() => { onEditSonderdienst(entry); onClose(); }}
+          >
+            <span>✏️</span> Sonderdienst bearbeiten
+          </button>
+          <button
             className="w-full text-left px-3 py-1.5 text-sm hover:bg-red-50 hover:text-red-700 flex items-center gap-2"
             onClick={() => { onDelete(entry); onClose(); }}
           >
@@ -114,13 +121,24 @@ function ContextMenu({ x, y, entry, canDuties, canDeviation, onClose, onAddSonde
 }
 
 // ── Sonderdienst Modal ────────────────────────────────────────
+export interface SonderdienstEdit {
+  id: number;
+  name: string;
+  shortname: string;
+  shift_id: number;
+  workplace_id: number;
+  startend: string;
+}
+
 interface SonderdiensteModalProps {
   employee: DayEntry;
   date: string;
   shifts: ShiftType[];
   workplaces: Workplace[];
+  existing?: SonderdienstEdit;  // gesetzt = Bearbeiten statt Neu (A6)
   onClose: () => void;
   onSave: (data: {
+    id?: number;
     employee_id: number;
     date: string;
     name: string;
@@ -133,26 +151,45 @@ interface SonderdiensteModalProps {
   }) => Promise<void>;
 }
 
-function SonderdiensteModal({ employee, date, shifts, workplaces, onClose, onSave }: SonderdiensteModalProps) {
-  const [shiftId, setShiftId] = useState<number>(shifts[0]?.ID ?? 0);
-  const [workplaceId, setWorkplaceId] = useState<number>(0);
-  const [startend, setStartend] = useState('');
+function SonderdiensteModal({ employee, date, shifts, workplaces, existing, onClose, onSave }: SonderdiensteModalProps) {
+  const isEdit = existing != null;
+  const [shiftId, setShiftId] = useState<number>(existing?.shift_id || shifts[0]?.ID || 0);
+  const [workplaceId, setWorkplaceId] = useState<number>(existing?.workplace_id ?? 0);
+  const [startend, setStartend] = useState(existing?.startend ?? '');
+  // Freier Name/Kurzname (A6) — vorbefüllt aus Bestand bzw. der gewählten Schicht
+  const initShift = shifts.find(s => s.ID === (existing?.shift_id || shifts[0]?.ID));
+  const [name, setName] = useState(existing?.name ?? initShift?.NAME ?? '');
+  const [shortname, setShortname] = useState(existing?.shortname ?? initShift?.SHORTNAME ?? '');
+  const [nameTouched, setNameTouched] = useState(isEdit);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
   const selectedShift = shifts.find(s => s.ID === shiftId);
 
+  // Schichtwechsel: Name/Kurzname auf die neue Schicht setzen, solange der Nutzer
+  // sie nicht selbst überschrieben hat (freier Name bleibt erhalten).
+  const onShiftChange = (id: number) => {
+    setShiftId(id);
+    if (!nameTouched) {
+      const s = shifts.find(x => x.ID === id);
+      setName(s?.NAME ?? '');
+      setShortname(s?.SHORTNAME ?? '');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!shiftId) { setError('Bitte Schicht auswählen'); return; }
+    if (!name.trim()) { setError('Bitte einen Namen angeben'); return; }
     setBusy(true);
     setError('');
     try {
       await onSave({
+        id: existing?.id,
         employee_id: employee.employee_id,
         date,
-        name: selectedShift?.NAME ?? '',
-        shortname: selectedShift?.SHORTNAME ?? '',
+        name: name.trim(),
+        shortname: (shortname || name).trim().slice(0, 20),
         shift_id: shiftId,
         workplace_id: workplaceId,
         startend,
@@ -171,7 +208,7 @@ function SonderdiensteModal({ employee, date, shifts, workplaces, onClose, onSav
     <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40" onClick={onClose}>
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-scaleIn w-full max-w-sm p-6" onClick={e => e.stopPropagation()}>
         <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-          <span>🔷</span> Sonderdienst eintragen
+          <span>🔷</span> {isEdit ? 'Sonderdienst bearbeiten' : 'Sonderdienst eintragen'}
         </h2>
         <div className="mb-3 p-2 bg-blue-50 rounded text-sm text-blue-800">
           <strong>{employee.employee_name}</strong> · {date}
@@ -181,7 +218,7 @@ function SonderdiensteModal({ employee, date, shifts, workplaces, onClose, onSav
             <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Schicht *</label>
             <select
               value={shiftId}
-              onChange={e => setShiftId(Number(e.target.value))}
+              onChange={e => onShiftChange(Number(e.target.value))}
               className="w-full border dark:border-gray-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
               required
             >
@@ -190,6 +227,30 @@ function SonderdiensteModal({ employee, date, shifts, workplaces, onClose, onSav
                 <option key={s.ID} value={s.ID}>{s.NAME} ({s.SHORTNAME})</option>
               ))}
             </select>
+          </div>
+          {/* Freier Name/Kurzname (A6) — abweichend von der Schichtbezeichnung */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="col-span-2">
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Name *</label>
+              <input
+                type="text"
+                value={name}
+                onChange={e => { setName(e.target.value); setNameTouched(true); }}
+                maxLength={100}
+                className="w-full border dark:border-gray-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Kürzel</label>
+              <input
+                type="text"
+                value={shortname}
+                onChange={e => { setShortname(e.target.value); setNameTouched(true); }}
+                maxLength={20}
+                className="w-full border dark:border-gray-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Arbeitsplatz (optional)</label>
@@ -1206,7 +1267,7 @@ export default function Einsatzplan() {
   } | null>(null);
 
   // Modal state
-  const [sonderdiensteModal, setSonderdiensteModal] = useState<{ entry: DayEntry; date: string } | null>(null);
+  const [sonderdiensteModal, setSonderdiensteModal] = useState<{ entry: DayEntry; date: string; existing?: SonderdienstEdit } | null>(null);
   const [abweichungModal, setAbweichungModal] = useState<{ entry: DayEntry; date: string } | null>(null);
 
   // ── Template state ────────────────────────────────────────
@@ -1331,6 +1392,23 @@ export default function Einsatzplan() {
     setSonderdiensteModal({ entry, date: contextMenu?.date ?? toIsoDate(selectedDate) });
   };
 
+  // A6: bestehenden Sonderdienst bearbeiten (Vorbefüllen aus dem Eintrag)
+  const handleEditSonderdienst = (entry: DayEntry) => {
+    if (entry.spshi_id == null) return;
+    setSonderdiensteModal({
+      entry,
+      date: contextMenu?.date ?? toIsoDate(selectedDate),
+      existing: {
+        id: entry.spshi_id,
+        name: entry.shift_name || entry.display_name || '',
+        shortname: entry.display_name || '',
+        shift_id: entry.shift_id ?? 0,
+        workplace_id: entry.workplace_id ?? 0,
+        startend: entry.spshi_startend ?? '',
+      },
+    });
+  };
+
   const handleAbweichung = (entry: DayEntry) => {
     setAbweichungModal({ entry, date: contextMenu?.date ?? toIsoDate(selectedDate) });
   };
@@ -1376,6 +1454,7 @@ export default function Einsatzplan() {
   };
 
   const handleSaveSonderdienst = async (data: {
+    id?: number;
     employee_id: number;
     date: string;
     name: string;
@@ -1389,6 +1468,19 @@ export default function Einsatzplan() {
     if (!grid.duties) throw new Error('Keine Schreibberechtigung für Dienste (WDUTIES)');
     if (isPastDate(data.date, todayStr) && !grid.past) {
       throw new Error('Änderungen in der Vergangenheit sind gesperrt (WPAST)');
+    }
+    // A6: Bearbeiten eines bestehenden Sonderdienstes (PUT) vs. Neuanlage (POST)
+    if (data.id != null) {
+      await api.updateEinsatzplanEntry(data.id, {
+        name: data.name,
+        shortname: data.shortname,
+        shift_id: data.shift_id,
+        workplace_id: data.workplace_id,
+        startend: data.startend,
+      });
+      loadData();
+      showToast('Sonderdienst aktualisiert', 'success');
+      return;
     }
     const res = await api.createEinsatzplanEntry({
       employee_id: data.employee_id,
@@ -1716,6 +1808,7 @@ export default function Einsatzplan() {
           canDeviation={grid.deviation}
           onClose={() => setContextMenu(null)}
           onAddSonderdienst={handleSonderdienste}
+          onEditSonderdienst={handleEditSonderdienst}
           onAddAbweichung={handleAbweichung}
           onDelete={handleDeleteSpshi}
         />
@@ -1728,6 +1821,7 @@ export default function Einsatzplan() {
           date={sonderdiensteModal.date}
           shifts={shifts}
           workplaces={workplaces}
+          existing={sonderdiensteModal.existing}
           onClose={() => setSonderdiensteModal(null)}
           onSave={handleSaveSonderdienst}
         />

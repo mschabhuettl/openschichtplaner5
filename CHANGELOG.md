@@ -10,6 +10,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Release-Vorbereitung per Workflow (`prepare-release.yml`):** hebt die
+  Version (`frontend/package.json` + Lockfile, README-Badge) an, schneidet die
+  `[Unreleased]`-Sektion der CHANGELOG zur Versions-Sektion und pusht Commit +
+  annotiertes Tag — das Publish bleibt tag-getrieben. Trockenlauf-Modus
+  (Default) zeigt den geplanten Stand nur im Step-Summary; fehlende oder leere
+  `[Unreleased]`-Sektionen werden abgelehnt. Ablauf dokumentiert in
+  `RELEASING.md`.
 - **Gesamt-Stack-Compose `docker-compose.stack.yml`:** fährt App und API als
   getrennte Container — nginx (Stage `frontend-static`) served das SPA und
   proxied `/api` an den API-Container, der aus dem Geschwister-Repo

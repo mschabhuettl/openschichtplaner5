@@ -50,6 +50,9 @@ perf(api): add TTL-based in-memory cache for frequent endpoints
 
 ## Versioning
 
+Releases (version bump, CHANGELOG cut, tag, publish) are automated — see
+[RELEASING.md](RELEASING.md) for the workflow.
+
 See `memory/sp5-versioning-policy.md` for the full versioning policy.
 
 **Short version:** After every stabilization batch, bump all three version locations:

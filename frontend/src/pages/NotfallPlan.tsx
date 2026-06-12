@@ -58,6 +58,51 @@ interface CoverageCandidate {
   shiftToday: string | null;
 }
 
+/** Vom Backend gelieferter, bereits auf Eignung gefilterter Kandidat. */
+interface EligibleReplacement {
+  id: number;
+  name: string;
+  firstname: string;
+  shortname: string;
+  function: string;
+  hrs_week: number;
+}
+
+const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? '';
+
+/** X-Auth-Token nur im Dev-Modus setzen; normale Sessions nutzen das Cookie. */
+function devAuthHeaders(): Record<string, string> {
+  try {
+    const raw = localStorage.getItem('sp5_session');
+    if (raw) {
+      const session = JSON.parse(raw) as { devMode?: boolean };
+      if (session.devMode) return { 'X-Auth-Token': '__dev_mode__' };
+    }
+  } catch {
+    /* ignore */
+  }
+  return {};
+}
+
+/** Nur geeignete Ersatzkandidaten vom Backend holen (harte Eignungsfilter). */
+async function fetchEligibleReplacements(
+  date: string,
+  shiftId: number,
+  absentEmployeeId: number,
+): Promise<EligibleReplacement[]> {
+  const params = new URLSearchParams({
+    date,
+    shift_id: String(shiftId),
+    absent_employee_id: String(absentEmployeeId),
+  });
+  const res = await fetch(
+    `${API_BASE}/api/v1/schedule/eligible-replacements?${params}`,
+    { credentials: 'include', headers: devAuthHeaders() },
+  );
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json() as Promise<EligibleReplacement[]>;
+}
+
 function toDateStr(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
@@ -127,68 +172,48 @@ export default function NotfallPlan() {
       .catch(() => setLoading(false));
   }, [date]);
 
-  // Compute candidates
-  const computeCandidates = useCallback(() => {
+  // Compute candidates — nur geeignete Kandidaten vom Backend holen.
+  const computeCandidates = useCallback(async () => {
     if (!selectedShift) {
       showToast('Bitte zuerst eine Schicht auswählen', 'warning');
       return;
     }
-
-    // Build map: employee_id → their day entry
-    const entryMap = new Map<number, DayEntry>();
-    for (const e of dayEntries) entryMap.set(e.employee_id, e);
-
-    const results: CoverageCandidate[] = [];
-
-    for (const emp of employees) {
-      const entry = entryMap.get(emp.ID);
-      const alreadyWorking = !!(entry && entry.shift_id !== null);
-      const onLeave = !!(entry && entry.kind !== null && entry.shift_id === null);
-      const shiftToday = alreadyWorking ? entry!.shift_name : null;
-
-      let score = 100;
-      const reasons: string[] = [];
-
-      // Hard blockers
-      if (alreadyWorking && emp.ID !== sickEmployee) {
-        score -= 60;
-        reasons.push(`Arbeitet bereits: ${shiftToday}`);
-      }
-      if (onLeave) {
-        score -= 80;
-        reasons.push(`Abwesend: ${entry!.leave_name || 'Urlaub'}`);
-      }
-
-      // Bonus: fewer hours = more available
-      const targetHrs = emp.HRSWEEK || 40;
-      if (targetHrs <= 20) {
-        score += 5;
-        reasons.push('Teilzeit — flexibler');
-      }
-
-      // Skip the sick employee themselves
-      if (emp.ID === sickEmployee) continue;
-
-      results.push({
-        employee: emp,
-        score: Math.max(0, Math.min(100, score)),
-        reasons,
-        alreadyWorking,
-        onLeave,
-        shiftToday,
-      });
+    if (!sickEmployee) {
+      showToast('Bitte zuerst den ausgefallenen Mitarbeiter markieren', 'warning');
+      return;
     }
 
-    // Sort: available first, then by score desc
-    results.sort((a, b) => {
-      if (!a.alreadyWorking && !a.onLeave && (b.alreadyWorking || b.onLeave)) return -1;
-      if ((a.alreadyWorking || a.onLeave) && !b.alreadyWorking && !b.onLeave) return 1;
-      return b.score - a.score;
-    });
-
-    setCandidates(results);
-    setShowAll(false);
-  }, [selectedShift, dayEntries, employees, sickEmployee, showToast]);
+    setLoading(true);
+    try {
+      const eligible = await fetchEligibleReplacements(date, selectedShift, sickEmployee);
+      const byId = new Map(employees.map((e) => [e.ID, e]));
+      const results: CoverageCandidate[] = eligible.map((c) => ({
+        employee: byId.get(c.id) ?? {
+          ID: c.id,
+          NAME: c.name,
+          FIRSTNAME: c.firstname,
+          SHORTNAME: c.shortname,
+          HRSWEEK: c.hrs_week,
+          HIDE: 0,
+          FUNCTION: c.function,
+        },
+        score: 100,
+        reasons: [],
+        alreadyWorking: false,
+        onLeave: false,
+        shiftToday: null,
+      }));
+      setCandidates(results);
+      setShowAll(false);
+      if (results.length === 0) {
+        showToast('Keine geeignete Vertretung gefunden', 'info');
+      }
+    } catch {
+      showToast('Netzwerkfehler bei der Ersatzsuche', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedShift, sickEmployee, date, employees, showToast]);
 
   const assignEmployee = useCallback(async (empId: number) => {
     if (!selectedShift) return;

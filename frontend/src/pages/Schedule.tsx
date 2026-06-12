@@ -183,6 +183,17 @@ function openPrintWindow(html: string) {
 // ── Constants ─────────────────────────────────────────────────
 const WEEKDAY_ABBR = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+
+/** ISO-8601 Kalenderwoche (Spec 4.11: „Kalenderwoche anzeigen"). */
+function getISOWeek(year: number, month: number, day: number): number {
+  const date = new Date(Date.UTC(year, month - 1, day));
+  const dayNum = (date.getUTCDay() + 6) % 7; // Mo=0 … So=6
+  date.setUTCDate(date.getUTCDate() - dayNum + 3); // Donnerstag dieser Woche
+  const firstThursday = new Date(Date.UTC(date.getUTCFullYear(), 0, 4));
+  const firstDayNum = (firstThursday.getUTCDay() + 6) % 7;
+  firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDayNum + 3);
+  return 1 + Math.round((date.getTime() - firstThursday.getTime()) / (7 * 864e5));
+}
 const MONTH_NAMES = [
   '', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
@@ -2012,6 +2023,8 @@ export default function Schedule() {
   const [entries, setEntries] = useState<ScheduleEntry[]>([]);
   // Soll-/Istplan-Sicht (Spec 4.12): 'ist' (Vorgabe), 'soll', 'both' (Soll+Ist)
   const [planMode, setPlanMode] = useState<'ist' | 'soll' | 'both'>('ist');
+  // Kalenderwoche im Tageskopf anzeigen (Spec 4.11)
+  const [showWeekNumbers, setShowWeekNumbers] = useState(false);
   const [holidays, setHolidays] = useState<Set<string>>(new Set());
   const [shifts, setShifts] = useState<ShiftType[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
@@ -4958,6 +4971,20 @@ export default function Schedule() {
           <option value="both">Soll- &amp; Istplan</option>
         </select>
 
+        {/* Kalenderwoche-Anzeige (Spec 4.11) */}
+        <button
+          onClick={() => setShowWeekNumbers(v => !v)}
+          className={`px-2 py-1.5 border rounded shadow-sm text-sm no-print ${
+            showWeekNumbers
+              ? 'bg-indigo-600 text-white border-indigo-600'
+              : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50'
+          }`}
+          title="Kalenderwochen im Tageskopf anzeigen"
+          aria-pressed={showWeekNumbers}
+        >
+          KW
+        </button>
+
         {/* Desktop view toggle: Tabelle / Woche / Kalender */}
         {!isMobile && (
           <div className="flex items-center gap-1 no-print">
@@ -5747,6 +5774,11 @@ export default function Schedule() {
                     title={thTitle + ' · Klick für Tagesübersicht'}
                     onClick={() => setDayDetailModal({ day, dateStr })}
                   >
+                    {showWeekNumbers && wd === 1 && (
+                      <div className="text-amber-300 text-[8px] leading-none font-semibold" title="Kalenderwoche">
+                        KW{getISOWeek(year, month, day)}
+                      </div>
+                    )}
                     <div className="text-slate-300 text-[10px]">{WEEKDAY_ABBR[wd]}</div>
                     <div className="font-bold">{day}</div>
                     {isHol && <div className="text-yellow-300 text-[8px] leading-none">★</div>}

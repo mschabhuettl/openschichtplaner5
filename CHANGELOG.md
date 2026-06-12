@@ -11,6 +11,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Dienstplan: Kalenderwochen-Anzeige (Spec 4.11) — „KW"-Umschalter blendet die
+  ISO-Kalenderwoche im Tageskopf (montags) ein.
 - Dienstplan: Arbeitsplatz-Filter (Spec 4.7) in der Filterleiste; Einträge zeigen
   den Arbeitsplatz-Namen; neue Einträge/Bestandseinträge können einem Arbeitsplatz
   zugeordnet werden.

@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.5.0] - 2026-06-12
+
 ### Added
 
 - Dienstplan: **Monats-Schnellwahl** — die Monatsanzeige ist ein Direktwahl-

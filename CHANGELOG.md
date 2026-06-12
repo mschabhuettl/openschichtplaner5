@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.3.0] - 2026-06-12
+
 ### Fixed
 - **Anmeldung wieder funktionsfähig:** Demo-Konten (`admin`/`planer`/`leser`,
   `Test1234`) und vom Original angelegte Konten melden sich wieder an und

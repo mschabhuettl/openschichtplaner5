@@ -304,7 +304,7 @@ def seed(db_path: str, dry_run: bool = False, seed_value: int = 42) -> None:
     print("\nErzeuge Tauschanfragen...")
     added_swaps = 0
     if len(db.get_swap_requests() or []) == 0:
-        pairs = list(zip(rng.sample(emp_ids, 8)[:4], rng.sample(emp_ids, 8)[4:]))
+        pairs = list(zip(rng.sample(emp_ids, 8)[:4], rng.sample(emp_ids, 8)[4:], strict=True))
         for a, b in pairs:
             d1 = today + timedelta(days=rng.randint(1, 10))
             d2 = today + timedelta(days=rng.randint(1, 10))

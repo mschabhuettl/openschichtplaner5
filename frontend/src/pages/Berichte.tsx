@@ -4,6 +4,7 @@ import type { Restriction } from '../api/client';
 import type { Employee, Group, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { escapeHtml, safeColor } from '../utils/escapeHtml';
 
 const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -62,16 +63,16 @@ async function reportEmployeeList(employees: Employee[], groups: Group[]) {
   for (const emp of employees) {
     const grpList = (empGroups[emp.ID] || []).join(', ') || '—';
     html += `<tr>
-<td>${emp.NUMBER || '—'}</td>
-<td><strong>${emp.NAME}</strong></td>
-<td>${emp.FIRSTNAME}</td>
-<td><span class="badge" style="background:#e0f2fe;color:#0369a1">${emp.SHORTNAME || '—'}</span></td>
+<td>${escapeHtml(emp.NUMBER || '—')}</td>
+<td><strong>${escapeHtml(emp.NAME)}</strong></td>
+<td>${escapeHtml(emp.FIRSTNAME)}</td>
+<td><span class="badge" style="background:#e0f2fe;color:#0369a1">${escapeHtml(emp.SHORTNAME || '—')}</span></td>
 <td>${(emp as Employee & { FUNCTION?: string }).FUNCTION || '—'}</td>
 <td style="text-align:right">${emp.HRSDAY?.toFixed(1) ?? '—'} h</td>
 <td style="text-align:right">${emp.HRSWEEK?.toFixed(1) ?? '—'} h</td>
 <td>${emp.EMPSTART || '—'}</td>
 <td>${emp.EMPEND || '—'}</td>
-<td>${grpList}</td>
+<td>${escapeHtml(grpList)}</td>
 </tr>`;
   }
   html += '</tbody></table>';
@@ -91,8 +92,8 @@ async function reportGroups(groups: Group[]) {
   const groupMap = Object.fromEntries(groups.map(g => [g.ID, g.NAME]));
   for (const g of groups) {
     html += `<tr>
-<td><strong>${g.NAME}</strong></td>
-<td>${g.SHORTNAME || '—'}</td>
+<td><strong>${escapeHtml(g.NAME)}</strong></td>
+<td>${escapeHtml(g.SHORTNAME || '—')}</td>
 <td>${g.SUPERID ? (groupMap[g.SUPERID] || `#${g.SUPERID}`) : '— (Hauptgruppe)'}</td>
 <td style="text-align:center">${g.member_count ?? '?'}</td>
 <td>${g.HIDE ? '<span class="badge" style="background:#fef2f2;color:#dc2626">Ausgeblendet</span>' : '<span class="badge" style="background:#f0fdf4;color:#16a34a">Aktiv</span>'}</td>
@@ -114,10 +115,10 @@ function reportShifts(shifts: ShiftType[]) {
   for (const s of shifts) {
     const dur = s.DURATION0 ? `${s.DURATION0.toFixed(1)} h` : '—';
     html += `<tr>
-<td><span class="badge" style="background:${s.COLORBK_HEX};color:${s.COLORTEXT_HEX}">${s.SHORTNAME}</span></td>
-<td><strong>${s.NAME}</strong></td>
+<td><span class="badge" style="background:${safeColor(s.COLORBK_HEX)};color:${safeColor(s.COLORTEXT_HEX)}">${escapeHtml(s.SHORTNAME)}</span></td>
+<td><strong>${escapeHtml(s.NAME)}</strong></td>
 <td style="text-align:right">${dur}</td>
-<td><span style="display:inline-block;width:40px;height:16px;border-radius:3px;background:${s.COLORBK_HEX};border:1px solid #ccc"></span></td>
+<td><span style="display:inline-block;width:40px;height:16px;border-radius:3px;background:${safeColor(s.COLORBK_HEX)};border:1px solid #ccc"></span></td>
 <td>${s.HIDE ? '<span class="badge" style="background:#fef2f2;color:#dc2626">Ausgeblendet</span>' : '<span class="badge" style="background:#f0fdf4;color:#16a34a">Aktiv</span>'}</td>
 </tr>`;
   }
@@ -165,7 +166,7 @@ async function reportMonthlySchedule(year: number, month: number, groupId: numbe
 
   let rows = '';
   for (const emp of emps) {
-    let cells = `<td style="${nameStyle}">${emp.NAME} ${emp.FIRSTNAME ? emp.FIRSTNAME.charAt(0) + '.' : ''}</td>`;
+    let cells = `<td style="${nameStyle}">${escapeHtml(emp.NAME)} ${escapeHtml(emp.FIRSTNAME ? emp.FIRSTNAME.charAt(0) + '.' : '')}</td>`;
     for (const d of days) {
       const dateStr = `${year}-${padZero(month)}-${padZero(d)}`;
       const entry = idx[`${emp.ID}::${dateStr}`];
@@ -173,8 +174,8 @@ async function reportMonthlySchedule(year: number, month: number, groupId: numbe
       const isWe = date.getDay() === 0 || date.getDay() === 6;
       const cellBg = isWe ? '#f1f5f9' : '#fff';
       if (entry) {
-        cells += `<td style="border:1px solid #ddd;padding:1px;text-align:center;background:${entry.color_bk || cellBg}">
-<span style="color:${entry.color_text || '#000'};font-size:9px;font-weight:bold">${entry.display_name || ''}</span></td>`;
+        cells += `<td style="border:1px solid #ddd;padding:1px;text-align:center;background:${safeColor(entry.color_bk || cellBg)}">
+<span style="color:${safeColor(entry.color_text || '#000')};font-size:9px;font-weight:bold">${escapeHtml(entry.display_name || '')}</span></td>`;
       } else {
         cells += `<td style="border:1px solid #ddd;background:${cellBg}"></td>`;
       }
@@ -234,9 +235,9 @@ async function reportVacation(year: number, employees: Employee[]) {
     const statusColor = remaining < 0 ? '#dc2626' : remaining === 0 ? '#d97706' : '#16a34a';
     const statusText = remaining < 0 ? 'Überschritten' : remaining === 0 ? 'Vollständig' : 'Offen';
     html += `<tr>
-<td><strong>${emp.NAME}</strong></td>
-<td>${emp.FIRSTNAME}</td>
-<td><span class="badge" style="background:#e0f2fe;color:#0369a1">${emp.SHORTNAME || '—'}</span></td>
+<td><strong>${escapeHtml(emp.NAME)}</strong></td>
+<td>${escapeHtml(emp.FIRSTNAME)}</td>
+<td><span class="badge" style="background:#e0f2fe;color:#0369a1">${escapeHtml(emp.SHORTNAME || '—')}</span></td>
 <td style="text-align:right">${s.entitlement} Tg.</td>
 <td style="text-align:right">${s.used} Tg.</td>
 <td style="text-align:right;font-weight:bold;color:${statusColor}">${remaining} Tg.</td>
@@ -265,7 +266,7 @@ async function reportHolidays(year: number) {
     html += `<tr>
 <td><strong>${h.DATE}</strong></td>
 <td ${isWe ? 'style="color:#dc2626"' : ''}>${dn}</td>
-<td>${h.NAME}</td>
+<td>${escapeHtml(h.NAME)}</td>
 <td>${h.INTERVAL === 1 ? 'Jährlich' : 'Einmalig'}</td>
 </tr>`;
   }
@@ -352,8 +353,8 @@ async function reportStundenAuswertung(
     const diffColor = diff > 0 ? '#16a34a' : diff < 0 ? '#dc2626' : '#374151';
     const diffSign = diff > 0 ? '+' : '';
     rows += `<tr>
-<td><strong>${emp.NAME}</strong>, ${emp.FIRSTNAME}</td>
-<td><span class="badge" style="background:#e0f2fe;color:#0369a1">${emp.SHORTNAME || '—'}</span></td>
+<td><strong>${escapeHtml(emp.NAME)}</strong>, ${escapeHtml(emp.FIRSTNAME)}</td>
+<td><span class="badge" style="background:#e0f2fe;color:#0369a1">${escapeHtml(emp.SHORTNAME || '—')}</span></td>
 <td style="text-align:right">${s.soll.toFixed(2)} h</td>
 <td style="text-align:right">${s.ist.toFixed(2)} h</td>
 <td style="text-align:right;font-weight:bold;color:${diffColor}">${diffSign}${diff.toFixed(2)} h</td>
@@ -460,11 +461,11 @@ async function reportUrlaubsantrag(
   <table style="width:100%;border-collapse:collapse;margin-bottom:16px;">
     <tr>
       <td style="padding:4px 8px;font-weight:bold;width:40%">Mitarbeiter:</td>
-      <td style="padding:4px 8px">${emp.NAME}, ${emp.FIRSTNAME}</td>
+      <td style="padding:4px 8px">${escapeHtml(emp.NAME)}, ${escapeHtml(emp.FIRSTNAME)}</td>
     </tr>
     <tr>
       <td style="padding:4px 8px;font-weight:bold">Personalnummer:</td>
-      <td style="padding:4px 8px">${emp.NUMBER || '—'}</td>
+      <td style="padding:4px 8px">${escapeHtml(emp.NUMBER || '—')}</td>
     </tr>
   </table>
 
@@ -519,7 +520,7 @@ async function reportUrlaubsantrag(
   <div style="text-align:center;font-size:10px;color:#888;margin-top:4px">Erstellt am ${now}</div>
 </div>`;
 
-  printHtml(html, `Urlaubsantrag – ${emp.NAME} ${emp.FIRSTNAME}`);
+  printHtml(html, `Urlaubsantrag – ${escapeHtml(emp.NAME)} ${escapeHtml(emp.FIRSTNAME)}`);
 }
 
 // ── Report: Quartals-Dienstplan ──────────────────────────────
@@ -565,7 +566,7 @@ async function reportQuarterSchedule(year: number, quarter: number, groupId: num
 
     let rows = '';
     for (const emp of emps) {
-      let cells = `<td style="${nameStyle}">${emp.NAME} ${emp.FIRSTNAME ? emp.FIRSTNAME.charAt(0) + '.' : ''}</td>`;
+      let cells = `<td style="${nameStyle}">${escapeHtml(emp.NAME)} ${escapeHtml(emp.FIRSTNAME ? emp.FIRSTNAME.charAt(0) + '.' : '')}</td>`;
       for (const d of days) {
         const dateStr = `${year}-${padZero(month)}-${padZero(d)}`;
         const entry = idx[`${emp.ID}::${dateStr}`];
@@ -573,7 +574,7 @@ async function reportQuarterSchedule(year: number, quarter: number, groupId: num
         const isWe = date.getDay() === 0 || date.getDay() === 6;
         const cellBg = isWe ? '#f1f5f9' : '#fff';
         if (entry) {
-          cells += `<td style="border:1px solid #ddd;padding:1px;text-align:center;background:${entry.color_bk || cellBg}"><span style="color:${entry.color_text || '#000'};font-size:8px;font-weight:bold">${entry.display_name || ''}</span></td>`;
+          cells += `<td style="border:1px solid #ddd;padding:1px;text-align:center;background:${safeColor(entry.color_bk || cellBg)}"><span style="color:${safeColor(entry.color_text || '#000')};font-size:8px;font-weight:bold">${escapeHtml(entry.display_name || '')}</span></td>`;
         } else {
           cells += `<td style="border:1px solid #ddd;background:${cellBg}"></td>`;
         }
@@ -634,7 +635,7 @@ async function reportYearSchedule(year: number, groupId: number | null, employee
 
   let rows = '';
   for (const emp of emps) {
-    let cells = `<td style="${nameStyle}">${emp.NAME} ${emp.FIRSTNAME ? emp.FIRSTNAME.charAt(0) + '.' : ''}</td>`;
+    let cells = `<td style="${nameStyle}">${escapeHtml(emp.NAME)} ${escapeHtml(emp.FIRSTNAME ? emp.FIRSTNAME.charAt(0) + '.' : '')}</td>`;
     for (let m = 1; m <= 12; m++) {
       const cell = empMonthData[emp.ID]?.[m];
       if (!cell) { cells += `<td style="border:1px solid #ddd;background:#fff"></td>`; continue; }
@@ -696,7 +697,7 @@ async function reportAbsenceOverview(year: number, month: number, groupId: numbe
 
   let rows = '';
   for (const emp of emps) {
-    let cells = `<td style="${nameStyle}">${emp.NAME} ${emp.FIRSTNAME ? emp.FIRSTNAME.charAt(0) + '.' : ''}</td>`;
+    let cells = `<td style="${nameStyle}">${escapeHtml(emp.NAME)} ${escapeHtml(emp.FIRSTNAME ? emp.FIRSTNAME.charAt(0) + '.' : '')}</td>`;
     for (const d of days) {
       const dateStr = `${year}-${padZero(month)}-${padZero(d)}`;
       const entry = idx[`${emp.ID}::${dateStr}`];
@@ -704,7 +705,7 @@ async function reportAbsenceOverview(year: number, month: number, groupId: numbe
       const isWe = date.getDay() === 0 || date.getDay() === 6;
       const cellBg = isWe ? '#f1f5f9' : '#fff';
       if (entry) {
-        cells += `<td style="border:1px solid #ddd;padding:1px;text-align:center;background:${entry.color_bk || '#fee2e2'}"><span style="color:${entry.color_text || '#dc2626'};font-size:8px;font-weight:bold">${entry.display_name || entry.leave_name || 'A'}</span></td>`;
+        cells += `<td style="border:1px solid #ddd;padding:1px;text-align:center;background:${safeColor(entry.color_bk || '#fee2e2')}"><span style="color:${safeColor(entry.color_text || '#dc2626')};font-size:8px;font-weight:bold">${escapeHtml(entry.display_name || entry.leave_name || 'A')}</span></td>`;
       } else {
         cells += `<td style="border:1px solid #ddd;background:${cellBg}"></td>`;
       }
@@ -804,9 +805,9 @@ async function reportBirthdays(employees: Employee[], birthdayMonth: number) {
   for (const { emp, month, day, year } of withBd) {
     const age = thisYear - year;
     html += `<tr>
-<td><strong>${emp.NAME}</strong></td>
-<td>${emp.FIRSTNAME}</td>
-<td><span class="badge" style="background:#e0f2fe;color:#0369a1">${emp.SHORTNAME || '—'}</span></td>
+<td><strong>${escapeHtml(emp.NAME)}</strong></td>
+<td>${escapeHtml(emp.FIRSTNAME)}</td>
+<td><span class="badge" style="background:#e0f2fe;color:#0369a1">${escapeHtml(emp.SHORTNAME || '—')}</span></td>
 <td>${padZero(day)}.${padZero(month)}.${year}</td>
 <td style="text-align:center">${age} Jahre</td>
 </tr>`;
@@ -828,7 +829,7 @@ async function reportAddresses(employees: Employee[]) {
   for (const emp of sorted) {
     const plzOrt = [emp.ZIP, emp.TOWN].filter(Boolean).join(' ') || '—';
     html += `<tr>
-<td><strong>${emp.NAME}</strong>, ${emp.FIRSTNAME}</td>
+<td><strong>${escapeHtml(emp.NAME)}</strong>, ${escapeHtml(emp.FIRSTNAME)}</td>
 <td>${emp.STREET || '—'}</td>
 <td>${plzOrt}</td>
 <td>${emp.PHONE || '—'}</td>
@@ -866,7 +867,7 @@ async function reportRestrictions(employees: Employee[]) {
 
     for (const [empIdStr, resList] of Object.entries(byEmp)) {
       const emp = empMap[parseInt(empIdStr)];
-      const empName = emp ? `${emp.NAME}, ${emp.FIRSTNAME}` : `ID ${empIdStr}`;
+      const empName = emp ? `${escapeHtml(emp.NAME)}, ${escapeHtml(emp.FIRSTNAME)}` : `ID ${empIdStr}`;
       for (const r of resList) {
         const wd = r.weekday === 0 ? 'Alle Tage' : (dayNames[r.weekday - 1] || `Tag ${r.weekday}`);
         const typ = r.restrict === 0 ? '<span class="badge" style="background:#fef2f2;color:#dc2626">Verboten</span>' :
@@ -917,7 +918,7 @@ async function reportAbsenceStats(year: number, groupId: number | null, employee
     const s = stats[emp.ID] || {};
     const total = Object.values(s).reduce((a, b) => a + b, 0);
     if (total === 0) continue;
-    let cells = `<td><strong>${emp.NAME}</strong>, ${emp.FIRSTNAME}</td>`;
+    let cells = `<td><strong>${escapeHtml(emp.NAME)}</strong>, ${escapeHtml(emp.FIRSTNAME)}</td>`;
     for (const lt of ltList) {
       const cnt = s[lt.ID] || 0;
       cells += `<td style="text-align:center">${cnt > 0 ? `<span class="badge" style="background:${lt.COLORBK_HEX}33;color:#374151">${cnt}</span>` : '—'}</td>`;
@@ -969,7 +970,7 @@ async function reportShiftStats(year: number, month: number, groupId: number | n
   for (const emp of emps) {
     const s = stats[emp.ID] || {};
     const total = Object.values(s).reduce((a, b) => a + b, 0);
-    let cells = `<td><strong>${emp.NAME}</strong>, ${emp.FIRSTNAME}</td>`;
+    let cells = `<td><strong>${escapeHtml(emp.NAME)}</strong>, ${escapeHtml(emp.FIRSTNAME)}</td>`;
     for (const lbl of shiftLabels) {
       const cnt = s[lbl] || 0;
       cells += `<td style="text-align:center">${cnt > 0 ? cnt : '—'}</td>`;
@@ -1040,7 +1041,7 @@ async function reportEntitlementStats(year: number, employees: Employee[]) {
     const rest = total - d.used;
     const restColor = rest < 0 ? '#dc2626' : rest < 3 ? '#d97706' : '#16a34a';
     html += `<tr>
-<td><strong>${emp.NAME}</strong>, ${emp.FIRSTNAME}</td>
+<td><strong>${escapeHtml(emp.NAME)}</strong>, ${escapeHtml(emp.FIRSTNAME)}</td>
 <td style="text-align:right">${d.entitlement} Tg.</td>
 <td style="text-align:right">${d.carry} Tg.</td>
 <td style="text-align:right;font-weight:bold">${total} Tg.</td>
@@ -1070,10 +1071,10 @@ async function reportGroupTree(groups: Group[]) {
 
   function renderGroup(g: Group, depth: number): string {
     const indent = depth * 24;
-    const badge = g.SHORTNAME ? `<span class="badge" style="background:#e0f2fe;color:#0369a1">${g.SHORTNAME}</span>` : '';
+    const badge = g.SHORTNAME ? `<span class="badge" style="background:#e0f2fe;color:#0369a1">${escapeHtml(g.SHORTNAME)}</span>` : '';
     const childCount = g.member_count != null ? `<span style="color:#666;font-size:10px">${g.member_count} Mitglieder</span>` : '';
     let html = `<tr>
-<td style="padding-left:${indent + 8}px">${depth > 0 ? '↳ ' : ''}<strong>${g.NAME}</strong></td>
+<td style="padding-left:${indent + 8}px">${depth > 0 ? '↳ ' : ''}<strong>${escapeHtml(g.NAME)}</strong></td>
 <td>${badge}</td>
 <td>${childCount}</td>
 <td>${g.HIDE ? '<span class="badge" style="background:#fef2f2;color:#dc2626">Ausgeblendet</span>' : '<span class="badge" style="background:#f0fdf4;color:#16a34a">Aktiv</span>'}</td>
@@ -1112,7 +1113,7 @@ async function reportGroupMembers(memberGroupId: number | null, employees: Emplo
     const memberIds = assignments.filter(a => a.group_id === grp.ID).map(a => a.employee_id);
     const members = memberIds.map(id => empMap[id]).filter(Boolean).sort((a, b) => (a.NAME || '').localeCompare(b.NAME || ''));
 
-    html += `<h2>🏢 ${grp.NAME}${grp.SHORTNAME ? ` (${grp.SHORTNAME})` : ''} — ${members.length} Mitglieder</h2>`;
+    html += `<h2>🏢 ${escapeHtml(grp.NAME)}${grp.SHORTNAME ? ` (${escapeHtml(grp.SHORTNAME)})` : ''} — ${members.length} Mitglieder</h2>`;
     if (members.length === 0) {
       html += '<p style="color:#999;font-size:11px">Keine Mitglieder.</p>';
     } else {
@@ -1156,7 +1157,7 @@ async function reportHolidayBans(groups: Group[]) {
         ? '<span class="badge" style="background:#fef2f2;color:#dc2626">Urlaubssperre</span>'
         : '<span class="badge" style="background:#fef9c3;color:#92400e">Eingeschränkt</span>';
       html += `<tr>
-<td><strong>${grpName}</strong></td>
+<td><strong>${escapeHtml(grpName)}</strong></td>
 <td>${b.start_date}</td>
 <td>${b.end_date}</td>
 <td>${type}</td>
@@ -1301,7 +1302,7 @@ async function reportDienstplanEintraege(
       sonder: rows.filter(r => r.art === 'Sonderdienst').length,
       abw: rows.filter(r => r.art === 'Abwesenheit').length,
     };
-    html += `<h2>👤 ${emp ? `${emp.NAME}, ${emp.FIRSTNAME}` : `MA #${id}`}${emp?.NUMBER ? ` (Nr. ${emp.NUMBER})` : ''}</h2>
+    html += `<h2>👤 ${emp ? `${escapeHtml(emp.NAME)}, ${escapeHtml(emp.FIRSTNAME)}` : `MA #${id}`}${emp?.NUMBER ? ` (Nr. ${emp.NUMBER})` : ''}</h2>
 <table>
 <thead><tr>
 <th scope="col">Datum</th><th scope="col">Art</th><th scope="col">Kürzel</th><th scope="col">Name</th>

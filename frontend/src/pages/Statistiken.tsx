@@ -5,6 +5,7 @@ import type { EmployeeStats, ExtraChargeSummary, EmployeeYearStats, SicknessStat
 import type { Employee, Group } from '../types';
 import { useT } from '../i18n';
 import { EmptyState } from '../components/EmptyState';
+import { escapeHtml } from '../utils/escapeHtml';
 
 // ── HTML Export helper ─────────────────────────────────────────
 function exportStatisticsHTML(
@@ -34,7 +35,7 @@ function exportStatisticsHTML(
     const otColor = ot >= 0 ? '#16a34a' : '#dc2626';
     const bg = i % 2 === 0 ? '#fff' : '#f8fafc';
     rows += `<tr>
-      <td style="${tdStyle}background:${bg};font-weight:500">${s.employee_name}</td>
+      <td style="${tdStyle}background:${bg};font-weight:500">${escapeHtml(s.employee_name)}</td>
       <td style="${tdRStyle}background:${bg};color:#374151">${s.target_hours.toFixed(1)}h</td>
       <td style="${tdRStyle}background:${bg};font-weight:600;color:#1d4ed8">${s.actual_hours.toFixed(1)}h</td>
       <td style="${tdRStyle}background:${bg};font-weight:600;color:${otColor}">${ot >= 0 ? '+' : ''}${ot.toFixed(1)}h</td>
@@ -69,7 +70,7 @@ function exportStatisticsHTML(
 </head>
 <body>
 <h1>📈 Statistiken – ${periodLabel}</h1>
-<div class="subtitle">Gruppe: ${groupLabel} &nbsp;|&nbsp; ${stats.length} Mitarbeiter &nbsp;|&nbsp; Erstellt: ${now}</div>
+<div class="subtitle">Gruppe: ${escapeHtml(groupLabel)} &nbsp;|&nbsp; ${stats.length} Mitarbeiter &nbsp;|&nbsp; Erstellt: ${now}</div>
 
 <div class="summary">
   <div class="card">

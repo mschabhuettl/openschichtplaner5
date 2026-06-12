@@ -50,13 +50,7 @@ perf(api): add TTL-based in-memory cache for frequent endpoints
 
 ## Versioning
 
-Releases (version bump, CHANGELOG cut, tag, publish) are automated — see
-[RELEASING.md](RELEASING.md) for the workflow.
-
-See `memory/sp5-versioning-policy.md` for the full versioning policy.
-
-**Short version:** After every stabilization batch, bump all three version locations:
-1. `frontend/package.json`
-2. `sp5api/main.py` (`_API_VERSION` + FastAPI `version=`) — in the
-   [openschichtplaner5-api](https://github.com/mschabhuettl/openschichtplaner5-api) repo
-3. Git tag: `git tag -a vX.Y.Z -m "vX.Y.Z — short description"`
+This project follows [Semantic Versioning](https://semver.org/). Releases —
+version bump, CHANGELOG cut, tag and publish — are automated: collect your
+changes under the `## [Unreleased]` heading in `CHANGELOG.md`, then run the
+`prepare-release` workflow. See [RELEASING.md](RELEASING.md) for the full flow.

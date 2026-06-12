@@ -489,8 +489,7 @@ function YearHeatmap({ yearData, onMonthClick }: YearHeatmapProps) {
     if (m.worst_status === 'critical') return { bg: '#fef2f2', text: '#dc2626', border: '#fca5a5' };
     if (m.worst_status === 'low') return { bg: '#fefce8', text: '#ca8a04', border: '#fde047' };
     const intensity = Math.min(m.coverage_pct / 100, 1);
-    const g = Math.round(80 + intensity * 100);
-    return { bg: `rgb(240, ${g + 30}, 240)`.replace('240,', '240,').replace(/rgb\(.*\)/, `hsl(142, 70%, ${95 - intensity * 30}%)`), text: '#15803d', border: `hsl(142, 50%, ${80 - intensity * 20}%)` };
+    return { bg: `hsl(142, 70%, ${95 - intensity * 30}%)`, text: '#15803d', border: `hsl(142, 50%, ${80 - intensity * 20}%)` };
   };
 
   return (

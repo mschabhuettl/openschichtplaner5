@@ -1,0 +1,18 @@
+# Dependabot: wöchentliche Update-PRs für npm (frontend), pip (backend)
+# und die GitHub-Actions-Versionen in den Workflows.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+
+  - package-ecosystem: pip
+    directory: /backend
+    schedule:
+      interval: weekly

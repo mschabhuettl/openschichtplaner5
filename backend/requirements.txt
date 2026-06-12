@@ -7,7 +7,7 @@ openschichtplaner5-api>=1.2.0
 # Core library (DBF bridge + ORM/sync), maintained in its own repo and released to
 # PyPI. Importable as `sp5lib`. Kept as a direct dependency: scripts/ and
 # backend/alembic/env.py import it without going through the API package.
-libopenschichtplaner5[postgres]>=1.7.0
+libopenschichtplaner5[postgres]>=1.8.0
 
 # Used directly by scripts/seed_demo_data.py
 python-dotenv>=1.0.0

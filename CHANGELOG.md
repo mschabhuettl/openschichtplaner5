@@ -11,6 +11,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Mitarbeiter-Detailseite (`/mitarbeiter/:id`): die Übersicht bündelt jetzt auch
+  die **Schichteinschränkungen** des Mitarbeiters (mit „verwalten →"-Verweis) —
+  Ein-Ort-Zusammenführung von Stammdaten, Kontakt/Notizen, Gruppe, Qualifikationen,
+  Verfügbarkeit, Statistik, Abwesenheiten und Einschränkungen wie im Original.
 - Stammdaten: **manuelle Reihenfolge** (programmweite POSITION-Sortierung) — ein
   „↕ Reihenfolge"-Dialog (▲/▼) auf Mitarbeiter, Schichtarten, Abwesenheitsarten
   und Arbeitsplätzen; die Mitarbeiter-Reihenfolge gilt direkt im Dienstplan.

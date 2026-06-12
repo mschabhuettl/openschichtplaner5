@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
-import type { ChangelogEntry, EmployeeYearStats } from '../api/client';
+import type { ChangelogEntry, EmployeeYearStats, Restriction } from '../api/client';
 import type { Employee, ShiftType, ScheduleEntry } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
@@ -78,6 +78,7 @@ export default function MitarbeiterProfil() {
   const [schedule7, setSchedule7] = useState<ScheduleEntry[]>([]);
   const [changelog, setChangelog] = useState<ChangelogEntry[]>([]);
   const [absences, setAbsences] = useState<{ date: string; leave_type_name: string; leave_type_short: string }[]>([]);
+  const [restrictions, setRestrictions] = useState<Restriction[]>([]);
   const [tab, setTab] = useState<'overview' | 'stats' | 'schedule' | 'log' | 'profile'>('overview');
   const [loading, setLoading] = useState(true);
   const [year] = useState(new Date().getFullYear());
@@ -118,7 +119,7 @@ export default function MitarbeiterProfil() {
       setEmployee(emp);
 
       // Group name via group assignments + Q039 data
-      const [assignments, stats, absData, clog, skillsList, skillAssigns, availData] = await Promise.all([
+      const [assignments, stats, absData, clog, skillsList, skillAssigns, availData, restr] = await Promise.all([
         api.getGroupAssignments(),
         api.getEmployeeStatsYear(employeeId, year),
         api.getAbsences({ employee_id: employeeId, year }),
@@ -126,10 +127,12 @@ export default function MitarbeiterProfil() {
         api.getSkills() as Promise<Skill[]>,
         api.getSkillAssignments({ employee_id: employeeId }) as Promise<SkillAssignment[]>,
         api.getAvailability(employeeId) as Promise<AvailabilityData>,
+        api.getRestrictions(employeeId).catch(() => []),
       ]);
       setAllSkills(skillsList);
       setEmpSkillAssignments(skillAssigns);
       setAvailability(availData);
+      setRestrictions(restr);
       // Init editable state
       setEditHrsWeek(emp.HRSWEEK);
       setEditHrsDay(emp.HRSDAY);
@@ -382,6 +385,33 @@ export default function MitarbeiterProfil() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Einschränkungen (Spec 4.11) — Ein-Ort-Bündelung wie im Original (P-3) */}
+          <div className="border rounded-xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-semibold text-gray-700">🚫 Einschränkungen</h2>
+              <button
+                onClick={() => navigate('/einschraenkungen')}
+                className="text-xs text-blue-600 hover:underline"
+              >verwalten →</button>
+            </div>
+            {restrictions.length === 0 ? (
+              <p className="text-sm text-gray-400">Keine Schichtrestriktionen.</p>
+            ) : (
+              <ul className="text-sm divide-y">
+                {restrictions.map(r => {
+                  const grade = r.restrict === 2 ? 'nie' : r.restrict === 1 ? 'auf Anfrage' : 'keine';
+                  const wd = r.weekday === 7 ? 'Feiertag' : (WEEKDAY_LABELS[r.weekday] ?? '?');
+                  return (
+                    <li key={r.id} className="py-1.5 flex items-center justify-between gap-2">
+                      <span className="font-medium">{r.shift_name || `Schicht #${r.shift_id}`}</span>
+                      <span className="text-gray-500">{wd} · <span className={r.restrict === 2 ? 'text-red-600' : 'text-amber-600'}>{grade}</span></span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
 
           {/* Kommende Abwesenheiten */}

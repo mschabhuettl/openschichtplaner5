@@ -9,6 +9,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Dienstplan: **Monats-Schnellwahl** — die Monatsanzeige ist ein Direktwahl-
+  Dropdown (Januar…Dezember); ein Klick springt in jeden Monat (analog zur
+  12-Monats-Leiste des Originals). ‹/›, Heute und Strg+G bleiben.
+- Dienstplan: die Auslastungsanzeige je Mitarbeiter zeigt zusätzlich den **Saldo
+  (Ist − Soll)** als signierte, farbcodierte Kennzahl in der Namensspalte — die
+  Stunden-Bilanz ist so beim Planen sichtbar, ohne die Personaltabelle zu öffnen.
+
 ---
 
 ## [1.4.0] - 2026-06-12

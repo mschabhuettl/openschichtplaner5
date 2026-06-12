@@ -4955,9 +4955,19 @@ export default function Schedule() {
         {/* Month navigation */}
         <div className="flex items-center gap-1.5">
           <button aria-label="Vorheriger Monat" onClick={prevMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] min-w-[44px]">‹</button>
-          <span className="font-semibold text-gray-700 min-w-[120px] sm:min-w-[140px] text-center text-sm">
-            {MONTH_NAMES[month]} {year}
-          </span>
+          {/* Monats-Schnellwahl (Spec 4.1; Original: J F M A M J / J A S O N D) — Direktsprung */}
+          <select
+            aria-label="Monat wählen"
+            value={month}
+            onChange={e => setMonth(Number(e.target.value))}
+            className="font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border rounded shadow-sm text-sm min-h-[44px] px-1.5"
+            title="Monat direkt wählen"
+          >
+            {MONTH_NAMES.slice(1).map((name, i) => (
+              <option key={i + 1} value={i + 1}>{name}</option>
+            ))}
+          </select>
+          <span className="font-semibold text-gray-700 dark:text-gray-200 text-sm tabular-nums">{year}</span>
           <button aria-label="Nächster Monat" onClick={nextMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] min-w-[44px]">›</button>
           <button
             onClick={goToToday}
@@ -5991,7 +6001,9 @@ export default function Schedule() {
                         : wlPct >= 95 ? '#22c55e'
                         : wlPct >= 70 ? '#f59e0b'
                         : '#ef4444';
-                      const wlTitle = wl ? `${wl.actual}h / ${wl.target}h (${wlPct ?? '?'}%)` : '';
+                      // Saldo = Ist − Soll (Original-Kennzahl „Saldo", Spec 3.9.2)
+                      const wlSaldo = wl ? Math.round((wl.actual - wl.target) * 10) / 10 : 0;
+                      const wlTitle = wl ? `Ist ${wl.actual}h / Soll ${wl.target}h · Saldo ${wlSaldo >= 0 ? '+' : ''}${wlSaldo}h (${wlPct ?? '?'}%)` : '';
                       return (
                         <>
                           {emp.BOLD === 1
@@ -6017,6 +6029,14 @@ export default function Schedule() {
                                 </div>
                                 <span className="text-[10px] font-mono tabular-nums" style={{ color: wlColor, minWidth: 32 }}>
                                   {wl.actual}h
+                                </span>
+                                {/* Saldo (Ist−Soll) — Original-Kennzahl beim Planen */}
+                                <span
+                                  className="text-[10px] font-mono tabular-nums"
+                                  style={{ color: wlSaldo >= 0 ? '#16a34a' : '#dc2626', minWidth: 30 }}
+                                  title="Saldo (Ist − Soll)"
+                                >
+                                  {wlSaldo >= 0 ? '+' : ''}{wlSaldo}
                                 </span>
                               </div>
                             </div>

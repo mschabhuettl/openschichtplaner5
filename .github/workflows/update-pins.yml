@@ -1,0 +1,49 @@
+name: Update PyPI Pins
+
+# Zieht die PyPI-Pins (LIB_SOURCE/API_SOURCE) in Dockerfile und den
+# docker-compose-Dateien auf die jeweils neueste veröffentlichte Version
+# nach und committet direkt auf main. Ohne Versionsänderung passiert nichts.
+# Die >=-Untergrenzen in backend/requirements.txt bleiben bewusst unberührt.
+
+on:
+  schedule:
+    - cron: '0 2 * * 1'  # Jeden Montag 02:00 UTC — vor dem wöchentlichen Image-Rebuild (docker.yml, 03:00)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-pins:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Neueste PyPI-Versionen ermitteln und Pins nachziehen
+        run: |
+          set -euo pipefail
+          LIB_VER=$(curl -fsSL https://pypi.org/pypi/libopenschichtplaner5/json | jq -r .info.version)
+          API_VER=$(curl -fsSL https://pypi.org/pypi/openschichtplaner5-api/json | jq -r .info.version)
+          echo "PyPI: libopenschichtplaner5 ${LIB_VER}, openschichtplaner5-api ${API_VER}"
+          if ! [[ "${LIB_VER}" =~ ^[0-9] && "${API_VER}" =~ ^[0-9] ]]; then
+            echo "::error::PyPI-Versionsabfrage lieferte keine gültigen Versionen"
+            exit 1
+          fi
+          sed -i -E "s/libopenschichtplaner5\[postgres\]==[0-9][0-9A-Za-z.]*/libopenschichtplaner5[postgres]==${LIB_VER}/g" \
+            Dockerfile docker-compose*.yml
+          sed -i -E "s/openschichtplaner5-api==[0-9][0-9A-Za-z.]*/openschichtplaner5-api==${API_VER}/g" \
+            Dockerfile docker-compose*.yml
+          echo "LIB_VER=${LIB_VER}" >> "$GITHUB_ENV"
+          echo "API_VER=${API_VER}" >> "$GITHUB_ENV"
+
+      - name: Änderungen committen und pushen
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            echo "Pins bereits aktuell — nichts zu tun."
+            exit 0
+          fi
+          git config user.name "Matthias Schabhüttl"
+          git config user.email "matthias@matthiasschabhuettl.com"
+          git commit -am "build(docker): PyPI-Pins nachgezogen (libopenschichtplaner5 ${LIB_VER}, openschichtplaner5-api ${API_VER})"
+          git push

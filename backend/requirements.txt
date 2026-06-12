@@ -10,7 +10,7 @@ openschichtplaner5-api>=1.2.0
 libopenschichtplaner5[postgres]>=1.7.0
 
 # Used directly by scripts/seed_demo_data.py
-python-dotenv>=1.0.0
+python-dotenv>=1.2.2
 
 # Lint (make lint runs ruff from backend/.venv)
 ruff>=0.1.0

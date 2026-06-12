@@ -4,17 +4,30 @@ Priorisierte Weiterentwicklung nach dem 1.2.0-Release (Stand: Juni 2026).
 
 ## A. Offene Paritäts-Verfeinerungen (Original-Features, bewusst vertagt)
 
+> **Erledigt:** Die Tagindex-Kodierung der Schichtrestriktionen (5RESTR.WEEKDAY)
+> ist auf den Original-Index (0=Mo..6=So, 7=Feiertag) umgestellt — Backend,
+> Auto-Planung und Frontend sind konsistent, die manuelle Eintragung prüft
+> Restriktionen korrekt. (Hinweis: vor dem Fix per Web-UI angelegte Sätze
+> nutzten „0=alle, 1=Mo..7=So" — diese sollten nach dem Upgrade überprüft
+> werden; eine automatische Migration ist nicht eindeutig möglich, da ein
+> gespeichertes WEEKDAY=0 zwischen „Montag" und altem „alle" mehrdeutig ist.)
+
 Priorität 1 (fachlich relevant, klar umrissen):
-1. **Soll-/Istplan-Modus** (Original 4.12): erfordert vorab die Klärung der
-   `TYPE`-Enum-Kodierung in 5MASHI/5SPSHI an einer Live-DB mit Sollplan-Daten.
-   Danach: Plan-Umschalter in Dienstplan + "Unterschiede"-Zeile.
+1. **Soll-/Istplan-Modus** (Original 4.12): bleibt blockiert — erfordert die
+   Klärung der `TYPE`/`schedule_type`-Enum-Kodierung in 5MASHI/5SPSHI (Spec
+   D-58 markiert die Werte als unsicher, „aus dem Datenmodell allein nicht
+   auflösbar"). Die Referenz-Beispiel-DB enthält keinerlei Plandaten, der
+   Wert ist also weder dort noch über den Wine-Harness ohne umfangreiche
+   GUI-Automation eindeutig beobachtbar. Erst nach Klärung: Plan-Umschalter +
+   "Unterschiede"-Zeile. Nicht gefakt.
 2. **Abwesenheits-Anonymisierung** (SHOWABS + 5USETT ANOA*): Render-Pfad in
    Dienstplan/Einsatzplan/Berichten, api-seitige Filterung für Benutzer mit
    eingeschränktem SHOWABS.
 3. **5GRACC/5EMACC-Sichtbarkeits-Scopes** (Benutzer sieht nur "seine" Gruppen/
    Mitarbeiter inkl. Vererbung): api-Filterung + Frontend-Gruppenauswahl.
-4. **Einschränkungen vertiefen**: Bestätigungszustand "?" und Prüfung auch bei
-   manueller Eintragung (heute nur im Auto-Planner).
+4. **Einschränkungen vertiefen**: Bestätigungszustand "?" (RESTRICT-Grad; Spec
+   dort unsicher). Die Prüfung bei manueller Eintragung ist umgesetzt (Konflikt-
+   Check mit korrektem Tagindex, s. o.).
 5. **Arbeitsplatz-Zuordnung im Dienstplan** (Kontextmenü je Dienst) +
    Arbeitsplatz-Filter in der Ansicht.
 

@@ -131,7 +131,7 @@ function ForfeitSection({ groups }: { groups: Group[] }) {
       <h2 className="text-sm font-bold text-gray-700 mb-1 uppercase tracking-wide">🗓️ Resturlaub verfallen lassen (Stichtag)</h2>
       <p className="text-xs text-gray-500 mb-3">
         Kürzt den Übertrag aus dem Vorjahr auf das bis zum Stichtag Verbrauchte
-        (neuer Rest = min(alter Rest, bis Stichtag genommene Tage), Spec 5.17). Nur für Administratoren.
+        (neuer Rest = min(alter Rest, bis Stichtag genommene Tage)). Nur für Administratoren.
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
         <div>

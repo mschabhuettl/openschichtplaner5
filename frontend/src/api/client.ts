@@ -121,7 +121,7 @@ export interface DashboardStats {
 
 // ─── Dashboard Summary Types ───────────────────────────────
 // ─── Schedule Coverage (Personalbedarf-Ampel) ─────────────────
-/** Tagesstatus der Personalbedarf-Ampel (Spec 3.9.4): 'none' = kein Bedarf definiert. */
+/** Tagesstatus der Personalbedarf-Ampel: 'none' = kein Bedarf definiert. */
 export type CoverageStatus = 'under' | 'ok' | 'over' | 'none';
 
 /** Bedarfszelle Gruppe × Schichtart eines Tages (5SHDEM-Wochenbedarf bzw. 5SPDEM-Tagesbedarf). */
@@ -902,12 +902,12 @@ export interface ExtraChargeSummary {
   holrule: number;
 }
 
-// ─── Personaltabelle (GET /api/personnel-table, Spec 3.9.2/3.9.3) ──
+// ─── Personaltabelle (GET /api/personnel-table) ──
 export interface PersonnelTableRow {
   employee_id: number;
   employee_name: string;
   employee_short: string;
-  // Standardspalten (Spec 3.9.2)
+  // Standardspalten
   iststunden: number;
   sollstunden: number;
   saldo: number;
@@ -929,7 +929,7 @@ export interface PersonnelTableResponse {
   date_from: string;
   date_to: string;
   group_id: number | null;
-  /** true = Zeitraum umfasst genau ein Kalenderjahr (Spec 3.9.3 Nr. 6). */
+  /** true = Zeitraum umfasst genau ein Kalenderjahr (Doppelwert verbraucht/Rest). */
   one_year: boolean;
   /** Definition der dynamischen Spalten (Reihenfolge/Beschriftung). */
   columns: {
@@ -939,7 +939,7 @@ export interface PersonnelTableResponse {
   rows: PersonnelTableRow[];
 }
 
-// ─── Stichtags-Verfall (POST /api/leave-entitlements/forfeit, Spec 3.7.3) ──
+// ─── Stichtags-Verfall (POST /api/leave-entitlements/forfeit) ──
 export interface LeaveForfeitCut {
   employee_id: number;
   employee_name: string;
@@ -962,7 +962,7 @@ export interface LeaveForfeitResult {
   total_forfeited: number;
 }
 
-// ─── Teiltags-Abwesenheiten (5ABSEN.INTERVAL, Spec D-54) ───
+// ─── Teiltags-Abwesenheiten (5ABSEN.INTERVAL) ───
 /** 0 = ganztägig, 1 = vormittags, 2 = nachmittags, 3 = Zeitraum (start_time/end_time). */
 export type AbsenceInterval = 0 | 1 | 2 | 3;
 
@@ -1287,7 +1287,7 @@ export const api = {
     fetchJSON<DayEntry[]>(`/api/v1/schedule/day?date=${date}${groupId ? `&group_id=${groupId}` : ''}`),
 
   /** Monatsmodus: getStatistics(year, month, groupId?) —
-   *  freier Auswertungszeitraum (Spec 3.9.1): getStatistics({ from, to, group_id? }). */
+   *  freier Auswertungszeitraum: getStatistics({ from, to, group_id? }). */
   getStatistics: (
     yearOrRange: number | { from: string; to: string; group_id?: number },
     month?: number,
@@ -1301,7 +1301,7 @@ export const api = {
     return fetchJSON<EmployeeStats[]>(`/api/v1/statistics?year=${yearOrRange}&month=${month}${groupId ? `&group_id=${groupId}` : ''}`);
   },
 
-  // ─── Personaltabelle (Spec 3.9.2/3.9.3) ───────────────────
+  // ─── Personaltabelle ───────────────────
   getPersonnelTable: (from: string, to: string, groupId?: number) => {
     const p = new URLSearchParams({ from, to });
     if (groupId != null) p.set('group_id', String(groupId));
@@ -1566,7 +1566,7 @@ export const api = {
   deleteExtraCharge: (id: number) =>
     deleteReq<{ ok: boolean; hidden: number }>(`/api/v1/extracharges/${id}`),
   /** Monatsmodus: getExtraChargesSummary(year, month, employeeId?) —
-   *  freier Auswertungszeitraum (Spec 3.9.1): getExtraChargesSummary({ from, to, employee_id? }). */
+   *  freier Auswertungszeitraum: getExtraChargesSummary({ from, to, employee_id? }). */
   getExtraChargesSummary: (
     yearOrRange: number | { from: string; to: string; employee_id?: number },
     month?: number,
@@ -2133,7 +2133,7 @@ export const api = {
   createLeaveEntitlement: (data: { employee_id: number; year: number; leave_type_id: number; entitlement: number; carry_forward?: number }) =>
     postJSON<unknown>('/api/v1/leave-entitlements', data),
 
-  // ─── Stichtags-Verfall (Spec 3.7.3 / Dialog 5.17) ──────────
+  // ─── Stichtags-Verfall (Resturlaub-Kürzung zum Stichtag) ──────────
   /** Kürzt je Mitarbeiter den Resturlaub des Stichtagsjahres auf den Verbrauch
    *  bis einschließlich Stichtag; dry_run=true liefert nur die Vorschau. Admin-Rolle. */
   forfeitLeaveEntitlements: (data: { cutoff_date: string; group_id?: number; dry_run?: boolean }) =>

@@ -659,7 +659,7 @@ export default function Jahresuebersicht() {
       {/* Header */}
       <PageHeader
         title="📆 Jahresübersicht"
-        subtitle="Jahres-Tagesraster eines Mitarbeiters (Spec 4.4) und Zusammenfassung"
+        subtitle="Jahres-Tagesraster eines Mitarbeiters und Zusammenfassung"
         actions={
           <div className="flex flex-wrap items-center gap-2">
             {/* Year navigation */}

@@ -580,7 +580,7 @@ function AppInner() {
       </div>
       {/* Global search bar */}
       <GlobalSearchBar />
-      <nav aria-label="Hauptnavigation" className="flex-1 py-2 overflow-y-auto">
+      <nav aria-label="Hauptnavigation" className="flex-1 py-2 overflow-y-auto overflow-x-hidden">
         {grouped.map(({ group, items }) => {
           if (items.length === 0) return null;
           const isCollapsed = group !== '' && collapsedGroups.has(group);
@@ -607,10 +607,10 @@ function AppInner() {
                       : 'text-slate-300 hover:bg-slate-700 hover:text-white'
                   }`}
                 >
-                  <span className="text-base leading-none">{item.icon}</span>
-                  <span className="flex-1 text-left">{t.navItems[item.id as keyof typeof t.navItems] ?? item.label}</span>
+                  <span className="text-base leading-none flex-shrink-0 w-5 text-center">{item.icon}</span>
+                  <span className="flex-1 min-w-0 text-left truncate">{t.navItems[item.id as keyof typeof t.navItems] ?? item.label}</span>
                   {item.badge && conflictCount > 0 && (
-                    <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold">
+                    <span className="flex-shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold">
                       {conflictCount > 99 ? '99+' : conflictCount}
                     </span>
                   )}

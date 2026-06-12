@@ -33,6 +33,7 @@ export interface UserPreferences {
   gespeichertesMonat: number | null;  // 1-12
   gespeichertesJahr: number | null;
   sichtbareSpalten: string[];         // column keys
+  startseite: string;                 // Route, auf die beim App-Start gesprungen wird ('/' = Dashboard)
 }
 
 export interface AppSettings {
@@ -65,10 +66,32 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     gespeichertesMonat: null,
     gespeichertesJahr: null,
     sichtbareSpalten: ['name', 'schicht', 'stunden', 'abwesenheit'],
+    startseite: '/',
   },
 };
 
 const STORAGE_KEY = 'sp5_app_settings';
+
+/** Auswählbare Startseiten (Anzeigename → Route). */
+export const START_PAGE_OPTIONS: { label: string; path: string }[] = [
+  { label: 'Dashboard', path: '/' },
+  { label: 'Dienstplan', path: '/schedule' },
+  { label: 'Einsatzplan', path: '/einsatzplan' },
+  { label: 'Wochenansicht', path: '/wochenansicht' },
+  { label: 'Mein Kalender', path: '/mein-kalender' },
+];
+
+/** Konfigurierte Startseite direkt aus localStorage (ohne Hook-Timing); '/' = Default. */
+export function getStartPage(): string {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return '/';
+    const p = (JSON.parse(raw) as Partial<AppSettings>).preferences;
+    return p?.startseite || '/';
+  } catch {
+    return '/';
+  }
+}
 
 // ─── Load / Save helpers ──────────────────────────────────────────────────────
 

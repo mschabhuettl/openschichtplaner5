@@ -4,7 +4,7 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useAppSettings, DEFAULT_APP_SETTINGS } from '../hooks/useAppSettings';
+import { useAppSettings, DEFAULT_APP_SETTINGS, getStartPage } from '../hooks/useAppSettings';
 
 const KEY = 'sp5_app_settings';
 
@@ -14,6 +14,15 @@ describe('useAppSettings', () => {
   it('returns defaults when nothing is stored', () => {
     const { result } = renderHook(() => useAppSettings());
     expect(result.current.settings).toEqual(DEFAULT_APP_SETTINGS);
+  });
+
+  it('getStartPage: Default "/" und konfigurierter Wert (P-4)', () => {
+    expect(getStartPage()).toBe('/');
+    localStorage.setItem(KEY, JSON.stringify({ preferences: { startseite: '/schedule' } }));
+    expect(getStartPage()).toBe('/schedule');
+    // korrupte Daten → Default
+    localStorage.setItem(KEY, '{bad json');
+    expect(getStartPage()).toBe('/');
   });
 
   it('deep-merges a stored partial with defaults (new keys survive)', () => {

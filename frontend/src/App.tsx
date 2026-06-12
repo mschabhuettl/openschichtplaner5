@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { getStartPage } from './hooks/useAppSettings';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SSEProvider, useSSEContext } from './contexts/SSEContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -414,6 +415,20 @@ function AppInner() {
 
   // Focus management: move focus to main content after route changes
   useFocusOnNavigate('main-content');
+
+  // P-4: einmaliger Sprung auf die konfigurierte Startseite beim App-Start
+  // (z. B. Planer direkt im Dienstplan). Spätere Klicks auf „Dashboard" bleiben
+  // unberührt, da nur beim ersten Mount und nur von „/" aus umgeleitet wird.
+  const startRedirectDone = useRef(false);
+  useEffect(() => {
+    if (startRedirectDone.current) return;
+    startRedirectDone.current = true;
+    if (location.pathname === '/') {
+      const start = getStartPage();
+      if (start && start !== '/') navigate(start, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Global keyboard shortcuts via extracted hook
   useKeyboardShortcuts({

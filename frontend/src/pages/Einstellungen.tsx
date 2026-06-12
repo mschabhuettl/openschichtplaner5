@@ -3,7 +3,7 @@ import { api } from '../api/client';
 import type { UsettSettings } from '../api/client';
 import { useToast } from '../hooks/useToast';
 import { useT } from '../i18n/context';
-import { useAppSettings } from '../hooks/useAppSettings';
+import { useAppSettings, START_PAGE_OPTIONS } from '../hooks/useAppSettings';
 import { useTheme } from '../contexts/ThemeContext';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { getConflictStrategy, setConflictStrategy, type ConflictStrategy } from '../components/scheduleGridUtils';
@@ -422,6 +422,20 @@ export default function Einstellungen() {
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Startseite</label>
+                <select
+                  value={appSettings.preferences.startseite}
+                  onChange={e => updateApp('preferences', { startseite: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {START_PAGE_OPTIONS.map(o => (
+                    <option key={o.path} value={o.path}>{o.label}</option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-gray-500">Seite, die beim Anmelden/Öffnen direkt angezeigt wird.</p>
               </div>
             </div>
           </Section>

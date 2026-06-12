@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Einstellungen: konfigurierbare **Startseite** — die Seite, die beim Öffnen/
+  Anmelden direkt erscheint (Dashboard, Dienstplan, Einsatzplan, Wochenansicht,
+  Mein Kalender). Planer können so direkt im Dienstplan starten; spätere Klicks
+  auf „Dashboard" bleiben unberührt.
+
 ---
 
 ## [1.5.0] - 2026-06-12

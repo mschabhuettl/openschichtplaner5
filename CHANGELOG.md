@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.6.0] - 2026-06-12
+
 ### Added
 
 - Mitarbeiter-Detailseite (`/mitarbeiter/:id`): die Übersicht bündelt jetzt auch

@@ -146,7 +146,11 @@ co-development via `make dev-link`, see **[docs/DEVELOPMENT.md](docs/DEVELOPMENT
 
 Roles are enforced in the backend (HTTP 403) and the frontend (controls hidden);
 fine-grained per-user permissions additionally gate individual planning actions.
-Demo users: `admin` / `planer` / `leser`, password `Test1234` each.
+Demo users `admin` / `planer` / `leser` (password `Test1234` each) are seeded
+automatically in dev mode (and whenever `SP5_SEED_DEMO_USERS=1`). Production
+deployments keep this off and use the accounts from their own `5USER` table —
+those log in with their existing password (including accounts created by the
+original Schichtplaner5, whose passwords may be empty or short).
 
 ---
 

@@ -252,7 +252,10 @@ curl -s https://meine-domain.de/api/health
 
 ### 2. Change the default admin password
 
-Default credentials: `admin` / `Test1234`
+The demo accounts (`admin` / `planer` / `leser`, password `Test1234`) are only
+seeded in dev mode or with `SP5_SEED_DEMO_USERS=1` — never in a default
+production deployment. If you enabled seeding for a first login, change the
+password immediately. Default demo credentials: `admin` / `Test1234`
 
 Log in via the web UI and change the password immediately under **Settings → Users**.
 

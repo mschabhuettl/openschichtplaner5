@@ -12,6 +12,7 @@ import { useUndoRedo } from '../hooks/useUndoRedo';
 import type { UndoableAction } from '../hooks/useUndoRedo';
 import { UndoRedoStatus } from '../components/UndoRedoStatus';
 import { ResponsiveTable } from '../components/ResponsiveTable';
+import { occupiedShiftIds } from './einsatzplanUtils';
 
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 const WEEKDAY_ABBR = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
@@ -1186,6 +1187,9 @@ export default function Einsatzplan() {
   // Employee search
   const [employeeSearch, setEmployeeSearch] = useState('');
 
+  // Leere Schichtzeilen im sichtbaren Zeitraum ausblenden (Spec 4.3-5 / 4.11.10-2)
+  const [hideEmptyShifts, setHideEmptyShifts] = useState(false);
+
   // Notes for day view: empId → Note[]
   const [dayNotesMap, setDayNotesMap] = useState<Map<number, Note[]>>(new Map());
   const [notePopup, setNotePopup] = useState<{ x: number; y: number; notes: Note[] } | null>(null);
@@ -1498,6 +1502,18 @@ export default function Einsatzplan() {
     return filtered;
   }, [weekEntries, employeeSearch]);
 
+  // Schichtarten, die im sichtbaren Zeitraum besetzt sind — Grundlage für das
+  // optionale Ausblenden leerer Zeilen (Spec 4.3-5 / 4.11.10-2). Abwesend-/Frei-
+  // Zeilen bleiben immer sichtbar.
+  const visibleShifts = useMemo(() => {
+    if (!hideEmptyShifts) return shifts;
+    const entries = viewMode === 'day'
+      ? filteredDayEntries
+      : Array.from(filteredWeekEntries.values()).flat();
+    const occupied = occupiedShiftIds(entries);
+    return shifts.filter(s => occupied.has(s.ID));
+  }, [hideEmptyShifts, shifts, viewMode, filteredDayEntries, filteredWeekEntries]);
+
   const totalCount = useMemo(() => {
     if (viewMode === 'day') {
       return new Set(dayEntries.map(e => e.employee_id)).size;
@@ -1632,6 +1648,16 @@ export default function Einsatzplan() {
 
         {loading && <span className="text-sm text-blue-500 animate-pulse">Lade...</span>}
 
+        {/* Leere Schichtzeilen ausblenden (Spec 4.3-5 / 4.11.10-2) */}
+        <button
+          onClick={() => setHideEmptyShifts(v => !v)}
+          aria-pressed={hideEmptyShifts}
+          className={`no-print px-3 py-1.5 text-sm rounded shadow-sm flex items-center gap-1.5 border ${hideEmptyShifts ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600'}`}
+          title="Schichtarten ohne Einteilung im sichtbaren Zeitraum ausblenden"
+        >
+          {hideEmptyShifts ? '👁️' : '🚫'} Leere Zeilen ausblenden
+        </button>
+
         {/* Template buttons */}
         {viewMode === 'week' && (
           <button
@@ -1764,7 +1790,7 @@ export default function Einsatzplan() {
           <DayView
             date={toIsoDate(selectedDate)}
             entries={filteredDayEntries}
-            shifts={shifts}
+            shifts={visibleShifts}
             notesByEmpId={dayNotesMap}
             onNoteClick={(e, notes) => {
               e.stopPropagation();
@@ -1776,7 +1802,7 @@ export default function Einsatzplan() {
           <WeekView
             weekDates={weekDates}
             entriesByDate={filteredWeekEntries}
-            shifts={shifts}
+            shifts={visibleShifts}
             onContextMenu={(e, entry, date) => handleOpenContextMenu(e, entry, date)}
           />
         )}

@@ -94,4 +94,15 @@ describe('FormModal', () => {
     fireEvent.submit(document.querySelector('form')!);
     expect(onSubmit).toHaveBeenCalledOnce();
   });
+
+  it('panel scrolls instead of overflowing the viewport when content is tall', () => {
+    render(<FormModal {...baseProps}><p>x</p></FormModal>);
+    const panel = screen.getByRole('dialog');
+    // Bounded height + internal scroll keep the header/footer reachable
+    expect(panel.className).toMatch(/max-h-\[90vh\]/);
+    expect(panel.className).toMatch(/overflow-y-auto/);
+    // Backdrop keeps padding so the panel never touches the window edge
+    const backdrop = document.querySelector('.fixed.inset-0') as HTMLElement;
+    expect(backdrop.className).toMatch(/\bp-4\b/);
+  });
 });

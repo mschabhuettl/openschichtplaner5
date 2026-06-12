@@ -238,6 +238,14 @@ def screenshot_all():
             shot(page, "dark-mode-dashboard")
             page.evaluate("localStorage.setItem('sp5_theme', 'light')")
 
+        def jahresabschluss_verfall():
+            # Resturlaub-Verfall: Vorschau laden, damit die Kürzungstabelle sichtbar ist
+            page.goto(BASE_URL + "/jahresabschluss", timeout=30000)
+            page.wait_for_load_state("networkidle", timeout=15000)
+            page.click("text=Verfall-Vorschau", timeout=10000)
+            page.wait_for_timeout(2500)
+            shot(page, "jahresabschluss-verfall")
+
         def mobile_ansicht():
             ctx = browser.new_context(
                 viewport={"width": 390, "height": 844}, locale="de-DE",
@@ -255,6 +263,7 @@ def screenshot_all():
 
         special("dienstplan-kalender", dienstplan_kalender)
         special("dark-mode-dashboard", dark_mode_dashboard)
+        special("jahresabschluss-verfall", jahresabschluss_verfall)
         special("mobile-ansicht", mobile_ansicht)
 
         browser.close()

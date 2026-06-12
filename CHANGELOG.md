@@ -11,6 +11,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Einschränkungen: Grad-Auswahl (nie / auf Anfrage / keine, Spec 4.11) in der
+  Einschränkungs-Maske; „auf Anfrage" lässt die Eintragung mit Warnung zu.
+- Dienstplan: Gruppen-Verknüpfung Vereinigung/Schnittmenge (Spec 4.6.3) bei
+  Mehrfach-Gruppenauswahl.
 - Dienstplan: Kalenderwochen-Anzeige (Spec 4.11) — „KW"-Umschalter blendet die
   ISO-Kalenderwoche im Tageskopf (montags) ein.
 - Dienstplan: Arbeitsplatz-Filter (Spec 4.7) in der Filterleiste; Einträge zeigen

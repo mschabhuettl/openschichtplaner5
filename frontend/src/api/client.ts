@@ -1609,7 +1609,7 @@ export const api = {
   // ─── Restrictions ─────────────────────────────────────────
   getRestrictions: (employeeId?: number) =>
     fetchJSON<Restriction[]>(employeeId != null ? `/api/v1/restrictions?employee_id=${employeeId}` : '/api/v1/restrictions'),
-  addRestriction: (data: { employee_id: number; shift_id: number; reason?: string; weekday?: number }) =>
+  addRestriction: (data: { employee_id: number; shift_id: number; reason?: string; weekday?: number; grade?: number }) =>
     postJSON<{ ok: boolean; record: unknown }>('/api/v1/restrictions', data),
   removeRestriction: (employeeId: number, shiftId: number, weekday = 0) =>
     deleteReq<{ ok: boolean; removed: number }>(`/api/v1/restrictions/${employeeId}/${shiftId}?weekday=${weekday}`),

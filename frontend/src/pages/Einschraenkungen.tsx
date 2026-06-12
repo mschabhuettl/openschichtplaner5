@@ -34,6 +34,8 @@ export default function Einschraenkungen() {
   const [formShiftId, setFormShiftId] = useState<number>(0);
   const [formReason, setFormReason] = useState('');
   const [formWeekday, setFormWeekday] = useState<number>(0);
+  // Einschränkungs-Grad (Spec 4.11): 0=keine, 1=auf Anfrage, 2=nie
+  const [formGrade, setFormGrade] = useState<number>(2);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -77,6 +79,7 @@ export default function Einschraenkungen() {
         shift_id: formShiftId,
         reason: formReason,
         weekday: formWeekday,
+        grade: formGrade,
       });
       setShowForm(false);
       setFormReason('');
@@ -189,6 +192,19 @@ export default function Einschraenkungen() {
                   <option key={i} value={i}>{l}</option>
                 ))}
                 <option value={7}>Feiertag</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Grad</label>
+              <select
+                value={formGrade}
+                onChange={e => setFormGrade(Number(e.target.value))}
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                title="nie = harte Sperre, auf Anfrage = nur mit Warnung einteilbar"
+              >
+                <option value={2}>nie (Sperre)</option>
+                <option value={1}>auf Anfrage (?)</option>
+                <option value={0}>keine</option>
               </select>
             </div>
             <div>

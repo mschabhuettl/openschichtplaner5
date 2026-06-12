@@ -28,9 +28,12 @@ Priorität 1 (fachlich relevant, klar umrissen):
    eingeschränktem SHOWABS.
 3. **5GRACC/5EMACC-Sichtbarkeits-Scopes** (Benutzer sieht nur "seine" Gruppen/
    Mitarbeiter inkl. Vererbung): api-Filterung + Frontend-Gruppenauswahl.
-4. **Einschränkungen vertiefen**: Bestätigungszustand "?" (RESTRICT-Grad; Spec
-   dort unsicher). Die Prüfung bei manueller Eintragung ist umgesetzt (Konflikt-
-   Check mit korrektem Tagindex, s. o.).
+4. ~~**Einschränkungen vertiefen**: Bestätigungszustand "?" (RESTRICT-Grad)~~ —
+   **erledigt (Zyklus 5):** 5RESTR.RESTRICT aus dem Dekompilat geklärt — **0=keine,
+   1=„auf Anfrage" („?"), 2=„nie"** (Spec-Tabelle + D-58 nachgeführt). Umgesetzt:
+   `set_restriction(grade=…)` (Default 2=nie), der Konflikt-Check sperrt hart nur
+   bei „nie" (409), „auf Anfrage" lässt die Eintragung mit Warnung zu, „keine"
+   greift nicht; UI-Auswahl des Grades in der Einschränkungs-Maske.
 5. **Arbeitsplatz-Zuordnung im Dienstplan** (Kontextmenü je Dienst) +
    Arbeitsplatz-Filter in der Ansicht.
 

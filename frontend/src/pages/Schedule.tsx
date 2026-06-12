@@ -2025,6 +2025,8 @@ export default function Schedule() {
   const [planMode, setPlanMode] = useState<'ist' | 'soll' | 'both'>('ist');
   // Kalenderwoche im Tageskopf anzeigen (Spec 4.11)
   const [showWeekNumbers, setShowWeekNumbers] = useState(false);
+  // Gruppen-Verknüpfung (Spec 4.6.3): Vereinigung (Vorgabe) oder Schnittmenge
+  const [groupCombineMode, setGroupCombineMode] = useState<'union' | 'intersection'>('union');
   const [holidays, setHolidays] = useState<Set<string>>(new Set());
   const [shifts, setShifts] = useState<ShiftType[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
@@ -2616,7 +2618,23 @@ export default function Schedule() {
       return sortEmployees(filtered).map(e => ({ type: 'employee' as const, employee: e }));
     }
 
-    // Multiple groups: show with separators
+    // Schnittmenge (Spec 4.6.3): nur MA in ALLEN gewählten Gruppen, flache Liste
+    if (groupCombineMode === 'intersection' && selectedGroupIds.length > 1) {
+      const inter = employees.filter(e =>
+        selectedGroupIds.every(gid => (groupMembersMap.get(gid) ?? new Set<number>()).has(e.ID))
+        && matchesSearch(e) && isActive(e),
+      );
+      const label = selectedGroupIds
+        .map(gid => groups.find(g => g.ID === gid)?.NAME ?? `Gruppe ${gid}`)
+        .join(' ∩ ');
+      const rows: DisplayRow[] = [
+        { type: 'group-header', groupId: selectedGroupIds[0], groupName: `(${label})` },
+      ];
+      for (const e of sortEmployees(inter)) rows.push({ type: 'employee', employee: e });
+      return rows;
+    }
+
+    // Vereinigung: jede Gruppe mit Trenner
     const rows: DisplayRow[] = [];
     for (const gid of selectedGroupIds) {
       const group = groups.find(g => g.ID === gid);
@@ -2629,7 +2647,7 @@ export default function Schedule() {
     }
     return rows;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedGroupIds, employees, groups, groupMembersMap, employeeSearch, filterLetter, filterEmployeeIds, showTerminated, year, month, employeeSort]);
+  }, [selectedGroupIds, groupCombineMode, employees, groups, groupMembersMap, employeeSearch, filterLetter, filterEmployeeIds, showTerminated, year, month, employeeSort]);
 
   // Employees only (for export and counters)
   const displayEmployees = useMemo(
@@ -5059,6 +5077,22 @@ export default function Schedule() {
           selectedIds={selectedGroupIds}
           onChange={setSelectedGroupIds}
         />
+
+        {/* Vereinigung/Schnittmenge bei Mehrfachauswahl (Spec 4.6.3) */}
+        {selectedGroupIds.length > 1 && (
+          <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden shadow-sm no-print text-xs">
+            <button
+              onClick={() => setGroupCombineMode('union')}
+              className={`px-2 py-1.5 ${groupCombineMode === 'union' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50'}`}
+              title="Vereinigung: Mitarbeiter aus mindestens einer Gruppe"
+            >∪ Vereinigung</button>
+            <button
+              onClick={() => setGroupCombineMode('intersection')}
+              className={`px-2 py-1.5 border-l border-gray-300 dark:border-gray-600 ${groupCombineMode === 'intersection' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50'}`}
+              title="Schnittmenge: Mitarbeiter in allen gewählten Gruppen"
+            >∩ Schnittmenge</button>
+          </div>
+        )}
 
         <EmployeeCountBadge
           visible={filteredDisplayRows.filter(r => r.type === 'employee').length}

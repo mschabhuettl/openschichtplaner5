@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.4.0] - 2026-06-12
+
 ### Added
 
 - Einschränkungen: Grad-Auswahl (nie / auf Anfrage / keine, Spec 4.11) in der

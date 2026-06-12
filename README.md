@@ -79,7 +79,7 @@ The key differentiator: OpenSchichtplaner5 reads and writes the **original `.DBF
 Images are built on every release and published to the GitHub Container Registry:
 
 ```bash
-docker pull ghcr.io/mschabhuettl/openschichtplaner5:latest   # or :1.2.0
+docker pull ghcr.io/mschabhuettl/openschichtplaner5:latest   # or :1.3.0
 ```
 
 The image serves SPA + API from a single container on port 8000. Mount the

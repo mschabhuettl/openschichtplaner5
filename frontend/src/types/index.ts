@@ -141,6 +141,7 @@ export interface ScheduleEntry {
   shift_id?: number;
   leave_type_id?: number;
   workplace_id?: number;
+  workplace_name?: string;
   display_name: string;
   color_bk: string;
   color_text: string;

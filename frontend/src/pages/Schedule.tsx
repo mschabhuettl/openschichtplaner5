@@ -1619,9 +1619,9 @@ const HoverTooltip = memo(function HoverTooltip({
       {shiftTimes && (
         <div className="text-green-300 text-[10px] mb-0.5">⏰ {shiftTimes}</div>
       )}
-      {entry?.workplace_id != null && (
-        <div className="text-gray-600 text-[10px] mb-0.5">📍 Arbeitsplatz #{entry.workplace_id}</div>
-      )}
+      {entry?.workplace_id ? (
+        <div className="text-gray-600 text-[10px] mb-0.5">📍 {entry.workplace_name || `Arbeitsplatz #${entry.workplace_id}`}</div>
+      ) : null}
       {/* Schicht-Statistik */}
       {entry?.kind === 'shift' && entry.shift_id != null && (
         <div className="mt-1 pt-1 border-t border-gray-700 space-y-0.5">
@@ -2070,6 +2070,7 @@ export default function Schedule() {
   // Filters
   const [filterShiftId, setFilterShiftId] = useState<number | ''>('');
   const [filterLeaveId, setFilterLeaveId] = useState<number | ''>('');
+  const [filterWorkplaceId, setFilterWorkplaceId] = useState<number | ''>('');
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [filterLetter, setFilterLetter] = useState('');
   const [filterEmployeeIds, setFilterEmployeeIds] = useState<number[]>([]);
@@ -2633,22 +2634,34 @@ export default function Schedule() {
     return letters;
   }, [employees]);
 
-  // Apply shift/leave filter: which employee rows to show
+  // Apply shift/leave/workplace filter: which employee rows to show
   const filteredDisplayRows = useMemo(() => {
-    if (!filterShiftId && !filterLeaveId) return displayRows;
+    if (!filterShiftId && !filterLeaveId && !filterWorkplaceId) return displayRows;
     return displayRows.filter(row => {
       if (row.type === 'group-header') return true; // always show group headers
       const emp = row.employee!;
-      // Check if this employee has the selected shift or leave type in any day
+      // Check if this employee has the selected shift/leave/workplace in any day
       for (let d = 1; d <= daysInMonth; d++) {
         for (const entry of entryMap.get(`${emp.ID}-${d}`) ?? []) {
           if (filterShiftId && entry.shift_id === filterShiftId) return true;
           if (filterLeaveId && entry.leave_type_id === filterLeaveId) return true;
+          if (filterWorkplaceId && entry.workplace_id === filterWorkplaceId) return true;
         }
       }
       return false;
     });
-  }, [displayRows, filterShiftId, filterLeaveId, entryMap, daysInMonth]);
+  }, [displayRows, filterShiftId, filterLeaveId, filterWorkplaceId, entryMap, daysInMonth]);
+
+  // Arbeitsplätze aus den geladenen Einträgen (id → Name) für den Filter (Spec 4.7)
+  const workplaceOptions = useMemo(() => {
+    const m = new Map<number, string>();
+    for (const e of entries) {
+      if (e.workplace_id && !m.has(e.workplace_id)) {
+        m.set(e.workplace_id, e.workplace_name || `#${e.workplace_id}`);
+      }
+    }
+    return Array.from(m, ([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
+  }, [entries]);
 
   // Entries for display employees only (used by Auslastungsbereich)
   const filteredEntries = useMemo(() => {
@@ -5228,6 +5241,7 @@ export default function Schedule() {
         const activeFilterCount = [
           filterShiftId !== '',
           filterLeaveId !== '',
+          filterWorkplaceId !== '',
           employeeSearch !== '',
           filterLetter !== '',
           filterEmployeeIds.length > 0,
@@ -5248,7 +5262,7 @@ export default function Schedule() {
               {activeFilterCount > 0 && (
                 <button
                   className="ml-auto text-xs px-2 py-0.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                  onClick={e => { e.stopPropagation(); setFilterShiftId(''); setFilterLeaveId(''); setEmployeeSearch(''); setFilterLetter(''); setFilterEmployeeIds([]); }}
+                  onClick={e => { e.stopPropagation(); setFilterShiftId(''); setFilterLeaveId(''); setFilterWorkplaceId(''); setEmployeeSearch(''); setFilterLetter(''); setFilterEmployeeIds([]); }}
                 >
                   × Zurücksetzen
                 </button>
@@ -5282,6 +5296,23 @@ export default function Schedule() {
                     ))}
                   </select>
                 </div>
+
+                {/* Workplace filter (Spec 4.7) */}
+                {workplaceOptions.length > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <label className="text-xs text-gray-500 whitespace-nowrap">Arbeitsplatz:</label>
+                    <select
+                      value={filterWorkplaceId}
+                      onChange={e => setFilterWorkplaceId(e.target.value ? Number(e.target.value) : '')}
+                      className="text-xs px-2 py-1 border rounded bg-white"
+                    >
+                      <option value="">Alle</option>
+                      {workplaceOptions.map(wp => (
+                        <option key={wp.id} value={wp.id}>{wp.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
                 {/* Employee text search */}
                 <div className="flex items-center gap-1.5">

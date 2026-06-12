@@ -34,6 +34,7 @@ interface SP5User {
   WDUTIES?: boolean;
   WABSENCES?: boolean;
   BACKUP?: boolean;
+  SHOWABS?: number;  // dreiwertig: 0=vollständig, 1=anonymisiert, 2=gar nicht
 }
 
 type Role = 'Admin' | 'Planer' | 'Leser';
@@ -43,6 +44,7 @@ interface UserForm {
   DESCRIP: string;
   PASSWORD: string;
   role: Role;
+  SHOWABS: number;
 }
 
 const EMPTY_FORM: UserForm = {
@@ -50,6 +52,7 @@ const EMPTY_FORM: UserForm = {
   DESCRIP: '',
   PASSWORD: '',
   role: 'Leser',
+  SHOWABS: 0,
 };
 
 type EmployeeAccessRecord = { id: number; user_id: number; employee_id: number; rights: number };
@@ -673,6 +676,7 @@ export default function Benutzerverwaltung() {
       DESCRIP: u.DESCRIP,
       PASSWORD: '',
       role: (u.role as Role) ?? 'Leser',
+      SHOWABS: u.SHOWABS ?? 0,
     });
     setFormError(null);
     setShowModal(true);
@@ -688,13 +692,17 @@ export default function Benutzerverwaltung() {
 
     setSaving(true);
     try {
-      const payload: Record<string, string> = {
+      const payload: Record<string, string | number> = {
         NAME: form.NAME.trim(),
         DESCRIP: form.DESCRIP.trim(),
         role: form.role,
       };
       if (form.PASSWORD.trim()) {
         payload.PASSWORD = form.PASSWORD;
+      }
+      // Abwesenheits-Sichtbarkeit nur für Nicht-Admins relevant (Admin = voll)
+      if (form.role !== 'Admin') {
+        payload.SHOWABS = form.SHOWABS;
       }
 
       const url = editId !== null ? `${API_BASE}/api/v1/users/${editId}` : `${API_BASE}/api/v1/users`;
@@ -1098,6 +1106,27 @@ export default function Benutzerverwaltung() {
                   {form.role === 'Leser' && 'Nur Lesezugriff auf Dienstpläne und Stammdaten.'}
                 </p>
               </div>
+
+              {form.role !== 'Admin' && (
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                    Abwesenheiten anzeigen
+                  </label>
+                  <select
+                    value={form.SHOWABS}
+                    onChange={e => setForm(f => ({ ...f, SHOWABS: Number(e.target.value) }))}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value={0}>Vollständig</option>
+                    <option value={1}>Anonymisiert</option>
+                    <option value={2}>Gar nicht</option>
+                  </select>
+                  <p className="mt-1.5 text-xs text-slate-500">
+                    Steuert, wie dieser Benutzer Abwesenheiten im Dienst-/Einsatzplan
+                    sieht (anonymisiert = Einheitsname „Abwesend").
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Modal Footer */}

@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Benutzerverwaltung: dreiwertige Einstellung „Abwesenheiten anzeigen"
+  (vollständig / anonymisiert / gar nicht) je Nicht-Admin-Benutzer. Anonymisierte
+  bzw. ausgeblendete Abwesenheiten werden serverseitig durchgesetzt und wirken im
+  Dienstplan, Einsatzplan und Dienstplan-Druck (Spec 9.5.2 / 9.2).
+
 ---
 
 ## [1.3.0] - 2026-06-12

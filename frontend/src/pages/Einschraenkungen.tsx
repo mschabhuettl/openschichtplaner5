@@ -179,16 +179,16 @@ export default function Einschraenkungen() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Wochentag (0=alle)</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Wochentag</label>
               <select
                 value={formWeekday}
                 onChange={e => setFormWeekday(Number(e.target.value))}
                 className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
               >
-                <option value={0}>Alle Wochentage</option>
                 {WEEKDAY_LABELS.map((l, i) => (
-                  <option key={i + 1} value={i + 1}>{l}</option>
+                  <option key={i} value={i}>{l}</option>
                 ))}
+                <option value={7}>Feiertag</option>
               </select>
             </div>
             <div>
@@ -282,9 +282,9 @@ export default function Einschraenkungen() {
                               </div>
                               <div className="text-xs text-gray-500 flex items-center gap-2">
                                 <span>
-                                  {r.weekday === 0
-                                    ? '🔒 Alle Wochentage'
-                                    : `📅 Nur ${WEEKDAY_LABELS[r.weekday - 1]}`}
+                                  {r.weekday === 7
+                                    ? '📅 Nur Feiertag'
+                                    : `📅 Nur ${WEEKDAY_LABELS[r.weekday] ?? r.weekday}`}
                                 </span>
                                 {r.reason && (
                                   <>

@@ -11,6 +11,9 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Dienstplan: Soll-/Istplan-Umschalter (Istplan / Sollplan / Soll- & Istplan,
+  Spec 4.12). Sollplan-Einträge werden mit „S" und gestricheltem Rahmen
+  gekennzeichnet; die Auto-Planung/Eintragung schreibt standardmäßig Istplan.
 - Benutzerverwaltung: dreiwertige Einstellung „Abwesenheiten anzeigen"
   (vollständig / anonymisiert / gar nicht) je Nicht-Admin-Benutzer. Anonymisierte
   bzw. ausgeblendete Abwesenheiten werden serverseitig durchgesetzt und wirken im

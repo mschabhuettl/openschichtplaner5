@@ -13,13 +13,16 @@ Priorisierte Weiterentwicklung nach dem 1.2.0-Release (Stand: Juni 2026).
 > gespeichertes WEEKDAY=0 zwischen „Montag" und altem „alle" mehrdeutig ist.)
 
 Priorität 1 (fachlich relevant, klar umrissen):
-1. **Soll-/Istplan-Modus** (Original 4.12): bleibt blockiert — erfordert die
-   Klärung der `TYPE`/`schedule_type`-Enum-Kodierung in 5MASHI/5SPSHI (Spec
-   D-58 markiert die Werte als unsicher, „aus dem Datenmodell allein nicht
-   auflösbar"). Die Referenz-Beispiel-DB enthält keinerlei Plandaten, der
-   Wert ist also weder dort noch über den Wine-Harness ohne umfangreiche
-   GUI-Automation eindeutig beobachtbar. Erst nach Klärung: Plan-Umschalter +
-   "Unterschiede"-Zeile. Nicht gefakt.
+1. ~~**Soll-/Istplan-Modus** (Original 4.12)~~ — **erledigt (Zyklus 5):** Die
+   `TYPE`-Kodierung in **5MASHI** ist aus dem Dekompilat geklärt — **0 = Istplan**
+   (Normaleintrag, Konstruktor-Default), **1 = Sollplan** (drei unabhängige
+   Render-Funktionen in SP5V.dll + Helfer in SP5R.dll verzweigen identisch;
+   Serialisierungs-Tag `L"Type"`; Spec D-58 nachgeführt). Umgesetzt: `get_schedule`
+   trägt `schedule_type` und filtert per `plan`-Argument (`ist`/`soll`/`both`),
+   Default = Istplan; `add_schedule_entry` schreibt `TYPE`, Soll- und Ist-Eintrag
+   dürfen am selben Tag koexistieren; `/api/schedule?plan=…`; Plan-Umschalter im
+   Dienstplan mit Soll-Kennzeichnung. **5SPSHI.TYPE** bleibt bewusst ausgenommen
+   (kodiert Sonderdienst vs. Arbeitszeitabweichung, nicht Soll/Ist — D-53/3.4.4).
 2. **Abwesenheits-Anonymisierung** (SHOWABS + 5USETT ANOA*): Render-Pfad in
    Dienstplan/Einsatzplan/Berichten, api-seitige Filterung für Benutzer mit
    eingeschränktem SHOWABS.

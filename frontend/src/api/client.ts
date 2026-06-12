@@ -1278,8 +1278,8 @@ export const api = {
   getLeaveTypes: () => fetchJSON<LeaveType[]>('/api/v1/leave-types'),
   getWorkplaces: () => fetchJSON<Workplace[]>('/api/v1/workplaces'),
   getHolidays: (year?: number) => fetchJSON<Holiday[]>(`/api/v1/holidays${year ? `?year=${year}` : ''}`),
-  getSchedule: (year: number, month: number, groupId?: number) =>
-    fetchJSON<ScheduleEntry[]>(`/api/v1/schedule?year=${year}&month=${month}${groupId ? `&group_id=${groupId}` : ''}`),
+  getSchedule: (year: number, month: number, groupId?: number, plan?: 'ist' | 'soll' | 'both') =>
+    fetchJSON<ScheduleEntry[]>(`/api/v1/schedule?year=${year}&month=${month}${groupId ? `&group_id=${groupId}` : ''}${plan ? `&plan=${plan}` : ''}`),
   getUsers: () => fetchJSON<User[]>('/api/v1/users'),
 
   // New endpoints

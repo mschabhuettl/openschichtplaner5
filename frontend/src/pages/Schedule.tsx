@@ -2010,6 +2010,8 @@ export default function Schedule() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [entries, setEntries] = useState<ScheduleEntry[]>([]);
+  // Soll-/Istplan-Sicht (Spec 4.12): 'ist' (Vorgabe), 'soll', 'both' (Soll+Ist)
+  const [planMode, setPlanMode] = useState<'ist' | 'soll' | 'both'>('ist');
   const [holidays, setHolidays] = useState<Set<string>>(new Set());
   const [shifts, setShifts] = useState<ShiftType[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
@@ -2223,7 +2225,7 @@ export default function Schedule() {
     // Always load without group filter; filtering done client-side for multi-group
     const groupIdForConflicts = selectedGroupIds.length === 1 ? selectedGroupIds[0] : undefined;
     Promise.all([
-      api.getSchedule(year, month),
+      api.getSchedule(year, month, undefined, planMode),
       api.getHolidays(year),
       api.getConflicts({ year, month, group_id: groupIdForConflicts }).catch(() => ({ conflicts: [] as ConflictEntry[] })),
     ]).then(([sched, hols, conflictsResult]) => {
@@ -2240,7 +2242,7 @@ export default function Schedule() {
   useEffect(() => {
     loadSchedule();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [year, month]);
+  }, [year, month, planMode]);
 
   // SSE: auto-refresh when schedule or conflicts change remotely
   useSSERefresh(['schedule_changed', 'conflict_updated', 'absence_changed'], loadSchedule);
@@ -4929,6 +4931,19 @@ export default function Schedule() {
             🗓
           </button>
         </div>
+
+        {/* Soll-/Istplan-Sicht (Spec 4.12) */}
+        <select
+          aria-label="Planart"
+          value={planMode}
+          onChange={e => setPlanMode(e.target.value as 'ist' | 'soll' | 'both')}
+          className="px-2 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-sm text-sm text-gray-700 dark:text-gray-200 no-print"
+          title="Soll-/Istplan-Modus"
+        >
+          <option value="ist">Istplan</option>
+          <option value="soll">Sollplan</option>
+          <option value="both">Soll- &amp; Istplan</option>
+        </select>
 
         {/* Desktop view toggle: Tabelle / Woche / Kalender */}
         {!isMobile && (

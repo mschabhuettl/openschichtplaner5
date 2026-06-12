@@ -5,7 +5,7 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
-import { ScheduleCellStack, CYCLE_TITLE } from '../components/ScheduleCellStack';
+import { ScheduleCellStack, CYCLE_TITLE, SOLL_TITLE } from '../components/ScheduleCellStack';
 import type { ScheduleEntry } from '../types';
 
 function entry(partial: Partial<ScheduleEntry>): ScheduleEntry {
@@ -70,5 +70,27 @@ describe('ScheduleCellStack', () => {
     expect(cycleChip.textContent).toContain('↻');
     // Manueller Eintrag ohne Zyklus-Badge
     expect(screen.getByText('F').textContent).not.toContain('↻');
+  });
+
+  it('kennzeichnet Sollplan-Einträge mit „S" und Tooltip (Spec 4.12)', () => {
+    render(<ScheduleCellStack entries={[entry({ schedule_type: 1, display_name: 'F' })]} />);
+    const el = screen.getByTitle(SOLL_TITLE);
+    expect(el.textContent).toContain('S');
+    expect(el.textContent).toContain('F');
+  });
+
+  it('unterscheidet Soll und Ist im Stapel', () => {
+    render(
+      <ScheduleCellStack
+        entries={[
+          entry({ display_name: 'F', schedule_type: 0, shift_name: 'Früh' }),
+          entry({ display_name: 'S', schedule_type: 1, shift_name: 'Spät' }),
+        ]}
+      />,
+    );
+    const sollChip = screen.getByTitle(`Spät · ${SOLL_TITLE}`);
+    expect(sollChip.textContent).toContain('S');
+    // Istplan-Eintrag ohne Soll-Tooltip
+    expect(screen.getByTitle('Früh')).toBeTruthy();
   });
 });

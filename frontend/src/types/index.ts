@@ -149,6 +149,10 @@ export interface ScheduleEntry {
   custom_name?: string;
   /** 'cycle' = generierter Zyklusdienst (5CYASS-Expansion); fehlt/null bei manuellen Einträgen. */
   source?: 'cycle' | null;
+  /** Soll-/Istplan (Spec 4.12): 0=Istplan (Normaleintrag), 1=Sollplan (Zielvorgabe). Nur bei kind==='shift'. */
+  schedule_type?: number;
+  /** anonymisierte Abwesenheit (5USER.SHOWABS=1) — Anzeige bereits serverseitig ersetzt. */
+  anonymized?: boolean;
 }
 
 export interface User {

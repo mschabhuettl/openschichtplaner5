@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useAuth, type DevViewRole } from '../contexts/AuthContext';
 
 const ROLES: { key: DevViewRole; label: string; icon: string; desc: string }[] = [
-  { key: 'dev',    label: 'Dev',    icon: '🔧', desc: 'Vollzugriff' },
-  { key: 'admin',  label: 'Admin',  icon: '👑', desc: 'Admin-Ansicht' },
+  { key: 'admin',  label: 'Admin',  icon: '👑', desc: 'Admin-Ansicht (Vollzugriff)' },
   { key: 'planer', label: 'Planer', icon: '📅', desc: 'Planer-Ansicht' },
   { key: 'lese',   label: 'Leser',  icon: '👁️', desc: 'Nur-Lesen-Ansicht' },
 ];
@@ -33,8 +32,8 @@ export function DevRoleSwitcher() {
         title="Dev View-Role Simulator — Backend läuft immer als Dev"
         style={{
           background: '#1c1917',
-          color: devViewRole === 'dev' ? '#fbbf24' : '#fb923c',
-          border: `2px solid ${devViewRole === 'dev' ? '#f59e0b' : '#ea580c'}`,
+          color: '#fb923c',
+          border: '2px solid #ea580c',
           borderRadius: '8px',
           padding: isMobile ? '3px 7px' : '6px 12px',
           cursor: 'pointer',
@@ -44,12 +43,12 @@ export function DevRoleSwitcher() {
           display: 'flex',
           alignItems: 'center',
           gap: isMobile ? '4px' : '6px',
-          boxShadow: `0 2px 10px ${devViewRole === 'dev' ? 'rgba(245,158,11,0.35)' : 'rgba(234,88,12,0.35)'}`,
+          boxShadow: '0 2px 10px rgba(234,88,12,0.35)',
           whiteSpace: 'nowrap',
           opacity: 0.85,
         }}
       >
-        {current.icon} {isMobile ? current.label : (devViewRole === 'dev' ? 'DEV MODE' : `Ansicht: ${current.label}`)} ▾
+        {current.icon} {isMobile ? current.label : `Ansicht: ${current.label}`} ▾
       </button>
 
       {open && (

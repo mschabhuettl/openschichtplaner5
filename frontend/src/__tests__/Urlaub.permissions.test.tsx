@@ -36,7 +36,7 @@ function setAuth(can: (perm: string) => boolean) {
   authMock.mockReturnValue({
     user: { ID: 9, NAME: 'P', role: 'Planer', WABSENCES: true },
     isDevMode: false,
-    devViewRole: 'dev',
+    devViewRole: 'admin',
     canWrite: true,
     canWriteDuties: true,
     canWriteAbsences: true,

@@ -158,7 +158,7 @@ function RoleRoute({ allowedRoles, children }: { allowedRoles: Array<'Admin' | '
   const { user, isDevMode, devViewRole } = useAuth();
   let role: 'Admin' | 'Planer' | 'Leser';
   if (isDevMode) {
-    role = devViewRole === 'admin' ? 'Admin' : devViewRole === 'planer' ? 'Planer' : devViewRole === 'dev' ? 'Admin' : 'Leser';
+    role = devViewRole === 'admin' ? 'Admin' : devViewRole === 'planer' ? 'Planer' : 'Leser';
   } else {
     role = (user?.role as 'Admin' | 'Planer' | 'Leser') ?? 'Leser';
   }
@@ -462,10 +462,8 @@ function AppInner() {
     if (!item.roles) return true; // no restriction
     if (isDevMode) {
       // In dev mode, simulate visibility based on devViewRole
-      if (devViewRole === 'dev') return true;
-      const simRole = devViewRole === 'admin' ? 'Admin'
-        : devViewRole === 'planer' ? 'Planer'
-        : 'Leser';
+      if (devViewRole === 'admin') return true;
+      const simRole = devViewRole === 'planer' ? 'Planer' : 'Leser';
       return item.roles.includes(simRole as 'Admin' | 'Planer' | 'Leser');
     }
     const role = user?.role ?? 'Leser';

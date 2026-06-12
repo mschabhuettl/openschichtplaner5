@@ -16,7 +16,7 @@ function setAuth(overrides: Record<string, unknown> = {}) {
   authMock.mockReturnValue({
     user: { role: 'Planer' },
     isDevMode: false,
-    devViewRole: 'dev',
+    devViewRole: 'admin',
     canWrite: true,
     canWriteDuties: true,
     canWriteAbsences: true,

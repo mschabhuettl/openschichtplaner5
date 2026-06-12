@@ -114,7 +114,7 @@ describe('AuthContext', () => {
   it('setDevViewRole is a no-op outside dev mode', () => {
     const { result } = setup();
     act(() => result.current.setDevViewRole('admin'));
-    expect(result.current.devViewRole).toBe('dev');
+    expect(result.current.devViewRole).toBe('admin');
   });
 
   // ── Non-dev capability derivation ────────────────────────────

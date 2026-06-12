@@ -26,7 +26,7 @@ describe('usePermissions', () => {
   beforeEach(() => authMock.mockReset());
 
   it('grants everything in dev full-view (devMode + devViewRole=dev)', () => {
-    setAuth({ isDevMode: true, devViewRole: 'dev' });
+    setAuth({ isDevMode: true, devViewRole: 'admin' });
     const { result } = renderHook(() => usePermissions());
     expect(result.current).toEqual({
       canEditSchedule: true,

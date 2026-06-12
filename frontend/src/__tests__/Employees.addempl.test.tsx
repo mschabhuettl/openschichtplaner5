@@ -52,7 +52,7 @@ function setAuth(opts: { role: string; canAdmin: boolean; can: (perm: string) =>
   authMock.mockReturnValue({
     user: { ID: 9, NAME: 'U', role: opts.role },
     isDevMode: false,
-    devViewRole: 'dev',
+    devViewRole: 'admin',
     canAdmin: opts.canAdmin,
     canWrite: true,
     canWriteOvertimes: true,

@@ -3,8 +3,8 @@ import { useAuth } from '../contexts/AuthContext';
 export function usePermissions() {
   const { user, isDevMode, devViewRole, canWriteDuties, canWriteAbsences, canAdmin } = useAuth();
 
-  // In dev mode with 'dev' view-role: full access to everything
-  const isFullDevView = isDevMode && (devViewRole === 'dev');
+  // In dev mode with the highest ('admin') view-role: full access
+  const isFullDevView = isDevMode && (devViewRole === 'admin');
 
   return {
     // Kann Schicht im Dienstplan setzen/löschen?

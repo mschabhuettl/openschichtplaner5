@@ -44,7 +44,7 @@ function setAuth(opts: { canWrite: boolean; can: (perm: string) => boolean }) {
   authMock.mockReturnValue({
     user: { ID: 9, NAME: 'P', role: 'Planer' },
     isDevMode: false,
-    devViewRole: 'dev',
+    devViewRole: 'admin',
     canWrite: opts.canWrite,
     can: opts.can,
   } as unknown as ReturnType<typeof useAuth>);

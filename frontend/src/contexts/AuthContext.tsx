@@ -30,14 +30,14 @@ export interface CurrentUser {
 }
 
 /** The roles available in the dev view-role simulator. */
-export type DevViewRole = 'dev' | 'admin' | 'planer' | 'lese';
+export type DevViewRole = 'admin' | 'planer' | 'lese';
 
 export interface AuthContextType {
   user: CurrentUser | null;
   isDevMode: boolean;
   /**
    * Dev-mode simulation: which role perspective to render the UI as.
-   * Always 'dev' for non-dev sessions. Does NOT affect backend auth —
+   * Always 'admin' (highest) for non-dev sessions. Does NOT affect backend auth —
    * all API calls still use the full dev token.
    */
   devViewRole: DevViewRole;
@@ -132,12 +132,7 @@ function devViewPermissions(role: DevViewRole) {
         simulatedRole: 'Planer' as const,
       };
     case 'admin':
-      return {
-        canWrite: true, canWriteDuties: true, canWriteAbsences: true,
-        canWriteOvertimes: true, canAdmin: true, canBackup: true,
-        simulatedRole: 'Admin' as const,
-      };
-    default: // 'dev' — full access
+    default: // 'admin' — full access (highest simulated level)
       return {
         canWrite: true, canWriteDuties: true, canWriteAbsences: true,
         canWriteOvertimes: true, canAdmin: true, canBackup: true,
@@ -158,7 +153,7 @@ function devViewCan(role: DevViewRole, perm: string): boolean {
       return perm === 'showabs' || perm === 'shownotes' || perm === 'showstats';
     case 'planer':
       return perm !== 'wswaponly' && perm !== 'addempl' && perm !== 'backup';
-    default: // 'dev' und 'admin': Vollzugriff
+    default: // 'admin': Vollzugriff
       return true;
   }
 }
@@ -180,7 +175,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [isDevMode, setIsDevMode] = useState(false);
-  const [devViewRole, setDevViewRoleState] = useState<DevViewRole>('dev');
+  const [devViewRole, setDevViewRoleState] = useState<DevViewRole>('admin');
   const [isLoading, setIsLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
   const expiryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -252,7 +247,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session.devMode) {
           setUser(DEV_USER);
           setIsDevMode(true);
-          setDevViewRoleState(session.devViewRole ?? 'dev');
+          setDevViewRoleState((session.devViewRole as string) === 'dev' ? 'admin' : (session.devViewRole ?? 'admin'));
           setToken(null);
         } else if (session.user) {
           // Token is managed by HttpOnly cookie; only restore user metadata from localStorage
@@ -296,7 +291,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(null);
       setUser(null);
       setIsDevMode(false);
-      setDevViewRoleState('dev');
+      setDevViewRoleState('admin');
     };
     window.addEventListener('sp5:unauthorized', handler);
     return () => window.removeEventListener('sp5:unauthorized', handler);
@@ -335,7 +330,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);  // token managed by HttpOnly cookie
     setUser(resolvedUser);
     setIsDevMode(false);
-    setDevViewRoleState('dev');
+    setDevViewRoleState('admin');
     // Schedule proactive logout before session expires
     if (expiresAt) {
       scheduleExpiryTimer(expiresAt);
@@ -343,12 +338,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const loginDev = () => {
-    const session: StoredSession = { token: '', user: DEV_USER, devMode: true, devViewRole: 'dev' };
+    const session: StoredSession = { token: '', user: DEV_USER, devMode: true, devViewRole: 'admin' };
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
     setToken(null);
     setUser(DEV_USER);
     setIsDevMode(true);
-    setDevViewRoleState('dev');
+    setDevViewRoleState('admin');
   };
 
   /** Switch the simulated view-role. Only changes UI — backend token stays __dev_mode__. */
@@ -382,7 +377,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
     setUser(null);
     setIsDevMode(false);
-    setDevViewRoleState('dev');
+    setDevViewRoleState('admin');
   };
 
   // Permission helpers — in dev mode, simulate the selected view-role for UI purposes

@@ -52,3 +52,16 @@ Bewusste Web-Abweichungen (kein Handlungsbedarf, dokumentiert):
 6. **SSO/OIDC** (Keycloak/Entra) zusätzlich zum 5USER-Login.
 7. **Mandantenfähigkeit** (mehrere DBF-Datenbanken parallel, Umschalter).
 8. **Webhooks/API-Erweiterung** für Lohn-Export-Integrationen (DATEV & Co.).
+
+## C. Infrastruktur & Tooling (vertagt, mit Begründung)
+
+1. **Release-Automatisierung** (Version-Bump + CHANGELOG + Tag aus Conventional
+   Commits, z. B. release-please): aktueller Tag-Flow funktioniert; Umstellung
+   ist Geschmacks-/Prozessfrage des Maintainers.
+2. **Redis-Session-Store** für Multi-Worker-Betrieb: neue Infrastruktur-
+   Abhängigkeit; bis dahin gilt die dokumentierte Single-Worker-Empfehlung.
+3. **Laufzeit-State konsolidieren** (backend/data + backend/api/data → ein
+   injizierbares Datenverzeichnis): ändert das Volume-Layout bestehender
+   Deployments und braucht einen Migrationspfad.
+4. **CodeQL/SAST**: pip-/npm-audit decken die Dependency-Seite bereits ab;
+   statische Analyse bei Bedarf nachrüsten.

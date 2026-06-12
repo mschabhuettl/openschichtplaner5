@@ -13,4 +13,4 @@ libopenschichtplaner5[postgres]>=1.7.0
 python-dotenv>=1.0.0
 
 # Lint (make lint runs ruff from backend/.venv)
-ruff>=0.1.0
+ruff>=0.15.17

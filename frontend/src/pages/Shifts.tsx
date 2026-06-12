@@ -8,6 +8,7 @@ import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { HelpTooltip } from '../components/HelpTooltip';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import ReorderDialog from '../components/ReorderDialog';
 import {
   DAY_TYPES,
   validateStartend,
@@ -51,6 +52,7 @@ const EMPTY_FORM: ShiftForm = {
 export default function Shifts() {
   const { canAdmin } = useAuth();
   const [shifts, setShifts] = useState<ShiftType[]>([]);
+  const [showReorder, setShowReorder] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
@@ -231,6 +233,13 @@ export default function Shifts() {
           >
             🖨️ <span className="hidden sm:inline">Drucken</span>
           </button>
+          {canAdmin && shifts.length > 1 && <button
+            onClick={() => setShowReorder(true)}
+            className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm"
+            title="Reihenfolge der Schichtarten manuell festlegen"
+          >
+            ↕ <span className="hidden sm:inline">Reihenfolge</span>
+          </button>}
           {canAdmin && <button
             onClick={openCreate}
             className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
@@ -492,6 +501,15 @@ export default function Shifts() {
       )}
 
       <ConfirmDialog {...confirmDialogProps} />
+      {showReorder && (
+        <ReorderDialog
+          entity="shifts"
+          title="Schichtarten-Reihenfolge"
+          items={shifts.map(s => ({ id: s.ID, label: `${s.NAME} (${s.SHORTNAME})` }))}
+          onClose={() => setShowReorder(false)}
+          onSaved={load}
+        />
+      )}
     </div>
   );
 }

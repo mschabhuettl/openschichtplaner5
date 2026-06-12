@@ -11,6 +11,9 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Stammdaten: **manuelle Reihenfolge** (programmweite POSITION-Sortierung) — ein
+  „↕ Reihenfolge"-Dialog (▲/▼) auf Mitarbeiter, Schichtarten, Abwesenheitsarten
+  und Arbeitsplätzen; die Mitarbeiter-Reihenfolge gilt direkt im Dienstplan.
 - Einsatzplan: **Sonderdienst bearbeiten** — bestehende Sonderdienste lassen sich
   jetzt nachträglich ändern (Kontextmenü „Sonderdienst bearbeiten", `PUT`), nicht
   mehr nur löschen+neu. Zudem **freier Name/Kürzel** je Sonderdienst (abweichend

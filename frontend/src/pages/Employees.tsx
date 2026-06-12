@@ -12,6 +12,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useCan } from '../hooks/useCan';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import ReorderDialog from '../components/ReorderDialog';
 import { EmptyState } from '../components/EmptyState';
 import EmployeeAvatar from '../components/EmployeeAvatar';
 import PhotoCropDialog from '../components/PhotoCropDialog';
@@ -240,6 +241,7 @@ export default function Employees() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [showReorder, setShowReorder] = useState(false);
   const [search, setSearch] = useState(
     () => searchParams.get('search') ?? sessionStorage.getItem('emp-search') ?? ''
   );
@@ -717,6 +719,13 @@ export default function Employees() {
           >
             📊 Excel
           </button>
+          {canAdmin && employees.length > 1 && <button
+            onClick={() => setShowReorder(true)}
+            className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm"
+            title="Mitarbeiter-Reihenfolge manuell festlegen (gilt im Dienstplan)"
+          >
+            ↕ <span className="hidden sm:inline">Reihenfolge</span>
+          </button>}
           {canAddEmployee && <button
             onClick={openCreate}
             className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
@@ -1278,6 +1287,16 @@ export default function Employees() {
       )}
 
       <ConfirmDialog {...confirmDialogProps} />
+
+      {showReorder && (
+        <ReorderDialog
+          entity="employees"
+          title="Mitarbeiter-Reihenfolge"
+          items={employees.map(e => ({ id: e.ID, label: `${e.NAME}, ${e.FIRSTNAME}` }))}
+          onClose={() => setShowReorder(false)}
+          onSaved={load}
+        />
+      )}
 
       {/* ── Bulk Group Assign Modal ────────────────────────────── */}
       {showBulkGroupModal && (

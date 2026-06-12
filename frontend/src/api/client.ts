@@ -1277,6 +1277,9 @@ export const api = {
   getShifts: () => fetchJSON<ShiftType[]>('/api/v1/shifts'),
   getLeaveTypes: () => fetchJSON<LeaveType[]>('/api/v1/leave-types'),
   getWorkplaces: () => fetchJSON<Workplace[]>('/api/v1/workplaces'),
+  /** A9: manuelle Stammdaten-Sortierung (POSITION). entity: employees|shifts|groups|leave_types|workplaces */
+  reorderMasterData: (entity: string, orderedIds: number[]) =>
+    postJSON<{ ok: boolean; updated: number }>(`/api/v1/reorder/${entity}`, { ordered_ids: orderedIds }),
   getHolidays: (year?: number) => fetchJSON<Holiday[]>(`/api/v1/holidays${year ? `?year=${year}` : ''}`),
   getSchedule: (year: number, month: number, groupId?: number, plan?: 'ist' | 'soll' | 'both') =>
     fetchJSON<ScheduleEntry[]>(`/api/v1/schedule?year=${year}&month=${month}${groupId ? `&group_id=${groupId}` : ''}${plan ? `&plan=${plan}` : ''}`),

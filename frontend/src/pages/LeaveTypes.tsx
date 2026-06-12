@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import ReorderDialog from '../components/ReorderDialog';
 import { EmptyState } from '../components/EmptyState';
 
 function hexToBGR(hex: string): number {
@@ -63,6 +64,7 @@ const CHARGETYP_OPTIONS: { value: number; label: string }[] = [
 export default function LeaveTypes() {
   const { canAdmin } = useAuth();
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
+  const [showReorder, setShowReorder] = useState(false);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -175,6 +177,13 @@ export default function LeaveTypes() {
           >
             🖨️ <span className="hidden sm:inline">Drucken</span>
           </button>
+          {canAdmin && leaveTypes.length > 1 && <button
+            onClick={() => setShowReorder(true)}
+            className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm"
+            title="Reihenfolge der Abwesenheitsarten manuell festlegen"
+          >
+            ↕ <span className="hidden sm:inline">Reihenfolge</span>
+          </button>}
           {canAdmin && <button
             onClick={openCreate}
             className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
@@ -391,6 +400,15 @@ export default function LeaveTypes() {
       )}
 
       <ConfirmDialog {...confirmDialogProps} />
+      {showReorder && (
+        <ReorderDialog
+          entity="leave_types"
+          title="Abwesenheitsarten-Reihenfolge"
+          items={leaveTypes.map(lt => ({ id: lt.ID, label: `${lt.NAME} (${lt.SHORTNAME})` }))}
+          onClose={() => setShowReorder(false)}
+          onSaved={load}
+        />
+      )}
     </div>
   );
 }

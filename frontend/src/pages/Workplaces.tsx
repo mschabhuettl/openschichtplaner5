@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import ReorderDialog from '../components/ReorderDialog';
 
 function hexToBGR(hex: string): number {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -32,6 +33,7 @@ const EMPTY_FORM: WorkplaceForm = {
 export default function Workplaces() {
   const { canAdmin } = useAuth();
   const [workplaces, setWorkplaces] = useState<Workplace[]>([]);
+  const [showReorder, setShowReorder] = useState(false);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -199,6 +201,13 @@ export default function Workplaces() {
             >
               🖨️ <span className="hidden sm:inline">Drucken</span>
             </button>
+            {canAdmin && workplaces.length > 1 && <button
+              onClick={() => setShowReorder(true)}
+              className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm"
+              title="Reihenfolge der Arbeitsplätze manuell festlegen"
+            >
+              ↕ <span className="hidden sm:inline">Reihenfolge</span>
+            </button>}
             {canAdmin && <button
               onClick={openCreate}
               className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
@@ -451,6 +460,15 @@ export default function Workplaces() {
       )}
 
       <ConfirmDialog {...confirmDialogProps} />
+      {showReorder && (
+        <ReorderDialog
+          entity="workplaces"
+          title="Arbeitsplätze-Reihenfolge"
+          items={workplaces.map(w => ({ id: w.ID, label: w.NAME }))}
+          onClose={() => setShowReorder(false)}
+          onSaved={load}
+        />
+      )}
     </div>
   );
 }

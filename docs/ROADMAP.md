@@ -39,13 +39,22 @@ Bewusste Web-Abweichungen (kein Handlungsbedarf, dokumentiert):
 
 ## B. Über das Original hinaus (neue Ideen, priorisiert)
 
-1. **PG-Backend-Berechnungsparität**: SP5PostgresDatabase auf die zentrale
-   calculations-Schicht heben (heute: DBF-Backend = Referenz, PG = Teilmenge
-   mit Alt-Formeln) + PG-Testinfrastruktur in CI.
+1. ~~**PG-Backend-Berechnungsparität**~~ — **erledigt:** das PostgreSQL-Backend
+   nutzt die zentrale Berechnungsschicht, ein CI-Job prüft die Parität gegen
+   echtes PostgreSQL.
 2. **CDX-Schreibsupport** (CodeBase-kompatible Indizes schreiben statt
-   invalidieren) — eliminiert Index-Rebuilds beim Original-Client.
-3. **Differenz-Testharness gegen das Original** via Wine (Original headless
-   befüttern, Berichte vergleichen) — härtet die Berechnungs-Parität ab.
+   invalidieren) — **vertagt mit Begründung:** Die heutige Strategie (veraltete
+   `.CDX` nach jedem Schreibzugriff entfernen, das Original baut sie beim
+   Öffnen neu auf) ist korrekt und interop-sicher. Ein vollständiger
+   FoxPro-Compound-Index-B-Baum-Schreiber wäre umfangreich und fehleranfällig,
+   während der einzige Gewinn ein einmaliger Index-Rebuild beim Öffnen wäre —
+   schlechtes Aufwand/Nutzen-Verhältnis (Simplicity first).
+3. ~~**Differenz-Testharness gegen das Original** via Wine~~ — **Machbarkeit
+   belegt, Kernnutzen umgesetzt:** Das Original läuft headless unter wine+Xvfb,
+   die Berechnungsparität ist gegen die Live-Anzeige bestätigt (optionaler
+   Orakeltest in der Library). Die *kontinuierliche* Voll-Automation aller
+   Berichtsdialoge bleibt bewusst vertagt (läuft nicht in CI, hoher
+   GUI-/OCR-Pflegeaufwand, geringer Grenznutzen).
 4. **Mehrschicht-Wünsche/Verfügbarkeits-Workflow** ausbauen (Self-Service-
    Planung mit Genehmigungsketten).
 5. **Mobile-PWA-Vertiefung**: Offline-Eintragung mit Sync-Queue.

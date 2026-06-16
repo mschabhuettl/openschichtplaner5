@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { entryArt, reportGroupLabel, groupReportRows, withEmptyEmployees } from '../utils/reportRows';
+import { entryArt, reportGroupLabel, groupReportRows, withEmptyEmployees, groupChargeDaysByEmployee, type ChargeDay } from '../utils/reportRows';
 
 describe('entryArt (A8: Datenbasis Soll/Ist im Listenbericht)', () => {
   it('benennt Dienst/Sonderdienst/Abwesenheit wie bisher', () => {
@@ -52,5 +52,25 @@ describe('withEmptyEmployees (A8: Nullzeilen)', () => {
   });
   it('mit showEmpty und ohne Kandidaten bleibt es bei den Einträgen', () => {
     expect(withEmptyEmployees([5], [], true)).toEqual([5]);
+  });
+});
+
+describe('groupChargeDaysByEmployee (A8: Zeitzuschläge je Tag)', () => {
+  const rows: ChargeDay[] = [
+    { employee_id: 2, employee_name: 'Berg', date: '2026-01-04', charge_id: 1, charge_name: 'Sonntag', hours: 8 },
+    { employee_id: 1, employee_name: 'Anger', date: '2026-01-01', charge_id: 3, charge_name: 'Nacht', hours: 2 },
+    { employee_id: 1, employee_name: 'Anger', date: '2026-01-02', charge_id: 3, charge_name: 'Nacht', hours: 6 },
+  ];
+
+  it('gruppiert je Mitarbeiter, summiert die Stunden, sortiert nach Name', () => {
+    const g = groupChargeDaysByEmployee(rows);
+    expect(g.map(x => x.employee_name)).toEqual(['Anger', 'Berg']);
+    expect(g[0].rows).toHaveLength(2);
+    expect(g[0].total).toBe(8);   // 2 + 6
+    expect(g[1].total).toBe(8);
+  });
+
+  it('liefert eine leere Liste für keine Zeilen', () => {
+    expect(groupChargeDaysByEmployee([])).toEqual([]);
   });
 });

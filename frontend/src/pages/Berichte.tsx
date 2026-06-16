@@ -5,7 +5,7 @@ import type { Employee, Group, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { escapeHtml, safeColor } from '../utils/escapeHtml';
-import { entryArt, groupReportRows, withEmptyEmployees, type ReportGroupMode } from '../utils/reportRows';
+import { entryArt, groupReportRows, withEmptyEmployees, groupChargeDaysByEmployee, type ReportGroupMode } from '../utils/reportRows';
 
 const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -781,6 +781,58 @@ async function reportExtracharges() {
   printHtml(html, 'Zeitzuschläge');
 }
 
+// ── Report: Zeitzuschläge je Tag (A8) ─────────────────────────
+// Spec 3.8: je (Mitarbeiter, Tag, Zuschlag) eine Zeile mit Stunden > 0,
+// gruppiert je Mitarbeiter mit Summe; über GET /api/extracharges/by-day.
+async function reportExtrachargesByDay(
+  fromDate: string,
+  toDate: string,
+  groupId: number | null,
+  groups: Group[],
+  format: 'print' | 'csv',
+) {
+  if (!fromDate || !toDate) { alert('Bitte Zeitraum (Von/Bis) auswählen.'); return; }
+  if (toDate < fromDate) { alert('Von-Datum muss vor Bis-Datum liegen.'); return; }
+  let rows = await api.getExtrachargesByDay(fromDate, toDate);
+  if (groupId) {
+    const memberIds = new Set(
+      (await api.getGroupAssignments()).filter(a => a.group_id === groupId).map(a => a.employee_id),
+    );
+    rows = rows.filter(r => memberIds.has(r.employee_id));
+  }
+  const groupName = groupId ? (groups.find(g => g.ID === groupId)?.NAME ?? `Gruppe ${groupId}`) : 'Alle';
+  const byEmp = groupChargeDaysByEmployee(rows);
+  const fmtDate = (d: string) => `${DAY_SHORT_DE[new Date(`${d}T00:00:00`).getDay()]} ${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(0, 4)}`;
+
+  if (format === 'csv') {
+    const lines = ['Mitarbeiter;Datum;Zuschlag;Stunden'];
+    for (const g of byEmp) {
+      for (const r of g.rows) {
+        lines.push([g.employee_name, r.date, r.charge_name, r.hours.toFixed(2)].map(csvCell).join(';'));
+      }
+      lines.push([g.employee_name, '', 'Summe', g.total.toFixed(2)].map(csvCell).join(';'));
+    }
+    downloadCSVFile(`zeitzuschlaege_je_tag_${fromDate}_${toDate}.csv`, lines.join('\n'));
+    return;
+  }
+
+  const now = new Date().toLocaleString('de-AT');
+  let html = `<h1>💰 Zeitzuschläge je Tag</h1>
+<div class="subtitle">Zeitraum: ${fromDate} bis ${toDate} &nbsp;|&nbsp; Gruppe: ${groupName} &nbsp;|&nbsp; ${byEmp.length} Mitarbeiter &nbsp;|&nbsp; Stand: ${now}</div>`;
+  if (byEmp.length === 0) {
+    html += '<p>Keine Zuschlagsstunden im gewählten Zeitraum.</p>';
+  }
+  for (const g of byEmp) {
+    html += `<h2>👤 ${escapeHtml(g.employee_name)}</h2>
+<table><thead><tr><th scope="col">Datum</th><th scope="col">Zuschlag</th><th scope="col" style="text-align:right">Stunden</th></tr></thead><tbody>`;
+    for (const r of g.rows) {
+      html += `<tr><td>${fmtDate(r.date)}</td><td>${escapeHtml(r.charge_name)}</td><td style="text-align:right">${r.hours.toFixed(2)} h</td></tr>`;
+    }
+    html += `</tbody><tfoot><tr style="background:#f1f5f9;font-weight:bold;border-top:2px solid #334155"><td colspan="2">∑ Summe</td><td style="text-align:right">${g.total.toFixed(2)} h</td></tr></tfoot></table>`;
+  }
+  printHtml(html, `Zeitzuschläge je Tag ${fromDate} – ${toDate}`);
+}
+
 // ── Report: Geburtstagsliste ──────────────────────────────────
 
 async function reportBirthdays(employees: Employee[], birthdayMonth: number) {
@@ -1547,6 +1599,14 @@ export default function Berichte() {
       title: 'Zeitzuschlag-Bericht',
       description: 'Liste aller Zeitzuschläge mit Zeiten und Wochentagen.',
       action: () => run(() => reportExtracharges()),
+      color: 'yellow',
+      category: 'Organisation',
+    },
+    {
+      icon: '💰',
+      title: 'Zeitzuschläge je Tag',
+      description: `Zuschlagsstunden je Mitarbeiter und Tag im Zeitraum ${listFrom} bis ${listTo} (Von/Bis oben), mit Summe je Mitarbeiter — ${listFormat === 'csv' ? 'CSV' : 'Druck'}.`,
+      action: () => run(() => reportExtrachargesByDay(listFrom, listTo, groupId, groups, listFormat)),
       color: 'yellow',
       category: 'Organisation',
     },

@@ -14,6 +14,33 @@ export function entryArt(
   return scheduleType === 1 ? `${base} · Soll` : base;
 }
 
+// ── A8: Zeitzuschläge je Tag — Gruppierung je Mitarbeiter ─────────────
+export interface ChargeDay {
+  employee_id: number;
+  employee_name: string;
+  date: string;
+  charge_id: number;
+  charge_name: string;
+  hours: number;
+}
+
+/** Gruppiert die Tageszeilen je Mitarbeiter (Name + Summe der Zuschlagsstunden). */
+export function groupChargeDaysByEmployee(
+  rows: ChargeDay[],
+): { employee_id: number; employee_name: string; rows: ChargeDay[]; total: number }[] {
+  const map = new Map<number, { employee_id: number; employee_name: string; rows: ChargeDay[]; total: number }>();
+  for (const r of rows) {
+    let g = map.get(r.employee_id);
+    if (!g) {
+      g = { employee_id: r.employee_id, employee_name: r.employee_name, rows: [], total: 0 };
+      map.set(r.employee_id, g);
+    }
+    g.rows.push(r);
+    g.total = Math.round((g.total + r.hours) * 100) / 100;
+  }
+  return [...map.values()].sort((a, b) => a.employee_name.localeCompare(b.employee_name, 'de'));
+}
+
 // ── A8: Untergliederung des Listenberichts nach KW/Monat ──────────────
 export type ReportGroupMode = 'none' | 'kw' | 'month';
 

@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Neuer Bericht **„Zeitzuschläge je Tag"** (Spec 3.8): listet die Zuschlagsstunden
+  je Mitarbeiter und Tag im Zeitraum (Von/Bis) mit Summe je Mitarbeiter, als Druck
+  oder CSV; berücksichtigt den Gruppenfilter. Nutzt den neuen API-Endpoint
+  `GET /api/extracharges/by-day`.
+
 ---
 
 ## [1.8.0] - 2026-06-16

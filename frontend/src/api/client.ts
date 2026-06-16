@@ -902,6 +902,15 @@ export interface ExtraChargeSummary {
   holrule: number;
 }
 
+export interface ExtraChargeDay {
+  employee_id: number;
+  employee_name: string;
+  date: string;
+  charge_id: number;
+  charge_name: string;
+  hours: number;
+}
+
 // ─── Personaltabelle (GET /api/personnel-table) ──
 export interface PersonnelTableRow {
   employee_id: number;
@@ -1562,6 +1571,8 @@ export const api = {
   // ─── CRUD: Extra Charges ──────────────────────────────────
   getExtraCharges: (include_hidden = false) =>
     fetchJSON<ExtraCharge[]>(`/api/v1/extracharges${include_hidden ? '?include_hidden=true' : ''}`),
+  getExtrachargesByDay: (from: string, to: string) =>
+    fetchJSON<ExtraChargeDay[]>(`/api/v1/extracharges/by-day?from=${from}&to=${to}`),
   createExtraCharge: (data: Partial<ExtraCharge>) =>
     postJSON<{ ok: boolean; record: unknown }>('/api/v1/extracharges', data),
   updateExtraCharge: (id: number, data: Partial<ExtraCharge>) =>

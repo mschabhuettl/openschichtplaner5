@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.6.1] - 2026-06-16
+
 ### Fixed
 
 - **Sidebar-Icons** ragen nicht mehr über die Seitenleiste: die Action-Icons im

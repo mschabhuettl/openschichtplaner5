@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.6.2] - 2026-06-16
+
 ### Changed
 
 - Release-Pipeline auf den vollständigen Standard angehoben: das App-Image-

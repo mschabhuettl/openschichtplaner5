@@ -9,6 +9,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Release-Pipeline auf den vollständigen Standard angehoben: das App-Image-
+  Release trägt nun eine Build-Provenance-Attestation, je Image wird ein
+  SPDX-SBOM erzeugt, attestiert und dem GitHub-Release als Asset beigelegt
+  (zusätzlich die Stack-Compose `docker-compose.stack.yml`). Multi-Arch
+  (amd64+arm64) und die ghcr-Tags Version/Minor/`latest` bleiben unverändert.
+  Optionale cosign-Signierung über die Repo-Variable `ENABLE_COSIGN`.
+
 ---
 
 ## [1.6.1] - 2026-06-16

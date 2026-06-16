@@ -1,17 +1,33 @@
 name: Release
 
-# Läuft auf Versions-Tags — entweder direkt gepusht oder per
-# workflow_dispatch auf dem Tag-Ref gestartet (prepare-release.yml nutzt das,
-# weil Tag-Pushes mit dem GITHUB_TOKEN keine Workflows auslösen).
+# Ein Versions-Tag veröffentlicht auf ALLE Kanäle dieses Repos:
+#   * ghcr.io         — das App-Image (SPA + API in einem Container),
+#                       multi-arch (amd64+arm64), Tags Version/Minor/latest
+#   * GitHub-Release  — Body = die von prepare-release.yml geschnittene
+#                       CHANGELOG-Sektion; Assets = SBOM + Stack-Compose
+# plus Build-Provenance-Attestation (Image) und ein SBOM je Image.
+#
+# Läuft auf Versions-Tags — entweder direkt gepusht oder per workflow_dispatch
+# auf dem Tag-Ref gestartet (prepare-release.yml nutzt das, weil Tag-Pushes mit
+# dem GITHUB_TOKEN keine Workflows auslösen). Das Publish bleibt tag-getrieben.
 on:
   push:
     tags:
       - 'v*.*.*'
   workflow_dispatch:
 
+# Re-Run-sicher: Läufe für denselben Ref serialisieren, ein laufendes Publish
+# nicht abbrechen.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
 jobs:
-  test:
-    name: Run Tests
+  build:
+    name: Test & build frontend
     runs-on: ubuntu-latest
     # Nur auf Tag-Refs releasen; die Folge-Jobs hängen über needs daran.
     if: startsWith(github.ref, 'refs/tags/v')
@@ -39,14 +55,17 @@ jobs:
 
   docker:
     name: Build & Push Docker Image
-    needs: test
+    needs: build
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: read
       packages: write
       security-events: write
-    outputs:
-      image_tag: ${{ steps.meta.outputs.version }}
+      id-token: write       # Build-Provenance- + SBOM-Attestation, cosign (OIDC)
+      attestations: write
+    env:
+      IMAGE: ghcr.io/${{ github.repository }}
     steps:
       - uses: actions/checkout@v6
 
@@ -62,13 +81,14 @@ jobs:
       - uses: docker/metadata-action@v6
         id: meta
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ${{ env.IMAGE }}
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=raw,value=latest
 
       - uses: docker/build-push-action@v7
+        id: build
         with:
           context: .
           platforms: linux/amd64,linux/arm64
@@ -78,10 +98,56 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Attest build provenance for the image
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+      - name: Generate SBOM (SPDX) for the image
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+          upload-artifact: false
+
+      - name: Attest SBOM for the image
+        uses: actions/attest-sbom@v4
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          sbom-path: sbom.spdx.json
+          push-to-registry: true
+
+      - name: Name the SBOM for the release asset
+        run: cp sbom.spdx.json "openschichtplaner5-${GITHUB_REF_NAME#v}.sbom.spdx.json"
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: sbom
+          path: '*.sbom.spdx.json'
+          if-no-files-found: error
+
+      # Optional, ohne neue Secrets: cosign keyless (OIDC). Default aus; per
+      # Repo-Variable ENABLE_COSIGN=true einschaltbar. Begründung: die
+      # verpflichtende Build-Provenance ist bereits Sigstore-keyless signiert.
+      - name: Install cosign (optional)
+        if: vars.ENABLE_COSIGN == 'true'
+        uses: sigstore/cosign-installer@v4
+
+      - name: Sign image with cosign (optional)
+        if: vars.ENABLE_COSIGN == 'true'
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: cosign sign --yes "${IMAGE}@${DIGEST}"
+
       - name: Scan image for CVEs (Trivy)
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ghcr.io/${{ github.repository }}:${{ steps.meta.outputs.version }}
+          image-ref: ${{ env.IMAGE }}@${{ steps.build.outputs.digest }}
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
@@ -95,8 +161,9 @@ jobs:
 
   github-release:
     name: Create GitHub Release
-    needs: docker
+    needs: [build, docker]
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
     steps:
@@ -108,12 +175,23 @@ jobs:
         id: version
         run: echo "version=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
 
+      - name: Download SBOM
+        uses: actions/download-artifact@v8
+        with:
+          name: sbom
+          path: assets/
+
+      - name: Stage the stack compose as an asset
+        run: cp docker-compose.stack.yml assets/docker-compose.stack.yml
+
       - name: Extract changelog section
         id: changelog
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          # Extract the section for this version from CHANGELOG.md
-          NOTES=$(awk "/^## \[${VERSION}\]/{found=1; next} found && /^## \[/{exit} found{print}" CHANGELOG.md)
+          # Extract the section for this version from CHANGELOG.md; drop the
+          # '---' separators this changelog uses (they would render as stray
+          # horizontal rules in the release body).
+          NOTES=$(awk "/^## \[${VERSION}\]/{found=1; next} found && /^## \[/{exit} found{print}" CHANGELOG.md | grep -v '^---$')
           if [ -z "$NOTES" ]; then
             NOTES="See [CHANGELOG.md](CHANGELOG.md) for details."
           fi
@@ -126,6 +204,9 @@ jobs:
         with:
           name: "v${{ steps.version.outputs.version }}"
           body_path: release_notes.md
+          files: |
+            assets/*.sbom.spdx.json
+            assets/docker-compose.stack.yml
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}
           generate_release_notes: false

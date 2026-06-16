@@ -284,6 +284,9 @@ jobs:
           SP5_BACKEND_DIR: ${{ github.workspace }}/backend
           SP5_FRONTEND_DIST: ${{ github.workspace }}/frontend/dist
           SECRET_KEY: "ci-cycle8-secret-not-for-production"
+          # The suite logs in for real once per test; lift the 5/min login limit so
+          # the real-login flow (and any retry) never trips the brute-force guard.
+          RATE_LIMIT_LOGIN: "100/minute"
 
       - name: Run cycle-8 regression suite over sp5.local (HTTP, non-localhost)
         working-directory: frontend

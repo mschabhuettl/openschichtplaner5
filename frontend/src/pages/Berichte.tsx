@@ -5,6 +5,7 @@ import type { Employee, Group, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { escapeHtml, safeColor } from '../utils/escapeHtml';
+import { entryArt } from '../utils/reportRows';
 
 const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -1198,6 +1199,7 @@ async function reportDienstplanEintraege(
   groups: Group[],
   shifts: ShiftType[],
   format: 'print' | 'csv',
+  plan: 'ist' | 'soll' | 'both' = 'ist',
 ) {
   if (!fromDate || !toDate) { alert('Bitte Zeitraum (Von/Bis) auswählen.'); return; }
   if (toDate < fromDate) { alert('Von-Datum muss vor Bis-Datum liegen.'); return; }
@@ -1220,7 +1222,7 @@ async function reportDienstplanEintraege(
   const wpMap = Object.fromEntries(workplaces.map(w => [w.ID, w.NAME]));
   const shiftMap = Object.fromEntries(shifts.map(s => [s.ID, s]));
 
-  const allEntries = (await Promise.all(monthKeys.map(k => api.getSchedule(k.y, k.m, groupId ?? undefined))))
+  const allEntries = (await Promise.all(monthKeys.map(k => api.getSchedule(k.y, k.m, groupId ?? undefined, plan))))
     .flat()
     .filter(e => e.date >= fromDate && e.date <= toDate);
 
@@ -1247,9 +1249,7 @@ async function reportDienstplanEintraege(
       const dur = shift[`DURATION${idx}` as keyof ShiftType] as number | undefined;
       hours = dur || shift.DURATION0 || 0;
     }
-    const art = e.kind === 'shift'
-      ? (e.source === 'cycle' ? 'Dienst (Zyklus)' : 'Dienst')
-      : e.kind === 'special_shift' ? 'Sonderdienst' : 'Abwesenheit';
+    const art = entryArt(e.kind ?? '', e.source, e.schedule_type);
     const row: ListRow = {
       date: e.date,
       art,
@@ -1288,8 +1288,9 @@ async function reportDienstplanEintraege(
   }
 
   const now = new Date().toLocaleString('de-AT');
+  const planLabel = plan === 'soll' ? 'Sollplan' : plan === 'both' ? 'Soll- & Istplan' : 'Istplan';
   let html = `<h1>📋 Dienstplaneinträge (Liste)</h1>
-<div class="subtitle">Zeitraum: ${fromDate} bis ${toDate} &nbsp;|&nbsp; Gruppe: ${groupName} &nbsp;|&nbsp; ${empIds.length} Mitarbeiter &nbsp;|&nbsp; Stand: ${now}</div>`;
+<div class="subtitle">Zeitraum: ${fromDate} bis ${toDate} &nbsp;|&nbsp; Datenbasis: ${planLabel} &nbsp;|&nbsp; Gruppe: ${groupName} &nbsp;|&nbsp; ${empIds.length} Mitarbeiter &nbsp;|&nbsp; Stand: ${now}</div>`;
 
   if (empIds.length === 0) {
     html += '<p>Keine Einträge im gewählten Zeitraum.</p>';
@@ -1362,6 +1363,7 @@ export default function Berichte() {
     `${now.getFullYear()}-${monthPadded}-${String(new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()).padStart(2, '0')}`,
   );
   const [listFormat, setListFormat] = useState<'print' | 'csv'>('print');
+  const [listPlan, setListPlan] = useState<'ist' | 'soll' | 'both'>('ist');
 
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
@@ -1489,7 +1491,7 @@ export default function Berichte() {
       icon: '📋',
       title: 'Dienstplaneinträge (Liste)',
       description: `Je Mitarbeiter alle Einträge ${listFrom} bis ${listTo}: Datum, Art (Dienst/Sonderdienst/Abwesenheit), Kürzel, Uhrzeiten, Arbeitsplatz, Stunden — mit Summen je Mitarbeiter (${listFormat === 'csv' ? 'CSV' : 'Druck'}).`,
-      action: () => run(() => reportDienstplanEintraege(listFrom, listTo, groupId, employees, groups, shifts, listFormat)),
+      action: () => run(() => reportDienstplanEintraege(listFrom, listTo, groupId, employees, groups, shifts, listFormat, listPlan)),
       color: 'green',
       category: 'Dienstplan',
     },
@@ -1740,6 +1742,18 @@ export default function Berichte() {
                     📊 CSV
                   </button>
                 </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Datenbasis</label>
+                <select
+                  value={listPlan}
+                  onChange={e => setListPlan(e.target.value as 'ist' | 'soll' | 'both')}
+                  className="px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
+                >
+                  <option value="ist">Istplan</option>
+                  <option value="soll">Sollplan</option>
+                  <option value="both">Soll- &amp; Istplan</option>
+                </select>
               </div>
               <div className="text-xs text-gray-500 max-w-xs">
                 Gruppenfilter oben wird berücksichtigt.

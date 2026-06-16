@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Bericht „Dienstplaneinträge (Liste)": Auswahl der **Datenbasis** Istplan /
+  Sollplan / Soll- & Istplan (Spec 4.12). Der Bericht zeigt die gewählte Datenbasis
+  im Kopf; bei „Soll- & Istplan" sind Sollplan-Schichten in der Art-Spalte mit
+  „· Soll" gekennzeichnet.
+
 ### Fixed
 
 - Dienstplan-Undo/Redo bewahrt jetzt den **Soll-/Istplan-Typ** und die

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { entryArt } from '../utils/reportRows';
+import { entryArt, reportGroupLabel, groupReportRows } from '../utils/reportRows';
 
 describe('entryArt (A8: Datenbasis Soll/Ist im Listenbericht)', () => {
   it('benennt Dienst/Sonderdienst/Abwesenheit wie bisher', () => {
@@ -12,5 +12,33 @@ describe('entryArt (A8: Datenbasis Soll/Ist im Listenbericht)', () => {
   it('kennzeichnet Sollplan-Schichten (schedule_type=1)', () => {
     expect(entryArt('shift', null, 1)).toBe('Dienst · Soll');
     expect(entryArt('shift', 'cycle', 1)).toBe('Dienst (Zyklus) · Soll');
+  });
+});
+
+describe('reportGroupLabel / groupReportRows (A8: Untergliederung KW/Monat)', () => {
+  it('bildet Monats- und KW-Labels (ISO-8601)', () => {
+    expect(reportGroupLabel('2026-06-15', 'month')).toBe('Juni 2026');
+    expect(reportGroupLabel('2026-06-15', 'kw')).toBe('KW 25 · 2026');
+    expect(reportGroupLabel('2026-12-31', 'kw')).toBe('KW 53 · 2026');
+    expect(reportGroupLabel('2026-01-01', 'kw')).toBe('KW 01 · 2026');
+    expect(reportGroupLabel('2026-06-15', 'none')).toBe('');
+  });
+
+  it('mode=none liefert genau eine Gruppe mit allen Zeilen', () => {
+    const rows = [{ date: '2026-06-15' }, { date: '2026-07-02' }];
+    expect(groupReportRows(rows, 'none')).toEqual([{ label: '', rows }]);
+  });
+
+  it('gruppiert datumssortierte Zeilen fortlaufend nach KW', () => {
+    const rows = [{ date: '2026-06-15' }, { date: '2026-06-17' }, { date: '2026-06-22' }];
+    const g = groupReportRows(rows, 'kw');
+    expect(g.map(x => x.label)).toEqual(['KW 25 · 2026', 'KW 26 · 2026']);
+    expect(g[0].rows).toHaveLength(2);
+    expect(g[1].rows).toHaveLength(1);
+  });
+
+  it('gruppiert nach Monat über Monatsgrenzen', () => {
+    const rows = [{ date: '2026-06-29' }, { date: '2026-07-01' }];
+    expect(groupReportRows(rows, 'month').map(x => x.label)).toEqual(['Juni 2026', 'Juli 2026']);
   });
 });

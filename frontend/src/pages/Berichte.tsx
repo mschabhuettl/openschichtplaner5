@@ -5,7 +5,7 @@ import type { Employee, Group, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { escapeHtml, safeColor } from '../utils/escapeHtml';
-import { entryArt } from '../utils/reportRows';
+import { entryArt, groupReportRows, type ReportGroupMode } from '../utils/reportRows';
 
 const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -1200,6 +1200,7 @@ async function reportDienstplanEintraege(
   shifts: ShiftType[],
   format: 'print' | 'csv',
   plan: 'ist' | 'soll' | 'both' = 'ist',
+  group: ReportGroupMode = 'none',
 ) {
   if (!fromDate || !toDate) { alert('Bitte Zeitraum (Von/Bis) auswählen.'); return; }
   if (toDate < fromDate) { alert('Von-Datum muss vor Bis-Datum liegen.'); return; }
@@ -1276,9 +1277,14 @@ async function reportDienstplanEintraege(
     for (const id of empIds) {
       const emp = empMap[id];
       const empName = emp ? `${emp.NAME}, ${emp.FIRSTNAME}` : `MA #${id}`;
-      for (const r of byEmp[id]) {
-        lines.push([empName, r.date, r.art, r.short, r.name, r.times, r.workplace,
-          r.hours != null ? r.hours.toFixed(2) : ''].map(csvCell).join(';'));
+      for (const grp of groupReportRows(byEmp[id], group)) {
+        if (grp.label) lines.push([empName, grp.label, '', '', '', '', '', ''].map(csvCell).join(';'));
+        for (const r of grp.rows) {
+          lines.push([empName, r.date, r.art, r.short, r.name, r.times, r.workplace,
+            r.hours != null ? r.hours.toFixed(2) : ''].map(csvCell).join(';'));
+        }
+        if (grp.label) lines.push([empName, '', 'Zwischensumme', '', `${grp.rows.length} Einträge`, '', '',
+          sumHours(grp.rows).toFixed(2)].map(csvCell).join(';'));
       }
       lines.push([empName, '', 'Summe', '', `${byEmp[id].length} Einträge`, '', '',
         sumHours(byEmp[id]).toFixed(2)].map(csvCell).join(';'));
@@ -1309,8 +1315,12 @@ async function reportDienstplanEintraege(
 <th scope="col">Datum</th><th scope="col">Art</th><th scope="col">Kürzel</th><th scope="col">Name</th>
 <th scope="col">Uhrzeiten</th><th scope="col">Arbeitsplatz</th><th scope="col" style="text-align:right">Stunden</th>
 </tr></thead><tbody>`;
-    for (const r of rows) {
-      html += `<tr>
+    for (const grp of groupReportRows(rows, group)) {
+      if (grp.label) {
+        html += `<tr style="background:#e2e8f0;font-weight:600"><td colspan="7">${grp.label}</td></tr>`;
+      }
+      for (const r of grp.rows) {
+        html += `<tr>
 <td>${fmtDate(r.date)}</td>
 <td>${r.art}</td>
 <td><strong>${r.short}</strong></td>
@@ -1319,6 +1329,10 @@ async function reportDienstplanEintraege(
 <td>${r.workplace || '—'}</td>
 <td style="text-align:right">${r.hours != null ? r.hours.toFixed(2) + ' h' : '—'}</td>
 </tr>`;
+      }
+      if (grp.label) {
+        html += `<tr style="background:#f8fafc;font-style:italic"><td colspan="6">∑ ${grp.label}: ${grp.rows.length} Einträge</td><td style="text-align:right">${sumHours(grp.rows).toFixed(2)} h</td></tr>`;
+      }
     }
     html += `</tbody>
 <tfoot><tr style="background:#f1f5f9;font-weight:bold;border-top:2px solid #334155">
@@ -1364,6 +1378,7 @@ export default function Berichte() {
   );
   const [listFormat, setListFormat] = useState<'print' | 'csv'>('print');
   const [listPlan, setListPlan] = useState<'ist' | 'soll' | 'both'>('ist');
+  const [listGroup, setListGroup] = useState<ReportGroupMode>('none');
 
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
@@ -1491,7 +1506,7 @@ export default function Berichte() {
       icon: '📋',
       title: 'Dienstplaneinträge (Liste)',
       description: `Je Mitarbeiter alle Einträge ${listFrom} bis ${listTo}: Datum, Art (Dienst/Sonderdienst/Abwesenheit), Kürzel, Uhrzeiten, Arbeitsplatz, Stunden — mit Summen je Mitarbeiter (${listFormat === 'csv' ? 'CSV' : 'Druck'}).`,
-      action: () => run(() => reportDienstplanEintraege(listFrom, listTo, groupId, employees, groups, shifts, listFormat, listPlan)),
+      action: () => run(() => reportDienstplanEintraege(listFrom, listTo, groupId, employees, groups, shifts, listFormat, listPlan, listGroup)),
       color: 'green',
       category: 'Dienstplan',
     },
@@ -1753,6 +1768,18 @@ export default function Berichte() {
                   <option value="ist">Istplan</option>
                   <option value="soll">Sollplan</option>
                   <option value="both">Soll- &amp; Istplan</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Untergliederung</label>
+                <select
+                  value={listGroup}
+                  onChange={e => setListGroup(e.target.value as ReportGroupMode)}
+                  className="px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white"
+                >
+                  <option value="none">keine</option>
+                  <option value="kw">Kalenderwoche</option>
+                  <option value="month">Monat</option>
                 </select>
               </div>
               <div className="text-xs text-gray-500 max-w-xs">

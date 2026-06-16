@@ -15,6 +15,9 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   Sollplan / Soll- & Istplan (Spec 4.12). Der Bericht zeigt die gewählte Datenbasis
   im Kopf; bei „Soll- & Istplan" sind Sollplan-Schichten in der Art-Spalte mit
   „· Soll" gekennzeichnet.
+- Bericht „Dienstplaneinträge (Liste)": optionale **Untergliederung** je Mitarbeiter
+  nach **Kalenderwoche** (ISO-8601) oder **Monat** — mit Zwischenüberschrift und
+  Zwischensumme je Untergruppe, in Druck und CSV.
 
 ### Fixed
 

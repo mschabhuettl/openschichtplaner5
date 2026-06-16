@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.8.0] - 2026-06-16
+
 ### Added
 
 - Bericht „Dienstplaneinträge (Liste)": Auswahl der **Datenbasis** Istplan /

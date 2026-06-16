@@ -47,8 +47,14 @@ Priorität 2 (Komfort-/Dialogtiefe):
    5HOBAN-Sperrzeitraum; 5PERIO mit wählbarer Farbe + farbiger Hinterlegung im
    Dienstplan-Kopf + Bezeichnung beim Hover. (Geltungsbereich-Enum R5.10-7
    bewusst nicht eingeschränkt — 5HOBAN.RESTRICT material-unbestimmbar.)
-8. Berichts-Optionstiefe: Untergliederung KW/Monat, Datenbasis Soll/Ist,
-   Nullzeilen, Halbjahres-/Jahres-Tagesraster-Varianten, Zeitzuschläge je Tag.
+8. Berichts-Optionstiefe — **weitgehend erledigt** (Listenbericht „Dienstplaneinträge"):
+   Datenbasis Istplan/Sollplan/Soll-&-Istplan ✓; Untergliederung KW/Monat ✓; Nullzeilen
+   (Mitarbeiter ohne Einträge) ✓. **Tagesraster-Varianten:** durch die vorhandenen
+   Berichte abgedeckt — Monats- und Quartals-Dienstplan sind volle Tagesraster (MA×Tage),
+   der Jahres-Dienstplan ist bewusst eine Monats-Zusammenfassung (ein 365-Spalten-
+   Tagesraster ist als Druckbericht untauglich); ein Halbjahr = zwei Quartalsberichte.
+   **Zeitzuschläge je Tag:** in Umsetzung — lib `extracharge_hours_by_day` (per-Tag-
+   Aufschlüsselung) vorhanden; api-Endpoint + Bericht folgen.
 9. ~~Manuelle POSITION-Sortierung der Stammdaten programmweit.~~ **erledigt.**
 10. Undo/Redo-Detailtreue: **teilweise erledigt** — Wiederherstellen bewahrt nun
     Soll-/Istplan-Typ und Arbeitsplatz eines Schichteintrags. **Offen

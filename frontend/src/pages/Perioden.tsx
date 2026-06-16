@@ -11,7 +11,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 // ─── Create Modal ──────────────────────────────────────────
 interface CreateModalProps {
   groups: Group[];
-  onSave: (data: { group_id: number; start: string; end: string; description: string }) => Promise<void>;
+  onSave: (data: { group_id: number; start: string; end: string; description: string; color: string }) => Promise<void>;
   onClose: () => void;
 }
 
@@ -20,6 +20,7 @@ function CreateModal({ groups, onSave, onClose }: CreateModalProps) {
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [description, setDescription] = useState('');
+  const [color, setColor] = useState('#fcd34d');  // R5.10-10: Hinterlegungsfarbe
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +30,7 @@ function CreateModal({ groups, onSave, onClose }: CreateModalProps) {
     setSaving(true);
     setError(null);
     try {
-      await onSave({ group_id: groupId, start, end, description });
+      await onSave({ group_id: groupId, start, end, description, color });
       onClose();
     } catch (e) {
       setError(String(e));
@@ -97,6 +98,22 @@ function CreateModal({ groups, onSave, onClose }: CreateModalProps) {
               />
             </div>
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Farbe</label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                aria-label="Farbe"
+                value={color}
+                onChange={e => setColor(e.target.value)}
+                className="w-12 h-9 rounded border cursor-pointer"
+              />
+              <div className="flex-1 h-9 rounded border border-gray-200 flex items-center px-3 text-sm" style={{ backgroundColor: color }}>
+                {description || 'Hinterlegung im Dienstplan'}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="px-6 py-4 border-t flex justify-end gap-3">
@@ -155,7 +172,7 @@ export default function Perioden() {
     load(gid);
   };
 
-  const handleCreate = async (data: { group_id: number; start: string; end: string; description: string }) => {
+  const handleCreate = async (data: { group_id: number; start: string; end: string; description: string; color: string }) => {
     await api.createPeriod(data);
     load(filterGroup === '' ? undefined : filterGroup);
     showToast('Abrechnungszeitraum erstellt ✓', 'success');
@@ -265,7 +282,10 @@ export default function Perioden() {
               {periods.map((p, i) => (
                 <tr key={p.id} className={i % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100'}>
                   <td className="px-4 py-3 font-medium text-gray-800">
-                    {p.description || <span className="text-gray-600 italic">–</span>}
+                    <span className="inline-flex items-center gap-2">
+                      <span className="inline-block w-3 h-3 rounded-sm border border-gray-300" style={{ backgroundColor: p.color || '#ffffff' }} title="Hinterlegungsfarbe" />
+                      {p.description || <span className="text-gray-600 italic">–</span>}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-gray-600">
                     {groupMap[p.group_id] || <span className="text-gray-600">Gruppe {p.group_id}</span>}

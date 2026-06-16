@@ -21,6 +21,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - Sonderdienst-Dialog: Mehrtages-Erfassung. Über ein optionales Bis-Datum wird der
   Sonderdienst für jeden Tag des Zeitraums (max. 92 Tage) in einem Rutsch angelegt;
   der Vorgang lässt sich als Ganzes per Rückgängig wieder entfernen.
+- Gekennzeichnete Zeiträume (Perioden) erhalten eine wählbare Farbe und werden im
+  Dienstplan farbig hinterlegt: die betroffenen Tagesspalten tragen im Kopf einen
+  farbigen Balken in der Periodenfarbe; die Bezeichnung erscheint beim Überfahren
+  des Spaltenkopfs (Original „gekennzeichnete Zeiträume", R5.10-8/11).
+- Urlaubssperren: Beim Eintragen einer Abwesenheit in einem gesperrten Zeitraum
+  zeigt das Urlaub-Fenster jetzt einen Hinweis (weiche Warnung, Eintragung bleibt
+  möglich) — getrieben vom neuen API-Warnfeld.
 
 ---
 

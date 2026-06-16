@@ -5,7 +5,8 @@ import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../contexts/AuthContext';
 import { useGridPermissions, cellWriteState, isPastDate, type CellWriteState } from '../hooks/useGridPermissions';
 import { api } from '../api/client';
-import type { ShiftRequirement, Note, ConflictEntry, CoverageDay, ScheduleTemplate, ScheduleComment, AbsenceTimeOptions } from '../api/client';
+import type { ShiftRequirement, Note, ConflictEntry, CoverageDay, ScheduleTemplate, ScheduleComment, AbsenceTimeOptions, Period } from '../api/client';
+import { periodForDate } from '../utils/periods';
 import type { Employee, Group, ScheduleEntry, ShiftType, LeaveType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useTheme } from '../contexts/ThemeContext';
@@ -2262,6 +2263,14 @@ export default function Schedule() {
 
   // SSE: auto-refresh when schedule or conflicts change remotely
   useSSERefresh(['schedule_changed', 'conflict_updated', 'absence_changed'], loadSchedule);
+
+  // R5.10-8: gekennzeichnete Zeiträume (5PERIO) der gewählten Gruppe — farbige
+  // Hinterlegung der Tagesspalten im Dienstplan + Bezeichnung beim Hover (R5.10-11).
+  const [periods, setPeriods] = useState<Period[]>([]);
+  useEffect(() => {
+    const gid = selectedGroupIds.length === 1 ? selectedGroupIds[0] : undefined;
+    api.getPeriods(gid).then(setPeriods).catch(() => setPeriods([]));
+  }, [selectedGroupIds]);
 
   // Reload trigger for copy-week (dispatched after successful copy)
   useEffect(() => {
@@ -5804,10 +5813,13 @@ export default function Schedule() {
                 const activeGroupId = selectedGroupIds.length === 1 ? selectedGroupIds[0] : 0;
                 const dayComment = scheduleCommentsMap.get(`${dateStr}-${activeGroupId}`)
                   ?? scheduleCommentsMap.get(`${dateStr}-0`);
+                // R5.10-8/11: gekennzeichneter Zeitraum an diesem Tag?
+                const dayPeriod = periodForDate(periods, dateStr);
                 const thTitle = [
                   isHol ? `Feiertag · ${dateStr}` : isToday ? `Heute · ${dateStr}` : dateStr,
                   coverageTitle,
                   dayComment ? `💬 ${dayComment.text}` : '',
+                  dayPeriod ? `🗓 ${dayPeriod.description || 'Gekennzeichneter Zeitraum'}` : '',
                 ].filter(Boolean).join(' · ');
                 return (
                   <th scope="col"
@@ -5815,6 +5827,7 @@ export default function Schedule() {
                     className={`px-0.5 py-1 text-center min-w-[34px] border-r border-slate-600 cursor-pointer hover:brightness-125 transition-[filter] ${
                       isHol ? 'bg-red-700' : isToday ? 'bg-blue-500' : isWe ? 'bg-slate-600' : ''
                     }`}
+                    style={dayPeriod ? { borderBottom: `4px solid ${dayPeriod.color || '#f59e0b'}` } : undefined}
                     title={thTitle + ' · Klick für Tagesübersicht'}
                     onClick={() => setDayDetailModal({ day, dateStr })}
                   >

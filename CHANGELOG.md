@@ -9,6 +9,31 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Sidebar-Icons** ragen nicht mehr über die Seitenleiste: die Action-Icons im
+  Kopf (Warnungen/Benachrichtigungen/Suche/Hilfe/Erste-Schritte/Tour) brechen jetzt
+  um, statt die `w-56`-Zeile zu sprengen.
+- **Dark-Mode-Schalter** unten links wird nicht mehr „zerrissen" dargestellt: der
+  Schiebeknopf war ohne `left`-Anker, der Browser löste `left:auto` auf seine
+  statische Position auf und der Knopf rutschte im An-Zustand über den Pillen-Rand —
+  jetzt `left-0` als Translate-Ursprung + durchgehend weißer Knopf.
+- **All-in-One-Image schreibt gemountete Daten-Verzeichnisse** (Entrypoint): behebt
+  „Interner Serverfehler" beim Speichern, wenn das DBF-Verzeichnis vom Host
+  eingebunden wird (gleiche gosu-Lösung wie im API-Image; Auto-Backups in
+  `SP5_BACKUP_DIR`).
+
+### Added
+
+- E2E-Regressionssuite (echter Login, Produktionsmodus, Nicht-localhost-Herkunft)
+  gegen alle sechs in Zyklus 8 reproduzierten Symptome; läuft in CI und wird rot,
+  wenn ein Fix zurückgenommen wird.
+
+### Changed
+
+- Docker-Pins nachgezogen: `LIB_SOURCE` → `==1.12.0`, `API_SOURCE` →
+  `openschichtplaner5-api==1.6.0`.
+
 ---
 
 ## [1.6.0] - 2026-06-12

@@ -18,6 +18,9 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - Bericht „Dienstplaneinträge (Liste)": optionale **Untergliederung** je Mitarbeiter
   nach **Kalenderwoche** (ISO-8601) oder **Monat** — mit Zwischenüberschrift und
   Zwischensumme je Untergruppe, in Druck und CSV.
+- Bericht „Dienstplaneinträge (Liste)": Option **„Mitarbeiter ohne Einträge zeigen"**
+  (Nullzeilen) — führt auch Mitarbeiter der gewählten Gruppe ohne Einträge im Zeitraum
+  als Leerzeile mit (sonst nur Mitarbeiter mit mindestens einem Eintrag).
 
 ### Fixed
 

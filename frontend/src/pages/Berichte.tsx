@@ -5,7 +5,7 @@ import type { Employee, Group, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { escapeHtml, safeColor } from '../utils/escapeHtml';
-import { entryArt, groupReportRows, type ReportGroupMode } from '../utils/reportRows';
+import { entryArt, groupReportRows, withEmptyEmployees, type ReportGroupMode } from '../utils/reportRows';
 
 const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -1201,6 +1201,7 @@ async function reportDienstplanEintraege(
   format: 'print' | 'csv',
   plan: 'ist' | 'soll' | 'both' = 'ist',
   group: ReportGroupMode = 'none',
+  showEmpty = false,
 ) {
   if (!fromDate || !toDate) { alert('Bitte Zeitraum (Von/Bis) auswählen.'); return; }
   if (toDate < fromDate) { alert('Von-Datum muss vor Bis-Datum liegen.'); return; }
@@ -1264,9 +1265,20 @@ async function reportDienstplanEintraege(
   }
 
   const empMap = Object.fromEntries(employees.map(e => [e.ID, e]));
-  const empIds = Object.keys(byEmp).map(Number)
+  // A8 Nullzeilen: optional auch Mitarbeiter ohne Einträge mitführen.
+  let candidateIds: number[] = [];
+  if (showEmpty) {
+    if (groupId) {
+      const memberIds = new Set<number>();
+      (await api.getGroupAssignments()).filter(a => a.group_id === groupId).forEach(a => memberIds.add(a.employee_id));
+      candidateIds = employees.filter(e => memberIds.has(e.ID)).map(e => e.ID);
+    } else {
+      candidateIds = employees.map(e => e.ID);
+    }
+  }
+  const empIds = withEmptyEmployees(Object.keys(byEmp).map(Number), candidateIds, showEmpty)
     .sort((a, b) => (empMap[a]?.NAME || '').localeCompare(empMap[b]?.NAME || '', 'de'));
-  for (const id of empIds) byEmp[id].sort((a, b) => a.date.localeCompare(b.date));
+  for (const id of empIds) (byEmp[id] ??= []).sort((a, b) => a.date.localeCompare(b.date));
 
   const groupName = groupId ? (groups.find(g => g.ID === groupId)?.NAME ?? `Gruppe ${groupId}`) : 'Alle';
   const fmtDate = (d: string) => `${DAY_SHORT_DE[new Date(`${d}T00:00:00`).getDay()]} ${d.slice(8, 10)}.${d.slice(5, 7)}.${d.slice(0, 4)}`;
@@ -1315,6 +1327,9 @@ async function reportDienstplanEintraege(
 <th scope="col">Datum</th><th scope="col">Art</th><th scope="col">Kürzel</th><th scope="col">Name</th>
 <th scope="col">Uhrzeiten</th><th scope="col">Arbeitsplatz</th><th scope="col" style="text-align:right">Stunden</th>
 </tr></thead><tbody>`;
+    if (rows.length === 0) {
+      html += `<tr><td colspan="7" style="color:#94a3b8;font-style:italic">keine Einträge im Zeitraum</td></tr>`;
+    }
     for (const grp of groupReportRows(rows, group)) {
       if (grp.label) {
         html += `<tr style="background:#e2e8f0;font-weight:600"><td colspan="7">${grp.label}</td></tr>`;
@@ -1379,6 +1394,7 @@ export default function Berichte() {
   const [listFormat, setListFormat] = useState<'print' | 'csv'>('print');
   const [listPlan, setListPlan] = useState<'ist' | 'soll' | 'both'>('ist');
   const [listGroup, setListGroup] = useState<ReportGroupMode>('none');
+  const [listShowEmpty, setListShowEmpty] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
@@ -1506,7 +1522,7 @@ export default function Berichte() {
       icon: '📋',
       title: 'Dienstplaneinträge (Liste)',
       description: `Je Mitarbeiter alle Einträge ${listFrom} bis ${listTo}: Datum, Art (Dienst/Sonderdienst/Abwesenheit), Kürzel, Uhrzeiten, Arbeitsplatz, Stunden — mit Summen je Mitarbeiter (${listFormat === 'csv' ? 'CSV' : 'Druck'}).`,
-      action: () => run(() => reportDienstplanEintraege(listFrom, listTo, groupId, employees, groups, shifts, listFormat, listPlan, listGroup)),
+      action: () => run(() => reportDienstplanEintraege(listFrom, listTo, groupId, employees, groups, shifts, listFormat, listPlan, listGroup, listShowEmpty)),
       color: 'green',
       category: 'Dienstplan',
     },
@@ -1782,6 +1798,15 @@ export default function Berichte() {
                   <option value="month">Monat</option>
                 </select>
               </div>
+              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer pb-2">
+                <input
+                  type="checkbox"
+                  checked={listShowEmpty}
+                  onChange={e => setListShowEmpty(e.target.checked)}
+                  className="rounded border-gray-300 text-green-600 focus:ring-green-400"
+                />
+                Mitarbeiter ohne Einträge zeigen
+              </label>
               <div className="text-xs text-gray-500 max-w-xs">
                 Gruppenfilter oben wird berücksichtigt.
               </div>

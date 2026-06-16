@@ -49,6 +49,18 @@ export function reportGroupLabel(dateStr: string, mode: ReportGroupMode): string
   return '';
 }
 
+/**
+ * IDs der im Listenbericht anzuzeigenden Mitarbeiter (A8 „Nullzeilen"): mit
+ * `showEmpty` werden auch Kandidaten ohne Einträge (z. B. alle Gruppenmitglieder)
+ * aufgenommen, sonst nur Mitarbeiter mit mindestens einem Eintrag.
+ */
+export function withEmptyEmployees(
+  idsWithEntries: number[], candidateIds: number[], showEmpty: boolean,
+): number[] {
+  if (!showEmpty) return [...idsWithEntries];
+  return [...new Set([...idsWithEntries, ...candidateIds])];
+}
+
 /** Gruppiert datumssortierte Zeilen fortlaufend nach KW/Monat (oder gar nicht). */
 export function groupReportRows<T extends { date: string }>(
   rows: T[], mode: ReportGroupMode,

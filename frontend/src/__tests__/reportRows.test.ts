@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { entryArt, reportGroupLabel, groupReportRows } from '../utils/reportRows';
+import { entryArt, reportGroupLabel, groupReportRows, withEmptyEmployees } from '../utils/reportRows';
 
 describe('entryArt (A8: Datenbasis Soll/Ist im Listenbericht)', () => {
   it('benennt Dienst/Sonderdienst/Abwesenheit wie bisher', () => {
@@ -40,5 +40,17 @@ describe('reportGroupLabel / groupReportRows (A8: Untergliederung KW/Monat)', ()
   it('gruppiert nach Monat über Monatsgrenzen', () => {
     const rows = [{ date: '2026-06-29' }, { date: '2026-07-01' }];
     expect(groupReportRows(rows, 'month').map(x => x.label)).toEqual(['Juni 2026', 'Juli 2026']);
+  });
+});
+
+describe('withEmptyEmployees (A8: Nullzeilen)', () => {
+  it('ohne showEmpty nur Mitarbeiter mit Einträgen', () => {
+    expect(withEmptyEmployees([1, 3], [1, 2, 3, 4], false)).toEqual([1, 3]);
+  });
+  it('mit showEmpty auch Kandidaten ohne Einträge, ohne Duplikate', () => {
+    expect(withEmptyEmployees([1, 3], [1, 2, 3, 4], true).sort()).toEqual([1, 2, 3, 4]);
+  });
+  it('mit showEmpty und ohne Kandidaten bleibt es bei den Einträgen', () => {
+    expect(withEmptyEmployees([5], [], true)).toEqual([5]);
   });
 });

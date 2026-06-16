@@ -1332,8 +1332,8 @@ export const api = {
   getGroupMembers: (groupId: number) =>
     fetchJSON<Employee[]>(`/api/v1/groups/${groupId}/members`),
 
-  createScheduleEntry: (employee_id: number, date: string, shift_id: number) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/v1/schedule', { employee_id, date, shift_id }),
+  createScheduleEntry: (employee_id: number, date: string, shift_id: number, options?: { schedule_type?: number; workplace_id?: number }) =>
+    postJSON<{ ok: boolean; record: unknown }>('/api/v1/schedule', { employee_id, date, shift_id, ...options }),
 
   deleteScheduleEntry: (employee_id: number, date: string) =>
     deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/schedule/${employee_id}/${date}`),

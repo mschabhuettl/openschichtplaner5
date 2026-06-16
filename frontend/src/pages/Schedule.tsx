@@ -7,6 +7,7 @@ import { useGridPermissions, cellWriteState, isPastDate, type CellWriteState } f
 import { api } from '../api/client';
 import type { ShiftRequirement, Note, ConflictEntry, CoverageDay, ScheduleTemplate, ScheduleComment, AbsenceTimeOptions, Period } from '../api/client';
 import { periodForDate } from '../utils/periods';
+import { shiftCreateOptions } from '../utils/scheduleRestore';
 import type { Employee, Group, ScheduleEntry, ShiftType, LeaveType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useTheme } from '../contexts/ThemeContext';
@@ -3343,7 +3344,8 @@ export default function Schedule() {
       if (isCycleEntry(e)) continue;
       try {
         if ((e.kind === 'shift' || e.kind === 'special_shift') && e.shift_id) {
-          await api.createScheduleEntry(empId, dateStr, e.shift_id);
+          // A10: Soll-/Istplan-Typ und Arbeitsplatz beim Wiederherstellen erhalten.
+          await api.createScheduleEntry(empId, dateStr, e.shift_id, shiftCreateOptions(e));
         } else if (e.kind === 'absence' && e.leave_type_id) {
           await api.createAbsence(empId, dateStr, e.leave_type_id);
         }

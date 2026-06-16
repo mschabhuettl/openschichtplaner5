@@ -9,6 +9,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Dienstplan-Undo/Redo bewahrt jetzt den **Soll-/Istplan-Typ** und die
+  **Arbeitsplatz-Zuordnung** eines Schichteintrags: Wird ein Sollplan- oder ein
+  einem Arbeitsplatz zugeordneter Eintrag gelöscht und per Rückgängig
+  wiederhergestellt, kommt er nicht mehr als einfacher Istplan-Eintrag ohne
+  Arbeitsplatz zurück (Detailtreue, ROADMAP §A.10).
+
 ---
 
 ## [1.7.0] - 2026-06-16

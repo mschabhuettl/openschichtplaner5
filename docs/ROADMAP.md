@@ -38,17 +38,36 @@ Priorität 1 (fachlich relevant, klar umrissen):
    Arbeitsplatz-Filter in der Ansicht.
 
 Priorität 2 (Komfort-/Dialogtiefe):
-6. Sonderdienst-Editor: freier Name/Farben, getrennte Arbeitsstunden,
-   Mehrtages-Erfassung, nachträgliches Bearbeiten.
-7. Urlaubssperren: Geltungsbereich je Gruppe + Warnung beim Eintragen;
-   "gekennzeichnete Zeiträume" (5PERIO) im Plan; Gruppen-Schnittmengen-Modus.
+6. ~~Sonderdienst-Editor: freier Name/Farben, getrennte Arbeitsstunden,
+   Mehrtages-Erfassung, nachträgliches Bearbeiten.~~ **erledigt** (Bearbeiten +
+   freier Name; freie Farben + getrennte Arbeitsstunden + Mehrtages-Erfassung).
+7. ~~Urlaubssperren: Geltungsbereich je Gruppe + Warnung beim Eintragen;
+   "gekennzeichnete Zeiträume" (5PERIO) im Plan; Gruppen-Schnittmengen-Modus.~~
+   **erledigt:** Schnittmengen-Modus; weiche Warnung beim Eintragen in einen
+   5HOBAN-Sperrzeitraum; 5PERIO mit wählbarer Farbe + farbiger Hinterlegung im
+   Dienstplan-Kopf + Bezeichnung beim Hover. (Geltungsbereich-Enum R5.10-7
+   bewusst nicht eingeschränkt — 5HOBAN.RESTRICT material-unbestimmbar.)
 8. Berichts-Optionstiefe: Untergliederung KW/Monat, Datenbasis Soll/Ist,
    Nullzeilen, Halbjahres-/Jahres-Tagesraster-Varianten, Zeitzuschläge je Tag.
-9. Manuelle POSITION-Sortierung der Stammdaten programmweit.
-10. Undo/Redo mit voller Detailtreue (Teiltags-Abwesenheiten, Kommentare).
-11. Import: Quell→Ziel-Feldzuordnungs-UI (Vorlagen decken den Workflow heute ab).
-12. Backup-Kommentar + Restore-Anzeige; Migrationspfad für SP3/4-/WF-Altsicherungen
-    (nur bei realem Bedarf).
+9. ~~Manuelle POSITION-Sortierung der Stammdaten programmweit.~~ **erledigt.**
+10. Undo/Redo-Detailtreue: **teilweise erledigt** — Wiederherstellen bewahrt nun
+    Soll-/Istplan-Typ und Arbeitsplatz eines Schichteintrags. **Offen
+    (Daten-Layer):** Teiltags-Abwesenheiten (INTERVAL/Zeit) werden beim Undo als
+    ganztägig wiederhergestellt, weil die Dienstplan-Schicht-/Abwesenheits-Einträge
+    (`get_schedule`) INTERVAL/Start/Ende heute nicht mit ausliefern — ein
+    abgegrenzter lib→api→UI-Zusatz (würde zugleich eine reichere Teiltags-Anzeige
+    im Raster ermöglichen). Kommentare bleiben eigenständige Entität (eigenes
+    Edit/Delete), nicht Teil des Zell-Undo — bewusste Abgrenzung.
+11. Import: Quell→Ziel-Feldzuordnungs-UI — **bewertet: bewusst nicht umgesetzt.**
+    Der Import ist vorlagenbasiert (dokumentierte Spaltennamen + herunterladbare
+    CSV-Vorlagen je Datentyp; „Dienstplan-Abwesenheiten" zusätzlich per
+    Personalnummer/Kürzel). Eine freie Feldzuordnungs-UI brächte über die Vorlagen
+    hinaus geringen Mehrwert bei deutlich höherer Komplexität (Simplicity first).
+12. Backup/Restore — **bewertet:** Server-Backup-Liste mit Download und
+    **Wiederherstellen** ist vorhanden. Backup-**Kommentar** (Freitext je Sicherung)
+    + Migrationspfad für **SP3/4-/WF-Altsicherungen** bleiben „nur bei realem Bedarf"
+    vertagt: kein belegter Bedarf, und die Altformat-Migration ist ein eigenes,
+    abgegrenztes Vorhaben ohne aktuellen Auslöser.
 
 Bewusste Web-Abweichungen (kein Handlungsbedarf, dokumentiert):
 - Löschen von Stammdaten = Ausblenden statt Original-Löschkaskaden (sicherer).

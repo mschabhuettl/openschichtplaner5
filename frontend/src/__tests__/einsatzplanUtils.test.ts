@@ -1,6 +1,17 @@
 import { describe, it, expect } from 'vitest';
-import { occupiedShiftIds } from '../pages/einsatzplanUtils';
+import { occupiedShiftIds, shiftDurationForDate } from '../pages/einsatzplanUtils';
 import type { DayEntry } from '../api/client';
+import type { ShiftType } from '../types';
+
+function shift(p: Partial<ShiftType>): ShiftType {
+  return {
+    ID: 1, NAME: 'S', SHORTNAME: 'S', POSITION: 0,
+    COLORBK: 16777215, COLORBK_HEX: '#fff', COLORTEXT: 0, COLORTEXT_HEX: '#000',
+    COLORBAR_HEX: '#000', COLORBK_LIGHT: true, HIDE: false,
+    TIMES_BY_WEEKDAY: {}, DURATION0: 0,
+    ...p,
+  };
+}
 
 function entry(p: Partial<DayEntry>): DayEntry {
   return {
@@ -33,5 +44,25 @@ describe('occupiedShiftIds', () => {
 
   it('returns an empty set for no entries', () => {
     expect(occupiedShiftIds([]).size).toBe(0);
+  });
+});
+
+describe('shiftDurationForDate', () => {
+  // Index-Konvention DURATION0=Mo … DURATION6=So (wie lib calculations.day_index).
+  const s = shift({ DURATION0: 8, DURATION1: 7, DURATION6: 5 });
+
+  it('liest die Tagesstunden am korrekten Wochentag-Index', () => {
+    expect(shiftDurationForDate(s, '2026-06-15')).toBe(8); // Montag → DURATION0
+    expect(shiftDurationForDate(s, '2026-06-16')).toBe(7); // Dienstag → DURATION1
+    expect(shiftDurationForDate(s, '2026-06-21')).toBe(5); // Sonntag → DURATION6
+  });
+
+  it('fällt auf DURATION0 zurück, wenn der Tageswert 0/fehlt', () => {
+    // Mittwoch (DURATION2) ist nicht gesetzt → Default DURATION0
+    expect(shiftDurationForDate(s, '2026-06-17')).toBe(8);
+  });
+
+  it('liefert 0 ohne Schicht', () => {
+    expect(shiftDurationForDate(undefined, '2026-06-15')).toBe(0);
   });
 });

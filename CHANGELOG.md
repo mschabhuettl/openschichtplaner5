@@ -9,6 +9,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Sonderdienst-Dialog (Einsatzplan): frei wählbare Hintergrund- und Schriftfarbe
+  sowie ein Feld für die Arbeitsstunden des Sonderdienstes. Die Arbeitsstunden
+  sind mit den Iststunden der gewählten Schicht am jeweiligen Tag vorbelegt und
+  frei überschreibbar; Farben und Stunden gelten beim Neuanlegen wie beim
+  Bearbeiten. Bisher übernahmen Sonderdienste nur die Schichtfarbe und wurden mit
+  0 Arbeitsstunden gespeichert — ein per Web angelegter Sonderdienst zählt damit
+  nun korrekt zu den Iststunden.
+
 ---
 
 ## [1.6.2] - 2026-06-16

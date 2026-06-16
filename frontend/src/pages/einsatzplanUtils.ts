@@ -2,6 +2,22 @@
  * Pure Hilfsfunktionen für den Einsatzplan.
  */
 import type { DayEntry } from '../api/client';
+import type { ShiftType } from '../types';
+
+/**
+ * Voreingestellte Arbeitsstunden eines Sonderdienstes für einen Tag (A6):
+ * die Iststunden der gewählten Schicht am Wochentag des Datums. Index-Konvention
+ * wie in der Library (calculations.day_index): DURATION0=Mo … DURATION6=So;
+ * fehlt der Tageswert, gilt der Default DURATION0. Feiertage (lib-Index 7) werden
+ * im Dialog nicht aufgelöst — der Planer kann den Wert frei überschreiben.
+ */
+export function shiftDurationForDate(shift: ShiftType | undefined, isoDate: string): number {
+  if (!shift) return 0;
+  const jsDay = new Date(isoDate + 'T00:00:00').getDay(); // 0=So … 6=Sa
+  const libIdx = (jsDay + 6) % 7;                          // Mo=0 … So=6
+  const perDay = (shift as unknown as Record<string, number | undefined>)[`DURATION${libIdx}`];
+  return Number(perDay || shift.DURATION0 || 0);
+}
 
 /**
  * IDs der Schichtarten, die in den übergebenen Einträgen besetzt sind

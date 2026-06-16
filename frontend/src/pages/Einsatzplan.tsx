@@ -12,10 +12,23 @@ import { useUndoRedo } from '../hooks/useUndoRedo';
 import type { UndoableAction } from '../hooks/useUndoRedo';
 import { UndoRedoStatus } from '../components/UndoRedoStatus';
 import { ResponsiveTable } from '../components/ResponsiveTable';
-import { occupiedShiftIds } from './einsatzplanUtils';
+import { occupiedShiftIds, shiftDurationForDate } from './einsatzplanUtils';
 
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 const WEEKDAY_ABBR = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+
+// COLORREF (BGR-Int) ↔ #RRGGBB — wie in den Stammdaten-Dialogen (Shifts/Workplaces).
+function hexToBGR(hex: string): number {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return (b << 16) | (g << 8) | r;
+}
+function bgrToHex(bgr: number | undefined): string {
+  if (bgr == null) return '#ffffff';
+  const b = bgr & 0xff, g = (bgr >> 8) & 0xff, r = (bgr >> 16) & 0xff;
+  return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+}
 
 function toIsoDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -128,6 +141,9 @@ export interface SonderdienstEdit {
   shift_id: number;
   workplace_id: number;
   startend: string;
+  colorBkHex?: string;   // A6: bestehende Farben/Stunden vorbefüllen
+  colorTextHex?: string;
+  duration?: number;
 }
 
 interface SonderdiensteModalProps {
@@ -148,10 +164,11 @@ interface SonderdiensteModalProps {
     startend: string;
     colorbk: number;
     colortext: number;
+    duration: number;
   }) => Promise<void>;
 }
 
-function SonderdiensteModal({ employee, date, shifts, workplaces, existing, onClose, onSave }: SonderdiensteModalProps) {
+export function SonderdiensteModal({ employee, date, shifts, workplaces, existing, onClose, onSave }: SonderdiensteModalProps) {
   const isEdit = existing != null;
   const [shiftId, setShiftId] = useState<number>(existing?.shift_id || shifts[0]?.ID || 0);
   const [workplaceId, setWorkplaceId] = useState<number>(existing?.workplace_id ?? 0);
@@ -161,20 +178,31 @@ function SonderdiensteModal({ employee, date, shifts, workplaces, existing, onCl
   const [name, setName] = useState(existing?.name ?? initShift?.NAME ?? '');
   const [shortname, setShortname] = useState(existing?.shortname ?? initShift?.SHORTNAME ?? '');
   const [nameTouched, setNameTouched] = useState(isEdit);
+  // Freie Farben + getrennte Arbeitsstunden (A6) — Default = gewählte Schicht/Tag.
+  const [bgHex, setBgHex] = useState(existing?.colorBkHex ?? bgrToHex(initShift?.COLORBK ?? 16777215));
+  const [textHex, setTextHex] = useState(existing?.colorTextHex ?? bgrToHex(initShift?.COLORTEXT ?? 0));
+  const [colorsTouched, setColorsTouched] = useState(isEdit);
+  const [hours, setHours] = useState(
+    String(existing?.duration ?? shiftDurationForDate(initShift, date)),
+  );
+  const [hoursTouched, setHoursTouched] = useState(isEdit);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
-  const selectedShift = shifts.find(s => s.ID === shiftId);
-
-  // Schichtwechsel: Name/Kurzname auf die neue Schicht setzen, solange der Nutzer
-  // sie nicht selbst überschrieben hat (freier Name bleibt erhalten).
+  // Schichtwechsel: Name/Kurzname/Farben/Stunden auf die neue Schicht setzen,
+  // solange der Nutzer sie nicht selbst überschrieben hat (freie Werte bleiben).
   const onShiftChange = (id: number) => {
     setShiftId(id);
+    const s = shifts.find(x => x.ID === id);
     if (!nameTouched) {
-      const s = shifts.find(x => x.ID === id);
       setName(s?.NAME ?? '');
       setShortname(s?.SHORTNAME ?? '');
     }
+    if (!colorsTouched) {
+      setBgHex(bgrToHex(s?.COLORBK ?? 16777215));
+      setTextHex(bgrToHex(s?.COLORTEXT ?? 0));
+    }
+    if (!hoursTouched) setHours(String(shiftDurationForDate(s, date)));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -193,8 +221,9 @@ function SonderdiensteModal({ employee, date, shifts, workplaces, existing, onCl
         shift_id: shiftId,
         workplace_id: workplaceId,
         startend,
-        colorbk: selectedShift?.COLORBK ?? 16777215,
-        colortext: selectedShift?.COLORTEXT ?? 0,
+        colorbk: hexToBGR(bgHex),
+        colortext: hexToBGR(textHex),
+        duration: parseFloat(hours) || 0,
       });
       onClose();
     } catch (e: unknown) {
@@ -274,6 +303,47 @@ function SonderdiensteModal({ employee, date, shifts, workplaces, existing, onCl
               placeholder="HH:MM-HH:MM"
               className="w-full border dark:border-gray-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
+          </div>
+          {/* Getrennte Arbeitsstunden (A6) — Default = Schichtstunden des Tages */}
+          <div>
+            <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Arbeitsstunden</label>
+            <input
+              type="number"
+              step="0.25"
+              min="0"
+              value={hours}
+              onChange={e => { setHours(e.target.value); setHoursTouched(true); }}
+              className="w-full border dark:border-gray-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+          {/* Freie Farben (A6) — Hintergrund + Schrift, Default = gewählte Schicht */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Hintergrundfarbe</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  aria-label="Hintergrundfarbe"
+                  value={bgHex}
+                  onChange={e => { setBgHex(e.target.value); setColorsTouched(true); }}
+                  className="w-10 h-8 rounded border cursor-pointer"
+                />
+                <div className="flex-1 h-8 rounded border border-gray-200 flex items-center justify-center text-xs font-bold"
+                  style={{ backgroundColor: bgHex, color: textHex }}>
+                  {shortname || name || 'SD'}
+                </div>
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Schriftfarbe</label>
+              <input
+                type="color"
+                aria-label="Schriftfarbe"
+                value={textHex}
+                onChange={e => { setTextHex(e.target.value); setColorsTouched(true); }}
+                className="w-10 h-8 rounded border cursor-pointer"
+              />
+            </div>
           </div>
           {error && <div className="text-red-600 text-xs">{error}</div>}
           <div className="flex gap-2 pt-2">
@@ -1187,6 +1257,7 @@ export default function Einsatzplan() {
               startend: d.startend as string,
               colorbk: d.colorbk as number,
               colortext: d.colortext as number,
+              duration: d.duration as number,
             });
           }
           break;
@@ -1208,6 +1279,7 @@ export default function Einsatzplan() {
             startend: d.startend as string,
             colorbk: d.colorbk as number,
             colortext: d.colortext as number,
+            duration: d.duration as number,
           });
           // Update the undoData with the new id
           action.undoData.createdId = res.record.id;
@@ -1405,6 +1477,9 @@ export default function Einsatzplan() {
         shift_id: entry.shift_id ?? 0,
         workplace_id: entry.workplace_id ?? 0,
         startend: entry.spshi_startend ?? '',
+        colorBkHex: entry.color_bk || undefined,
+        colorTextHex: entry.color_text || undefined,
+        duration: entry.spshi_duration ?? 0,
       },
     });
   };
@@ -1435,8 +1510,8 @@ export default function Einsatzplan() {
         startend: entry.spshi_startend ?? '',
         duration: entry.spshi_duration ?? 0,
         type: entry.spshi_type ?? 0,
-        colorbk: 0,
-        colortext: 0,
+        colorbk: entry.color_bk ? hexToBGR(entry.color_bk) : 0,
+        colortext: entry.color_text ? hexToBGR(entry.color_text) : 0,
       };
       await api.deleteEinsatzplanEntry(entryId);
       undoRedo.push({
@@ -1464,6 +1539,7 @@ export default function Einsatzplan() {
     startend: string;
     colorbk: number;
     colortext: number;
+    duration: number;
   }) => {
     if (!grid.duties) throw new Error('Keine Schreibberechtigung für Dienste (WDUTIES)');
     if (isPastDate(data.date, todayStr) && !grid.past) {
@@ -1477,6 +1553,9 @@ export default function Einsatzplan() {
         shift_id: data.shift_id,
         workplace_id: data.workplace_id,
         startend: data.startend,
+        colorbk: data.colorbk,
+        colortext: data.colortext,
+        duration: data.duration,
       });
       loadData();
       showToast('Sonderdienst aktualisiert', 'success');
@@ -1492,6 +1571,7 @@ export default function Einsatzplan() {
       startend: data.startend,
       colorbk: data.colorbk,
       colortext: data.colortext,
+      duration: data.duration,
     });
     // Find employee name for label
     const empName = dayEntries.find(e => e.employee_id === data.employee_id)?.employee_name ?? `MA #${data.employee_id}`;

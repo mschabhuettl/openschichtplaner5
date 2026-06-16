@@ -529,8 +529,8 @@ function AppInner() {
 
   const sidebarContent = (
     <>
-      <div className="p-4 border-b border-slate-700 flex items-center justify-between">
-        <div>
+      <div className="p-4 border-b border-slate-700 flex items-start justify-between gap-2">
+        <div className="min-w-0">
           <div className="text-lg font-bold text-white flex items-center gap-2">
             🧸 OpenSP5
             {isDevMode && (
@@ -542,7 +542,9 @@ function AppInner() {
           </div>
           <div className="text-xs text-slate-400 mt-0.5">{t.nav.dienstplanung}</div>
         </div>
-        <div className="flex items-center gap-1">
+        {/* Action icons: wrap to a new line instead of overflowing the w-56 sidebar
+            (cycle 8: 5–6 emoji buttons + logo exceed one row → icons protruded). */}
+        <div className="flex flex-wrap items-center justify-end gap-1 min-w-0">
           {/* Warnings Center bell */}
           <WarningsCenter />
           {/* In-App Notifications */}

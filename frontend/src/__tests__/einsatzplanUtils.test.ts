@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { occupiedShiftIds, shiftDurationForDate } from '../pages/einsatzplanUtils';
+import { occupiedShiftIds, shiftDurationForDate, datesInRange } from '../pages/einsatzplanUtils';
 import type { DayEntry } from '../api/client';
 import type { ShiftType } from '../types';
 
@@ -64,5 +64,25 @@ describe('shiftDurationForDate', () => {
 
   it('liefert 0 ohne Schicht', () => {
     expect(shiftDurationForDate(undefined, '2026-06-15')).toBe(0);
+  });
+});
+
+describe('datesInRange', () => {
+  it('listet alle Tage inklusive Start und Ende', () => {
+    expect(datesInRange('2026-06-15', '2026-06-17')).toEqual([
+      '2026-06-15', '2026-06-16', '2026-06-17',
+    ]);
+  });
+
+  it('überschreitet Monatsgrenzen korrekt', () => {
+    expect(datesInRange('2026-06-29', '2026-07-01')).toEqual([
+      '2026-06-29', '2026-06-30', '2026-07-01',
+    ]);
+  });
+
+  it('gibt nur den Starttag zurück, wenn Ende leer oder vor Start liegt', () => {
+    expect(datesInRange('2026-06-15', '')).toEqual(['2026-06-15']);
+    expect(datesInRange('2026-06-15', '2026-06-14')).toEqual(['2026-06-15']);
+    expect(datesInRange('2026-06-15', '2026-06-15')).toEqual(['2026-06-15']);
   });
 });

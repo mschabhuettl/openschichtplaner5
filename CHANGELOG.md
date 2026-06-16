@@ -18,6 +18,9 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   Bearbeiten. Bisher übernahmen Sonderdienste nur die Schichtfarbe und wurden mit
   0 Arbeitsstunden gespeichert — ein per Web angelegter Sonderdienst zählt damit
   nun korrekt zu den Iststunden.
+- Sonderdienst-Dialog: Mehrtages-Erfassung. Über ein optionales Bis-Datum wird der
+  Sonderdienst für jeden Tag des Zeitraums (max. 92 Tage) in einem Rutsch angelegt;
+  der Vorgang lässt sich als Ganzes per Rückgängig wieder entfernen.
 
 ---
 

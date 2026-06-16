@@ -20,6 +20,24 @@ export function shiftDurationForDate(shift: ShiftType | undefined, isoDate: stri
 }
 
 /**
+ * Aufsteigende Liste der ISO-Tagesdaten von startIso bis endIso (inklusive),
+ * für die Mehrtages-Erfassung von Sonderdiensten (A6). UTC-Arithmetik vermeidet
+ * Zeitzonen-/Sommerzeit-Drift. Ist endIso leer/ungültig oder vor startIso, wird
+ * nur der Starttag zurückgegeben.
+ */
+export function datesInRange(startIso: string, endIso: string): string[] {
+  const start = new Date(startIso + 'T00:00:00Z');
+  if (isNaN(start.getTime())) return [];
+  const end = new Date((endIso || startIso) + 'T00:00:00Z');
+  if (isNaN(end.getTime()) || end < start) return [startIso];
+  const out: string[] = [];
+  for (const d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
+    out.push(d.toISOString().slice(0, 10));
+  }
+  return out;
+}
+
+/**
  * IDs der Schichtarten, die in den übergebenen Einträgen besetzt sind
  * (mindestens ein eingeteilter Mitarbeiter). Abwesenheits- und Frei-Einträge
  * zählen nicht — sie werden in eigenen Zeilen geführt. Grundlage für das

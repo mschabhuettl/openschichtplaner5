@@ -89,5 +89,27 @@ describe('SonderdiensteModal — freie Farben + getrennte Arbeitsstunden (A6)', 
     expect(payload.id).toBe(7);
     expect(payload.colorbk).toBe(0xccbbaa);   // #aabbcc → BGR
     expect(payload.duration).toBe(4);
+    // Mehrtages-Erfassung gilt nur fürs Neuanlegen → beim Bearbeiten kein Bis-Feld
+    expect(screen.queryByLabelText('Bis-Datum')).toBeNull();
+  });
+
+  it('reicht beim Neuanlegen ein Bis-Datum für die Mehrtages-Erfassung durch', async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    render(
+      <SonderdiensteModal
+        employee={employee}
+        date="2026-06-15"
+        shifts={[makeShift({})]}
+        workplaces={workplaces}
+        onClose={() => {}}
+        onSave={onSave}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText('Bis-Datum'), { target: { value: '2026-06-17' } });
+    fireEvent.click(screen.getByRole('button', { name: /Speichern/ }));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave.mock.calls[0][0].endDate).toBe('2026-06-17');
   });
 });

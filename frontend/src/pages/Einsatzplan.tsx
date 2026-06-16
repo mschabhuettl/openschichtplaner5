@@ -12,7 +12,7 @@ import { useUndoRedo } from '../hooks/useUndoRedo';
 import type { UndoableAction } from '../hooks/useUndoRedo';
 import { UndoRedoStatus } from '../components/UndoRedoStatus';
 import { ResponsiveTable } from '../components/ResponsiveTable';
-import { occupiedShiftIds, shiftDurationForDate } from './einsatzplanUtils';
+import { occupiedShiftIds, shiftDurationForDate, datesInRange } from './einsatzplanUtils';
 
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 const WEEKDAY_ABBR = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
@@ -165,8 +165,11 @@ interface SonderdiensteModalProps {
     colorbk: number;
     colortext: number;
     duration: number;
+    endDate?: string;  // A6: Mehrtages-Erfassung (nur Neuanlage)
   }) => Promise<void>;
 }
+
+const MAX_RANGE_DAYS = 92;  // A6: Sonderdienst-Mehrtages-Erfassung sinnvoll begrenzt
 
 export function SonderdiensteModal({ employee, date, shifts, workplaces, existing, onClose, onSave }: SonderdiensteModalProps) {
   const isEdit = existing != null;
@@ -186,6 +189,7 @@ export function SonderdiensteModal({ employee, date, shifts, workplaces, existin
     String(existing?.duration ?? shiftDurationForDate(initShift, date)),
   );
   const [hoursTouched, setHoursTouched] = useState(isEdit);
+  const [endDate, setEndDate] = useState('');  // A6: leer = nur der eine Tag
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -209,6 +213,12 @@ export function SonderdiensteModal({ employee, date, shifts, workplaces, existin
     e.preventDefault();
     if (!shiftId) { setError('Bitte Schicht auswählen'); return; }
     if (!name.trim()) { setError('Bitte einen Namen angeben'); return; }
+    if (!isEdit && endDate) {
+      if (endDate < date) { setError('Das Bis-Datum liegt vor dem Startdatum'); return; }
+      if (datesInRange(date, endDate).length > MAX_RANGE_DAYS) {
+        setError(`Zeitraum zu groß (max. ${MAX_RANGE_DAYS} Tage)`); return;
+      }
+    }
     setBusy(true);
     setError('');
     try {
@@ -224,6 +234,7 @@ export function SonderdiensteModal({ employee, date, shifts, workplaces, existin
         colorbk: hexToBGR(bgHex),
         colortext: hexToBGR(textHex),
         duration: parseFloat(hours) || 0,
+        endDate: !isEdit && endDate ? endDate : undefined,
       });
       onClose();
     } catch (e: unknown) {
@@ -304,6 +315,23 @@ export function SonderdiensteModal({ employee, date, shifts, workplaces, existin
               className="w-full border dark:border-gray-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
+          {/* Mehrtages-Erfassung (A6) — nur beim Neuanlegen; leer = nur der eine Tag */}
+          {!isEdit && (
+            <div>
+              <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Bis (optional — mehrere Tage)</label>
+              <input
+                type="date"
+                aria-label="Bis-Datum"
+                value={endDate}
+                min={date}
+                onChange={e => setEndDate(e.target.value)}
+                className="w-full border dark:border-gray-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              {endDate && endDate >= date && (
+                <p className="text-xs text-gray-500 mt-0.5">{datesInRange(date, endDate).length} Tage ({date} – {endDate})</p>
+              )}
+            </div>
+          )}
           {/* Getrennte Arbeitsstunden (A6) — Default = Schichtstunden des Tages */}
           <div>
             <label className="block text-xs font-medium text-gray-600 dark:text-gray-600 mb-1">Arbeitsstunden</label>
@@ -1227,9 +1255,11 @@ export default function Einsatzplan() {
       switch (action.type) {
         case 'create_sonderdienst':
         case 'create_deviation': {
-          // Undo a create → delete the created record
-          const id = action.undoData.createdId as number;
-          await api.deleteEinsatzplanEntry(id);
+          // Undo a create → delete the created record(s).
+          // Sonderdienst kann mehrere Tage umfassen (createdIds), Abweichung genau einen.
+          const ids = (action.undoData.createdIds as number[] | undefined)
+            ?? [action.undoData.createdId as number];
+          for (const id of ids) await api.deleteEinsatzplanEntry(id);
           break;
         }
         case 'delete_entry': {
@@ -1269,20 +1299,25 @@ export default function Einsatzplan() {
       switch (action.type) {
         case 'create_sonderdienst': {
           const d = action.redoData as Record<string, unknown>;
-          const res = await api.createEinsatzplanEntry({
-            employee_id: d.employee_id as number,
-            date: d.date as string,
-            name: d.name as string,
-            shortname: d.shortname as string,
-            shift_id: d.shift_id as number,
-            workplace_id: d.workplace_id as number,
-            startend: d.startend as string,
-            colorbk: d.colorbk as number,
-            colortext: d.colortext as number,
-            duration: d.duration as number,
-          });
-          // Update the undoData with the new id
-          action.undoData.createdId = res.record.id;
+          // Mehrtages-Erfassung: je Tag neu anlegen (Fallback: der eine Tag).
+          const days = (d.dates as string[] | undefined) ?? [d.date as string];
+          const createdIds: number[] = [];
+          for (const day of days) {
+            const res = await api.createEinsatzplanEntry({
+              employee_id: d.employee_id as number,
+              date: day,
+              name: d.name as string,
+              shortname: d.shortname as string,
+              shift_id: d.shift_id as number,
+              workplace_id: d.workplace_id as number,
+              startend: d.startend as string,
+              colorbk: d.colorbk as number,
+              colortext: d.colortext as number,
+              duration: d.duration as number,
+            });
+            createdIds.push(res.record.id);
+          }
+          action.undoData.createdIds = createdIds;
           break;
         }
         case 'create_deviation': {
@@ -1540,6 +1575,7 @@ export default function Einsatzplan() {
     colorbk: number;
     colortext: number;
     duration: number;
+    endDate?: string;
   }) => {
     if (!grid.duties) throw new Error('Keine Schreibberechtigung für Dienste (WDUTIES)');
     if (isPastDate(data.date, todayStr) && !grid.past) {
@@ -1561,9 +1597,11 @@ export default function Einsatzplan() {
       showToast('Sonderdienst aktualisiert', 'success');
       return;
     }
-    const res = await api.createEinsatzplanEntry({
+    // A6: Mehrtages-Erfassung — ein Eintrag je Tag im Bereich (sonst genau einer).
+    const dates = data.endDate ? datesInRange(data.date, data.endDate) : [data.date];
+    const createOne = (day: string) => api.createEinsatzplanEntry({
       employee_id: data.employee_id,
-      date: data.date,
+      date: day,
       name: data.name,
       shortname: data.shortname,
       shift_id: data.shift_id,
@@ -1573,17 +1611,23 @@ export default function Einsatzplan() {
       colortext: data.colortext,
       duration: data.duration,
     });
-    // Find employee name for label
+    const createdIds: number[] = [];
+    for (const day of dates) {
+      const res = await createOne(day);
+      createdIds.push(res.record.id);
+    }
     const empName = dayEntries.find(e => e.employee_id === data.employee_id)?.employee_name ?? `MA #${data.employee_id}`;
     undoRedo.push({
       type: 'create_sonderdienst',
-      label: `Sonderdienst ${data.shortname} für ${empName}`,
-      undoData: { createdId: res.record.id },
-      redoData: { ...data },
+      label: dates.length > 1
+        ? `Sonderdienst ${data.shortname} für ${empName} (${dates.length} Tage)`
+        : `Sonderdienst ${data.shortname} für ${empName}`,
+      undoData: { createdIds },
+      redoData: { ...data, dates },
       timestamp: Date.now(),
     });
     loadData();
-    showToast('Sonderdienst gespeichert', 'success');
+    showToast(dates.length > 1 ? `Sonderdienst an ${dates.length} Tagen gespeichert` : 'Sonderdienst gespeichert', 'success');
   };
 
   const handleSaveAbweichung = async (data: {

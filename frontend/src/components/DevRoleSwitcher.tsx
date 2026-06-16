@@ -21,7 +21,12 @@ export function DevRoleSwitcher() {
   return (
     <div style={{
       position: 'fixed',
-      top: isMobile ? '54px' : '12px',  // below mobile header bar on small screens
+      // Desktop: bottom-right, out of the way of the top toolbars (the schedule
+      // view-toggle Monat/Woche/Kalender sits top-right and this z-9999 badge used
+      // to cover it, making those buttons unclickable in dev mode). Mobile: below
+      // the header (the bottom edge is taken by the BottomNav).
+      top: isMobile ? '54px' : 'auto',
+      bottom: isMobile ? 'auto' : '12px',
       right: isMobile ? '6px' : '12px',
       zIndex: 9999,
       fontFamily: 'monospace',
@@ -58,10 +63,12 @@ export function DevRoleSwitcher() {
             onClick={() => setOpen(false)}
             style={{ position: 'fixed', inset: 0, zIndex: -1 }}
           />
-          {/* Dropdown */}
+          {/* Dropdown — opens downward on mobile (badge at top), upward on desktop
+              (badge at bottom-right). */}
           <div style={{
             position: 'absolute',
-            top: '44px',
+            top: isMobile ? '44px' : 'auto',
+            bottom: isMobile ? 'auto' : '44px',
             right: 0,
             background: '#1c1917',
             border: '2px solid #f59e0b',

@@ -54,8 +54,8 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
 FROM python:3.12-slim
 WORKDIR /app
 
-# Install curl for the Docker HEALTHCHECK
-RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+# curl for the Docker HEALTHCHECK; gosu for the privilege-drop in the entrypoint
+RUN apt-get update && apt-get install -y --no-install-recommends curl gosu && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
 RUN groupadd --gid 1001 sp5 && \
@@ -78,12 +78,21 @@ VOLUME ["/app/data"]
 ENV SP5_DB_PATH=/app/data
 # Ressourcen-Root für sp5api + sp5lib (data/, api/data, alembic); frontend dist
 # liegt am Default-Ort SP5_BACKEND_DIR/../frontend/dist = /app/frontend/dist
-ENV SP5_BACKEND_DIR=/app/backend
+ENV SP5_BACKEND_DIR=/app/backend \
+    # Auto-Backups in das beschreibbare State-Volume (sonst /app/data/../backups
+    # = /app/backups auf der read-only rootfs).
+    SP5_BACKUP_DIR=/app/backend/backups
 
-# Drop to non-root
-USER sp5
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Kein festes `USER sp5`: der Container startet als root, damit der Entrypoint die
+# Schreibrechte am gemounteten Daten-Verzeichnis angleichen kann, und lässt die App
+# danach via gosu als dessen Eigentümer (sonst uid 1001) laufen. `--user` umgeht
+# den root-Schritt (dann ist der Aufrufer für die Schreibrechte verantwortlich).
 
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
   CMD curl -f http://localhost:8000/api/health || exit 1
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["python", "-m", "uvicorn", "sp5api.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -218,3 +218,83 @@ jobs:
         with:
           name: playwright-traces
           path: frontend/test-results/
+
+  e2e-cycle8-regressions:
+    # Real-login E2E against a PRODUCTION-mode backend over a NON-localhost HTTP
+    # origin (sp5.local) — the configuration the cycle-4/5 verifications never
+    # exercised (they used dev-mode + localStorage on localhost), which is why the
+    # Secure-cookie-over-HTTP login failure, the sidebar overflow and the broken
+    # dark-mode toggle all slipped through. Each test goes red if its fix is reverted.
+    name: E2E Cycle-8 Regressions (real login, prod, non-localhost)
+    runs-on: ubuntu-latest
+    needs: [lint-frontend]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright browser
+        working-directory: frontend
+        run: npx playwright install chromium --with-deps
+
+      - name: Install emoji font (needed to reproduce the sidebar overflow)
+        run: sudo apt-get update && sudo apt-get install -y fonts-noto-color-emoji
+
+      - name: Add non-localhost host alias
+        run: echo "127.0.0.1 sp5.local" | sudo tee -a /etc/hosts
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Start production-mode backend (serves SPA + /api, demo users seeded)
+        working-directory: backend
+        run: |
+          mkdir -p /tmp/sp5-c8-data
+          cp fixtures/*.DBF /tmp/sp5-c8-data/
+          uvicorn sp5api.main:app --host 0.0.0.0 --port 8000 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8000/api/health >/dev/null 2>&1 && break
+            sleep 1
+          done
+        env:
+          # PROD mode on purpose: SP5_DEV_MODE is NOT set → real login + Secure-cookie logic.
+          SP5_SEED_DEMO_USERS: "1"
+          SP5_DB_PATH: "/tmp/sp5-c8-data"
+          SP5_BACKEND_DIR: ${{ github.workspace }}/backend
+          SP5_FRONTEND_DIST: ${{ github.workspace }}/frontend/dist
+          SECRET_KEY: "ci-cycle8-secret-not-for-production"
+
+      - name: Run cycle-8 regression suite over sp5.local (HTTP, non-localhost)
+        working-directory: frontend
+        run: npx playwright test --config=playwright.cycle8.config.ts --reporter=github
+        env:
+          CI: true
+          E2E_BASE_URL: "http://sp5.local:8000"
+
+      - name: Upload cycle-8 report
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: playwright-cycle8-report
+          path: frontend/playwright-report/

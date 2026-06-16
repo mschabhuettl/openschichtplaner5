@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.7.0] - 2026-06-16
+
 ### Added
 
 - Sonderdienst-Dialog (Einsatzplan): frei wählbare Hintergrund- und Schriftfarbe

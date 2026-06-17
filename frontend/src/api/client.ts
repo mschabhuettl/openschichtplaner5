@@ -1399,7 +1399,7 @@ export const api = {
     return fetchJSON<{ id: number; employee_id: number; date: string; leave_type_id: number; leave_type_name: string; leave_type_short: string }[]>(`/api/v1/absences${qs ? `?${qs}` : ''}`);
   },
   createAbsence: (employee_id: number, date: string, leave_type_id: number, options?: AbsenceTimeOptions) =>
-    postJSON<{ ok: boolean; record: unknown }>('/api/v1/absences', { employee_id, date, leave_type_id, ...options }),
+    postJSON<{ ok: boolean; record: unknown; warnings?: string[] }>('/api/v1/absences', { employee_id, date, leave_type_id, ...options }),
   updateAbsence: (employee_id: number, date: string, data: { leave_type_id?: number } & AbsenceTimeOptions) =>
     putJSON<{ ok: boolean; record: unknown }>(`/api/v1/absences/${employee_id}/${date}`, data),
   deleteAbsence: (employee_id: number, date: string) =>

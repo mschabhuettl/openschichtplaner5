@@ -2930,7 +2930,10 @@ export default function Schedule() {
       if (choice === 'replace' && hasDeletableEntry(existing)) {
         await api.deleteScheduleEntry(empId, dateStr);
       }
-      await api.createAbsence(empId, dateStr, leaveTypeId, time);
+      const res = await api.createAbsence(empId, dateStr, leaveTypeId, time);
+      // Backend-Hinweise (z. B. Urlaubssperre R5.10-5, Feiertag, bestehende Schicht)
+      // im Dienstplan sichtbar machen — weiche Warnung, Eintragung bleibt bestehen.
+      res.warnings?.forEach(w => showToast(w, 'warning'));
       if (existing.length > 0) pushUndo([{ empId, day, before: existing }]);
       loadSchedule();
     } catch (e) {

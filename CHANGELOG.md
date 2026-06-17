@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Dienstplan: Beim Eintragen einer Abwesenheit über den Schnelleintrag werden die
+  Backend-Hinweise jetzt als Toast angezeigt (z. B. „Urlaubssperre für …", Feiertag) —
+  bisher erschienen sie nur im Urlaub-Fenster. Weiche Hinweise; die Eintragung bleibt
+  bestehen.
+
 ---
 
 ## [1.9.0] - 2026-06-17

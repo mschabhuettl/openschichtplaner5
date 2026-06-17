@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.9.0] - 2026-06-17
+
 ### Added
 
 - Neuer Bericht **„Zeitzuschläge je Tag"** (Spec 3.8): listet die Zuschlagsstunden

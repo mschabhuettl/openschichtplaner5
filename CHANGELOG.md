@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.9.1] - 2026-06-17
+
 ### Changed
 
 - Dienstplan: Beim Eintragen einer Abwesenheit über den Schnelleintrag werden die

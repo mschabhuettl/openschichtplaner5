@@ -2,7 +2,7 @@
 # its own repo and released to PyPI. Importable as `sp5api`. Extracted from
 # backend/api with full git history. Pulls in fastapi/uvicorn/pydantic etc. as
 # its own dependencies.
-openschichtplaner5-api>=1.2.0
+openschichtplaner5-api>=1.8.0
 
 # Core library (DBF bridge + ORM/sync), maintained in its own repo and released to
 # PyPI. Importable as `sp5lib`. Kept as a direct dependency: scripts/ and

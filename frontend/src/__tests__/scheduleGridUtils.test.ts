@@ -14,6 +14,7 @@ import {
   filterPrevMonthCopyEntries,
   canAddWithoutReplace,
   planCellDrop,
+  toAbsenceTimeOptions,
 } from '../components/scheduleGridUtils';
 import type { ScheduleEntry } from '../types';
 import type { CoverageDay } from '../api/client';
@@ -181,5 +182,31 @@ describe('planCellDrop', () => {
 
   it('„Zusätzlich eintragen" leert das Ziel nicht', () => {
     expect(planCellDrop({ sourceEntry: manual, targetEntries: [manual], isCopy: false, choice: 'add' }).clearTarget).toBe(false);
+  });
+});
+
+describe('toAbsenceTimeOptions (V-3: Teiltags-Abwesenheit → API-Format)', () => {
+  it('ganztägig (0) liefert keine Optionen', () => {
+    expect(toAbsenceTimeOptions({ interval: 0, start_time: '08:00', end_time: '12:00' })).toBeUndefined();
+  });
+
+  it('Vormittag/Nachmittag (1/2): nur interval, keine Zeiten', () => {
+    expect(toAbsenceTimeOptions({ interval: 1, start_time: '08:00', end_time: '12:00' })).toEqual({ interval: 1 });
+    expect(toAbsenceTimeOptions({ interval: 2, start_time: '08:00', end_time: '12:00' })).toEqual({ interval: 2 });
+  });
+
+  it('stundenweise (3): "HH:MM" → Minuten ab Mitternacht (int, wie von der API erwartet)', () => {
+    // Regression: vorher wurden "08:00"/"12:00" als String gesendet → API 422
+    // ("start_time: Must be an integer"). Jetzt int-Minuten.
+    expect(toAbsenceTimeOptions({ interval: 3, start_time: '08:00', end_time: '12:00' }))
+      .toEqual({ interval: 3, start_time: 480, end_time: 720 });
+    // Tageswechsel (end < start) bleibt zulässig und wird korrekt umgerechnet
+    expect(toAbsenceTimeOptions({ interval: 3, start_time: '22:00', end_time: '02:00' }))
+      .toEqual({ interval: 3, start_time: 1320, end_time: 120 });
+  });
+
+  it('ungültige/leere Zeit → 0 (statt NaN)', () => {
+    expect(toAbsenceTimeOptions({ interval: 3, start_time: '', end_time: '99:99' }))
+      .toEqual({ interval: 3, start_time: 0, end_time: 0 });
   });
 });

@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Dienstplan: Stundenweise Teiltags-Abwesenheiten (Auswahl „Std." mit Von-/Bis-Uhrzeit)
+  ließen sich nicht speichern — die Uhrzeiten wurden als „HH:MM" statt als Minuten an die
+  API geschickt, die mit „422 – start_time: Must be an integer" ablehnte. Die Umrechnung
+  erfolgt jetzt vor dem Senden; vormittags/nachmittags/ganztägig waren nie betroffen.
+
 ---
 
 ## [1.9.1] - 2026-06-17

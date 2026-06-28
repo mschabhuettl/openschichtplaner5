@@ -977,10 +977,10 @@ export type AbsenceInterval = 0 | 1 | 2 | 3;
 
 export interface AbsenceTimeOptions {
   interval?: AbsenceInterval;
-  /** Nur bei interval=3: Beginn "HH:MM". */
-  start_time?: string;
-  /** Nur bei interval=3: Ende "HH:MM" (darf rechnerisch über Mitternacht gehen). */
-  end_time?: string;
+  /** Nur bei interval=3: Beginn in Minuten ab Mitternacht (0..1440), wie von der API erwartet. */
+  start_time?: number;
+  /** Nur bei interval=3: Ende in Minuten ab Mitternacht (end < start = rechnerischer Tageswechsel). */
+  end_time?: number;
 }
 
 export interface WeekSchedule {

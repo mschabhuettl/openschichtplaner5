@@ -160,9 +160,24 @@ export const DEFAULT_ABSENCE_TIME: AbsenceTimeState = {
   end_time: '12:00',
 };
 
-/** State → API-Optionen; ganztägig (0) braucht keine Optionen. */
+/** "HH:MM" → Minuten ab Mitternacht (0..1439); ungültige Eingabe → 0. */
+function hhmmToMinutes(s: string): number {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(s.trim());
+  if (!m) return 0;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if (h > 23 || min > 59) return 0;
+  return h * 60 + min;
+}
+
+/**
+ * State → API-Optionen; ganztägig (0) braucht keine Optionen. Die API erwartet
+ * START/END als Minuten ab Mitternacht (int), nicht als "HH:MM" — der
+ * type="time"-Picker liefert "HH:MM", deshalb wird hier umgerechnet.
+ */
 export function toAbsenceTimeOptions(v: AbsenceTimeState): AbsenceTimeOptions | undefined {
   if (v.interval === 0) return undefined;
-  if (v.interval === 3) return { interval: 3, start_time: v.start_time, end_time: v.end_time };
+  if (v.interval === 3)
+    return { interval: 3, start_time: hhmmToMinutes(v.start_time), end_time: hhmmToMinutes(v.end_time) };
   return { interval: v.interval };
 }

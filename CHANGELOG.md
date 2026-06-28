@@ -9,6 +9,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Admin: „Als Benutzer ansehen" (Impersonation). In der Benutzerverwaltung öffnet
+  „👁️ Ansehen" pro Benutzer eine Ansicht der App aus dessen Sicht — mit dessen Rolle,
+  Rechten und Sichtbarkeit (nie mehr als der Admin). Ein dauerhaftes Banner oben zeigt
+  „Sie sehen die Anwendung als <Benutzer> (nur lesend)" mit „Zurück zu mir". Die Ansicht
+  ist **rein lesend** (Schreibaktionen sind gesperrt), nicht verschachtelbar und wird
+  serverseitig erzwungen und protokolliert; die eigene Anmeldung des Admins bleibt
+  unverändert. Erfordert das gebündelte API ab 1.10.0 / lib 1.15.0.
+
 ---
 
 ## [1.10.6] - 2026-06-28

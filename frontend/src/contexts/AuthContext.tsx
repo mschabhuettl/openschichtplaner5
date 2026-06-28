@@ -27,6 +27,15 @@ export interface CurrentUser {
    * wswaponly/wpast/addempl/showabs/shownotes/showstats/backup.
    */
   permissions?: Record<string, boolean>;
+  /**
+   * P-B Admin-Impersonation („Als Benutzer ansehen"): vom Server (/auth/me)
+   * gesetzt, während ein Admin als dieser Benutzer agiert. `_impersonation_active`
+   * markiert den Zustand; `_impersonated_by` ist der echte Admin (für das Banner
+   * und „Zurück zu mir"). Die Durchsetzung (nur lesend, keine Eskalation) erfolgt
+   * serverseitig — diese Felder dienen nur der Anzeige.
+   */
+  _impersonation_active?: boolean;
+  _impersonated_by?: { ID: number; NAME: string } | null;
 }
 
 /** The roles available in the dev view-role simulator. */
@@ -62,6 +71,15 @@ export interface AuthContextType {
    * gewählte devViewRole simuliert.
    */
   can: (perm: string) => boolean;
+  /**
+   * P-B Admin-Impersonation: aktiver „Als Benutzer ansehen"-Zustand (Ziel- und
+   * Admin-Name fürs Banner), sonst null. Server ist die Quelle der Wahrheit.
+   */
+  impersonation: { targetName: string; adminName: string } | null;
+  /** Startet die Impersonation eines Benutzers (admin-only, serverseitig geprüft). */
+  startImpersonation: (userId: number) => Promise<{ ok: boolean; detail?: string }>;
+  /** Beendet die aktive Impersonation und kehrt zur Admin-Identität zurück. */
+  stopImpersonation: () => Promise<void>;
 }
 
 // ── Default role permissions ─────────────────────────────────
@@ -89,6 +107,8 @@ function applyRoleDefaults(user: Partial<CurrentUser>): CurrentUser {
     SHOWSTATS: user.SHOWSTATS ?? (isAdmin || isPlaner),
     ACCADMWND: user.ACCADMWND ?? isAdmin,
     permissions: user.permissions,
+    _impersonation_active: user._impersonation_active,
+    _impersonated_by: user._impersonated_by,
   };
 }
 
@@ -223,6 +243,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // P-B Admin-Impersonation („Als Benutzer ansehen") — nur Anzeige; der Server
+  // erzwingt Rechte/Read-only. Beim Laden aus /auth/me gespiegelt.
+  const [impersonation, setImpersonation] = useState<{ targetName: string; adminName: string } | null>(null);
+
+  /**
+   * /auth/me lesen und den Impersonations-Zustand spiegeln. Ist eine
+   * Impersonation aktiv, wird die App naturgetreu als der Ziel-Benutzer
+   * gerendert (Rolle/Rechte/Flags aus /me) und das Banner gesetzt; sonst wird
+   * nur das Banner geleert (das normale User-State bleibt unangetastet).
+   */
+  const syncImpersonation = useCallback(async () => {
+    try {
+      const BASE = import.meta.env.VITE_API_URL ?? '';
+      const res = await fetch(`${BASE}/api/v1/auth/me`, { credentials: 'include' });
+      if (!res.ok) return;
+      const me = await res.json();
+      if (me && me._impersonation_active) {
+        setUser(applyRoleDefaults(me));
+        setImpersonation({
+          targetName: me.NAME ?? '?',
+          adminName: me._impersonated_by?.NAME ?? '?',
+        });
+      } else {
+        setImpersonation(null);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
   /** permissions in State + persistierter Session aktualisieren. */
   const applyPermissions = useCallback((perms: Record<string, boolean>) => {
     setUser(u => (u ? { ...u, permissions: perms } : u));
@@ -267,6 +315,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             fetchPermissions().then(perms => {
               if (perms) applyPermissions(perms);
             });
+            // P-B: aktiven Impersonations-Zustand aus /auth/me spiegeln (Banner +
+            // naturgetreues Rendern als Ziel-Benutzer nach einem Reload)
+            syncImpersonation();
           }
         }
       }
@@ -275,7 +326,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }, [scheduleExpiryTimer, fetchPermissions, applyPermissions]);
+  }, [scheduleExpiryTimer, fetchPermissions, applyPermissions, syncImpersonation]);
 
   // Auto-logout when API returns 401 or proactive expiry timer fires
   useEffect(() => {
@@ -380,6 +431,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setDevViewRoleState('admin');
   };
 
+  // ── P-B Admin-Impersonation („Als Benutzer ansehen") ──────────
+  // Start/Stop sind admin-only und serverseitig durchgesetzt. Nach Erfolg wird
+  // die Seite neu geladen, damit die gesamte App naturgetreu als die (geänderte)
+  // Identität rendert; der Restore-Pfad spiegelt den Zustand dann aus /auth/me.
+  const startImpersonation = async (userId: number): Promise<{ ok: boolean; detail?: string }> => {
+    const BASE = import.meta.env.VITE_API_URL ?? '';
+    const headers: Record<string, string> = {};
+    if (token) headers['X-Auth-Token'] = token;
+    try {
+      const res = await fetch(`${BASE}/api/v1/auth/impersonate/${userId}`, {
+        method: 'POST', headers, credentials: 'include',
+      });
+      if (res.ok) {
+        window.location.reload();
+        return { ok: true };
+      }
+      let detail: string | undefined;
+      try { detail = (await res.json())?.detail; } catch { /* ignore */ }
+      return { ok: false, detail };
+    } catch {
+      return { ok: false };
+    }
+  };
+
+  const stopImpersonation = async (): Promise<void> => {
+    const BASE = import.meta.env.VITE_API_URL ?? '';
+    const headers: Record<string, string> = {};
+    if (token) headers['X-Auth-Token'] = token;
+    try {
+      await fetch(`${BASE}/api/v1/auth/impersonate/stop`, {
+        method: 'POST', headers, credentials: 'include',
+      });
+    } catch { /* ignore */ }
+    window.location.reload();
+  };
+
   // Permission helpers — in dev mode, simulate the selected view-role for UI purposes
   const simPerms = isDevMode ? devViewPermissions(devViewRole) : null;
 
@@ -418,6 +505,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       canAdmin,
       canBackup,
       can,
+      impersonation,
+      startImpersonation,
+      stopImpersonation,
     }}>
       {children}
     </AuthContext.Provider>

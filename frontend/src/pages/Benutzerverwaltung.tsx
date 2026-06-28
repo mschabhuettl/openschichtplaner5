@@ -575,7 +575,7 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
 // ── Main Component ────────────────────────────────────────────────────────
 
 export default function Benutzerverwaltung() {
-  const { canAdmin } = useAuth();
+  const { canAdmin, user: currentUser, startImpersonation } = useAuth();
   const [users, setUsers] = useState<SP5User[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -953,6 +953,18 @@ export default function Benutzerverwaltung() {
                           title="Temporäres Passwort generieren"
                         >
                           🔄 Reset
+                        </button>
+                        )}
+                        {canAdmin && u.ID !== currentUser?.ID && (
+                        <button
+                          onClick={async () => {
+                            const r = await startImpersonation(u.ID);
+                            if (!r.ok) alert(r.detail || 'Ansehen als Benutzer fehlgeschlagen.');
+                          }}
+                          className="px-3 py-1.5 text-xs rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 font-medium transition-colors"
+                          title="Die Anwendung als dieser Benutzer ansehen (nur lesend)"
+                        >
+                          👁️ Ansehen
                         </button>
                         )}
                         {canAdmin && (

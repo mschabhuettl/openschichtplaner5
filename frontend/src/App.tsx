@@ -29,6 +29,7 @@ import { ThemeToggle } from './components/ThemeToggle';
 import { BottomNav } from './components/BottomNav';
 import { api, checkApiCompatibility } from './api/client';
 import { DevRoleSwitcher } from './components/DevRoleSwitcher';
+import { ImpersonationBanner } from './components/ImpersonationBanner';
 import GlobalSearchBar from './components/GlobalSearchBar';
 
 // Lazy-loaded pages — each page group is a separate chunk
@@ -685,6 +686,8 @@ function AppInner() {
       <ApiIncompatibleBanner />
       {/* Global offline connectivity banner */}
       <OfflineBanner />
+      {/* P-B Admin-Impersonation: persistentes „Als Benutzer ansehen"-Banner */}
+      <ImpersonationBanner />
       {/* Backend unreachable banner (startup check) */}
       <BackendUnreachableBanner />
 

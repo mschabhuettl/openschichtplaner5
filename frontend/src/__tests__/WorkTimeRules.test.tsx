@@ -238,9 +238,12 @@ describe('WorkTimeRules page', () => {
   // 13 ── group selector shows groups
   it('group selector shows loaded groups', async () => {
     setup();
-    await waitFor(() => screen.getByLabelText('Gruppe auswählen'));
-    const select = screen.getByLabelText('Gruppe auswählen') as HTMLSelectElement;
-    expect(select.options.length).toBeGreaterThan(1);
+    // Auf die befüllten Optionen warten, nicht nur auf das <select> — die
+    // Gruppen werden asynchron nachgeladen (sonst Race unter CI-Parallellast).
+    await waitFor(() => {
+      const select = screen.getByLabelText('Gruppe auswählen') as HTMLSelectElement;
+      expect(select.options.length).toBeGreaterThan(1);
+    });
   });
 
   // 14 ── no violations shows green OK message

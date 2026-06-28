@@ -1283,9 +1283,12 @@ export const api = {
   getEmployees: (includeHidden?: boolean) =>
     fetchJSON<Employee[]>(`/api/v1/employees${includeHidden ? '?include_hidden=true' : ''}`),
   getGroups: () => fetchJSON<Group[]>('/api/v1/groups'),
-  getShifts: () => fetchJSON<ShiftType[]>('/api/v1/shifts'),
-  getLeaveTypes: () => fetchJSON<LeaveType[]>('/api/v1/leave-types'),
-  getWorkplaces: () => fetchJSON<Workplace[]>('/api/v1/workplaces'),
+  getShifts: (include_hidden = false) =>
+    fetchJSON<ShiftType[]>(`/api/v1/shifts${include_hidden ? '?include_hidden=true' : ''}`),
+  getLeaveTypes: (include_hidden = false) =>
+    fetchJSON<LeaveType[]>(`/api/v1/leave-types${include_hidden ? '?include_hidden=true' : ''}`),
+  getWorkplaces: (include_hidden = false) =>
+    fetchJSON<Workplace[]>(`/api/v1/workplaces${include_hidden ? '?include_hidden=true' : ''}`),
   /** A9: manuelle Stammdaten-Sortierung (POSITION). entity: employees|shifts|groups|leave_types|workplaces */
   reorderMasterData: (entity: string, orderedIds: number[]) =>
     postJSON<{ ok: boolean; updated: number }>(`/api/v1/reorder/${entity}`, { ordered_ids: orderedIds }),

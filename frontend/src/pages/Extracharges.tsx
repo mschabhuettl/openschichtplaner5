@@ -93,7 +93,7 @@ export default function Extracharges() {
 
   const load = () => {
     setLoading(true);
-    api.getExtraCharges().then(data => {
+    api.getExtraCharges(true).then(data => { // inkl. ausgeblendete, damit das Toggle sie zeigen kann
       setCharges(data);
       setLoading(false);
     }).catch(() => setLoading(false));

@@ -66,6 +66,7 @@ export default function LeaveTypes() {
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [showReorder, setShowReorder] = useState(false);
   const [search, setSearch] = useState('');
+  const [showHidden, setShowHidden] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
@@ -84,7 +85,7 @@ export default function LeaveTypes() {
 
   const load = () => {
     setLoading(true);
-    api.getLeaveTypes().then(data => {
+    api.getLeaveTypes(true).then(data => { // inkl. ausgeblendete, damit sie wieder einblendbar sind
       setLeaveTypes(data);
       setLoading(false);
     }).catch((err) => { setLoading(false); showToast('Abwesenheitsarten konnten nicht geladen werden. ' + String(err), 'error'); });
@@ -196,7 +197,7 @@ export default function LeaveTypes() {
         <LoadingSpinner />
       ) : (
         <>
-        <div className="mb-3">
+        <div className="mb-3 flex items-center gap-3 flex-wrap">
           <input
             type="text"
             placeholder="🔍 Abwesenheitsart suchen…"
@@ -204,6 +205,12 @@ export default function LeaveTypes() {
             onChange={e => setSearch(e.target.value)}
             className="w-full sm:w-72 px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
+          {leaveTypes.some(lt => lt.HIDE) && (
+            <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer select-none whitespace-nowrap">
+              <input type="checkbox" checked={showHidden} onChange={e => setShowHidden(e.target.checked)} />
+              Ausgeblendete anzeigen ({leaveTypes.filter(lt => lt.HIDE).length})
+            </label>
+          )}
         </div>
         <div className="bg-white rounded-lg shadow overflow-x-auto">
           <table className="w-full text-sm min-w-[600px]">
@@ -218,8 +225,8 @@ export default function LeaveTypes() {
               </tr>
             </thead>
             <tbody>
-              {leaveTypes.filter(lt => !search || lt.NAME.toLowerCase().includes(search.toLowerCase()) || (lt.SHORTNAME || '').toLowerCase().includes(search.toLowerCase())).map((lt, i) => (
-                <tr key={lt.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}>
+              {leaveTypes.filter(lt => showHidden || !lt.HIDE).filter(lt => !search || lt.NAME.toLowerCase().includes(search.toLowerCase()) || (lt.SHORTNAME || '').toLowerCase().includes(search.toLowerCase())).map((lt, i) => (
+                <tr key={lt.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors ${lt.HIDE ? 'opacity-60' : ''}`}>
                   <td className="px-4 py-2">
                     <div
                       className="w-8 h-6 rounded border border-gray-300 flex items-center justify-center text-[10px] font-bold"
@@ -228,7 +235,10 @@ export default function LeaveTypes() {
                       {lt.SHORTNAME}
                     </div>
                   </td>
-                  <td className="px-4 py-2 font-semibold">{lt.NAME}</td>
+                  <td className="px-4 py-2 font-semibold">
+                    {lt.NAME}
+                    {lt.HIDE && (<span className="ml-2 inline-block px-1.5 py-0.5 text-[10px] font-medium rounded bg-gray-200 text-gray-600 align-middle">Ausgeblendet</span>)}
+                  </td>
                   <td className="px-4 py-2 text-gray-500">{lt.SHORTNAME}</td>
                   <td className="px-4 py-2 text-center">
                     {lt.ENTITLED

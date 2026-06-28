@@ -9,6 +9,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Stammdaten: Ausgeblendete Einträge wieder einblendbar (Sackgasse behoben). In
+  Schichtarten, Abwesenheitsarten, Arbeitsplätzen und Zuschlägen erscheint, sobald
+  ausgeblendete Einträge existieren, das Kontrollkästchen „Ausgeblendete anzeigen (N)".
+  Aktiviert zeigt es die ausgeblendeten Einträge abgeblendet mit „Ausgeblendet"-Marker;
+  über „Bearbeiten" lässt sich der Haken „Ausblenden" entfernen, womit der Eintrag wieder
+  aktiv wird. Bisher waren ausgeblendete Stammdaten in der App nicht mehr erreichbar,
+  obwohl das Original sie wieder einblenden kann. Nutzt das bestehende `include_hidden`
+  des API; keine Server-Änderung nötig.
+
 ---
 
 ## [1.11.0] - 2026-06-28

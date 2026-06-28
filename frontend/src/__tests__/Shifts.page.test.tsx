@@ -2,7 +2,7 @@
  * Page tests for Shifts.tsx
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { LanguageProvider } from '../i18n/context';
 
@@ -90,6 +90,39 @@ describe('Shifts page', () => {
     await waitFor(() => {
       // Error causes empty list — no shifts shown
       expect(screen.queryByText('Frühschicht')).toBeNull();
+    });
+  });
+
+  // P-VOLLERFASSUNG Lücke #3: ausgeblendete Stammdaten wieder einblendbar (Sackgasse beheben).
+  describe('Ausgeblendete Schichtarten', () => {
+    const mockWithHidden = [
+      ...mockShifts,
+      { ID: 3, NAME: 'Nachtschicht', SHORTNAME: 'N', DURATION0: 8, COLOR: 0x000000, HIDE: true },
+    ];
+
+    it('lädt inklusive ausgeblendeter (include_hidden=true)', async () => {
+      vi.mocked(api.getShifts).mockResolvedValue(mockWithHidden as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+      renderShifts();
+      await waitFor(() => expect(screen.getAllByText('Frühschicht').length).toBeGreaterThan(0));
+      expect(api.getShifts).toHaveBeenCalledWith(true);
+    });
+
+    it('blendet ausgeblendete Schichten standardmäßig aus, zeigt sie nach Toggle', async () => {
+      vi.mocked(api.getShifts).mockResolvedValue(mockWithHidden as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+      renderShifts();
+      await waitFor(() => expect(screen.getAllByText('Frühschicht').length).toBeGreaterThan(0));
+      // Standard: ausgeblendete Schicht NICHT sichtbar
+      expect(screen.queryByText('Nachtschicht')).toBeNull();
+      // Toggle ist da (Zähler 1) und aktiviert die ausgeblendete Schicht
+      const toggle = screen.getByRole('checkbox', { name: /Ausgeblendete anzeigen/ });
+      fireEvent.click(toggle);
+      await waitFor(() => expect(screen.getAllByText('Nachtschicht').length).toBeGreaterThan(0));
+    });
+
+    it('zeigt keinen Toggle, wenn nichts ausgeblendet ist', async () => {
+      renderShifts(); // mockShifts ohne HIDE
+      await waitFor(() => expect(screen.getAllByText('Frühschicht').length).toBeGreaterThan(0));
+      expect(screen.queryByRole('checkbox', { name: /Ausgeblendete anzeigen/ })).toBeNull();
     });
   });
 });

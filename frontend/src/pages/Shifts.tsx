@@ -75,6 +75,9 @@ export default function Shifts() {
   const [shiftSortDir, setShiftSortDir] = useState<ShiftSortDir>('asc');
   const [shiftSearch, setShiftSearch] = useState('');
   const debouncedShiftSearch = useDebounce(shiftSearch, 300);
+  // Ausgeblendete (archivierte) Schichtarten: standardmäßig verborgen, per Schalter
+  // wieder einblendbar und damit über „Bearbeiten" reaktivierbar (sonst Sackgasse).
+  const [showHidden, setShowHidden] = useState(false);
 
   const handleShiftSort = (key: ShiftSortKey) => {
     if (shiftSortKey === key) setShiftSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -85,6 +88,7 @@ export default function Shifts() {
   const sortedShifts = useMemo(() => {
     const q = debouncedShiftSearch.toLowerCase();
     return [...shifts]
+      .filter(s => showHidden || !s.HIDE)
       .filter(s => !q || (s.NAME || '').toLowerCase().includes(q) || (s.SHORTNAME || '').toLowerCase().includes(q))
       .sort((a, b) => {
         let av = '', bv = '';
@@ -96,11 +100,14 @@ export default function Shifts() {
         const cmp = av.localeCompare(bv, 'de');
         return shiftSortDir === 'asc' ? cmp : -cmp;
       });
-  }, [shifts, debouncedShiftSearch, shiftSortKey, shiftSortDir]);
+  }, [shifts, debouncedShiftSearch, shiftSortKey, shiftSortDir, showHidden]);
+
+  const hiddenShiftCount = useMemo(() => shifts.filter(s => s.HIDE).length, [shifts]);
 
   const load = () => {
     setLoading(true);
-    api.getShifts().then(data => {
+    // inkl. ausgeblendeter Schichtarten laden, damit sie wieder einblendbar sind
+    api.getShifts(true).then(data => {
       setShifts(data);
       setLoading(false);
     }).catch(() => setLoading(false));
@@ -226,6 +233,16 @@ export default function Shifts() {
               title="Suche zurücksetzen" aria-label="Suche zurücksetzen"
             >✕</button>
           )}
+          {hiddenShiftCount > 0 && (
+            <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer select-none whitespace-nowrap">
+              <input
+                type="checkbox"
+                checked={showHidden}
+                onChange={e => setShowHidden(e.target.checked)}
+              />
+              Ausgeblendete anzeigen ({hiddenShiftCount})
+            </label>
+          )}
           <button
             onClick={() => window.print()}
             className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
@@ -275,7 +292,7 @@ export default function Shifts() {
                   const sunTime = times['6'] || null;
                   const indiv = hasIndividualTimes(s);
                   return (
-                    <tr key={s.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}>
+                    <tr key={s.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors ${s.HIDE ? 'opacity-60' : ''}`}>
                       <td className="px-4 py-2">
                         <div
                           className="w-8 h-6 rounded border border-gray-300 flex items-center justify-center text-[10px] font-bold"
@@ -284,7 +301,14 @@ export default function Shifts() {
                           {s.SHORTNAME}
                         </div>
                       </td>
-                      <td className="px-4 py-2 font-semibold">{s.NAME}</td>
+                      <td className="px-4 py-2 font-semibold">
+                        {s.NAME}
+                        {s.HIDE && (
+                          <span className="ml-2 inline-block px-1.5 py-0.5 text-[10px] font-medium rounded bg-gray-200 text-gray-600 align-middle">
+                            Ausgeblendet
+                          </span>
+                        )}
+                      </td>
                       <td className="px-4 py-2 text-gray-500">{s.SHORTNAME}</td>
                       <td className="px-4 py-2 text-center text-gray-600 font-mono text-xs">
                         {indiv

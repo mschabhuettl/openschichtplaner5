@@ -35,6 +35,9 @@ export default function Workplaces() {
   const [workplaces, setWorkplaces] = useState<Workplace[]>([]);
   const [showReorder, setShowReorder] = useState(false);
   const [search, setSearch] = useState('');
+  // Ausgeblendete Arbeitsplätze: standardmäßig verborgen, per Schalter wieder
+  // einblendbar und damit reaktivierbar (sonst Sackgasse, kein Weg zurück).
+  const [showHidden, setShowHidden] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
 
@@ -61,7 +64,8 @@ export default function Workplaces() {
 
   const load = () => {
     setLoading(true);
-    api.getWorkplaces().then(data => {
+    // inkl. ausgeblendeter Arbeitsplätze laden, damit sie wieder einblendbar sind
+    api.getWorkplaces(true).then(data => {
       setWorkplaces(data);
       setLoading(false);
     }).catch((err) => { setLoading(false); showToast('Arbeitsplätze konnten nicht geladen werden. ' + String(err), 'error'); });
@@ -220,7 +224,7 @@ export default function Workplaces() {
           <LoadingSpinner />
         ) : (
           <>
-          <div className="mb-3">
+          <div className="mb-3 flex items-center gap-3 flex-wrap">
             <input
               type="text"
               placeholder="🔍 Arbeitsplatz suchen…"
@@ -228,6 +232,16 @@ export default function Workplaces() {
               onChange={e => setSearch(e.target.value)}
               className="w-full sm:w-72 px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
+            {workplaces.some(w => w.HIDE) && (
+              <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer select-none whitespace-nowrap">
+                <input
+                  type="checkbox"
+                  checked={showHidden}
+                  onChange={e => setShowHidden(e.target.checked)}
+                />
+                Ausgeblendete anzeigen ({workplaces.filter(w => w.HIDE).length})
+              </label>
+            )}
           </div>
           <div className="bg-white rounded-lg shadow overflow-x-auto">
             <table className="w-full text-sm min-w-[500px]">
@@ -240,14 +254,14 @@ export default function Workplaces() {
                 </tr>
               </thead>
               <tbody>
-                {workplaces.filter(w => !search || w.NAME.toLowerCase().includes(search.toLowerCase()) || (w.SHORTNAME || '').toLowerCase().includes(search.toLowerCase())).map((w, i) => (
+                {workplaces.filter(w => showHidden || !w.HIDE).filter(w => !search || w.NAME.toLowerCase().includes(search.toLowerCase()) || (w.SHORTNAME || '').toLowerCase().includes(search.toLowerCase())).map((w, i) => (
                   <tr
                     key={w.ID}
                     className={`border-b cursor-pointer ${
                       selectedWp?.ID === w.ID
                         ? 'bg-blue-50 border-blue-200'
                         : i % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                    } hover:bg-blue-50 transition-colors`}
+                    } hover:bg-blue-50 transition-colors ${w.HIDE ? 'opacity-60' : ''}`}
                     onClick={() => openDetail(w)}
                   >
                     <td className="px-4 py-2">
@@ -258,7 +272,14 @@ export default function Workplaces() {
                         {w.SHORTNAME?.slice(0, 2)}
                       </div>
                     </td>
-                    <td className="px-4 py-2 font-semibold">{w.NAME}</td>
+                    <td className="px-4 py-2 font-semibold">
+                      {w.NAME}
+                      {w.HIDE && (
+                        <span className="ml-2 inline-block px-1.5 py-0.5 text-[10px] font-medium rounded bg-gray-200 text-gray-600 align-middle">
+                          Ausgeblendet
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-2 text-gray-500">{w.SHORTNAME}</td>
                     <td className="px-4 py-2 text-center" onClick={e => e.stopPropagation()}>
                       <div className="flex gap-1 justify-center">

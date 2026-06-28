@@ -8,7 +8,7 @@ import { api } from '../api/client';
 import type { ShiftRequirement, Note, ConflictEntry, CoverageDay, ScheduleTemplate, ScheduleComment, AbsenceTimeOptions, Period } from '../api/client';
 import { periodForDate } from '../utils/periods';
 import { shiftCreateOptions, absenceTimeOptions } from '../utils/scheduleRestore';
-import type { Employee, Group, ScheduleEntry, ShiftType, LeaveType } from '../types';
+import type { Employee, Group, ScheduleEntry, ShiftType, LeaveType, Workplace } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useTheme } from '../contexts/ThemeContext';
 import { useConfirm } from '../hooks/useConfirm';
@@ -484,13 +484,14 @@ interface ContextMenuState {
 }
 
 // ── Full cell context menu (replaces old NoteContextMenu) ─────
-type CellMenuMode = 'menu' | 'shift-select' | 'absence-select' | 'delete-select' | 'sonderdienst' | 'deviation' | 'note';
+type CellMenuMode = 'menu' | 'shift-select' | 'absence-select' | 'delete-select' | 'sonderdienst' | 'deviation' | 'note' | 'workplace-select';
 
 interface CellContextMenuProps {
   state: ContextMenuState;
   entries: ScheduleEntry[];
   shifts: ShiftType[];
   leaveTypes: LeaveType[];
+  workplaces: Workplace[];
   hasClipboard: boolean;
   /** G-1: granulares Schreib-Gating der Zelle (WDUTIES/WABSENCES/WPAST). */
   writeState: CellWriteState;
@@ -504,6 +505,7 @@ interface CellContextMenuProps {
   onAddAbsence: (empId: number, day: number, leaveTypeId: number, time?: AbsenceTimeOptions) => void;
   onAddSonderdienst: (empId: number, dateStr: string, shiftId: number | null, startTime: string, endTime: string) => Promise<void>;
   onAddDeviation: (empId: number, dateStr: string, startTime: string, endTime: string) => Promise<void>;
+  onAssignWorkplace: (empId: number, dateStr: string, workplaceId: number) => Promise<void>;
   onDelete: (empId: number, day: number) => void;
   onDeleteEntry: (empId: number, day: number, entry: ScheduleEntry) => void;
   onCopy: (empId: number, day: number) => void;
@@ -511,10 +513,10 @@ interface CellContextMenuProps {
 }
 
 const CellContextMenu = memo(function CellContextMenu({
-  state, entries, shifts, leaveTypes, hasClipboard,
+  state, entries, shifts, leaveTypes, workplaces, hasClipboard,
   writeState, canNotes, canDeviation,
   onClose, onAddNote, onAssignShift, onAddAbsence,
-  onAddSonderdienst, onAddDeviation, onDelete, onDeleteEntry, onCopy, onPaste,
+  onAddSonderdienst, onAddDeviation, onAssignWorkplace, onDelete, onDeleteEntry, onCopy, onPaste,
 }: CellContextMenuProps) {
   const [mode, setMode] = useState<CellMenuMode>('menu');
   const [noteText, setNoteText] = useState('');
@@ -607,6 +609,15 @@ const CellContextMenu = memo(function CellContextMenu({
               ⏱️ Arbeitszeitabweichung...
             </button>
           )}
+          {/* V-14/R6.4: Arbeitsplatz einem Dienst zuordnen — nur wenn Arbeitsplätze definiert sind */}
+          {entries.some(en => en.kind === 'shift') && workplaces.length > 0 && writeState.canAddShift && !writeState.pastLocked && (
+            <button
+              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              onClick={() => setMode('workplace-select')}
+            >
+              🏢 Arbeitsplatz...
+            </button>
+          )}
           {canNotes && (
             <button
               className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
@@ -670,6 +681,46 @@ const CellContextMenu = memo(function CellContextMenu({
               </button>
             ))}
           </div>
+          <div className="border-t my-1" />
+          <button
+            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 flex items-center gap-1"
+            onClick={() => setMode('menu')}
+          >
+            ← Zurück
+          </button>
+        </div>
+      )}
+
+      {mode === 'workplace-select' && (
+        <div className="py-1">
+          <div className="px-3 py-1 text-gray-600 text-[10px] font-medium border-b mb-1">Arbeitsplatz zuordnen</div>
+          <div className="overflow-y-auto max-h-60">
+            {workplaces.filter(w => !w.HIDE).map(w => {
+              const active = entries.some(en => en.kind === 'shift' && en.workplace_id === w.ID);
+              return (
+                <button
+                  key={w.ID}
+                  onClick={() => { onAssignWorkplace(state.empId, state.dateStr, w.ID); onClose(); }}
+                  className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
+                >
+                  <span className="inline-block w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: w.COLORBK_HEX || '#ccc' }} />
+                  <span>{w.NAME}</span>
+                  {active && <span className="ml-auto text-[10px] text-green-600">✓</span>}
+                </button>
+              );
+            })}
+          </div>
+          {entries.some(en => en.kind === 'shift' && en.workplace_id) && (
+            <>
+              <div className="border-t my-1" />
+              <button
+                className="w-full px-3 py-1.5 text-left hover:bg-red-50 text-red-600 flex items-center gap-2"
+                onClick={() => { onAssignWorkplace(state.empId, state.dateStr, 0); onClose(); }}
+              >
+                ✕ Arbeitsplatz entfernen
+              </button>
+            </>
+          )}
           <div className="border-t my-1" />
           <button
             className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 flex items-center gap-1"
@@ -2032,6 +2083,7 @@ export default function Schedule() {
   const [holidays, setHolidays] = useState<Set<string>>(new Set());
   const [shifts, setShifts] = useState<ShiftType[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
+  const [workplaces, setWorkplaces] = useState<Workplace[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -2234,6 +2286,7 @@ export default function Schedule() {
     api.getGroups().then(setGroups);
     api.getShifts().then(setShifts);
     api.getLeaveTypes().then(setLeaveTypes);
+    api.getWorkplaces().then(setWorkplaces);
   }, []);
 
   // Load schedule + holidays when year/month/group changes
@@ -3092,6 +3145,21 @@ export default function Schedule() {
     setSaving(false);
   };
 
+  // ── Arbeitsplatz zuordnen/entfernen (5MASHI.WORKPLACID) ────
+  const handleAssignWorkplace = async (empId: number, dateStr: string, workplaceId: number) => {
+    if (!grid.duties) { showToast('Keine Schreibberechtigung für Dienste (WDUTIES)', 'error'); return; }
+    if (!guardPast(dateStr)) return;
+    setSaving(true);
+    try {
+      await api.assignScheduleWorkplace(empId, dateStr, workplaceId);
+      showToast(workplaceId ? 'Arbeitsplatz zugeordnet' : 'Arbeitsplatz entfernt', 'success');
+      loadSchedule();
+    } catch (e) {
+      showToast('Fehler beim Speichern: ' + (e as Error).message, 'error');
+    }
+    setSaving(false);
+  };
+
   // ── Single-cell copy/paste ─────────────────────────────────
   const handleSingleCellCopy = (empId: number, day: number) => {
     const empIdx = empIndexMap.get(empId) ?? 0;
@@ -3843,6 +3911,7 @@ export default function Schedule() {
           entries={entryMap.get(`${contextMenu.empId}-${contextMenu.day}`) ?? []}
           shifts={shifts}
           leaveTypes={leaveTypes}
+          workplaces={workplaces}
           hasClipboard={!!clipboard}
           writeState={cellWriteState(grid, contextMenu.dateStr, todayStr,
             entryMap.get(`${contextMenu.empId}-${contextMenu.day}`) ?? [])}
@@ -3854,6 +3923,7 @@ export default function Schedule() {
           onAddAbsence={handleAddAbsence}
           onAddSonderdienst={handleAddSonderdienst}
           onAddDeviation={handleAddDeviation}
+          onAssignWorkplace={handleAssignWorkplace}
           onDelete={handleDeleteEntry}
           onDeleteEntry={handleDeleteSingleEntry}
           onCopy={handleSingleCellCopy}

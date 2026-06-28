@@ -1347,6 +1347,10 @@ export const api = {
   deleteScheduleEntry: (employee_id: number, date: string) =>
     deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/schedule/${employee_id}/${date}`),
 
+  /** Arbeitsplatz (5MASHI.WORKPLACID) eines bestehenden Dienstes setzen; workplace_id=0 entfernt. */
+  assignScheduleWorkplace: (employee_id: number, date: string, workplace_id: number) =>
+    postJSON<{ ok: boolean; updated: number; workplace_id: number }>('/api/v1/schedule/workplace', { employee_id, date, workplace_id }),
+
   bulkSchedule: (
     entries: Array<{ employee_id: number; date: string; shift_id: number | null }>,
     overwrite = true,

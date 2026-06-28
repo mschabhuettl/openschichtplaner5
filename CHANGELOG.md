@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.10.2] - 2026-06-28
+
 ### Fixed
 
 - Anmeldung mit Original-Schichtplaner5-Konten, deren Passwort nicht rein aus ASCII

@@ -9,6 +9,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Dienstplan: Arbeitsplatz direkt im Zellen-Kontextmenü zuordnen oder entfernen. Per
+  Rechtsklick auf eine Schicht erscheint „🏢 Arbeitsplatz…" (nur wenn unter Stammdaten
+  Arbeitsplätze definiert sind); die aktive Zuordnung ist mit ✓ markiert, „✕ Arbeitsplatz
+  entfernen" löst sie wieder, ohne die Schicht selbst zu löschen. Bisher war die
+  Arbeitsplatz-Zuordnung nur über den Einsatzplan-Sonderdienst erreichbar.
+
 ---
 
 ## [1.10.2] - 2026-06-28

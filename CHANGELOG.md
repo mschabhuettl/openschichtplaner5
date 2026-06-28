@@ -9,6 +9,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Eine normale Soll-/Ist-Abweichung wird nicht mehr fälschlich als Konflikt angezeigt:
+  Steht ein Mitarbeiter im Sollplan auf einer Schicht und wird dann krank (Istplan zeigt
+  den Krankenstand), war das bisher als „Schicht + Abwesenheit"-Konflikt markiert — obwohl
+  das nur die normale Gegenüberstellung von geplant (Soll) und tatsächlich (Ist) ist. Die
+  Konflikterkennung wertet jetzt durchgängig nur die Ist-Ebene aus. Echte Konflikte (zwei
+  tatsächliche Schichten am selben Tag, Doppelbelegung) werden weiterhin erkannt. Über das
+  gebündelte Datenmodul (libopenschichtplaner5 1.14.4) und die API (openschichtplaner5-api
+  1.9.1).
+
 ---
 
 ## [1.10.5] - 2026-06-28

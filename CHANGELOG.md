@@ -9,6 +9,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Schnelleres Laden, besonders bei großen Dienstplänen: Das gebündelte Datenmodul
+  (libopenschichtplaner5 1.14.2) liest die DBF-Dateien effizienter ein und beantwortet
+  Dienstplan-Abfragen über einen nach Monat gruppierten Index statt die gesamte
+  Schicht-Tabelle pro Aufruf zu durchsuchen. Das verkürzt vor allem das erste Öffnen des
+  Dienstplans und das Neuladen nach Änderungen; der Effekt wächst mit der Datenmenge. Die
+  DBF-Dateien bleiben die alleinige Datenquelle, jeder Schreibvorgang geht unverändert
+  sofort byte-genau in die DBF.
+
 ---
 
 ## [1.10.3] - 2026-06-28

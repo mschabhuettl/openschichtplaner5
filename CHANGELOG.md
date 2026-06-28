@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.16.0] - 2026-06-28
+
 ### Added
 
 - Berichte → Monatsabschluss-Report (PDF): Eingabefelder **Berichtstitel** und

@@ -13,7 +13,7 @@ type CycleExceptionRecord = {
   employee_id: number;
   cycle_assignment_id: number;
   date: string;
-  type: number; // 0 = freier Tag, >0 = shift_id
+  type: number; // 5CYEXC.TYPE (Plan-Eintragsart, D-58) — die Ausnahme streicht den Zyklus-Dienst (freier Tag); 5CYEXC trägt keine Ersatzschicht
 };
 
 // ─── Weekday Labels ────────────────────────────────────────
@@ -510,15 +510,13 @@ function EditModal({ employee, groupName, employeeAssignments, cycles, onSave, o
 interface AddExceptionModalProps {
   employees: Employee[];
   assignments: CycleAssignment[];
-  shifts: ShiftType[];
   onCreated: () => void;
   onClose: () => void;
 }
 
-function AddExceptionModal({ employees, assignments, shifts, onCreated, onClose }: AddExceptionModalProps) {
+export function AddExceptionModal({ employees, assignments, onCreated, onClose }: AddExceptionModalProps) {
   const [employeeId, setEmployeeId] = useState<number | null>(null);
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
-  const [shiftId, setShiftId] = useState<number | null>(null); // null = freier Tag
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -535,11 +533,13 @@ function AddExceptionModal({ employees, assignments, shifts, onCreated, onClose 
     setSaving(true);
     setError(null);
     try {
+      // Die Zyklus-Ausnahme streicht den automatischen Zyklus-Dienst an diesem Tag
+      // (freier Tag). 5CYEXC trägt keine Ersatzschicht (kein SHIFTID-Feld); `type`
+      // ist die Plan-Eintragsart und wird vom Backend gesetzt.
       await api.setCycleException({
         employee_id: employeeId,
         cycle_assignment_id: assignmentId,
         date,
-        type: shiftId ?? 0,
       });
       onCreated();
     } catch (e) {
@@ -585,20 +585,11 @@ function AddExceptionModal({ employees, assignments, shifts, onCreated, onClose 
               className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Ausnahme-Schicht</label>
-            <select
-              value={shiftId ?? ''}
-              onChange={e => setShiftId(e.target.value ? Number(e.target.value) : null)}
-              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
-            >
-              <option value="">🏖️ Freier Tag (kein Dienst)</option>
-              {shifts.filter(s => !s.HIDE).map(s => (
-                <option key={s.ID} value={s.ID}>{s.NAME} [{s.SHORTNAME}]</option>
-              ))}
-            </select>
+          <div className="rounded-lg bg-orange-50 border border-orange-100 px-3 py-2">
+            <p className="text-sm text-gray-700">🏖️ Der automatische Zyklus-Dienst entfällt an diesem Tag (freier Tag).</p>
             <p className="text-xs text-gray-600 mt-1">
-              Leer lassen = freier Tag. Eine Schicht auswählen = diese Schicht wird statt der Zyklus-Schicht eingetragen.
+              Soll stattdessen eine andere Schicht gelten, den Tag hier freistellen und die
+              gewünschte Schicht im Dienstplan eintragen.
             </p>
           </div>
         </div>
@@ -709,17 +700,6 @@ export default function Schichtmodell() {
     const emp = employees.find(e => e.ID === employeeId);
     if (!emp) return `MA #${employeeId}`;
     return `${emp.NAME}, ${emp.FIRSTNAME}`;
-  };
-
-  const getShiftLabel = (type: number): { label: string; color?: string; bg?: string } => {
-    if (type === 0) return { label: '🏖️ Freier Tag' };
-    const shift = shifts.find(s => s.ID === type);
-    if (!shift) return { label: `Schicht #${type}` };
-    return {
-      label: shift.NAME,
-      color: shift.COLORTEXT_HEX,
-      bg: shift.COLORBK_HEX,
-    };
   };
 
   // Filter employees
@@ -1090,13 +1070,12 @@ export default function Schichtmodell() {
                 <tr>
                   <th scope="col" className="px-4 py-2 text-left">Mitarbeiter</th>
                   <th scope="col" className="px-4 py-2 text-center">Datum</th>
-                  <th scope="col" className="px-4 py-2 text-center">Ausnahme-Schicht</th>
+                  <th scope="col" className="px-4 py-2 text-center">Wirkung</th>
                   <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
                 </tr>
               </thead>
               <tbody>
                 {exceptions.map((exc, i) => {
-                  const shiftInfo = getShiftLabel(exc.type);
                   return (
                     <tr
                       key={exc.id}
@@ -1110,18 +1089,9 @@ export default function Schichtmodell() {
                         <span className="font-mono text-sm text-gray-700">{formatDateDE(exc.date)}</span>
                       </td>
                       <td className="px-4 py-2.5 text-center">
-                        {exc.type === 0 ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                            🏖️ Freier Tag
-                          </span>
-                        ) : (
-                          <span
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold"
-                            style={shiftInfo.bg ? { background: shiftInfo.bg, color: shiftInfo.color } : {}}
-                          >
-                            {shiftInfo.label}
-                          </span>
-                        )}
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                          🏖️ Freier Tag
+                        </span>
                       </td>
                       <td className="px-4 py-2.5 text-center">
                         <button
@@ -1175,7 +1145,6 @@ export default function Schichtmodell() {
         <AddExceptionModal
           employees={employees}
           assignments={assignments}
-          shifts={shifts}
           onCreated={() => {
             setShowAddExceptionModal(false);
             loadExceptions();

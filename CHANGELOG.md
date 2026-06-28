@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.10.1] - 2026-06-28
+
 ### Fixed
 
 - Schichtmodelle/Ausnahmen: Eine Modell-Ausnahme (5CYEXC) streicht jetzt schlicht den

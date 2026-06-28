@@ -1425,6 +1425,8 @@ export default function Berichte() {
 
   // Monatsabschluss-Report
   const [reportFormat, setReportFormat] = useState<'csv' | 'pdf'>('pdf');
+  const [reportTitle, setReportTitle] = useState('');
+  const [reportFooter, setReportFooter] = useState('');
   const [reportLoading, setReportLoading] = useState(false);
 
   // Extra parameters for new reports
@@ -1690,7 +1692,7 @@ export default function Berichte() {
       action: () => run(async () => {
         setReportLoading(true);
         try {
-          await api.downloadMonthlyReport(year, month, reportFormat, groupId ?? undefined);
+          await api.downloadMonthlyReport(year, month, reportFormat, groupId ?? undefined, reportTitle, reportFooter);
         } finally {
           setReportLoading(false);
         }
@@ -1939,6 +1941,34 @@ export default function Berichte() {
                   </button>
                 </div>
               </div>
+              {reportFormat === 'pdf' && (
+                <>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">Berichtstitel (optional)</label>
+                    <input
+                      type="text"
+                      aria-label="Berichtstitel"
+                      value={reportTitle}
+                      maxLength={120}
+                      onChange={e => setReportTitle(e.target.value)}
+                      placeholder="Monatsabschluss-Report"
+                      className="w-56 border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">Fußtext (optional)</label>
+                    <input
+                      type="text"
+                      aria-label="Fußtext"
+                      value={reportFooter}
+                      maxLength={200}
+                      onChange={e => setReportFooter(e.target.value)}
+                      placeholder="OpenSchichtplaner5"
+                      className="w-56 border rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                </>
+              )}
               <div className="text-xs text-gray-500 max-w-xs">
                 <span className="font-medium">PDF:</span> Professionell formatiert, druckbereit.<br/>
                 <span className="font-medium">CSV:</span> Für Excel/Calc, alle Rohdaten.

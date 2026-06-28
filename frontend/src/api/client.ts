@@ -1861,15 +1861,19 @@ export const api = {
     fetchJSON<{ results: SearchResult[]; query: string }>(`/api/v1/search?q=${encodeURIComponent(query)}`),
 
   // ─── Monthly Closing Report (Monatsabschluss) ──────────────
-  getMonthlyReportUrl: (year: number, month: number, format: 'csv' | 'pdf', groupId?: number): string => {
+  getMonthlyReportUrl: (year: number, month: number, format: 'csv' | 'pdf', groupId?: number, title?: string, footer?: string): string => {
     const qs = new URLSearchParams({ year: String(year), month: String(month), format });
     if (groupId != null) qs.set('group_id', String(groupId));
+    if (title && title.trim()) qs.set('title', title.trim());
+    if (footer && footer.trim()) qs.set('footer', footer.trim());
     return `${BASE_URL}/api/v1/reports/monthly?${qs.toString()}`;
   },
 
-  downloadMonthlyReport: async (year: number, month: number, format: 'csv' | 'pdf', groupId?: number): Promise<void> => {
+  downloadMonthlyReport: async (year: number, month: number, format: 'csv' | 'pdf', groupId?: number, title?: string, footer?: string): Promise<void> => {
     const qs = new URLSearchParams({ year: String(year), month: String(month), format });
     if (groupId != null) qs.set('group_id', String(groupId));
+    if (title && title.trim()) qs.set('title', title.trim());
+    if (footer && footer.trim()) qs.set('footer', footer.trim());
     const url = `${BASE_URL}/api/v1/reports/monthly?${qs.toString()}`;
     const res = await fetch(url, { credentials: 'include' });
     if (!res.ok) {

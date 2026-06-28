@@ -9,6 +9,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Berichte → Monatsabschluss-Report (PDF): Eingabefelder **Berichtstitel** und
+  **Fußtext** (beide optional). Der Titel erscheint in der Kopfzeile des PDF, der
+  Fußtext in der Fußzeile (vor der Seitenzahl). Ohne Eingabe bleibt die bisherige
+  Standardbeschriftung. Entspricht der Original-Funktion „eigener Berichtstitel"
+  (Berichtsfenster). Erfordert das gebündelte API ab 1.15.0.
+
 ---
 
 ## [1.15.0] - 2026-06-28

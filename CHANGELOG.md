@@ -9,6 +9,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Schichtarten und Abwesenheitsarten: eigene **Textfarbe** und **Balkenfarbe**
+  wählbar (zusätzlich zur Hintergrundfarbe). Im Bearbeiten-Dialog gibt es jetzt
+  drei Farbwähler (Hintergrund/Text/Balken) mit Live-Vorschau. Bisher war nur die
+  Hintergrundfarbe einstellbar, obwohl das Original alle drei Farben kennt und die
+  API/Datenbasis sie bereits speichern. Reine Frontend-Erweiterung.
+
 ---
 
 ## [1.13.0] - 2026-06-28

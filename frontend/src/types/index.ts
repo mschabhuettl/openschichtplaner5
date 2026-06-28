@@ -105,6 +105,7 @@ export interface LeaveType {
   SHORTNAME: string;
   POSITION: number;
   COLORBK_HEX: string;
+  COLORTEXT_HEX: string;
   COLORBAR_HEX: string;
   COLORBK_LIGHT: boolean;
   ENTITLED: boolean;

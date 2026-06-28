@@ -32,6 +32,8 @@ interface ShiftForm {
   NAME: string;
   SHORTNAME: string;
   colorHex: string;
+  colorTextHex: string;
+  colorBarHex: string;
   HIDE: boolean;
   NOEXTRA: boolean;
   /** Index 0..7 = Mo..So + Ft (Spec D-34). */
@@ -44,6 +46,8 @@ const EMPTY_FORM: ShiftForm = {
   NAME: '',
   SHORTNAME: '',
   colorHex: '#FFFFFF',
+  colorTextHex: '#000000',
+  colorBarHex: '#000000',
   HIDE: false,
   NOEXTRA: false,
   days: emptyDays(),
@@ -134,6 +138,8 @@ export default function Shifts() {
       NAME: s.NAME || '',
       SHORTNAME: s.SHORTNAME || '',
       colorHex: s.COLORBK_HEX || '#FFFFFF',
+      colorTextHex: s.COLORTEXT_HEX || '#000000',
+      colorBarHex: s.COLORBAR_HEX || '#000000',
       HIDE: s.HIDE || false,
       NOEXTRA: Boolean((s as ShiftWithNoextra).NOEXTRA),
       days,
@@ -167,6 +173,8 @@ export default function Shifts() {
       NAME: form.NAME,
       SHORTNAME: form.SHORTNAME,
       COLORBK: hexToBGR(form.colorHex),
+      COLORTEXT: hexToBGR(form.colorTextHex),
+      COLORBAR: hexToBGR(form.colorBarHex),
       HIDE: form.HIDE,
       NOEXTRA: form.NOEXTRA,
       ...buildShiftTimeFields(form.days),
@@ -381,17 +389,41 @@ export default function Shifts() {
                 {!form.SHORTNAME.trim() && error?.includes('Kürzel') && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Farbe</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={form.colorHex}
-                    onChange={e => setForm(f => ({ ...f, colorHex: e.target.value }))}
-                    className="w-12 h-9 rounded border cursor-pointer"
-                  />
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Farben</label>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <label className="flex items-center gap-1.5 text-xs text-gray-600">
+                    <input
+                      type="color"
+                      aria-label="Hintergrundfarbe"
+                      value={form.colorHex}
+                      onChange={e => setForm(f => ({ ...f, colorHex: e.target.value }))}
+                      className="w-10 h-9 rounded border cursor-pointer"
+                    />
+                    Hintergrund
+                  </label>
+                  <label className="flex items-center gap-1.5 text-xs text-gray-600">
+                    <input
+                      type="color"
+                      aria-label="Textfarbe"
+                      value={form.colorTextHex}
+                      onChange={e => setForm(f => ({ ...f, colorTextHex: e.target.value }))}
+                      className="w-10 h-9 rounded border cursor-pointer"
+                    />
+                    Text
+                  </label>
+                  <label className="flex items-center gap-1.5 text-xs text-gray-600">
+                    <input
+                      type="color"
+                      aria-label="Balkenfarbe"
+                      value={form.colorBarHex}
+                      onChange={e => setForm(f => ({ ...f, colorBarHex: e.target.value }))}
+                      className="w-10 h-9 rounded border cursor-pointer"
+                    />
+                    Balken
+                  </label>
                   <div
-                    className="flex-1 h-9 rounded border border-gray-200 flex items-center justify-center text-sm font-bold"
-                    style={{ backgroundColor: form.colorHex }}
+                    className="flex-1 min-w-[5rem] h-9 rounded border border-gray-200 flex items-center justify-center text-sm font-bold"
+                    style={{ backgroundColor: form.colorHex, color: form.colorTextHex, borderLeft: `5px solid ${form.colorBarHex}` }}
                   >
                     {form.SHORTNAME || form.NAME}
                   </div>

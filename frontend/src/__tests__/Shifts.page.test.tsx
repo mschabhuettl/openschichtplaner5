@@ -93,6 +93,34 @@ describe('Shifts page', () => {
     });
   });
 
+  // P-VOLLERFASSUNG Lücke #10: eigene Text-/Balkenfarbe je Schichtart wählbar.
+  describe('Farben (Text/Balken)', () => {
+    const colored = [
+      { ID: 1, NAME: 'Frühschicht', SHORTNAME: 'F', DURATION0: 8, HIDE: false,
+        COLORBK_HEX: '#ffffff', COLORTEXT_HEX: '#000000', COLORBAR_HEX: '#000000' },
+    ];
+
+    it('sendet COLORTEXT und COLORBAR aus den Farb-Pickern beim Speichern', async () => {
+      vi.mocked(api.getShifts).mockResolvedValue(colored as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+      renderShifts();
+      await waitFor(() => expect(screen.getAllByText('Frühschicht').length).toBeGreaterThan(0));
+
+      fireEvent.click(screen.getByText('Bearbeiten'));
+      await screen.findByText('Schichtart bearbeiten');
+
+      // Textfarbe auf Rot, Balkenfarbe auf Grün
+      fireEvent.change(screen.getByLabelText('Textfarbe'), { target: { value: '#ff0000' } });
+      fireEvent.change(screen.getByLabelText('Balkenfarbe'), { target: { value: '#00ff00' } });
+      fireEvent.click(screen.getByText('Speichern'));
+
+      await waitFor(() => expect(api.updateShift).toHaveBeenCalled());
+      const payload = vi.mocked(api.updateShift).mock.calls[0][1] as Record<string, number>;
+      // hexToBGR('#ff0000') = 0x0000FF = 255 ; hexToBGR('#00ff00') = 0x00FF00 = 65280
+      expect(payload.COLORTEXT).toBe(255);
+      expect(payload.COLORBAR).toBe(65280);
+    });
+  });
+
   // P-VOLLERFASSUNG Lücke #3: ausgeblendete Stammdaten wieder einblendbar (Sackgasse beheben).
   describe('Ausgeblendete Schichtarten', () => {
     const mockWithHidden = [

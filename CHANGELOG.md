@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.9.2] - 2026-06-28
+
 ### Fixed
 
 - Dienstplan: Stundenweise Teiltags-Abwesenheiten (Auswahl „Std." mit Von-/Bis-Uhrzeit)

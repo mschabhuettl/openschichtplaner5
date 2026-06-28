@@ -10,8 +10,8 @@
 #
 # Build-Args (Default: PyPI-Pins für reproduzierbare Builds; jedes
 # pip-Requirement ist als Override erlaubt, z. B. git+https://…@main):
-#   LIB_SOURCE  Default libopenschichtplaner5[postgres]==1.14.4 (PyPI-Pin)
-#   API_SOURCE  Default openschichtplaner5-api==1.9.1 (PyPI-Pin)
+#   LIB_SOURCE  Default libopenschichtplaner5[postgres]==1.15.0 (PyPI-Pin)
+#   API_SOURCE  Default openschichtplaner5-api==1.10.0 (PyPI-Pin)
 # ==============================================================================
 
 # Stage 1: Build Frontend
@@ -29,8 +29,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends git && \
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-ARG LIB_SOURCE="libopenschichtplaner5[postgres]==1.14.4"
-ARG API_SOURCE="openschichtplaner5-api==1.9.1"
+ARG LIB_SOURCE="libopenschichtplaner5[postgres]==1.15.0"
+ARG API_SOURCE="openschichtplaner5-api==1.10.0"
 
 # Library + API aus den Build-Args (statt veraltetem PyPI-Stand); danach die
 # restlichen requirements — deren lib/api-Constraints sind bereits erfüllt,

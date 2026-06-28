@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.10.3] - 2026-06-28
+
 ### Added
 
 - Dienstplan: Arbeitsplatz direkt im Zellen-Kontextmenü zuordnen oder entfernen. Per

@@ -27,6 +27,7 @@ interface BookingModalProps {
   defaultEmployeeId?: number;
   defaultYear: number;
   defaultMonth: number;
+  editBooking?: Booking | null;
   onSave: (data: { employee_id: number; date: string; type: number; value: number; note: string }) => Promise<void>;
   onClose: () => void;
 }
@@ -37,9 +38,11 @@ function BookingModal({
   defaultEmployeeId,
   defaultYear,
   defaultMonth,
+  editBooking,
   onSave,
   onClose,
 }: BookingModalProps) {
+  const isEdit = !!editBooking;
   const today = new Date().toISOString().slice(0, 10);
   // Default date: first day of selected month/year (or today if in the same month)
   const defaultDate = (() => {
@@ -58,15 +61,23 @@ function BookingModal({
 
   useEffect(() => {
     if (open) {
-      setEmpId(defaultEmployeeId ?? (employees[0]?.ID ?? 0));
-      setDate(defaultDate);
-      setType(0);
-      setValue('');
-      setNote('');
+      if (editBooking) {
+        setEmpId(editBooking.employee_id);
+        setDate(editBooking.date);
+        setType(editBooking.type);
+        setValue(String(editBooking.value));
+        setNote(editBooking.note ?? '');
+      } else {
+        setEmpId(defaultEmployeeId ?? (employees[0]?.ID ?? 0));
+        setDate(defaultDate);
+        setType(0);
+        setValue('');
+        setNote('');
+      }
       setError(null);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, editBooking]);
 
   if (!open) return null;
 
@@ -101,7 +112,7 @@ function BookingModal({
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-backdropIn">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-800">Neue Kontobuchung</h2>
+          <h2 className="text-lg font-semibold text-slate-800">{isEdit ? 'Kontobuchung bearbeiten' : 'Neue Kontobuchung'}</h2>
           <button aria-label="Schließen" onClick={onClose} className="text-slate-600 hover:text-slate-600 text-xl leading-none">✕</button>
         </div>
         <form onSubmit={handleSubmit} className="px-6 py-4 space-y-4">
@@ -114,7 +125,8 @@ function BookingModal({
             <select
               value={empId}
               onChange={e => setEmpId(Number(e.target.value))}
-              className="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isEdit}
+              className="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-slate-100 disabled:text-slate-500"
               required
             >
               <option value={0}>– Bitte wählen –</option>
@@ -187,7 +199,7 @@ function BookingModal({
               disabled={saving}
               className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
-              {saving ? 'Speichern…' : 'Buchung speichern'}
+              {saving ? 'Speichern…' : isEdit ? 'Änderungen speichern' : 'Buchung speichern'}
             </button>
           </div>
         </form>
@@ -261,6 +273,7 @@ export default function Kontobuchungen() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [editTarget, setEditTarget] = useState<Booking | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Booking | null>(null);
   const { showToast } = useToast();
 
@@ -297,17 +310,32 @@ export default function Kontobuchungen() {
     return `${e.NAME}${e.FIRSTNAME ? `, ${e.FIRSTNAME}` : ''}`;
   };
 
-  // Create booking
-  const handleCreate = async (data: {
+  // Create or update booking (the modal is shared between both flows)
+  const handleSave = async (data: {
     employee_id: number;
     date: string;
     type: number;
     value: number;
     note: string;
   }) => {
-    await api.createBooking(data);
-    showToast('Buchung gespeichert', 'success');
+    if (editTarget) {
+      await api.updateBooking(editTarget.id, {
+        date: data.date,
+        type: data.type,
+        value: data.value,
+        note: data.note,
+      });
+      showToast('Buchung aktualisiert', 'success');
+    } else {
+      await api.createBooking(data);
+      showToast('Buchung gespeichert', 'success');
+    }
     await loadBookings();
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditTarget(null);
   };
 
   // Delete booking
@@ -325,13 +353,14 @@ export default function Kontobuchungen() {
     <div className="p-2 sm:p-4 lg:p-6 max-w-5xl mx-auto">
 
       <BookingModal
-        open={showModal}
+        open={showModal || editTarget !== null}
         employees={employees}
         defaultEmployeeId={selectedEmployeeId}
         defaultYear={year}
         defaultMonth={month}
-        onSave={handleCreate}
-        onClose={() => setShowModal(false)}
+        editBooking={editTarget}
+        onSave={handleSave}
+        onClose={closeModal}
       />
 
       <DeleteConfirm
@@ -462,7 +491,7 @@ export default function Kontobuchungen() {
                   <th scope="col" className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Buchungsart</th>
                   <th scope="col" className="text-right px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Wert</th>
                   <th scope="col" className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">Kommentar</th>
-                  <th scope="col" className="px-4 py-2.5 w-12"></th>
+                  <th scope="col" className="px-4 py-2.5 w-20"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -495,13 +524,22 @@ export default function Kontobuchungen() {
                         {booking.note || <span className="text-slate-300">–</span>}
                       </td>
                       <td className="px-4 py-2.5">
-                        <button
-                          onClick={() => setDeleteTarget(booking)}
-                          className="text-slate-300 hover:text-red-500 transition-colors text-lg leading-none"
-                          title="Buchung löschen"
-                        >
-                          🗑
-                        </button>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => setEditTarget(booking)}
+                            className="text-slate-300 hover:text-blue-500 transition-colors text-base leading-none"
+                            title="Buchung bearbeiten"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            onClick={() => setDeleteTarget(booking)}
+                            className="text-slate-300 hover:text-red-500 transition-colors text-lg leading-none"
+                            title="Buchung löschen"
+                          >
+                            🗑
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

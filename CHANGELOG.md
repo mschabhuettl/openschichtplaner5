@@ -9,6 +9,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Kontobuchungen: Bestehende Buchungen lassen sich jetzt **bearbeiten**. Jede Zeile
+  der Buchungsliste hat neben dem Löschen-Symbol ein Stift-Symbol; es öffnet den
+  Buchungsdialog vorausgefüllt (Datum, Buchungsart, Wert, Kommentar). Der zugeordnete
+  Mitarbeiter bleibt beim Bearbeiten fest. Bisher war nur Anlegen + Löschen möglich.
+  Erfordert das gebündelte API ab 1.16.0.
+
 ---
 
 ## [1.16.0] - 2026-06-28

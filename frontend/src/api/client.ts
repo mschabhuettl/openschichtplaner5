@@ -1503,6 +1503,8 @@ export const api = {
   },
   createBooking: (data: { employee_id: number; date: string; type: number; value: number; note?: string }) =>
     postJSON<{ ok: boolean; record: Booking }>('/api/v1/bookings', data),
+  updateBooking: (id: number, data: { date?: string; type?: number; value?: number; note?: string }) =>
+    putJSON<{ ok: boolean; record: Booking }>(`/api/v1/bookings/${id}`, data),
   deleteBooking: (id: number) =>
     deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/bookings/${id}`),
 

@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.13.0] - 2026-06-28
+
 ### Added
 
 - Benutzerverwaltung: granulare Schreibrechte je Benutzer einstellbar. Im

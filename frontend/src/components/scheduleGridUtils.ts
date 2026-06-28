@@ -152,12 +152,15 @@ export interface AbsenceTimeState {
   interval: AbsenceInterval;
   start_time: string;
   end_time: string;
+  /** Optionaler Kommentartext (nur bei nicht-ganztägig); wird als Dienstplan-Notiz gespeichert. */
+  comment: string;
 }
 
 export const DEFAULT_ABSENCE_TIME: AbsenceTimeState = {
   interval: 0,
   start_time: '08:00',
   end_time: '12:00',
+  comment: '',
 };
 
 /** "HH:MM" → Minuten ab Mitternacht (0..1439); ungültige Eingabe → 0. */
@@ -177,7 +180,10 @@ function hhmmToMinutes(s: string): number {
  */
 export function toAbsenceTimeOptions(v: AbsenceTimeState): AbsenceTimeOptions | undefined {
   if (v.interval === 0) return undefined;
+  // Kommentar nur bei nicht-ganztägiger Eintragung (analog Original-Dialog).
+  const comment = (v.comment ?? '').trim();
+  const commentOpt = comment ? { comment } : {};
   if (v.interval === 3)
-    return { interval: 3, start_time: hhmmToMinutes(v.start_time), end_time: hhmmToMinutes(v.end_time) };
-  return { interval: v.interval };
+    return { interval: 3, start_time: hhmmToMinutes(v.start_time), end_time: hhmmToMinutes(v.end_time), ...commentOpt };
+  return { interval: v.interval, ...commentOpt };
 }

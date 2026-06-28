@@ -19,6 +19,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   aktiv wird. Bisher waren ausgeblendete Stammdaten in der App nicht mehr erreichbar,
   obwohl das Original sie wieder einblenden kann. Nutzt das bestehende `include_hidden`
   des API; keine Server-Änderung nötig.
+- Abwesenheit eintragen: optionaler Kommentartext bei nicht-ganztägiger Abwesenheit
+  (Vormittag/Nachmittag/Stundenweise), analog zum Original-Dialog. Das Eingabefeld
+  erscheint im Tageszeit-Picker; der Text wird als Dienstplan-Kommentar gespeichert
+  (am selben Tag/Mitarbeiter). Erfordert das gebündelte API ab 1.11.0.
 
 ---
 

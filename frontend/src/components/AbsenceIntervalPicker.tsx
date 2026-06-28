@@ -58,6 +58,18 @@ export function AbsenceIntervalPicker({
           />
         </div>
       )}
+      {/* Kommentartext nur bei nicht-ganztägiger Abwesenheit (analog Original). */}
+      {value.interval !== 0 && (
+        <input
+          type="text"
+          aria-label="Kommentar"
+          placeholder="Kommentar (optional)"
+          maxLength={125}
+          value={value.comment}
+          onChange={e => onChange({ ...value, comment: e.target.value })}
+          className="w-full mt-1 border dark:border-gray-600 rounded px-1 py-0.5 text-[10px] dark:bg-gray-700"
+        />
+      )}
     </div>
   );
 }

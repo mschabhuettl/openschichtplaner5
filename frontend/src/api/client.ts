@@ -981,6 +981,8 @@ export interface AbsenceTimeOptions {
   start_time?: number;
   /** Nur bei interval=3: Ende in Minuten ab Mitternacht (end < start = rechnerischer Tageswechsel). */
   end_time?: number;
+  /** Optionaler Kommentartext (nur bei nicht-ganztägig); wird als Dienstplan-Notiz gespeichert. Max. 125 Zeichen. */
+  comment?: string;
 }
 
 export interface WeekSchedule {

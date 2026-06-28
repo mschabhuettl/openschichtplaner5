@@ -209,4 +209,23 @@ describe('toAbsenceTimeOptions (V-3: Teiltags-Abwesenheit → API-Format)', () =
     expect(toAbsenceTimeOptions({ interval: 3, start_time: '', end_time: '99:99' }))
       .toEqual({ interval: 3, start_time: 0, end_time: 0 });
   });
+
+  // Lücke #5 (AbwesenheitenEintragen.09): optionaler Kommentartext, nur bei
+  // nicht-ganztägig; wird als Dienstplan-Notiz übernommen.
+  it('Kommentar wird bei nicht-ganztägig mitgegeben (getrimmt)', () => {
+    expect(toAbsenceTimeOptions({ interval: 1, start_time: '08:00', end_time: '12:00', comment: '  Reha  ' }))
+      .toEqual({ interval: 1, comment: 'Reha' });
+    expect(toAbsenceTimeOptions({ interval: 3, start_time: '08:00', end_time: '12:00', comment: 'Arzttermin' }))
+      .toEqual({ interval: 3, start_time: 480, end_time: 720, comment: 'Arzttermin' });
+  });
+
+  it('leerer/whitespace Kommentar wird weggelassen', () => {
+    expect(toAbsenceTimeOptions({ interval: 1, start_time: '08:00', end_time: '12:00', comment: '   ' }))
+      .toEqual({ interval: 1 });
+  });
+
+  it('ganztägig (0) ignoriert Kommentar (kein Kommentarfeld im Original)', () => {
+    expect(toAbsenceTimeOptions({ interval: 0, start_time: '08:00', end_time: '12:00', comment: 'egal' }))
+      .toBeUndefined();
+  });
 });

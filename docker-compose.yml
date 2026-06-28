@@ -11,7 +11,7 @@ services:
         # PyPI) — per .env/Umgebung überschreibbar, z.B. auf einen Tag oder
         # später einen PyPI-Stand.
         LIB_SOURCE: ${LIB_SOURCE:-libopenschichtplaner5[postgres]==1.18.0}
-        API_SOURCE: ${API_SOURCE:-openschichtplaner5-api==1.14.0}
+        API_SOURCE: ${API_SOURCE:-openschichtplaner5-api==1.15.0}
     ports:
       - "8000:8000"
     volumes:

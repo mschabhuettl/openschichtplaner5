@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.10.0] - 2026-06-28
+
 ### Fixed
 
 - Dienstplan-Undo/Redo und Verschieben bewahren jetzt die **Teiltags-Granularität**

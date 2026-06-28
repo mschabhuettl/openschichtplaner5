@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.12.0] - 2026-06-28
+
 ### Added
 
 - Stammdaten: Ausgeblendete Einträge wieder einblendbar (Sackgasse behoben). In

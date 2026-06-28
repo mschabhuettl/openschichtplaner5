@@ -10,8 +10,8 @@ services:
         # lib/api kommen aus Git-main (die aktuellen Versionen sind nicht auf
         # PyPI) — per .env/Umgebung überschreibbar, z.B. auf einen Tag oder
         # später einen PyPI-Stand.
-        LIB_SOURCE: ${LIB_SOURCE:-libopenschichtplaner5[postgres]==1.15.0}
-        API_SOURCE: ${API_SOURCE:-openschichtplaner5-api==1.11.0}
+        LIB_SOURCE: ${LIB_SOURCE:-libopenschichtplaner5[postgres]==1.16.0}
+        API_SOURCE: ${API_SOURCE:-openschichtplaner5-api==1.12.0}
     ports:
       - "8000:8000"
     volumes:

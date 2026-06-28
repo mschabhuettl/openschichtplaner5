@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.10.6] - 2026-06-28
+
 ### Fixed
 
 - Eine normale Soll-/Ist-Abweichung wird nicht mehr fälschlich als Konflikt angezeigt:

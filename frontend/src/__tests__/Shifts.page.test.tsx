@@ -119,6 +119,22 @@ describe('Shifts page', () => {
       expect(payload.COLORTEXT).toBe(255);
       expect(payload.COLORBAR).toBe(65280);
     });
+
+    it('sendet BOLD=1, wenn "Fette Schrift" angehakt wird', async () => {
+      vi.mocked(api.getShifts).mockResolvedValue(colored as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+      renderShifts();
+      await waitFor(() => expect(screen.getAllByText('Frühschicht').length).toBeGreaterThan(0));
+
+      fireEvent.click(screen.getByText('Bearbeiten'));
+      await screen.findByText('Schichtart bearbeiten');
+
+      fireEvent.click(screen.getByLabelText('Fette Schrift'));
+      fireEvent.click(screen.getByText('Speichern'));
+
+      await waitFor(() => expect(api.updateShift).toHaveBeenCalled());
+      const payload = vi.mocked(api.updateShift).mock.calls[0][1] as Record<string, number>;
+      expect(payload.BOLD).toBe(1);
+    });
   });
 
   // P-VOLLERFASSUNG Lücke #3: ausgeblendete Stammdaten wieder einblendbar (Sackgasse beheben).

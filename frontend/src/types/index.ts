@@ -77,6 +77,8 @@ export interface ShiftType {
   COLORTEXT_HEX: string;
   COLORBAR_HEX: string;
   COLORBK_LIGHT: boolean;
+  /** Fette Schrift im Plan (5SHIFT.BOLD); 0/1. */
+  BOLD?: number;
   HIDE: boolean;
   TIMES_BY_WEEKDAY: Record<string, { start: string; end: string } | null>;
   DURATION0: number;
@@ -108,6 +110,8 @@ export interface LeaveType {
   COLORTEXT_HEX: string;
   COLORBAR_HEX: string;
   COLORBK_LIGHT: boolean;
+  /** Fette Schrift im Plan (5LEAVT.BOLD); 0/1. */
+  BOLD?: number;
   ENTITLED: boolean;
   STDENTIT: number;
   HIDE: boolean;

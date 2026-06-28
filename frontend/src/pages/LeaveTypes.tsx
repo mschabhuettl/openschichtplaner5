@@ -35,6 +35,7 @@ interface LeaveTypeForm {
   colorHex: string;
   colorTextHex: string;
   colorBarHex: string;
+  bold: boolean;
   CHARGETYP: number;
   CHARGEHRS: number;
   ENTITLED: boolean;
@@ -50,6 +51,7 @@ const EMPTY_FORM: LeaveTypeForm = {
   colorHex: '#FFFFFF',
   colorTextHex: '#000000',
   colorBarHex: '#000000',
+  bold: false,
   CHARGETYP: 0,
   CHARGEHRS: 0,
   ENTITLED: false,
@@ -114,6 +116,7 @@ export default function LeaveTypes() {
       colorHex: lt.COLORBK_HEX || '#FFFFFF',
       colorTextHex: lt.COLORTEXT_HEX || '#000000',
       colorBarHex: lt.COLORBAR_HEX || '#000000',
+      bold: Boolean(lt.BOLD),
       CHARGETYP: ltc.CHARGETYP || 0,
       CHARGEHRS: ltc.CHARGEHRS || 0,
       ENTITLED: lt.ENTITLED || false,
@@ -138,6 +141,7 @@ export default function LeaveTypes() {
       COLORBK: hexToBGR(form.colorHex),
       COLORTEXT: hexToBGR(form.colorTextHex),
       COLORBAR: hexToBGR(form.colorBarHex),
+      BOLD: form.bold ? 1 : 0,
       CHARGETYP: form.CHARGETYP,
       CHARGEHRS: form.CHARGETYP === 2 ? form.CHARGEHRS : 0,
       ENTITLED: form.ENTITLED,
@@ -343,12 +347,21 @@ export default function LeaveTypes() {
                     Balken
                   </label>
                   <div
-                    className="flex-1 min-w-[5rem] h-9 rounded border border-gray-200 flex items-center justify-center text-sm font-bold"
-                    style={{ backgroundColor: form.colorHex, color: form.colorTextHex, borderLeft: `5px solid ${form.colorBarHex}` }}
+                    className="flex-1 min-w-[5rem] h-9 rounded border border-gray-200 flex items-center justify-center text-sm"
+                    style={{ backgroundColor: form.colorHex, color: form.colorTextHex, borderLeft: `5px solid ${form.colorBarHex}`, fontWeight: form.bold ? 'bold' : 'normal' }}
                   >
                     {form.SHORTNAME || form.NAME}
                   </div>
                 </div>
+                <label className="flex items-center gap-1.5 text-xs text-gray-600 mt-2">
+                  <input
+                    type="checkbox"
+                    aria-label="Fette Schrift"
+                    checked={form.bold}
+                    onChange={e => setForm(f => ({ ...f, bold: e.target.checked }))}
+                  />
+                  Fette Schrift im Plan
+                </label>
               </div>
               <fieldset className="border rounded p-2">
                 <legend className="text-xs font-semibold text-gray-600 px-1">Anzurechnende Arbeitszeit</legend>

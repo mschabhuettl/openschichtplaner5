@@ -34,6 +34,7 @@ interface ShiftForm {
   colorHex: string;
   colorTextHex: string;
   colorBarHex: string;
+  bold: boolean;
   HIDE: boolean;
   NOEXTRA: boolean;
   /** Index 0..7 = Mo..So + Ft (Spec D-34). */
@@ -48,6 +49,7 @@ const EMPTY_FORM: ShiftForm = {
   colorHex: '#FFFFFF',
   colorTextHex: '#000000',
   colorBarHex: '#000000',
+  bold: false,
   HIDE: false,
   NOEXTRA: false,
   days: emptyDays(),
@@ -140,6 +142,7 @@ export default function Shifts() {
       colorHex: s.COLORBK_HEX || '#FFFFFF',
       colorTextHex: s.COLORTEXT_HEX || '#000000',
       colorBarHex: s.COLORBAR_HEX || '#000000',
+      bold: Boolean(s.BOLD),
       HIDE: s.HIDE || false,
       NOEXTRA: Boolean((s as ShiftWithNoextra).NOEXTRA),
       days,
@@ -175,6 +178,7 @@ export default function Shifts() {
       COLORBK: hexToBGR(form.colorHex),
       COLORTEXT: hexToBGR(form.colorTextHex),
       COLORBAR: hexToBGR(form.colorBarHex),
+      BOLD: form.bold ? 1 : 0,
       HIDE: form.HIDE,
       NOEXTRA: form.NOEXTRA,
       ...buildShiftTimeFields(form.days),
@@ -422,12 +426,21 @@ export default function Shifts() {
                     Balken
                   </label>
                   <div
-                    className="flex-1 min-w-[5rem] h-9 rounded border border-gray-200 flex items-center justify-center text-sm font-bold"
-                    style={{ backgroundColor: form.colorHex, color: form.colorTextHex, borderLeft: `5px solid ${form.colorBarHex}` }}
+                    className="flex-1 min-w-[5rem] h-9 rounded border border-gray-200 flex items-center justify-center text-sm"
+                    style={{ backgroundColor: form.colorHex, color: form.colorTextHex, borderLeft: `5px solid ${form.colorBarHex}`, fontWeight: form.bold ? 'bold' : 'normal' }}
                   >
                     {form.SHORTNAME || form.NAME}
                   </div>
                 </div>
+                <label className="flex items-center gap-1.5 text-xs text-gray-600 mt-2">
+                  <input
+                    type="checkbox"
+                    aria-label="Fette Schrift"
+                    checked={form.bold}
+                    onChange={e => setForm(f => ({ ...f, bold: e.target.checked }))}
+                  />
+                  Fette Schrift im Plan
+                </label>
               </div>
 
               {/* Zeiten-Tabelle: 8 Tagestypen Mo..So + Ft (R5.5-4..R5.5-13) */}

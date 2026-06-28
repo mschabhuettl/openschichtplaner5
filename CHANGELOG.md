@@ -16,6 +16,11 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   drei Farbwähler (Hintergrund/Text/Balken) mit Live-Vorschau. Bisher war nur die
   Hintergrundfarbe einstellbar, obwohl das Original alle drei Farben kennt und die
   API/Datenbasis sie bereits speichern. Reine Frontend-Erweiterung.
+- Schichtarten und Abwesenheitsarten: Option **Fette Schrift im Plan**. Der
+  Bearbeiten-Dialog hat ein Kontrollkästchen, das die Schichtart bzw.
+  Abwesenheitsart fett darstellt; die Vorschau zeigt die Schriftstärke sofort an.
+  Entspricht der Original-Funktion (DBF-Feld BOLD) und wird durchgängig bis in die
+  Datenbasis geschrieben (lib ≥ 1.17.0 / api ≥ 1.13.0).
 
 ---
 

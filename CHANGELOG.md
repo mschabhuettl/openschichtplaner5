@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.17.0] - 2026-06-28
+
 ### Added
 
 - Kontobuchungen: Bestehende Buchungen lassen sich jetzt **bearbeiten**. Jede Zeile

@@ -9,6 +9,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Benutzerverwaltung: granulare Schreibrechte je Benutzer einstellbar. Im
+  Bearbeiten-Dialog eines Nicht-Admin-Benutzers gibt es den Abschnitt
+  „Besondere Schreibrechte" mit Kontrollkästchen (Dienste, Abwesenheiten,
+  Buchungen, Kommentare, Abweichungen, Schichtmodelle, Diensttausch,
+  Vergangenheit ändern, Mitarbeiter anlegen, Datensicherung). Die Rolle setzt
+  sinnvolle Voreinstellungen; einzelne Rechte lassen sich gezielt erlauben oder
+  entziehen. Bisher waren diese Rechte nur grob über die Rolle vergebbar.
+  Erfordert das gebündelte API ab 1.12.0.
+
 ---
 
 ## [1.12.0] - 2026-06-28

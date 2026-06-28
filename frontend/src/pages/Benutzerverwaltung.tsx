@@ -33,11 +33,43 @@ interface SP5User {
   POSITION?: number;
   WDUTIES?: boolean;
   WABSENCES?: boolean;
+  WOVERTIMES?: boolean;
+  WNOTES?: boolean;
+  WDEVIATION?: boolean;
+  WCYCLEASS?: boolean;
+  WSWAPONLY?: boolean;
+  WPAST?: boolean;
+  ADDEMPL?: boolean;
   BACKUP?: boolean;
   SHOWABS?: number;  // dreiwertig: 0=vollständig, 1=anonymisiert, 2=gar nicht
 }
 
 type Role = 'Admin' | 'Planer' | 'Leser';
+
+// Granulare 5USER-Schreibrechte (Spec 9.6), die einzeln setzbar sind und die
+// rollenbasierten Defaults überschreiben. Reihenfolge wie im Bearbeiten-Dialog.
+const WRITE_PERMISSIONS: { key: string; label: string }[] = [
+  { key: 'WDUTIES', label: 'Dienste eintragen/ändern' },
+  { key: 'WABSENCES', label: 'Abwesenheiten eintragen' },
+  { key: 'WOVERTIMES', label: 'Buchungen/Überstunden' },
+  { key: 'WNOTES', label: 'Kommentare/Notizen' },
+  { key: 'WDEVIATION', label: 'Arbeitszeitabweichungen' },
+  { key: 'WCYCLEASS', label: 'Schichtmodelle zuordnen' },
+  { key: 'WSWAPONLY', label: 'Nur Diensttausch' },
+  { key: 'WPAST', label: 'Vergangenheit ändern' },
+  { key: 'ADDEMPL', label: 'Mitarbeiter anlegen' },
+  { key: 'BACKUP', label: 'Datensicherung' },
+];
+
+/** Rollenbasierte Standard-Schreibrechte (wie im Backend create/update_user). */
+function roleDefaultPerms(role: Role): Record<string, boolean> {
+  const w = role !== 'Leser';
+  return {
+    WDUTIES: w, WABSENCES: w, WOVERTIMES: w, WNOTES: w, WDEVIATION: w,
+    WCYCLEASS: w, WPAST: w, WSWAPONLY: false, ADDEMPL: false,
+    BACKUP: role === 'Admin',
+  };
+}
 
 interface UserForm {
   NAME: string;
@@ -45,6 +77,7 @@ interface UserForm {
   PASSWORD: string;
   role: Role;
   SHOWABS: number;
+  permissions: Record<string, boolean>;
 }
 
 const EMPTY_FORM: UserForm = {
@@ -53,6 +86,7 @@ const EMPTY_FORM: UserForm = {
   PASSWORD: '',
   role: 'Leser',
   SHOWABS: 0,
+  permissions: roleDefaultPerms('Leser'),
 };
 
 type EmployeeAccessRecord = { id: number; user_id: number; employee_id: number; rights: number };
@@ -671,12 +705,17 @@ export default function Benutzerverwaltung() {
 
   const openEdit = (u: SP5User) => {
     setEditId(u.ID);
+    const rec = u as unknown as Record<string, unknown>;
     setForm({
       NAME: u.NAME,
       DESCRIP: u.DESCRIP,
       PASSWORD: '',
       role: (u.role as Role) ?? 'Leser',
       SHOWABS: u.SHOWABS ?? 0,
+      // Aktuelle Schreibrechte aus dem 5USER-Satz übernehmen.
+      permissions: Object.fromEntries(
+        WRITE_PERMISSIONS.map(p => [p.key, Boolean(rec[p.key])]),
+      ),
     });
     setFormError(null);
     setShowModal(true);
@@ -692,7 +731,7 @@ export default function Benutzerverwaltung() {
 
     setSaving(true);
     try {
-      const payload: Record<string, string | number> = {
+      const payload: Record<string, unknown> = {
         NAME: form.NAME.trim(),
         DESCRIP: form.DESCRIP.trim(),
         role: form.role,
@@ -700,9 +739,11 @@ export default function Benutzerverwaltung() {
       if (form.PASSWORD.trim()) {
         payload.PASSWORD = form.PASSWORD;
       }
-      // Abwesenheits-Sichtbarkeit nur für Nicht-Admins relevant (Admin = voll)
+      // Abwesenheits-Sichtbarkeit + granulare Schreibrechte nur für Nicht-Admins
+      // relevant (Admin = Vollzugriff, Flags werden serverseitig aus der Rolle gesetzt).
       if (form.role !== 'Admin') {
         payload.SHOWABS = form.SHOWABS;
+        payload.permissions = form.permissions;
       }
 
       const url = editId !== null ? `${API_BASE}/api/v1/users/${editId}` : `${API_BASE}/api/v1/users`;
@@ -1094,7 +1135,7 @@ export default function Benutzerverwaltung() {
                     <button
                       key={r}
                       type="button"
-                      onClick={() => setForm(f => ({ ...f, role: r }))}
+                      onClick={() => setForm(f => ({ ...f, role: r, permissions: roleDefaultPerms(r) }))}
                       className={`py-2 px-3 rounded-lg border text-sm font-semibold transition-colors ${
                         form.role === r
                           ? r === 'Admin'
@@ -1136,6 +1177,34 @@ export default function Benutzerverwaltung() {
                   <p className="mt-1.5 text-xs text-slate-500">
                     Steuert, wie dieser Benutzer Abwesenheiten im Dienst-/Einsatzplan
                     sieht (anonymisiert = Einheitsname „Abwesend").
+                  </p>
+                </div>
+              )}
+
+              {form.role !== 'Admin' && (
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">
+                    Besondere Schreibrechte
+                  </label>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                    {WRITE_PERMISSIONS.map(p => (
+                      <label key={p.key} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={!!form.permissions[p.key]}
+                          onChange={e => setForm(f => ({
+                            ...f,
+                            permissions: { ...f.permissions, [p.key]: e.target.checked },
+                          }))}
+                        />
+                        {p.label}
+                      </label>
+                    ))}
+                  </div>
+                  <p className="mt-1.5 text-xs text-slate-500">
+                    Feinjustierung der Schreibrechte über die Rolle hinaus. Die Rolle
+                    setzt sinnvolle Voreinstellungen; einzelne Rechte lassen sich hier
+                    gezielt erlauben oder entziehen.
                   </p>
                 </div>
               )}

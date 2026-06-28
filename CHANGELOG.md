@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.18.0] - 2026-06-28
+
 ### Added
 
 - Abrechnungszeiträume: Bestehende Zeiträume lassen sich jetzt **bearbeiten**. Jede

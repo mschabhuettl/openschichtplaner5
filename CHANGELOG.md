@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Abrechnungszeiträume: Bestehende Zeiträume lassen sich jetzt **bearbeiten**. Jede
+  Zeile der Liste hat neben „Löschen" einen Knopf „✏️ Bearbeiten"; er öffnet den
+  Zeitraum-Dialog vorausgefüllt (Gruppe, Bezeichnung, Start/Ende, Farbe). Bisher war
+  nur Anlegen + Löschen möglich. Erfordert das gebündelte API ab 1.17.0.
+
 ---
 
 ## [1.17.0] - 2026-06-28

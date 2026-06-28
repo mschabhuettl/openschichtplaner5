@@ -8,19 +8,21 @@ import { useToast } from '../hooks/useToast';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 
-// ─── Create Modal ──────────────────────────────────────────
+// ─── Create / Edit Modal ───────────────────────────────────
 interface CreateModalProps {
   groups: Group[];
+  editPeriod?: Period | null;
   onSave: (data: { group_id: number; start: string; end: string; description: string; color: string }) => Promise<void>;
   onClose: () => void;
 }
 
-function CreateModal({ groups, onSave, onClose }: CreateModalProps) {
-  const [groupId, setGroupId] = useState<number>(groups[0]?.ID ?? 0);
-  const [start, setStart] = useState('');
-  const [end, setEnd] = useState('');
-  const [description, setDescription] = useState('');
-  const [color, setColor] = useState('#fcd34d');  // R5.10-10: Hinterlegungsfarbe
+function CreateModal({ groups, editPeriod, onSave, onClose }: CreateModalProps) {
+  const isEdit = !!editPeriod;
+  const [groupId, setGroupId] = useState<number>(editPeriod?.group_id ?? groups[0]?.ID ?? 0);
+  const [start, setStart] = useState(editPeriod?.start ?? '');
+  const [end, setEnd] = useState(editPeriod?.end ?? '');
+  const [description, setDescription] = useState(editPeriod?.description ?? '');
+  const [color, setColor] = useState(editPeriod?.color ?? '#fcd34d');  // R5.10-10: Hinterlegungsfarbe
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,7 +45,7 @@ function CreateModal({ groups, onSave, onClose }: CreateModalProps) {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
       <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
         <div className="px-6 py-4 border-b flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-800">📅 Neuer Abrechnungszeitraum</h2>
+          <h2 className="text-lg font-bold text-gray-800">📅 {isEdit ? 'Zeitraum bearbeiten' : 'Neuer Abrechnungszeitraum'}</h2>
           <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
         </div>
 
@@ -125,7 +127,7 @@ function CreateModal({ groups, onSave, onClose }: CreateModalProps) {
             disabled={saving}
             className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
-            {saving ? 'Speichern…' : 'Erstellen'}
+            {saving ? 'Speichern…' : isEdit ? 'Speichern' : 'Erstellen'}
           </button>
         </div>
       </div>
@@ -144,6 +146,7 @@ export default function Perioden() {
   const [error, setError] = useState<string | null>(null);
   const [filterGroup, setFilterGroup] = useState<number | ''>('');
   const [showCreate, setShowCreate] = useState(false);
+  const [editTarget, setEditTarget] = useState<Period | null>(null);
   const [deleting, setDeleting] = useState<number | null>(null);
 
   const load = async (groupId?: number) => {
@@ -172,10 +175,21 @@ export default function Perioden() {
     load(gid);
   };
 
-  const handleCreate = async (data: { group_id: number; start: string; end: string; description: string; color: string }) => {
-    await api.createPeriod(data);
-    load(filterGroup === '' ? undefined : filterGroup);
-    showToast('Abrechnungszeitraum erstellt ✓', 'success');
+  const handleSave = async (data: { group_id: number; start: string; end: string; description: string; color: string }) => {
+    if (editTarget) {
+      await api.updatePeriod(editTarget.id, data);
+      load(filterGroup === '' ? undefined : filterGroup);
+      showToast('Abrechnungszeitraum aktualisiert ✓', 'success');
+    } else {
+      await api.createPeriod(data);
+      load(filterGroup === '' ? undefined : filterGroup);
+      showToast('Abrechnungszeitraum erstellt ✓', 'success');
+    }
+  };
+
+  const closeModal = () => {
+    setShowCreate(false);
+    setEditTarget(null);
   };
 
   const handleDelete = async (id: number) => {
@@ -294,13 +308,21 @@ export default function Perioden() {
                   <td className="px-4 py-3 text-gray-600 font-mono text-xs">{formatDate(p.end)}</td>
                   <td className="px-4 py-3 text-center">
                     {canEdit && (
-                    <button
-                      onClick={() => handleDelete(p.id)}
-                      disabled={deleting === p.id}
-                      className="px-3 py-1 text-xs rounded bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition-colors disabled:opacity-50"
-                    >
-                      {deleting === p.id ? '…' : '🗑 Löschen'}
-                    </button>
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => setEditTarget(p)}
+                        className="px-3 py-1 text-xs rounded bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 transition-colors"
+                      >
+                        ✏️ Bearbeiten
+                      </button>
+                      <button
+                        onClick={() => handleDelete(p.id)}
+                        disabled={deleting === p.id}
+                        className="px-3 py-1 text-xs rounded bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition-colors disabled:opacity-50"
+                      >
+                        {deleting === p.id ? '…' : '🗑 Löschen'}
+                      </button>
+                    </div>
                     )}
                   </td>
                 </tr>
@@ -313,12 +335,13 @@ export default function Perioden() {
         </div>
       )}
 
-      {/* Create Modal */}
-      {showCreate && groups.length > 0 && (
+      {/* Create / Edit Modal */}
+      {(showCreate || editTarget) && groups.length > 0 && (
         <CreateModal
           groups={groups}
-          onSave={handleCreate}
-          onClose={() => setShowCreate(false)}
+          editPeriod={editTarget}
+          onSave={handleSave}
+          onClose={closeModal}
         />
       )}
       <ConfirmDialog {...confirmDialogProps} />

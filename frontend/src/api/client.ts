@@ -1472,6 +1472,8 @@ export const api = {
     fetchJSON<Period[]>(`/api/v1/periods${group_id ? `?group_id=${group_id}` : ''}`),
   createPeriod: (data: { group_id: number; start: string; end: string; description?: string; color?: string }) =>
     postJSON<{ ok: boolean; record: Period }>('/api/v1/periods', data),
+  updatePeriod: (id: number, data: { group_id?: number; start?: string; end?: string; description?: string; color?: string }) =>
+    putJSON<{ ok: boolean; record: Period }>(`/api/v1/periods/${id}`, data),
   deletePeriod: (id: number) =>
     deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/periods/${id}`),
 

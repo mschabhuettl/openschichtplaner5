@@ -9,6 +9,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Schichtmodell zuweisen: Das Feld **Ende (optional)** ist jetzt aktiv. Damit lässt
+  sich eine Schichtmodell-Zuordnung befristen — der Zyklus erzeugt nach dem Enddatum
+  keine Dienste mehr; ohne Ende gilt die Zuordnung weiter offen. Bisher war das Feld
+  nur ein Platzhalter („von der API noch nicht gespeichert"). Entspricht der
+  Original-Funktion „Zuordnung über einen Zeitraum" (5CYASS.END). Erfordert das
+  gebündelte API ab 1.14.0 / lib 1.18.0.
+
 ---
 
 ## [1.14.0] - 2026-06-28

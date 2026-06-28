@@ -339,6 +339,7 @@ interface EditModalProps {
 function EditModal({ employee, groupName, employeeAssignments, cycles, onSave, onClose }: EditModalProps) {
   const [cycleId, setCycleId] = useState<number | null>(null);
   const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
+  const [endDate, setEndDate] = useState(''); // leer = offene (unbefristete) Zuordnung
   const [entrance, setEntrance] = useState(1); // 1 = Zyklusbeginn (R6.3-4/5)
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -353,12 +354,16 @@ function EditModal({ employee, groupName, employeeAssignments, cycles, onSave, o
       setError('Bitte ein Schichtmodell wählen.');
       return;
     }
+    if (endDate && endDate < effectiveStart) {
+      setError('Das Ende darf nicht vor dem (effektiven) Startdatum liegen.');
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
       // ENTRANCE wird über das zurückgerechnete Startdatum abgebildet (V-7):
       // Einstieg an Position P am Tag S ≙ Zuordnung mit Start S − P Tage.
-      const res = await api.assignCycle(employee.ID, cycleId, effectiveStart);
+      const res = await api.assignCycle(employee.ID, cycleId, effectiveStart, endDate || undefined);
       onSave(res.record);
     } catch (e) {
       setError(String(e));
@@ -469,10 +474,12 @@ function EditModal({ employee, groupName, employeeAssignments, cycles, onSave, o
               <label className="block text-sm font-medium text-gray-700 mb-1">Ende <span className="text-gray-400">(optional)</span></label>
               <input
                 type="date"
-                value=""
-                disabled
-                title="Zuordnungs-Ende (5CYASS.END) wird von der API noch nicht gespeichert"
-                className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-100 text-gray-400 cursor-not-allowed"
+                value={endDate}
+                min={startDate}
+                onChange={e => setEndDate(e.target.value)}
+                disabled={!cycleId}
+                title="Befristet die Zuordnung (5CYASS.END); leer = offen"
+                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-600"
               />
             </div>
           </div>
@@ -483,7 +490,9 @@ function EditModal({ employee, groupName, employeeAssignments, cycles, onSave, o
               zurückgerechnetes Startdatum <span className="font-mono">{formatDateDE(effectiveStart)}</span> gespeichert
               (die API kennt kein separates ENTRANCE-Feld).</>
             )}
-            {' '}Ein Zuordnungs-Ende wird von der API noch nicht unterstützt.
+            {endDate
+              ? <> Die Zuordnung ist bis <span className="font-mono">{formatDateDE(endDate)}</span> befristet — danach erzeugt der Zyklus keine Dienste mehr.</>
+              : ' Ohne Ende gilt die Zuordnung offen.'}
           </p>
         </div>
 

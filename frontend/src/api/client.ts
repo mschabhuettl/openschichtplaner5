@@ -1429,8 +1429,8 @@ export const api = {
   getShiftCycles: () => fetchJSON<ShiftCycle[]>('/api/v1/shift-cycles'),
   getShiftCycle: (id: number) => fetchJSON<ShiftCycle>(`/api/v1/shift-cycles/${id}`),
   getCycleAssignments: () => fetchJSON<CycleAssignment[]>('/api/v1/shift-cycles/assign'),
-  assignCycle: (employee_id: number, cycle_id: number, start_date: string) =>
-    postJSON<{ ok: boolean; record: CycleAssignment }>('/api/v1/shift-cycles/assign', { employee_id, cycle_id, start_date }),
+  assignCycle: (employee_id: number, cycle_id: number, start_date: string, end_date?: string) =>
+    postJSON<{ ok: boolean; record: CycleAssignment }>('/api/v1/shift-cycles/assign', { employee_id, cycle_id, start_date, ...(end_date ? { end_date } : {}) }),
   removeCycleAssignment: (employee_id: number) =>
     deleteReq<{ ok: boolean; removed: number }>(`/api/v1/shift-cycles/assign/${employee_id}`),
   createShiftCycle: (name: string, size_weeks: number) =>

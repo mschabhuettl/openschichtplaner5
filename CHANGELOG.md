@@ -9,6 +9,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Keine wiederkehrende Trägheit mehr auf Deployments, deren DBF-Verzeichnis periodisch
+  gespiegelt/neu synchronisiert wird (z. B. ein Bind-Mount mit 15-Minuten-Mirror): Bisher
+  änderte jeder Sync die Datei-Zeitstempel und zwang die App, beim nächsten Seitenaufruf
+  alle Tabellen neu einzulesen — auch wenn sich inhaltlich nichts geändert hatte. Das
+  gebündelte Datenmodul (libopenschichtplaner5 1.14.3) erkennt jetzt inhaltsbasiert, ob
+  eine Datei wirklich verändert wurde, und behält bei unverändertem Inhalt den vorhandenen
+  Einlese-Stand. Die DBF-Dateien bleiben die alleinige Datenquelle; Schreibvorgänge gehen
+  unverändert sofort byte-genau in die DBF.
+
 ---
 
 ## [1.10.4] - 2026-06-28

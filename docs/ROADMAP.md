@@ -23,11 +23,15 @@ Priorität 1 (fachlich relevant, klar umrissen):
    dürfen am selben Tag koexistieren; `/api/schedule?plan=…`; Plan-Umschalter im
    Dienstplan mit Soll-Kennzeichnung. **5SPSHI.TYPE** bleibt bewusst ausgenommen
    (kodiert Sonderdienst vs. Arbeitszeitabweichung, nicht Soll/Ist — D-53/3.4.4).
-2. **Abwesenheits-Anonymisierung** (SHOWABS + 5USETT ANOA*): Render-Pfad in
-   Dienstplan/Einsatzplan/Berichten, api-seitige Filterung für Benutzer mit
-   eingeschränktem SHOWABS.
-3. **5GRACC/5EMACC-Sichtbarkeits-Scopes** (Benutzer sieht nur "seine" Gruppen/
-   Mitarbeiter inkl. Vererbung): api-Filterung + Frontend-Gruppenauswahl.
+2. ~~**Abwesenheits-Anonymisierung** (SHOWABS + 5USETT ANOA*)~~ — **erledigt:** der
+   SHOWABS-Modus des Benutzers (`dependencies.py`, Spec 9.5.2/D-67) ersetzt die Abwesenheit
+   bereits serverseitig durch die ANOA*-Darstellung; der Plan-Eintrag trägt `anonymized`,
+   sodass Dienstplan/Einsatzplan/Berichte ohne Sonderpfad korrekt anzeigen
+   (`test_absence_anonymization` grün).
+3. ~~**5GRACC/5EMACC-Sichtbarkeits-Scopes** (Benutzer sieht nur "seine" Gruppen/
+   Mitarbeiter inkl. Vererbung)~~ — **erledigt:** `scopes.py` (`visible_group_ids`,
+   Spec 9.5.3) filtert Mitarbeiter-/Gruppenlisten api-seitig inkl. Vererbung; das Frontend
+   konsumiert die bereits eingegrenzten Listen (`test_visibility_scope` grün).
 4. ~~**Einschränkungen vertiefen**: Bestätigungszustand "?" (RESTRICT-Grad)~~ —
    **erledigt (Zyklus 5):** 5RESTR.RESTRICT aus dem Dekompilat geklärt — **0=keine,
    1=„auf Anfrage" („?"), 2=„nie"** (Spec-Tabelle + D-58 nachgeführt). Umgesetzt:
@@ -53,17 +57,17 @@ Priorität 2 (Komfort-/Dialogtiefe):
    Berichte abgedeckt — Monats- und Quartals-Dienstplan sind volle Tagesraster (MA×Tage),
    der Jahres-Dienstplan ist bewusst eine Monats-Zusammenfassung (ein 365-Spalten-
    Tagesraster ist als Druckbericht untauglich); ein Halbjahr = zwei Quartalsberichte.
-   **Zeitzuschläge je Tag:** in Umsetzung — lib `extracharge_hours_by_day` (per-Tag-
-   Aufschlüsselung) vorhanden; api-Endpoint + Bericht folgen.
+   **Zeitzuschläge je Tag:** ~~in Umsetzung~~ **erledigt** — lib `extracharge_hours_by_day`
+   (per-Tag-Aufschlüsselung), api `GET /api/extracharges/by-day`, eigener Bericht im Frontend
+   (released lib 1.13.0 / api 1.8.0 / app 1.9.0).
 9. ~~Manuelle POSITION-Sortierung der Stammdaten programmweit.~~ **erledigt.**
-10. Undo/Redo-Detailtreue: **teilweise erledigt** — Wiederherstellen bewahrt nun
-    Soll-/Istplan-Typ und Arbeitsplatz eines Schichteintrags. **Offen
-    (Daten-Layer):** Teiltags-Abwesenheiten (INTERVAL/Zeit) werden beim Undo als
-    ganztägig wiederhergestellt, weil die Dienstplan-Schicht-/Abwesenheits-Einträge
-    (`get_schedule`) INTERVAL/Start/Ende heute nicht mit ausliefern — ein
-    abgegrenzter lib→api→UI-Zusatz (würde zugleich eine reichere Teiltags-Anzeige
-    im Raster ermöglichen). Kommentare bleiben eigenständige Entität (eigenes
-    Edit/Delete), nicht Teil des Zell-Undo — bewusste Abgrenzung.
+10. Undo/Redo-Detailtreue: **erledigt** — Wiederherstellen bewahrt Soll-/Istplan-Typ
+    und Arbeitsplatz eines Schichteintrags ~~**Offen (Daten-Layer):** Teiltags-
+    Abwesenheiten als ganztägig wiederhergestellt~~ sowie nun die **Teiltags-Ausprägung**
+    einer Abwesenheit (vorm./nachm./stundenweise mit Uhrzeit): `get_schedule` liefert
+    INTERVAL/Start/Ende mit aus (lib 1.14.0), Undo/Verschieben übernehmen sie via
+    `absenceTimeOptions` (app 1.10.0, api ≥1.9.0). Kommentare bleiben eigenständige
+    Entität (eigenes Edit/Delete), nicht Teil des Zell-Undo — bewusste Abgrenzung.
 11. Import: Quell→Ziel-Feldzuordnungs-UI — **bewertet: bewusst nicht umgesetzt.**
     Der Import ist vorlagenbasiert (dokumentierte Spaltennamen + herunterladbare
     CSV-Vorlagen je Datentyp; „Dienstplan-Abwesenheiten" zusätzlich per

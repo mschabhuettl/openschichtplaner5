@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.14.0] - 2026-06-28
+
 ### Added
 
 - Schichtarten und Abwesenheitsarten: eigene **Textfarbe** und **Balkenfarbe**

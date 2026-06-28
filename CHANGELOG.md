@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.10.5] - 2026-06-28
+
 ### Changed
 
 - Keine wiederkehrende Trägheit mehr auf Deployments, deren DBF-Verzeichnis periodisch

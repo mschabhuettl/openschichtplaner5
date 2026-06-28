@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.15.0] - 2026-06-28
+
 ### Added
 
 - Schichtmodell zuweisen: Das Feld **Ende (optional)** ist jetzt aktiv. Damit lässt

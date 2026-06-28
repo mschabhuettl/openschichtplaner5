@@ -9,6 +9,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Anmeldung mit Original-Schichtplaner5-Konten, deren Passwort nicht rein aus ASCII
+  besteht: Konten mit Umlaut-Passwort oder aus neueren SP5-Versionen (die das Passwort
+  intern als UTF-16-Zeichenkette ablegen) ließen sich nicht anmelden („Invalid username
+  or password"), obwohl das Passwort korrekt war — nur reine ASCII-Passwörter
+  funktionierten. Das gebündelte Datenmodul (libopenschichtplaner5 ≥ 1.14.1) prüft das
+  Passwort jetzt wie das Original gegen beide Kodierungen (Windows-ANSI/CP1252 und
+  UTF-16); falsche Passwörter werden weiterhin abgewiesen. Tipp: Für über einen
+  Neustart hinweg gültige Sitzungen `SECRET_KEY` setzen (sonst pro-Prozess zufällig).
+
 ---
 
 ## [1.10.1] - 2026-06-28

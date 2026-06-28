@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.11.0] - 2026-06-28
+
 ### Added
 
 - Admin: „Als Benutzer ansehen" (Impersonation). In der Benutzerverwaltung öffnet

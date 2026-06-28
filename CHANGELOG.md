@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.10.4] - 2026-06-28
+
 ### Changed
 
 - Schnelleres Laden, besonders bei großen Dienstplänen: Das gebündelte Datenmodul

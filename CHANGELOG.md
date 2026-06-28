@@ -9,6 +9,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Schichtmodelle/Ausnahmen: Eine Modell-Ausnahme (5CYEXC) streicht jetzt schlicht den
+  automatischen Zyklusdienst an diesem Tag (freier Tag). Die frühere Auswahl einer
+  „Ersatzschicht" schickte deren Schicht-ID im Feld `type` an `POST /api/cycle-exceptions`,
+  das nur 0/1 erlaubt → „422 – Must be at most 1"; die Funktion war faktisch unbenutzbar
+  (5CYEXC besitzt kein Ersatzschicht-Feld). Wer eine andere Schicht möchte, stellt den Tag
+  frei und trägt sie im Dienstplan ein.
+
 ---
 
 ## [1.10.0] - 2026-06-28

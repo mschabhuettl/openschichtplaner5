@@ -7,7 +7,7 @@ import { useGridPermissions, cellWriteState, isPastDate, type CellWriteState } f
 import { api } from '../api/client';
 import type { ShiftRequirement, Note, ConflictEntry, CoverageDay, ScheduleTemplate, ScheduleComment, AbsenceTimeOptions, Period } from '../api/client';
 import { periodForDate } from '../utils/periods';
-import { shiftCreateOptions } from '../utils/scheduleRestore';
+import { shiftCreateOptions, absenceTimeOptions } from '../utils/scheduleRestore';
 import type { Employee, Group, ScheduleEntry, ShiftType, LeaveType } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useTheme } from '../contexts/ThemeContext';
@@ -3350,7 +3350,8 @@ export default function Schedule() {
           // A10: Soll-/Istplan-Typ und Arbeitsplatz beim Wiederherstellen erhalten.
           await api.createScheduleEntry(empId, dateStr, e.shift_id, shiftCreateOptions(e));
         } else if (e.kind === 'absence' && e.leave_type_id) {
-          await api.createAbsence(empId, dateStr, e.leave_type_id);
+          // A10: Teiltags-Granularität (vorm./nachm./stundenweise) beim Undo erhalten.
+          await api.createAbsence(empId, dateStr, e.leave_type_id, absenceTimeOptions(e));
         }
       } catch { /* ignore errors during undo/redo */ }
     }
@@ -3620,7 +3621,8 @@ export default function Schedule() {
       if (srcEntry.kind === 'shift' || srcEntry.kind === 'special_shift') {
         if (srcEntry.shift_id) await api.createScheduleEntry(targetEmpId, targetDateStr, srcEntry.shift_id);
       } else if (srcEntry.kind === 'absence') {
-        if (srcEntry.leave_type_id) await api.createAbsence(targetEmpId, targetDateStr, srcEntry.leave_type_id);
+        // A10: Teiltags-Granularität beim Verschieben einer Abwesenheit erhalten.
+        if (srcEntry.leave_type_id) await api.createAbsence(targetEmpId, targetDateStr, srcEntry.leave_type_id, absenceTimeOptions(srcEntry));
       }
       // Move: Quelle erst nach erfolgreichem Anlegen löschen (halbe Moves vermeiden)
       if (plan.deleteSource) {

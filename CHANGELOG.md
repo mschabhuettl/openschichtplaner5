@@ -9,6 +9,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Dienstplan-Undo/Redo und Verschieben bewahren jetzt die **Teiltags-Granularität**
+  einer Abwesenheit: Wird eine vormittags-/nachmittags- oder stundenweise Abwesenheit
+  gelöscht und per Rückgängig wiederhergestellt (oder in eine andere Zelle verschoben),
+  kommt sie nicht mehr als ganztägig zurück. Nutzt die neuen Teiltags-Felder aus
+  `GET /api/schedule` (ROADMAP §A.10; erfordert das gebündelte API ab 1.9.0 / lib 1.14.0).
+
 ---
 
 ## [1.9.2] - 2026-06-28

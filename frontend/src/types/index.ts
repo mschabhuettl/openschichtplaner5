@@ -152,6 +152,12 @@ export interface ScheduleEntry {
   source?: 'cycle' | null;
   /** Soll-/Istplan (Spec 4.12): 0=Istplan (Normaleintrag), 1=Sollplan (Zielvorgabe). Nur bei kind==='shift'. */
   schedule_type?: number;
+  /** Teiltags-Abwesenheit (Spec 3.5.2/D-54): 0=ganz, 1=vorm., 2=nachm., 3=stundenweise. Nur bei kind==='absence' (ab lib 1.14.0). */
+  interval?: number;
+  /** Nur bei interval=3: Beginn in Minuten ab Mitternacht. */
+  start_time?: number;
+  /** Nur bei interval=3: Ende in Minuten ab Mitternacht. */
+  end_time?: number;
   /** anonymisierte Abwesenheit (5USER.SHOWABS=1) — Anzeige bereits serverseitig ersetzt. */
   anonymized?: boolean;
 }

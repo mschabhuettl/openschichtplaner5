@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.0] - 2026-06-29
+
 ### Fixed
 
 - **Benutzerrollen aus echten Daten korrekt angezeigt + Nur-Lese-Konten konsequent

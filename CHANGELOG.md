@@ -9,6 +9,21 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Spürbar schnelleres Zeitkonto und Eintragen/Umplanen bei echter Datenmenge.**
+  Das Image bündelt **lib 1.23.2 / api 1.20.0**. Zwei gemessene Engpässe beseitigt
+  (Profiling an 30 Mitarbeitern / 15 330 Dienstplan-Sätzen über 2 Jahre):
+  - Die **Zeitkonto-Jahresübersicht** baute ihre Berechnungs-Eingaben pro
+    Mitarbeiter neu (voller Tabellen-Scan je Mitarbeiter). Jetzt einmal für alle
+    Mitarbeiter gebaut und je Mitarbeiter nur noch zerschnitten: **~106 → ~49 ms**
+    pro Abruf; der Vorteil wächst mit der Mitarbeiterzahl.
+  - **Eintragen/Umplanen** parste vor jedem Schreibvorgang die ganze Tabelle für
+    die nächste ID — seit der atomaren ID-Vergabe überflüssiger Aufwand. Entfernt:
+    ein Dienst-/Abwesenheits-Eintrag kostet **~187 → ~125 ms** bei großer Datenbank.
+  Beide Änderungen sind verhaltenswahrend (Ergebnisse byte-identisch zur bisherigen
+  Berechnung) und ändern weder DBF-Format noch Schreibverhalten.
+
 ---
 
 ## [1.21.0] - 2026-06-29

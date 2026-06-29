@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.2] - 2026-06-29
+
 ### Fixed
 
 - **Firmenverwaltung und ORM-Spiegel-Diagnose liefern keinen Fehler 500 mehr.** Das

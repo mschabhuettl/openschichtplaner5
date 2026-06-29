@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.20.1] - 2026-06-29
+
 ### Fixed
 
 - **Datenintegrität unter Last:** Das Image bündelt jetzt **libopenschichtplaner5 1.22.1**

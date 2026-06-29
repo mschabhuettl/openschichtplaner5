@@ -9,6 +9,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Datenintegrität unter Last:** Das Image bündelt jetzt **libopenschichtplaner5 1.22.1**
+  + **openschichtplaner5-api 1.19.1**. Damit ist ein Fehler behoben, bei dem schnelle/
+  gleichzeitige Schreibvorgänge (z. B. zügiges Eintragen/Umplanen von Schichten) unter
+  Last doppelte Datensatz-IDs vergeben konnten — wodurch ein nachfolgendes Ändern/Löschen
+  den falschen Datensatz traf und Einträge scheinbar „vertauscht" wurden. Die ID wird nun
+  atomar innerhalb der Schreibsperre vergeben. Reine Bündel-Aktualisierung, keine
+  UI-Änderung.
+
 ---
 
 ## [1.20.0] - 2026-06-29

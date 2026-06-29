@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Liefert die in 1.21.4 vorgesehene **Chunk-Ladefehler-Selbstheilung** tatsächlich aus:
+  der 1.21.4-Image-Build scheiterte an einer zu strengen Typsignatur des neuen
+  `lazyWithReload`-Helfers (Komponenten mit Pflicht-Props), sodass kein Image
+  veröffentlicht wurde. Signatur an Reacts eigene `lazy`-Form angeglichen; Build grün.
+
 ---
 
 ## [1.21.4] - 2026-06-29

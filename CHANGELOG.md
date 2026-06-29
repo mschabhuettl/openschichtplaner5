@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.19.0] - 2026-06-29
+
 ### Added
 
 - Urlaub → Urlaubssperren: Bestehende Sperren lassen sich jetzt **bearbeiten**. Jede

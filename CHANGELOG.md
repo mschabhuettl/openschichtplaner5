@@ -9,6 +9,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Seiten erholen sich automatisch von Chunk-Ladefehlern.** Lazy-geladene Seiten (u. a.
+  „Personalbedarf") zeigten gelegentlich „Seite konnte nicht geladen werden", und erst
+  ein manuelles Neuladen (STRG+R) brachte sie zurück — die typische Folge eines
+  fehlgeschlagenen dynamischen Chunk-Imports (nach einem Deploy verweist das
+  ausgelieferte `index.html` auf neue Chunk-Hashes; ein Browser mit altem Stand oder ein
+  kurzer Netz-Aussetzer fordert einen nicht mehr existierenden Chunk an). Lazy-Seiten
+  laden bei einem solchen Fehler jetzt genau einmal automatisch neu (loop-sicher), sodass
+  die frischen Chunks geholt werden. Bleibt der Fehler bestehen, erscheint weiterhin die
+  Fehlerseite.
+
 ---
 
 ## [1.21.3] - 2026-06-29

@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.1] - 2026-06-29
+
 ### Changed
 
 - **Spürbar schnelleres Zeitkonto und Eintragen/Umplanen bei echter Datenmenge.**

@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.20.0] - 2026-06-29
+
 ### Added
 
 - Sonderdienst eintragen: Kontrollkästchen **„Keine Arbeitszeitzuschläge berechnen"**

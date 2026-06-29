@@ -9,6 +9,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Firmenverwaltung und ORM-Spiegel-Diagnose liefern keinen Fehler 500 mehr.** Das
+  Image bündelt **api 1.20.1**: die interne ORM-/Firmen-SQLite-DB lag im Container an
+  einem nicht beschreibbaren Pfad (oberhalb des Daten-Volumes) → „unable to open
+  database file". Sie liegt jetzt im beschreibbaren State-Verzeichnis; Firmenverwaltung
+  und „Admin → ORM-Spiegel" laden wieder.
+- **Schicht-Briefing bleibt nicht mehr bei „Wetter wird geladen…" hängen.** Der externe
+  Wetterabruf hat jetzt einen harten Timeout und einen Fallback („Wetter nicht
+  verfügbar") — ein langsamer oder ausgefallener Wetterdienst blockiert das Briefing
+  nicht mehr.
+
 ---
 
 ## [1.21.1] - 2026-06-29

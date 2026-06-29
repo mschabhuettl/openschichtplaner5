@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.4] - 2026-06-29
+
 ### Fixed
 
 - **Seiten erholen sich automatisch von Chunk-Ladefehlern.** Lazy-geladene Seiten (u. a.

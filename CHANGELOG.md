@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Urlaub → Urlaubssperren: Bestehende Sperren lassen sich jetzt **bearbeiten**. Jede
+  Zeile der Liste hat neben „Löschen" einen Stift-Knopf; er öffnet das Sperren-Formular
+  vorausgefüllt (Gruppe, Von/Bis, Grund). Bisher war nur Anlegen + Löschen möglich.
+  Erfordert das gebündelte API ab 1.18.0.
+
 ---
 
 ## [1.18.0] - 2026-06-28

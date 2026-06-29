@@ -1104,10 +1104,13 @@ function SperrenTab({ groups }: SperrenTabProps) {
   const [bans, setBans] = useState<HolidayBan[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState({ group_id: groups[0]?.ID ?? 0, start_date: '', end_date: '', reason: '' });
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const resetForm = () => setForm({ group_id: groups[0]?.ID ?? 0, start_date: '', end_date: '', reason: '' });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -1126,20 +1129,42 @@ function SperrenTab({ groups }: SperrenTabProps) {
 
   useEffect(() => { load(); }, [load]);
 
-  const createBan = async () => {
+  const startEdit = (ban: HolidayBan) => {
+    setEditId(ban.id);
+    setForm({
+      group_id: ban.group_id,
+      start_date: ban.start_date ?? '',
+      end_date: ban.end_date ?? '',
+      reason: ban.reason ?? '',
+    });
+    setError(null);
+    setShowForm(true);
+  };
+
+  const cancelForm = () => {
+    setShowForm(false);
+    setEditId(null);
+    resetForm();
+  };
+
+  const saveBan = async () => {
     if (!form.start_date || !form.end_date) { setError('Bitte Von- und Bis-Datum angeben.'); return; }
     if (form.end_date < form.start_date) { setError('Bis-Datum muss >= Von-Datum sein.'); return; }
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch(`${API}/api/v1/holiday-bans`, {
-        method: 'POST',
+      const url = editId !== null
+        ? `${API}/api/v1/holiday-bans/${editId}`
+        : `${API}/api/v1/holiday-bans`;
+      const res = await fetch(url, {
+        method: editId !== null ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ ...form, group_id: Number(form.group_id) }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setShowForm(false);
-      setForm({ group_id: groups[0]?.ID ?? 0, start_date: '', end_date: '', reason: '' });
+      setEditId(null);
+      resetForm();
       await load();
     } catch (e) {
       setError(String(e));
@@ -1176,7 +1201,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
           {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
         </select>
         {canEditAbsences && (
-        <button onClick={() => setShowForm(!showForm)}
+        <button onClick={() => { if (showForm) { cancelForm(); } else { setEditId(null); resetForm(); setShowForm(true); } }}
           className="px-4 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center gap-1.5">
           ＋ Urlaubssperre anlegen
         </button>
@@ -1190,7 +1215,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
       {/* Create form */}
       {showForm && (
         <div className="mb-4 bg-white rounded-lg border shadow-sm p-4">
-          <h3 className="font-semibold text-gray-800 mb-3">Neue Urlaubssperre</h3>
+          <h3 className="font-semibold text-gray-800 mb-3">{editId !== null ? 'Urlaubssperre bearbeiten' : 'Neue Urlaubssperre'}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Gruppe</label>
@@ -1219,11 +1244,11 @@ function SperrenTab({ groups }: SperrenTabProps) {
             </div>
           </div>
           <div className="flex gap-2 mt-3">
-            <button onClick={createBan} disabled={saving}
+            <button onClick={saveBan} disabled={saving}
               className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60 flex items-center gap-2">
-              {saving && <span className="animate-spin">⟳</span>} Sperre anlegen
+              {saving && <span className="animate-spin">⟳</span>} {editId !== null ? 'Speichern' : 'Sperre anlegen'}
             </button>
-            <button onClick={() => setShowForm(false)} className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50">Abbrechen</button>
+            <button onClick={cancelForm} className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50">Abbrechen</button>
           </div>
         </div>
       )}
@@ -1269,10 +1294,16 @@ function SperrenTab({ groups }: SperrenTabProps) {
                     <td className="px-4 py-3 text-center text-gray-600 font-semibold">{days}</td>
                     <td className="px-4 py-3 text-center">
                       {canEditAbsences && (
-                      <button onClick={() => deleteBan(ban.id)} disabled={deleting === ban.id}
-                        className="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50">
-                        {deleting === ban.id ? '⟳' : '🗑️'}
-                      </button>
+                      <div className="flex items-center justify-center gap-1">
+                        <button onClick={() => startEdit(ban)} title="Urlaubssperre bearbeiten"
+                          className="text-blue-500 hover:text-blue-700 text-sm px-2 py-1 rounded hover:bg-blue-50">
+                          ✏️
+                        </button>
+                        <button onClick={() => deleteBan(ban.id)} disabled={deleting === ban.id}
+                          className="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50">
+                          {deleting === ban.id ? '⟳' : '🗑️'}
+                        </button>
+                      </div>
                       )}
                     </td>
                   </tr>

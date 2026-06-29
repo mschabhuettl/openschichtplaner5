@@ -1,4 +1,4 @@
-import { lazy, type ComponentType } from 'react';
+import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 
 /**
  * Drop-in replacement for React.lazy that auto-recovers from a failed dynamic
@@ -30,9 +30,12 @@ function isChunkLoadError(error: unknown): boolean {
   );
 }
 
-export function lazyWithReload<T extends ComponentType<unknown>>(
+// `any` mirrors React's own `lazy` signature: components carry their own (often
+// required) prop types, which are not assignable to ComponentType<unknown>.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function lazyWithReload<T extends ComponentType<any>>(
   factory: () => Promise<{ default: T }>,
-) {
+): LazyExoticComponent<T> {
   return lazy(async () => {
     try {
       const mod = await factory();

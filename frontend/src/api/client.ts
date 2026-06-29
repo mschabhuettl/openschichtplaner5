@@ -796,6 +796,7 @@ export interface EinsatzplanEntryCreate {
   colortext?: number;
   colorbar?: number;
   colorbk?: number;
+  noextra?: boolean;
 }
 
 export interface EinsatzplanEntryUpdate {
@@ -808,6 +809,7 @@ export interface EinsatzplanEntryUpdate {
   colortext?: number;
   colorbar?: number;
   colorbk?: number;
+  noextra?: boolean;
 }
 
 export interface DeviationCreate {
@@ -841,6 +843,7 @@ export interface SpshiEntry {
   colorbk: number;
   color_bk: string;
   color_text: string;
+  noextra?: boolean;
 }
 
 // ─── Types for new endpoints ────────────────────────────────

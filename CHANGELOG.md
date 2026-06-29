@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Sonderdienst eintragen: Kontrollkästchen **„Keine Arbeitszeitzuschläge berechnen"**
+  im Sonderdienst-Dialog (Einsatzplan). Markiert man es, wird der Sonderdienst ohne
+  Arbeitszeitzuschläge gerechnet (5SPSHI.NOEXTRA). Entspricht der Original-Funktion
+  (Sonderdienst-Eingabe). Erfordert das gebündelte API ab 1.19.0.
+
 ---
 
 ## [1.19.0] - 2026-06-29

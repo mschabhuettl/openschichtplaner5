@@ -165,6 +165,7 @@ interface SonderdiensteModalProps {
     colorbk: number;
     colortext: number;
     duration: number;
+    noextra: boolean;  // SonderdiensteEintragen.12: keine Arbeitszeitzuschläge
     endDate?: string;  // A6: Mehrtages-Erfassung (nur Neuanlage)
   }) => Promise<void>;
 }
@@ -190,6 +191,9 @@ export function SonderdiensteModal({ employee, date, shifts, workplaces, existin
   );
   const [hoursTouched, setHoursTouched] = useState(isEdit);
   const [endDate, setEndDate] = useState('');  // A6: leer = nur der eine Tag
+  // SonderdiensteEintragen.12: „keine Arbeitszeitzuschläge berechnen" (5SPSHI.NOEXTRA);
+  // nur bei der Neuanlage; beim Bearbeiten bleibt das gespeicherte Flag unberührt.
+  const [noextra, setNoextra] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -234,6 +238,7 @@ export function SonderdiensteModal({ employee, date, shifts, workplaces, existin
         colorbk: hexToBGR(bgHex),
         colortext: hexToBGR(textHex),
         duration: parseFloat(hours) || 0,
+        noextra,
         endDate: !isEdit && endDate ? endDate : undefined,
       });
       onClose();
@@ -344,6 +349,18 @@ export function SonderdiensteModal({ employee, date, shifts, workplaces, existin
               className="w-full border dark:border-gray-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
           </div>
+          {/* SonderdiensteEintragen.12 — nur bei der Neuanlage */}
+          {!isEdit && (
+            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={noextra}
+                onChange={e => setNoextra(e.target.checked)}
+                className="rounded border-gray-300 text-blue-600 focus:ring-blue-400"
+              />
+              Keine Arbeitszeitzuschläge berechnen
+            </label>
+          )}
           {/* Freie Farben (A6) — Hintergrund + Schrift, Default = gewählte Schicht */}
           <div className="grid grid-cols-2 gap-2">
             <div>
@@ -1575,6 +1592,7 @@ export default function Einsatzplan() {
     colorbk: number;
     colortext: number;
     duration: number;
+    noextra: boolean;
     endDate?: string;
   }) => {
     if (!grid.duties) throw new Error('Keine Schreibberechtigung für Dienste (WDUTIES)');
@@ -1610,6 +1628,7 @@ export default function Einsatzplan() {
       colorbk: data.colorbk,
       colortext: data.colortext,
       duration: data.duration,
+      noextra: data.noextra,
     });
     const createdIds: number[] = [];
     for (const day of dates) {

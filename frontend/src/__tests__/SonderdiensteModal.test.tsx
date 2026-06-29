@@ -93,6 +93,43 @@ describe('SonderdiensteModal — freie Farben + getrennte Arbeitsstunden (A6)', 
     expect(screen.queryByLabelText('Bis-Datum')).toBeNull();
   });
 
+  it('reicht „keine Arbeitszeitzuschläge" (NOEXTRA) beim Neuanlegen durch (SonderdiensteEintragen.12)', async () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    render(
+      <SonderdiensteModal
+        employee={employee}
+        date="2026-06-15"
+        shifts={[makeShift({})]}
+        workplaces={workplaces}
+        onClose={() => {}}
+        onSave={onSave}
+      />,
+    );
+
+    const cb = screen.getByLabelText(/Keine Arbeitszeitzuschläge berechnen/) as HTMLInputElement;
+    expect(cb.checked).toBe(false);  // Default
+    fireEvent.click(cb);
+    fireEvent.click(screen.getByRole('button', { name: /Speichern/ }));
+
+    await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1));
+    expect(onSave.mock.calls[0][0].noextra).toBe(true);
+  });
+
+  it('zeigt das NOEXTRA-Feld nicht beim Bearbeiten (nur Eintragen)', () => {
+    render(
+      <SonderdiensteModal
+        employee={employee}
+        date="2026-06-15"
+        shifts={[makeShift({})]}
+        workplaces={workplaces}
+        existing={{ id: 7, name: 'Extra', shortname: 'EX', shift_id: 1, workplace_id: 0, startend: '', duration: 4 }}
+        onClose={() => {}}
+        onSave={vi.fn()}
+      />,
+    );
+    expect(screen.queryByLabelText(/Keine Arbeitszeitzuschläge berechnen/)).toBeNull();
+  });
+
   it('reicht beim Neuanlegen ein Bis-Datum für die Mehrtages-Erfassung durch', async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     render(

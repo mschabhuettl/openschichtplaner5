@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.3] - 2026-06-29
+
 ### Fixed
 
 - **„Wiederkehrende Schichten" lädt nicht mehr ins Leere.** Die Seite blieb weiß (auch

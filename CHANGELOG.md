@@ -9,6 +9,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **„Wiederkehrende Schichten" lädt nicht mehr ins Leere.** Die Seite blieb weiß (auch
+  nach Neuladen), weil die API die Liste als Objekt `{patterns, total}` lieferte, das
+  Frontend aber ein Array erwartet und `.map()` darauf aufrief → Render-Absturz schon
+  beim leeren Datenstand. Das gebündelte **api 1.20.2** gleicht den Endpunkt-Vertrag ans
+  Frontend an (Array mit angereicherten Feldern beim Auflisten/Anlegen, `shift_id` statt
+  ungenutzter Zeitfelder, `generate` liefert `{created, skipped}`, ganzzahlige IDs). Damit
+  funktionieren Anlegen, Generieren und Löschen der Muster wieder. Kein Frontend-Code-Change.
+
 ---
 
 ## [1.21.2] - 2026-06-29

@@ -9,6 +9,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Benutzerrollen aus echten Daten korrekt angezeigt + Nur-Lese-Konten konsequent
+  schreibgesperrt.** Das Image bündelt **lib 1.23.0 / api 1.20.0**. Bisher wurden echte
+  5USER-Konten mit vollen oder differenzierten Schreibrechten (`RIGHTS` 0 bzw. 2)
+  fälschlich als „Leser" angezeigt — `RIGHTS` ist der Berechtigungs-**Modus** des
+  Originals (0 = volle Lese-/Schreibrechte, 1 = Nur-Leserechte, 2 = differenziert,
+  3 = wie 1), kein Ja/Nein-Schalter. Zusätzlich ist die Schreib-Durchsetzung jetzt an
+  den Modus gekoppelt: ein Nur-Lese-Konto kann nichts schreiben, auch wenn alte
+  Einzelrechte-Flags im Datensatz gesetzt sind. Die Frontend-Anzeige folgt dem vom
+  Backend gelieferten `role`/`permissions`.
+
 ---
 
 ## [1.20.1] - 2026-06-29

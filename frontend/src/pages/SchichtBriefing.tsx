@@ -94,11 +94,11 @@ function ShiftBadge({ entry }: { entry: ScheduleEntry }) {
   );
 }
 
-function WeatherCard({ weather }: { weather: Weather | null }) {
+function WeatherCard({ weather, failed }: { weather: Weather | null; failed: boolean }) {
   if (!weather) return (
-    <div className="bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl p-4 flex items-center gap-3 border border-sky-200 animate-pulse">
+    <div className={`bg-gradient-to-br from-sky-100 to-blue-100 rounded-xl p-4 flex items-center gap-3 border border-sky-200${failed ? '' : ' animate-pulse'}`}>
       <span className="text-3xl">🌤️</span>
-      <div className="text-sm text-sky-600">Wetter wird geladen…</div>
+      <div className="text-sm text-sky-600">{failed ? 'Wetter nicht verfügbar' : 'Wetter wird geladen…'}</div>
     </div>
   );
   return (
@@ -121,6 +121,7 @@ export default function SchichtBriefing() {
   const [schedule, setSchedule] = useState<ScheduleEntry[]>([]);
   const [absences, setAbsences] = useState<Absence[]>([]);
   const [weather, setWeather] = useState<Weather | null>(null);
+  const [weatherFailed, setWeatherFailed] = useState(false);
   const [notes, setNotes] = useState<string>('');
   const [savedNotes, setSavedNotes] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -166,13 +167,14 @@ export default function SchichtBriefing() {
     }).catch(() => {}).finally(() => setLoading(false));
   }, [date]);
 
-  // Load weather once (Vienna as default)
+  // Load weather once (Vienna as default). Externer Dienst darf das Briefing nie
+  // blockieren: harter Timeout + Fallback-Status, statt ewig „wird geladen…".
   useEffect(() => {
-    fetch('https://wttr.in/?format=j1')
+    fetch('https://wttr.in/?format=j1', { signal: AbortSignal.timeout(6000) })
       .then(r => r.json())
       .then(data => {
         const cur = data.current_condition?.[0];
-        if (!cur) return;
+        if (!cur) { setWeatherFailed(true); return; }
         setWeather({
           temp_c: parseInt(cur.temp_C),
           desc: cur.weatherDesc?.[0]?.value ?? '',
@@ -181,7 +183,7 @@ export default function SchichtBriefing() {
           humidity: parseInt(cur.humidity),
         });
       })
-      .catch(() => {});
+      .catch(() => setWeatherFailed(true));
   }, []);
 
   // Build employee map
@@ -352,7 +354,7 @@ export default function SchichtBriefing() {
           {/* Weather */}
           <div>
             <h2 className="text-sm font-bold text-slate-600 mb-2 uppercase tracking-wide">🌤️ Wetter</h2>
-            <WeatherCard weather={weather} />
+            <WeatherCard weather={weather} failed={weatherFailed} />
           </div>
 
           {/* Quick Stats */}

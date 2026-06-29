@@ -81,7 +81,7 @@ services:
       args:
         # lib/api als PyPI-Pins — überschreibbar (z. B. git+https://…@main)
         LIB_SOURCE: ${LIB_SOURCE:-libopenschichtplaner5[postgres]==1.23.2}
-        API_SOURCE: ${API_SOURCE:-openschichtplaner5-api==1.20.0}
+        API_SOURCE: ${API_SOURCE:-openschichtplaner5-api==1.20.1}
     container_name: sp5-backend
     image: openschichtplaner5:latest
     # NOT exposed to host — only accessible via nginx
@@ -140,7 +140,7 @@ services:
       dockerfile: Dockerfile
       args:
         LIB_SOURCE: ${LIB_SOURCE:-libopenschichtplaner5[postgres]==1.23.2}
-        API_SOURCE: ${API_SOURCE:-openschichtplaner5-api==1.20.0}
+        API_SOURCE: ${API_SOURCE:-openschichtplaner5-api==1.20.1}
     container_name: sp5-init-frontend
     entrypoint: ["/bin/sh", "-c", "cp -r /app/frontend/dist/* /output/ && echo 'Frontend files copied.'"]
     volumes:

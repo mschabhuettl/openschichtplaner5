@@ -93,7 +93,9 @@ function applyRoleDefaults(user: Partial<CurrentUser>): CurrentUser {
     NAME: user.NAME ?? '',
     DESCRIP: user.DESCRIP ?? '',
     ADMIN: user.ADMIN ?? isAdmin,
-    RIGHTS: user.RIGHTS ?? (isPlaner ? 1 : 0),
+    // 5USER.RIGHTS = Berechtigungs-Modus: 1 = Nur-Leserechte (Leser), 0 = voll
+    // (Planer/Admin). Fallback nur, wenn das Backend RIGHTS nicht mitliefert.
+    RIGHTS: user.RIGHTS ?? (role === 'Leser' ? 1 : 0),
     role,
     WDUTIES: user.WDUTIES ?? (isAdmin || isPlaner),
     WABSENCES: user.WABSENCES ?? (isAdmin || isPlaner),

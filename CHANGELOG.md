@@ -9,6 +9,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **System-Health-Dashboard zeigt den echten Status.** Die Kacheln „Backend-Status" und
+  „Datenbank" zeigten „✗ Fehler", obwohl Backend und Datenbank in Ordnung waren — die
+  Anzeige verglich mit falschen Statuswerten. Jetzt korrekt: „✓ Online" bzw.
+  „⚠ Eingeschränkt" je nach Backend-Zustand und „✓ Verbunden" bei verbundener Datenbank.
+  Die „Mitarbeiter"-Kachel zeigt die Mitarbeiterzahl (bündelt **api 1.22.0**).
+
 ---
 
 ## [1.21.10] - 2026-06-30

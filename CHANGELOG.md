@@ -9,6 +9,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Urlaubsantrag drucken.** In der Urlaubsverwaltung (Tab „Anträge") lässt sich je
+  Antrag das Urlaubsantragsformular des Originals als PDF herunterladen (📄): mit
+  Antragsteller, Abwesenheitsart, Zeitraum, beantragten Tagen, Genehmigt-/Abgelehnt-
+  Feld und den Unterschriftszeilen für Antragsteller und Vorgesetzten. Damit gibt es
+  das papiergebundene Genehmigungs-Pendant des Originals; der bestehende digitale
+  Genehmigen/Ablehnen-Ablauf bleibt unverändert. Bündelt **api 1.21.0**.
+
 ---
 
 ## [1.21.7] - 2026-06-30

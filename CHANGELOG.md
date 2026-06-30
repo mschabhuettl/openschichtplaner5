@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.7] - 2026-06-30
+
 ### Fixed
 
 - **Zeitzuschläge wirken jetzt an allen eingestellten Wochentagen.** Ein über die App

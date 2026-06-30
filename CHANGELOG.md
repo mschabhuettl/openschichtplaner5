@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **„Was ist neu?" zeigt jetzt die Versionshinweise** statt leer zu bleiben. Die Seite
+  liest die Release-Notes aus `CHANGELOG.md`, die jedoch nicht ins Container-Image
+  kopiert wurde — der Endpunkt lieferte deshalb nur „No changelog available." und die
+  Seite blieb ohne Einträge. Die `CHANGELOG.md` wird nun ins Image aufgenommen.
+
 ---
 
 ## [1.21.8] - 2026-06-30

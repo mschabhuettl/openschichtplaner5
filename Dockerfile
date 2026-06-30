@@ -66,6 +66,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 COPY backend/ ./backend/
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
+# Release-Notes für „Was ist neu?" — die API liest CHANGELOG.md aus
+# SP5_BACKEND_DIR/.. (= /app); ohne diese Datei bliebe die Seite leer.
+COPY CHANGELOG.md ./CHANGELOG.md
 
 # Mount point für DB — owned by app user. Ebenso der mutable Laufzeit-State
 # unter SP5_BACKEND_DIR (data/, api/data + api/uploads + api/*.json,

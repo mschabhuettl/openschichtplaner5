@@ -9,6 +9,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Lange Dienste werden nicht mehr als Konflikt gemeldet.** Eine z. B. 12-stündige
+  Schicht erschien bisher als „Konflikt" (langer Dienst). Ein starrer Stunden-Schwellwert
+  ist falsch — lange Dienste sind in vielen Betrieben normal und kein Konflikt. Das
+  gebündelte **libopenschichtplaner5 1.24.1** entfernt diese Meldung; die übrigen
+  Konflikte (Dienst und Abwesenheit am selben Tag, Urlaubssperre, Dienst am Feiertag)
+  bleiben unverändert.
+
 ---
 
 ## [1.21.11] - 2026-06-30

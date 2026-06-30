@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Liefert die in 1.21.9 vorgesehene **„Was ist neu?"-Reparatur** tatsächlich aus: der
+  1.21.9-Image-Build scheiterte, weil `CHANGELOG.md` per `.dockerignore` (`*.md`) vom
+  Build-Kontext ausgeschlossen war und der neue `COPY CHANGELOG.md` daher nichts fand.
+  `.dockerignore` nimmt die Datei nun wieder auf (`!CHANGELOG.md`); Image baut grün.
+
 ---
 
 ## [1.21.9] - 2026-06-30

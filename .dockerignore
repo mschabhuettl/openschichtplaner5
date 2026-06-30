@@ -39,6 +39,8 @@ test
 docs
 *.md
 !README.md
+# CHANGELOG.md wird fürs „Was ist neu?"-Panel ins Image kopiert (siehe Dockerfile).
+!CHANGELOG.md
 
 # Logs
 *.log

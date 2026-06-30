@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.9] - 2026-06-30
+
 ### Fixed
 
 - **„Was ist neu?" zeigt jetzt die Versionshinweise** statt leer zu bleiben. Die Seite

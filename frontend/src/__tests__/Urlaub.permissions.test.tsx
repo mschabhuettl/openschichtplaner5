@@ -12,6 +12,7 @@ vi.mock('../api/client', () => ({
     getLeaveTypes: vi.fn(),
     getGroups: vi.fn(),
     getAbsences: vi.fn(),
+    downloadVacationRequest: vi.fn(),
   },
 }));
 
@@ -84,6 +85,25 @@ describe('Urlaub — WABSENCES-Gating (G-1)', () => {
       expect(screen.getByTitle('Genehmigen')).toBeTruthy();
     });
     expect(screen.getByTitle('Ablehnen')).toBeTruthy();
+  });
+
+  // P2-6: der „Urlaubsantrag" (druckbares Original-Formular) ist je Zeile abrufbar,
+  // unabhängig von der Genehmigungs-Berechtigung; Klick lädt das PDF für MA/Datum/Art.
+  it('Urlaubsantrag-Druckknopf ruft downloadVacationRequest mit MA/Datum/Art', async () => {
+    setAuth(() => true);
+    vi.mocked(api.downloadVacationRequest).mockResolvedValue(undefined);
+    renderUrlaub();
+    const btn = await screen.findByTitle(/Urlaubsantrag als PDF/);
+    fireEvent.click(btn);
+    await waitFor(() =>
+      expect(api.downloadVacationRequest).toHaveBeenCalledWith(1, `${YEAR}-07-01`, `${YEAR}-07-01`, 10)
+    );
+  });
+
+  it('Urlaubsantrag-Druckknopf auch ohne wabsences vorhanden', async () => {
+    setAuth((perm) => perm !== 'wabsences');
+    renderUrlaub();
+    expect(await screen.findByTitle(/Urlaubsantrag als PDF/)).toBeTruthy();
   });
 
   it('ohne wabsences: keine Genehmigen-Aktion, stattdessen Hinweis', async () => {

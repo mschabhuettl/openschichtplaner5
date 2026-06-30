@@ -1340,10 +1340,21 @@ interface AbsenceStatusEntry { status: AbsenceStatus; reject_reason: string; }
 
 function AntraegeTab({ year, employees, leaveTypes, absences, loading }: AntraegeTabProps) {
   const t = useT();
+  const { showToast } = useToast();
   const { canEditAbsences } = usePermissions();
   const can = useCan();
   // G-1: Genehmigen/Ablehnen nur mit WABSENCES (Spec 9.5.3)
   const canApprove = canEditAbsences && can('wabsences');
+
+  // Original-„Urlaubsantrag" als druckbares PDF (Unterschriftszeilen
+  // Antragsteller/Vorgesetzter, Genehmigt/Abgelehnt) — Papier-Genehmigung wie das Original.
+  const printAntrag = async (ab: Absence) => {
+    try {
+      await api.downloadVacationRequest(ab.EMPLOYEE_ID, ab.DATE, ab.DATE, ab.LEAVE_TYPE_ID);
+    } catch (e) {
+      showToast(`Urlaubsantrag konnte nicht erstellt werden: ${String(e)}`, 'error');
+    }
+  };
   const [statusMap, setStatusMap] = useState<Record<string, AbsenceStatusEntry>>({});
   const [statusLoading, setStatusLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
@@ -1510,41 +1521,50 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
                     {statusBadge(statusEntry)}
                   </td>
                   <td className="px-4 py-2.5 text-center">
-                    {/* G-1: Genehmigen/Ablehnen nur mit WABSENCES */}
-                    {!canApprove ? (
-                      <span
-                        className="text-xs text-gray-400"
-                        title="Keine Schreibberechtigung für Abwesenheiten (WABSENCES)"
-                      >—</span>
-                    ) : status === 'pending' ? (
-                      <div className="flex items-center justify-center gap-1.5">
+                    <div className="flex items-center justify-center gap-1.5">
+                      {/* G-1: Genehmigen/Ablehnen nur mit WABSENCES */}
+                      {!canApprove ? (
+                        <span
+                          className="text-xs text-gray-400"
+                          title="Keine Schreibberechtigung für Abwesenheiten (WABSENCES)"
+                        >—</span>
+                      ) : status === 'pending' ? (
+                        <>
+                          <button
+                            onClick={() => updateStatus(ab.ID, 'approved')}
+                            disabled={isUpdating}
+                            className="px-2.5 py-1 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-60"
+                            title={t.urlaub.actionApprove}
+                          >
+                            {isUpdating ? '⟳' : `✅ ${t.urlaub.actionApprove}`}
+                          </button>
+                          <button
+                            onClick={() => { setRejectModal({ id: ab.ID }); setRejectReason(''); }}
+                            disabled={isUpdating}
+                            className="px-2.5 py-1 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
+                            title={t.urlaub.actionReject}
+                          >
+                            {isUpdating ? '⟳' : `❌ ${t.urlaub.actionReject}`}
+                          </button>
+                        </>
+                      ) : (
                         <button
-                          onClick={() => updateStatus(ab.ID, 'approved')}
+                          onClick={() => updateStatus(ab.ID, 'pending')}
                           disabled={isUpdating}
-                          className="px-2.5 py-1 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-60"
-                          title={t.urlaub.actionApprove}
+                          className="px-2 py-1 text-xs text-gray-500 hover:text-gray-700 border rounded hover:bg-gray-50 disabled:opacity-60"
+                          title={t.urlaub.actionReset}
                         >
-                          {isUpdating ? '⟳' : `✅ ${t.urlaub.actionApprove}`}
+                          {isUpdating ? '⟳' : `↺ ${t.urlaub.actionReset}`}
                         </button>
-                        <button
-                          onClick={() => { setRejectModal({ id: ab.ID }); setRejectReason(''); }}
-                          disabled={isUpdating}
-                          className="px-2.5 py-1 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
-                          title={t.urlaub.actionReject}
-                        >
-                          {isUpdating ? '⟳' : `❌ ${t.urlaub.actionReject}`}
-                        </button>
-                      </div>
-                    ) : (
+                      )}
                       <button
-                        onClick={() => updateStatus(ab.ID, 'pending')}
-                        disabled={isUpdating}
-                        className="px-2 py-1 text-xs text-gray-500 hover:text-gray-700 border rounded hover:bg-gray-50 disabled:opacity-60"
-                        title={t.urlaub.actionReset}
+                        onClick={() => printAntrag(ab)}
+                        className="px-2 py-1 text-xs rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50"
+                        title="Urlaubsantrag als PDF drucken (mit Unterschriftszeilen)"
                       >
-                        {isUpdating ? '⟳' : `↺ ${t.urlaub.actionReset}`}
+                        📄
                       </button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               );

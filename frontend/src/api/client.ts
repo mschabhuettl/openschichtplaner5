@@ -1900,6 +1900,27 @@ export const api = {
     URL.revokeObjectURL(dlUrl);
   },
 
+  // ─── Urlaubsantrag (printable vacation request form) ──────
+  downloadVacationRequest: async (employeeId: number, fromDate: string, toDate: string, leaveTypeId?: number): Promise<void> => {
+    const qs = new URLSearchParams({ employee_id: String(employeeId), from_date: fromDate, to_date: toDate });
+    if (leaveTypeId != null) qs.set('leave_type_id', String(leaveTypeId));
+    const url = `${BASE_URL}/api/v1/reports/vacation-request?${qs.toString()}`;
+    const res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error((data as { detail?: string }).detail || res.statusText);
+    }
+    const blob = await res.blob();
+    const dlUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = dlUrl;
+    a.download = `urlaubsantrag_${employeeId}_${fromDate}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(dlUrl);
+  },
+
   // ─── Sickness/Krankenstand Statistics ─────────────────────
   getSicknessStatistics: (year: number) =>
     fetchJSON<SicknessStatistics>(`/api/v1/statistics/sickness?year=${year}`),

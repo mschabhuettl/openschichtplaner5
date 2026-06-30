@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.5] - 2026-06-30
+
 ### Fixed
 
 - Liefert die in 1.21.4 vorgesehene **Chunk-Ladefehler-Selbstheilung** tatsächlich aus:

@@ -9,6 +9,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Arbeitsplätze: Farbwähler entfernt.** Das Anlegen/Bearbeiten eines Arbeitsplatzes
+  bot eine Farbauswahl, die gespeichert wurde, aber nirgends Wirkung zeigte — das
+  Original kennt für Arbeitsplätze keine Farbe (nur Name, Kürzel, Ausblenden; ein
+  zugeordneter Arbeitsplatz erscheint im Einsatzplan als Text). Der wirkungslose
+  Farbwähler samt „Farbe"-Spalte entfällt; die Seite entspricht jetzt dem Original.
+
 ---
 
 ## [1.21.5] - 2026-06-30

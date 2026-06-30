@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.11] - 2026-06-30
+
 ### Fixed
 
 - **System-Health-Dashboard zeigt den echten Status.** Die Kacheln „Backend-Status" und

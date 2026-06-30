@@ -82,8 +82,20 @@ export default function HealthDashboard() {
     );
   }
 
-  const statusColor = health?.status === 'ok' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
-  const dbColor = health?.db?.status === 'connected' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+  // Das Backend liefert status: 'healthy' | 'degraded' | 'unhealthy' und
+  // db.status: 'ok' | 'error' (NICHT 'ok'/'connected') — entsprechend prüfen,
+  // sonst zeigt das Dashboard auch bei gesundem Backend „✗ Fehler".
+  const statusColor = health?.status === 'healthy'
+    ? 'text-green-600 dark:text-green-400'
+    : health?.status === 'degraded'
+      ? 'text-amber-600 dark:text-amber-400'
+      : 'text-red-600 dark:text-red-400';
+  const statusLabel = health?.status === 'healthy'
+    ? '✓ Online'
+    : health?.status === 'degraded'
+      ? '⚠ Eingeschränkt'
+      : '✗ Fehler';
+  const dbColor = health?.db?.status === 'ok' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
 
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-6 dark:text-slate-100">
@@ -102,7 +114,7 @@ export default function HealthDashboard() {
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4">
           <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Backend-Status</div>
           <div className={`text-xl font-bold ${statusColor}`}>
-            {health?.status === 'ok' ? '✓ Online' : '✗ Fehler'}
+            {statusLabel}
           </div>
         </div>
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4">
@@ -118,7 +130,7 @@ export default function HealthDashboard() {
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 p-4">
           <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Datenbank</div>
           <div className={`text-xl font-bold ${dbColor}`}>
-            {health?.db?.status === 'connected' ? '✓ Verbunden' : '✗ Fehler'}
+            {health?.db?.status === 'ok' ? '✓ Verbunden' : '✗ Fehler'}
           </div>
         </div>
       </div>

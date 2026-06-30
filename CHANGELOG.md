@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.8] - 2026-06-30
+
 ### Added
 
 - **Urlaubsantrag drucken.** In der Urlaubsverwaltung (Tab „Anträge") lässt sich je

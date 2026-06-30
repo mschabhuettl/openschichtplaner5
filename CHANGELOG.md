@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.6] - 2026-06-30
+
 ### Changed
 
 - **Arbeitsplätze: Farbwähler entfernt.** Das Anlegen/Bearbeiten eines Arbeitsplatzes

@@ -9,6 +9,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Zeitzuschläge wirken jetzt an allen eingestellten Wochentagen.** Ein über die App
+  angelegter Zeitzuschlag (z. B. Nachtstunden) zählte bisher nur Montagsstunden, weil
+  die Wochentagsmaske im falschen Format gespeichert wurde — der Rechenkern las daraus
+  nur den ersten Wochentag. Das gebündelte **libopenschichtplaner5 1.24.0** liest beide
+  Formate korrekt und normalisiert beim Speichern auf das Originallayout; bereits
+  falsch gespeicherte Zuschläge rechnen damit sofort wieder über alle Tage. Zusätzlich
+  zeigt der Bearbeiten-Dialog die aktiven Wochentage eines bestehenden Zuschlags nun
+  korrekt an.
+
 ---
 
 ## [1.21.6] - 2026-06-30

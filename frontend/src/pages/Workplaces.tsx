@@ -9,24 +9,18 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import ReorderDialog from '../components/ReorderDialog';
 
-function hexToBGR(hex: string): number {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return (b << 16) | (g << 8) | r;
-}
-
+// Das Original kennt für Arbeitsplätze nur Name, Kürzel und „Ausblenden" — keine
+// Farbe (Handbuch „Arbeitsplätze erfassen"; ein zugeordneter Arbeitsplatz erscheint
+// im Einsatzplan als Text, nicht eingefärbt). Daher hier bewusst keine Farb-Option.
 interface WorkplaceForm {
   NAME: string;
   SHORTNAME: string;
-  colorHex: string;
   HIDE: boolean;
 }
 
 const EMPTY_FORM: WorkplaceForm = {
   NAME: '',
   SHORTNAME: '',
-  colorHex: '#FFFFFF',
   HIDE: false,
 };
 
@@ -91,7 +85,6 @@ export default function Workplaces() {
     setForm({
       NAME: w.NAME || '',
       SHORTNAME: w.SHORTNAME || '',
-      colorHex: w.COLORBK_HEX || '#FFFFFF',
       HIDE: false,
     });
     setError(null);
@@ -106,7 +99,6 @@ export default function Workplaces() {
     const payload = {
       NAME: form.NAME,
       SHORTNAME: form.SHORTNAME,
-      COLORBK: hexToBGR(form.colorHex),
       HIDE: form.HIDE,
     };
     try {
@@ -247,7 +239,6 @@ export default function Workplaces() {
             <table className="w-full text-sm min-w-[500px]">
               <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
                 <tr>
-                  <th scope="col" className="px-4 py-2 text-left">Farbe</th>
                   <th scope="col" className="px-4 py-2 text-left">Name</th>
                   <th scope="col" className="px-4 py-2 text-left">Kürzel</th>
                   <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
@@ -264,14 +255,6 @@ export default function Workplaces() {
                     } hover:bg-blue-50 transition-colors ${w.HIDE ? 'opacity-60' : ''}`}
                     onClick={() => openDetail(w)}
                   >
-                    <td className="px-4 py-2">
-                      <div
-                        className="w-8 h-6 rounded border border-gray-300 flex items-center justify-center text-[10px] font-bold"
-                        style={{ backgroundColor: w.COLORBK_HEX || '#FFFFFF' }}
-                      >
-                        {w.SHORTNAME?.slice(0, 2)}
-                      </div>
-                    </td>
                     <td className="px-4 py-2 font-semibold">
                       {w.NAME}
                       {w.HIDE && (
@@ -300,7 +283,7 @@ export default function Workplaces() {
                   </tr>
                 ))}
                 {workplaces.length === 0 && (
-                  <tr><td colSpan={4} className="text-center py-8 text-gray-600">Keine Arbeitsplätze</td></tr>
+                  <tr><td colSpan={3} className="text-center py-8 text-gray-600">Keine Arbeitsplätze</td></tr>
                 )}
               </tbody>
             </table>
@@ -315,10 +298,7 @@ export default function Workplaces() {
           <div className="bg-white rounded-lg shadow p-4">
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
-              <div
-                className="w-8 h-8 rounded flex items-center justify-center text-xs font-bold border border-gray-200"
-                style={{ backgroundColor: selectedWp.COLORBK_HEX || '#FFFFFF' }}
-              >
+              <div className="w-8 h-8 rounded flex items-center justify-center text-xs font-bold border border-gray-200 bg-slate-100 text-slate-700">
                 {selectedWp.SHORTNAME?.slice(0, 2)}
               </div>
               <div className="flex-1 min-w-0">
@@ -433,23 +413,6 @@ export default function Workplaces() {
                   onChange={e => setForm(f => ({ ...f, SHORTNAME: e.target.value }))}
                   className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Farbe</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={form.colorHex}
-                    onChange={e => setForm(f => ({ ...f, colorHex: e.target.value }))}
-                    className="w-12 h-9 rounded border cursor-pointer"
-                  />
-                  <div
-                    className="flex-1 h-9 rounded border border-gray-200 flex items-center justify-center text-sm font-bold"
-                    style={{ backgroundColor: form.colorHex }}
-                  >
-                    {form.SHORTNAME || form.NAME}
-                  </div>
-                </div>
               </div>
               <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                 <input

@@ -9,6 +9,7 @@ import { PageHeader } from '../components/PageHeader';
 import { EmptyState } from '../components/EmptyState';
 import { Badge } from '../components/Badge';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { parseValidDays, validDaysToString } from '../utils/validDays';
 
 const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const WEEKDAY_FULL = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
@@ -34,22 +35,6 @@ function timeToMinutes(time: string): number {
   const h = parseInt(parts[0]) || 0;
   const m = parseInt(parts[1]) || 0;
   return h * 60 + m;
-}
-
-// Parse VALIDDAYS string (7 chars, '0'/'1', may be encoded weirdly)
-function parseValidDays(validdays: string): boolean[] {
-  const result: boolean[] = new Array(7).fill(false);
-  if (!validdays) return result;
-  const chars = Array.from(validdays);
-  for (let i = 0; i < 7 && i < chars.length; i++) {
-    const code = chars[i].charCodeAt(0);
-    result[i] = code === 0x31 || code === 0x2031 || chars[i] === '1';
-  }
-  return result;
-}
-
-function validDaysToString(days: boolean[]): string {
-  return days.slice(0, 7).map(v => v ? '1' : '0').join('');
 }
 
 interface ExtraChargeForm {

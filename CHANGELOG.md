@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.12] - 2026-06-30
+
 ### Changed
 
 - **Lange Dienste werden nicht mehr als Konflikt gemeldet.** Eine z. B. 12-stündige

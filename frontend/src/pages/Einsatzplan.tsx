@@ -12,7 +12,7 @@ import { useUndoRedo } from '../hooks/useUndoRedo';
 import type { UndoableAction } from '../hooks/useUndoRedo';
 import { UndoRedoStatus } from '../components/UndoRedoStatus';
 import { ResponsiveTable } from '../components/ResponsiveTable';
-import { occupiedShiftIds, shiftDurationForDate, datesInRange } from './einsatzplanUtils';
+import { occupiedShiftIds, shiftDurationForDate, datesInRange, byEmployeeName } from './einsatzplanUtils';
 
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 const WEEKDAY_ABBR = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
@@ -776,6 +776,8 @@ function DayView({
       byShift.get(key)!.push(e);
     }
   }
+  byShift.forEach(list => list.sort(byEmployeeName));
+  freeEntries.sort(byEmployeeName);
 
   const d = new Date(date + 'T12:00:00');
   const weekdayName = WEEKDAY_NAMES[d.getDay()];
@@ -903,7 +905,7 @@ function WeekView({
               </td>
               {weekDates.map(d => {
                 const dayEntries = entriesByDate.get(d) || [];
-                const shiftEntries = dayEntries.filter(e => e.shift_id === shift.ID);
+                const shiftEntries = dayEntries.filter(e => e.shift_id === shift.ID).sort(byEmployeeName);
                 return (
                   <td key={d} className="border border-gray-200 p-1 align-top">
                     <div className="flex flex-col gap-0.5">

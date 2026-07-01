@@ -50,3 +50,11 @@ export function occupiedShiftIds(entries: Iterable<DayEntry>): Set<number> {
   }
   return occupied;
 }
+
+/**
+ * Einträge einer Zelle wie das Original ordnen (Default „Ansicht > Sortierung
+ * > Name"): alphabetisch nach Mitarbeitername.
+ */
+export function byEmployeeName(a: DayEntry, b: DayEntry): number {
+  return (a.employee_name || '').localeCompare(b.employee_name || '', 'de');
+}

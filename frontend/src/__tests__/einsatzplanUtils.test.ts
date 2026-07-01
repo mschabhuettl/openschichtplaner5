@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { occupiedShiftIds, shiftDurationForDate, datesInRange } from '../pages/einsatzplanUtils';
+import { occupiedShiftIds, shiftDurationForDate, datesInRange, byEmployeeName } from '../pages/einsatzplanUtils';
 import type { DayEntry } from '../api/client';
 import type { ShiftType } from '../types';
 
@@ -84,5 +84,18 @@ describe('datesInRange', () => {
     expect(datesInRange('2026-06-15', '')).toEqual(['2026-06-15']);
     expect(datesInRange('2026-06-15', '2026-06-14')).toEqual(['2026-06-15']);
     expect(datesInRange('2026-06-15', '2026-06-15')).toEqual(['2026-06-15']);
+  });
+});
+
+describe('byEmployeeName', () => {
+  it('ordnet Zell-Einträge alphabetisch nach Mitarbeitername (de, Umlaute korrekt)', () => {
+    const list = [
+      entry({ employee_id: 3, employee_name: 'Özdemir, Cem' }),
+      entry({ employee_id: 1, employee_name: 'Zimmer, Udo' }),
+      entry({ employee_id: 2, employee_name: 'Anders, Kerstin' }),
+      entry({ employee_id: 4, employee_name: '' }),
+    ];
+    const sorted = [...list].sort(byEmployeeName);
+    expect(sorted.map(e => e.employee_id)).toEqual([4, 2, 3, 1]);
   });
 });

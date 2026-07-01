@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.14] - 2026-07-01
+
 ### Fixed
 
 - **Mitarbeiterprofil zeigt die Vertragsstunden gemäß der Berechnungsbasis.**

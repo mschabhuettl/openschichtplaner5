@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
 import { api } from '../api/client';
 import type { Employee, LeaveType, Group } from '../types';
@@ -1838,15 +1838,130 @@ interface TimelineTabProps {
   loading: boolean;
 }
 
+const MONTH_NAMES = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+
+interface TimelineGridProps {
+  year: number;
+  employees: Employee[];
+  leaveTypes: LeaveType[];
+  absMap: Map<string, Absence>;
+  countByEmployee: Map<number, number>;
+  filterLeaveType: number | null;
+  onHover: (tip: {x: number; y: number; text: string} | null) => void;
+}
+
+// Vom Tooltip-State entkoppeltes Gantt-Grid: ~11k Zellen bei 30 MA × 365 Tagen —
+// ohne memo re-rendert JEDE Hover-Bewegung das komplette Grid (gemessen ~34 ms
+// pro Zelle, Punkt 17 „Jahres-Timeline extrem laggy"). Alle Props sind über
+// Hover-Zyklen referenzstabil, der Tooltip lebt beim Aufrufer.
+export const TimelineGrid = memo(function TimelineGrid({
+  year, employees, leaveTypes, absMap, countByEmployee, filterLeaveType, onHover,
+}: TimelineGridProps) {
+  const MONTH_DAYS = Array.from({length: 12}, (_, m) =>
+    new Date(year, m + 1, 0).getDate()
+  );
+  const getLT = (id: number) => leaveTypes.find(lt => lt.ID === id);
+
+  return (
+    <ResponsiveTable stickyFirstCol minWidth="900px" className="rounded-xl border border-gray-200 shadow-sm">
+      <table className="text-xs w-full border-collapse">
+        <thead>
+          <tr className="bg-gray-100 border-b">
+            <th scope="col" className="sticky left-0 z-10 bg-gray-100 text-left px-3 py-2 font-semibold text-gray-700 min-w-[160px] border-r">
+              Mitarbeiter
+            </th>
+            {MONTH_NAMES.map((m, mi) => (
+              <th scope="col" key={mi} colSpan={MONTH_DAYS[mi]}
+                className="text-center font-semibold text-gray-600 py-1 border-r border-gray-300"
+                style={{minWidth: `${MONTH_DAYS[mi] * 8}px`}}>
+                {m}
+              </th>
+            ))}
+            <th scope="col" className="text-center px-2 py-2 font-semibold text-gray-700 min-w-[40px]">∑</th>
+          </tr>
+          <tr className="bg-gray-50 border-b">
+            <th scope="col" className="sticky left-0 z-10 bg-gray-50 border-r"></th>
+            {MONTH_NAMES.map((_, mi) =>
+              Array.from({length: MONTH_DAYS[mi]}, (__, d) => (
+                <th scope="col" key={`${mi}-${d}`}
+                  className={`text-center font-normal py-0.5 border-r border-gray-100 ${
+                    new Date(year, mi, d + 1).getDay() === 0 || new Date(year, mi, d + 1).getDay() === 6
+                      ? 'bg-gray-200 text-gray-600' : 'text-gray-300'
+                  }`}
+                  style={{width: '8px', fontSize: '7px', padding: '1px 0'}}>
+                  {d + 1 === 1 || d + 1 === 5 || d + 1 === 10 || d + 1 === 15 || d + 1 === 20 || d + 1 === 25 ? d + 1 : ''}
+                </th>
+              ))
+            )}
+            <th scope="col" className="border-r"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {employees.length === 0 ? (
+            <tr>
+              <td colSpan={366 + 2} className="text-center text-gray-600 py-8">
+                Keine Mitarbeiter gefunden
+              </td>
+            </tr>
+          ) : (
+            employees.map((emp, rowIdx) => {
+              const empCount = countByEmployee.get(emp.ID) ?? 0;
+              return (
+                <tr key={emp.ID}
+                  className={`border-b transition-colors hover:bg-blue-50/30 ${rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
+                  <td className={`sticky left-0 z-10 px-3 py-1 border-r font-medium text-gray-800 whitespace-nowrap ${rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                    {emp.FIRSTNAME} {emp.NAME}
+                  </td>
+                  {MONTH_NAMES.map((_, mi) =>
+                    Array.from({length: MONTH_DAYS[mi]}, (__, d) => {
+                      const dayNum = d + 1;
+                      const dateStr = `${year}-${String(mi + 1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+                      const absence = absMap.get(`${emp.ID}_${dateStr}`);
+                      const isWeekend = new Date(year, mi, dayNum).getDay() === 0 || new Date(year, mi, dayNum).getDay() === 6;
+                      const lt = absence ? getLT(absence.LEAVE_TYPE_ID) : null;
+                      const show = !filterLeaveType || !absence || absence.LEAVE_TYPE_ID === filterLeaveType;
+
+                      return (
+                        <td key={`${mi}-${d}`}
+                          style={{
+                            width: '8px',
+                            minWidth: '8px',
+                            maxWidth: '8px',
+                            padding: 0,
+                            backgroundColor: absence && show && lt
+                              ? (lt.COLORBAR_HEX ?? lt.COLORBK_HEX ?? '#3b82f6')
+                              : isWeekend ? '#f3f4f6' : undefined,
+                          }}
+                          className={`border-r border-gray-100 ${absence && show ? 'cursor-pointer' : ''}`}
+                          onMouseEnter={absence && show && lt ? (e) => {
+                            onHover({
+                              x: e.clientX,
+                              y: e.clientY,
+                              text: `${emp.FIRSTNAME} ${emp.NAME}\n${new Date(dateStr).toLocaleDateString('de-AT')}\n${lt.NAME}`
+                            });
+                          } : undefined}
+                          onMouseLeave={() => onHover(null)}
+                        />
+                      );
+                    })
+                  )}
+                  <td className="text-center px-1 font-bold text-gray-600 border-l">
+                    {empCount > 0 ? <span className="text-blue-600">{empCount}</span> : <span className="text-gray-300">—</span>}
+                  </td>
+                </tr>
+              );
+            })
+          )}
+        </tbody>
+      </table>
+    </ResponsiveTable>
+  );
+});
+
 function TimelineTab({ year, employees, leaveTypes, absences, loading }: TimelineTabProps) {
   const [filterLeaveType, setFilterLeaveType] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const [tooltip, setTooltip] = useState<{x: number; y: number; text: string} | null>(null);
-
-  const MONTH_DAYS = Array.from({length: 12}, (_, m) =>
-    new Date(year, m + 1, 0).getDate()
-  );
-  const MONTH_NAMES = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 
   // Build a lookup: "employeeId_YYYY-MM-DD" → absence
   const absMap = useMemo(() => {
@@ -1875,8 +1990,6 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
     if (search && !(`${e.FIRSTNAME} ${e.NAME}`).toLowerCase().includes(search.toLowerCase())) return false;
     return true;
   }), [employees, search]);
-
-  const getLT = (id: number) => leaveTypes.find(lt => lt.ID === id);
 
   // Used leave types in current data
   const usedLeaveTypeIds = useMemo(() => {
@@ -1924,109 +2037,26 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
         ))}
       </div>
 
-      {/* Gantt Grid */}
-      <ResponsiveTable stickyFirstCol minWidth="900px" className="rounded-xl border border-gray-200 shadow-sm">
-        <table className="text-xs w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-100 border-b">
-              <th scope="col" className="sticky left-0 z-10 bg-gray-100 text-left px-3 py-2 font-semibold text-gray-700 min-w-[160px] border-r">
-                Mitarbeiter
-              </th>
-              {MONTH_NAMES.map((m, mi) => (
-                <th scope="col" key={mi} colSpan={MONTH_DAYS[mi]}
-                  className="text-center font-semibold text-gray-600 py-1 border-r border-gray-300"
-                  style={{minWidth: `${MONTH_DAYS[mi] * 8}px`}}>
-                  {m}
-                </th>
-              ))}
-              <th scope="col" className="text-center px-2 py-2 font-semibold text-gray-700 min-w-[40px]">∑</th>
-            </tr>
-            <tr className="bg-gray-50 border-b">
-              <th scope="col" className="sticky left-0 z-10 bg-gray-50 border-r"></th>
-              {MONTH_NAMES.map((_, mi) =>
-                Array.from({length: MONTH_DAYS[mi]}, (__, d) => (
-                  <th scope="col" key={`${mi}-${d}`}
-                    className={`text-center font-normal py-0.5 border-r border-gray-100 ${
-                      new Date(year, mi, d + 1).getDay() === 0 || new Date(year, mi, d + 1).getDay() === 6
-                        ? 'bg-gray-200 text-gray-600' : 'text-gray-300'
-                    }`}
-                    style={{width: '8px', fontSize: '7px', padding: '1px 0'}}>
-                    {d + 1 === 1 || d + 1 === 5 || d + 1 === 10 || d + 1 === 15 || d + 1 === 20 || d + 1 === 25 ? d + 1 : ''}
-                  </th>
-                ))
-              )}
-              <th scope="col" className="border-r"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredEmployees.length === 0 ? (
-              <tr>
-                <td colSpan={366 + 2} className="text-center text-gray-600 py-8">
-                  Keine Mitarbeiter gefunden
-                </td>
-              </tr>
-            ) : (
-              filteredEmployees.map((emp, rowIdx) => {
-                const empCount = countByEmployee.get(emp.ID) ?? 0;
-                return (
-                  <tr key={emp.ID}
-                    className={`border-b transition-colors hover:bg-blue-50/30 ${rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
-                    <td className={`sticky left-0 z-10 px-3 py-1 border-r font-medium text-gray-800 whitespace-nowrap ${rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                      {emp.FIRSTNAME} {emp.NAME}
-                    </td>
-                    {MONTH_NAMES.map((_, mi) =>
-                      Array.from({length: MONTH_DAYS[mi]}, (__, d) => {
-                        const dayNum = d + 1;
-                        const dateStr = `${year}-${String(mi + 1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
-                        const absence = absMap.get(`${emp.ID}_${dateStr}`);
-                        const isWeekend = new Date(year, mi, dayNum).getDay() === 0 || new Date(year, mi, dayNum).getDay() === 6;
-                        const lt = absence ? getLT(absence.LEAVE_TYPE_ID) : null;
-                        const show = !filterLeaveType || !absence || absence.LEAVE_TYPE_ID === filterLeaveType;
+      {/* Gantt Grid (memoized — Hover re-rendert nur den Tooltip, nicht ~11k Zellen) */}
+      <TimelineGrid
+        year={year}
+        employees={filteredEmployees}
+        leaveTypes={leaveTypes}
+        absMap={absMap}
+        countByEmployee={countByEmployee}
+        filterLeaveType={filterLeaveType}
+        onHover={setTooltip}
+      />
 
-                        return (
-                          <td key={`${mi}-${d}`}
-                            style={{
-                              width: '8px',
-                              minWidth: '8px',
-                              maxWidth: '8px',
-                              padding: 0,
-                              backgroundColor: absence && show && lt
-                                ? (lt.COLORBAR_HEX ?? lt.COLORBK_HEX ?? '#3b82f6')
-                                : isWeekend ? '#f3f4f6' : undefined,
-                            }}
-                            className={`border-r border-gray-100 ${absence && show ? 'cursor-pointer' : ''}`}
-                            onMouseEnter={absence && show && lt ? (e) => {
-                              setTooltip({
-                                x: e.clientX,
-                                y: e.clientY,
-                                text: `${emp.FIRSTNAME} ${emp.NAME}\n${new Date(dateStr).toLocaleDateString('de-AT')}\n${lt.NAME}`
-                              });
-                            } : undefined}
-                            onMouseLeave={() => setTooltip(null)}
-                          />
-                        );
-                      })
-                    )}
-                    <td className="text-center px-1 font-bold text-gray-600 border-l">
-                      {empCount > 0 ? <span className="text-blue-600">{empCount}</span> : <span className="text-gray-300">—</span>}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </ResponsiveTable>
-
-      {/* Tooltip */}
-      {tooltip && (
-        <div
-          className="fixed z-50 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl pointer-events-none whitespace-pre"
-          style={{left: tooltip.x + 12, top: tooltip.y - 10}}
-        >
-          {tooltip.text}
-        </div>
-      )}
+      {/* Tooltip: permanent gemountet, nur per display getoggelt — Ein-/Aushängen
+          löst über den space-y-4-Sibling-Selektor bei jedem Hover einen
+          Style-Recalc der kompletten ~11k-Zellen-Tabelle aus (~67 ms/Hover) */}
+      <div
+        className="fixed z-50 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl pointer-events-none whitespace-pre"
+        style={tooltip ? {left: tooltip.x + 12, top: tooltip.y - 10} : {display: 'none'}}
+      >
+        {tooltip?.text}
+      </div>
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

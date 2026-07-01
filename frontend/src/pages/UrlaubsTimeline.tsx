@@ -143,18 +143,16 @@ export default function UrlaubsTimeline() {
         setAbsences(abs);
         setGroups(grps);
 
-        // load group memberships
-        const gdata = grps;
+        // load group memberships (GET /groups/{id} existiert nicht — der
+        // Members-Endpunkt liefert die Mitarbeiter der Gruppe direkt)
         const map: Record<number, number[]> = {};
-        await Promise.all(gdata.map(async (g) => {
+        await Promise.all(grps.map(async (g) => {
           try {
-            const gdetail = await fetchRaw<{ members?: { employee_id: number }[] }>(`/api/v1/groups/${g.ID}`);
-            if (gdetail.members) {
-              gdetail.members.forEach((m: { employee_id: number }) => {
-                if (!map[m.employee_id]) map[m.employee_id] = [];
-                map[m.employee_id].push(g.ID);
-              });
-            }
+            const members = await api.getGroupMembers(g.ID);
+            members.forEach(m => {
+              if (!map[m.ID]) map[m.ID] = [];
+              map[m.ID].push(g.ID);
+            });
           } catch {
             // ignore
           }

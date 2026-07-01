@@ -9,6 +9,21 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Jahres-Timeline der Urlaubsverwaltung reagiert bei echter Datenmenge wieder flüssig.**
+  Bei ~30 Mitarbeitern rendert der Tab ein Gantt-Grid mit ~11.000 Zellen; jede
+  Mausbewegung über eine Abwesenheits-Zelle hat bisher das komplette Grid neu gerendert
+  und zusätzlich einen Style-Neuaufbau der ganzen Tabelle ausgelöst (gemessen ~168 ms
+  Hauptthread-Arbeit pro überfahrener Zelle — die Ansicht fühlte sich extrem träge an).
+  Das Grid ist jetzt vom Tooltip entkoppelt und der Tooltip bleibt dauerhaft eingehängt
+  (nur Sichtbarkeit wechselt): gemessen ~1,5 ms pro Zelle (Faktor >100).
+- **Gruppenfilter der Urlaubs-Timeline funktioniert wieder.** Die Seite lud
+  Gruppen-Mitgliedschaften über einen nicht existierenden Endpunkt
+  (`GET /api/v1/groups/{id}`, Antwort 404) und verwarf den Fehler still — die Wahl
+  einer Gruppe zeigte dadurch keine Mitarbeiter. Die Mitgliedschaften kommen jetzt vom
+  vorhandenen Endpunkt `GET /api/v1/groups/{id}/members`.
+
 ---
 
 ## [1.21.12] - 2026-06-30

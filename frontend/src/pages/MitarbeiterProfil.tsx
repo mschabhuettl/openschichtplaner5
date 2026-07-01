@@ -40,6 +40,20 @@ function formatDate(d: string | null | undefined): string {
   return new Date(d).toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
+// Vertragsbasis (5EMPL.CALCBASE, Spec 3.3.1): 0=Tag, 1=Woche, 2=Monat, 3=Gesamt.
+// Nur der Wert der gewählten Basis gilt — die übrigen HRS*-Felder pflegt das
+// Original nicht und sie können in echten Datenbanken veraltet/leer sein.
+const CALCBASE_LABELS = ['Tagessollstunden', 'Wochenstunden', 'Monatsstunden', 'Gesamtstunden'];
+
+function contractHours(emp: Employee): string {
+  switch (emp.CALCBASE ?? 0) {
+    case 1: return `${emp.HRSWEEK}h / Woche`;
+    case 2: return `${emp.HRSMONTH}h / Monat`;
+    case 3: return `${emp.HRSTOTAL ?? 0}h gesamt`;
+    default: return `${emp.HRSDAY}h / Tag`;
+  }
+}
+
 interface MiniBar { value: number; max: number; color: string; label: string; sub?: string; }
 function MiniBar({ value, max, color, label, sub }: MiniBar) {
   const pct = max > 0 ? Math.min(100, (value / max) * 100) : 0;
@@ -93,6 +107,7 @@ export default function MitarbeiterProfil() {
   const [editHrsWeek, setEditHrsWeek] = useState<number>(0);
   const [editHrsDay, setEditHrsDay] = useState<number>(0);
   const [editHrsMonth, setEditHrsMonth] = useState<number>(0);
+  const [editCalcBase, setEditCalcBase] = useState<number>(0);
   const [editAvailDays, setEditAvailDays] = useState<DayAvailability[]>([]);
   const [editSkillIds, setEditSkillIds] = useState<Set<string>>(new Set());
 
@@ -137,6 +152,7 @@ export default function MitarbeiterProfil() {
       setEditHrsWeek(emp.HRSWEEK);
       setEditHrsDay(emp.HRSDAY);
       setEditHrsMonth(emp.HRSMONTH);
+      setEditCalcBase(emp.CALCBASE ?? 0);
       setEditSkillIds(new Set(skillAssigns.map(a => a.skill_id)));
       if (availData?.days) {
         setEditAvailDays(availData.days.map(d => ({ ...d, time_windows: [...d.time_windows] })));
@@ -246,6 +262,7 @@ export default function MitarbeiterProfil() {
         HRSWEEK: editHrsWeek,
         HRSDAY: editHrsDay,
         HRSMONTH: editHrsMonth,
+        CALCBASE: editCalcBase,
       });
 
       // 2. Update availability
@@ -349,9 +366,8 @@ export default function MitarbeiterProfil() {
                   ['Geburtsdatum', employee.BIRTHDAY ? `${formatDate(employee.BIRTHDAY)} (${calcAge(employee.BIRTHDAY)} J.)` : '–'],
                   ['Eintritt', employee.EMPSTART ? `${formatDate(employee.EMPSTART)} (${calcTenure(employee.EMPSTART)})` : '–'],
                   ['Austritt', formatDate(employee.EMPEND)],
-                  ['Std/Tag', `${employee.HRSDAY}h`],
-                  ['Std/Woche', `${employee.HRSWEEK}h`],
-                  ['Std/Monat', `${employee.HRSMONTH}h`],
+                  ['Vertragsstunden', contractHours(employee)],
+                  ['Berechnungsbasis', CALCBASE_LABELS[employee.CALCBASE ?? 0] ?? `Basis ${employee.CALCBASE}`],
                   ['Arbeitstage', workdayLabels.length ? workdayLabels.join(', ') : '–'],
                 ].map(([k, v]) => (
                   <tr key={k} className="hover:bg-gray-50">
@@ -617,9 +633,25 @@ export default function MitarbeiterProfil() {
           {/* Contract Hours */}
           <div className="border rounded-xl p-4">
             <h2 className="font-semibold mb-3 text-gray-700">⏱️ Vertragsstunden</h2>
+            <div className="mb-3">
+              <label className="block text-xs text-gray-500 mb-1">Berechnungsbasis</label>
+              <select
+                value={editCalcBase}
+                onChange={e => setEditCalcBase(parseInt(e.target.value))}
+                className="border rounded-lg px-3 py-2 text-sm"
+              >
+                <option value={0}>Tagessollstunden</option>
+                <option value={1}>Wochenstunden</option>
+                <option value={2}>Monatsstunden</option>
+                {editCalcBase === 3 && <option value={3}>Gesamtstunden</option>}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Für die Sollstunden zählt nur der Wert der gewählten Basis.
+              </p>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Stunden / Tag</label>
+                <label className="block text-xs text-gray-500 mb-1">Stunden / Tag{editCalcBase === 0 ? ' (Vertragsbasis)' : ''}</label>
                 <input
                   type="number"
                   step="0.5"
@@ -631,7 +663,7 @@ export default function MitarbeiterProfil() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Stunden / Woche</label>
+                <label className="block text-xs text-gray-500 mb-1">Stunden / Woche{editCalcBase === 1 ? ' (Vertragsbasis)' : ''}</label>
                 <input
                   type="number"
                   step="0.5"
@@ -643,7 +675,7 @@ export default function MitarbeiterProfil() {
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-500 mb-1">Stunden / Monat</label>
+                <label className="block text-xs text-gray-500 mb-1">Stunden / Monat{editCalcBase === 2 ? ' (Vertragsbasis)' : ''}</label>
                 <input
                   type="number"
                   step="0.5"

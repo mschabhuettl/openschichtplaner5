@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.13] - 2026-07-01
+
 ### Fixed
 
 - **Jahres-Timeline der Urlaubsverwaltung reagiert bei echter Datenmenge wieder flüssig.**

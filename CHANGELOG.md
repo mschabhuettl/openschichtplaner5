@@ -9,6 +9,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Mitarbeiterprofil zeigt die Vertragsstunden gemäß der Berechnungsbasis.**
+  Schichtplaner5 pflegt je Mitarbeiter nur den Stundenwert der gewählten
+  Berechnungsbasis (Tagessoll-, Wochen-, Monats- oder Gesamtstunden); die übrigen
+  Felder können in bestehenden Datenbanken veraltet sein. Das Profil zeigte bisher
+  alle drei Rohwerte gleichwertig an — bei z. B. Wochenbasis erschienen so falsche
+  Angaben wie „Std/Tag 0h". Die Übersicht nennt jetzt Basis und gültigen Wert
+  (z. B. „38,5h / Woche"), und im Profil-Editor lässt sich die Berechnungsbasis
+  einsehen, ändern und speichern; das gültige Feld ist als „(Vertragsbasis)" markiert.
+
 ---
 
 ## [1.21.13] - 2026-07-01

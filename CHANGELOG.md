@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Ausgeschiedene Mitarbeiter sind in der Urlaubsverwaltung und der
+  Urlaubs-Timeline ausblendbar.** Mitarbeiter, deren Austritt vor dem
+  betrachteten Jahr liegt, werden dort jetzt standardmäßig ausgeblendet und
+  lassen sich über „Ausgeschiedene anzeigen" einblenden — wie im Dienstplan.
+
 ---
 
 ## [1.21.20] - 2026-07-02

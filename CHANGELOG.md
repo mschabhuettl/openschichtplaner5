@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.17] - 2026-07-02
+
 ### Changed
 
 - **Tauschbörse: Anträge nur noch mit Dienst auf beiden Seiten.** Ein Tauschantrag

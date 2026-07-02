@@ -7,7 +7,7 @@
 *Reads and writes the original DBF database files directly — no migration needed.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.21.16-brightgreen)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.21.17-brightgreen)](CHANGELOG.md)
 [![Tests](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/test.yml)
 [![Docker](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml/badge.svg)](https://github.com/mschabhuettl/openschichtplaner5/actions/workflows/docker.yml)
 [![ghcr.io](https://img.shields.io/badge/ghcr.io-image-2496ED?logo=docker&logoColor=white)](https://github.com/mschabhuettl/openschichtplaner5/pkgs/container/openschichtplaner5)

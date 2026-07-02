@@ -199,8 +199,9 @@ export interface ExtraCharge {
   POSITION: number;
   START: number;    // minutes from midnight
   END: number;      // minutes from midnight
-  VALIDITY: number;
-  VALIDDAYS: string; // 7 chars: '0'/'1' per weekday Mon-Sun
+  VALIDITY: number;  // 0=Wochentage, 1=festes Datum (Spec 3.8.2 Nr. 5)
+  VALIDDAYS: string; // 7 Zeichen '0'/'1' je Wochentag Mo-So
+  DATE?: string;     // JJJJ-MM-TT, nur bei VALIDITY=1
   HOLRULE: number;   // 0=all days, 1=holidays only, 2=not on holidays
   HIDE: number;
 }

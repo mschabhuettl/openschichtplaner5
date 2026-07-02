@@ -42,6 +42,9 @@ interface ExtraChargeForm {
   startTime: string;
   endTime: string;
   validDays: boolean[];
+  /** 0 = Wochentage (VALIDDAYS), 1 = festes Datum (Spec 3.8.2 Nr. 5) */
+  validity: number;
+  fixedDate: string;
   HOLRULE: number;
   HIDE: boolean;
 }
@@ -51,6 +54,8 @@ const EMPTY_FORM: ExtraChargeForm = {
   startTime: '00:00',
   endTime: '06:00',
   validDays: [true, true, true, true, true, true, true],
+  validity: 0,
+  fixedDate: '',
   HOLRULE: 0,
   HIDE: false,
 };
@@ -100,6 +105,8 @@ export default function Extracharges() {
       startTime: minutesToTime(c.START || 0),
       endTime: minutesToTime(c.END || 0),
       validDays: parseValidDays(c.VALIDDAYS || ''),
+      validity: c.VALIDITY || 0,
+      fixedDate: c.DATE || '',
       HOLRULE: c.HOLRULE || 0,
       HIDE: c.HIDE === 1,
     });
@@ -110,12 +117,15 @@ export default function Extracharges() {
   const handleSave = async () => {
     setError(null);
     if (!form.NAME.trim()) { setError('Bezeichnung ist ein Pflichtfeld.'); return; }
+    if (form.validity === 1 && !form.fixedDate) { setError('Der Modus „festes Datum" braucht ein Datum.'); return; }
     setSaving(true);
     const payload = {
       NAME: form.NAME,
       START: timeToMinutes(form.startTime),
       END: timeToMinutes(form.endTime),
       VALIDDAYS: validDaysToString(form.validDays),
+      VALIDITY: form.validity,
+      DATE: form.validity === 1 ? form.fixedDate : '',
       HOLRULE: form.HOLRULE,
       HIDE: form.HIDE ? 1 : 0,
     };
@@ -273,7 +283,7 @@ export default function Extracharges() {
                     {c.START === 0 && c.END === 0 ? '—' : minutesToTime(c.END)}
                   </td>
                   <td className="px-4 py-2 text-gray-600 text-xs">
-                    {activeDaysSummary(c.VALIDDAYS || '')}
+                    {c.VALIDITY === 1 ? `am ${c.DATE || '?'}` : activeDaysSummary(c.VALIDDAYS || '')}
                   </td>
                   <td className="px-4 py-2">
                     <Badge
@@ -356,20 +366,41 @@ export default function Extracharges() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Gilt für Wochentage</label>
-                <div className="flex gap-1 flex-wrap">
-                  {WEEKDAY_FULL.map((d, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => toggleDay(i)}
-                      className={`px-2 py-1 rounded text-xs font-semibold transition-colors ${form.validDays[i] ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}
-                      title={d}
-                    >
-                      {WEEKDAYS[i]}
-                    </button>
-                  ))}
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Gültigkeit</label>
+                <div className="flex gap-3 mb-2">
+                  <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                    <input type="radio" checked={form.validity === 0}
+                      onChange={() => setForm(f => ({ ...f, validity: 0 }))} />
+                    Wochentage
+                  </label>
+                  <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                    <input type="radio" checked={form.validity === 1}
+                      onChange={() => setForm(f => ({ ...f, validity: 1 }))} />
+                    Festes Datum
+                  </label>
                 </div>
+                {form.validity === 0 ? (
+                  <div className="flex gap-1 flex-wrap">
+                    {WEEKDAY_FULL.map((d, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => toggleDay(i)}
+                        className={`px-2 py-1 rounded text-xs font-semibold transition-colors ${form.validDays[i] ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}
+                        title={d}
+                      >
+                        {WEEKDAYS[i]}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <input
+                    type="date"
+                    value={form.fixedDate}
+                    onChange={e => setForm(f => ({ ...f, fixedDate: e.target.value }))}
+                    className="border border-gray-300 rounded px-2 py-1 text-sm"
+                  />
+                )}
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1">Feiertagsregel</label>

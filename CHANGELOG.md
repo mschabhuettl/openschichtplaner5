@@ -9,6 +9,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Design-System-Grundlagen.** Zentrale Kontrast-Funktion für farbige
+  Flächen (identische Entscheidung wie die Berichts-Seite), wiederverwendbare
+  Badge- und Modal-Bausteine, zentrale original-treue Sortierregeln und
+  WCAG-AA-geprüfte Farb-Tokens (zwei zu helle Grautöne im hellen Modus
+  minimal nachgedunkelt). Dokumentation in docs/design-system.md.
+
 ---
 
 ## [1.21.29] - 2026-07-02

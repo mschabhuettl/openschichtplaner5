@@ -9,6 +9,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Zeitzuschläge: Modus „festes Datum".** Wie im Original kann eine
+  Zuschlagsart jetzt statt einer Wochentagsmaske ein festes Kalenderdatum
+  tragen (z. B. Heiligabend-Zuschlag) — Umschalter im Formular, Anzeige
+  „am JJJJ-MM-TT" in der Liste, serverseitige Datums-Validierung
+  (gebündelt: libopenschichtplaner5 1.28.0, openschichtplaner5-api 1.27.0).
+
 ---
 
 ## [1.21.31] - 2026-07-02

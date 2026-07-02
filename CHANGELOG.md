@@ -9,6 +9,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Einsatzplan: Auflisten-Modi der Tagesansicht.** Wie im Original lässt
+  sich die Liste auf „Nur Arbeitende" oder „Nur Abwesende" beschränken
+  (Standard: alle Mitarbeiter inkl. Frei-Block).
+
 ---
 
 ## [1.21.33] - 2026-07-02

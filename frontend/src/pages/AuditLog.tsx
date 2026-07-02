@@ -175,8 +175,8 @@ export default function AuditLog() {
 
       {/* Filters */}
       <div style={{
-        background: '#f8fafc', borderRadius: '12px', padding: '1rem',
-        marginBottom: '1.25rem', border: '1px solid #e2e8f0',
+        background: 'var(--color-surface2)', borderRadius: '12px', padding: '1rem',
+        marginBottom: '1.25rem', border: '1px solid var(--color-border)',
       }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
           {/* Search */}
@@ -188,18 +188,18 @@ export default function AuditLog() {
               onChange={e => setSearch(e.target.value)}
               style={{
                 width: '100%', padding: '0.5rem 0.75rem', borderRadius: '8px',
-                border: '1px solid #d1d5db', fontSize: '0.9rem', boxSizing: 'border-box',
+                border: '1px solid var(--color-border2)', fontSize: '0.9rem', boxSizing: 'border-box',
               }}
             />
           </div>
 
           {/* Action filter */}
           <div>
-            <label style={{ fontSize: '0.75rem', color: '#6b7280', display: 'block', marginBottom: '0.25rem' }}>Aktion</label>
+            <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>Aktion</label>
             <select
               value={filterAction}
               onChange={e => setFilterAction(e.target.value)}
-              style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.85rem' }}
+              style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--color-border2)', fontSize: '0.85rem' }}
             >
               <option value="">Alle</option>
               {allActions.map(a => <option key={a} value={a}>{ACTION_ICON[a] ?? ''} {a}</option>)}
@@ -208,11 +208,11 @@ export default function AuditLog() {
 
           {/* Entity filter */}
           <div>
-            <label style={{ fontSize: '0.75rem', color: '#6b7280', display: 'block', marginBottom: '0.25rem' }}>Objekt-Typ</label>
+            <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>Objekt-Typ</label>
             <select
               value={filterEntity}
               onChange={e => setFilterEntity(e.target.value)}
-              style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.85rem' }}
+              style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--color-border2)', fontSize: '0.85rem' }}
             >
               <option value="">Alle</option>
               {allEntities.map(a => <option key={a} value={a}>{entityIcon(a)} {a}</option>)}
@@ -221,45 +221,45 @@ export default function AuditLog() {
 
           {/* User filter */}
           <div>
-            <label style={{ fontSize: '0.75rem', color: '#6b7280', display: 'block', marginBottom: '0.25rem' }}>Benutzer</label>
+            <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>Benutzer</label>
             <input
               type="text"
               placeholder="z.B. api"
               value={filterUser}
               onChange={e => setFilterUser(e.target.value)}
-              style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.85rem', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--color-border2)', fontSize: '0.85rem', boxSizing: 'border-box' }}
             />
           </div>
 
           {/* Date from */}
           <div>
-            <label style={{ fontSize: '0.75rem', color: '#6b7280', display: 'block', marginBottom: '0.25rem' }}>Von</label>
+            <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>Von</label>
             <input
               type="date"
               value={dateFrom}
               onChange={e => setDateFrom(e.target.value)}
-              style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.85rem', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--color-border2)', fontSize: '0.85rem', boxSizing: 'border-box' }}
             />
           </div>
 
           {/* Date to */}
           <div>
-            <label style={{ fontSize: '0.75rem', color: '#6b7280', display: 'block', marginBottom: '0.25rem' }}>Bis</label>
+            <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>Bis</label>
             <input
               type="date"
               value={dateTo}
               onChange={e => setDateTo(e.target.value)}
-              style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.85rem', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--color-border2)', fontSize: '0.85rem', boxSizing: 'border-box' }}
             />
           </div>
 
           {/* Limit */}
           <div>
-            <label style={{ fontSize: '0.75rem', color: '#6b7280', display: 'block', marginBottom: '0.25rem' }}>Max. Einträge</label>
+            <label style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', display: 'block', marginBottom: '0.25rem' }}>Max. Einträge</label>
             <select
               value={limit}
               onChange={e => setLimit(Number(e.target.value))}
-              style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid #d1d5db', fontSize: '0.85rem' }}
+              style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid var(--color-border2)', fontSize: '0.85rem' }}
             >
               {[50, 100, 200, 500, 1000].map(n => <option key={n} value={n}>{n}</option>)}
             </select>
@@ -271,7 +271,7 @@ export default function AuditLog() {
               onClick={() => { setFilterAction(''); setFilterEntity(''); setFilterUser(''); setDateFrom(''); setDateTo(''); setSearch(''); }}
               style={{
                 width: '100%', padding: '0.4rem', borderRadius: '6px',
-                border: '1px solid #d1d5db', background: '#fff',
+                border: '1px solid var(--color-border2)', background: 'var(--color-surface)',
                 fontSize: '0.85rem', cursor: 'pointer',
               }}
             >
@@ -283,12 +283,12 @@ export default function AuditLog() {
 
       {/* Result info */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-        <span style={{ color: '#6b7280', fontSize: '0.85rem' }}>
+        <span style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
           {visible.length} Einträge
           {visible.length !== entries.length ? ` (gefiltert aus ${entries.length})` : ''}
         </span>
         {entries.length > 0 && (
-          <span style={{ color: '#9ca3af', fontSize: '0.8rem' }}>
+          <span style={{ color: 'var(--color-text-subtle)', fontSize: '0.8rem' }}>
             Letzter Eintrag: {relTime(entries[0]?.timestamp)}
           </span>
         )}
@@ -296,7 +296,7 @@ export default function AuditLog() {
 
       {error && (
         <div style={{
-          background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px',
+          background: 'var(--color-danger-bg)', border: '1px solid var(--color-danger-border)', borderRadius: '8px',
           padding: '0.75rem 1rem', color: '#dc2626', marginBottom: '1rem',
         }}>
           ⚠️ {error}
@@ -304,16 +304,16 @@ export default function AuditLog() {
       )}
 
       {/* Table */}
-      <div style={{ background: '#fff', borderRadius: '12px', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+      <div style={{ background: 'var(--color-surface)', borderRadius: '12px', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem', minWidth: '700px' }}>
           <thead>
-            <tr style={{ background: '#f1f5f9', borderBottom: '2px solid #e2e8f0' }}>
-              <th scope="col" style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Zeitpunkt</th>
-              <th scope="col" style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Aktion</th>
-              <th scope="col" style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Objekt-Typ</th>
-              <th scope="col" style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: '#374151' }}>ID</th>
-              <th scope="col" style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Benutzer</th>
-              <th scope="col" style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Details</th>
+            <tr style={{ background: 'var(--color-surface3)', borderBottom: '2px solid var(--color-border)' }}>
+              <th scope="col" style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: 'var(--color-text3)' }}>Zeitpunkt</th>
+              <th scope="col" style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: 'var(--color-text3)' }}>Aktion</th>
+              <th scope="col" style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: 'var(--color-text3)' }}>Objekt-Typ</th>
+              <th scope="col" style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: 'var(--color-text3)' }}>ID</th>
+              <th scope="col" style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: 'var(--color-text3)' }}>Benutzer</th>
+              <th scope="col" style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: 'var(--color-text3)' }}>Details</th>
             </tr>
           </thead>
           <tbody>
@@ -327,7 +327,7 @@ export default function AuditLog() {
             )}
             {visible.length === 0 && loading && (
               <tr>
-                <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: '#9ca3af' }}>
+                <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-subtle)' }}>
                   ⏳ Lade…
                 </td>
               </tr>
@@ -336,17 +336,17 @@ export default function AuditLog() {
               <tr
                 key={i}
                 style={{
-                  borderBottom: '1px solid #f1f5f9',
-                  background: i % 2 === 0 ? '#fff' : '#fafafa',
+                  borderBottom: '1px solid var(--color-border)',
+                  background: i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface2)',
                   transition: 'background 0.15s',
                 }}
-                onMouseEnter={ev => (ev.currentTarget.style.background = '#eff6ff')}
-                onMouseLeave={ev => (ev.currentTarget.style.background = i % 2 === 0 ? '#fff' : '#fafafa')}
+                onMouseEnter={ev => (ev.currentTarget.style.background = 'var(--color-surface3)')}
+                onMouseLeave={ev => (ev.currentTarget.style.background = i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface2)')}
               >
                 {/* Timestamp */}
                 <td style={{ padding: '0.6rem 1rem', whiteSpace: 'nowrap' }}>
                   <div style={{ fontWeight: 500 }}>{fmtDate(e.timestamp)}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{relTime(e.timestamp)}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-subtle)' }}>{relTime(e.timestamp)}</div>
                 </td>
 
                 {/* Action badge */}
@@ -355,9 +355,9 @@ export default function AuditLog() {
                     display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
                     padding: '0.2rem 0.6rem', borderRadius: '99px',
                     fontSize: '0.78rem', fontWeight: 700,
-                    background: (ACTION_COLOR[e.action] ?? '#6b7280') + '20',
-                    color: ACTION_COLOR[e.action] ?? '#6b7280',
-                    border: `1px solid ${(ACTION_COLOR[e.action] ?? '#6b7280')}40`,
+                    background: (ACTION_COLOR[e.action] ?? 'var(--color-text-muted)') + '20',
+                    color: ACTION_COLOR[e.action] ?? 'var(--color-text-muted)',
+                    border: `1px solid ${(ACTION_COLOR[e.action] ?? 'var(--color-text-muted)')}40`,
                   }}>
                     {ACTION_ICON[e.action] ?? '•'} {e.action}
                   </span>
@@ -371,7 +371,7 @@ export default function AuditLog() {
                 </td>
 
                 {/* ID */}
-                <td style={{ padding: '0.6rem 1rem', color: '#9ca3af', fontFamily: 'monospace' }}>
+                <td style={{ padding: '0.6rem 1rem', color: 'var(--color-text-subtle)', fontFamily: 'monospace' }}>
                   {e.entity_id > 0 ? `#${e.entity_id}` : '–'}
                 </td>
 
@@ -380,19 +380,19 @@ export default function AuditLog() {
                   <span style={{
                     display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
                     padding: '0.2rem 0.5rem', borderRadius: '6px',
-                    background: '#f3f4f6', fontSize: '0.8rem',
+                    background: 'var(--color-surface3)', fontSize: '0.8rem',
                   }}>
                     👤 {e.user}
                   </span>
                 </td>
 
                 {/* Details */}
-                <td style={{ padding: '0.6rem 1rem', color: '#6b7280', maxWidth: '400px' }}>
+                <td style={{ padding: '0.6rem 1rem', color: 'var(--color-text-muted)', maxWidth: '400px' }}>
                   <span title={e.details} style={{
                     display: 'block', overflow: 'hidden',
                     textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
-                    {e.details || <em style={{ color: '#d1d5db' }}>–</em>}
+                    {e.details || <em style={{ color: 'var(--color-border2)' }}>–</em>}
                   </span>
                   {(e.old_value || e.new_value) && (
                     <details style={{ marginTop: '0.25rem', fontSize: '0.78rem' }}>
@@ -401,7 +401,7 @@ export default function AuditLog() {
                       </summary>
                       <div style={{ marginTop: '0.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                         {e.old_value && (
-                          <div style={{ background: '#fef2f2', borderRadius: '6px', padding: '0.3rem 0.5rem', border: '1px solid #fecaca', maxWidth: '180px', overflow: 'auto' }}>
+                          <div style={{ background: 'var(--color-danger-bg)', borderRadius: '6px', padding: '0.3rem 0.5rem', border: '1px solid var(--color-danger-border)', maxWidth: '180px', overflow: 'auto' }}>
                             <strong style={{ color: '#dc2626', fontSize: '0.72rem' }}>Vorher:</strong>
                             <pre style={{ margin: 0, fontSize: '0.72rem', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
                               {typeof e.old_value === 'string' ? e.old_value : JSON.stringify(e.old_value, null, 1)}
@@ -409,7 +409,7 @@ export default function AuditLog() {
                           </div>
                         )}
                         {e.new_value && (
-                          <div style={{ background: '#f0fdf4', borderRadius: '6px', padding: '0.3rem 0.5rem', border: '1px solid #bbf7d0', maxWidth: '180px', overflow: 'auto' }}>
+                          <div style={{ background: 'var(--color-success-bg)', borderRadius: '6px', padding: '0.3rem 0.5rem', border: '1px solid var(--color-success-border)', maxWidth: '180px', overflow: 'auto' }}>
                             <strong style={{ color: '#16a34a', fontSize: '0.72rem' }}>Nachher:</strong>
                             <pre style={{ margin: 0, fontSize: '0.72rem', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
                               {typeof e.new_value === 'string' ? e.new_value : JSON.stringify(e.new_value, null, 1)}
@@ -427,7 +427,7 @@ export default function AuditLog() {
       </div>
 
       {visible.length > 0 && (
-        <p style={{ textAlign: 'center', color: '#9ca3af', fontSize: '0.8rem', marginTop: '0.75rem' }}>
+        <p style={{ textAlign: 'center', color: 'var(--color-text-subtle)', fontSize: '0.8rem', marginTop: '0.75rem' }}>
           {visible.length} Einträge angezeigt
         </p>
       )}

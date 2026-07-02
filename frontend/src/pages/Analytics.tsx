@@ -61,8 +61,8 @@ function BarChart({ title, icon, values, labels, anomalies, unit, color, anomaly
 
   return (
     <div className="analytics-chart-card" style={{
-      background: 'white',
-      border: '1px solid #e2e8f0',
+      background: 'var(--color-surface)',
+      border: '1px solid var(--color-border)',
       borderRadius: 12,
       padding: '20px 24px',
       marginBottom: 24,
@@ -70,14 +70,14 @@ function BarChart({ title, icon, values, labels, anomalies, unit, color, anomaly
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
         <div>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#1e293b' }}>{icon} {title}</div>
-          {description && <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{description}</div>}
+          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text2)' }}>{icon} {title}</div>
+          {description && <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 2 }}>{description}</div>}
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, color: '#64748b', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 12, color: 'var(--color-text-muted)', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           <span>Ø {mean(values).toFixed(1)}{unit}</span>
           <span>σ {stddev(values).toFixed(1)}</span>
           {anomalyCount > 0 && (
-            <span style={{ background: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: 12, fontWeight: 600 }}>
+            <span style={{ background: 'var(--color-warn-badge)', color: 'var(--color-warn-text)', padding: '2px 8px', borderRadius: 12, fontWeight: 600 }}>
               ⚠️ {anomalyCount} Anomalie{anomalyCount > 1 ? 'n' : ''}
             </span>
           )}
@@ -113,7 +113,7 @@ function BarChart({ title, icon, values, labels, anomalies, unit, color, anomaly
             <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
               <div style={{
                 fontSize: 10,
-                color: anomaly ? '#92400e' : '#475569',
+                color: anomaly ? 'var(--color-warn-text)' : '#475569',
                 fontWeight: anomaly ? 700 : 400,
                 marginBottom: 3,
               }}>
@@ -148,7 +148,7 @@ function BarChart({ title, icon, values, labels, anomalies, unit, color, anomaly
             flex: 1,
             textAlign: 'center',
             fontSize: 11,
-            color: anomalies[i] ? '#92400e' : '#64748b',
+            color: anomalies[i] ? 'var(--color-warn-text)' : 'var(--color-text-muted)',
             fontWeight: anomalies[i] ? 700 : 400,
           }}>
             {lbl}
@@ -157,7 +157,7 @@ function BarChart({ title, icon, values, labels, anomalies, unit, color, anomaly
       </div>
 
       {/* Legend */}
-      <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: 11, color: '#64748b' }}>
+      <div style={{ display: 'flex', gap: 16, marginTop: 12, fontSize: 11, color: 'var(--color-text-muted)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <div style={{ width: 24, borderTop: '1.5px dashed #94a3b8' }} /> Ø Mittelwert
         </div>
@@ -217,8 +217,8 @@ function MultiLineChart({ title, icon, labels, series, description }: MultiLineC
 
   return (
     <div className="analytics-chart-card" style={{
-      background: 'white',
-      border: '1px solid #e2e8f0',
+      background: 'var(--color-surface)',
+      border: '1px solid var(--color-border)',
       borderRadius: 12,
       padding: '20px 24px',
       marginBottom: 24,
@@ -226,13 +226,13 @@ function MultiLineChart({ title, icon, labels, series, description }: MultiLineC
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
         <div>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#1e293b' }}>{icon} {title}</div>
-          {description && <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{description}</div>}
+          <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text2)' }}>{icon} {title}</div>
+          {description && <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 2 }}>{description}</div>}
         </div>
         {/* Legend */}
         <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           {series.map((s, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: '#475569' }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--color-text-muted)' }}>
               <svg width="20" height="4"><line x1="0" y1="2" x2="20" y2="2" stroke={s.color} strokeWidth="2.5" /></svg>
               {s.label}
             </div>
@@ -250,8 +250,8 @@ function MultiLineChart({ title, icon, labels, series, description }: MultiLineC
             const y = yPos(tick);
             return (
               <g key={i}>
-                <line x1={0} y1={y} x2={chartW} y2={y} stroke="#f1f5f9" strokeWidth="1" />
-                <text x={-6} y={y} textAnchor="end" dominantBaseline="middle" fontSize="10" fill="#94a3b8">
+                <line x1={0} y1={y} x2={chartW} y2={y} stroke="var(--color-surface3)" strokeWidth="1" />
+                <text x={-6} y={y} textAnchor="end" dominantBaseline="middle" fontSize="10" fill="var(--color-text-subtle)">
                   {tick.toFixed(tick >= 10 ? 0 : 1)}
                 </text>
               </g>
@@ -259,11 +259,11 @@ function MultiLineChart({ title, icon, labels, series, description }: MultiLineC
           })}
 
           {/* X-axis baseline */}
-          <line x1={0} y1={chartH} x2={chartW} y2={chartH} stroke="#e2e8f0" strokeWidth="1" />
+          <line x1={0} y1={chartH} x2={chartW} y2={chartH} stroke="var(--color-border)" strokeWidth="1" />
 
           {/* X-axis labels */}
           {labels.map((lbl, i) => (
-            <text key={i} x={xPos(i)} y={chartH + 14} textAnchor="middle" fontSize="10" fill="#94a3b8">
+            <text key={i} x={xPos(i)} y={chartH + 14} textAnchor="middle" fontSize="10" fill="var(--color-text-subtle)">
               {lbl}
             </text>
           ))}
@@ -302,7 +302,7 @@ function MultiLineChart({ title, icon, labels, series, description }: MultiLineC
                         cx={xPos(pi)}
                         cy={yPos(v)}
                         r={isHovered ? 6 : 4}
-                        fill="white"
+                        fill="var(--color-surface)"
                         stroke={s.color}
                         strokeWidth="2"
                       />
@@ -315,7 +315,7 @@ function MultiLineChart({ title, icon, labels, series, description }: MultiLineC
                             width={72}
                             height={22}
                             rx={4}
-                            fill="#1e293b"
+                            fill="var(--color-text2)"
                             opacity={0.9}
                           />
                           <text
@@ -323,7 +323,7 @@ function MultiLineChart({ title, icon, labels, series, description }: MultiLineC
                             y={yPos(v) - 17}
                             textAnchor="middle"
                             fontSize="11"
-                            fill="white"
+                            fill="var(--color-surface)"
                             fontWeight="600"
                           >
                             {labels[pi]}: {v.toFixed(v < 10 ? 1 : 0)}{s.unit}
@@ -396,16 +396,16 @@ function DonutChart({ title, icon, segments, description }: DonutChartProps) {
 
   return (
     <div className="analytics-chart-card" style={{
-      background: 'white',
-      border: '1px solid #e2e8f0',
+      background: 'var(--color-surface)',
+      border: '1px solid var(--color-border)',
       borderRadius: 12,
       padding: '20px 24px',
       marginBottom: 24,
       boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
     }}>
       <div style={{ marginBottom: 16 }}>
-        <div style={{ fontSize: 16, fontWeight: 700, color: '#1e293b' }}>{icon} {title}</div>
-        {description && <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{description}</div>}
+        <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text2)' }}>{icon} {title}</div>
+        {description && <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 2 }}>{description}</div>}
       </div>
 
       <div style={{ display: 'flex', gap: 32, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -420,7 +420,7 @@ function DonutChart({ title, icon, segments, description }: DonutChartProps) {
               d={`M ${seg.x1i} ${seg.y1i} L ${seg.x1} ${seg.y1} A ${seg.isHovered ? R + 6 : R} ${seg.isHovered ? R + 6 : R} 0 ${seg.largeArc} 1 ${seg.x2} ${seg.y2} L ${seg.x2i} ${seg.y2i} A ${r} ${r} 0 ${seg.largeArc} 0 ${seg.x1i} ${seg.y1i} Z`}
               fill={seg.color}
               opacity={hovered !== null && hovered !== i ? 0.5 : 1}
-              stroke="white"
+              stroke="var(--color-surface)"
               strokeWidth="2"
               onMouseEnter={() => setHovered(i)}
               onMouseLeave={() => setHovered(null)}
@@ -428,13 +428,13 @@ function DonutChart({ title, icon, segments, description }: DonutChartProps) {
             />
           ))}
           {/* Center label */}
-          <text x={CX} y={CY - 8} textAnchor="middle" fontSize="22" fontWeight="800" fill="#1e293b">
+          <text x={CX} y={CY - 8} textAnchor="middle" fontSize="22" fontWeight="800" fill="var(--color-text2)">
             {hoveredSeg ? hoveredSeg.value : total}
           </text>
-          <text x={CX} y={CY + 10} textAnchor="middle" fontSize="10" fill="#64748b">
+          <text x={CX} y={CY + 10} textAnchor="middle" fontSize="10" fill="var(--color-text-muted)">
             {hoveredSeg ? hoveredSeg.label : 'Gesamt'}
           </text>
-          <text x={CX} y={CY + 24} textAnchor="middle" fontSize="10" fill="#64748b">
+          <text x={CX} y={CY + 24} textAnchor="middle" fontSize="10" fill="var(--color-text-muted)">
             {hoveredSeg ? `${(hoveredSeg.frac * 100).toFixed(1)}%` : 'Abwesenheitstage'}
           </text>
         </svg>
@@ -463,10 +463,10 @@ function DonutChart({ title, icon, segments, description }: DonutChartProps) {
                 flexShrink: 0,
               }} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#1e293b' }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text2)' }}>
                   {seg.icon} {seg.label}
                 </div>
-                <div style={{ fontSize: 11, color: '#64748b' }}>
+                <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>
                   {seg.value} Tage · {(seg.frac * 100).toFixed(1)}%
                 </div>
               </div>
@@ -481,7 +481,7 @@ function DonutChart({ title, icon, segments, description }: DonutChartProps) {
               </div>
             </div>
           ))}
-          <div style={{ marginTop: 4, paddingTop: 8, borderTop: '1px solid #f1f5f9', fontSize: 11, color: '#94a3b8' }}>
+          <div style={{ marginTop: 4, paddingTop: 8, borderTop: '1px solid #f1f5f9', fontSize: 11, color: 'var(--color-text-subtle)' }}>
             Gesamt: {total} Abwesenheitstage im Jahr {new Date().getFullYear()}
           </div>
         </div>
@@ -519,20 +519,20 @@ function AnomalySummary({ monthly, sickAnomalies, otAnomalies, staffingAnomalies
 
   return (
     <div style={{
-      background: '#fffbeb',
-      border: '1px solid #fde68a',
+      background: 'var(--color-warn-bg)',
+      border: '1px solid var(--color-warn-border)',
       borderRadius: 12,
       padding: '16px 20px',
       marginBottom: 24,
     }}>
-      <div style={{ fontSize: 15, fontWeight: 700, color: '#92400e', marginBottom: 12 }}>
+      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-warn-text)', marginBottom: 12 }}>
         ⚠️ Anomalie-Zusammenfassung
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
         {anomalies.map((a, i) => (
           <div key={i} style={{
-            background: 'white',
-            border: '1px solid #fde68a',
+            background: 'var(--color-surface)',
+            border: '1px solid var(--color-warn-border)',
             borderRadius: 8,
             padding: '8px 14px',
             display: 'flex',
@@ -541,15 +541,15 @@ function AnomalySummary({ monthly, sickAnomalies, otAnomalies, staffingAnomalies
           }}>
             <span style={{ fontSize: 18 }}>{a.icon}</span>
             <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#1e293b' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--color-text2)' }}>
                 {MONTH_NAMES_SHORT[a.month - 1]}: {a.type}
               </div>
-              <div style={{ fontSize: 11, color: '#64748b' }}>{a.value} — überdurchschnittlich hoch</div>
+              <div style={{ fontSize: 11, color: 'var(--color-text-muted)' }}>{a.value} — überdurchschnittlich hoch</div>
             </div>
           </div>
         ))}
       </div>
-      <div style={{ fontSize: 11, color: '#78350f', marginTop: 10 }}>
+      <div style={{ fontSize: 11, color: 'var(--color-warn-text)', marginTop: 10 }}>
         Anomalie-Kriterium: Wert &gt; Mittelwert + 2 Standardabweichungen (2σ-Regel)
       </div>
     </div>
@@ -639,7 +639,7 @@ export default function Analytics() {
           /* KPI cards: wrap nicely */
           .analytics-kpi-row { flex-wrap: wrap !important; }
           /* Chart cards: avoid page break inside */
-          .analytics-chart-card { break-inside: avoid; page-break-inside: avoid; margin-bottom: 12px !important; box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+          .analytics-chart-card { break-inside: avoid; page-break-inside: avoid; margin-bottom: 12px !important; box-shadow: none !important; border: 1px solid var(--color-border) !important; }
           /* Data table: show clearly */
           .analytics-data-table table { font-size: 10px !important; }
           /* Remove interactive hover styles */
@@ -650,32 +650,32 @@ export default function Analytics() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: '#1e293b' }}>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: 'var(--color-text2)' }}>
             📈 Analytics & Trends
           </h1>
-          <div style={{ color: '#64748b', marginTop: 4, fontSize: 13 }}>
+          <div style={{ color: 'var(--color-text-muted)', marginTop: 4, fontSize: 13 }}>
             Trend-Analysen über 12 Monate — Anomalie-Erkennung via 2σ-Regel
           </div>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }} className="analytics-no-print">
           <button
             onClick={() => setYear(y => y - 1)}
-            style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: 14 }}
+            style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid var(--color-border)', background: 'var(--color-surface)', cursor: 'pointer', fontSize: 14 }}
           >←</button>
-          <span style={{ fontSize: 16, fontWeight: 700, color: '#1e293b', minWidth: 48, textAlign: 'center' }}>{year}</span>
+          <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--color-text2)', minWidth: 48, textAlign: 'center' }}>{year}</span>
           <button
             onClick={() => setYear(y => y + 1)}
             disabled={year >= currentYear}
-            style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #e2e8f0', background: year >= currentYear ? '#f8fafc' : 'white', cursor: year >= currentYear ? 'default' : 'pointer', fontSize: 14 }}
+            style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid var(--color-border)', background: year >= currentYear ? 'var(--color-surface2)' : 'var(--color-surface)', cursor: year >= currentYear ? 'default' : 'pointer', fontSize: 14 }}
           >→</button>
           <button
             onClick={() => window.print()}
-            style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: 14, marginLeft: 8 }}
+            style={{ padding: '6px 12px', borderRadius: 6, border: '1px solid var(--color-border)', background: 'var(--color-surface)', cursor: 'pointer', fontSize: 14, marginLeft: 8 }}
             title="Drucken"
           >🖨️</button>
         </div>
         {/* Print-only year display */}
-        <div className="analytics-print-title" style={{ fontSize: 14, color: '#64748b' }}>Jahr: {year}</div>
+        <div className="analytics-print-title" style={{ fontSize: 14, color: 'var(--color-text-muted)' }}>Jahr: {year}</div>
       </div>
 
       {!data && !loading && !error && (
@@ -695,11 +695,11 @@ export default function Analytics() {
               { label: 'Gesamte Überstunden', value: `${monthly.reduce((a, m) => a + Math.max(0, m.overtime), 0).toFixed(0)}h`, icon: '⏰', color: '#d97706' },
               { label: 'Ø Besetzung/Tag', value: `${mean(staffingValues).toFixed(1)} MA`, icon: '👥', color: '#2563eb' },
               { label: 'Gesamte Schichten', value: `${monthly.reduce((a, m) => a + m.shifts_count, 0)}`, icon: '📅', color: '#059669' },
-              { label: 'Anomalien erkannt', value: `${[...sickAnomalies, ...otAnomalies, ...staffingAnomalies].filter(Boolean).length}`, icon: '⚠️', color: '#92400e' },
+              { label: 'Anomalien erkannt', value: `${[...sickAnomalies, ...otAnomalies, ...staffingAnomalies].filter(Boolean).length}`, icon: '⚠️', color: 'var(--color-warn-text)' },
             ].map((kpi, i) => (
               <div key={i} style={{
-                background: 'white',
-                border: '1px solid #e2e8f0',
+                background: 'var(--color-surface)',
+                border: '1px solid var(--color-border)',
                 borderRadius: 10,
                 padding: '14px 18px',
                 flex: '1 1 160px',
@@ -707,7 +707,7 @@ export default function Analytics() {
               }}>
                 <div style={{ fontSize: 22 }}>{kpi.icon}</div>
                 <div style={{ fontSize: 22, fontWeight: 800, color: kpi.color, marginTop: 4 }}>{kpi.value}</div>
-                <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{kpi.label}</div>
+                <div style={{ fontSize: 11, color: 'var(--color-text-muted)', marginTop: 2 }}>{kpi.label}</div>
               </div>
             ))}
           </div>
@@ -777,7 +777,7 @@ export default function Analytics() {
             labels={labels}
             anomalies={otAnomalies}
             unit="h"
-            color="#fde68a"
+            color="var(--color-warn-border)"
             anomalyColor="#f59e0b"
             description="Gesamte Überstunden pro Monat (Ist – Soll) — Anomalie wenn > Ø + 2σ"
           />
@@ -797,25 +797,25 @@ export default function Analytics() {
 
           {/* Data Table */}
           <div style={{
-            background: 'white',
-            border: '1px solid #e2e8f0',
+            background: 'var(--color-surface)',
+            border: '1px solid var(--color-border)',
             borderRadius: 12,
             overflow: 'hidden',
             boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
           }}>
-            <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', fontSize: 15, fontWeight: 700, color: '#1e293b' }}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid #f1f5f9', fontSize: 15, fontWeight: 700, color: 'var(--color-text2)' }}>
               📋 Monatliche Rohdaten
             </div>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
-                  <tr style={{ background: '#f8fafc' }}>
-                    <th scope="col" style={{ padding: '10px 16px', textAlign: 'left', color: '#64748b', fontWeight: 600, borderBottom: '1px solid #e2e8f0' }}>Monat</th>
-                    <th scope="col" style={{ padding: '10px 16px', textAlign: 'right', color: '#64748b', fontWeight: 600, borderBottom: '1px solid #e2e8f0' }}>Kranktage</th>
-                    <th scope="col" style={{ padding: '10px 16px', textAlign: 'right', color: '#64748b', fontWeight: 600, borderBottom: '1px solid #e2e8f0' }}>Überstunden</th>
-                    <th scope="col" style={{ padding: '10px 16px', textAlign: 'right', color: '#64748b', fontWeight: 600, borderBottom: '1px solid #e2e8f0' }}>Schichten</th>
-                    <th scope="col" style={{ padding: '10px 16px', textAlign: 'right', color: '#64748b', fontWeight: 600, borderBottom: '1px solid #e2e8f0' }}>Ø MA/Tag</th>
-                    <th scope="col" style={{ padding: '10px 16px', textAlign: 'right', color: '#64748b', fontWeight: 600, borderBottom: '1px solid #e2e8f0' }}>Anomalie</th>
+                  <tr style={{ background: 'var(--color-surface2)' }}>
+                    <th scope="col" style={{ padding: '10px 16px', textAlign: 'left', color: 'var(--color-text-muted)', fontWeight: 600, borderBottom: '1px solid var(--color-border)' }}>Monat</th>
+                    <th scope="col" style={{ padding: '10px 16px', textAlign: 'right', color: 'var(--color-text-muted)', fontWeight: 600, borderBottom: '1px solid var(--color-border)' }}>Kranktage</th>
+                    <th scope="col" style={{ padding: '10px 16px', textAlign: 'right', color: 'var(--color-text-muted)', fontWeight: 600, borderBottom: '1px solid var(--color-border)' }}>Überstunden</th>
+                    <th scope="col" style={{ padding: '10px 16px', textAlign: 'right', color: 'var(--color-text-muted)', fontWeight: 600, borderBottom: '1px solid var(--color-border)' }}>Schichten</th>
+                    <th scope="col" style={{ padding: '10px 16px', textAlign: 'right', color: 'var(--color-text-muted)', fontWeight: 600, borderBottom: '1px solid var(--color-border)' }}>Ø MA/Tag</th>
+                    <th scope="col" style={{ padding: '10px 16px', textAlign: 'right', color: 'var(--color-text-muted)', fontWeight: 600, borderBottom: '1px solid var(--color-border)' }}>Anomalie</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -827,24 +827,24 @@ export default function Analytics() {
                       staffingAnomalies[i] ? '👥' : '',
                     ].filter(Boolean);
                     return (
-                      <tr key={i} style={{ background: rowAnomaly ? '#fffbeb' : (i % 2 === 0 ? 'white' : '#f8fafc') }}>
-                        <td style={{ padding: '8px 16px', fontWeight: 600, color: '#1e293b', borderBottom: '1px solid #f1f5f9' }}>
+                      <tr key={i} style={{ background: rowAnomaly ? 'var(--color-warn-bg)' : (i % 2 === 0 ? 'var(--color-surface)' : 'var(--color-surface2)') }}>
+                        <td style={{ padding: '8px 16px', fontWeight: 600, color: 'var(--color-text2)', borderBottom: '1px solid #f1f5f9' }}>
                           {MONTH_NAMES_SHORT[m.month - 1]}
                         </td>
-                        <td style={{ padding: '8px 16px', textAlign: 'right', borderBottom: '1px solid #f1f5f9', color: sickAnomalies[i] ? '#dc2626' : '#374151', fontWeight: sickAnomalies[i] ? 700 : 400 }}>
+                        <td style={{ padding: '8px 16px', textAlign: 'right', borderBottom: '1px solid #f1f5f9', color: sickAnomalies[i] ? '#dc2626' : 'var(--color-text3)', fontWeight: sickAnomalies[i] ? 700 : 400 }}>
                           {m.sick_days}
                         </td>
-                        <td style={{ padding: '8px 16px', textAlign: 'right', borderBottom: '1px solid #f1f5f9', color: otAnomalies[i] ? '#d97706' : '#374151', fontWeight: otAnomalies[i] ? 700 : 400 }}>
+                        <td style={{ padding: '8px 16px', textAlign: 'right', borderBottom: '1px solid #f1f5f9', color: otAnomalies[i] ? '#d97706' : 'var(--color-text3)', fontWeight: otAnomalies[i] ? 700 : 400 }}>
                           {m.overtime.toFixed(0)}h
                         </td>
-                        <td style={{ padding: '8px 16px', textAlign: 'right', borderBottom: '1px solid #f1f5f9', color: '#374151' }}>
+                        <td style={{ padding: '8px 16px', textAlign: 'right', borderBottom: '1px solid #f1f5f9', color: 'var(--color-text3)' }}>
                           {m.shifts_count}
                         </td>
-                        <td style={{ padding: '8px 16px', textAlign: 'right', borderBottom: '1px solid #f1f5f9', color: staffingAnomalies[i] ? '#0891b2' : '#374151', fontWeight: staffingAnomalies[i] ? 700 : 400 }}>
+                        <td style={{ padding: '8px 16px', textAlign: 'right', borderBottom: '1px solid #f1f5f9', color: staffingAnomalies[i] ? '#0891b2' : 'var(--color-text3)', fontWeight: staffingAnomalies[i] ? 700 : 400 }}>
                           {staffingValues[i]}
                         </td>
                         <td style={{ padding: '8px 16px', textAlign: 'right', borderBottom: '1px solid #f1f5f9' }}>
-                          {tags.length > 0 ? tags.join(' ') : <span style={{ color: '#94a3b8' }}>—</span>}
+                          {tags.length > 0 ? tags.join(' ') : <span style={{ color: 'var(--color-text-subtle)' }}>—</span>}
                         </td>
                       </tr>
                     );

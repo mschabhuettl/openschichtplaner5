@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.18] - 2026-07-02
+
 ### Fixed
 
 - **Gruppen-Filter heißen jetzt „Alle Gruppen".** In Zeitkonto, Überstunden,

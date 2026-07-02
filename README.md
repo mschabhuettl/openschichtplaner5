@@ -52,7 +52,7 @@ The key differentiator: OpenSchichtplaner5 reads and writes the **original `.DBF
 - ⚖️ **Work-time rules** — configurable rule engine (max hours/day, minimum rest, max consecutive days) with violation highlighting
 - 🔒 **Security** — role-based access plus fine-grained per-user permissions, 2FA (TOTP), bcrypt, JWT, rate limiting, audit log
 - 🔔 **Notifications** — real-time updates (SSE), email (SMTP), in-app notification center
-- 🐳 **Operations** — Docker deployment, CI/CD, backup/restore, health dashboard, SQLite (default) or PostgreSQL backend
+- 🐳 **Operations** — Docker deployment, CI/CD, backup/restore, health dashboard, SQLite (default) or PostgreSQL backend, read-only mode (`SP5_READONLY`) and original-scope core mode (`SP5_CORE_ONLY`)
 - 📱 **UX** — dark mode, i18n (de/en), mobile-responsive, keyboard navigation, global search (`Ctrl+K`), PWA
 
 > Full feature details: [GitHub Wiki](https://github.com/mschabhuettl/openschichtplaner5/wiki) · [CHANGELOG.md](CHANGELOG.md)

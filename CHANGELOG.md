@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.30] - 2026-07-02
+
 ### Changed
 
 - **Design-System-Grundlagen.** Zentrale Kontrast-Funktion für farbige

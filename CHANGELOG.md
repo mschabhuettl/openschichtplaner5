@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Dark-Mode: „Analytics & Trends" und „Audit-Log" sind jetzt durchgängig dunkel.**
+  Karten, Panels, Tabellen und Diagramm-Flächen dieser Seiten blieben im dunklen
+  Modus weiß bzw. zu hell und Überschriften waren kaum lesbar. Der
+  Onboarding-Wizard hatte zudem einen hellen Seitenhintergrund im Dark-Mode.
+
 ---
 
 ## [1.21.18] - 2026-07-02

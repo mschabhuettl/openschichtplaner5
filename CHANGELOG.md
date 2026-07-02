@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **„Mein Kalender" ist wieder für alle Rollen sichtbar.** Eine zu enge
+  Rollen-Beschränkung versteckte den Kalender im Normalbetrieb für
+  Admin/Planer (nur der Entwicklungsmodus zeigte ihn) — die Self-Service-
+  Ansicht steht jetzt wie „Mein Profil" jeder Rolle im Menü.
+
 ---
 
 ## [1.21.27] - 2026-07-02

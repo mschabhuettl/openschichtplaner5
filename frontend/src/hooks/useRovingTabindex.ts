@@ -9,7 +9,7 @@ interface UseRovingTabindexOptions {
 
 /**
  * Roving tabindex for toolbar / tablist patterns.
- * Only one item in the group is tabbable (tabIndex=0); the rest have tabIndex=-1.
+ * Nur ein Element der Gruppe ist tabbbar (tabIndex=0); der Rest hat tabIndex=-1.
  * Arrow keys move focus between items; Home/End jump to first/last.
  */
 export function useRovingTabindex(

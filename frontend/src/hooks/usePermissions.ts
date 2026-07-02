@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 export function usePermissions() {
   const { user, isDevMode, devViewRole, canWriteDuties, canWriteAbsences, canAdmin } = useAuth();
 
-  // In dev mode with the highest ('admin') view-role: full access
+  // Im Dev-Modus mit der höchsten View-Rolle ('admin'): Vollzugriff
   const isFullDevView = isDevMode && (devViewRole === 'admin');
 
   return {

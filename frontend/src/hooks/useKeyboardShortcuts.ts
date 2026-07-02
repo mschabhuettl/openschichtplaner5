@@ -43,7 +43,7 @@ interface UseKeyboardShortcutsOptions {
  * Global keyboard shortcuts hook.
  *
  * Listens for keydown events globally, ignoring when user is typing
- * in input/textarea/contenteditable. Supports single keys and
+ * in input/textarea/contenteditable. Unterstützt Einzeltasten und
  * "g then <key>" sequences within 1 second.
  */
 export function useKeyboardShortcuts({
@@ -56,7 +56,7 @@ export function useKeyboardShortcuts({
   const gPendingRef = useRef(false);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    // Check if user is typing in an input
+    // Prüfen, ob der Nutzer gerade in ein Eingabefeld tippt
     const tag = (document.activeElement as HTMLElement)?.tagName?.toLowerCase();
     const isTyping =
       tag === 'input' ||

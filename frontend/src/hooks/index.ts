@@ -1,4 +1,4 @@
-// Barrel export for all shared hooks
+// Barrel-Export aller geteilten Hooks
 export { useApiData } from './useApiData';
 export { useAppSettings } from './useAppSettings';
 export { useConfirm } from './useConfirm';

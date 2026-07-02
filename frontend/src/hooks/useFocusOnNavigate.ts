@@ -2,9 +2,9 @@ import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 
 /**
- * After each route change, move focus to the main content area.
+ * Nach jedem Routenwechsel den Fokus auf den Hauptinhalt setzen.
  * This ensures keyboard/screen-reader users land on relevant content
- * after navigation instead of being stuck at the top of the page.
+ * nach der Navigation weiterlesen kann, statt oben auf der Seite festzuhängen.
  */
 export function useFocusOnNavigate(mainContentId = 'main-content') {
   const location = useLocation();

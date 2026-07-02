@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Einsatzplan-Wochenansicht wie im Original.** Unter den Schichtzeilen zeigt
+  die Wochenmatrix jetzt für jede Abwesenheitsart eine eigene Zeile mit den
+  abwesenden Mitarbeitern (statt einer Sammelzeile „Abwesend"); „Leere Zeilen
+  ausblenden" wirkt auch auf diese Zeilen.
+
 ---
 
 ## [1.21.23] - 2026-07-02

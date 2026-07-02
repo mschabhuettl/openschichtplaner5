@@ -84,6 +84,10 @@ Bewusste Web-Abweichungen (kein Handlungsbedarf, dokumentiert):
 - Lokale Ansichts-/Anpassen-Optionen teilweise fix (Web-UX statt Registry).
 - Jahresübersicht: Eintragen direkt im Jahresraster nicht nötig (Klick führt
   zum Dienstplan).
+- **Wochenansicht bleibt** (Entscheidung 2026-07-02): Das Original kennt nur
+  Dienstplan/Einsatzplan/Jahresübersicht; die Wochenansicht ist eine additive
+  Web-Verbesserung (kompakte 7-Tage-Sicht, Mo–So × Schichten) ohne Einfluss
+  auf die Original-Ansichten und bleibt daher erhalten.
 
 ## B. Über das Original hinaus (neue Ideen, priorisiert)
 

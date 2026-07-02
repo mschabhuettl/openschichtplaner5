@@ -1,4 +1,4 @@
-// Barrel export for all shared components
+// Barrel-Export aller geteilten Komponenten
 export { Badge } from './Badge';
 export type { BadgeVariant, BadgeShape } from './Badge';
 export { BottomNav } from './BottomNav';

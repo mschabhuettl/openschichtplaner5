@@ -81,7 +81,7 @@ export function NotificationsPage() {
   const fetchNotifications = useCallback(async () => {
     try {
       const headers = getAuthHeaders();
-      // Fetch planner-wide notifications (limit 200 for full page)
+      // Planerweite Benachrichtigungen holen (Limit 200 für die Vollseite)
       const res = await fetch(`${BASE}/api/v1/notifications?limit=200`, { headers });
       if (res.ok) {
         const data = await res.json();
@@ -129,7 +129,7 @@ export function NotificationsPage() {
     } catch { /* ignore */ }
   };
 
-  // Derive unique notification types for filter
+  // Eindeutige Benachrichtigungstypen für den Filter ableiten
   const availableTypes = Array.from(new Set(notifications.map(n => n.type))).sort();
 
   // Apply filters

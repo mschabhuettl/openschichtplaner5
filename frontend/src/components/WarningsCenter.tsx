@@ -159,7 +159,7 @@ export default function WarningsCenter() {
   const [loading, setLoading] = useState(false);
   const [activityLoading, setActivityLoading] = useState(false);
 
-  // Track "last seen" timestamps for unread badge
+  // „Zuletzt gesehen"-Zeitstempel fürs Ungelesen-Badge führen
   const [, setLastWarningSeen] = useState<number>(() => getLastSeen(LAST_SEEN_KEY));
   const [lastActivitySeen, setLastActivitySeen] = useState<number>(() => getLastSeen(LAST_ACTIVITY_SEEN_KEY));
 
@@ -188,7 +188,7 @@ export default function WarningsCenter() {
       const res = await fetch(`${BASE}/api/v1/changelog?limit=20`, { headers: getAuthHeaders() });
       if (!res.ok) throw new Error('Laden fehlgeschlagen');
       const data: ChangelogResponse | ActivityEntry[] = await res.json();
-      // Handle both array and {entries: [...]} formats
+      // Beide Formate behandeln: Array und {entries: [...]}
       const entries = Array.isArray(data) ? data : (data as ChangelogResponse).entries ?? [];
       setActivities(entries);
     } catch { /* silently ignore */ } finally { setActivityLoading(false); }
@@ -234,7 +234,7 @@ export default function WarningsCenter() {
   const activeWarnings = warnings.filter(w => !dismissed.has(makeWarningKey(w)));
 
   // Unread warning count: warnings that were fetched but not "seen" yet
-  // We track this by counting if there are any active warnings at all and last seen was before last fetch
+  // Erfasst über: gibt es überhaupt aktive Warnungen und lag „zuletzt gesehen" vor dem letzten Fetch
   // Simpler: just count active (undismissed) warnings that exist
   const unreadWarnings = activeWarnings.length;
 
@@ -276,13 +276,13 @@ export default function WarningsCenter() {
     setLastActivitySeen(Date.now());
   }, []);
 
-  // Reset dismissed (for testing)
+  // Ausgeblendete zurücksetzen (für Tests)
   const resetDismissed = useCallback(() => {
     setDismissed(new Set());
     saveDismissed(new Set());
   }, []);
 
-  // Navigate and close
+  // Navigieren und schließen
   const handleLink = useCallback((link: string) => {
     setOpen(false);
     navigate(link);

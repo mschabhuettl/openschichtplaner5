@@ -24,12 +24,12 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const confirmRef = useRef<HTMLButtonElement>(null);
 
-  // Accessible focus management: trap Tab within the dialog (skipping disabled
-  // controls), close on Escape, and restore focus to the trigger on close.
+  // Barrierefreies Fokus-Management: Tab im Dialog halten (deaktivierte
+  // Controls übersprungen), Escape schließt, Fokus geht zurück zum Auslöser.
   const dialogRef = useFocusTrap<HTMLDivElement>(open, { onEscape: onCancel });
 
-  // This dialog prefers to land initial focus on the confirm button rather than
-  // the leading × button, so override the hook's default once it has armed.
+  // Dieser Dialog legt den Startfokus lieber auf den Bestätigen-Button statt
+  // aufs führende × — den Hook-Default nach dem Scharfen daher übersteuern.
   useEffect(() => {
     if (!open) return;
     const timer = window.setTimeout(() => confirmRef.current?.focus(), 0);

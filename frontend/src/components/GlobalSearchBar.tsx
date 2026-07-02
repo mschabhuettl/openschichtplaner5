@@ -119,7 +119,7 @@ export default function GlobalSearchBar() {
     leave_type: 'Abwesenheitsarten',
   };
 
-  // Compute global index for each result
+  // Globalen Index je Treffer berechnen
   let globalIdx = 0;
   const indexedGroups: { type: string; label: string; items: { result: SearchResult; idx: number }[] }[] = [];
   for (const [type, items] of Object.entries(grouped)) {

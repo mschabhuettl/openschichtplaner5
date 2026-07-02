@@ -13,9 +13,9 @@ export function ThemeToggle({ size = 'sm' }: { size?: 'sm' | 'md' }) {
   const knob = size === 'md'
     ? 'w-6 h-6 rounded-full'
     : 'w-4 h-4 rounded-full';
-  // With the knob anchored at left-0, translate-x is measured from the left edge.
-  // md: pill 56 / knob 24 → 4px and 28px give symmetric 4px gaps.
-  // sm: pill 44 / knob 16 → 4px and 24px give symmetric 4px gaps.
+  // Mit dem Knopf bei left-0 misst translate-x ab der linken Kante.
+  // md: Pille 56 / Knopf 24 → 4px und 28px ergeben symmetrische 4px-Lücken.
+  // sm: Pille 44 / Knopf 16 → 4px und 24px ergeben symmetrische 4px-Lücken.
   const translate = size === 'md'
     ? (isDark ? 'translate-x-7' : 'translate-x-1')
     : (isDark ? 'translate-x-[24px]' : 'translate-x-[4px]');
@@ -54,7 +54,7 @@ export function ThemeToggle({ size = 'sm' }: { size?: 'sm' | 'md' }) {
           transform ${translate}
           transition-transform duration-200 ease-in-out
         `}
-        // Explicit white (not the `bg-white` class) so the knob stays a visible
+        // Explizites Weiß (nicht die `bg-white`-Klasse), damit der Knopf sichtbar
         // white thumb in dark mode too — the global `html.dark .bg-white` override
         // would otherwise paint it dark-on-dark.
         style={{ backgroundColor: '#ffffff' }}

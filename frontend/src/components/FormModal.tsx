@@ -50,15 +50,15 @@ export function FormModal({
   children,
   size = 'md',
 }: FormModalProps) {
-  // Accessible focus management: trap Tab within the panel (skipping disabled
-  // controls), prefer focusing the first input, close on Escape, and restore
-  // focus to the trigger on close. See useFocusTrap.
+  // Barrierefreies Fokus-Management: Tab im Panel halten (deaktivierte
+  // Controls übersprungen), erstes Eingabefeld bevorzugen, Escape schließt,
+  // Fokus geht beim Schließen zurück zum Auslöser. Siehe useFocusTrap.
   const panelRef = useFocusTrap<HTMLDivElement>(open, {
     onEscape: onClose,
     preferInput: true,
   });
 
-  // Prevent body scroll when modal is open
+  // Body-Scroll bei offenem Modal unterbinden
   useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden';

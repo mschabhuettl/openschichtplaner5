@@ -395,7 +395,7 @@ export function FirstTimeSetupWizard({ onComplete }: FirstTimeSetupProps) {
 
   const handleNext = async () => {
     if (step === totalSteps - 2) {
-      // Before showing the Done step, save everything
+      // Vor dem Fertig-Schritt alles speichern
       setSaving(true);
       setError(null);
       try {
@@ -619,7 +619,7 @@ export function FirstTimeSetupWizard({ onComplete }: FirstTimeSetupProps) {
 // ── Hook: Should show onboarding? ────────────────────────────────────────────
 
 /**
- * Hook that determines whether the first-time setup wizard should be shown.
+ * Hook, der bestimmt, ob der Erst-Einrichtungs-Assistent gezeigt wird.
  * Returns [showWizard, dismissWizard].
  */
 export function useFirstTimeSetup(isAdmin: boolean): [boolean, () => void] {
@@ -631,7 +631,7 @@ export function useFirstTimeSetup(isAdmin: boolean): [boolean, () => void] {
     // Check localStorage first
     if (localStorage.getItem(STORAGE_KEY) === 'true') return;
 
-    // Check if there are employees
+    // Prüfen, ob Mitarbeiter existieren
     api.getEmployees()
       .then(employees => {
         if (employees.length === 0) {

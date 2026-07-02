@@ -59,7 +59,7 @@ interface Props {
 }
 
 export default function KeyboardShortcutsModal({ open, onClose }: Props) {
-  // Focus trap + Escape + focus restore (the dialog has no form fields, so the
+  // Fokus-Falle + Escape + Fokus-Rückgabe (der Dialog hat keine Formularfelder, der
   // close button receives initial focus).
   const panelRef = useFocusTrap<HTMLDivElement>(open, { onEscape: onClose });
 

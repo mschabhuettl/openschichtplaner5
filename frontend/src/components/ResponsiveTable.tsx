@@ -2,7 +2,7 @@
  * ResponsiveTable — wrapper for horizontal-scroll tables on mobile
  *
  * Features:
- * - overflow-x: auto with smooth touch scrolling
+ * - overflow-x: auto mit weichem Touch-Scrolling
  * - Scroll-shadow indicators (left/right)
  * - Optional sticky first column
  * - min-width to prevent column collapse

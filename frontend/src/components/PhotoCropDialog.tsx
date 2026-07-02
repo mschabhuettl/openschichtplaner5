@@ -2,7 +2,7 @@
  * PhotoCropDialog — A modal for cropping employee photos.
  *
  * Uses a pure-CSS/canvas approach (no external crop library needed).
- * The user drags a square selection area on the image to define the crop.
+ * Der Nutzer zieht eine quadratische Auswahl aufs Bild und bestimmt so den Zuschnitt.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusTrap } from '../hooks/useFocusTrap';
@@ -40,7 +40,7 @@ export default function PhotoCropDialog({ file, onConfirm, onCancel }: PhotoCrop
     const img = new Image();
     img.onload = () => {
       setImageEl(img);
-      // Default crop: centered square covering 80% of the shorter side
+      // Default-Zuschnitt: zentriertes Quadrat über 80 % der kürzeren Seite
       const side = Math.min(img.width, img.height) * 0.8;
       setCrop({
         x: (img.width - side) / 2,
@@ -105,7 +105,7 @@ export default function PhotoCropDialog({ file, onConfirm, onCancel }: PhotoCrop
 
   useEffect(() => { draw(); }, [draw]);
 
-  // Mouse handlers for dragging the crop area
+  // Maus-Handler fürs Ziehen des Zuschnitt-Bereichs
   const getCanvasPos = (e: React.MouseEvent) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
@@ -118,7 +118,7 @@ export default function PhotoCropDialog({ file, onConfirm, onCancel }: PhotoCrop
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const pos = getCanvasPos(e);
-    // Check if click is inside the crop area → drag mode
+    // Klick im Zuschnitt-Bereich? → Zieh-Modus
     if (
       pos.x >= crop.x && pos.x <= crop.x + crop.width &&
       pos.y >= crop.y && pos.y <= crop.y + crop.height

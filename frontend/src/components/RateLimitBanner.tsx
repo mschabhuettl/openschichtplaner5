@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 /**
  * RateLimitBanner — shows a warning banner when the API returns 429.
  * Listens for 'sp5:rate-limited' CustomEvents dispatched by the API client.
- * Auto-dismisses when the countdown expires.
+ * Blendet sich nach Ablauf des Countdowns selbst aus.
  */
 export default function RateLimitBanner() {
   const [visible, setVisible] = useState(false);

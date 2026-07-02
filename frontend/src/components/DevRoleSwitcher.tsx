@@ -15,13 +15,13 @@ export function DevRoleSwitcher() {
 
   const current = ROLES.find(r => r.key === devViewRole) ?? ROLES[0];
 
-  // Detect mobile viewport for compact styling
+  // Mobilen Viewport für kompaktes Styling erkennen
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   return (
     <div style={{
       position: 'fixed',
-      // Desktop: bottom-right, out of the way of the top toolbars (the schedule
+      // Desktop: unten rechts, außerhalb der oberen Toolbars (die Dienstplan-
       // view-toggle Monat/Woche/Kalender sits top-right and this z-9999 badge used
       // to cover it, making those buttons unclickable in dev mode). Mobile: below
       // the header (the bottom edge is taken by the BottomNav).

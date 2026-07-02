@@ -270,7 +270,7 @@ export default function SpotlightSearch({ open, onClose }: Props) {
     el?.scrollIntoView({ block: 'nearest' });
   }, [selectedIndex]);
 
-  // Group items for display
+  // Einträge für die Anzeige gruppieren
   const grouped = new Map<string, { item: PaletteItem; globalIdx: number }[]>();
   let gi = 0;
   for (const item of items) {

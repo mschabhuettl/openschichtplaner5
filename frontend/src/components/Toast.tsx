@@ -33,7 +33,7 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
     setTimeout(() => onRemove(toast.id), 200);
   };
 
-  // When toast is removed externally (auto-timeout), trigger exit animation
+  // Wird der Toast extern entfernt (Auto-Timeout), die Exit-Animation auslösen
   useEffect(() => {
     return () => {
       // cleanup — no action needed, external removal goes through state
@@ -85,7 +85,7 @@ export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
   );
 }
 
-// Convenience single-toast component for simple usage
+// Komfort-Komponente für den einfachen Einzel-Toast-Fall
 interface ToastProps {
   message: string;
   type?: ToastType['type'];

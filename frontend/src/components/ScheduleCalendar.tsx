@@ -116,7 +116,7 @@ const PaletteShiftChip = memo(function PaletteShiftChip({
   );
 });
 
-// ── Shift Chip (in calendar cell, draggable for move) ─────────
+// ── Schicht-Chip (in der Kalenderzelle, ziehbar zum Verschieben) ─
 
 const ShiftChip = memo(function ShiftChip({
   label,
@@ -195,7 +195,7 @@ const DayCell = memo(function DayCell({
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     if (readOnly) return;
-    // Check if the drag data is our type
+    // Prüfen, ob die Drag-Daten unser Typ sind
     if (e.dataTransfer.types.includes(DND_PALETTE_TYPE) || e.dataTransfer.types.includes(DND_MOVE_TYPE)) {
       e.preventDefault();
       e.dataTransfer.dropEffect = e.dataTransfer.types.includes(DND_PALETTE_TYPE) ? 'copy' : 'move';
@@ -238,7 +238,7 @@ const DayCell = memo(function DayCell({
       e.preventDefault();
       return;
     }
-    // For simplicity, move the first employee's assignment
+    // Der Einfachheit halber die Zuweisung des ersten MA verschieben
     const data: MoveDragData = {
       employeeId: sg.employeeIds[0],
       fromDateStr: dateStr,
@@ -409,7 +409,7 @@ function useTouchDndPolyfill(containerRef: React.RefObject<HTMLDivElement | null
         // Add dragging class to body
         document.body.classList.add('sp5-touch-dragging');
 
-        // Vibrate for haptic feedback
+        // Vibration als haptisches Feedback
         if (navigator.vibrate) navigator.vibrate(50);
       }, LONG_PRESS_MS);
     }
@@ -542,7 +542,7 @@ const ScheduleCalendar = memo(function ScheduleCalendar({
     return () => el.removeEventListener('sp5-touch-drop', handler);
   }, [onShiftAssign]);
 
-  // DnD handlers for day cells
+  // DnD-Handler für Tageszellen
   const handleDropPalette = useCallback((dateStr: string, data: PaletteDragData) => {
     onShiftAssign?.({ shiftId: data.shiftId, dateStr });
   }, [onShiftAssign]);
@@ -573,7 +573,7 @@ const ScheduleCalendar = memo(function ScheduleCalendar({
       const isWeekend = jsWd === 0 || jsWd === 6;
       const isHoliday = holidays.has(dateStr);
 
-      // Gather all entries for this day, grouped by display_name
+      // Alle Einträge des Tages sammeln, gruppiert nach display_name
       const groupMap = new Map<string, { label: string; bgColor: string; textColor: string; count: number; shiftId?: number; employeeIds: number[] }>();
       let totalAssigned = 0;
 

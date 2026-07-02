@@ -117,7 +117,7 @@ export function DataTable<T>({
     setPage(1);
   };
 
-  // Arrow key navigation for table rows
+  // Pfeiltasten-Navigation für Tabellenzeilen
   const handleTableKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (pageData.length === 0) return;
     const maxRow = pageData.length - 1;

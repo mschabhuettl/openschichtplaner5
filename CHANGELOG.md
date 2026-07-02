@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.23] - 2026-07-02
+
 ### Removed
 
 - **Verfügbarkeits-Matrix entfernt.** Die Ansicht war ein schreibgeschütztes

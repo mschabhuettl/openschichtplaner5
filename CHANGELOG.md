@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.28] - 2026-07-02
+
 ### Fixed
 
 - **„Mein Kalender" ist wieder für alle Rollen sichtbar.** Eine zu enge

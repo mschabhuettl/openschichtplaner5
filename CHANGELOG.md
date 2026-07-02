@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Jahresübersicht: alle Matrix-Zellen sind gleich groß.** Lange Sonderdienst-
+  Kurznamen (z. B. „N-CT 5:45-15:45") dehnten bisher ganze Tagesspalten des
+  Jahresrasters. Die Zellen zeigen jetzt das Kürzel (voller Name als Tooltip)
+  in einem festen Raster — wie im Original.
+
 ---
 
 ## [1.21.19] - 2026-07-02

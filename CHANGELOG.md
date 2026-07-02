@@ -9,6 +9,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Schichtmodelle mit Einheit „Tage".** Wie im Original kann ein Zyklus
+  jetzt in Tagen statt Wochen definiert werden (z. B. 10-Tage-Rotation,
+  wochentags-unabhängig): Umschalter im Editor, Tages-Raster in 7er-Blöcken,
+  korrekte Materialisierung in den Dienstplan (gebündelt:
+  libopenschichtplaner5 1.29.0, openschichtplaner5-api 1.28.0).
+
 ---
 
 ## [1.21.32] - 2026-07-02

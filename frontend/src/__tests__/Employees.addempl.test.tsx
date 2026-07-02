@@ -3,7 +3,7 @@
  * oder Admin-Rolle.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { LanguageProvider } from '../i18n';
 
@@ -119,5 +119,18 @@ describe('Employees — ADDEMPL-Gating (G-1)', () => {
       expect(screen.getByText(/Mustermann/)).toBeTruthy();
     });
     expect(screen.queryByText('+ Neu')).toBeNull();
+  });
+});
+
+describe('Berechnungsbasis Gesamtstunden (CALCBASE=3)', () => {
+  it('bietet die Option an und zeigt den Hinweis, solange Zeitraum/Stunden fehlen', async () => {
+    setAuth({ role: 'Admin', canAdmin: true, can: () => true });
+    renderEmployees();
+    fireEvent.click(await screen.findByRole('button', { name: /Neuer Mitarbeiter|Neu/ }));
+    const select = await screen.findByDisplayValue(/Pro Tag/);
+    expect(Array.from((select as HTMLSelectElement).options).map(o => o.textContent))
+      .toContain('Gesamtstunden (Beschäftigungszeitraum)');
+    fireEvent.change(select, { target: { value: '3' } });
+    expect(await screen.findByText(/Gesamtstunden-Basis erfordert/)).toBeTruthy();
   });
 });

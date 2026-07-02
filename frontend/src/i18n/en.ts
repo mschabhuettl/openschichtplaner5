@@ -244,6 +244,7 @@ const en: TranslationKeys = {
       perDay: 'Per Day',
       perWeek: 'Per Week',
       perMonth: 'Per Month',
+      total: 'Total hours (employment period)',
     },
   },
 

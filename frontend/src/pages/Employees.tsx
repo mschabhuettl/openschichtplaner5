@@ -1033,7 +1033,13 @@ export default function Employees() {
                       <option value="0">{t.employees.worktimeUnit.perDay}</option>
                       <option value="1">{t.employees.worktimeUnit.perWeek}</option>
                       <option value="2">{t.employees.worktimeUnit.perMonth}</option>
+                      <option value="3">{t.employees.worktimeUnit.total}</option>
                     </select>
+                    {form.CALCBASE === 3 && !(form.EMPSTART && form.EMPEND && form.HRSTOTAL > 0) && (
+                      <p className="text-xs text-amber-600 mt-1">
+                        Gesamtstunden-Basis erfordert Eintritt, Austritt und Gesamtstunden &gt; 0.
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer mt-5">

@@ -242,6 +242,7 @@ const de = {
       perDay: 'Pro Tag',
       perWeek: 'Pro Woche',
       perMonth: 'Pro Monat',
+      total: 'Gesamtstunden (Beschäftigungszeitraum)',
     },
   },
 

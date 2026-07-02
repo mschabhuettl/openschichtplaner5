@@ -47,7 +47,7 @@ export interface AuthContextType {
   /**
    * Dev-mode simulation: which role perspective to render the UI as.
    * Always 'admin' (highest) for non-dev sessions. Does NOT affect backend auth —
-   * all API calls still use the full dev token.
+   * alle API-Aufrufe nutzen weiterhin das volle Dev-Token.
    */
   devViewRole: DevViewRole;
   setDevViewRole: (role: DevViewRole) => void;
@@ -140,7 +140,7 @@ const DEV_USER: CurrentUser = {
 };
 
 /**
- * Returns simulated permissions for the given devViewRole.
+ * Liefert die simulierten Rechte für die gewählte devViewRole.
  * Used only for UI rendering — backend still gets the full dev token.
  */
 function devViewPermissions(role: DevViewRole) {
@@ -215,12 +215,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   /**
-   * Schedule a proactive logout shortly before the session expires.
+   * Plant einen proaktiven Logout kurz vor Ablauf der Session.
    * Fires 60 s before `expiresAt` (or immediately if already past).
    */
   const scheduleExpiryTimer = useCallback((expiresAt: number) => {
     clearExpiryTimer();
-    // Trigger 60 seconds before actual expiry so the user isn't mid-action
+    // 60 Sekunden vor dem echten Ablauf auslösen (Nutzer nicht mitten in einer Aktion treffen)
     const BUFFER_MS = 60_000;
     const msUntilExpiry = expiresAt * 1000 - Date.now() - BUFFER_MS;
     const delay = Math.max(msUntilExpiry, 0);
@@ -318,7 +318,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setDevViewRoleState((session.devViewRole as string) === 'dev' ? 'admin' : (session.devViewRole ?? 'admin'));
           setToken(null);
         } else if (session.user) {
-          // Token is managed by HttpOnly cookie; only restore user metadata from localStorage
+          // Token liegt im HttpOnly-Cookie; aus localStorage nur die Benutzer-Metadaten wiederherstellen
           setToken(null);
           setUser(applyRoleDefaults(session.user));
           // Restore proactive expiry timer
@@ -355,7 +355,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem(SESSION_KEY);
       // Signal to Login page that session expired (not a manual logout)
       sessionStorage.setItem('sp5_session_expired', '1');
-      // Dispatch a toast event so the UI can show a notification
+      // Toast-Event dispatchen, damit die UI eine Meldung zeigen kann
       window.dispatchEvent(new CustomEvent('sp5:session-expired-toast', {
         detail: { message: 'Sitzung abgelaufen — bitte neu anmelden.' },
       }));
@@ -382,7 +382,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!res.ok) {
       throw new Error(data.detail ?? 'Login fehlgeschlagen');
     }
-    // Check if 2FA is required
+    // Prüfen, ob 2FA verlangt wird
     if (data.requires_2fa) {
       const err = new Error('2FA_REQUIRED');
       (err as Error & { requires2FA: boolean }).requires2FA = true;

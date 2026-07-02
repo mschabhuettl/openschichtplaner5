@@ -22,7 +22,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     activeKeys.current.add(key);
     const id = Math.random().toString(36).slice(2);
     setToasts(prev => [...prev, { id, message, type }]);
-    // Errors and warnings stay visible longer than success/info
+    // Fehler und Warnungen bleiben länger sichtbar als Erfolg/Info
     const duration = type === 'error' ? 5500 : type === 'warning' ? 4500 : type === 'info' ? 4000 : 3000;
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));

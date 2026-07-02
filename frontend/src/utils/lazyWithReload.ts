@@ -1,20 +1,22 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 
 /**
- * Drop-in replacement for React.lazy that auto-recovers from a failed dynamic
- * import (lazy-chunk load error).
+ * Drop-in-Ersatz für React.lazy, der sich von einem fehlgeschlagenen
+ * dynamischen Import (Lazy-Chunk-Ladefehler) selbst erholt.
  *
- * Symptom this addresses: after a new deploy the served index.html references
- * fresh chunk hashes; a browser that still holds the previous index (or hits a
- * transient network blip) requests a chunk that no longer exists → the import()
- * rejects with a ChunkLoadError. Without recovery the page-level ErrorBoundary
- * shows „Seite nicht ladbar" and the user has to reload manually („STRG+R lädt
- * sie"). Here we reload once automatically to fetch the current index + chunks.
+ * Behobenes Symptom: Nach einem Deploy referenziert die ausgelieferte
+ * index.html frische Chunk-Hashes; ein Browser mit der alten index (oder ein
+ * kurzer Netz-Schluckauf) fordert einen Chunk an, den es nicht mehr gibt →
+ * import() wirft einen ChunkLoadError. Ohne Erholung zeigt die Seiten-
+ * ErrorBoundary „Seite nicht ladbar" und der Nutzer muss manuell neu laden
+ * („STRG+R lädt sie"). Hier wird einmal automatisch neu geladen, um die
+ * aktuelle index + Chunks zu holen.
  *
- * Loop-safe: a sessionStorage guard ensures we reload at most once per failure
- * episode. The guard is cleared on the next successful import, so a later deploy
- * in the same session can recover again. If the import still fails after the
- * reload, the error is rethrown and the ErrorBoundary fallback is shown.
+ * Schleifensicher: ein sessionStorage-Guard erlaubt höchstens einen Reload
+ * je Fehler-Episode. Der Guard wird beim nächsten erfolgreichen Import
+ * gelöscht, sodass ein späterer Deploy in derselben Session wieder erholen
+ * kann. Scheitert der Import auch nach dem Reload, wird der Fehler erneut
+ * geworfen und der ErrorBoundary-Fallback erscheint.
  */
 
 const RELOAD_GUARD_KEY = 'sp5-chunk-reloaded';
@@ -30,8 +32,8 @@ function isChunkLoadError(error: unknown): boolean {
   );
 }
 
-// `any` mirrors React's own `lazy` signature: components carry their own (often
-// required) prop types, which are not assignable to ComponentType<unknown>.
+// `any` spiegelt Reacts eigene `lazy`-Signatur: Komponenten tragen eigene (oft
+// verpflichtende) Prop-Typen, die nicht an ComponentType<unknown> zuweisbar sind.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function lazyWithReload<T extends ComponentType<any>>(
   factory: () => Promise<{ default: T }>,

@@ -73,7 +73,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     } catch { /* ignore */ }
   }, [preference]);
 
-  // Update meta theme-color for mobile browsers
+  // meta theme-color für mobile Browser nachziehen
   useEffect(() => {
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {

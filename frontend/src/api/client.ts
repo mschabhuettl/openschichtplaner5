@@ -10,7 +10,7 @@ export interface SearchResult {
   icon: string;
 }
 
-// ─── Workplace Employee (minimal employee info for assignment) ─
+// ─── Arbeitsplatz-Mitarbeiter (Minimal-Info für die Zuordnung) ─
 export interface WorkplaceEmployee {
   ID: number;
   NAME: string;
@@ -553,8 +553,8 @@ function isVersionAtLeast(actual: string, required: string): boolean {
 
 /**
  * Check backend API compatibility on app start.
- * Returns an object with `compatible` flag and version info.
- * Shows a dismissible banner via a CustomEvent if the backend is too old.
+ * Liefert ein Objekt mit `compatible`-Flag und Versionsinfo.
+ * Zeigt bei zu altem Backend ein schließbares Banner via CustomEvent.
  */
 export async function checkApiCompatibility(): Promise<{
   compatible: boolean;
@@ -600,7 +600,7 @@ const CACHEABLE_PATHS = new Set([
 ]);
 
 function isCacheable(path: string): boolean {
-  // Also cache holidays with year query param
+  // Feiertage auch mit year-Query-Param cachen
   if (path.startsWith('/api/v1/holidays')) return true;
   return CACHEABLE_PATHS.has(path);
 }
@@ -686,14 +686,14 @@ async function handleResponseError(res: Response): Promise<void> {
 }
 
 /** Wrap fetch calls with auto-retry (2 attempts, exponential backoff) on network errors.
- *  Only network-level errors are retried; HTTP 4xx/5xx are NOT retried.
- *  When the browser is offline, fail immediately with a user-friendly message. */
+ *  Nur Netzwerkfehler werden wiederholt; HTTP 4xx/5xx NICHT.
+ *  Ist der Browser offline, sofort mit verständlicher Meldung scheitern. */
 async function safeFetch(input: string, init?: RequestInit, _attempt = 0): Promise<Response> {
-  // Fail fast when the browser reports no connectivity
+  // Sofort scheitern, wenn der Browser keine Verbindung meldet
   if (!navigator.onLine) {
     throw new Error('Keine Internetverbindung. Bitte Netzwerk prüfen und erneut versuchen.');
   }
-  // Always include credentials so HttpOnly cookies are sent automatically
+  // credentials immer mitsenden (HttpOnly-Cookies gehen automatisch mit)
   const mergedInit: RequestInit = { credentials: 'include', ...init };
   try {
     return await fetch(input, mergedInit);
@@ -713,7 +713,7 @@ async function safeFetch(input: string, init?: RequestInit, _attempt = 0): Promi
 }
 
 async function fetchJSON<T>(path: string): Promise<T> {
-  // Serve from cache if available and fresh
+  // Aus dem Cache bedienen, wenn vorhanden und frisch
   if (isCacheable(path)) {
     const cached = _apiCache.get(path) as CacheEntry<T> | undefined;
     if (cached && cached.expires > Date.now()) {
@@ -846,7 +846,7 @@ export interface SpshiEntry {
   noextra?: boolean;
 }
 
-// ─── Types for new endpoints ────────────────────────────────
+// ─── Typen für neuere Endpunkte ─────────────────────────────
 export interface DayEntry {
   employee_id: number;
   employee_name: string;
@@ -2216,10 +2216,10 @@ export const api = {
     return res.json();
   },
 
-  // ─── Druckvorschau (generic fetch for report pages) ────────
+  // ─── Druckvorschau (generischer Fetch für Berichtsseiten) ──
   fetchReportData: <T>(path: string) => fetchJSON<T>(path),
 
-  // ─── Download with auth (for backup downloads etc.) ────────
+  // ─── Download mit Auth (Backup-Downloads etc.) ─────────────
   downloadWithAuth: async (url: string): Promise<Blob> => {
     const res = await safeFetch(url, { headers: authHeaders() });
     await handleResponseError(res);

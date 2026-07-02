@@ -1,10 +1,10 @@
 /**
  * 5XCHAR.VALIDDAYS weekday-mask helpers (Mon..Sun).
  *
- * The original stores the mask space-separated ("1 1 1 1 1 1 1"); the lib
+ * Das Original speichert die Maske leerzeichengetrennt ("1 1 1 1 1 1 1"); die lib
  * normalizes writes to that canonical form. `parseValidDays` therefore splits on
- * whitespace (and falls back to reading a compact "1111111" token character by
- * character), while `validDaysToString` emits the 7-char compact form the API
+ * toleriert Leerraum (und fällt aufs zeichenweise Lesen eines kompakten
+ * "1111111"-Tokens zurück), während `validDaysToString` die kompakte 7-Zeichen-Form der API
  * model accepts (^[01]{7}$).
  */
 

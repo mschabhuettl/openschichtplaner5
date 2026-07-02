@@ -9,6 +9,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Core-Modus per `SP5_CORE_ONLY=true`.** Die Instanz beschränkt sich auf den
+  Funktionsumfang des originalen Schichtplaner5: Zusatzfunktionen (Tauschbörse,
+  Wünsche, Analytics-Ansichten, Integrationen u. a.) verschwinden aus Menü und
+  API; die Kernfunktionen bleiben vollständig. Klassifikation mit Beleg in
+  docs/feature-classification.md; kombinierbar mit `SP5_READONLY`
+  (gebündeltes openschichtplaner5-api 1.26.0).
+
 ---
 
 ## [1.21.30] - 2026-07-02

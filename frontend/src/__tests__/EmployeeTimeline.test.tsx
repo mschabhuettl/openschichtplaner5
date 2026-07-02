@@ -274,4 +274,24 @@ describe('EmployeeTimeline', () => {
       expect(screen.getByText('Profil →')).toBeTruthy();
     });
   });
+  it('Ausgeschiedene: Dropdown blendet Ehemalige standardmäßig aus; Toggle zeigt sie (Befund 27)', async () => {
+    vi.mocked(api.getEmployees).mockResolvedValue([
+      ...mockEmployees,
+      { ...mockEmployees[0], ID: 99, NAME: 'Ehemalig', FIRSTNAME: 'Erna', EMPEND: '2019-12-31' },
+    ] as never);
+    await act(async () => { renderWithRouter('1'); });
+    await waitFor(() => screen.getAllByText('Hans Müller'));
+    // Selector-Button (👤) öffnet das Dropdown mit Such-Input
+    await act(async () => { fireEvent.click(screen.getByText('👤').closest('button')!); });
+    await waitFor(() => expect(screen.getByText('▲')).toBeTruthy());
+    const input = await screen.findByPlaceholderText(/Suchen/);
+    fireEvent.change(input, { target: { value: 'Ehemalig' } });
+    await waitFor(() => expect(screen.getByText('Keine Ergebnisse')).toBeTruthy());
+
+    // Toggle setzen — das Dropdown bleibt offen, gleiche Suche erneut
+    await act(async () => { fireEvent.click(screen.getByLabelText('Ausgeschiedene anzeigen')); });
+    fireEvent.change(input, { target: { value: 'Ehemalig' } });
+    await waitFor(() => expect(screen.getAllByText(/Ehemalig/).length).toBeGreaterThan(0));
+  });
 });
+

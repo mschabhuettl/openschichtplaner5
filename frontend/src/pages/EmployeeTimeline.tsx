@@ -6,6 +6,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
+import { isActiveInPeriod } from '../utils/formerEmployees';
 import type { Employee } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
@@ -495,6 +496,7 @@ export default function EmployeeTimeline() {
     return toISODate(d);
   });
 
+  const [showFormer, setShowFormer] = useState(false);
   const [scheduleData, setScheduleData] = useState<ShiftEntry[]>([]);
   const [absenceData, setAbsenceData] = useState<AbsenceEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -659,10 +661,21 @@ export default function EmployeeTimeline() {
           </p>
         </div>
 
-        {/* Employee selector */}
-        <div className="ml-auto">
+        {/* Employee selector — Ehemalige (Austritt vor dem Zeitraum) sind
+            standardmäßig ausgeblendet, außer der gewählte MA selbst */}
+        <div className="ml-auto flex items-center gap-3">
+          <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-gray-500 dark:text-gray-400">
+            <input
+              type="checkbox"
+              checked={showFormer}
+              onChange={e => setShowFormer(e.target.checked)}
+              className="rounded"
+            />
+            Ausgeschiedene anzeigen
+          </label>
           <EmployeeSelector
-            employees={employees}
+            employees={employees.filter(e =>
+              showFormer || e.ID === selectedId || isActiveInPeriod(e, parseDate(startDate)))}
             selectedId={selectedId}
             onChange={id => setSelectedId(id)}
           />

@@ -9,6 +9,20 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Mitarbeiterlisten sind überall alphabetisch sortiert — wie im Original.**
+  Schichtplaner5 zeigt Mitarbeiter standardmäßig nach **Ansicht > Sortierung > Name**
+  (Nachname, dann Vorname). Die App verwendete bisher die manuelle Reihenfolge aus
+  der Mitarbeiterverwaltung — dadurch wirkten Dienstplan, Timeline und alle
+  Auswahllisten „unsortiert". Das gebündelte **libopenschichtplaner5 1.25.0**
+  liefert die Mitarbeiter jetzt alphabetisch (Original-Reihenfolge, per
+  Original-Vergleich verifiziert).
+- **Einsatzplan: Mitarbeiter innerhalb einer Zeile alphabetisch.** Die Namens-Badges
+  je Schicht-/Abwesenheitszeile erschienen in Eintragungsreihenfolge; jetzt
+  alphabetisch wie die übrigen Listen. Die Reihenfolge der Schichtzeilen selbst
+  (wie in der Schichtarten-Verwaltung angeordnet) bleibt unverändert.
+
 ---
 
 ## [1.21.14] - 2026-07-01

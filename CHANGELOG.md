@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.29] - 2026-07-02
+
 ### Added
 
 - **Schreibgeschützter Betrieb per `SP5_READONLY=true`.** Die komplette Instanz

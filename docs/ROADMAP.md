@@ -122,11 +122,13 @@ Bewusste Web-Abweichungen (kein Handlungsbedarf, dokumentiert):
    Berichtsdialoge bleibt bewusst vertagt (läuft nicht in CI, hoher
    GUI-/OCR-Pflegeaufwand, geringer Grenznutzen).
 4. **Mehrschicht-Wünsche/Verfügbarkeits-Workflow** ausbauen (Self-Service-
-   Planung mit Genehmigungsketten).
-5. **Mobile-PWA-Vertiefung**: Offline-Eintragung mit Sync-Queue.
-6. **SSO/OIDC** (Keycloak/Entra) zusätzlich zum 5USER-Login.
+   Planung mit Genehmigungsketten). — **Design liegt vor:** ADR 0005.
+5. **Mobile-PWA-Vertiefung**. — **Design liegt vor:** ADR 0004 (lesender
+   Offline-Zugriff auf den eigenen Plan; Offline-EINTRAGUNG mit Sync-Queue
+   bewusst außerhalb des Zuschnitts, Begründung im ADR).
+6. **SSO/OIDC** (Keycloak/Entra) zusätzlich zum 5USER-Login. — **Design liegt vor:** ADR 0003.
 7. **Mandantenfähigkeit** (mehrere DBF-Datenbanken parallel, Umschalter).
-8. **Webhooks/API-Erweiterung** für Lohn-Export-Integrationen (DATEV & Co.).
+8. **Webhooks/API-Erweiterung** für Lohn-Export-Integrationen (DATEV & Co.). — **Design liegt vor:** ADR 0002.
 
 ## C. Infrastruktur & Tooling (vertagt, mit Begründung)
 

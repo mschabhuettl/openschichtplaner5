@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.24] - 2026-07-02
+
 ### Changed
 
 - **Einsatzplan-Wochenansicht wie im Original.** Unter den Schichtzeilen zeigt

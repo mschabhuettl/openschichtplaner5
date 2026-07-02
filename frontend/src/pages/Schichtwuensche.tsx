@@ -124,7 +124,7 @@ export default function Schichtwuensche() {
       .filter(w => filterType === 'ALL' || w.wish_type === filterType),
     [wishes, filterEmp, filterType]);
 
-  // Build map: date → wishes for calendar
+  // Map bauen: Datum → Wünsche für den Kalender
   const wishMap = useMemo(() => {
     const m = new Map<string, Wish[]>();
     for (const w of filteredWishes) {
@@ -184,7 +184,7 @@ export default function Schichtwuensche() {
     }
   }
 
-  // ── open dialog for specific day (click on calendar cell) ──
+  // ── Dialog für einen Tag öffnen (Klick auf Kalenderzelle) ──
   function openAddForDay(dateStr: string) {
     setNewDate(dateStr);
     setNewType('WUNSCH');
@@ -379,7 +379,7 @@ export default function Schichtwuensche() {
           </div>
           {/* Day grid */}
           {(() => {
-            // First weekday of month (0=Mo..6=So in our grid)
+            // Erster Wochentag des Monats (0=Mo..6=So im Raster)
             const firstJs  = new Date(year, month - 1, 1).getDay(); // 0=Sun
             const firstOff = (firstJs + 6) % 7; // convert to 0=Mon
             const cells: React.ReactElement[] = [];

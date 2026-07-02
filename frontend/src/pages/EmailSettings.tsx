@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '../hooks/useToast';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
-// Direct fetch helpers (email endpoints aren't in the main api object yet)
+// Direkte fetch-Helfer (E-Mail-Endpunkte sind noch nicht im api-Objekt)
 function authHeaders(extra: Record<string, string> = {}): Record<string, string> {
   const raw = localStorage.getItem('sp5_session');
   const token = raw ? (JSON.parse(raw) as { token?: string }).token : null;

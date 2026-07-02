@@ -135,7 +135,7 @@ function ShiftCard({ entry }: { entry: OnDutyEntry }) {
   const bg = entry.color_bk || '#334155';
   const fg = entry.color_text || '#ffffff';
 
-  // Decide text color for card body (always readable on dark bg)
+  // Textfarbe des Kartenkörpers wählen (auf dunklem Grund immer lesbar)
   const nameParts = entry.employee_name.split(',');
   const displayName = nameParts.length >= 2
     ? `${nameParts[1].trim()} ${nameParts[0].trim()}`

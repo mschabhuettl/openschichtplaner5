@@ -1,7 +1,7 @@
 /**
  * WorkTimeRules.tsx — Arbeitszeit-Regelwerk UI (Q081)
  *
- * Allows Admins to configure work time rules and both Admins/Planer
+ * Admins konfigurieren die Arbeitszeit-Regeln; Admins wie Planer
  * to run violation checks per employee or group.
  */
 

@@ -293,7 +293,7 @@ function RestoreSection({ serverRestoreFile, onServerRestoreConsumed, onRestoreD
     setError(null);
     try {
       const headers = getAuthHeaders();
-      // Download the backup then re-upload as restore
+      // Backup herunterladen und als Wiederherstellung erneut hochladen
       const dlRes = await fetch(`${API}/api/v1/admin/backups/${encodeURIComponent(filename)}/download`, { headers });
       if (!dlRes.ok) throw new Error(`Download fehlgeschlagen: HTTP ${dlRes.status}`);
       const blob = await dlRes.blob();

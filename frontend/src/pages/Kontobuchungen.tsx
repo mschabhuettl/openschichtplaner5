@@ -44,7 +44,7 @@ function BookingModal({
 }: BookingModalProps) {
   const isEdit = !!editBooking;
   const today = new Date().toISOString().slice(0, 10);
-  // Default date: first day of selected month/year (or today if in the same month)
+  // Default-Datum: Erster des gewählten Monats/Jahres (oder heute im selben Monat)
   const defaultDate = (() => {
     const d = new Date();
     if (d.getFullYear() === defaultYear && d.getMonth() + 1 === defaultMonth) return today;
@@ -310,7 +310,7 @@ export default function Kontobuchungen() {
     return `${e.NAME}${e.FIRSTNAME ? `, ${e.FIRSTNAME}` : ''}`;
   };
 
-  // Create or update booking (the modal is shared between both flows)
+  // Buchung anlegen oder ändern (das Modal teilen sich beide Flüsse)
   const handleSave = async (data: {
     employee_id: number;
     date: string;

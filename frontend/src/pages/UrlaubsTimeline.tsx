@@ -52,7 +52,7 @@ function monthBoundaries(year: number): { month: number; day: number; label: str
   return result;
 }
 
-// Group consecutive dates of same leave_type into spans
+// Aufeinanderfolgende Tage gleicher Abwesenheitsart zu Spannen gruppieren
 interface AbsenceSpan {
   employee_id: number;
   leave_type_id: number;
@@ -218,7 +218,7 @@ export default function UrlaubsTimeline() {
     return map;
   }, [filteredAbsences]);
 
-  // "Überschneidungs-Heatmap": how many people are absent on each day
+  // Überschneidungs-Heatmap: wie viele Personen je Tag abwesend sind
   const overlapByDay = useMemo(() => {
     const arr = new Array(totalDays + 1).fill(0);
     filteredAbsences.forEach(a => {

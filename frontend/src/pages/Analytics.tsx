@@ -387,7 +387,7 @@ function DonutChart({ title, icon, segments, description }: DonutChartProps) {
     const x2i = CX + r * Math.cos(endAngle);
     const y2i = CY + r * Math.sin(endAngle);
     const largeArc = angle > Math.PI ? 1 : 0;
-    // Mid-angle for label line
+    // Mittelwinkel für die Beschriftungslinie
     const midAngle = startAngle + angle / 2;
     return { ...s, frac, startAngle, endAngle, x1, y1, x2, y2, x1i, y1i, x2i, y2i, largeArc, midAngle, isHovered };
   });
@@ -574,7 +574,7 @@ export default function Analytics() {
   const currentYear = new Date().getFullYear();
 
   // Compute derived data (memoized to avoid recomputing on unrelated re-renders)
-  // Must be before early returns to satisfy rules-of-hooks
+  // Muss vor den frühen returns stehen (rules-of-hooks)
   const {
     monthly, labels,
     sickValues, otValues, staffingValues,

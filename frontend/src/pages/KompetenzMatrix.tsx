@@ -384,7 +384,7 @@ export default function KompetenzMatrix() {
     return a.name.localeCompare(b.name, 'de');
   });
 
-  // Gap analysis: employees with 0 of critical skills
+  // Lücken-Analyse: MA mit 0 der kritischen Skills
   const gapData = matrix?.skills.map(skill => {
     const holders = matrix.assignments.filter(a => a.skill_id === skill.id);
     const nonHolders = matrix.employees.filter(emp =>
@@ -393,7 +393,7 @@ export default function KompetenzMatrix() {
     return { skill, holders, nonHolders };
   }) ?? [];
 
-  // Einzelkämpfer-Risiko: skills with only 1 person qualified
+  // Einzelkämpfer-Risiko: Skills mit nur 1 qualifizierten Person
   const einzelkaempfer = gapData.filter(d => d.holders.length === 1);
 
   // ── API actions ───────────────────────────────────────────────────────────

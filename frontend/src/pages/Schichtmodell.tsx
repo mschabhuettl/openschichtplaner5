@@ -750,7 +750,7 @@ export default function Schichtmodell() {
 
   const handleCycleCreated = (newCycle: ShiftCycle) => {
     setShowCreateModal(false);
-    // Immediately open edit modal with the fresh full cycle
+    // Bearbeiten-Modal sofort mit dem frischen vollen Zyklus öffnen
     api.getShiftCycle(newCycle.ID)
       .then(full => {
         setCycles(prev => [...prev, full]);

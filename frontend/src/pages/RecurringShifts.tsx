@@ -1,10 +1,10 @@
 /**
  * RecurringShifts — Q073
  *
- * UI for managing recurring shift patterns.
+ * UI zur Verwaltung wiederkehrender Schicht-Patterns.
  * - List view with filters (by group, by employee)
- * - Create modal (employee, shift, recurrence type, day of week, valid_from, valid_until)
- * - Delete with confirmation dialog
+ * - Anlege-Modal (MA, Schicht, Wiederholungstyp, Wochentag, valid_from, valid_until)
+ * - Löschen mit Bestätigungsdialog
  * - Generate button per pattern: opens date range picker → calls generate endpoint → shows toast
  * - Admin/Planer only
  */
@@ -450,7 +450,7 @@ export default function RecurringShifts() {
 
   const employeesInGroup = useMemo(() => {
     if (filterGroupId == null) return employees;
-    // Filter employees displayed in the employee dropdown when a group is selected
+    // MA-Dropdown bei gewählter Gruppe filtern
     // (we don't have group memberships loaded here, so just show all)
     return employees;
   }, [employees, filterGroupId]);
@@ -460,7 +460,7 @@ export default function RecurringShifts() {
   const filteredPatterns = useMemo(() => {
     let p = patterns;
     if (filterGroupId != null) {
-      // Group filter is handled server-side via the API query, patterns already match
+      // Gruppenfilter läuft serverseitig über die API-Query, Patterns passen bereits
     }
     if (filterEmployeeId != null) {
       p = p.filter(r => r.employee_id === filterEmployeeId);

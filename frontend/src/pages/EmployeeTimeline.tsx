@@ -1,6 +1,6 @@
 /**
  * EmployeeTimeline.tsx — Q078
- * Horizontal timeline view for a single employee showing shifts and absences.
+ * Horizontale Timeline eines einzelnen MA mit Diensten und Abwesenheiten.
  * Route: /employees/:id/timeline
  */
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
@@ -62,7 +62,7 @@ function addDays(date: Date, days: number): Date {
 
 function toISODate(date: Date): string {
   // Format from local components so round-tripping through parseDate is stable.
-  // Using toISOString() shifts to UTC and would drop a day for users east of UTC.
+  // toISOString() verschiebt nach UTC und würde östlich von UTC einen Tag verlieren.
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
@@ -326,7 +326,7 @@ function DayRow({ date, dateLabel, shifts, absences, onTooltip }: DayRowProps) {
   );
 }
 
-// ─── Timeline Compact View (horizontal, for longer periods) ───
+// ─── Kompakte Timeline (horizontal, für längere Zeiträume) ───
 
 interface HorizontalTimelineProps {
   dates: string[];
@@ -418,7 +418,7 @@ function HorizontalTimeline({ dates, shiftsByDate, absencesByDate, onTooltip }: 
             const hasShift = shifts.length > 0;
             const hasAbsence = absences.length > 0;
 
-            // Pick color for cell
+            // Zellfarbe wählen
             let cellColor = '';
             let cellLabel = '';
             let tooltip: TooltipState | null = null;
@@ -527,7 +527,7 @@ export default function EmployeeTimeline() {
     setLoading(true);
     setError(null);
     try {
-      // Load schedule entries: use year/month approach for each month in range
+      // Planeinträge laden: je Monat im Zeitraum über year/month
       const months = new Set<string>();
       for (const date of dates) months.add(date.slice(0, 7));
 
@@ -583,7 +583,7 @@ export default function EmployeeTimeline() {
     loadData();
   }, [loadData]);
 
-  // Sync URL with selected employee
+  // URL mit dem gewählten MA synchron halten
   useEffect(() => {
     if (selectedId && id !== String(selectedId)) {
       navigate(`/employees/${selectedId}/timeline`, { replace: true });

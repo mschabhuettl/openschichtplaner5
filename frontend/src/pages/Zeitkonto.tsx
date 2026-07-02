@@ -454,7 +454,7 @@ export default function Zeitkonto() {
     </th>
   );
 
-  // Monthly spark mini-bar for inline display
+  // Monats-Mini-Balken für die Inline-Anzeige
   const MonthBars = ({ empId }: { empId: number }) => {
     const row = rows.find(r => r.employee_id === empId);
     if (!row) return null;

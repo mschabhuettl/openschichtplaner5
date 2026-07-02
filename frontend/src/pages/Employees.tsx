@@ -166,7 +166,7 @@ interface EmployeeForm {
   ARBITR1: string;
   ARBITR2: string;
   ARBITR3: string;
-  // Colors (hex string for picker, converted to int on save)
+  // Farben (Hex-String für den Picker, beim Speichern zu int)
   CFGLABEL_HEX: string;
   CBKLABEL_HEX: string;
   CBKSCHED_HEX: string;
@@ -261,7 +261,7 @@ export default function Employees() {
   );
   const debouncedSearch = useDebounce(search, 300);
 
-  // Sync filters to URL params and sessionStorage
+  // Filter mit URL-Params und sessionStorage synchron halten
   useEffect(() => {
     sessionStorage.setItem('emp-search', search);
     sessionStorage.setItem('emp-filterGroupId', filterGroupId === '' ? '' : String(filterGroupId));
@@ -294,7 +294,7 @@ export default function Employees() {
   const [workdaysList, setWorkdaysList] = useState<boolean[]>([true, true, true, true, true, false, false]);
   const [activeTab, setActiveTab] = useState<'basic' | 'personal' | 'colors' | 'notes' | 'groups'>('basic');
 
-  // ── Group assignments for modal ──────────────────────────────
+  // ── Gruppen-Zuweisungen für das Modal ────────────────────────
   const [empGroupIds_modal, setEmpGroupIds_modal] = useState<number[]>([]);
   const [groupSaving, setGroupSaving] = useState(false);
   const { showToast } = useToast();
@@ -389,13 +389,13 @@ export default function Employees() {
   // Real-time SSE refresh
   useSSERefresh(['employee_changed'], load);
 
-  // Load groups and group assignments for filter
+  // Gruppen und Zuweisungen für den Filter laden
   useEffect(() => {
     api.getGroups().then(g => setGroups(g.filter(gr => !gr.HIDE))).catch(() => {});
     api.getGroupAssignments().then(setGroupAssignments).catch(() => {});
   }, []);
 
-  // Load shifts once (for restriction dropdown)
+  // Schichten einmal laden (für das Einschränkungs-Dropdown)
   useEffect(() => {
     api.getShifts().then(setShifts).catch(() => {});
   }, []);

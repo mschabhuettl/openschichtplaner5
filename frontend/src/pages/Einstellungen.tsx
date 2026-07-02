@@ -24,7 +24,7 @@ function hexToBgr(hex: string): number {
   return b * 65536 + g * 256 + r;
 }
 
-// ─── Color picker with preview ─────────────────────────────
+// ─── Farbwähler mit Vorschau ────────────────────────────────
 interface ColorPickerProps {
   label: string;
   value: number;
@@ -196,7 +196,7 @@ export default function Einstellungen() {
     setIsDirty(changed);
   }, [settings, anoaname, anoashort, anoacrtxt, anoacrbar, anoacrbk, anoabold, backupfr]);
 
-  // Warn before leaving with unsaved DBF changes
+  // Vor dem Verlassen bei ungespeicherten DBF-Änderungen warnen
   const handleBeforeUnload = useCallback((e: BeforeUnloadEvent) => {
     if (isDirty) {
       e.preventDefault();

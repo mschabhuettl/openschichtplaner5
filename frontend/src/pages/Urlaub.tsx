@@ -471,7 +471,7 @@ function AbwesenheitenKalender({ employees, leaveTypes, absences, loading }: Abw
     setDetail({ entries, label });
   };
 
-  // Stats for current month
+  // Statistik des aktuellen Monats
   const totalAbsenceDays = entriesByDay.size > 0
     ? [...entriesByDay.values()].reduce((sum, e) => sum + e.length, 0)
     : 0;
@@ -668,7 +668,7 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
 
   const filteredEmployees = employees.filter(e => {
     if (!`${e.NAME} ${e.FIRSTNAME} ${e.NUMBER}`.toLowerCase().includes(search.toLowerCase())) return false;
-    // If leave type filter is active: only show employees who have at least one matching absence in that year
+    // Bei aktivem Arten-Filter: nur MA mit mindestens einer passenden Abwesenheit im Jahr
     if (filterLeaveTypeIds.length > 0) {
       const hasMatch = absences.some(a => {
         if (a.EMPLOYEE_ID !== e.ID) return false;
@@ -1417,7 +1417,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
   const getEmp = (id: number) => employees.find(e => e.ID === id);
   const getLT = (id: number) => leaveTypes.find(lt => lt.ID === id);
 
-  // Filter absences by year, search, and status filter
+  // Abwesenheiten nach Jahr, Suche und Status filtern
   const filtered = absences.filter(a => {
     if (!a.DATE?.startsWith(String(year))) return false;
     const emp = getEmp(a.EMPLOYEE_ID);
@@ -1637,7 +1637,7 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
 
   const MONTHS_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 
-  // Field accessors (data is now always normalized to UPPER_CASE on load)
+  // Feld-Zugriffe (Daten sind beim Laden immer auf UPPER_CASE normalisiert)
   const getEmpId = (a: Absence) => a.EMPLOYEE_ID;
   const getLtId = (a: Absence) => a.LEAVE_TYPE_ID;
   const getDate = (a: Absence) => a.DATE;
@@ -2105,7 +2105,7 @@ export default function Urlaub() {
   const [absences, setAbsences] = useState<Absence[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load absences - uses api client for typed response, maps lowercase keys to uppercase Absence
+  // Abwesenheiten laden — typisiert über den api-Client, lowercase-Schlüssel → Absence in Großschreibung
   const loadAbsences = useCallback(async () => {
     try {
       const data = await api.getAbsences({ year });

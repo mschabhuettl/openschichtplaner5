@@ -151,7 +151,7 @@ export default function RotationsAnalyse() {
       setEmployees(emps as unknown as Employee[]);
       setShiftDefs(shifts as unknown as ShiftDef[]);
 
-      // Load schedule for last N months
+      // Plan der letzten N Monate laden
       const now = new Date();
       const periods: { year: number; month: number }[] = [];
       for (let i = months - 1; i >= 0; i--) {
@@ -168,7 +168,7 @@ export default function RotationsAnalyse() {
       const byEmp: Record<number, Record<string, number>> = {};
       const weekendByEmp: Record<number, number> = {};
 
-      // Collect all weekend dates in the period
+      // Alle Wochenend-Tage des Zeitraums sammeln
       const allWeekendDates = new Set<string>();
       for (const e of allEntries) {
         if (isWeekend(e.date)) allWeekendDates.add(e.date);
@@ -264,7 +264,7 @@ export default function RotationsAnalyse() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Collect all unique shift names for columns
+  // Eindeutige Schichtnamen für die Spalten sammeln
   const allShiftNames = Array.from(
     new Set(rotations.flatMap(r => Object.keys(r.shiftCounts)))
   ).sort();

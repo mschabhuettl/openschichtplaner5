@@ -440,7 +440,7 @@ export default function TauschBoerse() {
     }
   };
 
-  // Filter for Leser view: only show own requests
+  // Filter der Leser-Ansicht: nur eigene Anträge zeigen
   const visibleRequests = useMemo(() => {
     if (!isLeserView || myEmployeeId === null) return requests;
     return requests.filter(r =>
@@ -459,7 +459,7 @@ export default function TauschBoerse() {
   const renderActions = (req: SwapRequest) => {
     const actions: React.ReactElement[] = [];
 
-    // Partner can accept/decline if pending_partner and they are the partner
+    // Partner darf bei pending_partner annehmen/ablehnen, wenn er der Partner ist
     if (req.status === 'pending_partner' && myEmployeeId === req.partner_id) {
       actions.push(
         <button key="accept" onClick={() => handlePartnerRespond(req.id, true)}

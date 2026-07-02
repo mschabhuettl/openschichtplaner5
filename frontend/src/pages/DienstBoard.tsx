@@ -199,7 +199,7 @@ export default function DienstBoard() {
 
   const displayedFree = showFree ? free : [];
 
-  // Hours timeline for board view: which hour is it now?
+  // Stunden-Zeitleiste der Board-Ansicht: welche Stunde ist jetzt?
   const nowHour = new Date().getHours();
   const nowMin = new Date().getMinutes();
 
@@ -317,7 +317,7 @@ export default function DienstBoard() {
             const sample = emps[0];
             const bg = sample.color_bk || '#E5E7EB';
             const fg = isLight(bg) ? '#111827' : '#FFFFFF';
-            // Find shift for times
+            // Schicht für die Zeiten finden
             const shiftObj = shifts.find(s => s.NAME === shiftName);
             const wd = new Date(date + 'T00:00:00').getDay().toString();
             const times = shiftObj?.TIMES_BY_WEEKDAY?.[wd];

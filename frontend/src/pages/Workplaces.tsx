@@ -68,7 +68,7 @@ export default function Workplaces() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, []); // nur beim Mount ausführen
 
-  // Load all employees once (for assignment panel)
+  // Alle MA einmal laden (für das Zuordnungs-Panel)
   useEffect(() => {
     api.getEmployees().then(setAllEmployees).catch(() => {});
   }, []);

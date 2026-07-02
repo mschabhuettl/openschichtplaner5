@@ -617,7 +617,7 @@ export default function KapazitaetsForecast() {
 
   const summary = forecast?.summary;
 
-  // Calculate avg coverage for "current" month bar
+  // Mittlere Abdeckung für den Balken des aktuellen Monats berechnen
   const avgCoverage = forecast && forecast.days.length > 0
     ? Math.round(
         forecast.days.filter(d => d.coverage_status !== 'unplanned').reduce((s, d) => s + d.scheduled_count, 0) /

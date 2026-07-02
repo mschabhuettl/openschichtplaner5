@@ -640,7 +640,7 @@ export default function Benutzerverwaltung() {
   const [search, setSearch] = useState('');
   const debouncedSearch = useDebounce(search, 300);
 
-  // ── Selected user for access management ────────────────────
+  // ── Gewählter Benutzer für die Zugriffs-Verwaltung ──────────
   const [selectedUserForAccess, setSelectedUserForAccess] = useState<SP5User | null>(null);
 
   // ── Password change modal ──────────────────────────────────
@@ -784,7 +784,7 @@ export default function Benutzerverwaltung() {
       }
       showToast('Benutzer gelöscht', 'success');
       setDeleteTarget(null);
-      // Clear access panel if the deleted user was selected
+      // Zugriffs-Panel leeren, wenn der gelöschte Benutzer gewählt war
       if (selectedUserForAccess?.ID === deleteTarget.ID) {
         setSelectedUserForAccess(null);
       }

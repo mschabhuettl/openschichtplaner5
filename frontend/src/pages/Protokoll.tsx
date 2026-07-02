@@ -87,7 +87,7 @@ export default function Protokoll() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load(); }, []);
 
-  // Client-side filter for action + entity + full-text search
+  // Clientseitiger Filter für Aktion + Entität + Volltextsuche
   const filtered = entries.filter(e => {
     if (filterAction && e.action !== filterAction) return false;
     if (filterEntity && e.entity !== filterEntity) return false;
@@ -101,7 +101,7 @@ export default function Protokoll() {
     return true;
   });
 
-  // Collect unique users + entities for filter dropdowns
+  // Eindeutige Benutzer + Entitäten für die Filter-Dropdowns sammeln
   const uniqueUsers = [...new Set(entries.map(e => e.user))].sort();
   const uniqueEntities = [...new Set(entries.map(e => e.entity))].sort();
 

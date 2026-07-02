@@ -129,7 +129,7 @@ export default function MitarbeiterVergleich() {
       setLeaveTypes(lt);
       setColorMap(buildColorMap(sh, lt));
     }).catch((e) => {
-      // Previously unhandled: a failed load left the page silently empty.
+      // Früher unbehandelt: ein Ladefehler ließ die Seite still leer.
       setLoadError(e instanceof Error ? e.message : 'Stammdaten konnten nicht geladen werden');
     });
   }, []);

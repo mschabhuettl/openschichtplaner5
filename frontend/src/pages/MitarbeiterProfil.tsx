@@ -9,7 +9,7 @@ const MONTH_NAMES = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt
 const WEEKDAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const WEEKDAY_FULL = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
 
-// ── Types for skills / availability ──────────────────────────────
+// ── Typen für Skills / Verfügbarkeit ─────────────────────────────
 interface Skill { id: string; name: string; description?: string; color?: string; icon?: string; category?: string; }
 interface SkillAssignment { id: string; employee_id: number; skill_id: string; level: number; assigned_at?: string; }
 interface DayAvailability { day: number; available: boolean; time_windows: { start: string; end: string }[]; }
@@ -166,7 +166,7 @@ export default function MitarbeiterProfil() {
       }
       setYearStats(stats);
       setAbsences(absData);
-      // Filter changelog for this employee where possible
+      // Protokoll möglichst auf diesen MA filtern
       const empLog = clog.filter(e =>
         (e.entity === 'employee' && e.entity_id === employeeId) ||
         (e.entity === 'schedule' && e.details?.includes(String(employeeId))) ||
@@ -174,7 +174,7 @@ export default function MitarbeiterProfil() {
       ).slice(0, 30);
       setChangelog(empLog);
 
-      // Fetch current month schedule for this employee
+      // Monatsplan dieses MA laden
       const now = new Date();
       const [schM1, schM2] = await Promise.all([
         api.getSchedule(now.getFullYear(), now.getMonth() + 1),
@@ -230,7 +230,7 @@ export default function MitarbeiterProfil() {
   // Upcoming absences (next 30 days)
   const now = new Date();
 
-  // Current month stats for KPI strip
+  // Monats-Statistik für die KPI-Leiste
   const currentMonthNum = now.getMonth() + 1;
   const currentMonthStat = months.find(m => m.month === currentMonthNum);
   const nowStr = now.toISOString().slice(0, 10);
@@ -251,7 +251,7 @@ export default function MitarbeiterProfil() {
     { id: 'log' as const, label: '🕐 Protokoll' },
   ];
 
-  // Q039: Save handler for profile tab
+  // Q039: Speichern-Handler des Profil-Tabs
   const handleProfileSave = async () => {
     if (!employeeId || !employee) return;
     setProfileSaving(true);

@@ -672,7 +672,7 @@ function EinsatzplanNotePopup({
   );
 }
 
-// Badge showing shift assignment for one employee
+// Badge der Schichtzuweisung eines MA
 function ShiftBadge({
   entry, notes, onNoteClick, onContextMenu,
 }: {
@@ -725,7 +725,7 @@ function ShiftBadge({
   );
 }
 
-// ── Empty employee cell (for right-clicking to add) ──────────
+// ── Leere MA-Zelle (Rechtsklick zum Hinzufügen) ──────────────
 function EmptyEmployeeCell({
   entry,
   onContextMenu,
@@ -1295,7 +1295,7 @@ export default function Einsatzplan() {
       switch (action.type) {
         case 'create_sonderdienst':
         case 'create_deviation': {
-          // Undo a create → delete the created record(s).
+          // Undo eines Anlegens → die angelegten Sätze löschen.
           // Sonderdienst kann mehrere Tage umfassen (createdIds), Abweichung genau einen.
           const ids = (action.undoData.createdIds as number[] | undefined)
             ?? [action.undoData.createdId as number];
@@ -1303,7 +1303,7 @@ export default function Einsatzplan() {
           break;
         }
         case 'delete_entry': {
-          // Undo a delete → re-create the entry
+          // Undo eines Löschens → den Eintrag neu anlegen
           const d = action.undoData as Record<string, unknown>;
           if (d.type === 1) {
             // It was a deviation
@@ -1401,7 +1401,7 @@ export default function Einsatzplan() {
   // Leere Schichtzeilen im sichtbaren Zeitraum ausblenden (Spec 4.3-5 / 4.11.10-2)
   const [hideEmptyShifts, setHideEmptyShifts] = useState(false);
 
-  // Notes for day view: empId → Note[]
+  // Notizen der Tagesansicht: empId → Note[]
   const [dayNotesMap, setDayNotesMap] = useState<Map<number, Note[]>>(new Map());
   const [notePopup, setNotePopup] = useState<{ x: number; y: number; notes: Note[] } | null>(null);
 

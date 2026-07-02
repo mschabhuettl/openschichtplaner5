@@ -585,7 +585,7 @@ export default function Notizen() {
               const wd = isValid ? new Date(year, month - 1, dayNum).getDay() : -1;
               const isWeekend = wd === 0 || wd === 6;
 
-              // dominant category color for the day dot
+              // dominante Kategorie-Farbe für den Tages-Punkt
               const dominantCat = dayNotes.length > 0 ? getCategoryDef(
                 dayNotes.find(n => n.category === 'dringend')?.category ??
                 dayNotes.find(n => n.category === 'wichtig')?.category ??

@@ -150,7 +150,7 @@ export default function SchichtBriefing() {
       .catch(() => {});
   }, []);
 
-  // Load schedule + absences for chosen date
+  // Plan + Abwesenheiten des gewählten Datums laden
   useEffect(() => {
     const d = new Date(date + 'T12:00:00');
     const year = d.getFullYear();
@@ -200,7 +200,7 @@ export default function SchichtBriefing() {
     shiftGroups[key].entries.push({ ...entry, emp: empMap[entry.employee_id] });
   }
 
-  // Absent employees for this day
+  // Abwesende MA dieses Tages
   const absentEmps = absences.map(a => ({ ...a, emp: empMap[a.employee_id] })).filter(a => a.emp);
 
   const totalOnDuty = Object.values(shiftGroups).reduce((s, g) => s + g.entries.length, 0);

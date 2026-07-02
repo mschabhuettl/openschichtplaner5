@@ -623,7 +623,7 @@ function DateSpecificTab({ shifts, groups }: { shifts: ShiftType[]; groups: Grou
     setShowModal(true);
   };
 
-  // Group rows by date for display
+  // Zeilen für die Anzeige nach Datum gruppieren
   const byDate: Record<string, SpecialStaffingReq[]> = {};
   for (const r of specialReqs) {
     const d = r.date || '?';

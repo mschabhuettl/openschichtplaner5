@@ -83,7 +83,6 @@ const Jahresrueckblick   = lazyWithReload(() => import('./pages/Jahresrueckblick
 const Druckvorschau      = lazyWithReload(() => import('./pages/Druckvorschau'));
 const Wochenansicht      = lazyWithReload(() => import('./pages/Wochenansicht'));
 const RotationsAnalyse   = lazyWithReload(() => import('./pages/RotationsAnalyse'));
-const VerfuegbarkeitsMatrix = lazyWithReload(() => import('./pages/VerfuegbarkeitsMatrix'));
 const KapazitaetsForecast = lazyWithReload(() => import('./pages/KapazitaetsForecast'));
 const QualitaetsBericht   = lazyWithReload(() => import('./pages/QualitaetsBericht'));
 const ConflictReport      = lazyWithReload(() => import('./pages/ConflictReport'));
@@ -241,7 +240,6 @@ const navItems: NavItem[] = [
   { id: 'notfall-plan',           label: 'Notfall-Plan',        icon: '🚨', group: 'Werkzeuge', path: '/notfall-plan',           roles: ['Admin', 'Planer'] },
   { id: 'uebergabe',              label: 'Übergabe',             icon: '🤝', group: 'Werkzeuge', path: '/uebergabe',              roles: ['Admin', 'Planer'] },
   { id: 'simulation',             label: 'Simulation',           icon: '🧪', group: 'Werkzeuge', path: '/simulation',             roles: ['Admin', 'Planer'] },
-  { id: 'verfuegbarkeits-matrix', label: 'Verfügbarkeits-Matrix',icon: '🧩', group: 'Werkzeuge', path: '/verfuegbarkeits-matrix', roles: ['Admin', 'Planer'] },
   { id: 'notizen',                label: 'Notizen',              icon: '📝', group: 'Werkzeuge', path: '/notizen', roles: ['Admin', 'Planer'] },
   { id: 'jahresabschluss',        label: 'Jahresabschluss',      icon: '📅', group: 'Werkzeuge', path: '/jahresabschluss', roles: ['Admin', 'Planer'] },
 
@@ -886,7 +884,6 @@ function AppInner() {
             <Route path="/druckvorschau" element={<PB name="Druckvorschau"><Druckvorschau /></PB>} />
             <Route path="/dienst-board" element={<PB name="Dienst-Board"><RoleRoute allowedRoles={['Admin', 'Planer']}><DienstBoard /></RoleRoute></PB>} />
             <Route path="/wochenansicht" element={<PB name="Wochenansicht"><Wochenansicht /></PB>} />
-            <Route path="/verfuegbarkeits-matrix" element={<PB name="Verfügbarkeits-Matrix"><RoleRoute allowedRoles={['Admin', 'Planer']}><VerfuegbarkeitsMatrix /></RoleRoute></PB>} />
             <Route path="/rotations-analyse" element={<PB name="Rotations-Analyse"><RoleRoute allowedRoles={['Admin', 'Planer']}><RotationsAnalyse /></RoleRoute></PB>} />
             <Route path="/kapazitaets-forecast" element={<PB name="Kapazitäts-Forecast"><RoleRoute allowedRoles={['Admin', 'Planer']}><KapazitaetsForecast /></RoleRoute></PB>} />
             <Route path="/qualitaets-bericht" element={<PB name="Qualitätsbericht"><RoleRoute allowedRoles={['Admin', 'Planer']}><QualitaetsBericht /></RoleRoute></PB>} />

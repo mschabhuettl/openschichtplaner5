@@ -109,7 +109,7 @@ Rollen in Klammern = `RoleRoute`-Beschränkung (ohne Angabe: alle Rollen).
 `/team` (A/P), `/geburtstagkalender`.
 
 **Werkzeuge:** `/notfall-plan` (A/P), `/uebergabe` (A/P), `/simulation` (A/P),
-`/verfuegbarkeits-matrix` (A/P), `/notizen` (A/P), `/jahresabschluss` (A/P).
+`/notizen` (A/P), `/jahresabschluss` (A/P).
 
 **Berichte/Analysen:** `/jahresrueckblick`, `/mitarbeiter-vergleich`, `/mitarbeiter[/:id]`,
 `/fairness`, `/rotations-analyse`, `/kapazitaets-forecast`, `/qualitaets-bericht`,

@@ -84,6 +84,13 @@ Bewusste Web-Abweichungen (kein Handlungsbedarf, dokumentiert):
 - Lokale Ansichts-/Anpassen-Optionen teilweise fix (Web-UX statt Registry).
 - Jahresübersicht: Eintragen direkt im Jahresraster nicht nötig (Klick führt
   zum Dienstplan).
+- **Verfügbarkeits-Matrix entfernt** (Konsolidierung 2026-07-02): Die Ansicht
+  war ein Read-only-Duplikat des Dienstplan-Monatsgitters (gleiche MA×Tage-
+  Matrix, gleiche Kürzel/Farben); CSV-Export bietet der Dienstplan selbst.
+- **Dienst-Board und Leitwand bleiben getrennt** (Entscheidung 2026-07-02):
+  ähnliche Tagesdaten, aber verschiedene Einsatzzwecke (interaktive Arbeits-
+  ansicht vs. Vollbild-Wallboard mit Uhr/Auto-Refresh für Monitore); eine
+  spätere Zusammenführung als Vollbild-Modus des Dienst-Boards ist denkbar.
 - **Wochenansicht bleibt** (Entscheidung 2026-07-02): Das Original kennt nur
   Dienstplan/Einsatzplan/Jahresübersicht; die Wochenansicht ist eine additive
   Web-Verbesserung (kompakte 7-Tage-Sicht, Mo–So × Schichten) ohne Einfluss

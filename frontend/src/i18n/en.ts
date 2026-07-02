@@ -101,7 +101,6 @@ const en: TranslationKeys = {
     'notfall-plan': 'Emergency Plan',
     uebergabe: 'Handover',
     simulation: 'Simulation',
-    'verfuegbarkeits-matrix': 'Availability Matrix',
     notizen: 'Notes',
     jahresabschluss: 'Year-End Closing',
     jahresrueckblick: 'Year in Review',

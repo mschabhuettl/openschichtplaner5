@@ -99,7 +99,6 @@ const de = {
     'notfall-plan': 'Notfall-Plan',
     uebergabe: 'Übergabe',
     simulation: 'Simulation',
-    'verfuegbarkeits-matrix': 'Verfügbarkeits-Matrix',
     notizen: 'Notizen',
     jahresabschluss: 'Jahresabschluss',
     jahresrueckblick: 'Jahresrückblick',

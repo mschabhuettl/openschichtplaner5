@@ -87,9 +87,4 @@ describe('Gruppen-Dropdowns heißen „Alle Gruppen" (Befund 23)', () => {
     await expectGroupDropdown();
   });
 
-  it('Verfügbarkeits-Matrix', async () => {
-    const { default: VerfuegbarkeitsMatrix } = await import('../pages/VerfuegbarkeitsMatrix');
-    wrap(<VerfuegbarkeitsMatrix />);
-    await expectGroupDropdown();
-  });
 });

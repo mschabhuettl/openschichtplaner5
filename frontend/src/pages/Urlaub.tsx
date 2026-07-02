@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
 import { api } from '../api/client';
+import { isActiveInPeriod } from '../utils/formerEmployees';
 import type { Employee, LeaveType, Group } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useSSERefresh } from '../contexts/SSEContext';
@@ -2097,6 +2098,7 @@ export default function Urlaub() {
   // Persist year
   useEffect(() => { sessionStorage.setItem('urlaub-year', String(year)); }, [year]);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [showFormer, setShowFormer] = useState(false);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [absences, setAbsences] = useState<Absence[]>([]);
@@ -2132,6 +2134,12 @@ export default function Urlaub() {
   // Real-time SSE refresh
   useSSERefresh(['absence_changed', 'employee_changed'], loadAbsences);
 
+  // Ehemalige (Austritt vor dem gewählten Jahr) standardmäßig ausblenden (Befund 27)
+  const visibleEmployees = useMemo(
+    () => (showFormer ? employees : employees.filter(e => isActiveInPeriod(e, new Date(year, 0, 1)))),
+    [employees, showFormer, year],
+  );
+
   const tabs: { id: UrlaubTab; label: string; icon: string }[] = [
     { id: 'antraege', label: 'Anträge', icon: '✅' },
     { id: 'abwesenheiten', label: 'Abwesenheiten', icon: '📋' },
@@ -2153,6 +2161,15 @@ export default function Urlaub() {
           <button aria-label="Vorheriges Jahr" onClick={() => setYear(y => y - 1)} className="px-2 py-1.5 min-w-[32px] rounded border hover:bg-gray-50 text-sm">‹</button>
           <span className="px-3 py-1 font-bold text-gray-800 text-sm">{year}</span>
           <button aria-label="Nächstes Jahr" onClick={() => setYear(y => y + 1)} className="px-2 py-1.5 min-w-[32px] rounded border hover:bg-gray-50 text-sm">›</button>
+          <label className="no-print flex items-center gap-1.5 cursor-pointer select-none text-xs text-gray-500 ml-2">
+            <input
+              type="checkbox"
+              checked={showFormer}
+              onChange={e => setShowFormer(e.target.checked)}
+              className="rounded"
+            />
+            Ausgeschiedene anzeigen
+          </label>
           <button
             onClick={() => window.print()}
             className="no-print ml-2 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
@@ -2201,25 +2218,25 @@ export default function Urlaub() {
 
       {/* Tab content */}
       {activeTab === 'antraege' && (
-        <AntraegeTab year={year} employees={employees} leaveTypes={leaveTypes}
+        <AntraegeTab year={year} employees={visibleEmployees} leaveTypes={leaveTypes}
           absences={absences} loading={loading} />
       )}
       {activeTab === 'abwesenheiten' && (
-        <AbwesenheitenTab year={year} employees={employees} leaveTypes={leaveTypes}
+        <AbwesenheitenTab year={year} employees={visibleEmployees} leaveTypes={leaveTypes}
           absences={absences} setAbsences={setAbsences} loading={loading} />
       )}
       {activeTab === 'ansprueche' && (
-        <AnsprüecheTab year={year} employees={employees} groups={groups} />
+        <AnsprüecheTab year={year} employees={visibleEmployees} groups={groups} />
       )}
       {activeTab === 'sperren' && (
         <SperrenTab groups={groups} />
       )}
       {activeTab === 'timeline' && (
-        <TimelineTab year={year} employees={employees} leaveTypes={leaveTypes}
+        <TimelineTab year={year} employees={visibleEmployees} leaveTypes={leaveTypes}
           absences={absences} groups={groups} loading={loading} />
       )}
       {activeTab === 'statistik' && (
-        <StatistikTab year={year} employees={employees} leaveTypes={leaveTypes}
+        <StatistikTab year={year} employees={visibleEmployees} leaveTypes={leaveTypes}
           absences={absences} loading={loading} />
       )}
       <ConfirmDialog {...confirmDialogProps} />

@@ -75,4 +75,17 @@ describe('UrlaubsTimeline — Gruppenfilter', () => {
     // Abwesenheiten des Jahres kommen weiterhin über fetchRaw
     expect(fetchMock.mock.calls.some(([url]) => String(url).includes(`/api/v1/absences?year=${YEAR}`))).toBe(true);
   });
+
+  it('Ehemalige (Austritt vor dem Jahr) sind standardmäßig ausgeblendet; Toggle zeigt sie (Befund 27)', async () => {
+    vi.mocked(api.getEmployees).mockResolvedValue([
+      { ID: 1, NAME: 'Müller', FIRSTNAME: 'Hans', HIDE: false },
+      { ID: 3, NAME: 'Ehemalig', FIRSTNAME: 'Erna', HIDE: false, EMPEND: '2019-12-31' },
+    ] as never);
+    render(<UrlaubsTimeline />);
+    await screen.findByText('H. Müller');
+    expect(screen.queryByText('E. Ehemalig')).toBeNull();
+
+    fireEvent.click(screen.getByLabelText('Ausgeschiedene anzeigen'));
+    await waitFor(() => expect(screen.getByText('E. Ehemalig')).toBeTruthy());
+  });
 });

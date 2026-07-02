@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { api } from '../api/client';
+import { isActiveInPeriod } from '../utils/formerEmployees';
 import type { Employee, LeaveType, Group } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 
@@ -122,6 +123,7 @@ export default function UrlaubsTimeline() {
   const [error, setError] = useState<string | null>(null);
   const [filterLeaveType, setFilterLeaveType] = useState<number | 'all'>('all');
   const [filterGroup, setFilterGroup] = useState<string>('all');
+  const [showFormer, setShowFormer] = useState(false);
   const [groups, setGroups] = useState<Group[]>([]);
   const [empGroups, setEmpGroups] = useState<Record<number, number[]>>({});
   const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, x: 0, y: 0, content: null, employeeName: '' });
@@ -179,10 +181,12 @@ export default function UrlaubsTimeline() {
 
   // Filter employees by group
   const filteredEmployees = useMemo(() => {
-    if (filterGroup === 'all') return employees;
+    const periodStart = new Date(year, 0, 1);
+    const base = showFormer ? employees : employees.filter(e => isActiveInPeriod(e, periodStart));
+    if (filterGroup === 'all') return base;
     const gid = parseInt(filterGroup);
-    return employees.filter(e => (empGroups[e.ID] ?? []).includes(gid));
-  }, [employees, filterGroup, empGroups]);
+    return base.filter(e => (empGroups[e.ID] ?? []).includes(gid));
+  }, [employees, filterGroup, empGroups, showFormer, year]);
 
   // Filter absences
   const filteredAbsences = useMemo(() => {
@@ -288,6 +292,17 @@ export default function UrlaubsTimeline() {
               <option key={g.ID} value={g.ID}>{g.NAME}</option>
             ))}
           </select>
+
+          {/* Ehemalige (EMPEND vor dem Jahr) sind standardmäßig ausgeblendet */}
+          <label className="flex items-center gap-1.5 cursor-pointer select-none text-xs text-gray-500 dark:text-gray-400">
+            <input
+              type="checkbox"
+              checked={showFormer}
+              onChange={e => setShowFormer(e.target.checked)}
+              className="rounded"
+            />
+            Ausgeschiedene anzeigen
+          </label>
         </div>
       </div>
 

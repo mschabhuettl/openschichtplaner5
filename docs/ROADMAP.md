@@ -1,6 +1,11 @@
 # ROADMAP — OpenSchichtplaner5
 
-Priorisierte Weiterentwicklung nach dem 1.2.0-Release (Stand: Juni 2026).
+Priorisierte Weiterentwicklung nach dem 1.2.0-Release (Stand: Juli 2026).
+
+> **Stand Juli 2026:** Die komplette Befundserie des Praxistests gegen eine echte
+> Datenbank (~40 Punkte: Datenintegrität, Rechte, Performance, Verhaltenslogik,
+> UI-Parität) ist abgearbeitet und in den Releases bis lib 1.26 / api 1.24 /
+> app 1.21.27 ausgeliefert; Details in den CHANGELOGs der drei Repos.
 
 ## A. Offene Paritäts-Verfeinerungen (Original-Features, bewusst vertagt)
 
@@ -38,8 +43,10 @@ Priorität 1 (fachlich relevant, klar umrissen):
    `set_restriction(grade=…)` (Default 2=nie), der Konflikt-Check sperrt hart nur
    bei „nie" (409), „auf Anfrage" lässt die Eintragung mit Warnung zu, „keine"
    greift nicht; UI-Auswahl des Grades in der Einschränkungs-Maske.
-5. **Arbeitsplatz-Zuordnung im Dienstplan** (Kontextmenü je Dienst) +
-   Arbeitsplatz-Filter in der Ansicht.
+5. ~~**Arbeitsplatz-Zuordnung im Dienstplan** (Kontextmenü je Dienst) +
+   Arbeitsplatz-Filter in der Ansicht.~~ — **erledigt:** Kontextmenü
+   „Arbeitsplatz…" (zuordnen/entfernen, 5MASHI.WORKPLACID) und
+   Arbeitsplatz-Filter in der Dienstplan-Filterleiste.
 
 Priorität 2 (Komfort-/Dialogtiefe):
 6. ~~Sonderdienst-Editor: freier Name/Farben, getrennte Arbeitsstunden,

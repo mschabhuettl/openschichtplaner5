@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.16] - 2026-07-02
+
 ### Changed
 
 - **Notfall-Plan: Ersatzsuche schlägt jetzt auch Mitarbeiter anderer Gruppen vor —

@@ -1163,7 +1163,7 @@ const AuslastungsBereich = memo(function AuslastungsBereich({
     return lookup;
   }, [staffingReqs, selectedGroupIds]);
 
-  // Active shifts: those with entries or requirements in this month
+  // Aktive Schichten: die mit Einträgen oder Bedarf in diesem Monat
   const activeShifts = useMemo(() => {
     const shiftIdsWithEntries = new Set<number>();
     for (const e of entries) {
@@ -1507,10 +1507,10 @@ function DayDetailModal({
   dateStr, day, weekdayName, isHoliday, isWeekend,
   employees, entryMap, shifts, notesMap, onClose,
 }: DayDetailModalProps) {
-  // shifts prop available for future use
+  // shifts-Prop für künftige Nutzung verfügbar
   void shifts;
 
-  // Group employees by their shift for this day
+  // Mitarbeiter nach ihrer Schicht an diesem Tag gruppieren
   const groups: Array<{ label: string; colorBk: string; colorText: string; employees: Array<{ emp: Employee; entry: ScheduleEntry }> }> = [];
   const noEntryEmps: Employee[] = [];
   const grouped = new Map<string, { label: string; colorBk: string; colorText: string; employees: Array<{ emp: Employee; entry: ScheduleEntry }> }>();
@@ -1636,7 +1636,7 @@ const HoverTooltip = memo(function HoverTooltip({
 }) {
   if (!entry && cellConflicts.length === 0) return null;
 
-  // Extract shift times from the ShiftType data
+  // Schichtzeiten aus den ShiftType-Daten ziehen
   let shiftTimes: string | null = null;
   if (shift && entry?.kind === 'shift') {
     // Determine DB weekday (0=Mon ... 6=Sun) from dateStr
@@ -1653,7 +1653,7 @@ const HoverTooltip = memo(function HoverTooltip({
         shiftTimes = `${startend.substring(0, dashIdx)} – ${startend.substring(dashIdx + 1)}`;
       }
     }
-    // Also try TIMES_BY_WEEKDAY for weekday-specific overrides
+    // Zusätzlich TIMES_BY_WEEKDAY für wochentagsspezifische Overrides prüfen
     if (shift.TIMES_BY_WEEKDAY) {
       const wdStr = String(dbWd + 1); // "1"=Mon ... "7"=Sun
       const wdTimes = shift.TIMES_BY_WEEKDAY[wdStr];
@@ -1791,7 +1791,7 @@ function WeekTemplateModal({
     }
   }
 
-  // Default to first Monday of month
+  // Default: erster Montag des Monats
   useEffect(() => {
     if (!refWeekStart && mondays.length > 0) setRefWeekStart(mondays[0]);
     if (!applyTargetMonday && mondays.length > 0) setApplyTargetMonday(mondays[0]);
@@ -2089,7 +2089,7 @@ export default function Schedule() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   // Match current user to an employee (by SHORTNAME or NAME)
-  // Used in Leser-view to highlight the user's own row
+  // In der Leser-Ansicht: die eigene Zeile hervorheben
    
   const currentUserEmpId = useMemo(() => {
     if (!isLeserView || !user || !employees.length) return null;
@@ -2194,7 +2194,7 @@ export default function Schedule() {
   const [showDateJump, setShowDateJump] = useState(false);
   const [dateJumpValue, setDateJumpValue] = useState('');
 
-  // ── Keyboard cursor (single selected cell for nav) ─────────
+  // ── Tastatur-Cursor (einzelne gewählte Zelle für die Navigation) ─
   const [selectedCell, setSelectedCell] = useState<{ empId: number; day: number } | null>(null);
 
   // ── HTML5 Drag & Drop ──────────────────────────────────────
@@ -2294,7 +2294,7 @@ export default function Schedule() {
   const loadSchedule = () => {
     setLoading(true);
     setLoadError(null);
-    // Always load without group filter; filtering done client-side for multi-group
+    // Immer ohne Gruppenfilter laden; Mehrfach-Gruppen filtern clientseitig
     const groupIdForConflicts = selectedGroupIds.length === 1 ? selectedGroupIds[0] : undefined;
     Promise.all([
       api.getSchedule(year, month, undefined, planMode),
@@ -2327,7 +2327,7 @@ export default function Schedule() {
     api.getPeriods(gid).then(setPeriods).catch(() => setPeriods([]));
   }, [selectedGroupIds]);
 
-  // Reload trigger for copy-week (dispatched after successful copy)
+  // Reload-Trigger fürs Wochen-Kopieren (nach erfolgreichem Kopieren dispatcht)
   useEffect(() => {
     const handler = () => loadSchedule();
     window.addEventListener('sp5-reload-schedule', handler);
@@ -2350,7 +2350,7 @@ export default function Schedule() {
       .catch(() => setCoverage([]));
   }, [year, month, selectedGroupIds]);
 
-  // Helper: build noteMap from array of notes
+  // Helfer: noteMap aus dem Notiz-Array bauen
   const buildNotesMap = (notes: Note[]): Map<string, Note[]> => {
     const map = new Map<string, Note[]>();
     for (const note of notes) {
@@ -2362,7 +2362,7 @@ export default function Schedule() {
     return map;
   };
 
-  // Load notes for the month via year/month backend filter
+  // Notizen des Monats über den year/month-Backend-Filter laden
   const loadNotesForMonth = () => {
     api.getNotes({ year, month }).then(notes => {
       setNotesMap(buildNotesMap(notes));
@@ -2390,7 +2390,7 @@ export default function Schedule() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, month]);
 
-  // Load wishes for the month
+  // Wünsche des Monats laden
   useEffect(() => {
     api.getWishes({ year, month }).then(ws => {
       const m = new Map<string, 'WUNSCH' | 'SPERRUNG'>();
@@ -2483,7 +2483,7 @@ export default function Schedule() {
     }
   };
 
-  // Load group members for selected groups
+  // Mitglieder der gewählten Gruppen laden
   useEffect(() => {
     if (selectedGroupIds.length === 0) return;
     const toLoad = selectedGroupIds.filter(gid => !groupMembersMap.has(gid));
@@ -2511,15 +2511,15 @@ export default function Schedule() {
   const pad = (n: number) => String(n).padStart(2, '0');
 
   // ── Today highlight ─────────────────────────────────────────
-  // todayDay is the day number (1-31) if the currently displayed month is the current month,
+  // todayDay ist die Tagesnummer (1-31), wenn der angezeigte Monat der aktuelle ist,
   // or -1 if we're looking at a different month.
   const todayDay = now.getFullYear() === year && now.getMonth() + 1 === month ? now.getDate() : -1;
 
   // ── Mobile week view: compute which 7 days to show ──────────
   const mobileWeekData = useMemo(() => {
-    // Find the Monday of the reference week:
-    // - If showing current month & today is in it: use current week
-    // - Otherwise: use first week of the month
+    // Montag der Referenzwoche bestimmen:
+    // - Zeigt die Ansicht den aktuellen Monat mit heute darin: aktuelle Woche
+    // - Sonst: erste Woche des Monats
     const now2 = new Date();
     let refMonday: Date;
     const isCurrentMonth = now2.getFullYear() === year && now2.getMonth() + 1 === month;
@@ -2539,7 +2539,7 @@ export default function Schedule() {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6);
 
-    // Which days of the current month fall in this week?
+    // Welche Tage des aktuellen Monats liegen in dieser Woche?
     const weekDaysInMonth: number[] = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(weekStart);
@@ -2569,7 +2569,7 @@ export default function Schedule() {
     return m;
   }, [entryMap]);
 
-  // Workload map: employeeId → { actual, target } hours for the visible month
+  // Auslastungs-Map: employeeId → { actual, target } Stunden des sichtbaren Monats
   const workloadMap = useMemo(() => {
     const shiftsById = new Map(shifts.map(s => [s.ID, s]));
     const m = new Map<number, { actual: number; target: number }>();
@@ -2629,7 +2629,7 @@ export default function Schedule() {
     return m;
   }, [conflicts]);
 
-  // Display rows with optional group separators
+  // Anzeige-Zeilen mit optionalen Gruppen-Trennern
   interface DisplayRow {
     type: 'employee' | 'group-header';
     employee?: Employee;
@@ -2713,13 +2713,13 @@ export default function Schedule() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroupIds, groupCombineMode, employees, groups, groupMembersMap, employeeSearch, filterLetter, filterEmployeeIds, showTerminated, year, month, employeeSort]);
 
-  // Employees only (for export and counters)
+  // Nur Mitarbeiter (für Export und Zähler)
   const displayEmployees = useMemo(
     () => displayRows.filter(r => r.type === 'employee').map(r => r.employee!),
     [displayRows],
   );
 
-  // Available first letters from all (unfiltered) employees for alphabet bar
+  // Verfügbare Anfangsbuchstaben aller (ungefilterten) MA für die Buchstabenleiste
   const availableLetters = useMemo(() => {
     const letters = new Set<string>();
     for (const emp of employees) {
@@ -2735,7 +2735,7 @@ export default function Schedule() {
     return displayRows.filter(row => {
       if (row.type === 'group-header') return true; // always show group headers
       const emp = row.employee!;
-      // Check if this employee has the selected shift/leave/workplace in any day
+      // Hat dieser MA die gewählte Schicht/Abwesenheit/Arbeitsplatz an irgendeinem Tag?
       for (let d = 1; d <= daysInMonth; d++) {
         for (const entry of entryMap.get(`${emp.ID}-${d}`) ?? []) {
           if (filterShiftId && entry.shift_id === filterShiftId) return true;
@@ -2758,7 +2758,7 @@ export default function Schedule() {
     return Array.from(m, ([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
   }, [entries]);
 
-  // Entries for display employees only (used by Auslastungsbereich)
+  // Einträge nur der angezeigten MA (für den Auslastungsbereich)
   const filteredEntries = useMemo(() => {
     const empIds = new Set(displayEmployees.map(e => e.ID));
     return entries.filter(e => empIds.has(e.employee_id));
@@ -2777,7 +2777,7 @@ export default function Schedule() {
     return m;
   }, [visibleEmployees]);
 
-  // Check if a (empId, day) cell is within the current selection rectangle
+  // Liegt die Zelle (empId, day) im aktuellen Auswahl-Rechteck?
   const isCellSelected = (empId: number, day: number): boolean => {
     if (!selection) return false;
     const { startEmpId, startDay, endEmpId, endDay } = selection;
@@ -2790,7 +2790,7 @@ export default function Schedule() {
     return ti >= minEi && ti <= maxEi && day >= minDay && day <= maxDay;
   };
 
-  // Return all (empId, day) cells in the current selection
+  // Alle (empId, day)-Zellen der aktuellen Auswahl liefern
   const getSelectedCells = (): Array<{ empId: number; day: number }> => {
     if (!selection) return [];
     const { startEmpId, startDay, endEmpId, endDay } = selection;
@@ -2808,7 +2808,7 @@ export default function Schedule() {
     return cells;
   };
 
-  // Selection info for toolbar / context menu
+  // Auswahl-Info für Toolbar / Kontextmenü
   const selectionInfo = useMemo(() => {
     if (!selection) return { cells: 0, employees: 0, days: 0 };
     const { startEmpId, startDay, endEmpId, endDay } = selection;
@@ -2819,7 +2819,7 @@ export default function Schedule() {
     return { cells: empCount * dayCount, employees: empCount, days: dayCount };
   }, [selection, empIndexMap]);
 
-  // Count shifts per day (for summary row)
+  // Schichten je Tag zählen (für die Summenzeile)
   const empCountPerDay = useMemo(() => {
     const m = new Map<number, number>();
     const empIds = new Set(displayEmployees.map(e => e.ID));
@@ -3235,7 +3235,7 @@ export default function Schedule() {
       return;
     }
     setSelection(null);
-    // Only set multi-select anchor for empty cells; cells with entries use HTML5 DnD
+    // Mehrfachauswahl-Anker nur für leere Zellen; Zellen mit Einträgen nutzen HTML5-DnD
     const hasEntries = (entryMap.get(`${empId}-${day}`)?.length ?? 0) > 0;
     if (!hasEntries) {
       dragAnchorRef.current = { empId, day };
@@ -3429,7 +3429,7 @@ export default function Schedule() {
   const handleUndo = async () => {
     if (undoStack.length === 0) return;
     const record = undoStack[undoStack.length - 1];
-    // Snapshot current state as redo record (= the "after" of the original operation)
+    // Ist-Zustand als Redo-Eintrag sichern (= das „Nachher" der Original-Operation)
     const redoRecord = {
       cells: record.cells.map(c => ({
         empId: c.empId,
@@ -3482,7 +3482,7 @@ export default function Schedule() {
     }
     const dayNum = new Date(dateStr).getDate();
 
-    // Find unassigned employees for this day
+    // Nicht eingeteilte Mitarbeiter dieses Tages finden
     const unassigned = displayEmployees.filter(emp => !entryMap.has(`${emp.ID}-${dayNum}`));
 
     if (unassigned.length === 0) {
@@ -3580,7 +3580,7 @@ export default function Schedule() {
     setCopyPrevMonthLoading(true);
     try {
       const prevEntries = await api.getSchedule(prevYear, prevMonth);
-      // Map by same day-of-month: day 1..N of prev month → day 1..N of cur month (up to min of both)
+      // Über gleiche Monatstage mappen: Tag 1..N des Vormonats → Tag 1..N des aktuellen (bis zum Minimum)
       const maxDays = Math.min(daysInPrevMonth, daysInCurMonth);
       const toAssign: Array<{ employee_id: number; date: string; shift_id: number | null }> = [];
       // Zyklusdienste (source==='cycle') nicht mit-materialisieren (APP-INT-4)
@@ -3630,7 +3630,7 @@ export default function Schedule() {
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
-    // Only clear target when leaving the grid entirely (not between cells)
+    // Ziel nur beim Verlassen des gesamten Rasters löschen (nicht zwischen Zellen)
     if (!(e.relatedTarget instanceof Element) || !e.currentTarget.closest('table')?.contains(e.relatedTarget)) {
       setDndTarget(null);
     }
@@ -3803,7 +3803,7 @@ export default function Schedule() {
     }
 
     if (e.key === 'Enter') {
-      // Don't trigger if a picker is already open or focus is in an input
+      // Nicht auslösen, wenn ein Picker offen ist oder der Fokus in einem Eingabefeld
       const activeTag = (document.activeElement as HTMLElement)?.tagName;
       if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT') return;
       e.preventDefault();
@@ -3823,13 +3823,13 @@ export default function Schedule() {
     else if (e.key === 'ArrowUp') { e.preventDefault(); newEmpIdx = Math.max(0, empIdx - 1); }
     else if (e.key === 'ArrowDown') { e.preventDefault(); newEmpIdx = Math.min(visibleEmployees.length - 1, empIdx + 1); }
     else {
-      // Letter shortcuts: first letter of shift shortname → assign shift
+      // Buchstaben-Shortcuts: Anfangsbuchstabe des Schicht-Kürzels → Schicht zuweisen
       if (e.key.length === 1 && /^[a-zA-Z]$/.test(e.key) && !e.ctrlKey && !e.metaKey && !e.altKey) {
-        // Don't intercept when focus is in an input
+        // Nicht abfangen, wenn der Fokus in einem Eingabefeld liegt
         const activeTag = (document.activeElement as HTMLElement)?.tagName;
         if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT') return;
         const letter = e.key.toUpperCase();
-        // Find shift whose SHORTNAME starts with this letter
+        // Schicht finden, deren SHORTNAME mit diesem Buchstaben beginnt
         const matchShift = shifts.find(s => s.SHORTNAME?.toUpperCase().startsWith(letter));
         if (matchShift) {
           e.preventDefault();
@@ -4127,7 +4127,7 @@ export default function Schedule() {
                   const skipEntries = autoPlanPreview.filter(p => p.status === 'skip');
                   const overwriteEntries = autoPlanPreview.filter(p => p.status === 'overwrite');
                   const restrictedEntries = autoPlanPreview.filter(p => p.status === 'restricted');
-                  // Group new entries by employee for display
+                  // Neue Einträge für die Anzeige nach MA gruppieren
                   const byEmp = new Map<string, typeof autoPlanPreview>();
                   for (const p of [...newEntries, ...overwriteEntries]) {
                     const k = p.employee_name;
@@ -4469,7 +4469,7 @@ export default function Schedule() {
         const weekDates = getWeekDates(effectiveMonday);
         const weekLabel = `${weekDates[0]} – ${weekDates[6]}`;
         const sourceEmp = employees.find(e => e.ID === copyWeekSource);
-        // Only look at entries within the current visible month
+        // Nur Einträge des sichtbaren Monats betrachten
         const sourceEntries = weekDates
           .filter(d => {
             const [wy, wm] = d.split('-').map(Number);
@@ -4905,7 +4905,7 @@ export default function Schedule() {
           const count = empShiftCount.get(emp.ID) ?? 0;
           if (count >= Math.ceil(avg)) continue; // already at/above average
 
-          // Find most frequent shift for this employee
+          // Häufigste Schicht dieses MA finden
           const shiftIds = empLastShifts.get(emp.ID) ?? [];
           const freq = new Map<number, number>();
           for (const id of shiftIds) freq.set(id, (freq.get(id) ?? 0) + 1);
@@ -5887,7 +5887,7 @@ export default function Schedule() {
                 // APP-INT-1: under=rot, ok=grün, over=orange, none=kein Indikator
                 const coverageDot = coverageIndicator(cov);
                 const coverageTitle = cov ? coverageTooltip(cov) : '';
-                // Q069: schedule comment for this day (group-specific or "all groups")
+                // Q069: Plan-Kommentar des Tages (gruppenspezifisch oder „alle Gruppen")
                 const activeGroupId = selectedGroupIds.length === 1 ? selectedGroupIds[0] : 0;
                 const dayComment = scheduleCommentsMap.get(`${dateStr}-${activeGroupId}`)
                   ?? scheduleCommentsMap.get(`${dateStr}-0`);
@@ -6079,7 +6079,7 @@ export default function Schedule() {
                     onClick={() => setHighlightedEmpId(id => id === emp.ID ? null : emp.ID)}
                   >
                     {(() => {
-                      // Birthday indicator: 🎂 if employee's birthday is in the current display month
+                      // Geburtstags-Indikator: 🎂 wenn der Geburtstag im angezeigten Monat liegt
                       const hasBirthdayThisMonth = emp.BIRTHDAY
                         ? (() => { try { return new Date(emp.BIRTHDAY!).getMonth() + 1 === month; } catch { return false; } })()
                         : false;
@@ -6151,10 +6151,10 @@ export default function Schedule() {
                       ? cellNotes.map(n => [n.text1, n.text2].filter(Boolean).join(' ')).join('\n')
                       : '';
 
-                    // Wish indicator for this cell
+                    // Wunsch-Indikator dieser Zelle
                     const wishType = wishMap.get(`${emp.ID}-${dateStr}`);
 
-                    // Conflict detection for this cell
+                    // Konflikt-Erkennung dieser Zelle
                     const cellConflicts = conflictMap.get(`${emp.ID}_${dateStr}`) ?? [];
                     const hasConflict = cellConflicts.length > 0;
                     const conflictTitle = hasConflict
@@ -6476,11 +6476,11 @@ export default function Schedule() {
         let monthCount: number | undefined;
         let colleaguesWithSameShift: string[] | undefined;
         if (tooltipEntry?.kind === 'shift' && tooltipEntry.shift_id != null) {
-          // Count: how many times this shift for this employee this month
+          // Zähler: wie oft diese Schicht für diesen MA in diesem Monat
           monthCount = entries.filter(
             e => e.employee_id === hoverTooltip.empId && e.shift_id === tooltipEntry.shift_id
           ).length;
-          // Colleagues: other employees with same shift today
+          // Kollegen: andere MA mit derselben Schicht heute
           const todayStr = `${year}-${pad(month)}-${pad(hoverTooltip.day)}`;
           colleaguesWithSameShift = entries
             .filter(e =>

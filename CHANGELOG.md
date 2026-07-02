@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.27] - 2026-07-02
+
 ### Added
 
 - **Mitarbeiter-Timeline: Ausgeschiedene im Auswahl-Dropdown ausblendbar** —

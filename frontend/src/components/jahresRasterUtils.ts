@@ -33,3 +33,9 @@ export function buildDayMap(entries: ScheduleEntry[]): Map<string, ScheduleEntry
   });
   return m;
 }
+
+/** Zell-Label auf das Kürzel begrenzen (Original: gleich große Matrix-Zellen,
+ *  kein Langtext wie „N-CT 5:45-15:45" aus freien Sonderdienst-Kurznamen). */
+export function shortLabel(label: string): string {
+  return (label || '').trim().split(/\s+/)[0] || '?';
+}

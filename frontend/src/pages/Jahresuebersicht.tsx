@@ -7,7 +7,7 @@ import { EmptyState, ApiErrorState } from '../components/EmptyState';
 import { PageHeader } from '../components/PageHeader';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { JahresRaster } from '../components/JahresRaster';
-import { buildDayMap, daysInMonth, toDateStr, MONTH_ABBR } from '../components/jahresRasterUtils';
+import { buildDayMap, daysInMonth, toDateStr, MONTH_ABBR, shortLabel } from '../components/jahresRasterUtils';
 
 // Map: SHORTNAME → { bk, text }
 type ShiftColorMap = Map<string, { bk: string; text: string }>;
@@ -50,7 +50,7 @@ function buildJahresrasterHTML(
         const bk = (entries.length === 1 && entries[0].color_bk) || tint;
         const text = (entries.length === 1 && entries[0].color_text) || '#000';
         const label = entries
-          .map(e => `${e.source === 'cycle' ? '↻' : ''}${e.display_name || '?'}`)
+          .map(e => `${e.source === 'cycle' ? '↻' : ''}${shortLabel(e.display_name || '?')}`)
           .join(' ');
         cells += `<td style="border:1px solid #ddd;background:${bk};color:${text};font-size:9px;font-weight:bold;text-align:center;padding:1px 2px">${label}</td>`;
       }
@@ -123,7 +123,7 @@ function buildJahresuebersichtHTML(
         const otColor = ot >= 0 ? '#16a34a' : '#dc2626';
         const labels = Object.entries(m.label_counts)
           .sort((a, b) => b[1] - a[1]).slice(0, 4)
-          .map(([l, c]) => `${l}${c > 1 ? `×${c}` : ''}`)
+          .map(([l, c]) => `${shortLabel(l)}${c > 1 ? `×${c}` : ''}`)
           .join(' ');
         cells += `<td style="${tdStyle}background:${rowBg}">
           <div style="font-family:monospace;font-size:9px;color:#374151">${labels}</div>
@@ -185,16 +185,24 @@ function openPrintWindowJ(html: string) {
 
 function ShiftBadge({ label, count, colorMap }: { label: string; count: number; colorMap: ShiftColorMap }) {
   const col = colorMap.get(label);
-  const text = count > 1 ? `${label}×${count}` : label;
+  const short = shortLabel(label);
+  const text = count > 1 ? `${short}×${count}` : short;
   if (col) {
     return (
       <span
-        className="inline-block px-1 rounded font-bold leading-tight"
+        className="inline-block px-1 rounded font-bold leading-tight max-w-full truncate align-top"
         style={{ backgroundColor: col.bk, color: col.text, fontSize: '9px' }}
+        title={label !== short ? label : undefined}
       >{text}</span>
     );
   }
-  return <span className="font-mono text-gray-600" style={{ fontSize: '9px' }}>{text}</span>;
+  return (
+    <span
+      className="font-mono text-gray-600 inline-block max-w-full truncate align-top"
+      style={{ fontSize: '9px' }}
+      title={label !== short ? label : undefined}
+    >{text}</span>
+  );
 }
 
 function MonthCell({ summary, colorMap }: { summary: MonthSummary; colorMap: ShiftColorMap }) {
@@ -206,7 +214,7 @@ function MonthCell({ summary, colorMap }: { summary: MonthSummary; colorMap: Shi
   const overtime = summary.actual_hours - summary.target_hours;
 
   return (
-    <td className={`border border-gray-200 p-1.5 align-top text-xs min-w-[90px] ${hasData ? '' : 'bg-gray-50'}`}>
+    <td className={`border border-gray-200 p-1.5 align-top text-xs w-[90px] min-w-[90px] max-w-[90px] ${hasData ? '' : 'bg-gray-50'}`}>
       {hasData ? (
         <div className="space-y-0.5">
           {topLabels.length > 0 && (

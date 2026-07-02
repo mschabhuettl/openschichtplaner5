@@ -15,7 +15,7 @@
  */
 import type { ScheduleEntry } from '../types';
 import { ScheduleCellStack } from './ScheduleCellStack';
-import { MONTH_ABBR, daysInMonth, toDateStr } from './jahresRasterUtils';
+import { MONTH_ABBR, daysInMonth, toDateStr, shortLabel } from './jahresRasterUtils';
 
 const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
 
@@ -36,7 +36,13 @@ export function JahresRaster({
 
   return (
     <div className="overflow-x-auto">
-      <table className="border-collapse text-xs" data-testid="jahresraster">
+      <table className="border-collapse text-xs table-fixed w-full min-w-[1000px]" data-testid="jahresraster">
+        {/* Gleich große Tagesspalten wie im Original (Zellinhalt darf die
+            Zellbreite nicht variieren, Befund 9) */}
+        <colgroup>
+          <col style={{ width: 52 }} />
+          {DAYS.map(d => <col key={d} />)}
+        </colgroup>
         <thead>
           <tr className="bg-slate-700 text-white">
             <th scope="col" className="sticky left-0 z-10 bg-slate-700 px-2 py-1.5 text-left min-w-[52px] border-r border-slate-600">
@@ -79,7 +85,7 @@ export function JahresRaster({
                     <td
                       key={day}
                       data-testid={`jr-cell-${month}-${day}`}
-                      className="border border-gray-200 p-0 h-7 text-center align-middle cursor-pointer hover:brightness-95 transition-[filter]"
+                      className="border border-gray-200 p-0 h-7 text-center align-middle cursor-pointer hover:brightness-95 transition-[filter] overflow-hidden"
                       style={{
                         // Farbkonvention wie im Dienstplan-Grid: Einzeleintrag
                         // färbt die Zelle (color_bk), sonst Feiertag/Heute/
@@ -93,7 +99,7 @@ export function JahresRaster({
                       title={title}
                       onClick={() => onMonthClick(month)}
                     >
-                      <ScheduleCellStack entries={entries} />
+                      <ScheduleCellStack entries={entries.map(e => ({ ...e, display_name: shortLabel(e.display_name || '?') }))} />
                     </td>
                   );
                 })}

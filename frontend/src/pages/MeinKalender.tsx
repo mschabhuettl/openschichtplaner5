@@ -203,7 +203,7 @@ export default function MeinKalender() {
     let cellBg = '';
     if (hasShift) cellBg = isDark ? 'bg-blue-900/30' : 'bg-blue-50';
     if (hasSperr) cellBg = isDark ? 'bg-red-900/40' : 'bg-red-50';
-    if (!cellBg && isWe) cellBg = isDark ? 'bg-gray-750' : 'bg-slate-50';
+    if (!cellBg && isWe) cellBg = isDark ? 'bg-gray-700' : 'bg-slate-50';
 
     return (
       <div
@@ -358,7 +358,7 @@ export default function MeinKalender() {
       {/* Upcoming wishes list */}
       {wishes.length > 0 && (
         <div className={`mt-6 rounded-xl border overflow-hidden ${card}`}>
-          <h2 className={`px-4 py-3 font-semibold text-sm border-b ${isDark ? 'border-gray-700 bg-gray-750' : 'border-gray-200 bg-gray-50'}`}>
+          <h2 className={`px-4 py-3 font-semibold text-sm border-b ${isDark ? 'border-gray-700 bg-gray-700' : 'border-gray-200 bg-gray-50'}`}>
             Meine Wünsche im {MONTH_NAMES[month - 1]}
           </h2>
           <div className="divide-y divide-gray-200 dark:divide-gray-700">

@@ -215,7 +215,7 @@ export default function Schichtwuensche() {
       : hasWunsch
         ? (isDark ? 'bg-green-900/40' : 'bg-green-50')
         : isWe
-          ? (isDark ? 'bg-gray-750' : 'bg-slate-50')
+          ? (isDark ? 'bg-gray-700' : 'bg-slate-50')
           : '';
 
     return (
@@ -430,7 +430,7 @@ export default function Schichtwuensche() {
                     const isS = w.wish_type === 'SPERRUNG';
                     const jsWd = new Date(w.date).getDay();
                     return (
-                      <tr key={w.id} className={`border-t ${isDark ? 'border-gray-700' : 'border-gray-100'} ${i % 2 === 0 ? '' : (isDark ? 'bg-gray-750' : 'bg-gray-50/50')} ${isDark ? 'hover:bg-gray-700' : 'hover:bg-blue-50'} transition-colors`}>
+                      <tr key={w.id} className={`border-t ${isDark ? 'border-gray-700' : 'border-gray-100'} ${i % 2 === 0 ? '' : (isDark ? 'bg-gray-700' : 'bg-gray-50/50')} ${isDark ? 'hover:bg-gray-700' : 'hover:bg-blue-50'} transition-colors`}>
                         <td className="px-4 py-2">
                           <span className="font-medium">{formatDateDE(w.date)}</span>
                           <span className={`ml-1 text-xs opacity-60`}>{WD_ABBR[jsWd]}</span>

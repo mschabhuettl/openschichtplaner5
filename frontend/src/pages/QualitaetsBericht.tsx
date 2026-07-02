@@ -240,19 +240,19 @@ export default function QualitaetsBericht() {
 
               {/* Quick facts */}
               <div className="flex-1 min-w-[200px] grid grid-cols-2 gap-2 text-sm">
-                <div className="bg-white/70 rounded-lg p-2 text-center">
+                <div className="bg-white/70 dark:bg-slate-800/70 rounded-lg p-2 text-center">
                   <div className="text-lg font-bold text-gray-800">{report.active_employees}</div>
                   <div className="text-xs text-gray-500">Mitarbeiter</div>
                 </div>
-                <div className="bg-white/70 rounded-lg p-2 text-center">
+                <div className="bg-white/70 dark:bg-slate-800/70 rounded-lg p-2 text-center">
                   <div className="text-lg font-bold text-gray-800">{report.work_days}</div>
                   <div className="text-xs text-gray-500">Werktage</div>
                 </div>
-                <div className="bg-white/70 rounded-lg p-2 text-center">
+                <div className="bg-white/70 dark:bg-slate-800/70 rounded-lg p-2 text-center">
                   <div className="text-lg font-bold text-gray-800">{report.coverage.ok_days}</div>
                   <div className="text-xs text-gray-500">OK-Tage</div>
                 </div>
-                <div className="bg-white/70 rounded-lg p-2 text-center">
+                <div className="bg-white/70 dark:bg-slate-800/70 rounded-lg p-2 text-center">
                   <div className={`text-lg font-bold ${report.coverage.critical_days > 0 ? 'text-red-600' : 'text-gray-800'}`}>
                     {report.coverage.critical_days}
                   </div>

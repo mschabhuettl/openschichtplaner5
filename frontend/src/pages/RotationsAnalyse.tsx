@@ -438,10 +438,10 @@ export default function RotationsAnalyse() {
                     key={r.employee.ID}
                     onClick={() => setSelectedMA(isSelected ? null : r.employee.ID)}
                     className={`border-b dark:border-gray-700 cursor-pointer transition-colors
-                      ${idx % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-850'}
+                      ${idx % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'}
                       ${isSelected ? 'ring-2 ring-blue-500 ring-inset' : 'hover:bg-blue-50 dark:hover:bg-gray-700'}`}
                   >
-                    <td className={`px-3 py-2 font-medium sticky left-0 z-10 ${idx % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-850'}`}>
+                    <td className={`px-3 py-2 font-medium sticky left-0 z-10 ${idx % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'}`}>
                       {r.employee.NAME}, {r.employee.FIRSTNAME}
                       <span className="ml-1 text-xs text-gray-600">({r.employee.SHORTNAME})</span>
                     </td>

@@ -156,7 +156,7 @@ export default function Changelog() {
               {/* Version header */}
               <button
                 onClick={() => toggleVersion(section.version)}
-                className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors text-left"
+                className="w-full flex items-center justify-between px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors text-left"
               >
                 <div className="flex items-center gap-3">
                   <span className="text-lg font-bold text-slate-800 dark:text-white">

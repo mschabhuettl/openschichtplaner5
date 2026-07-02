@@ -206,7 +206,7 @@ export function NotificationBell({ employeeId }: Props) {
               notifications.map(n => (
                 <div
                   key={n.id}
-                  className={`relative flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors ${!n.read ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
+                  className={`relative flex gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${!n.read ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
                 >
                   {/* Unread dot */}
                   {!n.read && (

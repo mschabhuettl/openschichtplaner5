@@ -235,7 +235,7 @@ function OverviewTab({ year }: { year: number }) {
             </thead>
             <tbody>
               {data.groups.map(g => (
-                <tr key={g.group_id} className="border-b dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-750">
+                <tr key={g.group_id} className="border-b dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700">
                   <td className="py-2 pr-4 font-medium">{g.group_name}</td>
                   <td className="py-2 pr-4 text-right">{g.vacation_days}</td>
                   <td className="py-2 pr-4 text-right">{g.sick_days}</td>
@@ -367,7 +367,7 @@ function GroupTab({ year, groups }: { year: number; groups: Group[] }) {
                 </thead>
                 <tbody>
                   {data.employees.map(e => (
-                    <tr key={e.employee_id} className="border-b dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-750">
+                    <tr key={e.employee_id} className="border-b dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700">
                       <td className="py-2 pr-4 font-medium">{e.employee_name}</td>
                       <td className="py-2 pr-4 text-right">{e.vacation_days}</td>
                       <td className="py-2 pr-4 text-right">{e.sick_days}</td>
@@ -501,7 +501,7 @@ function EmployeeTab({ year, employees }: { year: number; employees: Employee[] 
                     {data.by_month.map(m => {
                       const total = m.vacation + m.sick + m.other;
                       return (
-                        <tr key={m.month} className={`border-b dark:border-slate-700 ${total === 0 ? 'opacity-40' : 'hover:bg-gray-50 dark:hover:bg-slate-750'}`}>
+                        <tr key={m.month} className={`border-b dark:border-slate-700 ${total === 0 ? 'opacity-40' : 'hover:bg-gray-50 dark:hover:bg-slate-700'}`}>
                           <td className="py-1.5 pr-4">{MONTH_NAMES[m.month - 1]}</td>
                           <td className="py-1.5 pr-3 text-right">{m.vacation || '—'}</td>
                           <td className="py-1.5 pr-3 text-right">{m.sick || '—'}</td>

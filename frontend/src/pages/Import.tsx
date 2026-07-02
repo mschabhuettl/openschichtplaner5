@@ -450,7 +450,7 @@ function ValidationPreviewTable({
               return (
                 <tr key={ri}
                   className={`border-t border-gray-100 dark:border-gray-700 transition-colors ${
-                    isValid ? (ri % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-750')
+                    isValid ? (ri % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700')
                     : 'bg-red-50 dark:bg-red-900/20'}`}
                   title={!isValid ? v.errors.join('; ') : undefined}
                 >

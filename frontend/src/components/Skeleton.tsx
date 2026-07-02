@@ -69,7 +69,7 @@ export function SkeletonTable({ rows = 8, cols = 5, className = '' }: SkeletonTa
       {Array.from({ length: rows }).map((_, row) => (
         <div
           key={row}
-          className={`flex gap-4 px-4 py-3 border-b border-gray-100 dark:border-gray-700 ${row % 2 === 0 ? '' : 'bg-gray-50 dark:bg-gray-750'}`}
+          className={`flex gap-4 px-4 py-3 border-b border-gray-100 dark:border-gray-700 ${row % 2 === 0 ? '' : 'bg-gray-50 dark:bg-gray-700'}`}
         >
           {Array.from({ length: cols }).map((_, col) => (
             <Skeleton

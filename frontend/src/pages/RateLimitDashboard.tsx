@@ -261,7 +261,7 @@ export default function RateLimitDashboard() {
                   {data.events.slice(0, 200).map((evt, i) => (
                     <tr
                       key={i}
-                      className="border-t border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-750"
+                      className="border-t border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       <td className="px-3 py-2 whitespace-nowrap font-mono text-xs">
                         {formatDate(evt.timestamp)}

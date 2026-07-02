@@ -213,7 +213,7 @@ export function DataTable<T>({
                 tabIndex={i === focusedRow ? 0 : -1}
                 onClick={() => onRowClick?.(row)}
                 onFocus={() => setFocusedRow(i)}
-                className={`border-b border-gray-100 dark:border-slate-700 outline-none ${i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-gray-50 dark:bg-slate-750'} ${onRowClick ? 'cursor-pointer hover:bg-blue-50 dark:hover:bg-slate-700' : 'hover:bg-gray-50 dark:hover:bg-slate-700'} ${focusedRow === i ? 'ring-2 ring-inset ring-blue-500' : ''} transition-colors`}
+                className={`border-b border-gray-100 dark:border-slate-700 outline-none ${i % 2 === 0 ? 'bg-white dark:bg-slate-800' : 'bg-gray-50 dark:bg-slate-700'} ${onRowClick ? 'cursor-pointer hover:bg-blue-50 dark:hover:bg-slate-700' : 'hover:bg-gray-50 dark:hover:bg-slate-700'} ${focusedRow === i ? 'ring-2 ring-inset ring-blue-500' : ''} transition-colors`}
               >
                 {columns.map(col => (
                   <td key={col.key as string} className={`px-3 py-2 ${col.className ?? ''}`}>

@@ -195,13 +195,16 @@ interface NavItem {
   roles?: Array<'Admin' | 'Planer' | 'Leser'>;
 }
 
-const navItems: NavItem[] = [
+export const navItems: NavItem[] = [
   // ── Top-level ───────────────────────────────────────────────
   { id: 'dashboard',  label: 'Dashboard', icon: '📊', path: '/' },
   { id: 'konflikte',  label: 'Konflikte', icon: '⚠️', path: '/konflikte', badge: true },
   { id: 'mein-profil', label: 'Mein Profil', icon: '👤', path: '/mein-profil' },
   { id: 'notification-settings', label: 'Benachrichtigungen', icon: '🔔', path: '/notification-settings' },
-  { id: 'mein-kalender', label: 'Mein Kalender', icon: '📅', path: '/mein-kalender', roles: ['Leser'] },
+  // Self-Service wie „Mein Profil“: für ALLE Rollen sichtbar. Eine Leser-Whitelist
+  // versteckte den Kalender für Admin/Planer im Normalbetrieb (nur der Dev-Modus
+  // zeigte ihn über den Admin-Bypass) — Maintainer-Befund.
+  { id: 'mein-kalender', label: 'Mein Kalender', icon: '📅', path: '/mein-kalender' },
 
   // ── Planung — Kernplanung ────────────────────────────────────
   { id: 'schedule',         label: 'Dienstplan',       icon: '📅', group: 'Planung', path: '/schedule' },

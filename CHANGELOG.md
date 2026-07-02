@@ -9,6 +9,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Notfall-Plan: Ersatzsuche schlägt jetzt auch Mitarbeiter anderer Gruppen vor —
+  nachrangig.** Bisher erschienen nur Mitglieder einer gemeinsamen Gruppe des
+  ausgefallenen Mitarbeiters. Jetzt kommen diese weiterhin zuerst (voller Score),
+  dahinter alle übrigen geeigneten Mitarbeiter mit dem Hinweis „Andere Gruppe"
+  (Score 70). Die harten Eignungskriterien (Beschäftigungszeitraum, Verfügbarkeit,
+  Schichtrestriktionen) gelten unverändert für alle (gebündeltes
+  libopenschichtplaner5 1.26.0).
+
 ---
 
 ## [1.21.15] - 2026-07-02

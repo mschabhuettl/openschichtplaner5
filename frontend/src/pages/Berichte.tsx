@@ -297,11 +297,11 @@ async function reportStundenAuswertung(
     emps = employees.filter(e => memberIds.has(e.ID));
   }
 
-  // Load bookings for the month (all employees)
+  // Buchungen des Monats laden (alle MA)
   const monthPad = padZero(month);
   const allBookings = await api.getBookings(year, month);
 
-  // Load absences for the year, filter by month
+  // Abwesenheiten des Jahres laden, nach Monat filtern
   const allAbsences = await api.getAbsences({ year });
   const monthAbsences = allAbsences.filter(a => a.date && a.date.startsWith(`${year}-${monthPad}`));
 
@@ -434,13 +434,13 @@ async function reportUrlaubsantrag(
   const workdays = countWorkdays(from, to);
   const year = from.getFullYear();
 
-  // Load entitlements and used absences
+  // Ansprüche und verbrauchte Abwesenheiten laden
   const [entitlements, absences] = await Promise.all([
     api.getLeaveEntitlements({ year, employee_id: employeeId }),
     api.getAbsences({ year, employee_id: employeeId }),
   ]);
 
-  // Find total entitlement for year (vacation leave types)
+  // Gesamtanspruch des Jahres ermitteln (Urlaubs-Abwesenheitsarten)
   const leaveTypes = await api.getLeaveTypes();
   const vacationLtIds = new Set(leaveTypes.filter(lt => lt.ENTITLED).map(lt => lt.ID));
   const entTotal = entitlements
@@ -1430,7 +1430,7 @@ export default function Berichte() {
   const [reportFooter, setReportFooter] = useState('');
   const [reportLoading, setReportLoading] = useState(false);
 
-  // Extra parameters for new reports
+  // Zusatzparameter der neueren Berichte
   const [quarter, setQuarter] = useState(Math.ceil((now.getMonth() + 1) / 3));
   const [birthdayMonth, setBirthdayMonth] = useState(0); // 0 = all months
   const [memberGroupId, setMemberGroupId] = useState<number | null>(null);

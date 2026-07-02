@@ -18,7 +18,7 @@ function getSnapshot(): boolean {
  * useOnlineStatus — reactive hook that tracks browser connectivity.
  *
  * Returns `true` when online, `false` when offline.
- * Uses `useSyncExternalStore` for tear-free reads in React 18+.
+ * Nutzt `useSyncExternalStore` für riss-freie Reads ab React 18.
  */
 export function useOnlineStatus(): boolean {
   return useSyncExternalStore(subscribe, getSnapshot, () => true);
@@ -26,7 +26,7 @@ export function useOnlineStatus(): boolean {
 
 /**
  * useOnlineStatusWithFlash — like useOnlineStatus but also provides
- * a brief `justReconnected` flag (true for 3 s after coming back online).
+ * ein kurzes `justReconnected`-Flag (3 s lang true nach der Rückkehr online).
  */
 export function useOnlineStatusWithFlash(): {
   online: boolean;
@@ -34,10 +34,10 @@ export function useOnlineStatusWithFlash(): {
 } {
   const online = useOnlineStatus();
   const [justReconnected, setJustReconnected] = useState(false);
-  // Track the previous offline state in a ref: keeping it in state put it in the
-  // effect deps, so flipping it re-ran the effect and the cleanup cancelled the
+  // Vorherigen Offline-Zustand in einer Ref führen: als State stand er in den
+  // Effect-Deps — das Umschalten ließ den Effect neu laufen und der Cleanup brach den
   // 3 s timer before it fired — justReconnected then never cleared. A ref doesn't
-  // re-trigger the effect, so the timer survives.
+  // Effect nicht erneut aus, der Timer überlebt.
   const wasOfflineRef = useRef(!navigator.onLine);
 
   useEffect(() => {

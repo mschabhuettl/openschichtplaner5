@@ -100,7 +100,7 @@ function loadSettings(): AppSettings {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_APP_SETTINGS;
     const parsed = JSON.parse(raw) as Partial<AppSettings>;
-    // Deep-merge with defaults so new keys survive upgrades
+    // Tief mit den Defaults mergen — neue Schlüssel überleben Upgrades
     return {
       worktime: { ...DEFAULT_APP_SETTINGS.worktime, ...parsed.worktime },
       notifications: { ...DEFAULT_APP_SETTINGS.notifications, ...parsed.notifications },

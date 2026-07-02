@@ -126,7 +126,7 @@ export default function AuditLog() {
     return true;
   });
 
-  // Unique values for filter dropdowns
+  // Eindeutige Werte für die Filter-Dropdowns
   const allActions = [...new Set(entries.map(e => e.action))].sort();
   const allEntities = [...new Set(entries.map(e => e.entity))].sort();
 

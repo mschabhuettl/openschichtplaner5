@@ -139,6 +139,7 @@ All configuration is via environment variables in `.env`. See `.env.example` for
 | `ALLOWED_ORIGINS` | ✅ | Allowed CORS origins (your domain) |
 | `SP5_DOMAIN` | ✅ | Your domain (for nginx/certbot) |
 | `SP5_DEV_MODE` | ✅ | Must be `false` in production |
+| `SP5_READONLY` | ❌ | `true` = schreibgeschützte Instanz: die API lehnt JEDE Schreibmethode serverseitig mit 403 ab (auch für Admin), das Frontend blendet die Schreib-UI aus und zeigt ein Banner. Ideal für eine reine Leseansicht auf einem read-only gemounteten Datenbestand (Viewer-Betrieb). Default: aus |
 | `DEBUG` | ✅ | Must be `false` in production |
 | `SP5_HSTS` | ⬡ | Set `true` after enabling HTTPS |
 | `SP5_HTTP_PORT` | ⬡ | Host HTTP port (default: 80) |

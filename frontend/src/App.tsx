@@ -31,6 +31,7 @@ import { BottomNav } from './components/BottomNav';
 import { api, checkApiCompatibility } from './api/client';
 import { DevRoleSwitcher } from './components/DevRoleSwitcher';
 import { ImpersonationBanner } from './components/ImpersonationBanner';
+import { ReadOnlyBanner } from './components/ReadOnlyBanner';
 import GlobalSearchBar from './components/GlobalSearchBar';
 
 // Lazy-loaded pages — each page group is a separate chunk
@@ -690,6 +691,7 @@ function AppInner() {
       <OfflineBanner />
       {/* P-B Admin-Impersonation: persistentes „Als Benutzer ansehen"-Banner */}
       <ImpersonationBanner />
+      <ReadOnlyBanner />
       {/* Backend unreachable banner (startup check) */}
       <BackendUnreachableBanner />
 

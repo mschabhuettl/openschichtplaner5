@@ -76,6 +76,8 @@ export interface AuthContextType {
    * Admin-Name fürs Banner), sonst null. Server ist die Quelle der Wahrheit.
    */
   impersonation: { targetName: string; adminName: string } | null;
+  /** SP5_READONLY: Instanz ist serverseitig schreibgeschützt (aus /api/health). */
+  readOnlyInstance: boolean;
   /** Startet die Impersonation eines Benutzers (admin-only, serverseitig geprüft). */
   startImpersonation: (userId: number) => Promise<{ ok: boolean; detail?: string }>;
   /** Beendet die aktive Impersonation und kehrt zur Admin-Identität zurück. */
@@ -248,6 +250,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // P-B Admin-Impersonation („Als Benutzer ansehen") — nur Anzeige; der Server
   // erzwingt Rechte/Read-only. Beim Laden aus /auth/me gespiegelt.
   const [impersonation, setImpersonation] = useState<{ targetName: string; adminName: string } | null>(null);
+  const [readOnlyInstance, setReadOnlyInstance] = useState(false);
+
+  // SP5_READONLY aus dem öffentlichen Health-Endpunkt — die DURCHSETZUNG ist
+  // serverseitig (Middleware, 403); hier nur die konsistente Lese-Optik.
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/health`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(h => { if (h && typeof h.readonly === 'boolean') setReadOnlyInstance(h.readonly); })
+      .catch(() => {});
+  }, []);
 
   /**
    * /auth/me lesen und den Impersonations-Zustand spiegeln. Ist eine
@@ -472,26 +484,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Permission helpers — in dev mode, simulate the selected view-role for UI purposes
   const simPerms = isDevMode ? devViewPermissions(devViewRole) : null;
 
-  const canWrite = simPerms ? simPerms.canWrite : !!(user && (
+  const canWrite = !readOnlyInstance && (simPerms ? simPerms.canWrite : !!(user && (
     user.WDUTIES || user.WABSENCES || user.WOVERTIMES || user.WNOTES
-  ));
-  const canWriteDuties = simPerms ? simPerms.canWriteDuties : !!(user?.WDUTIES);
-  const canWriteAbsences = simPerms ? simPerms.canWriteAbsences : !!(user?.WABSENCES);
-  const canWriteOvertimes = simPerms ? simPerms.canWriteOvertimes : !!(user?.WOVERTIMES);
+  )));
+  const canWriteDuties = !readOnlyInstance && (simPerms ? simPerms.canWriteDuties : !!(user?.WDUTIES));
+  const canWriteAbsences = !readOnlyInstance && (simPerms ? simPerms.canWriteAbsences : !!(user?.WABSENCES));
+  const canWriteOvertimes = !readOnlyInstance && (simPerms ? simPerms.canWriteOvertimes : !!(user?.WOVERTIMES));
+  // canAdmin bleibt: es gate im UI auch reine LESE-Ansichten (z. B. Benutzerliste).
   const canAdmin = simPerms ? simPerms.canAdmin : !!(user?.ACCADMWND);
-  const canBackup = simPerms ? simPerms.canBackup : !!(user?.BACKUP);
+  const canBackup = !readOnlyInstance && (simPerms ? simPerms.canBackup : !!(user?.BACKUP));
 
   // G-1: granulares Flag-Gating — nur explizit false sperrt (wie die api)
   const can = useCallback((perm: string): boolean => {
+    if (readOnlyInstance) return false; // alle can()-Perms sind Schreibrechte
     if (isDevMode) return devViewCan(devViewRole, perm);
     if (!user) return false;
     if (user.role === 'Admin' || user.ADMIN) return true;
     return user.permissions?.[perm] !== false;
-  }, [isDevMode, devViewRole, user]);
+  }, [readOnlyInstance, isDevMode, devViewRole, user]);
 
   return (
     <AuthContext.Provider value={{
       user,
+      readOnlyInstance,
       isDevMode,
       devViewRole,
       setDevViewRole,

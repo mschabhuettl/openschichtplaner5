@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.31] - 2026-07-02
+
 ### Added
 
 - **Core-Modus per `SP5_CORE_ONLY=true`.** Die Instanz beschränkt sich auf den

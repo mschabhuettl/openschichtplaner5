@@ -2,6 +2,7 @@
  * Pure Hilfsfunktionen für den Einsatzplan.
  */
 import type { DayEntry } from '../api/client';
+import { deCompare } from '../utils/sortOrder';
 import type { ShiftType } from '../types';
 
 /**
@@ -53,8 +54,9 @@ export function occupiedShiftIds(entries: Iterable<DayEntry>): Set<number> {
 
 /**
  * Einträge einer Zelle wie das Original ordnen (Default „Ansicht > Sortierung
- * > Name"): alphabetisch nach Mitarbeitername.
+ * > Name"): alphabetisch nach Mitarbeitername — über die zentrale
+ * Design-System-Sortierung (utils/sortOrder).
  */
 export function byEmployeeName(a: DayEntry, b: DayEntry): number {
-  return (a.employee_name || '').localeCompare(b.employee_name || '', 'de');
+  return deCompare(a.employee_name, b.employee_name);
 }

@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Dark-Mode: letzte helle Reststellen behoben.** Ein vollständiger Durchlauf
+  über alle Seiten fand noch helle Hover-/Kartenflächen (u. a. „Was ist neu"-
+  Akkordeon, Qualitäts-Bericht) — verursacht durch nicht existierende
+  Tailwind-Farbstufen und fehlende Dark-Varianten; beides korrigiert.
+
 ---
 
 ## [1.21.24] - 2026-07-02

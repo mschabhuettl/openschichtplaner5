@@ -6,6 +6,7 @@ import { useToast } from '../hooks/useToast';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { escapeHtml, safeColor } from '../utils/escapeHtml';
 import { entryArt, groupReportRows, withEmptyEmployees, groupChargeDaysByEmployee, type ReportGroupMode } from '../utils/reportRows';
+import { groupTreeOptions } from '../utils/groupTree';
 
 const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -1750,7 +1751,7 @@ export default function Berichte() {
           <select value={groupId ?? ''} onChange={e => setGroupId(e.target.value ? parseInt(e.target.value) : null)}
             className="px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[160px]">
             <option value="">Alle Gruppen</option>
-            {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+            {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
           </select>
         </div>
       </div>
@@ -1914,7 +1915,7 @@ export default function Berichte() {
                 <select value={memberGroupId ?? ''} onChange={e => setMemberGroupId(e.target.value ? parseInt(e.target.value) : null)}
                   className="px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white min-w-[160px]">
                   <option value="">Alle Gruppen</option>
-                  {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+                  {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
                 </select>
               </div>
             </div>

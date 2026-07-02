@@ -29,6 +29,7 @@ import ScheduleCalendar from '../components/ScheduleCalendar';
 import type { DndAssignPayload, DndMovePayload } from '../components/ScheduleCalendar';
 import { ResponsiveTable } from '../components/ResponsiveTable';
 import { EmptyState } from '../components/EmptyState';
+import { groupTreeOptions } from '../utils/groupTree';
 
 // ── JS weekday → DB weekday (0=Mon..6=Sun) ────────────────────
 function jsWdToDbWd(jsWd: number): number {
@@ -4318,8 +4319,8 @@ export default function Schedule() {
               className="w-full border rounded px-3 py-2 mb-3 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
             >
               <option value="">— Gruppe wählen —</option>
-              {groups.map(g => (
-                <option key={g.ID} value={g.ID}>{g.NAME} ({g.member_count ?? '?'} MA)</option>
+              {groupTreeOptions(groups).map(o => (
+                <option key={o.id} value={o.id}>{o.label} ({groups.find(g => g.ID === o.id)?.member_count ?? '?'} MA)</option>
               ))}
             </select>
 

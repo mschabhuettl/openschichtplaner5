@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
 import type { WeekSchedule, DayEntry } from '../api/client';
 import type { Group } from '../types/index';
+import { groupTreeOptions } from '../utils/groupTree';
 
 // ─── Helpers ──────────────────────────────────────────────
 
@@ -266,9 +267,7 @@ export default function Wochenansicht() {
           className="px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm"
         >
           <option value="">Alle Gruppen</option>
-          {groups.map(g => (
-            <option key={g.ID} value={g.ID}>{g.NAME}</option>
-          ))}
+          {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
 
         {/* Search */}

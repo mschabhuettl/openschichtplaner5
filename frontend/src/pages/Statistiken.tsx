@@ -6,6 +6,7 @@ import type { Employee, Group } from '../types';
 import { useT } from '../i18n';
 import { EmptyState } from '../components/EmptyState';
 import { escapeHtml } from '../utils/escapeHtml';
+import { groupTreeOptions } from '../utils/groupTree';
 
 // ── HTML Export helper ─────────────────────────────────────────
 function exportStatisticsHTML(
@@ -912,7 +913,7 @@ export default function Statistiken() {
           className="px-3 py-1.5 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm text-sm"
         >
           <option value="">{t.statistiken.allGroups}</option>
-          {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+          {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
 
         {loading && <span className="text-sm text-blue-500 animate-pulse">Lade...</span>}
@@ -1402,7 +1403,7 @@ export default function Statistiken() {
               className="px-3 py-1.5 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm text-sm"
             >
               <option value="">{t.statistiken.allGroups}</option>
-              {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+              {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
             </select>
             {!compareLoading && compareData.length > 0 && (
               <button
@@ -1586,7 +1587,7 @@ export default function Statistiken() {
               className="px-3 py-1.5 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm text-sm"
             >
               <option value="">{t.statistiken.allGroups}</option>
-              {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+              {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
             </select>
           </div>
 
@@ -1833,7 +1834,7 @@ export default function Statistiken() {
               className="px-3 py-1.5 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm text-sm"
             >
               <option value="">{t.statistiken.allGroups}</option>
-              {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+              {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
             </select>
 
             {yrLoading && <span className="text-sm text-blue-500 animate-pulse">Lade...</span>}

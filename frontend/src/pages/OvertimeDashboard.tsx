@@ -15,6 +15,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { api } from '../api/client';
 import type { OvertimeDashboardRow, OvertimeDashboardResponse } from '../api/client';
 import type { Group } from '../types';
+import { groupTreeOptions } from '../utils/groupTree';
 
 // ── Colour helpers ────────────────────────────────────────────────────────────
 
@@ -230,7 +231,7 @@ export default function OvertimeDashboard() {
           aria-label="Gruppe filtern"
         >
           <option value="">Alle Gruppen</option>
-          {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+          {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
 
         {/* Search */}

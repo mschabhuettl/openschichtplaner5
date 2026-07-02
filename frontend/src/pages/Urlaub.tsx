@@ -13,6 +13,7 @@ import { useT } from '../i18n';
 import { ResponsiveTable } from '../components/ResponsiveTable';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { EmptyState } from '../components/EmptyState';
+import { groupTreeOptions } from '../utils/groupTree';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
@@ -985,7 +986,7 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
         <select value={groupId ?? ''} onChange={e => setGroupId(e.target.value ? Number(e.target.value) : null)}
           className="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">{t.urlaub.allGroups}</option>
-          {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+          {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
         <input type="text" placeholder="Suchen..." value={search} onChange={e => setSearch(e.target.value)}
           className="px-3 py-1.5 border rounded shadow-sm text-sm w-36" />
@@ -1199,7 +1200,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
         <select value={groupId ?? ''} onChange={e => setGroupId(e.target.value ? Number(e.target.value) : null)}
           className="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">{t.urlaub.allGroups}</option>
-          {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+          {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
         {canEditAbsences && (
         <button onClick={() => { if (showForm) { cancelForm(); } else { setEditId(null); resetForm(); setShowForm(true); } }}
@@ -1222,7 +1223,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
               <label className="block text-xs font-medium text-gray-700 mb-1">Gruppe</label>
               <select value={form.group_id} onChange={e => setForm(f => ({ ...f, group_id: Number(e.target.value) }))}
                 className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+                {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
               </select>
             </div>
             <div>

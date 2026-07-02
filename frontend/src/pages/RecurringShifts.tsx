@@ -17,6 +17,7 @@ import type {
   RecurringShiftRecurrence,
 } from '../api/client';
 import type { Employee, Group, ShiftType } from '../types';
+import { groupTreeOptions } from '../utils/groupTree';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -529,9 +530,7 @@ export default function RecurringShifts() {
             className="px-3 py-1.5 text-sm border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
           >
             <option value="">Alle Gruppen</option>
-            {groups.map(g => (
-              <option key={g.ID} value={g.ID}>{g.NAME}</option>
-            ))}
+            {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
           </select>
         </div>
         <div>

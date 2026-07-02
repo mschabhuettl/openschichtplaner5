@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
 import type { Group } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { groupTreeOptions } from '../utils/groupTree';
 
 function getAuthHeaders(): Record<string, string> {
   try {
@@ -299,8 +300,8 @@ export default function Jahresrueckblick() {
             className="text-sm border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200"
           >
             <option value="">Alle Gruppen</option>
-            {groups.map(g => (
-              <option key={g.ID} value={g.ID}>{g.NAME || `Gruppe ${g.ID}`}</option>
+            {groupTreeOptions(groups).map(o => (
+              <option key={o.id} value={o.id}>{o.label || `Gruppe ${o.id}`}</option>
             ))}
           </select>
           <button

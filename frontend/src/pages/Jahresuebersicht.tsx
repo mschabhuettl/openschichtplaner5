@@ -8,6 +8,7 @@ import { PageHeader } from '../components/PageHeader';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { JahresRaster } from '../components/JahresRaster';
 import { buildDayMap, daysInMonth, toDateStr, MONTH_ABBR, shortLabel } from '../components/jahresRasterUtils';
+import { groupTreeOptions } from '../utils/groupTree';
 
 // Map: SHORTNAME → { bk, text }
 type ShiftColorMap = Map<string, { bk: string; text: string }>;
@@ -718,7 +719,7 @@ export default function Jahresuebersicht() {
               className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
             >
               <option value="">Alle Gruppen</option>
-              {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+              {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
             </select>
 
             {/* Employee selector (Raster immer; Zusammenfassung nur Einzelansicht) */}

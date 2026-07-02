@@ -13,6 +13,7 @@ import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { PageHeader } from '../components/PageHeader';
+import { groupTreeOptions } from '../utils/groupTree';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -278,9 +279,7 @@ function ScheduleModal({ schedule, groups, onSave, onClose, saving }: ScheduleMo
                            focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Alle Gruppen</option>
-                {groups.map(g => (
-                  <option key={g.ID} value={g.ID}>{g.NAME}</option>
-                ))}
+                {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
               </select>
             </div>
           </div>

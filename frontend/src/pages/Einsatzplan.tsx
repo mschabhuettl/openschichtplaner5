@@ -13,6 +13,7 @@ import type { UndoableAction } from '../hooks/useUndoRedo';
 import { UndoRedoStatus } from '../components/UndoRedoStatus';
 import { ResponsiveTable } from '../components/ResponsiveTable';
 import { occupiedShiftIds, shiftDurationForDate, datesInRange, byEmployeeName } from './einsatzplanUtils';
+import { groupTreeOptions } from '../utils/groupTree';
 
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 const WEEKDAY_ABBR = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
@@ -1849,7 +1850,7 @@ export default function Einsatzplan() {
           className="px-3 py-1.5 bg-white dark:bg-gray-700 border dark:border-gray-600 rounded shadow-sm text-sm dark:text-gray-200"
         >
           <option value="">Alle Gruppen</option>
-          {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+          {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
 
         {/* Employee search */}

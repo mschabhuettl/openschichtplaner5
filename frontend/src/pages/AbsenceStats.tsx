@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
 import type { Group, Employee } from '../types';
+import { groupTreeOptions } from '../utils/groupTree';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -283,9 +284,7 @@ function GroupTab({ year, groups }: { year: number; groups: Group[] }) {
           onChange={handleGroupChange}
         >
           <option value="">— Gruppe wählen —</option>
-          {groups.map(g => (
-            <option key={g.ID} value={g.ID}>{g.NAME}</option>
-          ))}
+          {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
       </div>
 

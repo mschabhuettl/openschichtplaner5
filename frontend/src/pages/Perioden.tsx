@@ -7,6 +7,7 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useToast } from '../hooks/useToast';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { groupTreeOptions } from '../utils/groupTree';
 
 // ─── Create / Edit Modal ───────────────────────────────────
 interface CreateModalProps {
@@ -63,9 +64,7 @@ function CreateModal({ groups, editPeriod, onSave, onClose }: CreateModalProps) 
               onChange={e => setGroupId(Number(e.target.value))}
               className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              {groups.map(g => (
-                <option key={g.ID} value={g.ID}>{g.NAME}</option>
-              ))}
+              {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
             </select>
           </div>
 
@@ -237,7 +236,7 @@ export default function Perioden() {
             className="px-3 py-1.5 border rounded shadow-sm text-sm"
           >
             <option value="">Alle Gruppen</option>
-            {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+            {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
           </select>
           <button
             onClick={() => window.print()}

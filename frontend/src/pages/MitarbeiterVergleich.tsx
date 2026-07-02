@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import type { MonthSummary, EmployeeYearStats } from '../api/client';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import type { Employee, Group, ShiftType, LeaveType } from '../types/index';
+import { groupTreeOptions } from '../utils/groupTree';
 
 const MONTH_NAMES = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -229,7 +230,7 @@ export default function MitarbeiterVergleich() {
             onChange={e => setFilterGroup(e.target.value ? Number(e.target.value) : null)}
           >
             <option value="">Alle Gruppen</option>
-            {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+            {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
           </select>
           <select
             className="border rounded px-2 py-1 text-sm"

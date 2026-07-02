@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { api } from '../api/client';
 import type { PersonnelTableRow, PersonnelTableResponse } from '../api/client';
 import { useT } from '../i18n';
+import { groupTreeOptions } from '../utils/groupTree';
 
 type SortDir = 'asc' | 'desc';
 type PeriodMode = 'month' | 'range';
@@ -328,9 +329,7 @@ export default function Personaltabelle() {
           className="border border-slate-300 rounded px-3 py-1.5 text-sm bg-white min-w-[160px]"
         >
           <option value="">{t.personaltabelle.allGroups}</option>
-          {groups.map(g => (
-            <option key={g.ID} value={g.ID}>{g.NAME}</option>
-          ))}
+          {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
         <div className="relative">
           <input

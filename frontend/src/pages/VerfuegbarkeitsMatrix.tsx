@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { api } from '../api/client';
+import { groupTreeOptions } from '../utils/groupTree';
 
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -409,9 +410,7 @@ export default function VerfuegbarkeitsMatrix() {
           className="text-sm border border-slate-200 rounded px-2 py-1.5 bg-white text-slate-700"
         >
           <option value={0}>Alle Gruppen</option>
-          {groups.map(g => (
-            <option key={g.ID} value={g.ID}>{g.NAME}</option>
-          ))}
+          {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
 
         {/* Actions */}

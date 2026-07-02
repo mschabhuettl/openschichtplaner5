@@ -6,6 +6,7 @@ import { useToast } from '../hooks/useToast';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { entranceOptions, entranceOffsetDays, effectiveCycleStart } from '../utils/cycleEntrance';
+import { groupTreeOptions } from '../utils/groupTree';
 
 // ─── Types ─────────────────────────────────────────────────
 type CycleExceptionRecord = {
@@ -815,7 +816,7 @@ export default function Schichtmodell() {
             className="px-3 py-1.5 border rounded shadow-sm text-sm"
           >
             <option value="">Alle Gruppen</option>
-            {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+            {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
           </select>
           <input
             type="text"

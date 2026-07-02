@@ -3,6 +3,7 @@ import { useToast } from '../hooks/useToast';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { groupTreeOptions } from '../utils/groupTree';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 function getAuthHeaders(): Record<string, string> {
@@ -405,7 +406,7 @@ export default function SchichtKalibrator() {
         <select value={filterGroup} onChange={e => setFilterGroup(e.target.value === '' ? '' : Number(e.target.value))}
           className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-300">
           <option value="">Alle Gruppen</option>
-          {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+          {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
         <select value={sortBy} onChange={e => setSortBy(e.target.value as 'name' | 'week')}
           className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white focus:outline-none focus:ring-2 focus:ring-blue-300">

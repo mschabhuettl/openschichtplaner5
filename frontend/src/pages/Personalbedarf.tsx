@@ -6,6 +6,7 @@ import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { expandDateRange, MAX_SPECIAL_RANGE_DAYS } from '../utils/dateRange';
+import { groupTreeOptions } from '../utils/groupTree';
 
 // ─── Constants ─────────────────────────────────────────────
 // Tagindex 0..7 nach Spec D-34: 0=Montag … 6=Sonntag, 7=Feiertag (V-11)
@@ -287,7 +288,7 @@ function SpecialEditModal({ shifts, groups, existing, onSave, onClose, defaultDa
               onChange={e => setGroupId(Number(e.target.value))}
               className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+              {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
             </select>
           </div>
 
@@ -410,7 +411,7 @@ function WeeklyTab({
           className="px-3 py-1.5 border rounded shadow-sm text-sm"
         >
           <option value="">Alle Gruppen</option>
-          {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+          {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
         {!loading && (
           <span className="text-sm text-blue-600 font-medium ml-2">
@@ -657,7 +658,7 @@ function DateSpecificTab({ shifts, groups }: { shifts: ShiftType[]; groups: Grou
             className="px-3 py-1.5 border rounded shadow-sm text-sm"
           >
             <option value="">Alle Gruppen</option>
-            {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+            {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
           </select>
         </div>
         {filterDate && (

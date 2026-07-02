@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { groupTreeOptions } from '../utils/groupTree';
 
 // ─── Types ────────────────────────────────────────────────
 interface AbsentEmployee {
@@ -683,9 +684,7 @@ export default function KapazitaetsForecast() {
           className="text-sm px-3 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white"
         >
           <option value="">Alle Gruppen</option>
-          {groups.map(g => (
-            <option key={g.ID} value={g.ID}>{g.NAME}</option>
-          ))}
+          {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
         <button
           onClick={load}

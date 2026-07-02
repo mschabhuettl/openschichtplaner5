@@ -17,6 +17,7 @@ import { EmptyState } from '../components/EmptyState';
 import EmployeeAvatar from '../components/EmployeeAvatar';
 import PhotoCropDialog from '../components/PhotoCropDialog';
 import { useT } from '../i18n';
+import { groupTreeOptions } from '../utils/groupTree';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
@@ -670,7 +671,7 @@ export default function Employees() {
             title="Nach Gruppe filtern"
           >
             <option value="">{t.employees.allGroups}</option>
-            {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+            {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
           </select>
           <select
             value={filterHide}
@@ -1311,7 +1312,7 @@ export default function Employees() {
               className="w-full px-3 py-2 border rounded text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="">— Gruppe auswählen —</option>
-              {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}{g.SHORTNAME ? ` (${g.SHORTNAME})` : ''}</option>)}
+              {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
             </select>
             <div className="flex gap-2 justify-end">
               <button onClick={() => setShowBulkGroupModal(false)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm">Abbrechen</button>

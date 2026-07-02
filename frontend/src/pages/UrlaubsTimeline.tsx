@@ -3,6 +3,7 @@ import { api } from '../api/client';
 import { isActiveInPeriod } from '../utils/formerEmployees';
 import type { Employee, LeaveType, Group } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { groupTreeOptions } from '../utils/groupTree';
 
 const BASE_URL = (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? '';
 
@@ -288,9 +289,7 @@ export default function UrlaubsTimeline() {
             className="px-2 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
           >
             <option value="all">Alle Gruppen</option>
-            {groups.map(g => (
-              <option key={g.ID} value={g.ID}>{g.NAME}</option>
-            ))}
+            {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
           </select>
 
           {/* Ehemalige (EMPEND vor dem Jahr) sind standardmäßig ausgeblendet */}

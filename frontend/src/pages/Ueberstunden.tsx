@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { api } from '../api/client';
 import type { OvertimeRow, OvertimeSummary } from '../api/client';
 import type { Group } from '../types';
+import { groupTreeOptions } from '../utils/groupTree';
 
 type SortKey = 'name' | 'soll' | 'ist' | 'delta';
 type SortDir = 'asc' | 'desc';
@@ -140,7 +141,7 @@ export default function Ueberstunden() {
           className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
         >
           <option value="">Alle Gruppen</option>
-          {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+          {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
 
         {/* Search */}

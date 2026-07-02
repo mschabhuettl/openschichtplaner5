@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { ApiErrorState } from '../components/EmptyState';
+import { groupTreeOptions } from '../utils/groupTree';
 
 interface DayEntry {
   employee_id: number;
@@ -260,9 +261,7 @@ export default function DienstBoard() {
           className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 bg-white shadow-sm"
         >
           <option value="">Alle Gruppen</option>
-          {groups.map(g => (
-            <option key={g.ID} value={g.ID}>{g.NAME}</option>
-          ))}
+          {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
 
         {/* View mode switcher */}

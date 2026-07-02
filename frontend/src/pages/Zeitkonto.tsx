@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../api/client';
 import type { ZeitkontoRow, ZeitkontoDetail, ZeitkontoMonthDetail, ZeitkontoSummary } from '../api/client';
 import type { Group } from '../types';
+import { groupTreeOptions } from '../utils/groupTree';
 
 const MONTH_NAMES = [
   '', 'Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
@@ -491,7 +492,7 @@ export default function Zeitkonto() {
           className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
         >
           <option value="">Alle Gruppen</option>
-          {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+          {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
 
         {(loading || detailLoading) && (

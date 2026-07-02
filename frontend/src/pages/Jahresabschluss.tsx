@@ -3,6 +3,7 @@ import { api } from '../api/client';
 import type { LeaveForfeitResult } from '../api/client';
 import { useAuth } from '../contexts/AuthContext';
 import type { Group } from '../types';
+import { groupTreeOptions } from '../utils/groupTree';
 
 const API = import.meta.env.VITE_API_URL ?? '';
 function getAuthHeaders(): Record<string, string> {
@@ -144,7 +145,7 @@ function ForfeitSection({ groups }: { groups: Group[] }) {
           <select value={groupId ?? ''} onChange={e => setGroupId(e.target.value ? Number(e.target.value) : null)}
             className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">Alle Gruppen</option>
-            {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+            {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
           </select>
         </div>
         <div>
@@ -331,7 +332,7 @@ export default function Jahresabschluss() {
             <select value={groupId ?? ''} onChange={e => setGroupId(e.target.value ? Number(e.target.value) : null)}
               className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">Alle Gruppen</option>
-              {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+              {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
             </select>
           </div>
           <div>

@@ -11,6 +11,7 @@ import type { DayEntry } from '../api/client';
 import type { Employee, Group } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { EmptyState } from '../components/EmptyState';
+import { groupTreeOptions } from '../utils/groupTree';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -558,9 +559,7 @@ export default function TeamUebersicht() {
             className="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 text-sm outline-none focus:ring-2 focus:ring-blue-500/40"
           >
             <option value="all">Alle Gruppen</option>
-            {groups.map(g => (
-              <option key={g.ID} value={g.ID}>{g.NAME}</option>
-            ))}
+            {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
           </select>
         </div>
       </div>

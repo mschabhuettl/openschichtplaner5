@@ -17,7 +17,7 @@ vi.mock('../api/client', () => {
     get(_t, prop: string) {
       if (!fns.has(prop)) {
         const byShape: Record<string, unknown> = {
-          getGroups: [{ ID: 5, NAME: 'Team A' }, { ID: 6, NAME: 'Team B' }],
+          getGroups: [{ ID: 5, NAME: 'Team A', SUPERID: 6 }, { ID: 6, NAME: 'Team B', SUPERID: 0 }],
           // Zeitkonto-Summary/-Overtime erwarten Objekt-Shapes
           getZeitkontoSummary: { total_target_hours: 0, total_actual_hours: 0, total_saldo: 0, employees_count: 0 },
           getOvertimeSummary: { employees: [], summary: { total_soll: 0, total_ist: 0, total_delta: 0, total_carry: 0, total_saldo: 0 } },
@@ -46,7 +46,9 @@ async function expectGroupDropdown() {
   expect(option).toBeTruthy();
   const select = option.closest('select')!;
   const labels = Array.from(select.options).map(o => o.textContent);
-  expect(labels).toContain('Team A');
+  // Baumgerechte Darstellung (Befund 18): Kind eingerückt unter dem Elternteil
+  expect(labels.some(l => l.includes('└ Team A'))).toBe(true);
+  expect(labels).toContain('Team B');
   // Kein Gruppen-Dropdown gibt sich mehr als Mitarbeiterliste aus
   expect(labels).not.toContain('Alle Mitarbeiter');
 }

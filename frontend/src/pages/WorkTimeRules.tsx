@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
+import { groupTreeOptions } from '../utils/groupTree';
 import type {
   WorkTimeRulesConfig,
   WorkTimeViolation,
@@ -485,9 +486,7 @@ export default function WorkTimeRules({ role: roleProp }: WorkTimeRulesProps = {
               aria-label="Gruppe auswählen"
             >
               <option value="">— Alle Gruppen —</option>
-              {groups.map(g => (
-                <option key={g.ID} value={g.ID}>{g.NAME}</option>
-              ))}
+              {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
             </select>
           </div>
 

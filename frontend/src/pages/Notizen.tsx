@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useCan } from '../hooks/useCan';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { groupTreeOptions } from '../utils/groupTree';
 
 const WEEKDAY_ABBR = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const MONTH_NAMES = [
@@ -472,7 +473,7 @@ export default function Notizen() {
               className="text-sm border border-slate-300 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value={0}>Alle Gruppen</option>
-              {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
+              {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
             </select>
 
             {/* Employee filter */}

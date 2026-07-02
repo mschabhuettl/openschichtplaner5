@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Berechnungsbasis „Gesamtstunden" im Mitarbeiterformular.** Die vierte
+  Basisoption des Originals (Gesamtstunden über den Beschäftigungszeitraum)
+  lässt sich jetzt auswählen; Anlegen/Ändern verlangen dafür Eintritt,
+  Austritt und Gesamtstunden > 0 (gebündeltes openschichtplaner5-api 1.24.0).
+
 ---
 
 ## [1.21.25] - 2026-07-02

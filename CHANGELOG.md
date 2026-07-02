@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.25] - 2026-07-02
+
 ### Fixed
 
 - **Dark-Mode: letzte helle Reststellen behoben.** Ein vollständiger Durchlauf

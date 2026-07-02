@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.19] - 2026-07-02
+
 ### Fixed
 
 - **Dark-Mode: „Analytics & Trends" und „Audit-Log" sind jetzt durchgängig dunkel.**

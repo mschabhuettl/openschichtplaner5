@@ -9,6 +9,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Schreibgeschützter Betrieb per `SP5_READONLY=true`.** Die komplette Instanz
+  wird zur reinen Leseansicht: der Server lehnt jede Schreibaktion zentral ab
+  (auch für Administratoren), die Oberfläche blendet Schreib-Bedienelemente aus
+  und zeigt dauerhaft ein Hinweis-Banner. Ideal für eine Leseansicht auf
+  read-only eingebundenem Datenbestand (gebündeltes openschichtplaner5-api 1.25.0).
+
 ---
 
 ## [1.21.28] - 2026-07-02

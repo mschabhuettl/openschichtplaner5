@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.15] - 2026-07-02
+
 ### Changed
 
 - **Mitarbeiterlisten sind überall alphabetisch sortiert — wie im Original.**

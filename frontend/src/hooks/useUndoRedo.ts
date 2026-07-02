@@ -52,7 +52,7 @@ export function useUndoRedo({ onUndo, onRedo }: UseUndoRedoOptions): UndoRedoHan
   const [lastAction, setLastAction] = useState<{ action: UndoableAction; direction: 'undo' | 'redo' } | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // Use refs for callbacks so keyboard handler always has latest
+  // Callbacks in Refs halten, damit der Tastatur-Handler immer die neuesten hat
   const onUndoRef = useRef(onUndo);
   const onRedoRef = useRef(onRedo);
   onUndoRef.current = onUndo;
@@ -109,7 +109,7 @@ export function useUndoRedo({ onUndo, onRedo }: UseUndoRedoOptions): UndoRedoHan
       }));
       setLastAction({ action, direction: 'redo' });
     } catch {
-      // If redo fails, don't modify the stack
+      // Scheitert das Redo, den Stack nicht verändern
     } finally {
       setBusy(false);
     }

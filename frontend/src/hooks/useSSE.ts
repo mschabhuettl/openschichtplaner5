@@ -33,10 +33,10 @@ const MAX_RETRY_DELAY = 30_000; // 30s cap
 const INITIAL_RETRY_DELAY = 1_000; // 1s
 
 /**
- * useSSE — connects to /api/v1/events and returns connection status.
+ * useSSE — verbindet sich mit /api/v1/events und liefert den Verbindungsstatus.
  *
- * Automatically reconnects with exponential backoff (unlimited retries).
- * Uses Page Visibility API to pause/resume when tab is hidden/visible.
+ * Verbindet automatisch neu mit exponentiellem Backoff (unbegrenzte Versuche).
+ * Nutzt die Page-Visibility-API zum Pausieren/Fortsetzen bei verstecktem Tab.
  * Passes the auth token as a query parameter (EventSource doesn't support headers).
  */
 export function useSSE({ token, onEvent, baseUrl }: UseSSEOptions) {
@@ -106,7 +106,7 @@ export function useSSE({ token, onEvent, baseUrl }: UseSSEOptions) {
       esRef.current = null;
       setStatus('disconnected');
 
-      // Only retry if tab is visible
+      // Nur bei sichtbarem Tab erneut versuchen
       if (document.visibilityState === 'hidden') return;
 
       // Exponential backoff reconnect (unlimited retries)

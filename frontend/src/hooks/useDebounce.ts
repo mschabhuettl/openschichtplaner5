@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 /**
- * Debounces a value by the specified delay (default 300ms).
+ * Entprellt einen Wert um die angegebene Verzögerung (Default 300 ms).
  * Useful for search inputs to avoid filtering on every keystroke.
  */
 export function useDebounce<T>(value: T, delay = 300): T {

@@ -14,7 +14,7 @@ interface UseApiDataResult<T> {
 }
 
 /**
- * useApiData — lightweight hook for data fetching with loading/error/retry state.
+ * useApiData — leichter Hook fürs Datenladen mit Loading-/Fehler-/Retry-Zustand.
  *
  * Usage:
  *   const { data, loading, error, refresh } = useApiData(() => api.getEmployees());
@@ -31,7 +31,7 @@ export function useApiData<T>(
   // Ref to avoid stale closure in refresh
   const fetchFnRef = useRef(fetchFn);
   fetchFnRef.current = fetchFn;
-  // Monotonic call id: only the most recent invocation may commit its result, so
+  // Monotone Aufruf-ID: nur der jüngste Aufruf darf sein Ergebnis committen —
   // out-of-order responses from rapid dep changes can't overwrite newer data.
   const callIdRef = useRef(0);
 

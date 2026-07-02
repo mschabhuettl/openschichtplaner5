@@ -1,10 +1,11 @@
 import { useEffect, useRef } from 'react';
 
 /**
- * Selector for focusable elements inside a dialog. Note the `:not([disabled])`
- * guards — a disabled button/input must NOT be a tab stop, otherwise the trap
- * can land focus on an inert control (e.g. a "Submit" button that is disabled
- * until the form is valid) and the keyboard user appears stuck.
+ * Selektor für fokussierbare Elemente in einem Dialog. Wichtig sind die
+ * `:not([disabled])`-Guards — ein deaktivierter Button/Input darf KEIN
+ * Tab-Stopp sein, sonst landet die Falle auf einem toten Control (z. B. dem
+ * bis zur Formular-Gültigkeit deaktivierten Speichern-Button) und der
+ * Tastatur-Nutzer wirkt festgefahren.
  */
 const FOCUSABLE_SELECTOR = [
   'a[href]',
@@ -19,24 +20,24 @@ interface FocusTrapOptions {
   /** Called when Escape is pressed while the trap is active. */
   onEscape?: () => void;
   /**
-   * When true, initial focus prefers the first text input/textarea over the
-   * first focusable element — the natural starting point for a form dialog.
+   * Wenn true, bevorzugt der Startfokus das erste Text-Input/Textarea vor dem
+   * ersten fokussierbaren Element — der natürliche Einstieg eines Formulardialogs.
    */
   preferInput?: boolean;
 }
 
 /**
- * useFocusTrap — accessible modal focus management in one hook.
+ * useFocusTrap — barrierefreies Modal-Fokus-Management in einem Hook.
  *
- * While `active` is true it:
- *  - remembers the element that had focus and restores it on close/unmount
- *    (WCAG 2.4.3 — focus order),
- *  - moves focus into the dialog container,
- *  - cycles Tab / Shift+Tab within the container so focus can't escape to the
- *    page behind the modal (WCAG 2.1.2 — no keyboard trap on the page), and
- *  - invokes `onEscape` on the Escape key.
+ * Solange `active` true ist:
+ *  - merkt sich das fokussierte Element und stellt es beim Schließen/Unmount
+ *    wieder her (WCAG 2.4.3 — Fokus-Reihenfolge),
+ *  - setzt den Fokus in den Dialog-Container,
+ *  - hält Tab / Shift+Tab im Container (Fokus kann nicht auf die Seite hinter
+ *    dem Modal entkommen — WCAG 2.1.2, keine Tastaturfalle) und
+ *  - ruft `onEscape` bei der Escape-Taste.
  *
- * Attach the returned ref to the dialog panel element.
+ * Die zurückgegebene Ref ans Dialog-Panel hängen.
  *
  * Usage:
  *   const ref = useFocusTrap<HTMLDivElement>(open, { onEscape: onClose });
@@ -49,9 +50,9 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
   const containerRef = useRef<T>(null);
   const { preferInput = false } = options;
 
-  // Keep the latest onEscape callback in a ref so the keydown handler always
-  // calls the current one without re-arming (and re-focusing) the trap each
-  // time the parent passes a fresh inline callback.
+  // Den neuesten onEscape-Callback in einer Ref halten, damit der keydown-
+  // Handler immer den aktuellen ruft, ohne die Falle bei jedem frischen
+  // Inline-Callback des Parents neu zu scharfen (und neu zu fokussieren).
   const onEscapeRef = useRef(options.onEscape);
   useEffect(() => {
     onEscapeRef.current = options.onEscape;
@@ -67,7 +68,7 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
     const focusables = () =>
       Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
 
-    // Move focus into the dialog (deferred so the panel is mounted/painted).
+    // Fokus in den Dialog setzen (verzögert, bis das Panel gemountet/gezeichnet ist).
     const initial = preferInput
       ? container.querySelector<HTMLElement>(
           'input:not([disabled]), textarea:not([disabled])',
@@ -85,7 +86,7 @@ export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(
 
       const items = focusables();
       if (items.length === 0) {
-        // Nothing focusable — keep focus pinned to the container.
+        // Nichts fokussierbar — Fokus am Container festhalten.
         e.preventDefault();
         return;
       }

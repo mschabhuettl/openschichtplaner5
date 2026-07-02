@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.21] - 2026-07-02
+
 ### Added
 
 - **Ausgeschiedene Mitarbeiter sind in der Urlaubsverwaltung und der

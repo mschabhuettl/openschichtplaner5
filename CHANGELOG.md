@@ -9,6 +9,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Mitarbeiter-Timeline: Ausgeschiedene im Auswahl-Dropdown ausblendbar** —
+  gleiche „Ausgeschiedene anzeigen"-Logik wie im Dienstplan und der
+  Urlaubsverwaltung; der aktuell gewählte Mitarbeiter bleibt immer wählbar.
+
 ---
 
 ## [1.21.26] - 2026-07-02

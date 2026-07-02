@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Gruppen-Filter heißen jetzt „Alle Gruppen".** In Zeitkonto, Überstunden,
+  Überstunden-Dashboard, Verfügbarkeits-Matrix und Statistiken war die
+  Standard-Option des Gruppen-Filters mit „Alle Mitarbeiter" beschriftet,
+  obwohl die Liste Gruppen enthält.
+
 ---
 
 ## [1.21.17] - 2026-07-02

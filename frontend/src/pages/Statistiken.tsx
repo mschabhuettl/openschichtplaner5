@@ -911,7 +911,7 @@ export default function Statistiken() {
           onChange={e => setGroupId(e.target.value ? Number(e.target.value) : undefined)}
           className="px-3 py-1.5 bg-white dark:bg-slate-700 dark:text-slate-200 border dark:border-slate-600 rounded shadow-sm text-sm"
         >
-          <option value="">{t.statistiken.allEmployees}</option>
+          <option value="">{t.statistiken.allGroups}</option>
           {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
         </select>
 

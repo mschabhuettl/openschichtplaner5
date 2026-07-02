@@ -139,7 +139,7 @@ export default function Ueberstunden() {
           onChange={e => setGroupId(e.target.value ? Number(e.target.value) : undefined)}
           className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
         >
-          <option value="">Alle Mitarbeiter</option>
+          <option value="">Alle Gruppen</option>
           {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
         </select>
 

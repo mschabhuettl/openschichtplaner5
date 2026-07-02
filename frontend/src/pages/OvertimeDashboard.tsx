@@ -229,7 +229,7 @@ export default function OvertimeDashboard() {
           className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
           aria-label="Gruppe filtern"
         >
-          <option value="">Alle Mitarbeiter</option>
+          <option value="">Alle Gruppen</option>
           {groups.map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
         </select>
 

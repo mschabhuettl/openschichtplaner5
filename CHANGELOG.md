@@ -9,6 +9,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Removed
+
+- **Verfügbarkeits-Matrix entfernt.** Die Ansicht war ein schreibgeschütztes
+  Duplikat des Dienstplan-Monatsgitters; alle Informationen (und der CSV-Export)
+  stehen im Dienstplan zur Verfügung.
+
 ---
 
 ## [1.21.22] - 2026-07-02

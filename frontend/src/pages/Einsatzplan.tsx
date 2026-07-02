@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { api } from '../api/client';
 import { useSSERefresh } from '../contexts/SSEContext';
 import type { DayEntry, Note, ScheduleTemplate } from '../api/client';
-import type { Group, ShiftType, Workplace } from '../types';
+import type { Group, LeaveType, ShiftType, Workplace } from '../types';
 import { useToast } from '../hooks/useToast';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -864,13 +864,27 @@ function WeekView({
   weekDates,
   entriesByDate,
   shifts,
+  leaveTypes,
+  hideEmpty,
   onContextMenu,
 }: {
   weekDates: string[];
   entriesByDate: Map<string, DayEntry[]>;
   shifts: ShiftType[];
+  leaveTypes: LeaveType[];
+  hideEmpty: boolean;
   onContextMenu?: (e: React.MouseEvent, entry: DayEntry, date: string) => void;
 }) {
+  // Original-Layout (Spec 4.3): unter den Schichtzeilen eine Zeile JE
+  // Abwesenheitsart mit den abwesenden Mitarbeitern; leere Arten sind über
+  // die bestehende Ausblenden-Option (hideEmpty) abschaltbar.
+  const absenceNamesInWeek = new Set<string>();
+  for (const d of weekDates) {
+    for (const e of entriesByDate.get(d) || []) {
+      if (e.kind === 'absence') absenceNamesInWeek.add(e.leave_name || e.display_name);
+    }
+  }
+  const absenceRows = leaveTypes.filter(lt => !hideEmpty || absenceNamesInWeek.has(lt.NAME));
   return (
     <ResponsiveTable stickyFirstCol minWidth="600px">
       <table className="border-collapse text-xs w-full">
@@ -946,32 +960,38 @@ function WeekView({
               })}
             </tr>
           ))}
-          {/* Absence row */}
-          <tr>
-            <td className="sticky left-0 z-10 px-3 py-1.5 border border-gray-200 font-semibold text-sm bg-amber-50 text-amber-700 whitespace-nowrap">
-              Abwesend
-            </td>
-            {weekDates.map(d => {
-              const dayEntries = entriesByDate.get(d) || [];
-              const absences = dayEntries.filter(e => e.kind === 'absence');
-              return (
-                <td key={d} className="border border-gray-200 p-1 align-top bg-amber-50">
-                  <div className="flex flex-col gap-0.5">
-                    {absences.map(e => (
-                      <div
-                        key={e.employee_id}
-                        className="px-1 py-0.5 rounded text-[10px] font-semibold cursor-context-menu"
-                        style={{ backgroundColor: e.color_bk, color: e.color_text, border: '1px solid rgba(0,0,0,0.1)' }}
-                        onContextMenu={ev => { ev.preventDefault(); onContextMenu?.(ev, e, d); }}
-                      >
-                        {e.display_name} {e.employee_name}
-                      </div>
-                    ))}
-                  </div>
-                </td>
-              );
-            })}
-          </tr>
+          {/* Je Abwesenheitsart eine Zeile (Original-Layout) */}
+          {absenceRows.map(lt => (
+            <tr key={`lt-${lt.ID}`} data-testid={`einsatz-absence-row-${lt.ID}`}>
+              <td
+                className="sticky left-0 z-10 px-3 py-1.5 border border-gray-200 font-semibold text-sm whitespace-nowrap"
+                style={{ backgroundColor: lt.COLORBK_HEX || '#fef3c7', color: lt.COLORBK_LIGHT === false ? '#fff' : '#374151' }}
+              >
+                {lt.NAME}
+              </td>
+              {weekDates.map(d => {
+                const absences = (entriesByDate.get(d) || []).filter(
+                  e => e.kind === 'absence' && (e.leave_name || e.display_name) === lt.NAME,
+                ).sort(byEmployeeName);
+                return (
+                  <td key={d} className="border border-gray-200 p-1 align-top">
+                    <div className="flex flex-col gap-0.5">
+                      {absences.map(e => (
+                        <div
+                          key={e.employee_id}
+                          className="px-1 py-0.5 rounded text-[10px] font-semibold cursor-context-menu"
+                          style={{ backgroundColor: e.color_bk, color: e.color_text, border: '1px solid rgba(0,0,0,0.1)' }}
+                          onContextMenu={ev => { ev.preventDefault(); onContextMenu?.(ev, e, d); }}
+                        >
+                          {e.employee_name}
+                        </div>
+                      ))}
+                    </div>
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
           {/* Free row */}
           <tr>
             <td className="sticky left-0 z-10 px-3 py-1.5 border border-gray-200 dark:border-gray-600 font-semibold text-sm bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 whitespace-nowrap">
@@ -1364,11 +1384,14 @@ export default function Einsatzplan() {
   });
 
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
+
+  useEffect(() => { api.getLeaveTypes().then(setLeaveTypes).catch(() => {}); }, []);
   const [selectedDate, setSelectedDate] = useState<Date>(today);
   const [groupId, setGroupId] = useState<number | undefined>(undefined);
 
   const [groups, setGroups] = useState<Group[]>([]);
   const [shifts, setShifts] = useState<ShiftType[]>([]);
+  const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [workplaces, setWorkplaces] = useState<Workplace[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -2040,6 +2063,8 @@ export default function Einsatzplan() {
           />
         ) : (
           <WeekView
+            leaveTypes={leaveTypes}
+            hideEmpty={hideEmptyShifts}
             weekDates={weekDates}
             entriesByDate={filteredWeekEntries}
             shifts={visibleShifts}

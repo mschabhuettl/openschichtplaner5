@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.33] - 2026-07-02
+
 ### Added
 
 - **Schichtmodelle mit Einheit „Tage".** Wie im Original kann ein Zyklus

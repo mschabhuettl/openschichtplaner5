@@ -745,13 +745,14 @@ function EmptyEmployeeCell({
 }
 
 // Day view: one date
-function DayView({
+export function DayView({
   date,
   entries,
   shifts,
   notesByEmpId,
   onNoteClick,
   onContextMenu,
+  listMode = 'alle',
 }: {
   date: string;
   entries: DayEntry[];
@@ -759,6 +760,8 @@ function DayView({
   notesByEmpId?: Map<number, Note[]>;
   onNoteClick?: (e: React.MouseEvent, notes: Note[]) => void;
   onContextMenu?: (e: React.MouseEvent, entry: DayEntry) => void;
+  /** Auflisten-Modus wie das Original (Spec 4.3): alle | arbeitend | abwesend */
+  listMode?: 'alle' | 'arbeitend' | 'abwesend';
 }) {
   // Group entries by shift_id
   const byShift = new Map<number | null, DayEntry[]>();
@@ -789,7 +792,7 @@ function DayView({
         {weekdayName}, {date}
       </h2>
 
-      {shifts.map(shift => {
+      {listMode !== 'abwesend' && shifts.map(shift => {
         const shiftEntries = byShift.get(shift.ID) || [];
         return (
           <div key={shift.ID} className="rounded-lg border overflow-hidden">
@@ -820,7 +823,7 @@ function DayView({
       })}
 
       {/* Absences section */}
-      {byShift.has(null) && (
+      {listMode !== 'arbeitend' && byShift.has(null) && (
         <div className="rounded-lg border overflow-hidden">
           <div className="px-3 py-1.5 text-sm font-bold bg-amber-50 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300">
             Abwesend — {byShift.get(null)!.length} MA
@@ -840,6 +843,7 @@ function DayView({
       )}
 
       {/* Free employees */}
+      {listMode === 'alle' && (
       <div className="rounded-lg border overflow-hidden">
         <div className="px-3 py-1.5 text-sm font-bold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
           Frei / kein Eintrag — {freeEntries.length} MA
@@ -855,6 +859,7 @@ function DayView({
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }
@@ -1384,6 +1389,8 @@ export default function Einsatzplan() {
   });
 
   const [viewMode, setViewMode] = useState<'day' | 'week'>('day');
+  // Auflisten-Modus der Tagesansicht wie das Original (Spec 4.3)
+  const [listMode, setListMode] = useState<'alle' | 'arbeitend' | 'abwesend'>('alle');
 
   useEffect(() => { api.getLeaveTypes().then(setLeaveTypes).catch(() => {}); }, []);
   const [selectedDate, setSelectedDate] = useState<Date>(today);
@@ -1919,6 +1926,21 @@ export default function Einsatzplan() {
           {hideEmptyShifts ? '👁️' : '🚫'} Leere Zeilen ausblenden
         </button>
 
+        {viewMode === 'day' && (
+          <label className="no-print flex items-center gap-1.5 text-sm text-gray-700 dark:text-gray-200">
+            Auflisten:
+            <select
+              value={listMode}
+              onChange={e => setListMode(e.target.value as 'alle' | 'arbeitend' | 'abwesend')}
+              className="border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-sm bg-white dark:bg-gray-700"
+            >
+              <option value="alle">Alle Mitarbeiter</option>
+              <option value="arbeitend">Nur Arbeitende</option>
+              <option value="abwesend">Nur Abwesende</option>
+            </select>
+          </label>
+        )}
+
         {/* Template buttons */}
         {viewMode === 'week' && (
           <button
@@ -2052,6 +2074,7 @@ export default function Einsatzplan() {
         {viewMode === 'day' ? (
           <DayView
             date={toIsoDate(selectedDate)}
+            listMode={listMode}
             entries={filteredDayEntries}
             shifts={visibleShifts}
             notesByEmpId={dayNotesMap}

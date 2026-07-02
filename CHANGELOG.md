@@ -9,6 +9,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Tauschbörse: Anträge nur noch mit Dienst auf beiden Seiten.** Ein Tauschantrag
+  (auch Self-Service) lässt sich nur anlegen, wenn Antragsteller und Partner am
+  jeweils eigenen Datum einen Dienst haben — vorher konnte die Genehmigung eines
+  einseitigen Antrags den vorhandenen Dienst ersatzlos entfernen. Die Genehmigung
+  prüft zusätzlich erneut und lehnt mit klarer Meldung ab, falls ein Dienst seit
+  der Antragstellung entfernt wurde (gebündeltes openschichtplaner5-api 1.23.0).
+
 ---
 
 ## [1.21.16] - 2026-07-02

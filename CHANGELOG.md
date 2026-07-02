@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.20] - 2026-07-02
+
 ### Fixed
 
 - **Jahresübersicht: alle Matrix-Zellen sind gleich groß.** Lange Sonderdienst-

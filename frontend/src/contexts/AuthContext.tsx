@@ -78,6 +78,8 @@ export interface AuthContextType {
   impersonation: { targetName: string; adminName: string } | null;
   /** SP5_READONLY: Instanz ist serverseitig schreibgeschützt (aus /api/health). */
   readOnlyInstance: boolean;
+  /** SP5_CORE_ONLY: Instanz läuft im Original-Funktionsumfang (aus /api/health). */
+  coreOnly: boolean;
   /** Startet die Impersonation eines Benutzers (admin-only, serverseitig geprüft). */
   startImpersonation: (userId: number) => Promise<{ ok: boolean; detail?: string }>;
   /** Beendet die aktive Impersonation und kehrt zur Admin-Identität zurück. */
@@ -251,13 +253,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // erzwingt Rechte/Read-only. Beim Laden aus /auth/me gespiegelt.
   const [impersonation, setImpersonation] = useState<{ targetName: string; adminName: string } | null>(null);
   const [readOnlyInstance, setReadOnlyInstance] = useState(false);
+  const [coreOnly, setCoreOnly] = useState(false);
 
   // SP5_READONLY aus dem öffentlichen Health-Endpunkt — die DURCHSETZUNG ist
   // serverseitig (Middleware, 403); hier nur die konsistente Lese-Optik.
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL ?? ''}/api/health`)
       .then(r => (r.ok ? r.json() : null))
-      .then(h => { if (h && typeof h.readonly === 'boolean') setReadOnlyInstance(h.readonly); })
+      .then(h => {
+        if (h && typeof h.readonly === 'boolean') setReadOnlyInstance(h.readonly);
+        if (h && typeof h.core_only === 'boolean') setCoreOnly(h.core_only);
+      })
       .catch(() => {});
   }, []);
 
@@ -507,6 +513,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider value={{
       user,
       readOnlyInstance,
+      coreOnly,
       isDevMode,
       devViewRole,
       setDevViewRole,

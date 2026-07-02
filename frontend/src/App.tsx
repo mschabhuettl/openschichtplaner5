@@ -32,6 +32,8 @@ import { api, checkApiCompatibility } from './api/client';
 import { DevRoleSwitcher } from './components/DevRoleSwitcher';
 import { ImpersonationBanner } from './components/ImpersonationBanner';
 import { ReadOnlyBanner } from './components/ReadOnlyBanner';
+import { isExtraPath } from './utils/coreOnly';
+import { CoreOnlyGuard } from './components/CoreOnlyGuard';
 import GlobalSearchBar from './components/GlobalSearchBar';
 
 // Lazy-loaded pages — each page group is a separate chunk
@@ -476,8 +478,10 @@ function AppInner() {
   }, [currentItem, location.pathname]);
 
   // Filter nav items based on user role (or simulated devViewRole in dev mode)
-  const { devViewRole } = useAuth();
+  const { devViewRole, coreOnly } = useAuth();
   const visibleItems = navItems.filter(item => {
+    // SP5_CORE_ONLY: EXTRA-Ansichten komplett aus dem Menü (utils/coreOnly)
+    if (coreOnly && item.path && isExtraPath(item.path)) return false;
     if (!item.roles) return true; // no restriction
     if (isDevMode) {
       // In dev mode, simulate visibility based on devViewRole
@@ -831,6 +835,7 @@ function AppInner() {
 
         <main id="main-content" tabIndex={-1} className="flex-1 overflow-auto pb-14 md:pb-0 outline-none">
           {/* Per-page Suspense + ErrorBoundary via <PB> wrapper */}
+          <CoreOnlyGuard>
           <Routes>
             <Route path="/" element={<PB name="Dashboard"><Dashboard /></PB>} />
             <Route path="/konflikte" element={<PB name="Konflikte"><Konflikte /></PB>} />
@@ -912,6 +917,7 @@ function AppInner() {
             <Route path="/login" element={<Navigate to="/" replace />} />
             <Route path="*" element={<PB name="404"><NotFound /></PB>} />
           </Routes>
+          </CoreOnlyGuard>
         </main>
         {/* Bottom navigation bar — mobile only */}
         <BottomNav />

@@ -66,6 +66,8 @@ interface EligibleReplacement {
   shortname: string;
   function: string;
   hrs_week: number;
+  /** Teilt eine Gruppe mit dem Ausfall-MA — solche Kandidaten kommen zuerst. */
+  same_group: boolean;
 }
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? '';
@@ -187,6 +189,8 @@ export default function NotfallPlan() {
     try {
       const eligible = await fetchEligibleReplacements(date, selectedShift, sickEmployee);
       const byId = new Map(employees.map((e) => [e.ID, e]));
+      // Gruppen-Priorität (Reihenfolge kommt vom Backend): eigene Gruppe
+      // zuerst mit vollem Score, Gruppen-fremde nachrangig gekennzeichnet.
       const results: CoverageCandidate[] = eligible.map((c) => ({
         employee: byId.get(c.id) ?? {
           ID: c.id,
@@ -197,8 +201,8 @@ export default function NotfallPlan() {
           HIDE: 0,
           FUNCTION: c.function,
         },
-        score: 100,
-        reasons: [],
+        score: c.same_group ? 100 : 70,
+        reasons: c.same_group ? [] : ['Andere Gruppe'],
         alreadyWorking: false,
         onLeave: false,
         shiftToday: null,

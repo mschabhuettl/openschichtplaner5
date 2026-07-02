@@ -150,9 +150,11 @@ interface EditCycleModalProps {
   onClose: () => void;
 }
 
-function EditCycleModal({ cycle, shifts, onSaved, onClose }: EditCycleModalProps) {
+export function EditCycleModal({ cycle, shifts, onSaved, onClose }: EditCycleModalProps) {
   const [name, setName] = useState(cycle.name);
   const [sizeWeeks, setSizeWeeks] = useState(cycle.weeks);
+  // Einheit wie das Original (5CYCLE.UNIT): 1 = Wochen, 0 = Tage (SIZE in Tagen)
+  const [unit, setUnit] = useState<number>(cycle.unit ?? 1);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -172,15 +174,31 @@ function EditCycleModal({ cycle, shifts, onSaved, onClose }: EditCycleModalProps
   const [grid, setGrid] = useState<(number | null)[][]>(() => buildGrid(cycle, cycle.weeks));
 
   // Rebuild grid when sizeWeeks changes
-  const handleWeeksChange = (newWeeks: number) => {
-    const clamped = Math.max(1, Math.min(12, newWeeks));
-    setSizeWeeks(clamped);
+  // Spaltenzahl des Rasters: Wochen direkt, Tage in 7er-Blöcken (Original-Optik)
+  const columnCount = unit === 1 ? sizeWeeks : Math.ceil(sizeWeeks / 7);
+
+  const resizeGrid = (cols: number) => {
     setGrid(prev => {
-      const next: (number | null)[][] = Array.from({ length: clamped }, (_, wi) =>
+      const next: (number | null)[][] = Array.from({ length: cols }, (_, wi) =>
         wi < prev.length ? [...prev[wi]] : Array(7).fill(null)
       );
       return next;
     });
+  };
+
+  const handleWeeksChange = (newSize: number) => {
+    const max = unit === 1 ? 12 : 84;
+    const clamped = Math.max(1, Math.min(max, newSize));
+    setSizeWeeks(clamped);
+    resizeGrid(unit === 1 ? clamped : Math.ceil(clamped / 7));
+  };
+
+  const handleUnitChange = (newUnit: number) => {
+    setUnit(newUnit);
+    // Umfang beim Wechsel semantisch übernehmen: 2 Wochen ↔ 14 Tage
+    const newSize = newUnit === 0 ? Math.min(84, sizeWeeks * 7) : Math.max(1, Math.round(sizeWeeks / 7));
+    setSizeWeeks(newSize);
+    resizeGrid(newUnit === 1 ? newSize : Math.ceil(newSize / 7));
   };
 
   const setCell = (week: number, day: number, shiftId: number | null) => {
@@ -199,13 +217,15 @@ function EditCycleModal({ cycle, shifts, onSaved, onClose }: EditCycleModalProps
     const entries: { index: number; shift_id: number | null }[] = [];
     grid.forEach((week, wi) => {
       week.forEach((shiftId, di) => {
-        if (shiftId !== null) {
-          entries.push({ index: wi * 7 + di, shift_id: shiftId });
+        const index = wi * 7 + di;
+        // Tages-Modus: Zellen jenseits des Umfangs (letzter Teil-Block) ignorieren
+        if (shiftId !== null && (unit === 1 || index < sizeWeeks)) {
+          entries.push({ index, shift_id: shiftId });
         }
       });
     });
     try {
-      const res = await api.updateShiftCycle(cycle.ID, name.trim(), sizeWeeks, entries);
+      const res = await api.updateShiftCycle(cycle.ID, name.trim(), sizeWeeks, entries, unit);
       onSaved(res.cycle);
     } catch (e) {
       setError(String(e));
@@ -240,12 +260,27 @@ function EditCycleModal({ cycle, shifts, onSaved, onClose }: EditCycleModalProps
                 className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+            <div className="w-40">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Einheit</label>
+              <div className="flex gap-3 py-2">
+                <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                  <input type="radio" checked={unit === 1} onChange={() => handleUnitChange(1)} />
+                  Wochen
+                </label>
+                <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                  <input type="radio" checked={unit === 0} onChange={() => handleUnitChange(0)} />
+                  Tage
+                </label>
+              </div>
+            </div>
             <div className="w-36">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Anzahl Wochen</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {unit === 1 ? 'Anzahl Wochen' : 'Anzahl Tage'}
+              </label>
               <input
                 type="number"
                 min={1}
-                max={12}
+                max={unit === 1 ? 12 : 84}
                 value={sizeWeeks}
                 onChange={e => handleWeeksChange(Number(e.target.value))}
                 className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -255,15 +290,17 @@ function EditCycleModal({ cycle, shifts, onSaved, onClose }: EditCycleModalProps
 
           {/* Week grid */}
           <div>
-            <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">Wochenplan</div>
+            <div className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-3">
+              {unit === 1 ? 'Wochenplan' : 'Tagesplan (fortlaufend, wochentags-unabhängig)'}
+            </div>
             <div className="overflow-x-auto">
               <table className="text-sm border-collapse w-full">
                 <thead className="sticky top-0 z-10 bg-white">
                   <tr>
                     <th scope="col" className="px-3 py-2 text-left text-xs font-semibold text-gray-500 w-16">Tag</th>
-                    {Array.from({ length: sizeWeeks }, (_, wi) => (
+                    {Array.from({ length: columnCount }, (_, wi) => (
                       <th scope="col" key={wi} className="px-2 py-2 text-center text-xs font-semibold text-gray-500 min-w-[130px]">
-                        Woche {wi + 1}
+                        {unit === 1 ? `Woche ${wi + 1}` : `Tage ${wi * 7 + 1}–${Math.min((wi + 1) * 7, sizeWeeks)}`}
                       </th>
                     ))}
                   </tr>
@@ -271,8 +308,14 @@ function EditCycleModal({ cycle, shifts, onSaved, onClose }: EditCycleModalProps
                 <tbody>
                   {WEEKDAYS.map((dayLabel, di) => (
                     <tr key={di} className={`${di % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}>
-                      <td className="px-3 py-1.5 text-xs font-semibold text-gray-600 w-16">{dayLabel}</td>
-                      {Array.from({ length: sizeWeeks }, (_, wi) => {
+                      <td className="px-3 py-1.5 text-xs font-semibold text-gray-600 w-16">
+                        {unit === 1 ? dayLabel : `Tag +${di + 1}`}
+                      </td>
+                      {Array.from({ length: columnCount }, (_, wi) => {
+                        // Tages-Modus: Zellen jenseits des Umfangs deaktivieren
+                        if (unit === 0 && wi * 7 + di >= sizeWeeks) {
+                          return <td key={wi} className="px-2 py-1.5 text-center text-gray-300">–</td>;
+                        }
                         const shiftId = grid[wi]?.[di] ?? null;
                         const shift = shifts.find(s => s.ID === shiftId);
                         return (

@@ -1436,10 +1436,10 @@ export const api = {
     postJSON<{ ok: boolean; record: CycleAssignment }>('/api/v1/shift-cycles/assign', { employee_id, cycle_id, start_date, ...(end_date ? { end_date } : {}) }),
   removeCycleAssignment: (employee_id: number) =>
     deleteReq<{ ok: boolean; removed: number }>(`/api/v1/shift-cycles/assign/${employee_id}`),
-  createShiftCycle: (name: string, size_weeks: number) =>
-    postJSON<{ ok: boolean; cycle: ShiftCycle }>('/api/v1/shift-cycles', { name, size_weeks }),
-  updateShiftCycle: (id: number, name: string, size_weeks: number, entries: { index: number; shift_id: number | null }[]) =>
-    putJSON<{ ok: boolean; cycle: ShiftCycle }>(`/api/v1/shift-cycles/${id}`, { name, size_weeks, entries }),
+  createShiftCycle: (name: string, size_weeks: number, unit: number = 1) =>
+    postJSON<{ ok: boolean; cycle: ShiftCycle }>('/api/v1/shift-cycles', { name, size_weeks, unit }),
+  updateShiftCycle: (id: number, name: string, size_weeks: number, entries: { index: number; shift_id: number | null }[], unit?: number) =>
+    putJSON<{ ok: boolean; cycle: ShiftCycle }>(`/api/v1/shift-cycles/${id}`, { name, size_weeks, entries, unit }),
   deleteShiftCycle: (id: number) =>
     deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/shift-cycles/${id}`),
 

@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.34] - 2026-07-02
+
 ### Added
 
 - **Einsatzplan: Auflisten-Modi der Tagesansicht.** Wie im Original lässt

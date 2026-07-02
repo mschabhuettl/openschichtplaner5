@@ -9,6 +9,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Gruppen-Auswahllisten zeigen die Gruppenhierarchie.** Alle Gruppen-Dropdowns
+  stellen Untergruppen jetzt eingerückt unter ihrer Obergruppe dar (wie die
+  Baumstruktur der Gruppenauswahl im Original) statt als flache Liste.
+
 ---
 
 ## [1.21.21] - 2026-07-02

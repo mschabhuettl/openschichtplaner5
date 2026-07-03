@@ -9,6 +9,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Felddarstellungsmodi im Dienstplan.** Wie im Original lassen sich
+  Dienste und Abwesenheiten getrennt als Kürzel, Farbbalken, Farbbalken
+  und Kürzel oder nur als gefärbter Hintergrund darstellen
+  (Einstellungen → Anzeige; Standard unverändert: Kürzel).
+- **Konfigurierbare Zusatzfeld-Bezeichnungen.** Die Beschriftungen der
+  beiden Stammdaten-Zusatzfelder sind unter Einstellungen → Anzeige
+  anpassbar (wie im Original; dort maschinenlokal, hier als
+  App-Einstellung).
+
 ---
 
 ## [1.21.34] - 2026-07-02

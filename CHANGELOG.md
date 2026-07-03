@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.38] - 2026-07-03
+
 ### Changed
 
 - **Schnellerer Seitenaufbau.** Die Kopfleisten-Komponenten laden ihre

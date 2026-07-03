@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.40] - 2026-07-03
+
 ### Fixed
 
 - **iCal und „Mein Kalender" funktionieren jetzt auch auf echten

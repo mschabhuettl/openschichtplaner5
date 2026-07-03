@@ -9,6 +9,11 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Zusatzfelder im Mitarbeiter-Profil.** Das Profil zeigt die beiden
+  Stammdaten-Zusatzfelder mit ihren konfigurierten Bezeichnungen.
+
 ---
 
 ## [1.21.35] - 2026-07-03

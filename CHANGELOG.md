@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.43] - 2026-07-03
+
 ### Fixed
 
 - **Dienst eintragen nochmals schneller (große Bestände).** Bündelt

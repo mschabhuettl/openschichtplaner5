@@ -16,6 +16,8 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { ConflictDialog } from '../components/ConflictDialog';
 import type { ConflictChoice } from '../components/ConflictDialog';
 import { ScheduleCellStack } from '../components/ScheduleCellStack';
+import type { DarstellungsModi } from '../components/ScheduleCellStack';
+import { useAppSettings } from '../hooks/useAppSettings';
 import { AbsenceIntervalPicker } from '../components/AbsenceIntervalPicker';
 import {
   buildEntryMap, coverageIndicator, coverageTooltip,
@@ -2154,6 +2156,21 @@ export default function Schedule() {
   const [saving, setSaving] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const { showToast } = useToast();
+  const { settings: appSettings } = useAppSettings();
+  // Felddarstellung (Original-Anpassen-Dialog); stabile Referenz für die memoisierte Tabelle
+  const darstellungsModi: DarstellungsModi = useMemo(
+    () => ({
+      dienste: appSettings.display.darstellungDienste || 'kuerzel',
+      abwesenheiten: appSettings.display.darstellungAbwesenheiten || 'kuerzel',
+    }),
+    [appSettings.display.darstellungDienste, appSettings.display.darstellungAbwesenheiten],
+  );
+  // Zellhintergrund nur in den Modi mit gefärbter Fläche (kuerzel/hintergrund)
+  const cellBgFor = (entry: { kind?: string; color_bk?: string } | undefined): string | undefined => {
+    if (!entry) return undefined;
+    const mode = entry.kind === 'absence' ? darstellungsModi.abwesenheiten : darstellungsModi.dienste;
+    return mode === 'farbbalken' || mode === 'farbbalken_kuerzel' ? undefined : entry.color_bk;
+  };
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const { isDark } = useTheme();
   const exportRef = useRef<HTMLDivElement>(null);
@@ -6186,7 +6203,7 @@ export default function Schedule() {
                             ? (isDark ? '#1e3a5f' : '#bfdbfe')
                             : isSelected
                             ? (isDark ? '#1e3060' : '#dbeafe')
-                            : ((cellEntries.length === 1 ? entry?.color_bk : undefined) || (isHol
+                            : ((cellEntries.length === 1 ? cellBgFor(entry) : undefined) || (isHol
                                 ? (isDark ? '#2d1212' : '#fef2f2')
                                 : isToday
                                 ? (isDark ? '#0d1f3c' : '#eff6ff')
@@ -6240,7 +6257,7 @@ export default function Schedule() {
                         {cellEntries.length > 0 ? (
                           <div className="relative">
                             {/* V-1: alle Einträge der Zelle gestapelt; ↻ = Zyklusdienst */}
-                            <ScheduleCellStack entries={cellEntries} />
+                            <ScheduleCellStack entries={cellEntries} modi={darstellungsModi} />
                             {/* Conflict warning icon */}
                             {hasConflict && (
                               <span

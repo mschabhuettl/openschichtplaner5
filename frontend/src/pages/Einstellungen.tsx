@@ -368,6 +368,39 @@ export default function Einstellungen() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Darstellung Dienste
+                </label>
+                <select
+                  value={appSettings.display.darstellungDienste}
+                  onChange={e => updateApp('display', { darstellungDienste: e.target.value as never })}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="kuerzel">Kürzel</option>
+                  <option value="farbbalken">Farbbalken</option>
+                  <option value="farbbalken_kuerzel">Farbbalken und Kürzel</option>
+                  <option value="hintergrund">Nur Hintergrund färben</option>
+                </select>
+                <p className="text-xs text-gray-600 mt-1">Zellendarstellung im Dienstplan (wie im Original einstellbar)</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Darstellung Abwesenheiten
+                </label>
+                <select
+                  value={appSettings.display.darstellungAbwesenheiten}
+                  onChange={e => updateApp('display', { darstellungAbwesenheiten: e.target.value as never })}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="kuerzel">Kürzel</option>
+                  <option value="farbbalken">Farbbalken</option>
+                  <option value="farbbalken_kuerzel">Farbbalken und Kürzel</option>
+                  <option value="hintergrund">Nur Hintergrund färben</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Bezeichnung Zusatzfeld 1
                 </label>
                 <input

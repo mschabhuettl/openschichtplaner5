@@ -30,6 +30,9 @@ export interface DisplaySettings {
    *  Original-Anpassen-Dialog; im Original maschinenlokal, hier App-Setting. */
   zusatzfeldLabel1: string;
   zusatzfeldLabel2: string;
+  /** Felddarstellung im Dienstplan wie der Original-Anpassen-Dialog. */
+  darstellungDienste: 'kuerzel' | 'farbbalken' | 'farbbalken_kuerzel' | 'hintergrund';
+  darstellungAbwesenheiten: 'kuerzel' | 'farbbalken' | 'farbbalken_kuerzel' | 'hintergrund';
 }
 
 export interface UserPreferences {
@@ -66,6 +69,8 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     konflikteSchwellenwert: 3,
     zusatzfeldLabel1: 'Zusatzfeld 1',
     zusatzfeldLabel2: 'Zusatzfeld 2',
+    darstellungDienste: 'kuerzel',
+    darstellungAbwesenheiten: 'kuerzel',
   },
   preferences: {
     bevorzugteAnsicht: 'liste',

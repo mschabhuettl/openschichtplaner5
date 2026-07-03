@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.35] - 2026-07-03
+
 ### Added
 
 - **Felddarstellungsmodi im Dienstplan.** Wie im Original lassen sich

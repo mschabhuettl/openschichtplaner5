@@ -9,6 +9,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Dienste eintragen und umplanen ist deutlich schneller.** Bündelt
+  **libopenschichtplaner5 1.29.2**: Der Duplikat-Schutz beim Eintragen las
+  bei großen Beständen die komplette Dienstplan-Tabelle je Schreibvorgang
+  neu — eine einzelne Zellen-Aktion dauerte dadurch um die halbe Sekunde,
+  Umplanen (Löschen + Neu-Eintragen) rund eine Sekunde. Gemessen bei
+  120 Mitarbeitern: Eintragen jetzt in 130–220 ms statt ~500 ms; auch
+  Löschen, Aktualisieren und Arbeitsplatz-Zuordnung profitieren.
+
 ---
 
 ## [1.21.41] - 2026-07-03

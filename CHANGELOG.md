@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.37] - 2026-07-03
+
 ### Fixed
 
 - **„Mein Kalender" ohne Mitarbeiter-Datensatz.** Konten ohne zugeordneten

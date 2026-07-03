@@ -681,7 +681,9 @@ async function handleResponseError(res: Response): Promise<void> {
   }
   if (!res.ok) {
     const msg = await extractErrorMessage(res);
-    throw new Error(msg);
+    // status transportieren, damit Aufrufer 404 (Zustand) von echten Fehlern
+    // unterscheiden können, ohne Message-Matching.
+    throw Object.assign(new Error(msg), { status: res.status });
   }
 }
 

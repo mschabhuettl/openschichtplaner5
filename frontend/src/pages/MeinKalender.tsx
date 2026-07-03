@@ -56,6 +56,8 @@ export default function MeinKalender() {
   const [wishes, setWishes] = useState<Wish[]>([]);
   const [shifts, setShifts] = useState<ShiftType[]>([]);
   const [loading, setLoading] = useState(false);
+  // Konto ohne MA-Datensatz (self-Endpunkte 404) — Zustand, kein Fehler
+  const [noEmployee, setNoEmployee] = useState(false);
 
   // wish dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -88,8 +90,15 @@ export default function MeinKalender() {
       .then(([sched, w]) => {
         setSchedule(sched);
         setWishes(w);
+        setNoEmployee(false);
       })
-      .catch(() => showToast('Fehler beim Laden', 'error'))
+      .catch((e: { status?: number }) => {
+        if (e?.status === 404) {
+          setNoEmployee(true);  // kein MA-Datensatz — Leerzustand statt Toast
+        } else {
+          showToast('Fehler beim Laden', 'error');
+        }
+      })
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year, month]);
@@ -276,6 +285,21 @@ export default function MeinKalender() {
   const totalBlocked = wishes.filter(w => w.wish_type === 'SPERRUNG').length;
 
   // ── render ─────────────────────────────────────────────────
+  if (noEmployee) {
+    return (
+      <div className={`min-h-screen p-4 md:p-6 ${bg}`}>
+        <h1 className="text-2xl font-bold mb-4">📅 Mein Kalender</h1>
+        <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-xl p-4 max-w-2xl">
+          <p className="text-amber-800 dark:text-amber-300 text-sm">
+            ⚠️ Deinem Konto ist kein Mitarbeiter-Datensatz zugeordnet — es gibt
+            daher keinen persönlichen Kalender. Ein Planer kann die Zuordnung
+            über die Benutzerverwaltung herstellen (Benutzername = Nachname).
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`min-h-screen p-4 md:p-6 ${bg}`}>
       {/* Header */}

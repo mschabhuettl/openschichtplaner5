@@ -235,19 +235,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * Wahrheit). Liefert null bei Fehlern — dann bleibt das bisherige
    * permissions-Objekt (bzw. die Rollen-Defaults) in Kraft.
    */
-  const fetchPermissions = useCallback(async (): Promise<Record<string, boolean> | null> => {
-    try {
+  // /auth/me wird von fetchPermissions UND syncImpersonation gebraucht; ein
+  // geteilter In-flight-Fetch verhindert den doppelten Request beim Session-Restore.
+  const meInflight = useRef<Promise<Record<string, unknown> | null> | null>(null);
+  const fetchMe = useCallback(async (): Promise<Record<string, unknown> | null> => {
+    if (!meInflight.current) {
       const BASE = import.meta.env.VITE_API_URL ?? '';
-      const res = await fetch(`${BASE}/api/v1/auth/me`, { credentials: 'include' });
-      if (!res.ok) return null;
-      const data = await res.json();
-      return data && typeof data.permissions === 'object' && data.permissions !== null
-        ? data.permissions as Record<string, boolean>
-        : null;
-    } catch {
-      return null;
+      meInflight.current = fetch(`${BASE}/api/v1/auth/me`, { credentials: 'include' })
+        .then(res => (res.ok ? res.json() : null))
+        .catch(() => null)
+        .finally(() => { setTimeout(() => { meInflight.current = null; }, 0); }) as Promise<Record<string, unknown> | null>;
     }
+    return meInflight.current;
   }, []);
+
+  const fetchPermissions = useCallback(async (): Promise<Record<string, boolean> | null> => {
+    const data = await fetchMe();
+    return data && typeof data.permissions === 'object' && data.permissions !== null
+      ? data.permissions as Record<string, boolean>
+      : null;
+  }, [fetchMe]);
 
   // P-B Admin-Impersonation („Als Benutzer ansehen") — nur Anzeige; der Server
   // erzwingt Rechte/Read-only. Beim Laden aus /auth/me gespiegelt.
@@ -275,11 +282,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    */
   const syncImpersonation = useCallback(async () => {
     try {
-      const BASE = import.meta.env.VITE_API_URL ?? '';
-      const res = await fetch(`${BASE}/api/v1/auth/me`, { credentials: 'include' });
-      if (!res.ok) return;
-      const me = await res.json();
-      if (me && me._impersonation_active) {
+      const me = await fetchMe() as (Record<string, unknown> & { _impersonation_active?: boolean; NAME?: string; _impersonated_by?: { NAME?: string } }) | null;
+      if (!me) return;
+      if (me._impersonation_active) {
         setUser(applyRoleDefaults(me));
         setImpersonation({
           targetName: me.NAME ?? '?',
@@ -289,7 +294,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setImpersonation(null);
       }
     } catch { /* ignore */ }
-  }, []);
+  }, [fetchMe]);
 
   /** permissions in State + persistierter Session aktualisieren. */
   const applyPermissions = useCallback((perms: Record<string, boolean>) => {

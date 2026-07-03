@@ -410,6 +410,18 @@ function AppInner() {
   const { language, setLanguage } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [conflictCount, setConflictCount] = useState(0);
+  // Nur die sichtbare Kopfleiste mountet ihre Fetch-Komponenten (WarningsCenter,
+  // NotificationBell sitzen in Desktop-Sidebar UND Mobile-Topbar — ohne den Guard
+  // fetchen beide Instanzen dieselben Endpunkte doppelt).
+  const [isMobileHeader, setIsMobileHeader] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const onChange = (e: MediaQueryListEvent) => setIsMobileHeader(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
   const [spotlightOpen, setSpotlightOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [quickHelpOpen, setQuickHelpOpen] = useState(false);
@@ -554,9 +566,9 @@ function AppInner() {
             (cycle 8: 5–6 emoji buttons + logo exceed one row → icons protruded). */}
         <div className="flex flex-wrap items-center justify-end gap-1 min-w-0">
           {/* Warnings Center bell */}
-          <WarningsCenter />
+          {!isMobileHeader && <WarningsCenter />}
           {/* In-App Notifications */}
-          <NotificationBell />
+          {!isMobileHeader && <NotificationBell />}
           {/* Spotlight search button */}
           <button
             onClick={() => setSpotlightOpen(true)}
@@ -819,9 +831,9 @@ function AppInner() {
           <span className="font-semibold text-sm flex-1 min-w-0 truncate px-1">
             <span className="hidden xs:inline">{currentItem?.icon} </span>SP5
           </span>
-          <WarningsCenter />
+          {isMobileHeader && <WarningsCenter />}
           {/* In-App Notifications */}
-          <NotificationBell />
+          {isMobileHeader && <NotificationBell />}
           <button
             onClick={() => setSpotlightOpen(true)}
             title="Schnellsuche"

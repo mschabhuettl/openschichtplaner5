@@ -1,6 +1,6 @@
 # Architektur — openschichtplaner5 (App-Repo)
 
-> Stand: 2026-06-12, Branch `main`. Version: **1.2.0**, MIT.
+> Stand: Juli 2026, Branch `main` (Versionsstand: siehe CHANGELOG/Releases), MIT.
 > Dieses Dokument beschreibt den **IST-Zustand** dieses Repos; die Schwester-Repos
 > [`libopenschichtplaner5`](https://github.com/mschabhuettl/libopenschichtplaner5) (Import: `sp5lib`) und
 > [`openschichtplaner5-api`](https://github.com/mschabhuettl/openschichtplaner5-api) (Import: `sp5api`)
@@ -188,9 +188,10 @@ Frontend-Build (nur bei Änderung) → `uvicorn sp5api.main:app` mit `SP5_BACKEN
 
 **Docker-Images:** `ghcr.io/mschabhuettl/openschichtplaner5:{latest,<semver>,sha-…}`
 (amd64+arm64), ASGI-Entrypoint `sp5api.main:app`, Port 8000, Healthcheck `/api/health`.
-Build-Args `LIB_SOURCE`/`API_SOURCE` defaulten auf die PyPI-Pins
-(`libopenschichtplaner5[postgres]==1.7.0`, `openschichtplaner5-api==1.2.0`) und sind
-mit beliebigen pip-Requirements (z. B. `git+https://…@main`) überschreibbar.
+Build-Args `LIB_SOURCE`/`API_SOURCE` defaulten auf die jeweils aktuellen
+PyPI-Pins (Werte siehe Dockerfile; der `update-pins`-Workflow zieht sie nach
+jedem lib-/api-Release nach) und sind mit beliebigen pip-Requirements
+(z. B. `git+https://…@main`) überschreibbar.
 
 **Stack-Compose:** `docker-compose.stack.yml` fährt den Gesamt-Stack über die
 Geschwister-Repos — App-nginx (Stage `frontend-static` served das SPA, proxied
@@ -276,7 +277,7 @@ Prod-Compose trennt nginx und Backend zusätzlich um SSL/Hardening. Kurz:
   Auto-DB-Migration beim Start (sp5lib `auto_migrate`); dualer DB-Backend SQLite
   (Default) / PostgreSQL (Alembic: eine Initial-Migration `a7d24c64d83e`;
   `backend/scripts/seed_postgresql.py` befüllt PG einmalig aus den DBF-Daten und
-  ist an die aktuelle ORM-Modellstruktur der Library 1.7.0 angepasst).
+  folgt der aktuellen ORM-Modellstruktur der Library).
 
 **Nicht (mehr) in diesem Repo implementiert:** sämtliche REST-/Auth-/Report-Logik
 (→ API-Repo, inkl. pytest-Suite) und die DBF-/ORM-/Sync-/E-Mail-Schicht (→ Lib-Repo).
@@ -298,8 +299,9 @@ Prod-Compose trennt nginx und Backend zusätzlich um SSL/Hardening. Kurz:
 - dazu `python-dotenv` (Seed-Skript) und `ruff` (Lint).
 
 Historie: erst Git-Dependency (`git+https…@main`), inzwischen PyPI-Releases mit
-`>=`-Pins (floatende Minor-Updates); die Docker-Builds pinnen exakt
-(`==1.7.0`/`==1.2.0` als Build-Arg-Default, überschreibbar).
+`>=`-Pins (floatende Minor-Updates); die Docker-Builds pinnen exakt (aktuelle
+`==`-Pins als Build-Arg-Default im Dockerfile, überschreibbar; automatisch
+nachgezogen durch `update-pins`).
 
 ### 4.2 Editable-Workflow für Co-Entwicklung (`make dev-link`)
 

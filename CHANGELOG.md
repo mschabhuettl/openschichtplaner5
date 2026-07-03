@@ -9,6 +9,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **„Mein Kalender" ohne Mitarbeiter-Datensatz.** Konten ohne zugeordneten
+  Mitarbeiter (z. B. reine Admin-Konten) sehen statt eines Fehler-Toasts
+  einen erklärenden Hinweis mit dem Weg zur Zuordnung.
+
 ---
 
 ## [1.21.36] - 2026-07-03

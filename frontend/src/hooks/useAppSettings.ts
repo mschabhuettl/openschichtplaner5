@@ -26,6 +26,10 @@ export interface DisplaySettings {
   wochenbeginn: 'montag' | 'sonntag';
   datumsformat: 'DD.MM.YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD';
   konflikteSchwellenwert: number;     // >= this many = critical
+  /** Bezeichnungen der Stammdaten-Zusatzfelder (5EMPL.ARBITR1/2) — wie der
+   *  Original-Anpassen-Dialog; im Original maschinenlokal, hier App-Setting. */
+  zusatzfeldLabel1: string;
+  zusatzfeldLabel2: string;
 }
 
 export interface UserPreferences {
@@ -60,6 +64,8 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
     wochenbeginn: 'montag',
     datumsformat: 'DD.MM.YYYY',
     konflikteSchwellenwert: 3,
+    zusatzfeldLabel1: 'Zusatzfeld 1',
+    zusatzfeldLabel2: 'Zusatzfeld 2',
   },
   preferences: {
     bevorzugteAnsicht: 'liste',

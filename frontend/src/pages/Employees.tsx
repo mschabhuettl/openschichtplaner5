@@ -8,6 +8,7 @@ import { SkeletonTable } from '../components/Skeleton';
 import { ResponsiveTable } from '../components/ResponsiveTable';
 import type { Employee, ShiftType } from '../types';
 import { useToast } from '../hooks/useToast';
+import { useAppSettings } from '../hooks/useAppSettings';
 import { useAuth } from '../contexts/AuthContext';
 import { useCan } from '../hooks/useCan';
 import { useConfirm } from '../hooks/useConfirm';
@@ -298,6 +299,7 @@ export default function Employees() {
   const [empGroupIds_modal, setEmpGroupIds_modal] = useState<number[]>([]);
   const [groupSaving, setGroupSaving] = useState(false);
   const { showToast } = useToast();
+  const { settings: appSettings } = useAppSettings();
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
   // ── Bulk selection state ─────────────────────────────────────
@@ -1154,12 +1156,12 @@ export default function Employees() {
                     className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Freies Feld 1</label>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">{appSettings.display.zusatzfeldLabel1 || 'Zusatzfeld 1'}</label>
                   <input type="text" value={form.ARBITR1} onChange={e => setForm(f => ({ ...f, ARBITR1: e.target.value }))}
                     className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Freies Feld 2</label>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">{appSettings.display.zusatzfeldLabel2 || 'Zusatzfeld 2'}</label>
                   <input type="text" value={form.ARBITR2} onChange={e => setForm(f => ({ ...f, ARBITR2: e.target.value }))}
                     className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>

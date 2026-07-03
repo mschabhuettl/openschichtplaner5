@@ -365,6 +365,33 @@ export default function Einstellungen() {
                 />
                 <p className="text-xs text-gray-600 mt-1">Ab wie vielen Konflikten = kritisch (rot)</p>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bezeichnung Zusatzfeld 1
+                </label>
+                <input
+                  type="text"
+                  maxLength={40}
+                  value={appSettings.display.zusatzfeldLabel1}
+                  onChange={e => updateApp('display', { zusatzfeldLabel1: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-600 mt-1">Beschriftung des ersten Stammdaten-Zusatzfelds (wie im Original konfigurierbar)</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bezeichnung Zusatzfeld 2
+                </label>
+                <input
+                  type="text"
+                  maxLength={40}
+                  value={appSettings.display.zusatzfeldLabel2}
+                  onChange={e => updateApp('display', { zusatzfeldLabel2: e.target.value })}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
 
             <div className="mt-4 p-3 bg-blue-50 rounded-lg text-xs text-blue-700">

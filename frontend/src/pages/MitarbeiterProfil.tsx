@@ -4,6 +4,7 @@ import { api } from '../api/client';
 import type { ChangelogEntry, EmployeeYearStats, Restriction } from '../api/client';
 import type { Employee, ShiftType, ScheduleEntry } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { useAppSettings } from '../hooks/useAppSettings';
 
 const MONTH_NAMES = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
 const WEEKDAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
@@ -83,6 +84,7 @@ function KPICard({ label, value, icon, color, sub }: KPICard) {
 export default function MitarbeiterProfil() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { settings: appSettings } = useAppSettings();
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [shifts, setShifts] = useState<ShiftType[]>([]);
@@ -389,6 +391,8 @@ export default function MitarbeiterProfil() {
                   ['E-Mail', employee.EMAIL || '–'],
                   ['Straße', employee.STREET || '–'],
                   ['PLZ/Ort', employee.ZIP && employee.TOWN ? `${employee.ZIP} ${employee.TOWN}` : '–'],
+                  [appSettings.display.zusatzfeldLabel1 || 'Zusatzfeld 1', employee.ARBITR1 || '–'],
+                  [appSettings.display.zusatzfeldLabel2 || 'Zusatzfeld 2', employee.ARBITR2 || '–'],
                   ['Notiz 1', employee.NOTE1 || '–'],
                   ['Notiz 2', employee.NOTE2 || '–'],
                   ['Notiz 3', employee.NOTE3 || '–'],

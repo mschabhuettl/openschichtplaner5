@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.36] - 2026-07-03
+
 ### Added
 
 - **Zusatzfelder im Mitarbeiter-Profil.** Das Profil zeigt die beiden

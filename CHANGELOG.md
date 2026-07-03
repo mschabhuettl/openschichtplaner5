@@ -9,6 +9,12 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Build-Korrektur für die unter 1.21.38 dokumentierten Änderungen —
+  1.21.38 wurde wegen eines CI-Fehlers nie als Image veröffentlicht;
+  dieses Release liefert beides aus.
+
 ---
 
 ## [1.21.38] - 2026-07-03

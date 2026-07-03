@@ -198,6 +198,19 @@ Geschwister-Repos — App-nginx (Stage `frontend-static` served das SPA, proxied
 und optionales `postgres`-Profil für den PostgreSQL-Betrieb (`DB_BACKEND=postgresql`);
 der einmalige DBF→PG-Seed-Schritt ist im Kopfkommentar der Datei dokumentiert.
 
+**Container-Grenzen (warum es keinen lib-Container gibt):**
+`libopenschichtplaner5` ist eine **Bibliothek** — kein Dienst, kein Prozess,
+kein Port. Sie wird von der API als Python-Paket importiert (`import sp5lib`)
+und läuft damit **im selben Prozess/Container wie die API**; ein eigener
+lib-Laufzeit-Container würde nur einen erfundenen Netzwerk-Vertrag samt
+Latenz einführen, ohne Isolations- oder Skalierungsgewinn. Getrennt werden
+die **Dienste**: im Stack-Compose laufen SPA-Auslieferung (nginx) und API als
+eigene Container, die über das Compose-Netz sprechen. Das Default-Compose
+bündelt beides bewusst in **einen** Container (uvicorn served SPA + API) —
+gleiche Codebasis, einfachste Betriebsform (z. B. Portainer); das
+Prod-Compose trennt nginx und Backend zusätzlich um SSL/Hardening. Kurz:
+**api ↔ app trennen: ja (Stack); lib herauslösen: nein (Bibliothek).**
+
 ---
 
 ## 3. Was ist implementiert (Feature-Inventur IST-Stand)

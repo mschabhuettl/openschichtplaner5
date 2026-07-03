@@ -119,6 +119,13 @@ and the hardening checklist see **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**.
 A three-service stack (nginx-served SPA + API container + optional PostgreSQL)
 is available via `docker-compose.stack.yml`.
 
+Container boundaries in the stack: the SPA (nginx) and the API run as
+**separate containers**; the library (`libopenschichtplaner5`) is deliberately
+**not** a container of its own — it is a Python package imported by the API
+and runs inside the API process (a separate "lib service" would only add
+network overhead without any isolation benefit). Details in
+[docs/architecture.md](docs/architecture.md).
+
 ### Local without Docker
 
 Prerequisites: Python 3.12+, Node.js 20+, access to the SP5 `.DBF` files.

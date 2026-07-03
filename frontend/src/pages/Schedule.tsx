@@ -4324,6 +4324,10 @@ export default function Schedule() {
       if (showKbHelp) { setShowKbHelp(false); return; }
       if (showDateJump) { setShowDateJump(false); return; }
       setSelection(null);
+      // Beide Kontextmenü-Varianten schließen: der onKeyDown des Menüs selbst
+      // greift nur bei Fokus IM Menü — nach einem Rechtsklick liegt der Fokus
+      // aber auf der Zelle, darum muss der globale Handler mit schließen.
+      setContextMenu(null);
       setBulkContextMenu(null);
       setSelectedCell(null);
       setActivePicker(null);

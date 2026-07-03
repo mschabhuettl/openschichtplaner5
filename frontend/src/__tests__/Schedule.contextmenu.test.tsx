@@ -104,6 +104,10 @@ const fullWriteState: CellWriteState = {
 
 // Verdrahtet EmployeeRow + CellContextMenu wie in Schedule.tsx: Rechtsklick auf
 // eine Zelle öffnet das Menü, Escape (globaler Keydown) schließt es.
+// ACHTUNG Harness-Grenze: der Escape-Listener hier SPIEGELT den globalen
+// Keydown-Handler von Schedule.tsx (Escape-Zweig muss dort setContextMenu(null)
+// aufrufen — der onKeyDown des Menüs selbst greift nur bei Fokus im Menü).
+// Der echte Pfad ist zusätzlich im Browser belegt (ctxmenu-close-Proof).
 function MenuHarness() {
   const [menu, setMenu] = useState<ContextMenuState | null>(null);
   const cb = useMemo(

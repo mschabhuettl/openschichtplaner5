@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Dienstplan-Kontextmenü lässt sich mit Escape schließen.** Der globale
+  Escape-Handler räumte Auswahl und Bulk-Menü, ließ das Zellen-Kontextmenü
+  aber offen (der menü-eigene Handler greift nur bei Fokus im Menü) —
+  Schließen ging bisher nur per Klick außerhalb.
+
 ---
 
 ## [1.21.42] - 2026-07-03

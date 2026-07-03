@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.42] - 2026-07-03
+
 ### Fixed
 
 - **Dienste eintragen und umplanen ist deutlich schneller.** Bündelt

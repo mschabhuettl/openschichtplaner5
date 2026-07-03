@@ -285,7 +285,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const me = await fetchMe() as (Record<string, unknown> & { _impersonation_active?: boolean; NAME?: string; _impersonated_by?: { NAME?: string } }) | null;
       if (!me) return;
       if (me._impersonation_active) {
-        setUser(applyRoleDefaults(me));
+        setUser(applyRoleDefaults(me as Partial<CurrentUser>));
         setImpersonation({
           targetName: me.NAME ?? '?',
           adminName: me._impersonated_by?.NAME ?? '?',

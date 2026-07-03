@@ -9,6 +9,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Schnellerer Seitenaufbau.** Die Kopfleisten-Komponenten laden ihre
+  Daten nur noch einmal (vorher doppelt durch parallel gemountete
+  Desktop- und Mobil-Leiste), und die Anmeldeprüfung bündelt ihre
+  Serverabfragen.
+
 ---
 
 ## [1.21.37] - 2026-07-03

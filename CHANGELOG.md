@@ -9,6 +9,23 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **iCal und „Mein Kalender" funktionieren jetzt auch auf echten
+  Datenbanken.** Bündelt **api 1.28.2**: Der persönliche iCal-Export und der
+  Abo-Feed lösten den Mitarbeiter bisher über die Benutzer-ID auf — auf
+  realen Datenbanken schlug das Erzeugen der Abo-URL deshalb immer fehl
+  (Meldung „Mitarbeiter nicht gefunden"). Jetzt gilt die Namensgleichheit
+  Benutzerkonto ↔ Mitarbeiter, wie bei „Mein Profil"/„Mein Kalender";
+  Konten ohne namensgleichen Mitarbeiter erhalten eine klare Meldung statt
+  eines Fehlers (oder gar eines fremden Kalenders).
+- **Service Worker/PWA repariert (Einzelcontainer-Betrieb).** `/sw.js`,
+  `/manifest.json` und die App-Icons wurden vom SPA-Fallback als HTML
+  ausgeliefert — die Service-Worker-Registrierung schlug bei jedem
+  Seitenaufruf mit einem Konsolenfehler fehl. Root-Statikdateien kommen
+  jetzt mit korrektem MIME-Typ (api 1.28.2); der nginx-Stack-Betrieb war
+  nie betroffen.
+
 ---
 
 ## [1.21.39] - 2026-07-03

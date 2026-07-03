@@ -18,7 +18,11 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   (Meldung „Mitarbeiter nicht gefunden"). Jetzt gilt die Namensgleichheit
   Benutzerkonto ↔ Mitarbeiter, wie bei „Mein Profil"/„Mein Kalender";
   Konten ohne namensgleichen Mitarbeiter erhalten eine klare Meldung statt
-  eines Fehlers (oder gar eines fremden Kalenders).
+  eines Fehlers (oder gar eines fremden Kalenders). Zusätzlich (lib 1.29.1)
+  liegen die Abo-Tokens jetzt im veränderlichen Daten-Verzeichnis statt
+  neben den DBF-Dateien — auf read-only eingebundenen oder periodisch
+  gespiegelten Beständen war das Abo bisher nicht anlegbar bzw. ging beim
+  nächsten Sync verloren; ein Altbestand wird einmalig übernommen.
 - **Service Worker/PWA repariert (Einzelcontainer-Betrieb).** `/sw.js`,
   `/manifest.json` und die App-Icons wurden vom SPA-Fallback als HTML
   ausgeliefert — die Service-Worker-Registrierung schlug bei jedem

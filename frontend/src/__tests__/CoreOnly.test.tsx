@@ -5,7 +5,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { EXTRA_ROUTE_PATHS, isExtraPath } from '../utils/coreOnly';
+import { isExtraPath } from '../utils/coreOnly';
 
 vi.mock('../api/client', () => ({ api: new Proxy({}, { get: () => vi.fn() }) }));
 import { navItems } from '../App';

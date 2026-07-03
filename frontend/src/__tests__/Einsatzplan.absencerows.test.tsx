@@ -3,7 +3,7 @@
  * Abwesenheitsart (unter den Schichtzeilen), Zellen = abwesende Mitarbeiter.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { LanguageProvider } from '../i18n';
 import { ToastProvider } from '../contexts/ToastContext';

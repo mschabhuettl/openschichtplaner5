@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.39] - 2026-07-03
+
 ### Fixed
 
 - Build-Korrektur für die unter 1.21.38 dokumentierten Änderungen —

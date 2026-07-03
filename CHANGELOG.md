@@ -11,6 +11,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Dienst eintragen nochmals schneller (große Bestände).** Bündelt
+  **api 1.28.3**: Die Konflikt-Prüfungen beim Eintragen lesen über den
+  Daten-Cache statt die DBF-Dateien je Aufruf neu zu parsen — eine
+  Zellen-Aktion liegt jetzt bei ~30–130 ms (Tagesbeginn: ~500 ms).
 - **Dienstplan-Kontextmenü lässt sich mit Escape schließen.** Der globale
   Escape-Handler räumte Auswahl und Bulk-Menü, ließ das Zellen-Kontextmenü
   aber offen (der menü-eigene Handler greift nur bei Fokus im Menü) —

@@ -15,6 +15,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Kontextmenü im Dienstplan öffnet auch bei großen Plänen sofort.** Bei
+  Beständen mit vielen Mitarbeitern baute sich das Monats-Raster mit jedem
+  Klick komplett neu auf — das Rechtsklick-Menü erschien dadurch spürbar
+  verzögert (auf schwächeren Rechnern ein bis zwei Sekunden), was wie „reagiert
+  nicht" wirkte. Die Mitarbeiter-Zeilen werden jetzt einzeln aktualisiert:
+  Öffnen des Kontextmenüs, Popups und der Schicht-Tooltip zeichnen nur noch das
+  Nötige neu statt das ganze Raster. Auch das Bewegen der Maus über die Zellen
+  (Tooltip) belastet das Raster nicht mehr. Verhalten und Aussehen bleiben
+  unverändert.
 - **iCal und „Mein Kalender" funktionieren jetzt auch auf echten
   Datenbanken.** Bündelt **api 1.28.2**: Der persönliche iCal-Export und der
   Abo-Feed lösten den Mitarbeiter bisher über die Benutzer-ID auf — auf

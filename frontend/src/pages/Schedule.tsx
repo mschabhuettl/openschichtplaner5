@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef, useMemo, memo, useCallback, type CSSProperties } from 'react';
+import { useState, useEffect, useRef, useMemo, memo, useCallback, forwardRef, useImperativeHandle, type CSSProperties, type Dispatch, type SetStateAction } from 'react';
 import { useSSERefresh } from '../contexts/SSEContext';
 import { useNavigate } from 'react-router-dom';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../contexts/AuthContext';
-import { useGridPermissions, cellWriteState, isPastDate, type CellWriteState } from '../hooks/useGridPermissions';
+import { useGridPermissions, cellWriteState, isPastDate, type CellWriteState, type GridWritePerms } from '../hooks/useGridPermissions';
 import { api } from '../api/client';
 import type { ShiftRequirement, Note, ConflictEntry, CoverageDay, ScheduleTemplate, ScheduleComment, AbsenceTimeOptions, Period } from '../api/client';
 import { periodForDate } from '../utils/periods';
@@ -478,7 +478,7 @@ const EmployeeMultiSelect = memo(function EmployeeMultiSelect({
 });
 
 // ── Note context menu ─────────────────────────────────────────
-interface ContextMenuState {
+export interface ContextMenuState {
   x: number;
   y: number;
   empId: number;
@@ -515,7 +515,7 @@ interface CellContextMenuProps {
   onPaste: (empId: number, day: number) => void;
 }
 
-const CellContextMenu = memo(function CellContextMenu({
+export const CellContextMenu = memo(function CellContextMenu({
   state, entries, shifts, leaveTypes, workplaces, hasClipboard,
   writeState, canNotes, canDeviation,
   onClose, onAddNote, onAssignShift, onAddAbsence,
@@ -2035,6 +2035,469 @@ function WeekTemplateModal({
   );
 }
 
+// ── Zellhintergrund je Darstellungsmodus (pure, entkoppelt von der Komponente) ─
+// Nur in den Modi mit gefärbter Fläche (kuerzel/hintergrund) wird color_bk gesetzt.
+function cellBgForModi(
+  entry: { kind?: string; color_bk?: string } | undefined,
+  modi: DarstellungsModi,
+): string | undefined {
+  if (!entry) return undefined;
+  const mode = entry.kind === 'absence' ? modi.abwesenheiten : modi.dienste;
+  return mode === 'farbbalken' || mode === 'farbbalken_kuerzel' ? undefined : entry.color_bk;
+}
+
+// ── Stabile Zell-Handler, die die memoisierte Zeile vom Eltern-State entkoppeln ─
+export interface RowCallbacks {
+  onCellMouseDown: (e: React.MouseEvent, empId: number, day: number) => void;
+  onCellMouseEnter: (empId: number, day: number) => void;
+  onContextMenu: (e: React.MouseEvent, empId: number, day: number) => void;
+  onDragStart: (e: React.DragEvent, empId: number, day: number) => void;
+  onDragEnd: () => void;
+  onDragOver: (e: React.DragEvent, empId: number, day: number) => void;
+  onDragLeave: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent, empId: number, day: number) => void;
+  onDeleteEntry: (empId: number, day: number) => void;
+  onAddShift: (empId: number, day: number, shiftId: number) => void;
+  onAddAbsence: (empId: number, day: number, leaveTypeId: number, time?: AbsenceTimeOptions) => void;
+}
+
+// Imperative Hover-API: entkoppelt die Positions-Updates (mousemove) komplett vom
+// Grid-Renderpfad — enter/move/leave landen im permanent gemounteten HoverTooltipHost.
+export interface HoverApi {
+  enter: (empId: number, day: number, x: number, y: number) => void;
+  move: (x: number, y: number) => void;
+  leave: () => void;
+}
+
+export interface EmployeeRowProps {
+  emp: Employee;
+  idx: number;
+  displayedDays: number[];
+  year: number;
+  month: number;
+  todayDay: number;
+  todayStr: string;
+  entryMap: Map<string, ScheduleEntry[]>;
+  holidays: Set<string>;
+  notesMap: Map<string, Note[]>;
+  wishMap: Map<string, 'WUNSCH' | 'SPERRUNG'>;
+  conflictMap: Map<string, ConflictEntry[]>;
+  workloadMap: Map<number, { actual: number; target: number }>;
+  shifts: ShiftType[];
+  leaveTypes: LeaveType[];
+  darstellungsModi: DarstellungsModi;
+  grid: GridWritePerms;
+  isDark: boolean;
+  isLeserView: boolean;
+  currentUserEmpId: number | null;
+  showWorkloadBars: boolean;
+  filterShiftId: number | '';
+  filterLeaveId: number | '';
+  // Zeilen-lokale Minimal-Props (nur betroffene Zeilen ändern sich → memo bailt aus)
+  selectedDay: number | null;
+  dndSrcDay: number | null;
+  dndTgtDay: number | null;
+  activePickerDay: number | null;
+  selInBand: boolean;
+  selMinDay: number;
+  selMaxDay: number;
+  isRowHighlighted: boolean;
+  isDimmed: boolean;
+  cb: RowCallbacks;
+  hover: HoverApi;
+  setActivePicker: Dispatch<SetStateAction<{ empId: number; day: number } | null>>;
+  setNotePopup: Dispatch<SetStateAction<NoteDetailPopupState | null>>;
+  setHighlightedEmpId: Dispatch<SetStateAction<number | null>>;
+}
+
+// Eine Mitarbeiter-Zeile des Monats-Grids (Namenszelle + 28–31 Tageszellen).
+// Bei 120 MA × 31 Tagen re-renderte JEDER setState (Kontextmenü, Hover, Popups)
+// das komplette ~3.700-Zellen-Grid — Kontextmenü-Öffnen dauerte unter CPU-Drossel
+// 1,6–2,0 s. Als memo() mit referenzstabilen Handlern und zeilen-lokalen Minimal-
+// Props rendert nur noch die tatsächlich betroffene Zeile neu; unbeteiligte Zeilen
+// bailen aus (analog Jahres-Timeline-Fix). Verhalten identisch.
+const rowPad = (n: number) => String(n).padStart(2, '0');
+
+export const EmployeeRow = memo(function EmployeeRow({
+  emp, idx, displayedDays, year, month, todayDay, todayStr,
+  entryMap, holidays, notesMap, wishMap, conflictMap, workloadMap,
+  shifts, leaveTypes, darstellungsModi, grid, isDark, isLeserView, currentUserEmpId,
+  showWorkloadBars, filterShiftId, filterLeaveId,
+  selectedDay, dndSrcDay, dndTgtDay, activePickerDay, selInBand, selMinDay, selMaxDay,
+  isRowHighlighted, isDimmed, cb, hover, setActivePicker, setNotePopup, setHighlightedEmpId,
+}: EmployeeRowProps) {
+  const rowBg = idx % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+  const empRowStyle = (emp.CBKSCHED != null && emp.CBKSCHED !== 16777215 && emp.CBKSCHED !== 0 && emp.CBKSCHED_HEX)
+    ? { backgroundColor: emp.CBKSCHED_HEX }
+    : undefined;
+  const empNameStyle = (emp.CBKLABEL != null && emp.CBKLABEL !== 16777215 && emp.CBKLABEL !== 0 && emp.CBKLABEL_HEX)
+    ? { backgroundColor: emp.CBKLABEL_HEX, color: emp.CFGLABEL_HEX || '#000' }
+    : undefined;
+  const isCurrentUserRow = isLeserView && currentUserEmpId !== null && currentUserEmpId === emp.ID;
+  return (
+    <tr className={empRowStyle ? undefined : (isCurrentUserRow ? 'bg-blue-50 dark:bg-blue-950/30' : rowBg)} style={empRowStyle}>
+      <td
+        className="sticky left-0 z-10 bg-white dark:bg-gray-900 px-2 sm:px-3 py-1 border-r border-gray-200 border-b border-b-gray-100 font-medium whitespace-nowrap cursor-pointer select-none min-w-[90px] sm:min-w-[160px] max-w-[90px] sm:max-w-[160px] overflow-hidden"
+        style={isRowHighlighted
+          ? { ...(empNameStyle || {}), outline: '2px solid #0ea5e9', outlineOffset: '-2px', backgroundColor: empNameStyle?.backgroundColor ?? '#e0f2fe' }
+          : empNameStyle}
+        title="Klicken zum Hervorheben aller Schichten dieses Mitarbeiters"
+        onClick={() => setHighlightedEmpId(id => id === emp.ID ? null : emp.ID)}
+      >
+        {(() => {
+          // Geburtstags-Indikator: 🎂 wenn der Geburtstag im angezeigten Monat liegt
+          const hasBirthdayThisMonth = emp.BIRTHDAY
+            ? (() => { try { return new Date(emp.BIRTHDAY!).getMonth() + 1 === month; } catch { return false; } })()
+            : false;
+          const birthdayDate = hasBirthdayThisMonth && emp.BIRTHDAY
+            ? new Date(emp.BIRTHDAY).toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit' })
+            : '';
+          const wl = workloadMap.get(emp.ID);
+          const wlPct = wl && wl.target > 0 ? Math.min(100, Math.round((wl.actual / wl.target) * 100)) : null;
+          const wlColor = wlPct === null ? '#94a3b8'
+            : wlPct >= 95 ? '#22c55e'
+            : wlPct >= 70 ? '#f59e0b'
+            : '#ef4444';
+          // Saldo = Ist − Soll (Original-Kennzahl „Saldo", Spec 3.9.2)
+          const wlSaldo = wl ? Math.round((wl.actual - wl.target) * 10) / 10 : 0;
+          const wlTitle = wl ? `Ist ${wl.actual}h / Soll ${wl.target}h · Saldo ${wlSaldo >= 0 ? '+' : ''}${wlSaldo}h (${wlPct ?? '?'}%)` : '';
+          return (
+            <>
+              {emp.BOLD === 1
+                ? <strong className="block truncate text-[11px] sm:text-xs">{emp.NAME}, {emp.FIRSTNAME}</strong>
+                : <span className="block truncate text-[11px] sm:text-xs">{emp.NAME}, {emp.FIRSTNAME}</span>}
+              {isLeserView && currentUserEmpId === emp.ID && (
+                <span className="ml-1.5 rounded bg-blue-500 px-1 py-0.5 text-[10px] font-bold text-white">Du</span>
+              )}
+              {hasBirthdayThisMonth && (
+                <span
+                  className="ml-1 text-sm cursor-default"
+                  title={`🎂 Geburtstag: ${birthdayDate}`}
+                >🎂</span>
+              )}
+              {showWorkloadBars && wl && (
+                <div className="mt-0.5" title={wlTitle}>
+                  <div className="flex items-center gap-1">
+                    <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden" style={{ minWidth: 48 }}>
+                      <div
+                        className="h-full rounded-full transition-all duration-300"
+                        style={{ width: `${wlPct ?? 0}%`, backgroundColor: wlColor }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-mono tabular-nums" style={{ color: wlColor, minWidth: 32 }}>
+                      {wl.actual}h
+                    </span>
+                    {/* Saldo (Ist−Soll) — Original-Kennzahl beim Planen */}
+                    <span
+                      className="text-[10px] font-mono tabular-nums"
+                      style={{ color: wlSaldo >= 0 ? '#16a34a' : '#dc2626', minWidth: 30 }}
+                      title="Saldo (Ist − Soll)"
+                    >
+                      {wlSaldo >= 0 ? '+' : ''}{wlSaldo}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </>
+          );
+        })()}
+      </td>
+      {displayedDays.map(day => {
+        const cellEntries = entryMap.get(`${emp.ID}-${day}`) ?? [];
+        const entry = cellEntries[0]; // Primär-Eintrag (Dienste vor Abwesenheiten)
+        const dateStr = `${year}-${rowPad(month)}-${rowPad(day)}`;
+        const isHol = holidays.has(dateStr);
+        const wd = getWeekday(year, month, day);
+        const isWe = wd === 0 || wd === 6;
+        const isPickerOpen = activePickerDay === day;
+        const noteKey = `${emp.ID}-${dateStr}`;
+        const cellNotes = notesMap.get(noteKey) ?? [];
+        const hasNote = cellNotes.length > 0;
+        const noteTitle = hasNote
+          ? cellNotes.map(n => [n.text1, n.text2].filter(Boolean).join(' ')).join('\n')
+          : '';
+
+        // Wunsch-Indikator dieser Zelle
+        const wishType = wishMap.get(`${emp.ID}-${dateStr}`);
+
+        // Konflikt-Erkennung dieser Zelle
+        const cellConflicts = conflictMap.get(`${emp.ID}_${dateStr}`) ?? [];
+        const hasConflict = cellConflicts.length > 0;
+        const conflictTitle = hasConflict
+          ? cellConflicts.map(c => c.message).join('\n')
+          : '';
+
+        // Highlight if any cell entry matches active filter
+        const isFilterMatch = cellEntries.some(en =>
+          (filterShiftId !== '' && en.shift_id === filterShiftId) ||
+          (filterLeaveId !== '' && en.leave_type_id === filterLeaveId));
+
+        const isSelected = selInBand && day >= selMinDay && day <= selMaxDay;
+        const isCursor = selectedDay === day;
+        const isDndSrc = dndSrcDay === day;
+        const isDndTgt = dndTgtDay === day;
+        const isToday = day === todayDay;
+        const isEmpHighlighted = isRowHighlighted;
+        const isOtherEmpDimmed = isDimmed;
+        // G-1: granulares Schreib-Gating der Zelle (WDUTIES/WABSENCES/WPAST)
+        const cellPerm = cellWriteState(grid, dateStr, todayStr, cellEntries);
+        return (
+          <td
+            key={day}
+            className={`border border-gray-100 p-0 text-center relative group`}
+            title={!isLeserView ? (cellPerm.readOnlyReason ?? undefined) : undefined}
+            draggable={cellPerm.canDrag && !isLeserView}
+            style={{
+              backgroundColor: isDndTgt
+                ? (isDark ? '#1e3a5f' : '#bfdbfe')
+                : isSelected
+                ? (isDark ? '#1e3060' : '#dbeafe')
+                : ((cellEntries.length === 1 ? cellBgForModi(entry, darstellungsModi) : undefined) || (isHol
+                    ? (isDark ? '#2d1212' : '#fef2f2')
+                    : isToday
+                    ? (isDark ? '#0d1f3c' : '#eff6ff')
+                    : isWe
+                    ? (isDark ? '#1a2535' : '#f1f5f9')
+                    : (isDark ? undefined : undefined))),
+              outline: isDndTgt
+                ? '2px solid #1d4ed8'
+                : isDndSrc
+                ? '2px dashed #6b7280'
+                : isCursor
+                ? '2px solid #1d4ed8'
+                : isSelected
+                ? '2px solid #2563eb'
+                : isEmpHighlighted && cellEntries.length > 0
+                ? '2px solid #0ea5e9'
+                : isToday && !hasConflict && !isFilterMatch
+                ? '2px solid #93c5fd'
+                : (hasConflict ? '2px solid #ef4444' : isFilterMatch ? '2px solid #3b82f6' : undefined),
+              outlineOffset: '-2px',
+              opacity: isDndSrc ? 0.5 : isOtherEmpDimmed ? 0.35 : 1,
+              // G-1: Read-only-Cursor, wenn Ziehen/Bearbeiten der Zelle gesperrt ist
+              cursor: cellEntries.length > 0
+                ? (cellPerm.canDrag && !isLeserView ? 'grab' : 'not-allowed')
+                : (cellPerm.pastLocked ? 'not-allowed' : 'default'),
+            }}
+            onMouseDown={e => cb.onCellMouseDown(e, emp.ID, day)}
+            onMouseEnter={e => {
+              cb.onCellMouseEnter(emp.ID, day);
+              hover.enter(emp.ID, day, e.clientX, e.clientY);
+            }}
+            onMouseLeave={() => hover.leave()}
+            onMouseMove={e => hover.move(e.clientX, e.clientY)}
+            onDragStart={e => cb.onDragStart(e, emp.ID, day)}
+            onDragEnd={cb.onDragEnd}
+            onDragOver={e => cb.onDragOver(e, emp.ID, day)}
+            onDragLeave={cb.onDragLeave}
+            onDrop={e => cb.onDrop(e, emp.ID, day)}
+            onContextMenu={e => cb.onContextMenu(e, emp.ID, day)}
+          >
+            {cellEntries.length > 0 ? (
+              <div className="relative">
+                {/* V-1: alle Einträge der Zelle gestapelt; ↻ = Zyklusdienst */}
+                <ScheduleCellStack entries={cellEntries} modi={darstellungsModi} />
+                {/* Conflict warning icon */}
+                {hasConflict && (
+                  <span
+                    className="absolute top-0 left-0 text-[8px] leading-none z-10 cursor-help"
+                    title={conflictTitle}
+                  >
+                    ⚠️
+                  </span>
+                )}
+                {/* Note icon */}
+                {hasNote && (
+                  <button
+                    className="absolute top-0 right-0 text-[8px] leading-none z-10 hover:scale-125 transition-transform"
+                    title={noteTitle}
+                    onClick={e => {
+                      e.stopPropagation();
+                      setNotePopup({ x: e.clientX, y: e.clientY, empId: emp.ID, dateStr, notes: cellNotes });
+                    }}
+                  >
+                    💬
+                  </button>
+                )}
+                {/* Wish / Sperrtag indicator */}
+                {wishType && (
+                  <span
+                    className="absolute bottom-0 left-0 text-[7px] leading-none z-10 cursor-help"
+                    title={wishType === 'WUNSCH' ? 'Schicht-Wunsch eingetragen' : 'Sperrtag eingetragen'}
+                  >
+                    {wishType === 'WUNSCH' ? '🟢' : '🔴'}
+                  </span>
+                )}
+                {/* Delete button on hover — nur mit Schreibrecht (G-1) */}
+                {cellPerm.canDelete && (
+                <button
+                  onClick={() => cb.onDeleteEntry(emp.ID, day)}
+                  onMouseDown={e => e.stopPropagation()}
+                  className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white rounded-full text-[8px] leading-none items-center justify-center hidden group-hover:flex z-10"
+                  title={cellEntries.length > 1 ? 'Alle Einträge löschen' : 'Eintrag löschen'}
+                >
+                  ×
+                </button>
+                )}
+              </div>
+            ) : (
+              <div className="relative h-[34px] sm:h-6">
+                {/* Conflict icon for empty cells */}
+                {hasConflict && (
+                  <span
+                    className="absolute top-0 left-0 text-[8px] leading-none z-10 cursor-help"
+                    title={conflictTitle}
+                  >
+                    ⚠️
+                  </span>
+                )}
+                {/* Note icon for empty cells too */}
+                {hasNote && (
+                  <button
+                    className="absolute top-0 right-0 text-[8px] leading-none z-10 hover:scale-125 transition-transform"
+                    title={noteTitle}
+                    onClick={e => {
+                      e.stopPropagation();
+                      setNotePopup({ x: e.clientX, y: e.clientY, empId: emp.ID, dateStr, notes: cellNotes });
+                    }}
+                  >
+                    💬
+                  </button>
+                )}
+                {/* Wish / Sperrtag indicator for empty cells */}
+                {wishType && (
+                  <span
+                    className="absolute bottom-0 left-0 text-[7px] leading-none z-10 cursor-help"
+                    title={wishType === 'WUNSCH' ? 'Schicht-Wunsch eingetragen' : 'Sperrtag eingetragen'}
+                  >
+                    {wishType === 'WUNSCH' ? '🟢' : '🔴'}
+                  </span>
+                )}
+                {(cellPerm.canAddShift || cellPerm.canAddAbsence) && (
+                <button
+                  onClick={() => setActivePicker(p =>
+                    p?.empId === emp.ID && p?.day === day ? null : { empId: emp.ID, day }
+                  )}
+                  onMouseDown={e => e.stopPropagation()}
+                  className="absolute inset-0 w-full h-full flex items-center justify-center text-gray-300 hover:text-blue-400 hover:bg-blue-50 transition-colors opacity-0 group-hover:opacity-100"
+                  title="Schicht hinzufügen"
+                >
+                  <span className="text-[10px] font-bold">+</span>
+                </button>
+                )}
+              </div>
+            )}
+
+            {/* Shift picker popup — only for users who can edit (G-1: je Eintragsart) */}
+            {isPickerOpen && (cellPerm.canAddShift || cellPerm.canAddAbsence) && (
+              <ShiftPicker
+                shifts={cellPerm.canAddShift ? shifts : []}
+                leaveTypes={cellPerm.canAddAbsence ? leaveTypes : []}
+                onSelect={shiftId => { cb.onAddShift(emp.ID, day, shiftId); setActivePicker(null); }}
+                onAbsence={(leaveTypeId, time) => { cb.onAddAbsence(emp.ID, day, leaveTypeId, time); setActivePicker(null); }}
+                onClose={() => setActivePicker(null)}
+              />
+            )}
+          </td>
+        );
+      })}
+    </tr>
+  );
+});
+
+// ── HoverTooltipHost ─────────────────────────────────────────
+// Permanent gemountete Hülle für den Schicht-Hover-Tooltip. enter/move/leave laufen
+// über den imperativen Handle, sodass Mausbewegungen NUR diesen kleinen Teilbaum
+// re-rendern — das Grid (Schedule) bleibt unberührt. Der Tooltip erscheint 500 ms
+// nach dem Betreten einer Zelle und folgt danach dem Cursor (Original-Verhalten).
+interface HoverTooltipHostHandle {
+  enter: (empId: number, day: number, x: number, y: number) => void;
+  move: (x: number, y: number) => void;
+  leave: () => void;
+}
+
+interface HoverTooltipHostProps {
+  employees: Employee[];
+  entries: ScheduleEntry[];
+  entryMap: Map<string, ScheduleEntry[]>;
+  shifts: ShiftType[];
+  conflictMap: Map<string, ConflictEntry[]>;
+  year: number;
+  month: number;
+}
+
+const HoverTooltipHost = forwardRef<HoverTooltipHostHandle, HoverTooltipHostProps>(
+  function HoverTooltipHost({ employees, entries, entryMap, shifts, conflictMap, year, month }, ref) {
+    const [active, setActive] = useState<{ empId: number; day: number } | null>(null);
+    const [pos, setPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    // Sichtbarkeits-Flag für move() — im Effect (nicht während des Renders) gespiegelt.
+    const activeRef = useRef<{ empId: number; day: number } | null>(null);
+    useEffect(() => { activeRef.current = active; }, [active]);
+
+    useImperativeHandle(ref, () => ({
+      enter: (empId, day, x, y) => {
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(() => {
+          setActive({ empId, day });
+          setPos({ x, y });
+        }, 500);
+      },
+      move: (x, y) => {
+        // Nur solange der Tooltip sichtbar ist die Position aktualisieren (wie Original)
+        if (activeRef.current) setPos({ x, y });
+      },
+      leave: () => {
+        if (timerRef.current) clearTimeout(timerRef.current);
+        setActive(null);
+      },
+    }), []);
+
+    useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
+
+    if (!active) return null;
+    const tooltipEntry = (entryMap.get(`${active.empId}-${active.day}`) ?? [])[0] ?? null;
+    const tooltipShift = tooltipEntry?.shift_id
+      ? (shifts.find(s => s.ID === tooltipEntry.shift_id) ?? null)
+      : null;
+    const dateStr = `${year}-${rowPad(month)}-${rowPad(active.day)}`;
+
+    // ── Schicht-Statistik berechnen ──────────────────────
+    let monthCount: number | undefined;
+    let colleaguesWithSameShift: string[] | undefined;
+    if (tooltipEntry?.kind === 'shift' && tooltipEntry.shift_id != null) {
+      // Zähler: wie oft diese Schicht für diesen MA in diesem Monat
+      monthCount = entries.filter(
+        e => e.employee_id === active.empId && e.shift_id === tooltipEntry.shift_id
+      ).length;
+      // Kollegen: andere MA mit derselben Schicht heute
+      colleaguesWithSameShift = entries
+        .filter(e =>
+          e.employee_id !== active.empId &&
+          e.shift_id === tooltipEntry.shift_id &&
+          e.date === dateStr
+        )
+        .map(e => {
+          const emp = employees.find(x => x.ID === e.employee_id);
+          return emp ? `${emp.NAME}, ${emp.FIRSTNAME}` : `MA ${e.employee_id}`;
+        });
+    }
+
+    return (
+      <HoverTooltip
+        state={{ empId: active.empId, day: active.day, x: pos.x, y: pos.y }}
+        emp={employees.find(e => e.ID === active.empId) ?? null}
+        entry={tooltipEntry}
+        dateStr={dateStr}
+        cellConflicts={conflictMap.get(`${active.empId}_${dateStr}`) ?? []}
+        shift={tooltipShift}
+        monthCount={monthCount}
+        colleaguesWithSameShift={colleaguesWithSameShift}
+      />
+    );
+  },
+);
+
 // ── Main Schedule Component ───────────────────────────────────
 export default function Schedule() {
   const now = new Date();
@@ -2043,6 +2506,12 @@ export default function Schedule() {
   const { devViewRole, user } = useAuth();
   // G-1: granulare 5USER-Schreibrechte (WDUTIES/WABSENCES/WNOTES/WDEVIATION/WPAST)
   const grid = useGridPermissions();
+  // Referenzstabile Kopie für die memoisierten Grid-Zeilen (useGridPermissions liefert
+  // pro Render ein neues Objekt — das würde den memo-Bailout brechen).
+  const gridStable = useMemo<GridWritePerms>(
+    () => ({ duties: grid.duties, absences: grid.absences, notes: grid.notes, deviation: grid.deviation, past: grid.past }),
+    [grid.duties, grid.absences, grid.notes, grid.deviation, grid.past],
+  );
   // Leser view: read-only mode (devViewRole 'lese' or real Leser role)
   const isLeserView = devViewRole === 'lese' || user?.role === 'Leser';
   // Heutiges Datum (ISO) für das WPAST-Gating von Vergangenheits-Edits
@@ -2165,12 +2634,6 @@ export default function Schedule() {
     }),
     [appSettings.display.darstellungDienste, appSettings.display.darstellungAbwesenheiten],
   );
-  // Zellhintergrund nur in den Modi mit gefärbter Fläche (kuerzel/hintergrund)
-  const cellBgFor = (entry: { kind?: string; color_bk?: string } | undefined): string | undefined => {
-    if (!entry) return undefined;
-    const mode = entry.kind === 'absence' ? darstellungsModi.abwesenheiten : darstellungsModi.dienste;
-    return mode === 'farbbalken' || mode === 'farbbalken_kuerzel' ? undefined : entry.color_bk;
-  };
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const { isDark } = useTheme();
   const exportRef = useRef<HTMLDivElement>(null);
@@ -2219,8 +2682,15 @@ export default function Schedule() {
   const [dndTarget, setDndTarget] = useState<{ empId: number; day: number } | null>(null);
 
   // ── Hover Tooltip ──────────────────────────────────────────
-  const [hoverTooltip, setHoverTooltip] = useState<HoverTooltipState | null>(null);
-  const hoverTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Der Tooltip lebt entkoppelt im permanent gemounteten HoverTooltipHost; enter/
+  // move/leave laufen imperativ über diesen Ref, damit Mausbewegungen das Grid
+  // NICHT re-rendern (Original-Perf-Ursache).
+  const hoverHostRef = useRef<HoverTooltipHostHandle>(null);
+  const hover = useMemo<HoverApi>(() => ({
+    enter: (empId, day, x, y) => hoverHostRef.current?.enter(empId, day, x, y),
+    move: (x, y) => hoverHostRef.current?.move(x, y),
+    leave: () => hoverHostRef.current?.leave(),
+  }), []);
 
   // ── Mitarbeiter-Hervorhebung ───────────────────────────────
   const [highlightedEmpId, setHighlightedEmpId] = useState<number | null>(null);
@@ -2524,7 +2994,9 @@ export default function Schedule() {
   // ── Computed values ─────────────────────────────────────────
 
   const daysInMonth = getDaysInMonth(year, month);
-  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  // Referenzstabil halten — die memoisierten Grid-Zeilen bailen nur aus, wenn
+  // ihre Array-Props zwischen Renders identisch bleiben.
+  const days = useMemo(() => Array.from({ length: daysInMonth }, (_, i) => i + 1), [daysInMonth]);
   const pad = (n: number) => String(n).padStart(2, '0');
 
   // ── Today highlight ─────────────────────────────────────────
@@ -2574,7 +3046,10 @@ export default function Schedule() {
   }, [year, month, mobileWeekOffset]);
 
   // Displayed days: 7-day week on mobile, full month on desktop
-  const displayedDays = (isMobile || forceWeekView) ? mobileWeekData.weekDaysInMonth : days;
+  const displayedDays = useMemo(
+    () => (isMobile || forceWeekView) ? mobileWeekData.weekDaysInMonth : days,
+    [isMobile, forceWeekView, mobileWeekData, days],
+  );
 
   // Entry lookup: "empId-day" → ALLE Einträge des Tages (V-1, Spec 6.7)
   const entryMap = useMemo(() => buildEntryMap(entries), [entries]);
@@ -2793,6 +3268,20 @@ export default function Schedule() {
     visibleEmployees.forEach((e, i) => m.set(e.ID, i));
     return m;
   }, [visibleEmployees]);
+
+  // Auswahl-Rechteck einmal als Index-/Tagesband auflösen, damit die memoisierten
+  // Zeilen je nur skalare Minimal-Props (im Band? welche Tage?) erhalten.
+  const selBand = useMemo(() => {
+    if (!selection) return null;
+    const si = empIndexMap.get(selection.startEmpId) ?? -1;
+    const ei = empIndexMap.get(selection.endEmpId) ?? -1;
+    if (si === -1 || ei === -1) return null;
+    return {
+      minEi: Math.min(si, ei), maxEi: Math.max(si, ei),
+      minDay: Math.min(selection.startDay, selection.endDay),
+      maxDay: Math.max(selection.startDay, selection.endDay),
+    };
+  }, [selection, empIndexMap]);
 
   // Liegt die Zelle (empId, day) im aktuellen Auswahl-Rechteck?
   const isCellSelected = (empId: number, day: number): boolean => {
@@ -3740,6 +4229,39 @@ export default function Schedule() {
     setDndSource(null);
     setDndTarget(null);
   };
+
+  // ── Referenzstabile Zell-Handler für die memoisierten Grid-Zeilen ──
+  // Die Handler oben werden pro Render neu erzeugt (sie schließen über aktuellen
+  // State). Ohne Stabilisierung würde die Row-memo bei JEDEM Render neu rendern.
+  // Muster wie kbHandlerRef: eine pro Render aktualisierte Live-Referenz plus ein
+  // einmalig memoisiertes Wrapper-Objekt mit stabiler Identität.
+  const rowCbLiveRef = useRef<RowCallbacks>(null as unknown as RowCallbacks);
+  rowCbLiveRef.current = {
+    onCellMouseDown: handleCellMouseDown,
+    onCellMouseEnter: handleCellMouseEnter,
+    onContextMenu: handleContextMenu,
+    onDragStart: handleDragStart,
+    onDragEnd: handleDragEnd,
+    onDragOver: handleDragOver,
+    onDragLeave: handleDragLeave,
+    onDrop: handleDrop,
+    onDeleteEntry: (empId, day) => handleDeleteEntry(empId, day),
+    onAddShift: handleAddShift,
+    onAddAbsence: handleAddAbsence,
+  };
+  const rowCb = useMemo<RowCallbacks>(() => ({
+    onCellMouseDown: (e, empId, day) => rowCbLiveRef.current.onCellMouseDown(e, empId, day),
+    onCellMouseEnter: (empId, day) => rowCbLiveRef.current.onCellMouseEnter(empId, day),
+    onContextMenu: (e, empId, day) => rowCbLiveRef.current.onContextMenu(e, empId, day),
+    onDragStart: (e, empId, day) => rowCbLiveRef.current.onDragStart(e, empId, day),
+    onDragEnd: () => rowCbLiveRef.current.onDragEnd(),
+    onDragOver: (e, empId, day) => rowCbLiveRef.current.onDragOver(e, empId, day),
+    onDragLeave: (e) => rowCbLiveRef.current.onDragLeave(e),
+    onDrop: (e, empId, day) => rowCbLiveRef.current.onDrop(e, empId, day),
+    onDeleteEntry: (empId, day) => rowCbLiveRef.current.onDeleteEntry(empId, day),
+    onAddShift: (empId, day, shiftId) => rowCbLiveRef.current.onAddShift(empId, day, shiftId),
+    onAddAbsence: (empId, day, leaveTypeId, time) => rowCbLiveRef.current.onAddAbsence(empId, day, leaveTypeId, time),
+  }), []);
 
   // ── Keyboard handler (ref pattern avoids stale closures) ────
   const kbHandlerRef = useRef<(e: KeyboardEvent) => void>(() => {});
@@ -6077,292 +6599,49 @@ export default function Schedule() {
 
               // Employee row
               const emp = row.employee!;
-              const rowBg = idx % 2 === 0 ? 'bg-white' : 'bg-gray-50';
-              const empRowStyle = (emp.CBKSCHED != null && emp.CBKSCHED !== 16777215 && emp.CBKSCHED !== 0 && emp.CBKSCHED_HEX)
-                ? { backgroundColor: emp.CBKSCHED_HEX }
-                : undefined;
-              const empNameStyle = (emp.CBKLABEL != null && emp.CBKLABEL !== 16777215 && emp.CBKLABEL !== 0 && emp.CBKLABEL_HEX)
-                ? { backgroundColor: emp.CBKLABEL_HEX, color: emp.CFGLABEL_HEX || '#000' }
-                : undefined;
-              const isCurrentUserRow = isLeserView && currentUserEmpId !== null && currentUserEmpId === emp.ID;
+              const ti = empIndexMap.get(emp.ID) ?? -1;
+              const selInBand = selBand != null && ti >= selBand.minEi && ti <= selBand.maxEi;
               return (
-                <tr key={emp.ID} className={empRowStyle ? undefined : (isCurrentUserRow ? 'bg-blue-50 dark:bg-blue-950/30' : rowBg)} style={empRowStyle}>
-                  <td
-                    className="sticky left-0 z-10 bg-white dark:bg-gray-900 px-2 sm:px-3 py-1 border-r border-gray-200 border-b border-b-gray-100 font-medium whitespace-nowrap cursor-pointer select-none min-w-[90px] sm:min-w-[160px] max-w-[90px] sm:max-w-[160px] overflow-hidden"
-                    style={highlightedEmpId === emp.ID
-                      ? { ...(empNameStyle || {}), outline: '2px solid #0ea5e9', outlineOffset: '-2px', backgroundColor: empNameStyle?.backgroundColor ?? '#e0f2fe' }
-                      : empNameStyle}
-                    title="Klicken zum Hervorheben aller Schichten dieses Mitarbeiters"
-                    onClick={() => setHighlightedEmpId(id => id === emp.ID ? null : emp.ID)}
-                  >
-                    {(() => {
-                      // Geburtstags-Indikator: 🎂 wenn der Geburtstag im angezeigten Monat liegt
-                      const hasBirthdayThisMonth = emp.BIRTHDAY
-                        ? (() => { try { return new Date(emp.BIRTHDAY!).getMonth() + 1 === month; } catch { return false; } })()
-                        : false;
-                      const birthdayDate = hasBirthdayThisMonth && emp.BIRTHDAY
-                        ? new Date(emp.BIRTHDAY).toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit' })
-                        : '';
-                      const wl = workloadMap.get(emp.ID);
-                      const wlPct = wl && wl.target > 0 ? Math.min(100, Math.round((wl.actual / wl.target) * 100)) : null;
-                      const wlColor = wlPct === null ? '#94a3b8'
-                        : wlPct >= 95 ? '#22c55e'
-                        : wlPct >= 70 ? '#f59e0b'
-                        : '#ef4444';
-                      // Saldo = Ist − Soll (Original-Kennzahl „Saldo", Spec 3.9.2)
-                      const wlSaldo = wl ? Math.round((wl.actual - wl.target) * 10) / 10 : 0;
-                      const wlTitle = wl ? `Ist ${wl.actual}h / Soll ${wl.target}h · Saldo ${wlSaldo >= 0 ? '+' : ''}${wlSaldo}h (${wlPct ?? '?'}%)` : '';
-                      return (
-                        <>
-                          {emp.BOLD === 1
-                            ? <strong className="block truncate text-[11px] sm:text-xs">{emp.NAME}, {emp.FIRSTNAME}</strong>
-                            : <span className="block truncate text-[11px] sm:text-xs">{emp.NAME}, {emp.FIRSTNAME}</span>}
-                          {isLeserView && currentUserEmpId === emp.ID && (
-                            <span className="ml-1.5 rounded bg-blue-500 px-1 py-0.5 text-[10px] font-bold text-white">Du</span>
-                          )}
-                          {hasBirthdayThisMonth && (
-                            <span
-                              className="ml-1 text-sm cursor-default"
-                              title={`🎂 Geburtstag: ${birthdayDate}`}
-                            >🎂</span>
-                          )}
-                          {showWorkloadBars && wl && (
-                            <div className="mt-0.5" title={wlTitle}>
-                              <div className="flex items-center gap-1">
-                                <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden" style={{ minWidth: 48 }}>
-                                  <div
-                                    className="h-full rounded-full transition-all duration-300"
-                                    style={{ width: `${wlPct ?? 0}%`, backgroundColor: wlColor }}
-                                  />
-                                </div>
-                                <span className="text-[10px] font-mono tabular-nums" style={{ color: wlColor, minWidth: 32 }}>
-                                  {wl.actual}h
-                                </span>
-                                {/* Saldo (Ist−Soll) — Original-Kennzahl beim Planen */}
-                                <span
-                                  className="text-[10px] font-mono tabular-nums"
-                                  style={{ color: wlSaldo >= 0 ? '#16a34a' : '#dc2626', minWidth: 30 }}
-                                  title="Saldo (Ist − Soll)"
-                                >
-                                  {wlSaldo >= 0 ? '+' : ''}{wlSaldo}
-                                </span>
-                              </div>
-                            </div>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </td>
-                  {displayedDays.map(day => {
-                    const cellEntries = entryMap.get(`${emp.ID}-${day}`) ?? [];
-                    const entry = cellEntries[0]; // Primär-Eintrag (Dienste vor Abwesenheiten)
-                    const dateStr = `${year}-${pad(month)}-${pad(day)}`;
-                    const isHol = holidays.has(dateStr);
-                    const wd = getWeekday(year, month, day);
-                    const isWe = wd === 0 || wd === 6;
-                    const isPickerOpen = activePicker?.empId === emp.ID && activePicker?.day === day;
-                    const noteKey = `${emp.ID}-${dateStr}`;
-                    const cellNotes = notesMap.get(noteKey) ?? [];
-                    const hasNote = cellNotes.length > 0;
-                    const noteTitle = hasNote
-                      ? cellNotes.map(n => [n.text1, n.text2].filter(Boolean).join(' ')).join('\n')
-                      : '';
-
-                    // Wunsch-Indikator dieser Zelle
-                    const wishType = wishMap.get(`${emp.ID}-${dateStr}`);
-
-                    // Konflikt-Erkennung dieser Zelle
-                    const cellConflicts = conflictMap.get(`${emp.ID}_${dateStr}`) ?? [];
-                    const hasConflict = cellConflicts.length > 0;
-                    const conflictTitle = hasConflict
-                      ? cellConflicts.map(c => c.message).join('\n')
-                      : '';
-
-                    // Highlight if any cell entry matches active filter
-                    const isFilterMatch = cellEntries.some(en =>
-                      (filterShiftId !== '' && en.shift_id === filterShiftId) ||
-                      (filterLeaveId !== '' && en.leave_type_id === filterLeaveId));
-
-                    const isSelected = isCellSelected(emp.ID, day);
-                    const isCursor = selectedCell?.empId === emp.ID && selectedCell?.day === day;
-                    const isDndSrc = dndSource?.empId === emp.ID && dndSource?.day === day;
-                    const isDndTgt = dndTarget?.empId === emp.ID && dndTarget?.day === day;
-                    const isToday = day === todayDay;
-                    const isEmpHighlighted = highlightedEmpId !== null && highlightedEmpId === emp.ID;
-                    const isOtherEmpDimmed = highlightedEmpId !== null && highlightedEmpId !== emp.ID;
-                    // G-1: granulares Schreib-Gating der Zelle (WDUTIES/WABSENCES/WPAST)
-                    const cellPerm = cellWriteState(grid, dateStr, todayStr, cellEntries);
-                    return (
-                      <td
-                        key={day}
-                        className={`border border-gray-100 p-0 text-center relative group`}
-                        title={!isLeserView ? (cellPerm.readOnlyReason ?? undefined) : undefined}
-                        draggable={cellPerm.canDrag && !isLeserView}
-                        style={{
-                          backgroundColor: isDndTgt
-                            ? (isDark ? '#1e3a5f' : '#bfdbfe')
-                            : isSelected
-                            ? (isDark ? '#1e3060' : '#dbeafe')
-                            : ((cellEntries.length === 1 ? cellBgFor(entry) : undefined) || (isHol
-                                ? (isDark ? '#2d1212' : '#fef2f2')
-                                : isToday
-                                ? (isDark ? '#0d1f3c' : '#eff6ff')
-                                : isWe
-                                ? (isDark ? '#1a2535' : '#f1f5f9')
-                                : (isDark ? undefined : undefined))),
-                          outline: isDndTgt
-                            ? '2px solid #1d4ed8'
-                            : isDndSrc
-                            ? '2px dashed #6b7280'
-                            : isCursor
-                            ? '2px solid #1d4ed8'
-                            : isSelected
-                            ? '2px solid #2563eb'
-                            : isEmpHighlighted && cellEntries.length > 0
-                            ? '2px solid #0ea5e9'
-                            : isToday && !hasConflict && !isFilterMatch
-                            ? '2px solid #93c5fd'
-                            : (hasConflict ? '2px solid #ef4444' : isFilterMatch ? '2px solid #3b82f6' : undefined),
-                          outlineOffset: '-2px',
-                          opacity: isDndSrc ? 0.5 : isOtherEmpDimmed ? 0.35 : 1,
-                          // G-1: Read-only-Cursor, wenn Ziehen/Bearbeiten der Zelle gesperrt ist
-                          cursor: cellEntries.length > 0
-                            ? (cellPerm.canDrag && !isLeserView ? 'grab' : 'not-allowed')
-                            : (cellPerm.pastLocked ? 'not-allowed' : 'default'),
-                        }}
-                        onMouseDown={e => handleCellMouseDown(e, emp.ID, day)}
-                        onMouseEnter={e => {
-                          handleCellMouseEnter(emp.ID, day);
-                          if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
-                          hoverTimerRef.current = setTimeout(() => {
-                            setHoverTooltip({ empId: emp.ID, day, x: e.clientX, y: e.clientY });
-                          }, 500);
-                        }}
-                        onMouseLeave={() => {
-                          if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current);
-                          setHoverTooltip(null);
-                        }}
-                        onMouseMove={e => {
-                          if (hoverTooltip?.empId === emp.ID && hoverTooltip?.day === day) {
-                            setHoverTooltip((prev: HoverTooltipState | null) => prev ? { ...prev, x: e.clientX, y: e.clientY } : null);
-                          }
-                        }}
-                        onDragStart={e => handleDragStart(e, emp.ID, day)}
-                        onDragEnd={handleDragEnd}
-                        onDragOver={e => handleDragOver(e, emp.ID, day)}
-                        onDragLeave={handleDragLeave}
-                        onDrop={e => handleDrop(e, emp.ID, day)}
-                        onContextMenu={e => handleContextMenu(e, emp.ID, day)}
-                      >
-                        {cellEntries.length > 0 ? (
-                          <div className="relative">
-                            {/* V-1: alle Einträge der Zelle gestapelt; ↻ = Zyklusdienst */}
-                            <ScheduleCellStack entries={cellEntries} modi={darstellungsModi} />
-                            {/* Conflict warning icon */}
-                            {hasConflict && (
-                              <span
-                                className="absolute top-0 left-0 text-[8px] leading-none z-10 cursor-help"
-                                title={conflictTitle}
-                              >
-                                ⚠️
-                              </span>
-                            )}
-                            {/* Note icon */}
-                            {hasNote && (
-                              <button
-                                className="absolute top-0 right-0 text-[8px] leading-none z-10 hover:scale-125 transition-transform"
-                                title={noteTitle}
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  setNotePopup({ x: e.clientX, y: e.clientY, empId: emp.ID, dateStr, notes: cellNotes });
-                                }}
-                              >
-                                💬
-                              </button>
-                            )}
-                            {/* Wish / Sperrtag indicator */}
-                            {wishType && (
-                              <span
-                                className="absolute bottom-0 left-0 text-[7px] leading-none z-10 cursor-help"
-                                title={wishType === 'WUNSCH' ? 'Schicht-Wunsch eingetragen' : 'Sperrtag eingetragen'}
-                              >
-                                {wishType === 'WUNSCH' ? '🟢' : '🔴'}
-                              </span>
-                            )}
-                            {/* Delete button on hover — nur mit Schreibrecht (G-1) */}
-                            {cellPerm.canDelete && (
-                            <button
-                              onClick={() => handleDeleteEntry(emp.ID, day)}
-                              onMouseDown={e => e.stopPropagation()}
-                              className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white rounded-full text-[8px] leading-none items-center justify-center hidden group-hover:flex z-10"
-                              title={cellEntries.length > 1 ? 'Alle Einträge löschen' : 'Eintrag löschen'}
-                            >
-                              ×
-                            </button>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="relative h-[34px] sm:h-6">
-                            {/* Conflict icon for empty cells */}
-                            {hasConflict && (
-                              <span
-                                className="absolute top-0 left-0 text-[8px] leading-none z-10 cursor-help"
-                                title={conflictTitle}
-                              >
-                                ⚠️
-                              </span>
-                            )}
-                            {/* Note icon for empty cells too */}
-                            {hasNote && (
-                              <button
-                                className="absolute top-0 right-0 text-[8px] leading-none z-10 hover:scale-125 transition-transform"
-                                title={noteTitle}
-                                onClick={e => {
-                                  e.stopPropagation();
-                                  setNotePopup({ x: e.clientX, y: e.clientY, empId: emp.ID, dateStr, notes: cellNotes });
-                                }}
-                              >
-                                💬
-                              </button>
-                            )}
-                            {/* Wish / Sperrtag indicator for empty cells */}
-                            {wishType && (
-                              <span
-                                className="absolute bottom-0 left-0 text-[7px] leading-none z-10 cursor-help"
-                                title={wishType === 'WUNSCH' ? 'Schicht-Wunsch eingetragen' : 'Sperrtag eingetragen'}
-                              >
-                                {wishType === 'WUNSCH' ? '🟢' : '🔴'}
-                              </span>
-                            )}
-                            {(cellPerm.canAddShift || cellPerm.canAddAbsence) && (
-                            <button
-                              onClick={() => setActivePicker(p =>
-                                p?.empId === emp.ID && p?.day === day ? null : { empId: emp.ID, day }
-                              )}
-                              onMouseDown={e => e.stopPropagation()}
-                              className="absolute inset-0 w-full h-full flex items-center justify-center text-gray-300 hover:text-blue-400 hover:bg-blue-50 transition-colors opacity-0 group-hover:opacity-100"
-                              title="Schicht hinzufügen"
-                            >
-                              <span className="text-[10px] font-bold">+</span>
-                            </button>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Shift picker popup — only for users who can edit (G-1: je Eintragsart) */}
-                        {isPickerOpen && (cellPerm.canAddShift || cellPerm.canAddAbsence) && (
-                          <ShiftPicker
-                            shifts={cellPerm.canAddShift ? shifts : []}
-                            leaveTypes={cellPerm.canAddAbsence ? leaveTypes : []}
-                            onSelect={shiftId => { handleAddShift(emp.ID, day, shiftId); setActivePicker(null); }}
-                            onAbsence={(leaveTypeId, time) => { handleAddAbsence(emp.ID, day, leaveTypeId, time); setActivePicker(null); }}
-                            onClose={() => setActivePicker(null)}
-                          />
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
+                <EmployeeRow
+                  key={emp.ID}
+                  emp={emp}
+                  idx={idx}
+                  displayedDays={displayedDays}
+                  year={year}
+                  month={month}
+                  todayDay={todayDay}
+                  todayStr={todayStr}
+                  entryMap={entryMap}
+                  holidays={holidays}
+                  notesMap={notesMap}
+                  wishMap={wishMap}
+                  conflictMap={conflictMap}
+                  workloadMap={workloadMap}
+                  shifts={shifts}
+                  leaveTypes={leaveTypes}
+                  darstellungsModi={darstellungsModi}
+                  grid={gridStable}
+                  isDark={isDark}
+                  isLeserView={isLeserView}
+                  currentUserEmpId={currentUserEmpId}
+                  showWorkloadBars={showWorkloadBars}
+                  filterShiftId={filterShiftId}
+                  filterLeaveId={filterLeaveId}
+                  selectedDay={selectedCell?.empId === emp.ID ? selectedCell.day : null}
+                  dndSrcDay={dndSource?.empId === emp.ID ? dndSource.day : null}
+                  dndTgtDay={dndTarget?.empId === emp.ID ? dndTarget.day : null}
+                  activePickerDay={activePicker?.empId === emp.ID ? activePicker.day : null}
+                  selInBand={selInBand}
+                  selMinDay={selInBand && selBand ? selBand.minDay : 0}
+                  selMaxDay={selInBand && selBand ? selBand.maxDay : 0}
+                  isRowHighlighted={highlightedEmpId === emp.ID}
+                  isDimmed={highlightedEmpId !== null && highlightedEmpId !== emp.ID}
+                  cb={rowCb}
+                  hover={hover}
+                  setActivePicker={setActivePicker}
+                  setNotePopup={setNotePopup}
+                  setHighlightedEmpId={setHighlightedEmpId}
+                />
               );
             })}
 
@@ -6482,48 +6761,18 @@ export default function Schedule() {
         </div>
       </div>
 
-      {/* ── Hover Tooltip ── */}
-      {hoverTooltip && (() => {
-        const tooltipEntry = (entryMap.get(`${hoverTooltip.empId}-${hoverTooltip.day}`) ?? [])[0] ?? null;
-        const tooltipShift = tooltipEntry?.shift_id
-          ? (shifts.find(s => s.ID === tooltipEntry.shift_id) ?? null)
-          : null;
-
-        // ── Schicht-Statistik berechnen ──────────────────────
-        let monthCount: number | undefined;
-        let colleaguesWithSameShift: string[] | undefined;
-        if (tooltipEntry?.kind === 'shift' && tooltipEntry.shift_id != null) {
-          // Zähler: wie oft diese Schicht für diesen MA in diesem Monat
-          monthCount = entries.filter(
-            e => e.employee_id === hoverTooltip.empId && e.shift_id === tooltipEntry.shift_id
-          ).length;
-          // Kollegen: andere MA mit derselben Schicht heute
-          const todayStr = `${year}-${pad(month)}-${pad(hoverTooltip.day)}`;
-          colleaguesWithSameShift = entries
-            .filter(e =>
-              e.employee_id !== hoverTooltip.empId &&
-              e.shift_id === tooltipEntry.shift_id &&
-              e.date === todayStr
-            )
-            .map(e => {
-              const emp = employees.find(x => x.ID === e.employee_id);
-              return emp ? `${emp.NAME}, ${emp.FIRSTNAME}` : `MA ${e.employee_id}`;
-            });
-        }
-
-        return (
-          <HoverTooltip
-            state={hoverTooltip}
-            emp={employees.find(e => e.ID === hoverTooltip.empId) ?? null}
-            entry={tooltipEntry}
-            dateStr={`${year}-${pad(month)}-${pad(hoverTooltip.day)}`}
-            cellConflicts={conflictMap.get(`${hoverTooltip.empId}_${year}-${pad(month)}-${pad(hoverTooltip.day)}`) ?? []}
-            shift={tooltipShift}
-            monthCount={monthCount}
-            colleaguesWithSameShift={colleaguesWithSameShift}
-          />
-        );
-      })()}
+      {/* ── Hover Tooltip (permanent gemountet — Mausbewegungen re-rendern nur
+             diesen Teilbaum, nie das Grid) ── */}
+      <HoverTooltipHost
+        ref={hoverHostRef}
+        employees={employees}
+        entries={entries}
+        entryMap={entryMap}
+        shifts={shifts}
+        conflictMap={conflictMap}
+        year={year}
+        month={month}
+      />
       <ConfirmDialog {...confirmDialogProps} />
     </div>
   );

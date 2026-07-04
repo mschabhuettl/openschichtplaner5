@@ -2044,7 +2044,18 @@ export const api = {
 
   // ─── Self-Service (Leser) ─────────────────────────────────
   getMyEmployee: () =>
-    fetchJSON<{ employee: Record<string, unknown> | null; user_id: number }>('/api/v1/me/employee'),
+    fetchJSON<{
+      employee: Record<string, unknown> | null;
+      user_id: number;
+      can_link?: boolean;
+      suggestion?: { id: number; name: string; firstname?: string; number?: string } | null;
+    }>('/api/v1/me/employee'),
+
+  linkMyEmployee: (employeeId: number) =>
+    postJSON<{ ok: boolean; user_id: number; employee_id: number }>(
+      '/api/v1/me/employee',
+      { employee_id: employeeId },
+    ),
 
   createSelfWish: (body: {
     date: string;

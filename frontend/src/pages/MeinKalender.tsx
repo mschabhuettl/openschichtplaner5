@@ -58,6 +58,14 @@ export default function MeinKalender() {
   const [loading, setLoading] = useState(false);
   // Konto ohne MA-Datensatz (self-Endpunkte 404) — Zustand, kein Fehler
   const [noEmployee, setNoEmployee] = useState(false);
+  // Verknüpfungs-Kontext für den unverknüpften Fall (keine Sackgasse):
+  // Planer/Admin dürfen die Zuordnung direkt hier herstellen.
+  const [canLink, setCanLink] = useState(false);
+  const [linkSuggestion, setLinkSuggestion] = useState<{ id: number; name: string } | null>(null);
+  const [linkEmployees, setLinkEmployees] = useState<Array<{ ID: number; NAME: string; FIRSTNAME?: string }>>([]);
+  const [linkSel, setLinkSel] = useState<number | ''>('');
+  const [linking, setLinking] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   // wish dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -101,7 +109,42 @@ export default function MeinKalender() {
       })
       .finally(() => setLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [year, month]);
+  }, [year, month, reloadKey]);
+
+  // ── unverknüpftes Konto: Zuordnungs-Kontext laden (keine Sackgasse) ─
+  useEffect(() => {
+    if (!noEmployee) return;
+    let cancelled = false;
+    api.getMyEmployee().then(async r => {
+      if (cancelled) return;
+      const allowed = !!r.can_link;
+      setCanLink(allowed);
+      setLinkSuggestion(r.suggestion ?? null);
+      setLinkSel(r.suggestion?.id ?? '');
+      if (allowed) {
+        try {
+          const emps = await api.getEmployees(false);
+          if (!cancelled) setLinkEmployees(emps);
+        } catch { /* Liste optional */ }
+      }
+    }).catch(() => { /* Kontext optional */ });
+    return () => { cancelled = true; };
+  }, [noEmployee]);
+
+  const handleLink = async () => {
+    if (linkSel === '') return;
+    setLinking(true);
+    try {
+      await api.linkMyEmployee(linkSel as number);
+      showToast('Mitarbeiter zugeordnet', 'success');
+      setNoEmployee(false);
+      setReloadKey(k => k + 1);
+    } catch {
+      showToast('Zuordnung fehlgeschlagen', 'error');
+    } finally {
+      setLinking(false);
+    }
+  };
 
   // ── derived maps ───────────────────────────────────────────
   const shiftMap = useMemo(() => new Map(shifts.map(s => [s.ID, s])), [shifts]);
@@ -290,11 +333,48 @@ export default function MeinKalender() {
       <div className={`min-h-screen p-4 md:p-6 ${bg}`}>
         <h1 className="text-2xl font-bold mb-4">📅 Mein Kalender</h1>
         <div className="bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-700 rounded-xl p-4 max-w-2xl">
-          <p className="text-amber-800 dark:text-amber-300 text-sm">
-            ⚠️ Deinem Konto ist kein Mitarbeiter-Datensatz zugeordnet — es gibt
-            daher keinen persönlichen Kalender. Ein Planer kann die Zuordnung
-            über die Benutzerverwaltung herstellen (Benutzername = Nachname).
+          <p className="text-amber-800 dark:text-amber-300 text-sm mb-3">
+            Deinem Konto ist noch kein Mitarbeiter-Datensatz zugeordnet — daher
+            gibt es noch keinen persönlichen Kalender.
           </p>
+          {canLink ? (
+            <div className="space-y-3">
+              <p className="text-amber-800 dark:text-amber-300 text-sm">
+                Wähle deinen Mitarbeiter-Datensatz aus, um die Zuordnung herzustellen:
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  value={linkSel}
+                  onChange={e => setLinkSel(e.target.value === '' ? '' : Number(e.target.value))}
+                  className="border rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 dark:border-gray-600"
+                >
+                  <option value="">— Mitarbeiter wählen —</option>
+                  {linkEmployees.map(e => (
+                    <option key={e.ID} value={e.ID}>
+                      {e.NAME}{e.FIRSTNAME ? `, ${e.FIRSTNAME}` : ''}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  onClick={handleLink}
+                  disabled={linkSel === '' || linking}
+                  className="px-4 py-2 rounded-lg text-sm font-medium bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-50"
+                >
+                  {linking ? 'Verknüpfe…' : 'Verknüpfen'}
+                </button>
+              </div>
+              {linkSuggestion && (
+                <p className="text-amber-700 dark:text-amber-400 text-xs">
+                  Vorschlag (namensgleich): {linkSuggestion.name}
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="text-amber-800 dark:text-amber-300 text-sm">
+              Bitte einen Administrator, dein Konto in der Benutzerverwaltung
+              einem Mitarbeiter zuzuordnen.
+            </p>
+          )}
         </div>
       </div>
     );

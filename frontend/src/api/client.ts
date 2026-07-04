@@ -1701,6 +1701,19 @@ export const api = {
   deleteGroupAccess: (id: number) =>
     deleteReq<{ ok: boolean; deleted: number }>(`/api/v1/group-access/${id}`),
 
+  // ─── User→Mitarbeiter-Zuordnung (persönlicher Mitarbeiter) ──
+  getUserEmployee: (userId: number) =>
+    fetchJSON<{ user_id: number; employee: Record<string, unknown> | null }>(
+      `/api/v1/users/${userId}/employee`,
+    ),
+  linkUserEmployee: (userId: number, employeeId: number) =>
+    putJSON<{ ok: boolean; user_id: number; employee_id: number }>(
+      `/api/v1/users/${userId}/employee`,
+      { employee_id: employeeId },
+    ),
+  unlinkUserEmployee: (userId: number) =>
+    deleteReq<{ ok: boolean; removed: boolean }>(`/api/v1/users/${userId}/employee`),
+
   // ─── Carry Forward (Saldo-Übertrag) ──────────────────────
   getCarryForward: (employeeId: number, year: number) =>
     fetchJSON<{ employee_id: number; year: number; hours: number; booking_id: number | null }>(

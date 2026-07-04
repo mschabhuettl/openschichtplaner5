@@ -9,6 +9,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Benutzerverwaltung: „Persönlicher Mitarbeiter".** Im Rechte-Panel eines
+  Kontos kann ein Administrator jetzt den zugeordneten Mitarbeiter setzen bzw.
+  entfernen — die Grundlage für „Mein Kalender", Wünsche und iCal. Damit ist der
+  in „Mein Kalender" angezeigte Hinweis („bitte einen Administrator, dich in der
+  Benutzerverwaltung zuzuordnen") UI-actionable. Benötigt openschichtplaner5-api
+  mit `GET/PUT/DELETE /api/users/{id}/employee`.
+
 ---
 
 ## [1.21.44] - 2026-07-04

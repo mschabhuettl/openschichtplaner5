@@ -335,18 +335,24 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
   const [loading, setLoading] = useState(true);
   const [showAddEmployeeModal, setShowAddEmployeeModal] = useState(false);
   const [showAddGroupModal, setShowAddGroupModal] = useState(false);
+  const [linkedEmpId, setLinkedEmpId] = useState<number | null>(null);
+  const [linkSel, setLinkSel] = useState<number | ''>('');
+  const [savingLink, setSavingLink] = useState(false);
   const { showToast } = useToast();
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
   const loadAccess = useCallback(async () => {
     setLoading(true);
     try {
-      const [empAccess, grpAccess] = await Promise.all([
+      const [empAccess, grpAccess, linked] = await Promise.all([
         api.getEmployeeAccess(user.ID),
         api.getGroupAccess(user.ID),
+        api.getUserEmployee(user.ID),
       ]);
       setEmployeeAccess(empAccess as EmployeeAccessRecord[]);
       setGroupAccess(grpAccess as GroupAccessRecord[]);
+      const emp = linked?.employee as { ID?: number } | null;
+      setLinkedEmpId(emp && typeof emp.ID === 'number' ? emp.ID : null);
     } catch (e) {
       console.error('Fehler beim Laden der Zugriffsrechte:', e);
     } finally {
@@ -389,6 +395,32 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
     }
   };
 
+  const handleSetLink = async () => {
+    if (!linkSel) return;
+    setSavingLink(true);
+    try {
+      await api.linkUserEmployee(user.ID, Number(linkSel));
+      setLinkedEmpId(Number(linkSel));
+      setLinkSel('');
+      showToast('Persönlicher Mitarbeiter zugeordnet', 'success');
+    } catch (e) {
+      showToast('Fehler: ' + String(e), 'error');
+    } finally {
+      setSavingLink(false);
+    }
+  };
+
+  const handleClearLink = async () => {
+    if (!await confirmDialog({ message: 'Persönliche Mitarbeiter-Zuordnung entfernen?', danger: true })) return;
+    try {
+      await api.unlinkUserEmployee(user.ID);
+      setLinkedEmpId(null);
+      showToast('Zuordnung entfernt', 'success');
+    } catch (e) {
+      showToast('Fehler: ' + String(e), 'error');
+    }
+  };
+
   return (
     <div className="mt-6 bg-white rounded-xl shadow border border-slate-200">
       {/* Header */}
@@ -422,6 +454,41 @@ function AccessPanel({ user, employees, groups, onClose }: AccessPanelProps) {
           </p>
         </div>
       )}
+
+      {/* Persönlicher Mitarbeiter (Identität für „Mein Kalender") */}
+      <div className="px-6 py-4 border-b border-slate-100">
+        <h3 className="text-sm font-semibold text-slate-700 mb-1">👤 Persönlicher Mitarbeiter</h3>
+        <p className="text-xs text-slate-500 mb-2">
+          Ordnet dieses Konto einem Mitarbeiter zu — Grundlage für „Mein Kalender", Wünsche und iCal.
+          Ersetzt die Namensheuristik; nötig, wenn der Anmeldename nicht dem Nachnamen entspricht.
+        </p>
+        {linkedEmpId != null ? (
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-slate-800 font-medium">{getEmployeeName(linkedEmpId)}</span>
+            <button onClick={handleClearLink} className="text-xs text-red-600 hover:underline">Entfernen</button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <select
+              value={linkSel}
+              onChange={e => setLinkSel(e.target.value ? Number(e.target.value) : '')}
+              className="border border-slate-300 rounded px-2 py-1 text-sm"
+            >
+              <option value="">– Mitarbeiter auswählen –</option>
+              {employees.map(emp => (
+                <option key={emp.ID} value={emp.ID}>{emp.NAME}, {emp.FIRSTNAME}</option>
+              ))}
+            </select>
+            <button
+              onClick={handleSetLink}
+              disabled={!linkSel || savingLink}
+              className="px-3 py-1 text-sm bg-blue-600 text-white rounded disabled:opacity-50"
+            >
+              Zuordnen
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Tab navigation */}
       <div className="flex gap-1 px-6 pt-4 border-b border-slate-100">

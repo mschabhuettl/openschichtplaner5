@@ -9,6 +9,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Tauschbörse: Kreuz-Tausch kann keinen Dienst mehr verlieren.** Bündelt
+  **api 1.28.4**: War der Empfänger eines Tauschs über verschiedene Daten am
+  eingehenden Datum bereits belegt (Dienst oder Abwesenheit), ging der
+  getauschte Dienst bei der Genehmigung ersatzlos verloren — die Antwort
+  meldete trotzdem Erfolg. Solche Anträge werden jetzt schon beim Anlegen
+  abgelehnt; entsteht die Kollision erst später, verweigert die Genehmigung
+  mit klarer Meldung und beide Dienste bleiben erhalten.
+
 ---
 
 ## [1.21.43] - 2026-07-03

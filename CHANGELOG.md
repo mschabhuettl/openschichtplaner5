@@ -9,6 +9,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Mitarbeiterliste: keine „0" mehr hinter jedem Nachnamen.** Die Liste zeigte
+  hinter jedem aktiven Mitarbeiter eine literale „0" — `{emp.HIDE && <Badge/>}`,
+  wobei `HIDE` die Ganzzahl 0 ist und React `0 && …` als „0" rendert. Jetzt
+  boolesch ausgewertet; das „Inaktiv"-Badge erscheint weiterhin nur für
+  ausgeblendete Mitarbeiter. (Bei der Browser-Re-Verifikation entdeckt.)
+
 ### Added
 
 - **Benutzerverwaltung: „Persönlicher Mitarbeiter".** Im Rechte-Panel eines

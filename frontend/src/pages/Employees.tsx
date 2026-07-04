@@ -827,7 +827,7 @@ export default function Employees() {
                     <td className="px-4 py-2 text-gray-500">{emp.NUMBER}</td>
                     <td className="px-4 py-2 font-semibold">
                       {emp.NAME}
-                      {emp.HIDE && <span className="ml-2 text-[10px] font-semibold px-1.5 py-0.5 bg-gray-300 text-gray-700 rounded-full uppercase">Inaktiv</span>}
+                      {!!emp.HIDE && <span className="ml-2 text-[10px] font-semibold px-1.5 py-0.5 bg-gray-300 text-gray-700 rounded-full uppercase">Inaktiv</span>}
                     </td>
                     <td className="px-4 py-2">{emp.FIRSTNAME}</td>
                     <td className="px-4 py-2 text-gray-500">{emp.SHORTNAME}</td>

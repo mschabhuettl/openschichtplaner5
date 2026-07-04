@@ -11,6 +11,13 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **Fairness-Score: kein Absturz mehr für Jahre ohne Schichtdaten.** Für ein Jahr
+  ohne Daten liefert die API `fairness: {}` (ein truthy leeres Objekt); der Guard
+  `{metrics && …}` ließ die Kennzahl-Karten trotzdem rendern und `…toFixed()` warf
+  „Cannot read properties of undefined" → die ganze Seite fiel auf die Fehlergrenze.
+  Jetzt werden Karten/Banner nur bei tatsächlich vorhandenen Kennzahlen gezeigt; sonst
+  erscheint die vorhandene Leer-Ansicht („Keine Schichtdaten für <Jahr>"). (Im
+  Browser-Smoke aller Hauptseiten entdeckt.)
 - **Mitarbeiterliste: keine „0" mehr hinter jedem Nachnamen.** Die Liste zeigte
   hinter jedem aktiven Mitarbeiter eine literale „0" — `{emp.HIDE && <Badge/>}`,
   wobei `HIDE` die Ganzzahl 0 ist und React `0 && …` als „0" rendert. Jetzt

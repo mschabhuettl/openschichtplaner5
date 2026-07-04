@@ -124,6 +124,9 @@ export default function Fairness() {
 
   const employees = data?.employees ?? [];
   const metrics = data?.fairness;
+  // Ohne Schichtdaten liefert die API `fairness: {}` — ein truthy leeres Objekt.
+  // Erst rendern, wenn die Kennzahlen wirklich da sind (sonst crasht `.toFixed()`).
+  const hasMetrics = !!metrics && typeof metrics.overall === 'number';
 
   const sorted = [...employees].sort((a, b) => {
     let diff = 0;
@@ -183,7 +186,7 @@ export default function Fairness() {
       </div>
 
       {/* Summary cards */}
-      {metrics && (
+      {hasMetrics && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { label: 'Gesamt', score: metrics.total_score, avg: metrics.avg_total, icon: '📋', unit: 'Schichten' },
@@ -216,7 +219,7 @@ export default function Fairness() {
       )}
 
       {/* Overall score banner */}
-      {metrics && (
+      {hasMetrics && (
         <div className={`rounded-xl p-4 border-2 flex items-center gap-4 ${
           metrics.overall >= 90 ? 'bg-green-50 border-green-300'
           : metrics.overall >= 70 ? 'bg-yellow-50 border-yellow-300'

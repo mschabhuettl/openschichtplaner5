@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.21.44] - 2026-07-04
+
 ### Fixed
 
 - **Tauschbörse: Kreuz-Tausch kann keinen Dienst mehr verlieren.** Bündelt

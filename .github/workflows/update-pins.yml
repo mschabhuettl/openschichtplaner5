@@ -63,6 +63,19 @@ jobs:
             if [[ -n "${EXPECTED_API}" ]] && ! version_ge "${API_VER}" "${EXPECTED_API}"; then
               STALE="${STALE:+${STALE}, }openschichtplaner5-api ${API_VER} < ${EXPECTED_API}"
             fi
+            # pip nutzt den Simple-Index, der dem JSON-Endpunkt nachhaengen kann.
+            # Erst fortfahren, wenn die erwartete Version DORT gelistet ist — sonst
+            # scheitert der nachgelagerte Docker-Build (pip install ==X, CDN-Race).
+            if [[ -n "${EXPECTED_API}" ]]; then
+              api_re="_api-$(printf '%s' "${EXPECTED_API}" | sed 's/\./\\./g')[.-]"
+              curl -fsSL https://pypi.org/simple/openschichtplaner5-api/ | grep -qE "${api_re}" \
+                || STALE="${STALE:+${STALE}, }api ${EXPECTED_API} noch nicht im pip-Simple-Index"
+            fi
+            if [[ -n "${EXPECTED_LIB}" ]]; then
+              lib_re="libopenschichtplaner5-$(printf '%s' "${EXPECTED_LIB}" | sed 's/\./\\./g')[.-]"
+              curl -fsSL https://pypi.org/simple/libopenschichtplaner5/ | grep -qE "${lib_re}" \
+                || STALE="${STALE:+${STALE}, }lib ${EXPECTED_LIB} noch nicht im pip-Simple-Index"
+            fi
             if [[ -z "${STALE}" ]]; then
               break
             fi

@@ -36,7 +36,16 @@ ARG API_SOURCE="openschichtplaner5-api==1.32.0"
 # restlichen requirements — deren lib/api-Constraints sind bereits erfüllt,
 # ruff (reines Lint-Tool) bleibt aus dem Runtime-venv draußen.
 COPY backend/requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir "${LIB_SOURCE}" "${API_SOURCE}" && \
+# Retry gegen PyPI-CDN-Propagationsverzögerung: eine frisch veröffentlichte,
+# exakt gepinnte lib/api-Version ist evtl. noch nicht auf dem CDN-Knoten dieses
+# Build-Runners sichtbar (Cross-Node-Varianz) — pip re-resolved je Versuch neu,
+# ein transienter Miss heilt sich so im Build statt das Image rot zu machen.
+RUN for i in 1 2 3 4 5 6 7 8; do \
+      pip install --no-cache-dir "${LIB_SOURCE}" "${API_SOURCE}" && break; \
+      [ "$i" = 8 ] && { echo "pip install nach 8 Versuchen fehlgeschlagen" >&2; exit 1; }; \
+      echo "pip install Versuch $i fehlgeschlagen (PyPI-CDN-Propagation?) — warte 30s"; \
+      sleep 30; \
+    done && \
     grep -v '^ruff' /tmp/requirements.txt | pip install --no-cache-dir -r /dev/stdin
 
 # Stage 3 (optional, nur Stack): nginx served die SPA, /api geht an Service "api"

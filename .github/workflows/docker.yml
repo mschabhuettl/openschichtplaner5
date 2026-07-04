@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:  # manueller/programmatischer Rebuild (z. B. nach Pin-Bump via update-pins)
   schedule:
     - cron: '0 3 * * 1'  # Jeden Montag 03:00 UTC — frisches Base-Image für Security-Updates
 

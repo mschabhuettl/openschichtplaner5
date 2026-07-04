@@ -32,6 +32,7 @@ on:
 
 permissions:
   contents: write
+  actions: write  # um nach dem Pin-Bump docker.yml anzustoßen (Bot-Push triggert keinen Build)
 
 jobs:
   update-pins:
@@ -85,13 +86,25 @@ jobs:
           echo "API_VER=${API_VER}" >> "$GITHUB_ENV"
 
       - name: Änderungen committen und pushen
+        id: commit
         run: |
           set -euo pipefail
           if git diff --quiet; then
             echo "Pins bereits aktuell — nichts zu tun."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git config user.name "Matthias Schabhüttl"
           git config user.email "matthias@matthiasschabhuettl.com"
           git commit -am "build(docker): PyPI-Pins nachgezogen (libopenschichtplaner5 ${LIB_VER}, openschichtplaner5-api ${API_VER})"
           git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Docker-Image neu bauen
+        # Der Pin-Bump-Commit läuft über GITHUB_TOKEN und triggert KEINEN
+        # push-basierten Build — daher docker.yml explizit anstoßen, damit das
+        # veröffentlichte Image die neuen Pins tatsächlich enthält.
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run docker.yml --ref main

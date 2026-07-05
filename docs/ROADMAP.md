@@ -127,7 +127,7 @@ Bewusste Web-Abweichungen (kein Handlungsbedarf, dokumentiert):
    Offline-Zugriff auf den eigenen Plan; Offline-EINTRAGUNG mit Sync-Queue
    bewusst außerhalb des Zuschnitts, Begründung im ADR).
 6. **SSO/OIDC** (Keycloak/Entra) zusätzlich zum 5USER-Login. — **Design liegt vor:** ADR 0003.
-7. **Mandantenfähigkeit** (mehrere DBF-Datenbanken parallel, Umschalter).
+7. **Mandantenfähigkeit** (mehrere DBF-Datenbanken parallel, Umschalter). — **Design liegt vor:** ADR 0006.
 8. **Webhooks/API-Erweiterung** für Lohn-Export-Integrationen (DATEV & Co.). — **Design liegt vor:** ADR 0002.
 
 ## C. Infrastruktur & Tooling (vertagt, mit Begründung)

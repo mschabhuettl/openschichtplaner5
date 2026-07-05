@@ -13,7 +13,7 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, type ComponentProps } from 'react';
 import {
   EmployeeRow,
   CellContextMenu,
@@ -108,7 +108,13 @@ const fullWriteState: CellWriteState = {
 // Keydown-Handler von Schedule.tsx (Escape-Zweig muss dort setContextMenu(null)
 // aufrufen — der onKeyDown des Menüs selbst greift nur bei Fokus im Menü).
 // Der echte Pfad ist zusätzlich im Browser belegt (ctxmenu-close-Proof).
-function MenuHarness() {
+function MenuHarness({
+  shifts = [],
+  onAssignShift = () => {},
+}: {
+  shifts?: ComponentProps<typeof CellContextMenu>['shifts'];
+  onAssignShift?: ComponentProps<typeof CellContextMenu>['onAssignShift'];
+} = {}) {
   const [menu, setMenu] = useState<ContextMenuState | null>(null);
   const cb = useMemo(
     () =>
@@ -135,7 +141,7 @@ function MenuHarness() {
         <CellContextMenu
           state={menu}
           entries={[]}
-          shifts={[]}
+          shifts={shifts}
           leaveTypes={[]}
           workplaces={[]}
           hasClipboard={false}
@@ -144,7 +150,7 @@ function MenuHarness() {
           canDeviation
           onClose={() => setMenu(null)}
           onAddNote={async () => {}}
-          onAssignShift={() => {}}
+          onAssignShift={onAssignShift}
           onAddAbsence={() => {}}
           onAddSonderdienst={async () => {}}
           onAddDeviation={async () => {}}
@@ -194,6 +200,22 @@ describe('Dienstplan-Kontextmenü (P-KONTEXTMENÜ)', () => {
 
     fireEvent.mouseDown(document.body);
     expect(screen.queryByText('📋 Schicht zuweisen...')).toBeNull();
+  });
+
+  it('Schicht zuweisen → Klick auf eine Schicht ruft onAssignShift(empId, day, shiftId)', () => {
+    // Deckt die Schreib-Verdrahtung ab, die der Kopf-Test mit Stub nicht prüfte:
+    // Rechtsklick → „Schicht zuweisen…" → Schicht anklicken muss onAssignShift mit
+    // (empId, day, shiftId) der Zelle aufrufen (Kern des Umplanens/Eintragens).
+    const onAssignShift = vi.fn();
+    const shifts = [
+      { ID: 1, SHORTNAME: 'F', NAME: 'Frühschicht', HIDE: false, COLORBK_HEX: '#ffffff', COLORTEXT_HEX: '#000000' },
+    ] as unknown as ComponentProps<typeof CellContextMenu>['shifts'];
+    const { container } = render(<MenuHarness shifts={shifts} onAssignShift={onAssignShift} />);
+    // tds[1] = Tag 1 → empId 5 (emp.ID), day 1
+    fireEvent.contextMenu(container.querySelectorAll('td')[1]);
+    fireEvent.click(screen.getByText('📋 Schicht zuweisen...'));
+    fireEvent.click(screen.getByText('F – Frühschicht'));
+    expect(onAssignShift).toHaveBeenCalledWith(5, 1, 1);
   });
 });
 

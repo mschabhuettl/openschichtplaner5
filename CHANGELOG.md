@@ -9,6 +9,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Design-System „Taktwerk" — Fundament (T1).** Das verbindliche Design-System
+  (Design-Handoff des Maintainers) ist als Grundlage eingebaut: 15 Farb-Token als
+  Light/Dark-Paare (CSS-Variablen + Tailwind-Mapping `bg-ebene`/`text-schrift`/…),
+  System-Font-Stacks (`font-sans`/`font-mono`), Radius-/Elevation-Stufen sowie der
+  Farb-Algorithmus `utils/shiftColor.ts` für Mitarbeiter-/Schichtfarben (Hue bleibt,
+  S/L auf Schiene, Vordergrund per WCAG-Kontrast, Hohl-/Tint-/Spine-Varianten,
+  Kollisions-Spreizung, memoisiert). Kontrast-Garantien testfest (voller Hue-Sweep
+  beider Modi; Token-Paar-Prüfung). Die Optik der App ist in diesem Schritt
+  unverändert — die Umstellung der Ansichten folgt mit der Referenz-Ansicht
+  Dienstplan. Details: `docs/design-system.md`.
+
 ### Fixed
 
 - **Fairness-Score: kein Absturz mehr für Jahre ohne Schichtdaten.** Für ein Jahr

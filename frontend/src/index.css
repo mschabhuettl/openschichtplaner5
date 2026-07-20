@@ -62,6 +62,47 @@ html.dark {
   color-scheme: dark;
 }
 
+/* ── Taktwerk Design-Tokens (verbindliches Design-System) ────────
+   Quelle: docs/design-system.md. Immer als Light/Dark-Paar pflegen;
+   Nutzung über die Tailwind-Klassen bg-ebene / text-schrift / … .
+   Die --color-*-Legacy-Token oben bleiben, bis alle Ansichten
+   migriert sind. */
+:root {
+  --grund: #f4f5f8;
+  --ebene: #ffffff;
+  --ebene-2: #ffffff;
+  --rail: #ffffff;
+  --kontur: #e3e5eb;
+  --kontur-soft: #edeff4;
+  --wash: #f0f2f6;
+  --schrift: #15171c;
+  --schrift-2: #666c78;
+  --schrift-3: #8a90a0;
+  --glut: #c96a14;
+  --glut-flaeche: #fdf3e7;
+  --glut-ink: #ffffff;
+  --signal: #be3b3b;
+  --signal-flaeche: #fbf1f1;
+}
+
+html.dark {
+  --grund: #0e1420;
+  --ebene: #111927;
+  --ebene-2: #16202f;
+  --rail: #0b101a;
+  --kontur: #232c3d;
+  --kontur-soft: #1b2434;
+  --wash: #0b101a;
+  --schrift: #e9ecf2;
+  --schrift-2: #939cad;
+  --schrift-3: #646b7c;
+  --glut: #f0a35c;
+  --glut-flaeche: #20180e;
+  --glut-ink: #1a1108;
+  --signal: #e4696f;
+  --signal-flaeche: #1d0f12;
+}
+
 body {
   @apply bg-gray-100 text-gray-900;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;

@@ -33,7 +33,8 @@ import { ResponsiveTable } from '../components/ResponsiveTable';
 import { EmptyState } from '../components/EmptyState';
 import { groupTreeOptions } from '../utils/groupTree';
 import { shiftCellColorsMemo, tint, spine } from '../utils/shiftColor';
-import { phaseForStart, formatSaldo, type Phase } from '../utils/scheduleVisuals';
+import { phaseForStart, formatSaldo, sunTimesForMonth, tagbogenGradient, zeitfadenLeft, type Phase } from '../utils/scheduleVisuals';
+import '../styles/schedule-taktwerk.css';
 import { parseStartendIntervals } from '../utils/startend';
 
 // ── JS weekday → DB weekday (0=Mon..6=Sun) ────────────────────
@@ -2144,7 +2145,7 @@ export const EmployeeRow = memo(function EmployeeRow({
   return (
     <tr className={empRowStyle ? undefined : (isCurrentUserRow ? 'bg-glut-flaeche' : undefined)} style={empRowStyle}>
       <td
-        className="sticky left-0 z-10 bg-ebene px-2 sm:px-3 py-1 border-r border-kontur border-b border-b-kontur-soft font-medium whitespace-nowrap cursor-pointer select-none min-w-[90px] sm:min-w-[178px] max-w-[90px] sm:max-w-[178px] overflow-hidden"
+        className="tw-name sticky left-0 z-10 bg-ebene px-2 sm:px-3 py-1 border-r border-kontur border-b border-b-kontur-soft font-medium whitespace-nowrap cursor-pointer select-none min-w-[90px] sm:min-w-[178px] max-w-[90px] sm:max-w-[178px] overflow-hidden"
         style={isRowHighlighted
           ? { ...(empNameStyle || {}), outline: '2px solid var(--glut)', outlineOffset: '-2px', backgroundColor: empNameStyle?.backgroundColor ?? 'var(--glut-flaeche)' }
           : empNameStyle}
@@ -2267,6 +2268,7 @@ export const EmployeeRow = memo(function EmployeeRow({
         return (
           <td
             key={day}
+            data-col={day}
             className={`border border-kontur-soft p-0 text-center relative group${isWe && !isToday && !isHol ? ' bg-wash' : ''}`}
             title={!isLeserView ? (cellPerm.readOnlyReason ?? undefined) : undefined}
             draggable={cellPerm.canDrag && !isLeserView}
@@ -2523,6 +2525,34 @@ const HoverTooltipHost = forwardRef<HoverTooltipHostHandle, HoverTooltipHostProp
   },
 );
 
+// ── Zeitfaden ────────────────────────────────────────────────
+// Glut-Linie an der Jetzt-Position. Tickt minütlich ISOLIERT in dieser
+// memo-Komponente — re-rendert nie das Grid (Muster HoverTooltipHost).
+const Zeitfaden = memo(function Zeitfaden({ dayIndex, isDark }: { dayIndex: number; isDark: boolean }) {
+  const [nowMin, setNowMin] = useState(() => { const d = new Date(); return d.getHours() * 60 + d.getMinutes(); });
+  useEffect(() => {
+    const t = setInterval(() => { const d = new Date(); setNowMin(d.getHours() * 60 + d.getMinutes()); }, 60_000);
+    return () => clearInterval(t);
+  }, []);
+  const x = zeitfadenLeft(dayIndex, nowMin);
+  const hh = String(Math.floor(nowMin / 60)).padStart(2, '0');
+  const mm = String(nowMin % 60).padStart(2, '0');
+  return (
+    <div
+      aria-hidden="true"
+      className="hidden sm:block absolute inset-y-0 pointer-events-none z-[5]"
+      style={{ left: x, width: 2, background: 'var(--glut)', boxShadow: isDark ? '0 0 8px rgba(240,163,92,.5)' : undefined }}
+    >
+      <span
+        className="absolute font-mono text-[8.5px] font-bold leading-tight rounded-cell px-[5px] py-px whitespace-nowrap"
+        style={{ left: 5, top: 12, background: 'var(--glut)', color: isDark ? '#1a1108' : '#ffffff' }}
+      >
+        {hh}:{mm}
+      </span>
+    </div>
+  );
+});
+
 // ── Main Schedule Component ───────────────────────────────────
 export default function Schedule() {
   const now = new Date();
@@ -2730,10 +2760,19 @@ export default function Schedule() {
   // move/leave laufen imperativ über diesen Ref, damit Mausbewegungen das Grid
   // NICHT re-rendern (Original-Perf-Ursache).
   const hoverHostRef = useRef<HoverTooltipHostHandle>(null);
+  // Hover-Kreuz: Spalten-Tönung über data-hovercol am <table> (CSS in
+  // schedule-taktwerk.css) — imperativ, damit mousemove das Grid nie re-rendert.
+  const twTableRef = useRef<HTMLTableElement>(null);
   const hover = useMemo<HoverApi>(() => ({
-    enter: (empId, day, x, y) => hoverHostRef.current?.enter(empId, day, x, y),
+    enter: (empId, day, x, y) => {
+      if (twTableRef.current) twTableRef.current.dataset.hovercol = String(day);
+      hoverHostRef.current?.enter(empId, day, x, y);
+    },
     move: (x, y) => hoverHostRef.current?.move(x, y),
-    leave: () => hoverHostRef.current?.leave(),
+    leave: () => {
+      if (twTableRef.current) delete twTableRef.current.dataset.hovercol;
+      hoverHostRef.current?.leave();
+    },
   }), []);
 
   // ── Mitarbeiter-Hervorhebung ───────────────────────────────
@@ -6458,8 +6497,42 @@ export default function Schedule() {
       {/* ── Schedule Grid (Table View) ── */}
       {(viewMode === 'table' || isMobile) && (
       <ResponsiveTable stickyFirstCol className="flex-1 bg-ebene rounded-panel border border-kontur">
-        <table className="border-collapse text-xs" style={isDragging ? { userSelect: 'none' } : undefined}>
+        <div className="relative w-max min-w-full">
+        <table ref={twTableRef} className="tw-grid border-collapse text-xs" style={isDragging ? { userSelect: 'none' } : undefined}>
           <thead>
+            {/* Tagbogen: 10px-Lichtband — Nacht→Tageslicht→Nacht je Tagesspalte */}
+            <tr aria-hidden="true" className="hidden sm:table-row">
+              <td className="sticky left-0 z-20 bg-ebene border-r border-kontur border-b border-kontur p-0" style={{ height: 10 }} />
+              {displayedDays.map(day => {
+                const wd = getWeekday(year, month, day);
+                const isWe = wd === 0 || wd === 6;
+                const isToday = day === todayDay;
+                const sun = sunTimesForMonth(month);
+                return (
+                  <td
+                    key={day}
+                    data-col={day}
+                    className="relative p-0 border-r border-kontur-soft border-b border-kontur"
+                    style={{
+                      height: 10,
+                      background: tagbogenGradient(sun.sunriseMin, sun.sunsetMin, isDark ? '#141c2c' : '#dfe3ea', isDark ? '#5c4a24' : '#f2d49a'),
+                      opacity: isWe ? 0.4 : undefined,
+                      boxShadow: isToday ? 'inset 0 -2px 0 var(--glut)' : undefined,
+                    }}
+                  >
+                    {showWeekNumbers && wd === 1 && (
+                      <span
+                        className="absolute left-[2px] -top-[1px] font-mono text-[7px] font-bold leading-[9px] rounded-[2px] px-[2px] z-[2]"
+                        style={{ background: 'var(--schrift-3)', color: isDark ? '#0e1420' : '#ffffff' }}
+                        title="Kalenderwoche"
+                      >
+                        KW{getISOWeek(year, month, day)}
+                      </span>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
             <tr className="bg-ebene">
               <th scope="col" className="sticky left-0 z-20 bg-ebene px-2 sm:px-3 py-1 text-left min-w-[90px] sm:min-w-[178px] border-r border-kontur border-b border-kontur align-bottom">
                 <span className="flex items-end justify-between gap-1 text-[9px] font-bold uppercase tracking-[.1em] text-schrift-3">
@@ -6492,6 +6565,7 @@ export default function Schedule() {
                 return (
                   <th scope="col"
                     key={day}
+                    data-col={day}
                     className={`px-0.5 pt-1 pb-[3px] text-center min-w-[34px] sm:w-[42px] sm:min-w-[42px] border-r border-kontur-soft border-b border-kontur cursor-pointer align-bottom${isWe && !isToday && !isHol ? ' bg-wash' : ''}`}
                     style={{
                       backgroundColor: isHol
@@ -6508,11 +6582,6 @@ export default function Schedule() {
                     title={thTitle + ' · Klick für Tagesübersicht'}
                     onClick={() => setDayDetailModal({ day, dateStr })}
                   >
-                    {showWeekNumbers && wd === 1 && (
-                      <div className="font-mono text-[7px] leading-none font-bold text-schrift-3" title="Kalenderwoche">
-                        KW{getISOWeek(year, month, day)}
-                      </div>
-                    )}
                     <div className={`text-[8px] tracking-[.05em] ${isHol ? 'text-signal' : isToday ? 'text-glut' : isWe ? 'text-schrift-3' : 'text-schrift-2'}`}>{WEEKDAY_ABBR[wd]}</div>
                     <div className={`font-mono tabular-nums text-[11.5px] font-bold leading-tight ${isHol ? 'text-signal' : isToday ? 'text-glut' : 'text-schrift'}`}>{day}</div>
                     {coverageDot && (
@@ -6754,6 +6823,10 @@ export default function Schedule() {
             )}
           </tbody>
         </table>
+        {displayedDays.indexOf(todayDay) >= 0 && (
+          <Zeitfaden dayIndex={displayedDays.indexOf(todayDay)} isDark={isDark} />
+        )}
+        </div>
       </ResponsiveTable>
       )}
 

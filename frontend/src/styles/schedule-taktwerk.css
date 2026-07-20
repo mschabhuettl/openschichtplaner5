@@ -1,0 +1,288 @@
+/*
+ * Taktwerk-Dienstplan: statische Stile ohne React-Renderpfad.
+ * - Hover-Kreuz: Zeilen-Tönung per tr:hover, Spalten-Tönung über das
+ *   data-hovercol-Attribut am <table class="tw-grid"> (imperativ gesetzt in
+ *   der Hover-API von Schedule.tsx — KEIN React-State, kein Grid-Re-Render).
+ * - Zell-Hover-Ring 1,5px in Schrift-2 (Inline-Outlines der Zustände
+ *   Cursor/Konflikt/DnD gewinnen als inline styles automatisch).
+ * - pop-Animation des Kontextmenüs (90 ms, ease-out).
+ * Werte aus docs/design-system.md §1 (Hover-Tönung) und §6 (Kontextmenü).
+ */
+
+/* Zeilen-Tönung (nur Tageszellen; die sticky Namenszelle bekommt eine
+   deckende Mischfarbe, damit sie beim Scrollen opak bleibt) */
+.tw-grid tbody tr:hover td[data-col] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid tbody tr:hover td[data-col] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid tbody tr:hover td.tw-name {
+  background-color: #f8f9fa;
+}
+html.dark .tw-grid tbody tr:hover td.tw-name {
+  background-color: #1a2230;
+}
+
+/* Zell-Hover-Ring */
+.tw-grid tbody td[data-col]:hover {
+  outline: 1.5px solid var(--schrift-2);
+  outline-offset: -1.5px;
+}
+
+/* Kontextmenü-Animation (Referenz: opacity 0→1, scale .95→1, y −3→0) */
+@keyframes tw-pop {
+  from { opacity: 0; transform: scale(0.95) translateY(-3px); }
+  to   { opacity: 1; transform: none; }
+}
+.tw-pop { animation: tw-pop 0.09s ease-out; }
+
+/* Spalten-Tönung des Hover-Kreuzes (statisch generiert je Tagesspalte) */
+.tw-grid[data-hovercol="1"] td[data-col="1"],
+.tw-grid[data-hovercol="1"] th[data-col="1"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="1"] td[data-col="1"],
+html.dark .tw-grid[data-hovercol="1"] th[data-col="1"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="2"] td[data-col="2"],
+.tw-grid[data-hovercol="2"] th[data-col="2"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="2"] td[data-col="2"],
+html.dark .tw-grid[data-hovercol="2"] th[data-col="2"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="3"] td[data-col="3"],
+.tw-grid[data-hovercol="3"] th[data-col="3"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="3"] td[data-col="3"],
+html.dark .tw-grid[data-hovercol="3"] th[data-col="3"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="4"] td[data-col="4"],
+.tw-grid[data-hovercol="4"] th[data-col="4"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="4"] td[data-col="4"],
+html.dark .tw-grid[data-hovercol="4"] th[data-col="4"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="5"] td[data-col="5"],
+.tw-grid[data-hovercol="5"] th[data-col="5"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="5"] td[data-col="5"],
+html.dark .tw-grid[data-hovercol="5"] th[data-col="5"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="6"] td[data-col="6"],
+.tw-grid[data-hovercol="6"] th[data-col="6"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="6"] td[data-col="6"],
+html.dark .tw-grid[data-hovercol="6"] th[data-col="6"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="7"] td[data-col="7"],
+.tw-grid[data-hovercol="7"] th[data-col="7"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="7"] td[data-col="7"],
+html.dark .tw-grid[data-hovercol="7"] th[data-col="7"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="8"] td[data-col="8"],
+.tw-grid[data-hovercol="8"] th[data-col="8"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="8"] td[data-col="8"],
+html.dark .tw-grid[data-hovercol="8"] th[data-col="8"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="9"] td[data-col="9"],
+.tw-grid[data-hovercol="9"] th[data-col="9"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="9"] td[data-col="9"],
+html.dark .tw-grid[data-hovercol="9"] th[data-col="9"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="10"] td[data-col="10"],
+.tw-grid[data-hovercol="10"] th[data-col="10"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="10"] td[data-col="10"],
+html.dark .tw-grid[data-hovercol="10"] th[data-col="10"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="11"] td[data-col="11"],
+.tw-grid[data-hovercol="11"] th[data-col="11"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="11"] td[data-col="11"],
+html.dark .tw-grid[data-hovercol="11"] th[data-col="11"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="12"] td[data-col="12"],
+.tw-grid[data-hovercol="12"] th[data-col="12"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="12"] td[data-col="12"],
+html.dark .tw-grid[data-hovercol="12"] th[data-col="12"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="13"] td[data-col="13"],
+.tw-grid[data-hovercol="13"] th[data-col="13"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="13"] td[data-col="13"],
+html.dark .tw-grid[data-hovercol="13"] th[data-col="13"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="14"] td[data-col="14"],
+.tw-grid[data-hovercol="14"] th[data-col="14"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="14"] td[data-col="14"],
+html.dark .tw-grid[data-hovercol="14"] th[data-col="14"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="15"] td[data-col="15"],
+.tw-grid[data-hovercol="15"] th[data-col="15"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="15"] td[data-col="15"],
+html.dark .tw-grid[data-hovercol="15"] th[data-col="15"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="16"] td[data-col="16"],
+.tw-grid[data-hovercol="16"] th[data-col="16"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="16"] td[data-col="16"],
+html.dark .tw-grid[data-hovercol="16"] th[data-col="16"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="17"] td[data-col="17"],
+.tw-grid[data-hovercol="17"] th[data-col="17"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="17"] td[data-col="17"],
+html.dark .tw-grid[data-hovercol="17"] th[data-col="17"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="18"] td[data-col="18"],
+.tw-grid[data-hovercol="18"] th[data-col="18"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="18"] td[data-col="18"],
+html.dark .tw-grid[data-hovercol="18"] th[data-col="18"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="19"] td[data-col="19"],
+.tw-grid[data-hovercol="19"] th[data-col="19"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="19"] td[data-col="19"],
+html.dark .tw-grid[data-hovercol="19"] th[data-col="19"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="20"] td[data-col="20"],
+.tw-grid[data-hovercol="20"] th[data-col="20"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="20"] td[data-col="20"],
+html.dark .tw-grid[data-hovercol="20"] th[data-col="20"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="21"] td[data-col="21"],
+.tw-grid[data-hovercol="21"] th[data-col="21"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="21"] td[data-col="21"],
+html.dark .tw-grid[data-hovercol="21"] th[data-col="21"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="22"] td[data-col="22"],
+.tw-grid[data-hovercol="22"] th[data-col="22"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="22"] td[data-col="22"],
+html.dark .tw-grid[data-hovercol="22"] th[data-col="22"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="23"] td[data-col="23"],
+.tw-grid[data-hovercol="23"] th[data-col="23"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="23"] td[data-col="23"],
+html.dark .tw-grid[data-hovercol="23"] th[data-col="23"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="24"] td[data-col="24"],
+.tw-grid[data-hovercol="24"] th[data-col="24"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="24"] td[data-col="24"],
+html.dark .tw-grid[data-hovercol="24"] th[data-col="24"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="25"] td[data-col="25"],
+.tw-grid[data-hovercol="25"] th[data-col="25"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="25"] td[data-col="25"],
+html.dark .tw-grid[data-hovercol="25"] th[data-col="25"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="26"] td[data-col="26"],
+.tw-grid[data-hovercol="26"] th[data-col="26"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="26"] td[data-col="26"],
+html.dark .tw-grid[data-hovercol="26"] th[data-col="26"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="27"] td[data-col="27"],
+.tw-grid[data-hovercol="27"] th[data-col="27"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="27"] td[data-col="27"],
+html.dark .tw-grid[data-hovercol="27"] th[data-col="27"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="28"] td[data-col="28"],
+.tw-grid[data-hovercol="28"] th[data-col="28"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="28"] td[data-col="28"],
+html.dark .tw-grid[data-hovercol="28"] th[data-col="28"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="29"] td[data-col="29"],
+.tw-grid[data-hovercol="29"] th[data-col="29"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="29"] td[data-col="29"],
+html.dark .tw-grid[data-hovercol="29"] th[data-col="29"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="30"] td[data-col="30"],
+.tw-grid[data-hovercol="30"] th[data-col="30"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="30"] td[data-col="30"],
+html.dark .tw-grid[data-hovercol="30"] th[data-col="30"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}
+.tw-grid[data-hovercol="31"] td[data-col="31"],
+.tw-grid[data-hovercol="31"] th[data-col="31"] {
+  background-color: rgba(21, 23, 28, 0.028);
+}
+html.dark .tw-grid[data-hovercol="31"] td[data-col="31"],
+html.dark .tw-grid[data-hovercol="31"] th[data-col="31"] {
+  background-color: rgba(233, 236, 242, 0.035);
+}

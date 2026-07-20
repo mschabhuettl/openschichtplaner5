@@ -41,16 +41,24 @@ describe('shiftColor: Voll-Chip AA-Garantie', () => {
     expect(failures).toEqual([]);
   });
 
-  it('auch pathologische Rohfarben (sehr hell/dunkel/grau) landen auf der Schiene', () => {
+  it('achromatische Rohfarben (weiß/schwarz/grau) bleiben grau auf der Schiene', () => {
     for (const theme of THEMES) {
       for (const raw of ['#ffffff', '#000000', '#808080', '#fefefe', '#010101']) {
         const { ratio } = shiftCellColors(raw, theme);
         expect(ratio).toBeGreaterThanOrEqual(4.5);
-        // Schiene: Helligkeit fix (37/38%), unabhängig von der Roh-Helligkeit
+        // Achromat-Regel: keine Färbung (S=0), Helligkeit fix auf der Schiene
         const [, s, l] = hexToHsl(normalize(raw, theme));
+        expect(Math.round(s)).toBe(0);
         expect(Math.round(l)).toBe(theme === 'dark' ? 37 : 38);
-        expect(Math.round(s)).toBe(theme === 'dark' ? 46 : 52);
       }
+    }
+  });
+
+  it('Achromat kollidiert nicht mit echtem Rot (ZA #808080 vs. Kr #FF0000)', () => {
+    for (const theme of THEMES) {
+      expect(normalize('#808080', theme)).not.toBe(normalize('#ff0000', theme));
+      const [, sHollow] = hexToHsl(hollow('#808080', theme));
+      expect(Math.round(sHollow)).toBe(0);
     }
   });
 });

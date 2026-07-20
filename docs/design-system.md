@@ -93,6 +93,13 @@ gerendert:
    Personen-Badges; `hsl(h,45%,94%)`/`hsl(h,30%,16%)` + 3px-Spine), Spine
    (nur die 3px-Kante, `hsl(h,55%,42%)`/`hsl(h,50%,55%)`).
 
+**Achromat-Sonderfall (dokumentierte Präzisierung):** (nahezu) graue
+Rohfarben (Sättigung < 8 %) haben keinen Farbton — die Hue-Schiene würde sie
+rot einfärben und z. B. Zeitausgleich `#808080` ununterscheidbar von Krank
+`#FF0000` machen. Die Wiedererkennungs-Regel gilt sinngemäß: der Graue bleibt
+grau (S=0 auf derselben Helligkeits-Schiene); Achromaten nehmen auch nicht an
+der Kollisions-Spreizung teil.
+
 **AA-Nachführung (dokumentierte Präzisierung):** Für Grün-/Cyan-Hues erreicht
 die nominelle Schiene mit keinem Ink-Ton 4,5:1 (light worst 4,34 bei h≈189,
 dark 4,31 bei h≈136) — dort hat die im Handoff zweifach zugesicherte

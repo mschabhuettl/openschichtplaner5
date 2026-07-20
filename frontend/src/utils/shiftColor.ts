@@ -81,6 +81,19 @@ export function bestForeground(bg: string): string {
 // ── Normalisierung (der Kern) ───────────────────────────────────────
 
 /**
+ * Achromat-Sonderfall: (nahezu) graue Rohfarben haben keinen Farbton — die
+ * Hue-Schiene würde sie rot einfärben und mit echten Rot-Tönen kollidieren
+ * (z. B. Zeitausgleich #808080 ununterscheidbar von Krank #FF0000). Die
+ * Wiedererkennungs-Regel gilt sinngemäß: der Graue bleibt grau (S=0).
+ */
+const ACHROMATIC_MAX_S = 8;
+
+function hueSat(raw: string, s: number): [number, number] {
+  const [h, rawS] = hexToHsl(raw);
+  return rawS < ACHROMATIC_MAX_S ? [0, 0] : [h, s];
+}
+
+/**
  * AA-Nachführung: für Grün-/Cyan-Hues erreicht die nominelle Schiene mit
  * keinem der beiden Ink-Töne 4.5:1 (light worst 4.34, dark 4.31) — die
  * zugesicherte Garantie „Text besteht überall AA" hat Vorrang vor dem
@@ -98,26 +111,26 @@ function railHex(h: number, s: number, l: number): string {
 
 /** Dienst-Chip-Fläche: Hue bleibt, S/L auf Schiene. Text besteht AA (≥4.5:1). */
 export function normalize(raw: string, theme: Theme): string {
-  const [h] = hexToHsl(raw);
-  return theme === 'dark' ? railHex(h, 46, 37) : railHex(h, 52, 38);
+  const [h, s] = hueSat(raw, theme === 'dark' ? 46 : 52);
+  return railHex(h, s, theme === 'dark' ? 37 : 38);
 }
 
 /** Abwesenheiten (hohl): Kontur-/Textfarbe für gestrichelte Chips auf Ebene-Hintergrund. */
 export function hollow(raw: string, theme: Theme): string {
-  const [h] = hexToHsl(raw);
-  return theme === 'dark' ? hslToHex(h, 55, 66) : hslToHex(h, 60, 34);
+  const [h, s] = hueSat(raw, theme === 'dark' ? 55 : 60);
+  return theme === 'dark' ? hslToHex(h, s, 66) : hslToHex(h, s, 34);
 }
 
 /** Tint-Fläche (Zeilenköpfe, Personen-Badges) — Text darauf = normale Schrift-Token. */
 export function tint(raw: string, theme: Theme): string {
-  const [h] = hexToHsl(raw);
-  return theme === 'dark' ? hslToHex(h, 30, 16) : hslToHex(h, 45, 94);
+  const [h, s] = hueSat(raw, theme === 'dark' ? 30 : 45);
+  return theme === 'dark' ? hslToHex(h, s, 16) : hslToHex(h, s, 94);
 }
 
 /** 3px-Spine (Kante an Zeilenköpfen, Listen, Legenden). */
 export function spine(raw: string, theme: Theme): string {
-  const [h] = hexToHsl(raw);
-  return theme === 'dark' ? hslToHex(h, 50, 55) : hslToHex(h, 55, 42);
+  const [h, s] = hueSat(raw, theme === 'dark' ? 50 : 55);
+  return theme === 'dark' ? hslToHex(h, s, 55) : hslToHex(h, s, 42);
 }
 
 // ── Kollisions-Spreizung ────────────────────────────────────────────
@@ -132,6 +145,7 @@ const MIN_HUE_GAP = 14;
  */
 export function spreadHues(raws: string[]): Map<string, number> {
   const entries = [...new Set(raws)]
+    .filter((raw) => hexToHsl(raw)[1] >= ACHROMATIC_MAX_S) // Achromaten besetzen keinen Farbton
     .map((raw) => ({ raw, h: hexToHsl(raw)[0] }))
     .sort((a, b) => a.h - b.h);
   for (let i = 1; i < entries.length; i++) {
@@ -143,8 +157,9 @@ export function spreadHues(raws: string[]): Map<string, number> {
 
 /** normalize() mit gespreiztem Hue aus spreadHues(). */
 export function normalizeSpread(raw: string, theme: Theme, hues: Map<string, number>): string {
-  const h = hues.get(raw) ?? hexToHsl(raw)[0];
-  return theme === 'dark' ? railHex(h, 46, 37) : railHex(h, 52, 38);
+  const [h0, s] = hueSat(raw, theme === 'dark' ? 46 : 52);
+  const h = s === 0 ? h0 : hues.get(raw) ?? h0;
+  return railHex(h, s, theme === 'dark' ? 37 : 38);
 }
 
 // ── Komfort: fertiges Style-Paket für eine Zelle ────────────────────

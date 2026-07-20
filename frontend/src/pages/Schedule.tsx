@@ -32,6 +32,9 @@ import type { DndAssignPayload, DndMovePayload } from '../components/ScheduleCal
 import { ResponsiveTable } from '../components/ResponsiveTable';
 import { EmptyState } from '../components/EmptyState';
 import { groupTreeOptions } from '../utils/groupTree';
+import { shiftCellColorsMemo, tint, spine } from '../utils/shiftColor';
+import { phaseForStart, formatSaldo, type Phase } from '../utils/scheduleVisuals';
+import { parseStartendIntervals } from '../utils/startend';
 
 // ── JS weekday → DB weekday (0=Mon..6=Sun) ────────────────────
 function jsWdToDbWd(jsWd: number): number {
@@ -2043,7 +2046,9 @@ function cellBgForModi(
 ): string | undefined {
   if (!entry) return undefined;
   const mode = entry.kind === 'absence' ? modi.abwesenheiten : modi.dienste;
-  return mode === 'farbbalken' || mode === 'farbbalken_kuerzel' ? undefined : entry.color_bk;
+  // Nur „Hintergrund färben" tönt die Zelle selbst; im Kürzel-Modus trägt
+  // der Taktwerk-Chip die Farbe (Zellgrund bleibt neutral).
+  return mode === 'hintergrund' ? entry.color_bk : undefined;
 }
 
 // ── Stabile Zell-Handler, die die memoisierte Zeile vom Eltern-State entkoppeln ─
@@ -2086,6 +2091,7 @@ export interface EmployeeRowProps {
   shifts: ShiftType[];
   leaveTypes: LeaveType[];
   darstellungsModi: DarstellungsModi;
+  phaseMap: Map<number, Phase>;
   grid: GridWritePerms;
   isDark: boolean;
   isLeserView: boolean;
@@ -2119,27 +2125,28 @@ export interface EmployeeRowProps {
 const rowPad = (n: number) => String(n).padStart(2, '0');
 
 export const EmployeeRow = memo(function EmployeeRow({
-  emp, idx, displayedDays, year, month, todayDay, todayStr,
+  emp, displayedDays, year, month, todayDay, todayStr,
   entryMap, holidays, notesMap, wishMap, conflictMap, workloadMap,
-  shifts, leaveTypes, darstellungsModi, grid, isDark, isLeserView, currentUserEmpId,
+  shifts, leaveTypes, darstellungsModi, phaseMap, grid, isDark, isLeserView, currentUserEmpId,
   showWorkloadBars, filterShiftId, filterLeaveId,
   selectedDay, dndSrcDay, dndTgtDay, activePickerDay, selInBand, selMinDay, selMaxDay,
   isRowHighlighted, isDimmed, cb, hover, setActivePicker, setNotePopup, setHighlightedEmpId,
 }: EmployeeRowProps) {
-  const rowBg = idx % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+  const theme = isDark ? 'dark' : 'light';
+  // MA-Farben als Tint-Fläche (Rohfarbe nie direkt; Text = Schrift-Token)
   const empRowStyle = (emp.CBKSCHED != null && emp.CBKSCHED !== 16777215 && emp.CBKSCHED !== 0 && emp.CBKSCHED_HEX)
-    ? { backgroundColor: emp.CBKSCHED_HEX }
+    ? { backgroundColor: tint(emp.CBKSCHED_HEX, theme) }
     : undefined;
   const empNameStyle = (emp.CBKLABEL != null && emp.CBKLABEL !== 16777215 && emp.CBKLABEL !== 0 && emp.CBKLABEL_HEX)
-    ? { backgroundColor: emp.CBKLABEL_HEX, color: emp.CFGLABEL_HEX || '#000' }
+    ? { backgroundColor: tint(emp.CBKLABEL_HEX, theme), boxShadow: `inset 3px 0 0 ${spine(emp.CBKLABEL_HEX, theme)}` }
     : undefined;
   const isCurrentUserRow = isLeserView && currentUserEmpId !== null && currentUserEmpId === emp.ID;
   return (
-    <tr className={empRowStyle ? undefined : (isCurrentUserRow ? 'bg-blue-50 dark:bg-blue-950/30' : rowBg)} style={empRowStyle}>
+    <tr className={empRowStyle ? undefined : (isCurrentUserRow ? 'bg-glut-flaeche' : undefined)} style={empRowStyle}>
       <td
-        className="sticky left-0 z-10 bg-white dark:bg-gray-900 px-2 sm:px-3 py-1 border-r border-gray-200 border-b border-b-gray-100 font-medium whitespace-nowrap cursor-pointer select-none min-w-[90px] sm:min-w-[160px] max-w-[90px] sm:max-w-[160px] overflow-hidden"
+        className="sticky left-0 z-10 bg-ebene px-2 sm:px-3 py-1 border-r border-kontur border-b border-b-kontur-soft font-medium whitespace-nowrap cursor-pointer select-none min-w-[90px] sm:min-w-[178px] max-w-[90px] sm:max-w-[178px] overflow-hidden"
         style={isRowHighlighted
-          ? { ...(empNameStyle || {}), outline: '2px solid #0ea5e9', outlineOffset: '-2px', backgroundColor: empNameStyle?.backgroundColor ?? '#e0f2fe' }
+          ? { ...(empNameStyle || {}), outline: '2px solid var(--glut)', outlineOffset: '-2px', backgroundColor: empNameStyle?.backgroundColor ?? 'var(--glut-flaeche)' }
           : empNameStyle}
         title="Klicken zum Hervorheben aller Schichten dieses Mitarbeiters"
         onClick={() => setHighlightedEmpId(id => id === emp.ID ? null : emp.ID)}
@@ -2163,18 +2170,29 @@ export const EmployeeRow = memo(function EmployeeRow({
           const wlTitle = wl ? `Ist ${wl.actual}h / Soll ${wl.target}h · Saldo ${wlSaldo >= 0 ? '+' : ''}${wlSaldo}h (${wlPct ?? '?'}%)` : '';
           return (
             <>
-              {emp.BOLD === 1
-                ? <strong className="block truncate text-[11px] sm:text-xs">{emp.NAME}, {emp.FIRSTNAME}</strong>
-                : <span className="block truncate text-[11px] sm:text-xs">{emp.NAME}, {emp.FIRSTNAME}</span>}
-              {isLeserView && currentUserEmpId === emp.ID && (
-                <span className="ml-1.5 rounded bg-blue-500 px-1 py-0.5 text-[10px] font-bold text-white">Du</span>
-              )}
-              {hasBirthdayThisMonth && (
-                <span
-                  className="ml-1 text-sm cursor-default"
-                  title={`🎂 Geburtstag: ${birthdayDate}`}
-                >🎂</span>
-              )}
+              <span className="flex items-center justify-between gap-1.5">
+                <span className="flex items-center gap-1 min-w-0">
+                  {emp.BOLD === 1
+                    ? <strong className="truncate text-[11px] sm:text-xs text-schrift">{emp.NAME}, {emp.FIRSTNAME}</strong>
+                    : <span className="truncate text-[11px] sm:text-xs text-schrift">{emp.NAME}, {emp.FIRSTNAME}</span>}
+                  {isLeserView && currentUserEmpId === emp.ID && (
+                    <span className="flex-shrink-0 rounded bg-glut px-1 py-0.5 text-[10px] font-bold text-glut-ink">Du</span>
+                  )}
+                  {hasBirthdayThisMonth && (
+                    <span
+                      className="flex-shrink-0 text-sm cursor-default"
+                      title={`🎂 Geburtstag: ${birthdayDate}`}
+                    >🎂</span>
+                  )}
+                </span>
+                {/* Saldo (Ist − Soll) rechtsbündig — negativ in Signal */}
+                {wl && (
+                  <span
+                    className={`hidden sm:inline font-mono tabular-nums text-[9px] flex-shrink-0 ${wlSaldo < 0 ? 'text-signal' : 'text-schrift-3'}`}
+                    title={wlTitle}
+                  >{formatSaldo(wlSaldo)}</span>
+                )}
+              </span>
               {showWorkloadBars && wl && (
                 <div className="mt-0.5" title={wlTitle}>
                   <div className="flex items-center gap-1">
@@ -2241,39 +2259,46 @@ export const EmployeeRow = memo(function EmployeeRow({
         const isOtherEmpDimmed = isDimmed;
         // G-1: granulares Schreib-Gating der Zelle (WDUTIES/WABSENCES/WPAST)
         const cellPerm = cellWriteState(grid, dateStr, todayStr, cellEntries);
+        // Taktwerk-Zustandskaskade: Wanne (Auswahl/DnD-Ziel) > Modus-Fläche >
+        // Feiertag > Heute-Wash (inline) > Wochenend-Wash (Klasse bg-wash).
+        const glutHex = isDark ? '#f0a35c' : '#c96a14';
+        const glutWanne = isDark ? 'rgba(240,163,92,.13)' : 'rgba(201,106,20,.10)';
+        const modiBg = cellEntries.length === 1 ? cellBgForModi(entry, darstellungsModi) : undefined;
         return (
           <td
             key={day}
-            className={`border border-gray-100 p-0 text-center relative group`}
+            className={`border border-kontur-soft p-0 text-center relative group${isWe && !isToday && !isHol ? ' bg-wash' : ''}`}
             title={!isLeserView ? (cellPerm.readOnlyReason ?? undefined) : undefined}
             draggable={cellPerm.canDrag && !isLeserView}
             style={{
-              backgroundColor: isDndTgt
-                ? (isDark ? '#1e3a5f' : '#bfdbfe')
-                : isSelected
-                ? (isDark ? '#1e3060' : '#dbeafe')
-                : ((cellEntries.length === 1 ? cellBgForModi(entry, darstellungsModi) : undefined) || (isHol
-                    ? (isDark ? '#2d1212' : '#fef2f2')
+              backgroundColor: isDndTgt || isSelected
+                ? glutWanne
+                : (modiBg
+                    ? shiftCellColorsMemo(modiBg, isDark ? 'dark' : 'light').background
+                    : isHol
+                    ? (isDark ? 'rgba(228,105,111,.12)' : 'rgba(190,59,59,.08)')
                     : isToday
-                    ? (isDark ? '#0d1f3c' : '#eff6ff')
-                    : isWe
-                    ? (isDark ? '#1a2535' : '#f1f5f9')
-                    : (isDark ? undefined : undefined))),
+                    ? (isDark ? 'rgba(240,163,92,.05)' : 'rgba(201,106,20,.045)')
+                    : undefined),
+              // Bereichsauswahl ohne Cursor: Glut-Innenkanten oben/unten
+              boxShadow: isSelected && !isCursor
+                ? `inset 0 1px 0 ${glutHex}55, inset 0 -1px 0 ${glutHex}55`
+                : undefined,
               outline: isDndTgt
-                ? '2px solid #1d4ed8'
+                ? '2px dashed var(--glut)'
+                : hasConflict
+                ? '2px solid var(--signal)'
                 : isDndSrc
-                ? '2px dashed #6b7280'
+                ? '2px dashed var(--schrift-3)'
                 : isCursor
-                ? '2px solid #1d4ed8'
-                : isSelected
-                ? '2px solid #2563eb'
+                ? '2px solid var(--glut)'
                 : isEmpHighlighted && cellEntries.length > 0
-                ? '2px solid #0ea5e9'
-                : isToday && !hasConflict && !isFilterMatch
-                ? '2px solid #93c5fd'
-                : (hasConflict ? '2px solid #ef4444' : isFilterMatch ? '2px solid #3b82f6' : undefined),
+                ? '1.5px solid var(--schrift-2)'
+                : isFilterMatch
+                ? '1.5px solid var(--schrift-2)'
+                : undefined,
               outlineOffset: '-2px',
-              opacity: isDndSrc ? 0.5 : isOtherEmpDimmed ? 0.35 : 1,
+              opacity: isDndSrc ? 0.3 : isOtherEmpDimmed ? 0.35 : 1,
               // G-1: Read-only-Cursor, wenn Ziehen/Bearbeiten der Zelle gesperrt ist
               cursor: cellEntries.length > 0
                 ? (cellPerm.canDrag && !isLeserView ? 'grab' : 'not-allowed')
@@ -2296,20 +2321,20 @@ export const EmployeeRow = memo(function EmployeeRow({
             {cellEntries.length > 0 ? (
               <div className="relative">
                 {/* V-1: alle Einträge der Zelle gestapelt; ↻ = Zyklusdienst */}
-                <ScheduleCellStack entries={cellEntries} modi={darstellungsModi} />
-                {/* Conflict warning icon */}
+                <ScheduleCellStack entries={cellEntries} modi={darstellungsModi} isDark={isDark} phaseMap={phaseMap} />
+                {/* Konflikt-Ecke („!" in Signal — einziges Rot im Raster) */}
                 {hasConflict && (
                   <span
-                    className="absolute top-0 left-0 text-[8px] leading-none z-10 cursor-help"
+                    className="absolute -top-[1px] right-[1px] text-[8px] font-extrabold leading-none z-10 cursor-help text-signal"
                     title={conflictTitle}
                   >
-                    ⚠️
+                    !
                   </span>
                 )}
                 {/* Note icon */}
                 {hasNote && (
                   <button
-                    className="absolute top-0 right-0 text-[8px] leading-none z-10 hover:scale-125 transition-transform"
+                    className="absolute top-0 left-0 text-[8px] leading-none z-10 hover:scale-125 transition-transform"
                     title={noteTitle}
                     onClick={e => {
                       e.stopPropagation();
@@ -2333,7 +2358,7 @@ export const EmployeeRow = memo(function EmployeeRow({
                 <button
                   onClick={() => cb.onDeleteEntry(emp.ID, day)}
                   onMouseDown={e => e.stopPropagation()}
-                  className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white rounded-full text-[8px] leading-none items-center justify-center hidden group-hover:flex z-10"
+                  className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-signal text-white dark:text-[#1a1108] rounded-full text-[8px] leading-none items-center justify-center hidden group-hover:flex z-10"
                   title={cellEntries.length > 1 ? 'Alle Einträge löschen' : 'Eintrag löschen'}
                 >
                   ×
@@ -2342,19 +2367,19 @@ export const EmployeeRow = memo(function EmployeeRow({
               </div>
             ) : (
               <div className="relative h-[34px] sm:h-6">
-                {/* Conflict icon for empty cells */}
+                {/* Konflikt-Ecke für leere Zellen */}
                 {hasConflict && (
                   <span
-                    className="absolute top-0 left-0 text-[8px] leading-none z-10 cursor-help"
+                    className="absolute -top-[1px] right-[1px] text-[8px] font-extrabold leading-none z-10 cursor-help text-signal"
                     title={conflictTitle}
                   >
-                    ⚠️
+                    !
                   </span>
                 )}
                 {/* Note icon for empty cells too */}
                 {hasNote && (
                   <button
-                    className="absolute top-0 right-0 text-[8px] leading-none z-10 hover:scale-125 transition-transform"
+                    className="absolute top-0 left-0 text-[8px] leading-none z-10 hover:scale-125 transition-transform"
                     title={noteTitle}
                     onClick={e => {
                       e.stopPropagation();
@@ -2379,7 +2404,7 @@ export const EmployeeRow = memo(function EmployeeRow({
                     p?.empId === emp.ID && p?.day === day ? null : { empId: emp.ID, day }
                   )}
                   onMouseDown={e => e.stopPropagation()}
-                  className="absolute inset-0 w-full h-full flex items-center justify-center text-gray-300 hover:text-blue-400 hover:bg-blue-50 transition-colors opacity-0 group-hover:opacity-100"
+                  className="absolute inset-0 w-full h-full flex items-center justify-center text-schrift-3 hover:text-glut hover:bg-glut-flaeche transition-colors opacity-0 group-hover:opacity-100"
                   title="Schicht hinzufügen"
                 >
                   <span className="text-[10px] font-bold">+</span>
@@ -2634,6 +2659,25 @@ export default function Schedule() {
     }),
     [appSettings.display.darstellungDienste, appSettings.display.darstellungAbwesenheiten],
   );
+  // Phasenkerbe: Dienstbeginn je Schicht (erste STARTEND-Zeit) → Phase.
+  // Referenzstabil (useMemo an shifts) — Prop der memoisierten Zeilen.
+  const phaseMap = useMemo(() => {
+    const m = new Map<number, Phase>();
+    for (const s of shifts) {
+      const fields = [s.STARTEND0, s.STARTEND1, s.STARTEND2, s.STARTEND3, s.STARTEND4, s.STARTEND5, s.STARTEND6, s.STARTEND7];
+      let start: number | null = null;
+      for (const f of fields) {
+        const iv = parseStartendIntervals(f);
+        const t = iv[0]?.start;
+        if (t && /^\d{2}:\d{2}$/.test(t)) {
+          start = Number(t.slice(0, 2)) * 60 + Number(t.slice(3, 5));
+          break;
+        }
+      }
+      m.set(s.ID, phaseForStart(start));
+    }
+    return m;
+  }, [shifts]);
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const { isDark } = useTheme();
   const exportRef = useRef<HTMLDivElement>(null);
@@ -6413,12 +6457,15 @@ export default function Schedule() {
 
       {/* ── Schedule Grid (Table View) ── */}
       {(viewMode === 'table' || isMobile) && (
-      <ResponsiveTable stickyFirstCol className="flex-1 bg-white rounded-lg shadow border border-gray-200">
+      <ResponsiveTable stickyFirstCol className="flex-1 bg-ebene rounded-panel border border-kontur">
         <table className="border-collapse text-xs" style={isDragging ? { userSelect: 'none' } : undefined}>
           <thead>
-            <tr className="bg-slate-700 text-white">
-              <th scope="col" className="sticky left-0 z-20 bg-slate-700 px-3 py-2 text-left min-w-[90px] sm:min-w-[160px] border-r border-slate-600">
-                Mitarbeiter
+            <tr className="bg-ebene">
+              <th scope="col" className="sticky left-0 z-20 bg-ebene px-2 sm:px-3 py-1 text-left min-w-[90px] sm:min-w-[178px] border-r border-kontur border-b border-kontur align-bottom">
+                <span className="flex items-end justify-between gap-1 text-[9px] font-bold uppercase tracking-[.1em] text-schrift-3">
+                  <span>Mitarbeiter</span>
+                  <span className="hidden sm:inline">Saldo</span>
+                </span>
               </th>
               {displayedDays.map(day => {
                 const wd = getWeekday(year, month, day);
@@ -6445,22 +6492,29 @@ export default function Schedule() {
                 return (
                   <th scope="col"
                     key={day}
-                    className={`px-0.5 py-1 text-center min-w-[34px] border-r border-slate-600 cursor-pointer hover:brightness-125 transition-[filter] ${
-                      isHol ? 'bg-red-700' : isToday ? 'bg-blue-500' : isWe ? 'bg-slate-600' : ''
-                    }`}
-                    style={dayPeriod ? { borderBottom: `4px solid ${dayPeriod.color || '#f59e0b'}` } : undefined}
+                    className={`px-0.5 pt-1 pb-[3px] text-center min-w-[34px] sm:w-[42px] sm:min-w-[42px] border-r border-kontur-soft border-b border-kontur cursor-pointer align-bottom${isWe && !isToday && !isHol ? ' bg-wash' : ''}`}
+                    style={{
+                      backgroundColor: isHol
+                        ? (isDark ? 'rgba(228,105,111,.12)' : 'rgba(190,59,59,.08)')
+                        : isToday
+                        ? (isDark ? 'rgba(240,163,92,.05)' : 'rgba(201,106,20,.045)')
+                        : undefined,
+                      borderBottom: dayPeriod
+                        ? `4px solid ${dayPeriod.color ? shiftCellColorsMemo(dayPeriod.color, isDark ? 'dark' : 'light').background : 'var(--glut)'}`
+                        : isHol
+                        ? '2px solid var(--signal)'
+                        : undefined,
+                    }}
                     title={thTitle + ' · Klick für Tagesübersicht'}
                     onClick={() => setDayDetailModal({ day, dateStr })}
                   >
                     {showWeekNumbers && wd === 1 && (
-                      <div className="text-amber-300 text-[8px] leading-none font-semibold" title="Kalenderwoche">
+                      <div className="font-mono text-[7px] leading-none font-bold text-schrift-3" title="Kalenderwoche">
                         KW{getISOWeek(year, month, day)}
                       </div>
                     )}
-                    <div className="text-slate-300 text-[10px]">{WEEKDAY_ABBR[wd]}</div>
-                    <div className="font-bold">{day}</div>
-                    {isHol && <div className="text-yellow-300 text-[8px] leading-none">★</div>}
-                    {isToday && !isHol && <div className="text-blue-200 text-[8px] leading-none">●</div>}
+                    <div className={`text-[8px] tracking-[.05em] ${isHol ? 'text-signal' : isToday ? 'text-glut' : isWe ? 'text-schrift-3' : 'text-schrift-2'}`}>{WEEKDAY_ABBR[wd]}</div>
+                    <div className={`font-mono tabular-nums text-[11.5px] font-bold leading-tight ${isHol ? 'text-signal' : isToday ? 'text-glut' : 'text-schrift'}`}>{day}</div>
                     {coverageDot && (
                       <div
                         className="mx-auto mt-0.5 rounded-full"
@@ -6590,12 +6644,12 @@ export default function Schedule() {
               // Group header row
               if (row.type === 'group-header') {
                 return (
-                  <tr key={`grp-${row.groupId}`} className="bg-blue-50 dark:bg-blue-900/20">
+                  <tr key={`grp-${row.groupId}`} className="bg-[#fafbfc] dark:bg-[#0e1522]">
                     <td
                       colSpan={displayedDays.length + 1}
-                      className="sticky left-0 px-3 py-1 text-xs font-bold text-blue-700 dark:text-blue-300 border-b border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20"
+                      className="sticky left-0 h-[17px] px-3 py-0 text-[8.5px] font-extrabold uppercase tracking-[.12em] text-schrift-3 border-b border-kontur bg-[#fafbfc] dark:bg-[#0e1522]"
                     >
-                      👥 {row.groupName}
+                      {row.groupName}
                     </td>
                   </tr>
                 );
@@ -6624,6 +6678,7 @@ export default function Schedule() {
                   shifts={shifts}
                   leaveTypes={leaveTypes}
                   darstellungsModi={darstellungsModi}
+                  phaseMap={phaseMap}
                   grid={gridStable}
                   isDark={isDark}
                   isLeserView={isLeserView}
@@ -6669,8 +6724,8 @@ export default function Schedule() {
 
             {/* Summary row */}
             {displayEmployees.length > 0 && (
-              <tr className="bg-slate-50 border-t-2 border-slate-300">
-                <td className="sticky left-0 z-10 bg-slate-100 px-3 py-1 border-r border-gray-300 font-semibold text-xs text-slate-600 whitespace-nowrap">
+              <tr className="bg-[#fafbfc] dark:bg-[#0e1522] border-t border-kontur">
+                <td className="sticky left-0 z-10 bg-[#fafbfc] dark:bg-[#0e1522] px-3 py-1 border-r border-kontur font-bold text-[10px] text-schrift-2 whitespace-nowrap">
                   ∑ Einsätze
                 </td>
                 {displayedDays.map(day => {
@@ -6682,25 +6737,15 @@ export default function Schedule() {
                   return (
                     <td
                       key={day}
-                      className={`border border-gray-200 text-center py-1 ${isWe ? 'bg-slate-100' : ''}`}
+                      className={`border-r border-kontur-soft text-center py-1 font-mono tabular-nums text-[9.5px]${isWe ? ' bg-wash' : ''}`}
                       title={`${count} von ${total} MA eingeteilt`}
                     >
                       {count > 0 ? (
-                        <div>
-                          <div className={`text-[10px] font-bold ${pct >= 0.8 ? 'text-green-600' : pct >= 0.5 ? 'text-amber-600' : 'text-red-600'}`}>
-                            {count}
-                          </div>
-                          <div
-                            className="mx-auto rounded-full mt-0.5"
-                            style={{
-                              width: '20px',
-                              height: '3px',
-                              backgroundColor: pct >= 0.8 ? '#16a34a' : pct >= 0.5 ? '#d97706' : '#dc2626',
-                            }}
-                          />
-                        </div>
+                        <span className={pct < 0.5 ? 'font-extrabold text-signal' : 'font-medium text-schrift-2'}>
+                          {count}
+                        </span>
                       ) : (
-                        <span className="text-gray-200 text-[10px]">—</span>
+                        <span className="text-schrift-3">—</span>
                       )}
                     </td>
                   );
@@ -6725,30 +6770,31 @@ export default function Schedule() {
 
       {/* ── Legend ── */}
       <div className="mt-3 flex items-center gap-2 flex-wrap">
-        <span className="text-xs text-gray-500">Legende:</span>
-        <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">● Heute</span>
-        <span className="text-xs px-2 py-0.5 bg-slate-200 rounded">Wochenende</span>
-        <span className="text-xs px-2 py-0.5 bg-red-100 rounded">★ Feiertag</span>
-        <span className="text-xs px-2 py-0.5 text-green-600 bg-green-50 rounded">■ ≥80%</span>
-        <span className="text-xs px-2 py-0.5 text-amber-600 bg-amber-50 rounded">■ 50–79%</span>
-        <span className="text-xs px-2 py-0.5 text-red-600 bg-red-50 rounded">■ &lt;50%</span>
-        <span className="text-xs px-2 py-0.5 bg-gray-100 rounded" title="Generierter Dienst aus dem Schichtmodell — änderbar nur per Überschreiben">↻ Zyklusdienst</span>
-        <span className="text-xs px-2 py-0.5 bg-gray-100 rounded" title="Personalbedarf-Ampel in der Kopfzeile">Ampel: 🔴 unter · 🟢 ok · 🟠 über Soll</span>
+        <span className="text-xs text-schrift-3">Legende:</span>
+        <span className="text-xs px-2 py-0.5 bg-glut-flaeche text-glut rounded-cell">● Heute</span>
+        <span className="text-xs px-2 py-0.5 bg-wash text-schrift-2 rounded-cell">Wochenende</span>
+        <span className="text-xs px-2 py-0.5 bg-signal-flaeche text-signal rounded-cell">Feiertag</span>
+        <span className="text-xs px-2 py-0.5 text-signal rounded-cell font-bold" title="Weniger als die Hälfte der Mitarbeiter eingeteilt">∑ unterbesetzt</span>
+        <span className="text-xs px-2 py-0.5 bg-wash text-schrift-2 rounded-cell" title="Generierter Dienst aus dem Schichtmodell — änderbar nur per Überschreiben">↻ Zyklusdienst</span>
+        <span className="text-xs px-2 py-0.5 bg-wash text-schrift-2 rounded-cell" title="Personalbedarf-Ampel in der Kopfzeile">Ampel: 🔴 unter · 🟢 ok · 🟠 über Soll</span>
       </div>
       {/* ── Shift Color Legend ── */}
       {shifts.filter(s => !s.HIDE).length > 0 && (
         <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
           <span className="text-xs text-gray-500">Schichten:</span>
-          {shifts.filter(s => !s.HIDE).map(s => (
-            <span
-              key={s.ID}
-              className="text-[11px] font-bold px-1.5 py-0.5 rounded border border-black/10"
-              style={{ backgroundColor: s.COLORBK_HEX || '#e5e7eb', color: s.COLORTEXT_HEX || '#111' }}
-              title={s.NAME}
-            >
-              {s.SHORTNAME}
-            </span>
-          ))}
+          {shifts.filter(s => !s.HIDE).map(s => {
+            const c = s.COLORBK_HEX ? shiftCellColorsMemo(s.COLORBK_HEX, isDark ? 'dark' : 'light') : null;
+            return (
+              <span
+                key={s.ID}
+                className="min-w-[20px] text-center text-[8.5px] font-bold px-1 leading-[13px] rounded-cell"
+                style={c ? { backgroundColor: c.background, color: c.color } : undefined}
+                title={s.NAME}
+              >
+                {s.SHORTNAME}
+              </span>
+            );
+          })}
           <span className="hidden sm:inline no-print text-xs text-gray-600 ml-2">
             Hover → Tooltip · Drag &amp; Drop (Alt=Kopieren) · Pfeiltasten → Navigation · Del → Löschen · Enter → Schicht · Ctrl+Z/Y → Undo/Redo
           </span>

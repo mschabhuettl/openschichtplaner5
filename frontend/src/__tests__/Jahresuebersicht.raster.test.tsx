@@ -143,7 +143,7 @@ describe('Jahresübersicht — Jahresraster (V-8, Spec 4.4)', () => {
     await renderRaster();
 
     const cell = screen.getByTestId('jr-cell-3-16');
-    const badge = within(cell).getByTitle(CYCLE_TITLE);
+    const badge = within(cell).getByTitle(`N · ${CYCLE_TITLE}`);
     expect(badge.textContent).toContain('↻');
     expect(badge.textContent).toContain('N');
   });

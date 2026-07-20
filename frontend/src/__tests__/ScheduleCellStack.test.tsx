@@ -52,7 +52,7 @@ describe('ScheduleCellStack', () => {
 
   it('kennzeichnet Zyklusdienste mit ↻ und Tooltip „aus Schichtmodell"', () => {
     render(<ScheduleCellStack entries={[entry({ source: 'cycle', display_name: 'N' })]} />);
-    const el = screen.getByTitle(CYCLE_TITLE);
+    const el = screen.getByTitle(`N · ${CYCLE_TITLE}`);
     expect(el.textContent).toContain('↻');
     expect(el.textContent).toContain('N');
   });
@@ -74,7 +74,7 @@ describe('ScheduleCellStack', () => {
 
   it('kennzeichnet Sollplan-Einträge mit „S" und Tooltip (Spec 4.12)', () => {
     render(<ScheduleCellStack entries={[entry({ schedule_type: 1, display_name: 'F' })]} />);
-    const el = screen.getByTitle(SOLL_TITLE);
+    const el = screen.getByTitle(`F · ${SOLL_TITLE}`);
     expect(el.textContent).toContain('S');
     expect(el.textContent).toContain('F');
   });

@@ -1,6 +1,9 @@
 /**
- * Badge — einheitliche Inline-Badge-Komponente
- * Ersetzt die vielen lokalen <span>-Implementierungen.
+ * Badge — einheitliche Inline-Badge-Komponente als Taktwerk-Status-Pille
+ * (docs/design-system.md §6): Outline-Pille mit Punkt, Vorder-/Randfarbe
+ * nach der Status-Schiene (fg light hsl(h,55%,32%) / dark hsl(h,45%,70%),
+ * Rand light hsl(h,40%,84%) / dark hsl(h,35%,28%)). `gray` ist bewusst
+ * neutral (Schrift-2/Kontur) statt der blaustichigen #7a8090-Schiene.
  */
 
 export type BadgeVariant =
@@ -17,23 +20,24 @@ interface BadgeProps {
 }
 
 const variantMap: Record<BadgeVariant, string> = {
-  green:  'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/40 dark:text-green-300 dark:border-green-700/50',
-  blue:   'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700/50',
-  red:    'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-700/50',
-  yellow: 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/40 dark:text-yellow-300 dark:border-yellow-700/50',
-  orange: 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/40 dark:text-orange-300 dark:border-orange-700/50',
-  purple: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-700/50',
-  gray:   'bg-gray-100 text-gray-700 border-gray-200 dark:bg-slate-700 dark:text-slate-200 dark:border-slate-600',
-  teal:   'bg-teal-100 text-teal-800 border-teal-200 dark:bg-teal-900/40 dark:text-teal-300 dark:border-teal-700/50',
-  indigo: 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-300 dark:border-indigo-700/50',
+  green:  'text-[#257e3e] border-[#c6e7cf] dark:text-[#90d5a4] dark:border-[#2e603d]',
+  blue:   'text-[#25527e] border-[#c6d6e7] dark:text-[#90b3d5] dark:border-[#2e4760]',
+  red:    'text-[#7e2525] border-[#e7c6c6] dark:text-[#d59090] dark:border-[#602e2e]',
+  yellow: 'text-[#7e6e25] border-[#e7e1c6] dark:text-[#d5c890] dark:border-[#60572e]',
+  orange: 'text-[#7e5f25] border-[#e7dbc6] dark:text-[#d5bd90] dark:border-[#604f2e]',
+  purple: 'text-[#52257e] border-[#d6c6e7] dark:text-[#b390d5] dark:border-[#472e60]',
+  gray:   'text-schrift-2 border-kontur',
+  teal:   'text-[#257e7e] border-[#c6e7e7] dark:text-[#90d5d5] dark:border-[#2e6060]',
+  indigo: 'text-[#25257e] border-[#c6c6e7] dark:text-[#9090d5] dark:border-[#2e2e60]',
 };
 
 export function Badge({ children, variant = 'gray', shape = 'pill', className = '' }: BadgeProps) {
   const rounded = shape === 'pill' ? 'rounded-full' : 'rounded';
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 text-xs font-semibold border whitespace-nowrap ${rounded} ${variantMap[variant]} ${className}`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold border whitespace-nowrap bg-transparent ${rounded} ${variantMap[variant]} ${className}`}
     >
+      <span className="w-[5px] h-[5px] rounded-full bg-current flex-shrink-0" aria-hidden="true" />
       {children}
     </span>
   );

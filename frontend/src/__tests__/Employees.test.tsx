@@ -148,7 +148,7 @@ describe('Employees', () => {
   it('shows loading skeleton initially', () => {
     vi.mocked(api.getEmployees).mockReturnValue(new Promise(() => {}));
     renderEmployees();
-    const skeletons = document.querySelectorAll('.animate-pulse');
+    const skeletons = document.querySelectorAll('.animate-shimmer');
     expect(skeletons.length).toBeGreaterThan(0);
   });
 

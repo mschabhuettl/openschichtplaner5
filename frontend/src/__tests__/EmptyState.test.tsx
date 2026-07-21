@@ -67,14 +67,14 @@ describe('ApiErrorState', () => {
   it('renders retry button and calls onRetry', () => {
     const onRetry = vi.fn();
     render(<ApiErrorState onRetry={onRetry} />);
-    const btn = screen.getByText('🔄 Erneut versuchen');
+    const btn = screen.getByText('Erneut versuchen');
     fireEvent.click(btn);
     expect(onRetry).toHaveBeenCalledOnce();
   });
 
   it('does not render retry button without onRetry', () => {
     render(<ApiErrorState />);
-    expect(screen.queryByText('🔄 Erneut versuchen')).toBeNull();
+    expect(screen.queryByText('Erneut versuchen')).toBeNull();
   });
 
   it('announces errors via role=alert', () => {

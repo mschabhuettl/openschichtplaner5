@@ -16,24 +16,34 @@ describe('StatCard dark mode', () => {
     expect(screen.getByText('Mitarbeiter')).toBeTruthy();
   });
 
-  it('includes dark: variants on the card surface for every accent', () => {
+  it('Kartenfläche ist in beiden Modi abgedeckt (Token-Paar oder dark:-Variante)', () => {
     const accents = ['blue', 'green', 'orange', 'red', 'purple', 'gray', 'teal', 'yellow', 'indigo'] as const;
     for (const accent of accents) {
       const { container, unmount } = render(<StatCard label="x" value="1" accent={accent} />);
       const card = container.firstChild as HTMLElement;
-      expect(card.className).toMatch(/dark:/);
+      // Taktwerk-Token (bg-ebene/border-kontur) tragen Light UND Dark;
+      // explizite dark:-Varianten sind nur für Nicht-Token-Farben nötig.
+      expect(card.className).toMatch(/bg-ebene/);
+      expect(card.className).toMatch(/border-kontur/);
       unmount();
     }
   });
 });
 
 describe('Badge dark mode', () => {
-  it('includes dark: variants for each variant', () => {
+  it('jede Variante ist in beiden Modi abgedeckt (Token-Paar oder dark:-Variante)', () => {
     const variants = ['green', 'blue', 'red', 'yellow', 'orange', 'purple', 'gray', 'teal', 'indigo'] as const;
     for (const variant of variants) {
       const { container, unmount } = render(<Badge variant={variant}>label</Badge>);
       const span = container.firstChild as HTMLElement;
-      expect(span.className).toMatch(/dark:/);
+      // Farbige Pillen brauchen dark:-Paare; die neutrale graue Pille läuft
+      // vollständig über Taktwerk-Token (schrift-2/kontur = Light+Dark).
+      if (variant === 'gray') {
+        expect(span.className).toMatch(/text-schrift-2/);
+        expect(span.className).toMatch(/border-kontur/);
+      } else {
+        expect(span.className).toMatch(/dark:/);
+      }
       unmount();
     }
   });
@@ -43,9 +53,9 @@ describe('PageHeader dark mode', () => {
   it('title and subtitle carry dark: text colors', () => {
     render(<PageHeader title="Titel" subtitle="Untertitel" />);
     const title = screen.getByRole('heading', { level: 1 });
-    expect(title.className).toMatch(/dark:text-/);
+    expect(title.className).toMatch(/text-schrift/);
     const subtitle = screen.getByText('Untertitel');
-    expect(subtitle.className).toMatch(/dark:text-/);
+    expect(subtitle.className).toMatch(/text-schrift-2/);
   });
 });
 

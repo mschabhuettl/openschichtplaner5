@@ -12,6 +12,11 @@ interface ConfirmDialogProps {
   onCancel: () => void;
 }
 
+/**
+ * Bestätigungsdialog nach Taktwerk-Dialog-Muster (docs/design-system.md §6):
+ * Kopf 13px/700 mit Esc-Hint, Fußzeile auf Fläche 2 mit Abbrechen (Outline)
+ * und Bestätigen (Umkehrung bzw. Signal bei destruktiven Aktionen).
+ */
 export function ConfirmDialog({
   open,
   title = 'Bestätigung',
@@ -53,54 +58,44 @@ export function ConfirmDialog({
       />
 
       {/* Dialog */}
-      <div ref={dialogRef} className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-md w-full mx-4 animate-scaleIn">
-        {/* Close button */}
-        <button
-          onClick={onCancel}
-          className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-          aria-label="Schließen"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-
-        {/* Icon + Title */}
-        <div className="flex items-center gap-3 mb-3">
-          <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-            danger ? 'bg-red-100 dark:bg-red-900/30' : 'bg-amber-100 dark:bg-amber-900/30'
-          }`}>
-            {danger
-              ? <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-              : <svg className="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-            }
-          </div>
-          <h2
-            id="confirm-title"
-            className="text-base font-semibold text-gray-900 dark:text-gray-100"
-          >
+      <div
+        ref={dialogRef}
+        className="relative bg-ebene rounded-[10px] shadow-dialog dark:shadow-dialog-dark dark:border dark:border-kontur max-w-md w-full mx-4 overflow-hidden animate-scaleIn"
+      >
+        {/* Kopf: Titel + Esc-Hint */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-kontur">
+          <h2 id="confirm-title" className="text-[13px] font-bold text-schrift">
             {title}
           </h2>
+          <button
+            onClick={onCancel}
+            className="font-mono text-[10px] text-schrift-3 hover:text-schrift px-1.5 py-0.5 rounded-ui border border-kontur transition-colors"
+            aria-label="Schließen"
+          >
+            Esc
+          </button>
         </div>
 
         {/* Message */}
-        <p id="confirm-message" className="text-sm text-gray-600 dark:text-gray-300 mb-5 leading-relaxed">
+        <p id="confirm-message" className="px-4 py-3.5 text-sm text-schrift-2 leading-relaxed">
           {message}
         </p>
 
-        {/* Buttons */}
-        <div className="flex gap-2 justify-end">
+        {/* Fußzeile: Abbrechen (Outline) + Bestätigen (Umkehrung / Signal) */}
+        <div className="flex gap-2 justify-end px-4 py-2.5 border-t border-kontur bg-[#fafbfc] dark:bg-[#0e1522]">
           <button
             onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+            className="px-3 py-1.5 text-sm text-schrift bg-ebene border border-kontur rounded-ui hover:bg-wash transition-colors"
           >
             {cancelLabel}
           </button>
           <button
             ref={confirmRef}
             onClick={onConfirm}
-            className={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${
+            className={`px-3 py-1.5 text-sm font-semibold rounded-ui transition-opacity hover:opacity-90 ${
               danger
-                ? 'bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600'
-                : 'bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600'
+                ? 'bg-signal text-white dark:text-[#1a1108]'
+                : 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420]'
             }`}
           >
             {confirmLabel}

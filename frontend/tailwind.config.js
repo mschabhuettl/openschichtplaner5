@@ -33,6 +33,8 @@ export default {
       boxShadow: {
         overlay: '0 14px 40px rgba(0,0,0,.18)',
         'overlay-dark': '0 14px 40px rgba(0,0,0,.5)',
+        dialog: '0 20px 50px rgba(14,20,32,.3)',
+        'dialog-dark': '0 20px 50px rgba(0,0,0,.5)',
       },
       keyframes: {
         slideIn: {

@@ -12,11 +12,11 @@ import {
 } from '../components/Skeleton';
 
 describe('Skeleton', () => {
-  it('renders a div with animate-pulse class', () => {
+  it('renders a div with animate-shimmer class', () => {
     const { container } = render(<Skeleton />);
     const el = container.firstChild as HTMLElement;
     expect(el).toBeTruthy();
-    expect(el.className).toContain('animate-pulse');
+    expect(el.className).toContain('animate-shimmer');
   });
 
   it('applies custom className', () => {
@@ -52,7 +52,7 @@ describe('SkeletonText', () => {
 describe('SkeletonCard', () => {
   it('renders multiple skeleton children', () => {
     const { container } = render(<SkeletonCard />);
-    const children = container.querySelectorAll('.animate-pulse');
+    const children = container.querySelectorAll('.animate-shimmer');
     expect(children.length).toBeGreaterThan(1);
   });
 
@@ -72,14 +72,14 @@ describe('SkeletonCard', () => {
 describe('SkeletonTable', () => {
   it('renders skeleton elements', () => {
     const { container } = render(<SkeletonTable />);
-    const skeletons = container.querySelectorAll('.animate-pulse');
+    const skeletons = container.querySelectorAll('.animate-shimmer');
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it('renders custom rows and cols', () => {
     const { container } = render(<SkeletonTable rows={3} cols={2} />);
     // 1 header row × 2 cols + 3 data rows × 2 cols = 8 skeleton elements
-    const skeletons = container.querySelectorAll('.animate-pulse');
+    const skeletons = container.querySelectorAll('.animate-shimmer');
     expect(skeletons.length).toBe(8);
   });
 });
@@ -87,14 +87,14 @@ describe('SkeletonTable', () => {
 describe('SkeletonGrid', () => {
   it('renders skeleton elements', () => {
     const { container } = render(<SkeletonGrid />);
-    const skeletons = container.querySelectorAll('.animate-pulse');
+    const skeletons = container.querySelectorAll('.animate-shimmer');
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
   it('renders custom rows and cols', () => {
     const { container } = render(<SkeletonGrid rows={2} cols={3} />);
     // header: 1 + 3 = 4; data: 2 rows × (1 label + 3 cells) = 8; total = 12
-    const skeletons = container.querySelectorAll('.animate-pulse');
+    const skeletons = container.querySelectorAll('.animate-shimmer');
     expect(skeletons.length).toBe(12);
   });
 });

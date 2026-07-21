@@ -100,7 +100,9 @@ describe('FormModal', () => {
     const panel = screen.getByRole('dialog');
     // Bounded height + internal scroll keep the header/footer reachable
     expect(panel.className).toMatch(/max-h-\[90vh\]/);
-    expect(panel.className).toMatch(/overflow-y-auto/);
+    // Scrollbereich ist der innere Body-Container (Kopf/Fuss bleiben stehen)
+    expect(panel.querySelector('.overflow-y-auto')).toBeTruthy();
+    expect(panel.className).toMatch(/max-h-\[90vh\]/);
     // Backdrop keeps padding so the panel never touches the window edge
     const backdrop = document.querySelector('.fixed.inset-0') as HTMLElement;
     expect(backdrop.className).toMatch(/\bp-4\b/);

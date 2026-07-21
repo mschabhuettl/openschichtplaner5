@@ -84,7 +84,7 @@ describe('ConfirmDialog', () => {
   it('applies danger styling when danger=true', () => {
     render(<ConfirmDialog {...baseProps} danger={true} />);
     const confirmBtn = screen.getByText('Bestätigen');
-    expect(confirmBtn.className).toContain('red');
+    expect(confirmBtn.className).toContain('signal');
   });
 
   it('restores focus to the trigger element when closed', () => {

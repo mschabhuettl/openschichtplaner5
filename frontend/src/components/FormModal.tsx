@@ -4,7 +4,7 @@ import { useFocusTrap } from '../hooks/useFocusTrap';
 interface FormModalProps {
   open: boolean;
   title: string;
-  /** Called when backdrop or × is clicked */
+  /** Called when backdrop or Esc is clicked */
   onClose: () => void;
   /** Called on form submit */
   onSubmit?: (e: React.FormEvent) => void;
@@ -30,7 +30,9 @@ const SIZE_MAP: Record<NonNullable<FormModalProps['size']>, string> = {
 };
 
 /**
- * FormModal — wiederverwendbare Modal-Hülle für Formulare.
+ * FormModal — wiederverwendbare Modal-Hülle für Formulare
+ * (Taktwerk-Dialog, docs/design-system.md §6: Kopf 13px/700 + Esc-Hint,
+ * Fußzeile auf Fläche 2, Primär = Umkehrung, Sekundär = Outline).
  *
  * Usage:
  *   <FormModal open={showModal} title="Neue Gruppe" onClose={() => setShowModal(false)}
@@ -72,62 +74,65 @@ export function FormModal({
 
   const content = (
     <div
-      className={`bg-white dark:bg-slate-800 rounded-xl shadow-2xl animate-scaleIn w-full ${SIZE_MAP[size]} mx-4 p-6 max-h-[90vh] overflow-y-auto ${className}`}
+      className={`bg-ebene rounded-[10px] shadow-dialog dark:shadow-dialog-dark dark:border dark:border-kontur animate-scaleIn w-full ${SIZE_MAP[size]} mx-4 max-h-[90vh] flex flex-col overflow-hidden ${className}`}
       ref={panelRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="form-modal-title"
       onClick={e => e.stopPropagation()}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 id="form-modal-title" className="text-lg font-bold text-gray-800 dark:text-slate-100">
+      {/* Kopf: Titel + Esc-Hint */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-kontur">
+        <h2 id="form-modal-title" className="text-[13px] font-bold text-schrift">
           {title}
         </h2>
         <button
           type="button"
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 text-xl leading-none p-1 -mr-1 rounded hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
+          className="font-mono text-[10px] text-schrift-3 hover:text-schrift px-1.5 py-0.5 rounded-ui border border-kontur transition-colors"
           aria-label="Schließen"
         >
-          ×
+          Esc
         </button>
       </div>
 
-      {/* Error */}
-      {error && (
-        <div className="mb-3 p-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded text-sm">
-          {error}
-        </div>
-      )}
-
-      {/* Body */}
-      {onSubmit ? (
-        <form onSubmit={onSubmit} noValidate>
-          <div className="space-y-3">{children}</div>
-          <div className="flex justify-end gap-2 mt-5">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm rounded border border-gray-300 dark:border-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
-            >
-              Abbrechen
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="px-4 py-2 text-sm rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-            >
-              {submitting && (
-                <span className="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              )}
-              {submitLabel}
-            </button>
+      <div className="px-4 py-3 overflow-y-auto">
+        {/* Error */}
+        {error && (
+          <div className="mb-3 p-2 bg-signal-flaeche border border-[#eecfcf] dark:border-[#5a2626] text-signal rounded-ui text-sm">
+            {error}
           </div>
-        </form>
-      ) : (
-        <>{children}</>
-      )}
+        )}
+
+        {/* Body */}
+        {onSubmit ? (
+          <form onSubmit={onSubmit} noValidate>
+            <div className="space-y-3">{children}</div>
+            <div className="flex justify-end gap-2 mt-5 -mx-4 -mb-3 px-4 py-2.5 border-t border-kontur bg-[#fafbfc] dark:bg-[#0e1522]">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-3 py-1.5 text-sm text-schrift bg-ebene border border-kontur rounded-ui hover:bg-wash transition-colors"
+              >
+                Abbrechen
+              </button>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="px-3 py-1.5 text-sm font-semibold rounded-ui bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed transition-opacity flex items-center gap-2"
+              >
+                {submitting && (
+                  <span className="inline-block w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin opacity-70" />
+                )}
+                {submitLabel}
+                <span className="font-mono text-[9px] opacity-55" aria-hidden="true">⏎</span>
+              </button>
+            </div>
+          </form>
+        ) : (
+          <>{children}</>
+        )}
+      </div>
     </div>
   );
 

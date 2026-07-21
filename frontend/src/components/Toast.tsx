@@ -1,24 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Toast as ToastType } from '../hooks/useToast';
 
+/**
+ * Toasts nach Taktwerk-Muster (Interaktions-Referenz): fixed bottom-center,
+ * Umkehrungs-Fläche (invertiert zum Theme), 11.5px/600, rise-Animation
+ * (140 ms, ease-out). Der Typ bleibt über das Icon + ARIA-Rolle unterscheidbar;
+ * die Fläche selbst ist bewusst neutral (Chrome kennt nur Glut + Signal).
+ */
 interface ToastContainerProps {
   toasts: ToastType[];
   onRemove: (id: string) => void;
 }
 
-const typeStyles: Record<ToastType['type'], string> = {
-  success: 'bg-green-600 text-white border-green-700',
-  error: 'bg-red-600 text-white border-red-700',
-  info: 'bg-blue-600 text-white border-blue-700',
-  warning: 'bg-amber-500 text-white border-amber-600',
+const typeIcons: Record<ToastType['type'], string> = {
+  success: '✓',
+  error: '!',
+  info: 'ℹ',
+  warning: '⚠',
 };
 
-const typeIcons: Record<ToastType['type'], string> = {
-  success: '✅',
-  error: '❌',
-  info: 'ℹ️',
-  warning: '⚠️',
-};
+const INVERT = 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420]';
+
+const iconClass = (type: ToastType['type']) =>
+  type === 'error' || type === 'warning'
+    ? 'text-[#e4696f] dark:text-[#be3b3b] font-extrabold'
+    : 'opacity-80';
 
 interface ToastItemProps {
   toast: ToastType;
@@ -30,35 +36,28 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
 
   const handleRemove = () => {
     setRemoving(true);
-    setTimeout(() => onRemove(toast.id), 200);
+    setTimeout(() => onRemove(toast.id), 140);
   };
-
-  // Wird der Toast extern entfernt (Auto-Timeout), die Exit-Animation auslösen
-  useEffect(() => {
-    return () => {
-      // cleanup — no action needed, external removal goes through state
-    };
-  }, []);
 
   return (
     <div
       role={toast.type === 'error' ? 'alert' : 'status'}
       aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
       className={`
-        flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg border text-sm font-medium
-        pointer-events-auto cursor-pointer
-        ${removing ? 'animate-slideOut' : 'animate-slideIn'}
-        max-w-sm min-w-[240px]
-        ${typeStyles[toast.type]}
+        flex items-center gap-3 px-3.5 py-2.5 rounded-panel text-[11.5px] font-semibold
+        shadow-[0_10px_30px_rgba(0,0,0,.4)] pointer-events-auto cursor-pointer
+        max-w-sm min-w-[240px] transition-opacity duration-150
+        ${removing ? 'opacity-0' : 'animate-rise'}
+        ${INVERT}
       `}
       onClick={handleRemove}
       title="Klicken zum Schließen"
     >
-      <span className="text-base flex-shrink-0" aria-hidden="true">{typeIcons[toast.type]}</span>
+      <span className={`text-sm flex-shrink-0 ${iconClass(toast.type)}`} aria-hidden="true">{typeIcons[toast.type]}</span>
       <span className="flex-1">{toast.message}</span>
       <button
         onClick={e => { e.stopPropagation(); handleRemove(); }}
-        className="ml-1 opacity-70 hover:opacity-100 text-lg leading-none"
+        className="ml-1 opacity-60 hover:opacity-100 text-base leading-none"
         aria-label="Benachrichtigung schließen"
       >
         ×
@@ -72,7 +71,7 @@ export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
 
   return (
     <div
-      className="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"
+      className="fixed bottom-[26px] left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center gap-2 pointer-events-none"
       role="region"
       aria-label="Benachrichtigungen"
       aria-live="polite"
@@ -96,16 +95,16 @@ export function Toast({ message, type = 'success', onClose }: ToastProps) {
   return (
     <div
       className={`
-        fixed top-4 right-4 z-[9999] flex items-center gap-2 px-4 py-3
-        rounded-lg shadow-lg border text-sm font-medium max-w-sm
-        animate-slideIn
-        ${typeStyles[type]}
+        fixed bottom-[26px] left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-3
+        px-3.5 py-2.5 rounded-panel text-[11.5px] font-semibold max-w-sm
+        shadow-[0_10px_30px_rgba(0,0,0,.4)] animate-rise
+        ${INVERT}
       `}
       onClick={onClose}
     >
-      <span className="text-base">{typeIcons[type]}</span>
+      <span className={`text-sm ${iconClass(type)}`} aria-hidden="true">{typeIcons[type]}</span>
       <span>{message}</span>
-      <button aria-label="Schließen" onClick={onClose} className="ml-1 opacity-70 hover:opacity-100 text-lg">×</button>
+      <button aria-label="Schließen" onClick={onClose} className="ml-1 opacity-60 hover:opacity-100 text-base">×</button>
     </div>
   );
 }

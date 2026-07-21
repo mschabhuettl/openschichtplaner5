@@ -1,10 +1,10 @@
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 /**
- * Modal-Primitive des Design-Systems (UX-Audit B4) für Nicht-Formular-Fälle
- * (Bestätigung, Detail-Anzeige). Formulare nutzen FormModal. Verhalten:
- * ESC schließt, Backdrop-Klick schließt, Fokus-Falle mit Rückgabe des Fokus
- * (useFocusTrap) — identisch über alle Ansichten.
+ * Modal-Primitive des Design-Systems (Taktwerk-Dialog, docs/design-system.md §6)
+ * für Nicht-Formular-Fälle (Bestätigung, Detail-Anzeige). Formulare nutzen
+ * FormModal. Verhalten: ESC schließt, Backdrop-Klick schließt, Fokus-Falle mit
+ * Rückgabe des Fokus (useFocusTrap) — identisch über alle Ansichten.
  */
 export function Modal({
   open,
@@ -18,7 +18,7 @@ export function Modal({
   title: string;
   onClose: () => void;
   children: React.ReactNode;
-  /** Optionale Aktionsleiste unten (Buttons); ohne footer nur Inhalt + ×. */
+  /** Optionale Aktionsleiste unten (Buttons); ohne footer nur Inhalt + Esc. */
   footer?: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 }) {
@@ -35,22 +35,22 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`w-full ${sizeClass} rounded-xl bg-white dark:bg-slate-800 shadow-xl flex flex-col max-h-[90vh]`}
+        className={`w-full ${sizeClass} rounded-[10px] bg-ebene shadow-dialog dark:shadow-dialog-dark dark:border dark:border-kontur flex flex-col max-h-[90vh] overflow-hidden`}
       >
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 px-4 py-3">
-          <h2 className="text-base font-semibold text-slate-800 dark:text-slate-100">{title}</h2>
+        <div className="flex items-center justify-between border-b border-kontur px-4 py-3">
+          <h2 className="text-[13px] font-bold text-schrift">{title}</h2>
           <button
             type="button"
             onClick={onClose}
             aria-label="Schließen"
-            className="rounded p-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700"
+            className="font-mono text-[10px] text-schrift-3 hover:text-schrift px-1.5 py-0.5 rounded-ui border border-kontur transition-colors"
           >
-            ✕
+            Esc
           </button>
         </div>
-        <div className="overflow-y-auto px-4 py-3">{children}</div>
+        <div className="overflow-y-auto px-4 py-3 text-schrift">{children}</div>
         {footer && (
-          <div className="flex justify-end gap-2 border-t border-slate-200 dark:border-slate-700 px-4 py-3">
+          <div className="flex justify-end gap-2 border-t border-kontur px-4 py-2.5 bg-[#fafbfc] dark:bg-[#0e1522]">
             {footer}
           </div>
         )}

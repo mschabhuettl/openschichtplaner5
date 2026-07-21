@@ -1,7 +1,9 @@
 import React from 'react';
 
 /**
- * Skeleton — animated placeholder components for loading states.
+ * Skeleton — Ladeplatzhalter nach Taktwerk (docs/design-system.md §6):
+ * 11px-Balken, Radius 3px, Kontur-Farbe, Shimmer 1,2 s — gestaffelt je Zeile
+ * (+0,12 s), IM ZEILENRHYTHMUS des Ziel-Layouts.
  * Usage: import { Skeleton, SkeletonText, SkeletonCard, SkeletonTable } from '../components/Skeleton';
  */
 
@@ -12,34 +14,37 @@ interface SkeletonProps {
   style?: React.CSSProperties;
 }
 
-/** Base skeleton block — animated grey rectangle */
+/** Basis-Balken — schimmernde Kontur-Fläche */
 export function Skeleton({ className = '', width, height, style }: SkeletonProps) {
   return (
     <div
-      className={`animate-pulse bg-gray-200 dark:bg-gray-700 rounded ${className}`}
+      className={`animate-shimmer bg-kontur rounded-[3px] ${className}`}
       style={{ width, height, ...style }}
     />
   );
 }
 
-/** Single line of placeholder text */
+/** Einzelne Platzhalter-Textzeile */
 export function SkeletonText({ className = '', width = 'w-full' }: { className?: string; width?: string }) {
-  return <Skeleton className={`h-3 ${width} ${className}`} />;
+  return <Skeleton className={`h-[11px] ${width} ${className}`} />;
 }
 
-/** Card-shaped skeleton placeholder */
+/** Karten-Platzhalter */
 export function SkeletonCard({ className = '' }: { className?: string }) {
   return (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-xl shadow p-5 flex flex-col gap-3 ${className}`}
+      className={`bg-ebene rounded-panel border border-kontur p-5 flex flex-col gap-3 ${className}`}
       role="status"
       aria-live="polite"
     >
       <span className="sr-only">Lädt …</span>
-      <Skeleton className="h-4 w-36" />
-      <Skeleton className="h-3 w-full" />
-      <Skeleton className="h-3 w-4/5" />
-      <Skeleton className="h-3 w-3/5" />
+      {[0, 1, 2, 3].map(i => (
+        <Skeleton
+          key={i}
+          className={`h-[11px] ${['w-36', 'w-full', 'w-4/5', 'w-3/5'][i]}`}
+          style={{ animationDelay: `${i * 0.12}s` }}
+        />
+      ))}
     </div>
   );
 }
@@ -50,32 +55,35 @@ interface SkeletonTableProps {
   className?: string;
 }
 
-/** Table skeleton — placeholder rows + cols */
+/** Tabellen-Platzhalter im 28px-Zeilenrhythmus */
 export function SkeletonTable({ rows = 8, cols = 5, className = '' }: SkeletonTableProps) {
   return (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden ${className}`}
+      className={`bg-ebene rounded-panel border border-kontur overflow-hidden ${className}`}
       role="status"
       aria-live="polite"
     >
       <span className="sr-only">Lädt …</span>
-      {/* Header */}
-      <div className="bg-slate-700 px-4 py-2 flex gap-4">
+      {/* Kopf auf Fläche 2 */}
+      <div className="bg-[#fafbfc] dark:bg-[#0e1522] border-b border-kontur px-3 py-2 flex gap-4 items-center">
         {Array.from({ length: cols }).map((_, i) => (
-          <Skeleton key={i} className="h-3 bg-slate-500" style={{ width: `${80 + (i % 3) * 20}px` }} />
+          <Skeleton key={i} className="h-[9px]" style={{ width: `${80 + (i % 3) * 20}px` }} />
         ))}
       </div>
-      {/* Rows */}
+      {/* Zeilen (28px) */}
       {Array.from({ length: rows }).map((_, row) => (
         <div
           key={row}
-          className={`flex gap-4 px-4 py-3 border-b border-gray-100 dark:border-gray-700 ${row % 2 === 0 ? '' : 'bg-gray-50 dark:bg-gray-700'}`}
+          className="flex gap-4 px-3 items-center h-[28px] border-b border-kontur-soft"
         >
           {Array.from({ length: cols }).map((_, col) => (
             <Skeleton
               key={col}
-              className="h-3"
-              style={{ width: `${60 + ((row + col) % 4) * 15}px` }}
+              className="h-[11px]"
+              style={{
+                width: `${60 + ((row + col) % 4) * 15}px`,
+                animationDelay: `${row * 0.12 + col * 0.04}s`,
+              }}
             />
           ))}
         </div>
@@ -84,7 +92,7 @@ export function SkeletonTable({ rows = 8, cols = 5, className = '' }: SkeletonTa
   );
 }
 
-/** Grid skeleton for schedule/calendar views */
+/** Raster-Platzhalter für Dienstplan-/Kalenderansichten */
 interface SkeletonGridProps {
   rows?: number;
   cols?: number;
@@ -99,19 +107,20 @@ export function SkeletonGrid({ rows = 6, cols = 7, className = '' }: SkeletonGri
         className="grid gap-0.5"
         style={{ gridTemplateColumns: `120px repeat(${cols}, minmax(36px, 1fr))` }}
       >
-        {/* Header row */}
-        <Skeleton className="h-8 rounded-none bg-slate-300 dark:bg-slate-600" />
+        {/* Kopfzeile */}
+        <Skeleton className="h-8 rounded-none bg-wash" />
         {Array.from({ length: cols }).map((_, i) => (
-          <Skeleton key={i} className="h-8 rounded-none bg-slate-300 dark:bg-slate-600" />
+          <Skeleton key={i} className="h-8 rounded-none bg-wash" style={{ animationDelay: `${i * 0.04}s` }} />
         ))}
-        {/* Data rows */}
+        {/* Datenzeilen (25px-Rhythmus des Grids) */}
         {Array.from({ length: rows }).map((_, row) => (
           <React.Fragment key={`row-${row}`}>
-            <Skeleton className="h-9 rounded-none" />
+            <Skeleton className="h-[25px] rounded-none" style={{ animationDelay: `${row * 0.12}s` }} />
             {Array.from({ length: cols }).map((_, col) => (
               <Skeleton
                 key={`cell-${row}-${col}`}
-                className={`h-9 rounded-none ${(row + col) % 5 === 0 ? 'bg-blue-100 dark:bg-blue-900' : ''}`}
+                className="h-[25px] rounded-none bg-kontur-soft"
+                style={{ animationDelay: `${row * 0.12 + col * 0.04}s` }}
               />
             ))}
           </React.Fragment>

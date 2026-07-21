@@ -14,12 +14,12 @@ export function LoadingSpinner({ message, size = 'md' }: LoadingSpinnerProps) {
   };
   return (
     <div
-      className="flex flex-col items-center justify-center py-20 gap-3 text-slate-500 dark:text-slate-400"
+      className="flex flex-col items-center justify-center py-20 gap-3 text-schrift-2"
       role="status"
       aria-live="polite"
     >
       <div
-        className={`${sizeClasses[size]} border-slate-300 dark:border-slate-600 border-t-blue-500 rounded-full animate-spin`}
+        className={`${sizeClasses[size]} border-kontur border-t-glut rounded-full animate-spin`}
         aria-hidden="true"
       />
       {/* Always expose an accessible loading label, even when no visible message is given. */}

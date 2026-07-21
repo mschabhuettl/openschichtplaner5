@@ -185,8 +185,9 @@ Chips mit Phasenkerben, hohle Abwesenheiten, Glut-Navigation, Signal-Konflikt:
   nach Nutzungshäufigkeit: Einsatzplan → Urlaub → Stammdaten → Berichte →
   Rest. Beim Abschluss einer Ansicht: deren `--color-*`-/`isDark`-Reste
   entfernen.
-- **T4 Baum-Select** als gemeinsames Primitive (löst
-  [design-multiselect.md](design-multiselect.md) ein).
+- **T4 Baum-Select — umgesetzt:** `components/ui/MultiSelect.tsx` (löst
+  [design-multiselect.md](design-multiselect.md) ein); Adoption in den
+  Ansichten läuft mit T3.
 
 ## 10. Stehende Regel
 

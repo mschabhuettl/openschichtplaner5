@@ -1,8 +1,13 @@
 # Design: ui/MultiSelect (Mehrfachauswahl-Filter)
 
-Stand: Juli 2026. Anhang zum Design-System-Review (docs/design-system.md);
-Umsetzung erst NACH dem Review (Phase-4-Baustein). Kein Verhaltensbruch:
-Alle bestehenden Einfach-Dropdowns bleiben, bis eine Ansicht migriert wird.
+Stand: Juli 2026. Anhang zum Design-System (docs/design-system.md).
+**Umgesetzt:** `frontend/src/components/ui/MultiSelect.tsx` (Taktwerk-
+Baum-Select: 27px-Zeilen, 13px-Glut-Checkboxen, Fokuszeile mit Glut-Wanne
++ Spine, Kbd-Footer, Suchfeld ab 15 Optionen; Tastatur ↑↓/Space/⏎/Esc).
+Entschieden: „Alle" als Reset-Zeile oben (Bestandsverhalten), Suchfeld ab
+15 Optionen, keine Persistenz (bewusst flüchtig). Kein Verhaltensbruch:
+Alle bestehenden Einfach-Dropdowns bleiben, bis eine Ansicht migriert wird
+(Adoptionsreihenfolge unten).
 
 ## Motivation
 

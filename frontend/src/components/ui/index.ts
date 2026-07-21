@@ -6,3 +6,5 @@
 export { Badge } from './Badge';
 export { Modal } from './Modal';
 export { FormModal } from '../FormModal';
+export { MultiSelect } from './MultiSelect';
+export type { MultiSelectOption } from './MultiSelect';

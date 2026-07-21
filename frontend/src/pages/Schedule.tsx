@@ -232,6 +232,8 @@ const ShiftPicker = memo(function ShiftPicker({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [absTime, setAbsTime] = useState(DEFAULT_ABSENCE_TIME);
+  // Picker ist kurzlebig (mountet bei jedem Öffnen) — Theme direkt vom Dokument
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -256,11 +258,11 @@ const ShiftPicker = memo(function ShiftPicker({
         <button
           key={s.ID}
           onClick={() => { onSelect(s.ID); onClose(); }}
-          className="w-full flex items-center gap-1.5 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
+          className="w-full flex items-center gap-1.5 px-2 py-1 rounded hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] text-left"
         >
           <span
             className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
-            style={{ backgroundColor: s.COLORBK_HEX, color: s.COLORTEXT_HEX }}
+            style={menuChipStyle(s.COLORBK_HEX, isDark)}
           >
             {s.SHORTNAME?.[0] || '?'}
           </span>
@@ -269,18 +271,18 @@ const ShiftPicker = memo(function ShiftPicker({
       ))}
       {leaveTypes.length > 0 && (
         <>
-          <div className="border-t my-1" />
-          <div className="font-semibold text-gray-600 mb-1 px-1">Abwesenheit</div>
+          <div className="border-t border-kontur my-1" />
+          <div className="font-semibold text-schrift-2 mb-1 px-1">Abwesenheit</div>
           <AbsenceIntervalPicker value={absTime} onChange={setAbsTime} />
           {leaveTypes.map(lt => (
             <button
               key={lt.ID}
               onClick={() => { onAbsence(lt.ID, toAbsenceTimeOptions(absTime)); onClose(); }}
-              className="w-full flex items-center gap-1.5 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
+              className="w-full flex items-center gap-1.5 px-2 py-1 rounded hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] text-left"
             >
               <span
                 className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
-                style={{ backgroundColor: lt.COLORBK_HEX, color: lt.COLORBAR_HEX }}
+                style={menuChipStyle(lt.COLORBK_HEX, isDark, true)}
               >
                 {lt.SHORTNAME?.[0] || 'A'}
               </span>
@@ -334,7 +336,7 @@ const GroupMultiSelect = memo(function GroupMultiSelect({
       {open && (
         <div className="absolute top-full mt-1 left-0 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl min-w-[190px] py-1">
           <button
-            className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left text-sm hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
             onClick={() => { onChange([]); setOpen(false); }}
           >
             <span
@@ -346,13 +348,13 @@ const GroupMultiSelect = memo(function GroupMultiSelect({
             </span>
             Alle Gruppen
           </button>
-          <div className="border-t my-1" />
+          <div className="border-t border-kontur my-1" />
           {groups.map(g => {
             const isSelected = selectedIds.includes(g.ID);
             return (
               <button
                 key={g.ID}
-                className="w-full px-3 py-1.5 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                className="w-full px-3 py-1.5 text-left text-sm hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
                 onClick={() => {
                   if (isSelected) {
                     onChange(selectedIds.filter(id => id !== g.ID));
@@ -438,7 +440,7 @@ const EmployeeMultiSelect = memo(function EmployeeMultiSelect({
           </div>
           <div className="overflow-y-auto max-h-52">
             <button
-              className="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              className="w-full px-3 py-1.5 text-left text-xs hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
               onClick={() => { onChange([]); setSearch(''); setOpen(false); }}
             >
               <span className={`w-3.5 h-3.5 rounded border flex items-center justify-center text-[9px] flex-shrink-0 ${selectedIds.length === 0 ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300'}`}>
@@ -452,7 +454,7 @@ const EmployeeMultiSelect = memo(function EmployeeMultiSelect({
               return (
                 <button
                   key={emp.ID}
-                  className="w-full px-3 py-1 text-left text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+                  className="w-full px-3 py-1 text-left text-xs hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
                   onClick={() => {
                     if (isSelected) onChange(selectedIds.filter(id => id !== emp.ID));
                     else onChange([...selectedIds, emp.ID]);
@@ -519,6 +521,15 @@ interface CellContextMenuProps {
   onPaste: (empId: number, day: number) => void;
 }
 
+// Menü-Chips: Rohfarben normalisiert (massiv) bzw. hohl (Abwesenheiten)
+function menuChipStyle(raw: string | undefined, isDark: boolean, hollowChip = false): CSSProperties | undefined {
+  if (!raw) return undefined;
+  const c = shiftCellColorsMemo(raw, isDark ? 'dark' : 'light', { hollow: hollowChip });
+  return hollowChip
+    ? { border: `1.5px dashed ${c.color}`, color: c.color }
+    : { backgroundColor: c.background, color: c.color };
+}
+
 export const CellContextMenu = memo(function CellContextMenu({
   state, entries, shifts, leaveTypes, workplaces, hasClipboard,
   writeState, canNotes, canDeviation,
@@ -532,6 +543,9 @@ export const CellContextMenu = memo(function CellContextMenu({
   const [deviation, setDeviation] = useState({ startTime: '08:00', endTime: '16:00' });
   const [saving, setSaving] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  // Menü ist kurzlebig (mountet bei jedem Öffnen neu) — Theme direkt vom
+  // Dokument lesen statt Provider-Abhängigkeit (Test-/Embedding-frei).
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -570,23 +584,23 @@ export const CellContextMenu = memo(function CellContextMenu({
   return (
     <div
       ref={ref}
-      className="fixed z-[100] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 text-xs dark:text-gray-200"
+      className="tw-pop fixed z-[100] bg-ebene dark:bg-ebene-2 rounded-panel shadow-overlay dark:shadow-overlay-dark border border-kontur text-xs text-schrift overflow-hidden"
       style={{ left: state.x, top: state.y, minWidth: 215 }}
     >
       {mode === 'menu' && (
         <div className="py-1">
-          <div className="px-3 py-1 text-gray-600 text-[10px] font-medium border-b mb-1">
+          <div className="px-3 py-1 font-mono text-[9.5px] text-schrift-3 border-b border-kontur mb-1">
             {state.dateStr}
           </div>
           {/* G-1: Menüpunkte nur mit dem jeweiligen Schreibrecht */}
           {writeState.pastLocked && (
-            <div className="px-3 py-1 text-[10px] text-gray-500">
+            <div className="px-3 py-1 text-[10px] text-schrift-3">
               🔒 Vergangenheit gesperrt (WPAST)
             </div>
           )}
           {writeState.canAddShift && (
             <button
-              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
               onClick={() => setMode('shift-select')}
             >
               📋 Schicht zuweisen...
@@ -594,7 +608,7 @@ export const CellContextMenu = memo(function CellContextMenu({
           )}
           {writeState.canAddAbsence && (
             <button
-              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
               onClick={() => setMode('absence-select')}
             >
               🏖️ Abwesenheit eintragen...
@@ -602,7 +616,7 @@ export const CellContextMenu = memo(function CellContextMenu({
           )}
           {writeState.canAddShift && (
             <button
-              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
               onClick={() => setMode('sonderdienst')}
             >
               ⚡ Sonderdienst...
@@ -610,7 +624,7 @@ export const CellContextMenu = memo(function CellContextMenu({
           )}
           {entries.some(en => en.kind === 'shift') && canDeviation && !writeState.pastLocked && (
             <button
-              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
               onClick={() => setMode('deviation')}
             >
               ⏱️ Arbeitszeitabweichung...
@@ -619,7 +633,7 @@ export const CellContextMenu = memo(function CellContextMenu({
           {/* V-14/R6.4: Arbeitsplatz einem Dienst zuordnen — nur wenn Arbeitsplätze definiert sind */}
           {entries.some(en => en.kind === 'shift') && workplaces.length > 0 && writeState.canAddShift && !writeState.pastLocked && (
             <button
-              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
               onClick={() => setMode('workplace-select')}
             >
               🏢 Arbeitsplatz...
@@ -627,20 +641,20 @@ export const CellContextMenu = memo(function CellContextMenu({
           )}
           {canNotes && (
             <button
-              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
               onClick={() => setMode('note')}
             >
               💬 Notiz hinzufügen
             </button>
           )}
           {entries.some(en => en.source === 'cycle') && (
-            <div className="px-3 py-1 text-[10px] text-gray-500" title="aus Schichtmodell (Zyklus)">
+            <div className="px-3 py-1 text-[10px] text-schrift-3" title="aus Schichtmodell (Zyklus)">
               ↻ Zyklusdienst — nur per Überschreiben änderbar
             </div>
           )}
           {entries.length > 0 && writeState.canDelete && (
             <button
-              className="w-full px-3 py-1.5 text-left hover:bg-red-50 text-red-600 flex items-center gap-2"
+              className="w-full px-3 py-1.5 text-left hover:bg-signal-flaeche text-signal flex items-center gap-2"
               onClick={() => {
                 if (entries.length > 1) { setMode('delete-select'); return; }
                 onDelete(state.empId, state.day);
@@ -650,16 +664,16 @@ export const CellContextMenu = memo(function CellContextMenu({
               🗑️ Löschen{entries.length > 1 ? '…' : ''}
             </button>
           )}
-          <div className="border-t my-1" />
+          <div className="border-t border-kontur my-1" />
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
             onClick={() => { onCopy(state.empId, state.day); onClose(); }}
           >
             📄 Kopieren
           </button>
           {hasClipboard && writeState.canAddShift && (
             <button
-              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
               onClick={() => { onPaste(state.empId, state.day); onClose(); }}
             >
               📌 Einfügen
@@ -670,17 +684,17 @@ export const CellContextMenu = memo(function CellContextMenu({
 
       {mode === 'shift-select' && (
         <div className="py-1">
-          <div className="px-3 py-1 text-gray-600 text-[10px] font-medium border-b mb-1">Schicht wählen</div>
+          <div className="px-3 py-1 font-mono text-[9.5px] text-schrift-3 border-b border-kontur mb-1">Schicht wählen</div>
           <div className="overflow-y-auto max-h-60">
             {shifts.filter(s => !s.HIDE).map(s => (
               <button
                 key={s.ID}
                 onClick={() => { onAssignShift(state.empId, state.day, s.ID); onClose(); }}
-                className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
+                className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] text-left"
               >
                 <span
                   className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
-                  style={{ backgroundColor: s.COLORBK_HEX, color: s.COLORTEXT_HEX }}
+                  style={menuChipStyle(s.COLORBK_HEX, isDark)}
                 >
                   {s.SHORTNAME?.[0] || '?'}
                 </span>
@@ -688,9 +702,9 @@ export const CellContextMenu = memo(function CellContextMenu({
               </button>
             ))}
           </div>
-          <div className="border-t my-1" />
+          <div className="border-t border-kontur my-1" />
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 flex items-center gap-1"
+            className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] text-schrift-3 flex items-center gap-1"
             onClick={() => setMode('menu')}
           >
             ← Zurück
@@ -700,7 +714,7 @@ export const CellContextMenu = memo(function CellContextMenu({
 
       {mode === 'workplace-select' && (
         <div className="py-1">
-          <div className="px-3 py-1 text-gray-600 text-[10px] font-medium border-b mb-1">Arbeitsplatz zuordnen</div>
+          <div className="px-3 py-1 font-mono text-[9.5px] text-schrift-3 border-b border-kontur mb-1">Arbeitsplatz zuordnen</div>
           <div className="overflow-y-auto max-h-60">
             {workplaces.filter(w => !w.HIDE).map(w => {
               const active = entries.some(en => en.kind === 'shift' && en.workplace_id === w.ID);
@@ -708,9 +722,9 @@ export const CellContextMenu = memo(function CellContextMenu({
                 <button
                   key={w.ID}
                   onClick={() => { onAssignWorkplace(state.empId, state.dateStr, w.ID); onClose(); }}
-                  className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
+                  className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] text-left"
                 >
-                  <span className="inline-block w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: w.COLORBK_HEX || '#ccc' }} />
+                  <span className="inline-block w-3 h-3 rounded-sm flex-shrink-0" style={menuChipStyle(w.COLORBK_HEX, isDark) ?? { backgroundColor: 'var(--kontur)' }} />
                   <span>{w.NAME}</span>
                   {active && <span className="ml-auto text-[10px] text-green-600">✓</span>}
                 </button>
@@ -719,18 +733,18 @@ export const CellContextMenu = memo(function CellContextMenu({
           </div>
           {entries.some(en => en.kind === 'shift' && en.workplace_id) && (
             <>
-              <div className="border-t my-1" />
+              <div className="border-t border-kontur my-1" />
               <button
-                className="w-full px-3 py-1.5 text-left hover:bg-red-50 text-red-600 flex items-center gap-2"
+                className="w-full px-3 py-1.5 text-left hover:bg-signal-flaeche text-signal flex items-center gap-2"
                 onClick={() => { onAssignWorkplace(state.empId, state.dateStr, 0); onClose(); }}
               >
                 ✕ Arbeitsplatz entfernen
               </button>
             </>
           )}
-          <div className="border-t my-1" />
+          <div className="border-t border-kontur my-1" />
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 flex items-center gap-1"
+            className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] text-schrift-3 flex items-center gap-1"
             onClick={() => setMode('menu')}
           >
             ← Zurück
@@ -740,18 +754,18 @@ export const CellContextMenu = memo(function CellContextMenu({
 
       {mode === 'absence-select' && (
         <div className="py-1">
-          <div className="px-3 py-1 text-gray-600 text-[10px] font-medium border-b mb-1">Abwesenheitsart wählen</div>
+          <div className="px-3 py-1 font-mono text-[9.5px] text-schrift-3 border-b border-kontur mb-1">Abwesenheitsart wählen</div>
           <AbsenceIntervalPicker value={absTime} onChange={setAbsTime} />
           <div className="overflow-y-auto max-h-60">
             {leaveTypes.filter(lt => !lt.HIDE).map(lt => (
               <button
                 key={lt.ID}
                 onClick={() => { onAddAbsence(state.empId, state.day, lt.ID, toAbsenceTimeOptions(absTime)); onClose(); }}
-                className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
+                className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] text-left"
               >
                 <span
                   className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
-                  style={{ backgroundColor: lt.COLORBK_HEX, color: '#333' }}
+                  style={menuChipStyle(lt.COLORBK_HEX, isDark, true)}
                 >
                   {lt.SHORTNAME?.[0] || '?'}
                 </span>
@@ -759,9 +773,9 @@ export const CellContextMenu = memo(function CellContextMenu({
               </button>
             ))}
           </div>
-          <div className="border-t my-1" />
+          <div className="border-t border-kontur my-1" />
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 flex items-center gap-1"
+            className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] text-schrift-3 flex items-center gap-1"
             onClick={() => setMode('menu')}
           >
             ← Zurück
@@ -771,16 +785,16 @@ export const CellContextMenu = memo(function CellContextMenu({
 
       {mode === 'delete-select' && (
         <div className="py-1">
-          <div className="px-3 py-1 text-gray-600 text-[10px] font-medium border-b mb-1">Welchen Eintrag löschen?</div>
+          <div className="px-3 py-1 font-mono text-[9.5px] text-schrift-3 border-b border-kontur mb-1">Welchen Eintrag löschen?</div>
           {entries.map((en, i) => (
             <button
               key={i}
               onClick={() => { onDeleteEntry(state.empId, state.day, en); onClose(); }}
-              className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-red-50 text-left"
+              className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-signal-flaeche text-left"
             >
               <span
                 className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
-                style={{ backgroundColor: en.color_bk || '#64748b', color: en.color_text || '#fff' }}
+                style={en.kind === 'absence' ? menuChipStyle(en.color_bk, isDark, true) : menuChipStyle(en.color_bk, isDark)}
               >
                 {en.display_name?.[0] || '?'}
               </span>
@@ -790,15 +804,15 @@ export const CellContextMenu = memo(function CellContextMenu({
               </span>
             </button>
           ))}
-          <div className="border-t my-1" />
+          <div className="border-t border-kontur my-1" />
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-red-50 text-red-600 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left hover:bg-signal-flaeche text-signal flex items-center gap-2"
             onClick={() => { onDelete(state.empId, state.day); onClose(); }}
           >
             🗑️ Alle Einträge löschen
           </button>
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 flex items-center gap-1"
+            className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] text-schrift-3 flex items-center gap-1"
             onClick={() => setMode('menu')}
           >
             ← Zurück
@@ -808,9 +822,9 @@ export const CellContextMenu = memo(function CellContextMenu({
 
       {mode === 'sonderdienst' && (
         <div className="p-2" style={{ minWidth: 225 }}>
-          <div className="text-gray-500 mb-2 font-medium text-[11px] border-b pb-1">⚡ Sonderdienst</div>
+          <div className="text-schrift-2 mb-2 font-semibold text-[11px] border-b border-kontur pb-1">⚡ Sonderdienst</div>
           <div className="mb-2">
-            <label className="text-gray-600 text-[10px] block mb-0.5">Schichtart (optional)</label>
+            <label className="text-schrift-3 text-[10px] block mb-0.5">Schichtart (optional)</label>
             <select
               className="w-full border rounded p-1 text-xs focus:outline-blue-400"
               value={sonderdienst.shiftId}
@@ -824,7 +838,7 @@ export const CellContextMenu = memo(function CellContextMenu({
           </div>
           <div className="flex gap-2 mb-2">
             <div className="flex-1">
-              <label className="text-gray-600 text-[10px] block mb-0.5">Von</label>
+              <label className="text-schrift-3 text-[10px] block mb-0.5">Von</label>
               <input
                 type="time"
                 className="w-full border rounded p-1 text-xs focus:outline-blue-400"
@@ -833,7 +847,7 @@ export const CellContextMenu = memo(function CellContextMenu({
               />
             </div>
             <div className="flex-1">
-              <label className="text-gray-600 text-[10px] block mb-0.5">Bis</label>
+              <label className="text-schrift-3 text-[10px] block mb-0.5">Bis</label>
               <input
                 type="time"
                 className="w-full border rounded p-1 text-xs focus:outline-blue-400"
@@ -844,14 +858,14 @@ export const CellContextMenu = memo(function CellContextMenu({
           </div>
           <div className="flex gap-1">
             <button
-              className="flex-1 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              className="flex-1 px-2 py-1 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui hover:opacity-90 disabled:opacity-50"
               onClick={handleSaveSonderdienst}
               disabled={saving}
             >
               {saving ? '…' : 'Speichern'}
             </button>
             <button
-              className="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200"
+              className="px-2 py-1 border border-kontur rounded-ui hover:bg-wash"
               onClick={() => setMode('menu')}
             >
               ←
@@ -862,10 +876,10 @@ export const CellContextMenu = memo(function CellContextMenu({
 
       {mode === 'deviation' && (
         <div className="p-2" style={{ minWidth: 225 }}>
-          <div className="text-gray-500 mb-2 font-medium text-[11px] border-b pb-1">⏱️ Arbeitszeitabweichung</div>
+          <div className="text-schrift-2 mb-2 font-semibold text-[11px] border-b border-kontur pb-1">⏱️ Arbeitszeitabweichung</div>
           <div className="flex gap-2 mb-2">
             <div className="flex-1">
-              <label className="text-gray-600 text-[10px] block mb-0.5">Von</label>
+              <label className="text-schrift-3 text-[10px] block mb-0.5">Von</label>
               <input
                 type="time"
                 className="w-full border rounded p-1 text-xs focus:outline-blue-400"
@@ -874,7 +888,7 @@ export const CellContextMenu = memo(function CellContextMenu({
               />
             </div>
             <div className="flex-1">
-              <label className="text-gray-600 text-[10px] block mb-0.5">Bis</label>
+              <label className="text-schrift-3 text-[10px] block mb-0.5">Bis</label>
               <input
                 type="time"
                 className="w-full border rounded p-1 text-xs focus:outline-blue-400"
@@ -885,14 +899,14 @@ export const CellContextMenu = memo(function CellContextMenu({
           </div>
           <div className="flex gap-1">
             <button
-              className="flex-1 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              className="flex-1 px-2 py-1 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui hover:opacity-90 disabled:opacity-50"
               onClick={handleSaveDeviation}
               disabled={saving}
             >
               {saving ? '…' : 'Speichern'}
             </button>
             <button
-              className="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200"
+              className="px-2 py-1 border border-kontur rounded-ui hover:bg-wash"
               onClick={() => setMode('menu')}
             >
               ←
@@ -903,7 +917,7 @@ export const CellContextMenu = memo(function CellContextMenu({
 
       {mode === 'note' && (
         <div className="p-2">
-          <div className="text-gray-500 mb-1 font-medium">Notiz:</div>
+          <div className="text-schrift-2 mb-1 font-semibold">Notiz:</div>
           <textarea
             autoFocus
             className="w-full border rounded p-1 text-xs resize-none focus:outline-blue-400"
@@ -918,14 +932,14 @@ export const CellContextMenu = memo(function CellContextMenu({
           />
           <div className="flex gap-1 mt-1">
             <button
-              className="flex-1 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              className="flex-1 px-2 py-1 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui hover:opacity-90 disabled:opacity-50"
               onClick={handleSaveNote}
               disabled={saving || !noteText.trim()}
             >
               {saving ? '…' : 'Speichern'}
             </button>
             <button
-              className="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200"
+              className="px-2 py-1 border border-kontur rounded-ui hover:bg-wash"
               onClick={() => setMode('menu')}
             >
               ←
@@ -1034,7 +1048,7 @@ function NoteDetailPopup({
               />
               <div className="flex gap-1 mt-1">
                 <button
-                  className="flex-1 px-2 py-0.5 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-[11px]"
+                  className="flex-1 px-2 py-0.5 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui hover:opacity-90 disabled:opacity-50 text-[11px]"
                   onClick={handleSaveEdit}
                   disabled={busy || !editText.trim()}
                 >
@@ -1086,7 +1100,7 @@ function NoteDetailPopup({
           />
           <div className="flex gap-1 mt-1">
             <button
-              className="flex-1 px-2 py-0.5 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-[11px]"
+              className="flex-1 px-2 py-0.5 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui hover:opacity-90 disabled:opacity-50 text-[11px]"
               onClick={handleAdd}
               disabled={busy || !addText.trim()}
             >
@@ -1337,7 +1351,7 @@ function ShiftFilterDropdown({
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1.5 px-2 py-1 border dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-xs hover:bg-gray-50 dark:hover:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200"
+        className="flex items-center gap-1.5 px-2 py-1 border dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-xs hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] dark:hover:bg-gray-600 dark:text-gray-200"
       >
         {selected ? (
           <>
@@ -1357,7 +1371,7 @@ function ShiftFilterDropdown({
       {open && (
         <div className="absolute top-full mt-1 left-0 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl min-w-[200px] py-1">
           <button
-            className="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left text-xs hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
             onClick={() => { onChange(''); setOpen(false); }}
           >
             <span
@@ -1369,11 +1383,11 @@ function ShiftFilterDropdown({
             </span>
             Alle Schichten
           </button>
-          <div className="border-t my-1" />
+          <div className="border-t border-kontur my-1" />
           {shifts.map(s => (
             <button
               key={s.ID}
-              className="w-full px-3 py-1.5 text-left text-xs hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              className="w-full px-3 py-1.5 text-left text-xs hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
               onClick={() => { onChange(s.ID); setOpen(false); }}
             >
               <span
@@ -1427,7 +1441,7 @@ function BulkContextMenu({
   return (
     <div
       ref={ref}
-      className="fixed z-[100] bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-600 text-xs dark:text-gray-200"
+      className="tw-pop fixed z-[100] bg-ebene dark:bg-ebene-2 rounded-panel shadow-overlay dark:shadow-overlay-dark border border-kontur text-xs text-schrift overflow-hidden"
       style={{ left: x, top: y, minWidth: 210 }}
     >
       <div className="px-3 py-1.5 bg-blue-50 dark:bg-blue-900/40 border-b dark:border-gray-600 text-[10px] text-blue-700 dark:text-blue-300 font-semibold rounded-t-lg flex items-center justify-between">
@@ -1437,27 +1451,27 @@ function BulkContextMenu({
       {mode === 'menu' ? (
         <div className="py-1">
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
             onClick={() => setMode('shift-select')}
           >
             📋 Schicht zuweisen...
           </button>
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-red-50 text-red-600 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left hover:bg-signal-flaeche text-signal flex items-center gap-2"
             onClick={() => { onDelete(); onClose(); }}
           >
             🗑️ Löschen
           </button>
-          <div className="border-t my-1" />
+          <div className="border-t border-kontur my-1" />
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+            className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
             onClick={() => { onCopy(); onClose(); }}
           >
             📄 Kopieren
           </button>
           {hasClipboard && (
             <button
-              className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
+              className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
               onClick={onPaste}
             >
               📌 Einfügen
@@ -1466,12 +1480,12 @@ function BulkContextMenu({
         </div>
       ) : (
         <div className="py-1">
-          <div className="px-3 py-1 text-gray-600 text-[10px] font-medium border-b mb-1">Schicht wählen</div>
+          <div className="px-3 py-1 font-mono text-[9.5px] text-schrift-3 border-b border-kontur mb-1">Schicht wählen</div>
           {shifts.map(s => (
             <button
               key={s.ID}
               onClick={() => { onAssignShift(s.ID); onClose(); }}
-              className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-left"
+              className="w-full flex items-center gap-1.5 px-3 py-1.5 hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] text-left"
             >
               <span
                 className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
@@ -1482,9 +1496,9 @@ function BulkContextMenu({
               <span>{s.SHORTNAME} – {s.NAME}</span>
             </button>
           ))}
-          <div className="border-t my-1" />
+          <div className="border-t border-kontur my-1" />
           <button
-            className="w-full px-3 py-1.5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-500 flex items-center gap-1"
+            className="w-full px-3 py-1.5 text-left hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] text-schrift-3 flex items-center gap-1"
             onClick={() => setMode('menu')}
           >
             ← Zurück
@@ -1709,7 +1723,7 @@ const HoverTooltip = memo(function HoverTooltip({
             </div>
           )}
           {colleaguesWithSameShift != null && colleaguesWithSameShift.length === 0 && (
-            <div className="text-[10px] text-gray-500 flex items-center gap-1">
+            <div className="text-[10px] text-schrift-3 flex items-center gap-1">
               <span>👤</span>
               <span>Einzige mit dieser Schicht heute</span>
             </div>
@@ -4590,7 +4604,7 @@ export default function Schedule() {
             <div className="flex gap-2 justify-end mt-3">
               <button
                 onClick={() => setShowDateJump(false)}
-                className="px-3 py-1.5 text-sm rounded border hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+                className="px-3 py-1.5 text-sm rounded border hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] dark:border-gray-600 dark:text-gray-200"
               >
                 Abbrechen
               </button>
@@ -4725,7 +4739,7 @@ export default function Schedule() {
                 <div className="flex gap-3 justify-end">
                   <button
                     onClick={closeAutoPlan}
-                    className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                    className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                     disabled={autoPlanLoading}
                   >
                     Abbrechen
@@ -4820,14 +4834,14 @@ export default function Schedule() {
                 <div className="flex gap-3 justify-end">
                   <button
                     onClick={closeAutoPlan}
-                    className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                    className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                     disabled={autoPlanLoading}
                   >
                     Abbrechen
                   </button>
                   <button
                     onClick={() => setAutoPlanStep('config')}
-                    className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                    className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                     disabled={autoPlanLoading}
                   >
                     ← Zurück
@@ -5000,7 +5014,7 @@ export default function Schedule() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowBulkGroup(false)}
-                className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] rounded"
               >
                 Abbrechen
               </button>
@@ -5054,7 +5068,7 @@ export default function Schedule() {
               <div className="flex gap-2 justify-end">
                 <button
                   onClick={() => setShowCopyPrevMonth(false)}
-                  className="px-4 py-2 text-sm rounded border hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="px-4 py-2 text-sm rounded border hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)]"
                 >
                   Abbrechen
                 </button>
@@ -5221,7 +5235,7 @@ export default function Schedule() {
                 </div>
                 <div className="border rounded-lg overflow-y-auto max-h-40 divide-y">
                   {displayEmployees.filter(e => e.ID !== copyWeekSource).map(emp => (
-                    <label key={emp.ID} className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                    <label key={emp.ID} className="flex items-center gap-2 px-3 py-1.5 hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] cursor-pointer">
                       <input
                         type="checkbox"
                         checked={copyWeekTargets.has(emp.ID)}
@@ -5255,7 +5269,7 @@ export default function Schedule() {
               <div className="flex gap-3 justify-end">
                 <button
                   onClick={closeCopyWeek}
-                  className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                  className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                   disabled={copyWeekLoading}
                 >
                   Abbrechen
@@ -5651,7 +5665,7 @@ export default function Schedule() {
                 </span>
                 <button
                   onClick={() => setShowRecommendations(false)}
-                  className="px-4 py-1.5 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+                  className="px-4 py-1.5 border border-kontur rounded-ui hover:bg-wash text-sm text-schrift"
                 >
                   Schließen
                 </button>
@@ -5663,28 +5677,28 @@ export default function Schedule() {
 
       {/* ── Header ── */}
       <div className="flex items-center gap-2 mb-3 flex-wrap">
-        <h1 className="text-lg sm:text-xl font-bold text-gray-800">📅 Dienstplan</h1>
+        <h1 className="text-base sm:text-lg font-extrabold tracking-[-.01em] text-schrift">Dienstplan</h1>
 
         {/* Month navigation */}
         <div className="flex items-center gap-1.5">
-          <button aria-label="Vorheriger Monat" onClick={prevMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] min-w-[44px]">‹</button>
+          <button aria-label="Vorheriger Monat" onClick={prevMonth} className="px-2 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui hover:bg-wash text-sm text-schrift-2 min-h-[44px] min-w-[44px]">‹</button>
           {/* Monats-Schnellwahl (Spec 4.1; Original: J F M A M J / J A S O N D) — Direktsprung */}
           <select
             aria-label="Monat wählen"
             value={month}
             onChange={e => setMonth(Number(e.target.value))}
-            className="font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border rounded shadow-sm text-sm min-h-[44px] px-1.5"
+            className="font-semibold text-schrift bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-sm min-h-[44px] px-1.5"
             title="Monat direkt wählen"
           >
             {MONTH_NAMES.slice(1).map((name, i) => (
               <option key={i + 1} value={i + 1}>{name}</option>
             ))}
           </select>
-          <span className="font-semibold text-gray-700 dark:text-gray-200 text-sm tabular-nums">{year}</span>
-          <button aria-label="Nächster Monat" onClick={nextMonth} className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] min-w-[44px]">›</button>
+          <span className="font-semibold text-schrift text-sm font-mono tabular-nums">{year}</span>
+          <button aria-label="Nächster Monat" onClick={nextMonth} className="px-2 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui hover:bg-wash text-sm text-schrift-2 min-h-[44px] min-w-[44px]">›</button>
           <button
             onClick={goToToday}
-            className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] text-blue-600 font-medium"
+            className="px-2 py-1.5 border border-[#d9a675] dark:border-[#a15618] bg-glut-flaeche rounded-ui text-sm min-h-[44px] text-[#a64a08] dark:text-glut font-semibold"
             title="Zum aktuellen Monat springen"
           >
             Heute
@@ -5692,7 +5706,7 @@ export default function Schedule() {
           <button
             aria-label="Gehe zu Datum"
             onClick={openDateJump}
-            className="px-2 py-1.5 bg-white border rounded shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 text-sm min-h-[44px] min-w-[44px]"
+            className="px-2 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui hover:bg-wash text-sm text-schrift-2 min-h-[44px] min-w-[44px]"
             title="Gehe zu Datum (Strg+G)"
           >
             🗓
@@ -5704,7 +5718,7 @@ export default function Schedule() {
           aria-label="Planart"
           value={planMode}
           onChange={e => setPlanMode(e.target.value as 'ist' | 'soll' | 'both')}
-          className="px-2 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded shadow-sm text-sm text-gray-700 dark:text-gray-200 no-print"
+          className="px-2 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift no-print"
           title="Soll-/Istplan-Modus"
         >
           <option value="ist">Istplan</option>
@@ -5717,8 +5731,8 @@ export default function Schedule() {
           onClick={() => setShowWeekNumbers(v => !v)}
           className={`px-2 py-1.5 border rounded shadow-sm text-sm no-print ${
             showWeekNumbers
-              ? 'bg-indigo-600 text-white border-indigo-600'
-              : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50'
+              ? 'bg-[#15171c] text-white border-[#15171c] dark:bg-[#e9ecf2] dark:text-[#0e1420] dark:border-[#e9ecf2] font-semibold'
+              : 'bg-ebene dark:bg-ebene-2 text-schrift-2 border-kontur hover:bg-wash'
           }`}
           title="Kalenderwochen im Tageskopf anzeigen"
           aria-pressed={showWeekNumbers}
@@ -5730,13 +5744,13 @@ export default function Schedule() {
         {!isMobile && (
           <div className="flex items-center gap-1 no-print">
             {/* Table / Week / Calendar segmented toggle */}
-            <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden shadow-sm">
+            <div className="flex rounded-ui border border-kontur overflow-hidden">
               <button
                 onClick={() => { setViewMode('table'); setForceWeekView(false); }}
                 className={`px-2 py-1.5 text-xs flex items-center gap-1 transition-colors ${
                   viewMode === 'table' && !forceWeekView
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                    ? 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold'
+                    : 'bg-ebene dark:bg-ebene-2 text-schrift-2 hover:bg-wash'
                 }`}
                 title="Monats-Tabelle"
               >
@@ -5744,10 +5758,10 @@ export default function Schedule() {
               </button>
               <button
                 onClick={() => { setViewMode('table'); setForceWeekView(true); }}
-                className={`px-2 py-1.5 text-xs flex items-center gap-1 transition-colors border-l border-gray-300 dark:border-gray-600 ${
+                className={`px-2 py-1.5 text-xs flex items-center gap-1 transition-colors border-l border-kontur ${
                   viewMode === 'table' && forceWeekView
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                    ? 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold'
+                    : 'bg-ebene dark:bg-ebene-2 text-schrift-2 hover:bg-wash'
                 }`}
                 title="Wochen-Tabelle"
               >
@@ -5755,10 +5769,10 @@ export default function Schedule() {
               </button>
               <button
                 onClick={() => { setViewMode('calendar'); setForceWeekView(false); }}
-                className={`px-2 py-1.5 text-xs flex items-center gap-1 transition-colors border-l border-gray-300 dark:border-gray-600 ${
+                className={`px-2 py-1.5 text-xs flex items-center gap-1 transition-colors border-l border-kontur ${
                   viewMode === 'calendar'
-                    ? 'bg-teal-600 text-white'
-                    : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                    ? 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold'
+                    : 'bg-ebene dark:bg-ebene-2 text-schrift-2 hover:bg-wash'
                 }`}
                 title="Kalender-Übersicht"
               >
@@ -5767,9 +5781,9 @@ export default function Schedule() {
             </div>
             {forceWeekView && viewMode === 'table' && (
               <>
-                <button onClick={prevWeek} aria-label="Vorherige Woche" className="px-2 py-1.5 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50 text-xs text-gray-600" title="Vorherige Woche">‹</button>
-                <span className="text-xs text-indigo-700 font-medium px-2 py-1.5 bg-indigo-50 border border-indigo-200 rounded whitespace-nowrap">{mobileWeekData.label}</span>
-                <button onClick={nextWeek} aria-label="Nächste Woche" className="px-2 py-1.5 bg-white border border-gray-300 rounded shadow-sm hover:bg-gray-50 text-xs text-gray-600" title="Nächste Woche">›</button>
+                <button onClick={prevWeek} aria-label="Vorherige Woche" className="px-2 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui hover:bg-wash text-xs text-schrift-2" title="Vorherige Woche">‹</button>
+                <span className="text-xs text-glut font-medium px-2 py-1.5 bg-glut-flaeche border border-[#d9a675] dark:border-[#a15618] rounded-ui whitespace-nowrap">{mobileWeekData.label}</span>
+                <button onClick={nextWeek} aria-label="Nächste Woche" className="px-2 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui hover:bg-wash text-xs text-schrift-2" title="Nächste Woche">›</button>
               </>
             )}
           </div>
@@ -5780,15 +5794,15 @@ export default function Schedule() {
           <div className="flex items-center gap-1.5 sm:hidden">
             <button
               onClick={prevWeek}
-              className="px-3 py-2 bg-indigo-50 border border-indigo-200 rounded shadow-sm hover:bg-indigo-100 text-sm min-h-[44px] min-w-[44px] text-indigo-700"
+              className="px-3 py-2 bg-glut-flaeche border border-[#d9a675] dark:border-[#a15618] rounded-ui text-sm min-h-[44px] min-w-[44px] text-[#a64a08] dark:text-glut"
               title="Vorherige Woche" aria-label="Vorherige Woche"
             >‹</button>
-            <span className="font-medium text-indigo-700 text-sm min-w-[140px] text-center bg-indigo-50 border border-indigo-200 rounded px-2 py-1.5">
+            <span className="font-medium text-glut text-sm min-w-[140px] text-center bg-glut-flaeche border border-[#d9a675] dark:border-[#a15618] rounded-ui px-2 py-1.5">
               📅 {mobileWeekData.label}
             </span>
             <button
               onClick={nextWeek}
-              className="px-3 py-2 bg-indigo-50 border border-indigo-200 rounded shadow-sm hover:bg-indigo-100 text-sm min-h-[44px] min-w-[44px] text-indigo-700"
+              className="px-3 py-2 bg-glut-flaeche border border-[#d9a675] dark:border-[#a15618] rounded-ui text-sm min-h-[44px] min-w-[44px] text-[#a64a08] dark:text-glut"
               title="Nächste Woche" aria-label="Nächste Woche"
             >›</button>
           </div>
@@ -5803,15 +5817,15 @@ export default function Schedule() {
 
         {/* Vereinigung/Schnittmenge bei Mehrfachauswahl (Spec 4.6.3) */}
         {selectedGroupIds.length > 1 && (
-          <div className="flex rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden shadow-sm no-print text-xs">
+          <div className="flex rounded-ui border border-kontur overflow-hidden no-print text-xs">
             <button
               onClick={() => setGroupCombineMode('union')}
-              className={`px-2 py-1.5 ${groupCombineMode === 'union' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50'}`}
+              className={`px-2 py-1.5 ${groupCombineMode === 'union' ? 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold' : 'bg-ebene dark:bg-ebene-2 text-schrift-2 hover:bg-wash'}`}
               title="Vereinigung: Mitarbeiter aus mindestens einer Gruppe"
             >∪ Vereinigung</button>
             <button
               onClick={() => setGroupCombineMode('intersection')}
-              className={`px-2 py-1.5 border-l border-gray-300 dark:border-gray-600 ${groupCombineMode === 'intersection' ? 'bg-indigo-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50'}`}
+              className={`px-2 py-1.5 border-l border-kontur ${groupCombineMode === 'intersection' ? 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold' : 'bg-ebene dark:bg-ebene-2 text-schrift-2 hover:bg-wash'}`}
               title="Schnittmenge: Mitarbeiter in allen gewählten Gruppen"
             >∩ Schnittmenge</button>
           </div>
@@ -5834,7 +5848,7 @@ export default function Schedule() {
           <button
             onClick={handleUndo}
             disabled={undoStack.length === 0}
-            className="px-2 py-1.5 bg-white border rounded shadow-sm text-xs sm:text-sm flex items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed min-h-[32px]"
+            className="px-2 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-xs sm:text-sm text-schrift-2 flex items-center gap-1 hover:bg-wash disabled:opacity-40 disabled:cursor-not-allowed min-h-[32px]"
             title={`Rückgängig (Ctrl+Z) — ${undoStack.length} Einträge`}
           >
             ↩ <span className="hidden sm:inline">Undo</span>
@@ -5842,7 +5856,7 @@ export default function Schedule() {
           <button
             onClick={handleRedo}
             disabled={redoStack.length === 0}
-            className="px-2 py-1.5 bg-white border rounded shadow-sm text-xs sm:text-sm flex items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed min-h-[32px]"
+            className="px-2 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-xs sm:text-sm text-schrift-2 flex items-center gap-1 hover:bg-wash disabled:opacity-40 disabled:cursor-not-allowed min-h-[32px]"
             title={`Wiederholen (Ctrl+Y) — ${redoStack.length} Einträge`}
           >
             ↪ <span className="hidden sm:inline">Redo</span>
@@ -5851,7 +5865,7 @@ export default function Schedule() {
           {/* Vormonat kopieren button */}
           <button
             onClick={() => setShowCopyPrevMonth(true)}
-            className="px-2 sm:px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            className="px-2 sm:px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-xs sm:text-sm text-schrift hover:bg-wash flex items-center gap-1 min-h-[32px]"
             title="Schichten des Vormonats als Vorlage übernehmen"
           >
             📅 <span className="hidden sm:inline">Vormonat</span>
@@ -5889,7 +5903,7 @@ export default function Schedule() {
           {/* Schicht-Empfehlung button */}
           <button
             onClick={() => setShowRecommendations(true)}
-            className="px-2 sm:px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            className="px-2 sm:px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-xs sm:text-sm text-schrift hover:bg-wash flex items-center gap-1 min-h-[32px]"
             title="Mitarbeiter mit wenig Schichten anzeigen und Empfehlungen erhalten"
           >
             💡 <span className="hidden sm:inline">Empfehlungen</span>
@@ -5923,7 +5937,7 @@ export default function Schedule() {
           {/* Auto-Planen button */}
           <button
             onClick={() => setShowAutoPlan(true)}
-            className="px-2 sm:px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            className="px-2 sm:px-3 py-1.5 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui text-xs sm:text-sm font-semibold hover:opacity-90 flex items-center gap-1 min-h-[32px]"
             title="Dienstplan aus Schichtmodellen automatisch befüllen"
           >
             🤖 <span className="hidden sm:inline">Auto-Planen</span>
@@ -5980,7 +5994,7 @@ export default function Schedule() {
           {/* Keyboard help button */}
           <button
             onClick={() => setShowKbHelp(h => !h)}
-            className="px-2 py-1.5 bg-white border rounded shadow-sm text-xs sm:text-sm flex items-center gap-1 hover:bg-gray-50 dark:hover:bg-gray-700 min-h-[32px]"
+            className="px-2 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-xs sm:text-sm text-schrift flex items-center gap-1 hover:bg-wash min-h-[32px]"
             title="Tastaturkürzel anzeigen (?)"
           >
             ⌨️
@@ -5995,9 +6009,9 @@ export default function Schedule() {
               ⬇ <span className="hidden sm:inline">Export</span>
             </button>
             {showExportMenu && (
-              <div className="absolute right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl z-50 min-w-[160px] py-1">
+              <div className="tw-pop absolute right-0 mt-1 bg-ebene dark:bg-ebene-2 border border-kontur rounded-panel shadow-overlay dark:shadow-overlay-dark z-50 min-w-[160px] py-1">
                 <button
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)]"
                   onClick={() => {
                     exportCSV(displayEmployees, days, entryMap, year, month);
                     setShowExportMenu(false);
@@ -6006,7 +6020,7 @@ export default function Schedule() {
                   📄 CSV exportieren
                 </button>
                 <button
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)]"
                   onClick={() => {
                     exportHTML(displayEmployees, days, entryMap, holidays, year, month, MONTH_NAMES[month], shifts);
                     setShowExportMenu(false);
@@ -6032,15 +6046,15 @@ export default function Schedule() {
         ].filter(Boolean).length;
 
         return (
-          <div className="mb-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+          <div className="mb-3 bg-ebene border border-kontur rounded-panel">
             {/* Filter header / toggle */}
             <div
               className="flex items-center gap-2 px-3 py-2 cursor-pointer select-none"
               onClick={() => setShowFilterPanel(p => !p)}
             >
-              <span className="text-xs font-semibold text-gray-500">🔍 Filter</span>
+              <span className="text-[9px] font-bold uppercase tracking-[.1em] text-schrift-3">Filter</span>
               {activeFilterCount > 0 && (
-                <span className="px-1.5 py-0.5 text-[10px] font-bold bg-blue-500 text-white rounded-full">{activeFilterCount}</span>
+                <span className="px-1.5 py-0.5 text-[10px] font-bold font-mono bg-glut text-glut-ink rounded-full">{activeFilterCount}</span>
               )}
               <span className="text-gray-600 text-xs ml-1">{showFilterPanel ? '▲' : '▼'}</span>
               {activeFilterCount > 0 && (
@@ -6468,7 +6482,7 @@ export default function Schedule() {
           )}
           <button
             onClick={() => { setSelection(null); setBulkShiftId(''); }}
-            className="ml-auto px-2 py-1 bg-white border border-gray-300 text-gray-600 rounded hover:bg-gray-50 dark:hover:bg-gray-700"
+            className="ml-auto px-2 py-1 bg-white border border-gray-300 text-gray-600 rounded hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)]"
           >
             ✕ Auswahl aufheben
           </button>
@@ -6616,9 +6630,9 @@ export default function Schedule() {
           </thead>
           <tbody>
             {/* ── Tagesnotizen row ── */}
-            <tr className="bg-indigo-50 border-b border-indigo-200">
-              <td className="sticky left-0 z-10 bg-indigo-50 px-2 sm:px-3 py-1 border-r border-indigo-200 font-semibold text-[11px] text-indigo-700 whitespace-nowrap min-w-[90px] sm:min-w-[160px]">
-                📝 Tagesnotizen
+            <tr className="bg-ebene border-b border-kontur">
+              <td className="sticky left-0 z-10 bg-ebene px-2 sm:px-3 py-1 border-r border-kontur font-semibold text-[9.5px] text-schrift-3 whitespace-nowrap min-w-[90px] sm:min-w-[178px]">
+                Notizen
               </td>
               {displayedDays.map(day => {
                 const dateStr = `${year}-${pad(month)}-${pad(day)}`;
@@ -6632,7 +6646,7 @@ export default function Schedule() {
                 return (
                   <td
                     key={day}
-                    className={`border border-indigo-100 text-center py-1 relative ${isWe ? 'bg-indigo-100' : ''}`}
+                    className={`border-r border-kontur-soft border-b border-kontur text-center py-1 relative${isWe ? ' bg-wash' : ''}`}
                     onContextMenu={e => handleContextMenu(e, 0, day)}
                   >
                     {hasDayNote ? (
@@ -6647,7 +6661,7 @@ export default function Schedule() {
                         📝
                       </button>
                     ) : (
-                      <span className="text-gray-200 text-[10px] cursor-default select-none">·</span>
+                      <span className="text-schrift-3/50 text-[10px] cursor-default select-none">·</span>
                     )}
                   </td>
                 );
@@ -6656,9 +6670,9 @@ export default function Schedule() {
 
             {/* ── Schichtplan-Kommentare row (Q069) ── */}
             {!isLeserView && (
-              <tr className="bg-amber-50 border-b border-amber-200">
-                <td className="sticky left-0 z-10 bg-amber-50 px-2 sm:px-3 py-1 border-r border-amber-200 font-semibold text-[11px] text-amber-700 whitespace-nowrap min-w-[90px] sm:min-w-[160px]">
-                  💬 Kommentare
+              <tr className="bg-ebene border-b border-kontur">
+                <td className="sticky left-0 z-10 bg-ebene px-2 sm:px-3 py-1 border-r border-kontur font-semibold text-[9.5px] text-schrift-3 whitespace-nowrap min-w-[90px] sm:min-w-[178px]">
+                  Kommentare
                 </td>
                 {displayedDays.map(day => {
                   const dateStr = `${year}-${pad(month)}-${pad(day)}`;
@@ -6670,7 +6684,7 @@ export default function Schedule() {
                   return (
                     <td
                       key={day}
-                      className={`border border-amber-100 text-center py-1 relative ${isWe ? 'bg-amber-100' : ''}`}
+                      className={`border-r border-kontur-soft border-b border-kontur text-center py-1 relative${isWe ? ' bg-wash' : ''}`}
                     >
                       {comment ? (
                         <button
@@ -6686,7 +6700,7 @@ export default function Schedule() {
                         </button>
                       ) : grid.notes ? (
                         <button
-                          className="text-gray-300 text-[10px] hover:text-amber-400 cursor-pointer transition-colors"
+                          className="text-schrift-3 text-[10px] hover:text-glut cursor-pointer transition-colors"
                           title="Kommentar hinzufügen"
                           onClick={e => {
                             e.stopPropagation();
@@ -6699,7 +6713,7 @@ export default function Schedule() {
                       ) : (
                         /* G-1: Kommentar-Editor nur mit WNOTES */
                         <span
-                          className="text-gray-200 text-[10px] cursor-default select-none"
+                          className="text-schrift-3/50 text-[10px] cursor-default select-none"
                           title="Keine Schreibberechtigung für Kommentare (WNOTES)"
                         >·</span>
                       )}

@@ -133,8 +133,8 @@ export default function GlobalSearchBar() {
   return (
     <div ref={containerRef} className="relative px-3 py-2" role="combobox" aria-expanded={open} aria-haspopup="listbox" aria-owns="global-search-results">
       {/* Search input */}
-      <div className="flex items-center gap-2 rounded-lg bg-slate-700/60 px-2.5 py-1.5 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
-        <svg className="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <div className="flex items-center gap-2 rounded-lg bg-wash border border-kontur px-2.5 py-1.5 focus-within:ring-1 focus-within:ring-glut transition-all">
+        <svg className="w-4 h-4 text-schrift-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input
@@ -144,7 +144,7 @@ export default function GlobalSearchBar() {
           onFocus={handleFocus}
           onKeyDown={handleKeyDown}
           placeholder="Suche…"
-          className="flex-1 bg-transparent text-sm text-white placeholder-slate-400 outline-none min-w-0"
+          className="flex-1 bg-transparent text-sm text-schrift placeholder:text-schrift-3 outline-none min-w-0"
           autoComplete="off"
           spellCheck={false}
           aria-label="Globale Suche"
@@ -153,7 +153,7 @@ export default function GlobalSearchBar() {
           aria-activedescendant={selectedIndex >= 0 ? `gsb-item-${selectedIndex}` : undefined}
         />
         {loading && (
-          <div className="w-3.5 h-3.5 border-2 border-slate-500 border-t-white rounded-full animate-spin flex-shrink-0" aria-label="Laden…" />
+          <div className="w-3.5 h-3.5 border-2 border-kontur border-t-schrift rounded-full animate-spin flex-shrink-0" aria-label="Laden…" />
         )}
       </div>
 
@@ -164,17 +164,17 @@ export default function GlobalSearchBar() {
           id="global-search-results"
           role="listbox"
           aria-label="Suchergebnisse"
-          className="absolute left-2 right-2 mt-1 max-h-80 overflow-y-auto rounded-lg bg-slate-800 border border-slate-600 shadow-xl z-50"
+          className="absolute left-2 right-2 mt-1 max-h-80 overflow-y-auto rounded-lg bg-ebene dark:bg-ebene-2 border border-kontur shadow-overlay dark:shadow-overlay-dark z-50"
         >
           {results.length === 0 && !loading && query.trim() && (
-            <div className="px-4 py-6 text-center text-slate-400 text-sm">
+            <div className="px-4 py-6 text-center text-schrift-2 text-sm">
               Keine Ergebnisse für „{query}"
             </div>
           )}
 
           {indexedGroups.map(group => (
             <div key={group.type}>
-              <div className="px-3 pt-2.5 pb-1 text-[10px] uppercase tracking-widest text-slate-500 font-semibold">
+              <div className="px-3 pt-2.5 pb-1 text-[10px] uppercase tracking-widest text-schrift-3 font-bold">
                 {group.label}
               </div>
               {group.items.map(({ result, idx }) => (
@@ -188,19 +188,19 @@ export default function GlobalSearchBar() {
                   onMouseEnter={() => setSelectedIndex(idx)}
                   className={`w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors ${
                     idx === selectedIndex
-                      ? 'bg-blue-600/40 text-white'
-                      : 'text-slate-200 hover:bg-white/5'
+                      ? 'bg-glut-flaeche text-glut'
+                      : 'text-schrift hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)]'
                   }`}
                 >
                   <span className="text-base flex-shrink-0 w-6 text-center">{result.icon ?? '📋'}</span>
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{result.title}</div>
                     {result.subtitle && (
-                      <div className="text-xs text-slate-400 truncate">{result.subtitle}</div>
+                      <div className="text-xs text-schrift-2 truncate">{result.subtitle}</div>
                     )}
                   </div>
                   {idx === selectedIndex && (
-                    <kbd className="flex-shrink-0 text-[10px] text-slate-400 border border-slate-600 px-1 py-0.5 rounded">↵</kbd>
+                    <kbd className="flex-shrink-0 text-[10px] text-schrift-2 border border-kontur px-1 py-0.5 rounded font-mono">↵</kbd>
                   )}
                 </button>
               ))}

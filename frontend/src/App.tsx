@@ -549,9 +549,9 @@ function AppInner() {
 
   const sidebarContent = (
     <>
-      <div className="p-4 border-b border-slate-700 flex items-start justify-between gap-2">
+      <div className="p-4 border-b border-kontur flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div className="text-lg font-bold text-white flex items-center gap-2">
+          <div className="text-lg font-bold text-schrift flex items-center gap-2">
             🧸 OpenSP5
             {isDevMode && (
               <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold
@@ -560,7 +560,7 @@ function AppInner() {
               </span>
             )}
           </div>
-          <div className="text-xs text-slate-400 mt-0.5">{t.nav.dienstplanung}</div>
+          <div className="text-xs text-schrift-2 mt-0.5">{t.nav.dienstplanung}</div>
         </div>
         {/* Action icons: wrap to a new line instead of overflowing the w-56 sidebar
             (cycle 8: 5–6 emoji buttons + logo exceed one row → icons protruded). */}
@@ -574,7 +574,7 @@ function AppInner() {
             onClick={() => setSpotlightOpen(true)}
             title="Schnellsuche (Ctrl+K)"
             aria-label="Schnellsuche öffnen"
-            className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors min-w-[36px] min-h-[36px] md:min-w-0 md:min-h-0 flex items-center justify-center"
+            className="text-schrift-2 hover:text-schrift p-1 rounded hover:bg-wash transition-colors min-w-[36px] min-h-[36px] md:min-w-0 md:min-h-0 flex items-center justify-center"
           >
             🔍
           </button>
@@ -583,7 +583,7 @@ function AppInner() {
             onClick={() => setShortcutsOpen(true)}
             title="Keyboard-Shortcuts anzeigen (?)"
             aria-label="Keyboard-Shortcuts anzeigen"
-            className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors text-sm font-bold leading-none min-w-[36px] min-h-[36px] md:min-w-0 md:min-h-0 flex items-center justify-center"
+            className="text-schrift-2 hover:text-schrift p-1 rounded hover:bg-wash transition-colors text-sm font-bold leading-none min-w-[36px] min-h-[36px] md:min-w-0 md:min-h-0 flex items-center justify-center"
           >
             ?
           </button>
@@ -592,7 +592,7 @@ function AppInner() {
             onClick={() => setQuickHelpOpen(true)}
             title="Erste Schritte anzeigen"
             aria-label="Erste Schritte anzeigen"
-            className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors text-sm leading-none min-w-[36px] min-h-[36px] md:min-w-0 md:min-h-0 flex items-center justify-center"
+            className="text-schrift-2 hover:text-schrift p-1 rounded hover:bg-wash transition-colors text-sm leading-none min-w-[36px] min-h-[36px] md:min-w-0 md:min-h-0 flex items-center justify-center"
           >
             📖
           </button>
@@ -601,13 +601,13 @@ function AppInner() {
             onClick={startTour}
             title="Geführte Tour starten"
             aria-label="Geführte Tour starten"
-            className="text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors text-sm leading-none min-w-[36px] min-h-[36px] md:min-w-0 md:min-h-0 flex items-center justify-center"
+            className="text-schrift-2 hover:text-schrift p-1 rounded hover:bg-wash transition-colors text-sm leading-none min-w-[36px] min-h-[36px] md:min-w-0 md:min-h-0 flex items-center justify-center"
           >
             🧭
           </button>
           {/* Close button — only visible on mobile */}
           <button
-            className="md:hidden text-slate-400 hover:text-white min-w-[44px] min-h-[44px] flex items-center justify-center rounded hover:bg-slate-700 transition-colors"
+            className="md:hidden text-schrift-2 hover:text-schrift min-w-[44px] min-h-[44px] flex items-center justify-center rounded hover:bg-wash transition-colors"
             onClick={() => setSidebarOpen(false)}
             aria-label="Menü schließen"
           >
@@ -627,7 +627,7 @@ function AppInner() {
                 <button
                   onClick={() => toggleGroup(group)}
                   aria-expanded={!isCollapsed}
-                  className="w-full flex items-center justify-between px-4 pt-3 pb-1 text-[10px] uppercase tracking-widest text-slate-500 font-semibold hover:text-slate-300 transition-colors"
+                  className="w-full flex items-center justify-between px-4 pt-3 pb-1 text-[10px] uppercase tracking-widest text-schrift-3 font-semibold hover:text-schrift-2 transition-colors"
                 >
                   <span>{t.navGroups[group as keyof typeof t.navGroups] ?? group}</span>
                   <span aria-hidden="true" className="text-[9px] opacity-60">{isCollapsed ? '▶' : '▼'}</span>
@@ -640,14 +640,14 @@ function AppInner() {
                   aria-current={isActive(item) ? 'page' : undefined}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-base min-h-[48px] transition-colors ${
                     isActive(item)
-                      ? 'bg-blue-600 text-white font-semibold'
-                      : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                      ? 'bg-glut-flaeche text-glut font-bold shadow-[inset_3px_0_0_var(--glut)]'
+                      : 'text-schrift-2 hover:bg-wash hover:text-schrift'
                   }`}
                 >
                   <span className="text-base leading-none flex-shrink-0 w-5 text-center">{item.icon}</span>
                   <span className="flex-1 min-w-0 text-left truncate">{t.navItems[item.id as keyof typeof t.navItems] ?? item.label}</span>
                   {item.badge && conflictCount > 0 && (
-                    <span className="flex-shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold">
+                    <span className="flex-shrink-0 inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full bg-signal-flaeche text-signal border border-[#eecfcf] dark:border-[#5a2626] font-mono text-[10px] font-bold">
                       {conflictCount > 99 ? '99+' : conflictCount}
                     </span>
                   )}
@@ -658,13 +658,13 @@ function AppInner() {
         })}
       </nav>
       {/* User info + logout */}
-      <div className="p-3 border-t border-slate-700">
+      <div className="p-3 border-t border-kontur">
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-slate-400 text-xs leading-tight flex-1 min-w-0">
-            <span className="block text-slate-300 font-medium truncate">
+          <span className="text-schrift-2 text-xs leading-tight flex-1 min-w-0">
+            <span className="block text-schrift font-medium truncate">
               {isDevMode ? '🛠️ Developer' : user?.NAME ?? '?'}
             </span>
-            <span className="block text-slate-500">
+            <span className="block text-schrift-3">
               {isDevMode ? 'Dev-Mode' : user?.role ?? ''}
             </span>
           </span>
@@ -676,7 +676,7 @@ function AppInner() {
             title={language === 'de' ? 'Switch to English' : 'Auf Deutsch wechseln'}
             aria-label={language === 'de' ? 'Switch to English' : 'Auf Deutsch wechseln'}
             className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg
-                       text-slate-400 hover:text-white hover:bg-slate-600 transition-colors
+                       text-schrift-2 hover:text-schrift hover:bg-wash transition-colors
                        text-sm font-bold leading-none"
           >
             {language === 'de' ? '🇩🇪' : '🇬🇧'}
@@ -686,8 +686,8 @@ function AppInner() {
         </div>
         <button
           onClick={logout}
-          className="w-full py-2.5 px-3 text-sm text-slate-400 hover:text-white
-                     bg-slate-700 hover:bg-slate-600 rounded transition text-left min-h-[44px]"
+          className="w-full py-2.5 px-3 text-sm text-schrift-2 hover:text-schrift
+                     bg-wash hover:bg-wash rounded transition text-left min-h-[44px]"
         >
           ↩ {t.nav.logout}
         </button>
@@ -696,7 +696,7 @@ function AppInner() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-100">
+    <div className="flex h-screen overflow-hidden bg-grund">
       {/* First-time setup wizard */}
       {showSetupWizard && (
         <FirstTimeSetupWizard onComplete={() => { dismissSetupWizard(); navigate('/schedule'); }} />
@@ -809,7 +809,7 @@ function AppInner() {
 
       {/* Sidebar — desktop: always visible | mobile: slide-in drawer */}
       <aside aria-label="Seitenmenü" className={`
-        fixed inset-y-0 left-0 z-30 w-56 bg-slate-800 text-white flex flex-col shadow-xl
+        fixed inset-y-0 left-0 z-30 w-56 bg-rail text-schrift border-r border-kontur flex flex-col
         transform transition-transform duration-200 ease-in-out
         md:relative md:translate-x-0 md:flex-shrink-0
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
@@ -820,7 +820,7 @@ function AppInner() {
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Mobile top bar with hamburger */}
-        <header className="md:hidden flex items-center gap-1 px-2 bg-slate-800 text-white shadow h-14 flex-shrink-0">
+        <header className="md:hidden flex items-center gap-1 px-2 bg-rail text-schrift border-b border-kontur h-14 flex-shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Menü öffnen"

@@ -27,7 +27,7 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Mobile Navigation"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-800 border-t border-slate-700 flex"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-rail border-t border-kontur flex"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {BOTTOM_NAV_ITEMS.map(item => {
@@ -40,12 +40,12 @@ export function BottomNav() {
             aria-label={item.label}
             className={`relative flex-1 flex flex-col items-center justify-center py-2 gap-0.5 min-h-[56px] transition-colors ${
               active
-                ? 'text-blue-400'
-                : 'text-slate-400 hover:text-slate-200 active:bg-slate-700'
+                ? 'text-glut'
+                : 'text-schrift-2 hover:text-schrift active:bg-wash'
             }`}
           >
             <span className="text-xl leading-none">{item.icon}</span>
-            <span className={`text-[10px] leading-tight font-medium ${active ? 'text-blue-400' : ''}`}>
+            <span className={`text-[10px] leading-tight font-medium ${active ? 'text-glut' : ''}`}>
               {item.label}
             </span>
             {active && (

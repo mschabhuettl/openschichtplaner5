@@ -257,13 +257,8 @@ html.dark .bg-black\/50 { background-color: rgba(0, 0, 0, 0.7) !important; }
 /* ── Dark Mode: Toast notifications ─────────────────────────── */
 html.dark .bg-slate-800 { background-color: #0f172a !important; }
 
-/* ── Dark Mode: Sidebar (stays dark, ensure consistency) ──────── */
-/* The sidebar is already bg-slate-800 — override to slate-950 in dark mode */
-html.dark aside.fixed { background-color: #0a0f1e !important; }
-html.dark aside.fixed .border-slate-700 { border-color: #1e293b !important; }
-
-/* ── Dark Mode: Mobile header ────────────────────────────────── */
-html.dark header.bg-slate-800 { background-color: #0a0f1e !important; }
+/* Sidebar/Topbar laufen seit der Taktwerk-Migration über die Rail-Token
+   (bg-rail, Light/Dark-Paar) — keine Dark-Sonderregeln mehr nötig. */
 
 /* ── Dark Mode: Scrollbar ────────────────────────────────────── */
 html.dark {

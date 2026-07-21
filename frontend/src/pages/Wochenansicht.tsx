@@ -3,6 +3,7 @@ import { api } from '../api/client';
 import type { WeekSchedule, DayEntry } from '../api/client';
 import type { Group } from '../types/index';
 import { groupTreeOptions } from '../utils/groupTree';
+import { shiftCellColorsMemo } from '../utils/shiftColor';
 
 // ─── Helpers ──────────────────────────────────────────────
 
@@ -60,27 +61,30 @@ interface ShiftCellProps {
 }
 
 function ShiftCell({ entry, compact }: ShiftCellProps) {
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   if (!entry || (!entry.display_name && !entry.shift_short && !entry.leave_name)) {
     return (
-      <div className={`${compact ? 'h-7' : 'h-9'} flex items-center justify-center text-gray-300 dark:text-gray-600 text-xs`}>
+      <div className={`${compact ? 'h-7' : 'h-9'} flex items-center justify-center text-schrift-3 text-xs`}>
         –
       </div>
     );
   }
 
   const label = entry.display_name || entry.shift_short || entry.leave_name || '?';
-  const bg = entry.color_bk && entry.color_bk !== '#FFFFFF' ? entry.color_bk : null;
-  const fg = entry.color_text || '#000000';
+  const raw = entry.color_bk && entry.color_bk !== '#FFFFFF' ? entry.color_bk : null;
 
-  // Determine style
+  // Abwesenheiten = Hohl-Chips (gestrichelt), Dienste = gefüllte Chips
   const isAbsence = entry.kind === 'absence';
   const isLeave = entry.kind === null && entry.leave_name;
+  const hollowChip = Boolean(isAbsence || isLeave);
 
-  if (bg) {
+  if (raw) {
+    // DBF-Rohfarbe nie roh rendern — normalisieren, Vordergrund wird berechnet
+    const c = shiftCellColorsMemo(raw, isDark ? 'dark' : 'light', { hollow: hollowChip });
     return (
       <div
-        className={`${compact ? 'h-7 text-xs' : 'h-9 text-sm'} flex items-center justify-center rounded font-semibold px-1 truncate`}
-        style={{ backgroundColor: bg, color: fg }}
+        className={`${compact ? 'h-7 text-xs' : 'h-9 text-sm'} flex items-center justify-center rounded-cell font-semibold px-1 truncate`}
+        style={hollowChip ? { border: `1.5px dashed ${c.color}`, color: c.color } : { backgroundColor: c.background, color: c.color }}
         title={entry.shift_name || entry.leave_name || label}
       >
         {label}
@@ -88,10 +92,10 @@ function ShiftCell({ entry, compact }: ShiftCellProps) {
     );
   }
 
-  if (isAbsence || isLeave) {
+  if (hollowChip) {
     return (
       <div
-        className={`${compact ? 'h-7 text-xs' : 'h-9 text-sm'} flex items-center justify-center rounded font-medium px-1 truncate bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700`}
+        className={`${compact ? 'h-7 text-xs' : 'h-9 text-sm'} flex items-center justify-center rounded-cell font-medium px-1 truncate border border-dashed border-kontur text-schrift-2`}
         title={entry.leave_name || label}
       >
         {label}
@@ -99,9 +103,10 @@ function ShiftCell({ entry, compact }: ShiftCellProps) {
     );
   }
 
+  // Farblose Dienste: Text in Schrift-2, kein Füllkörper
   return (
     <div
-      className={`${compact ? 'h-7 text-xs' : 'h-9 text-sm'} flex items-center justify-center rounded font-medium px-1 truncate bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300`}
+      className={`${compact ? 'h-7 text-xs' : 'h-9 text-sm'} flex items-center justify-center rounded-cell font-medium px-1 truncate text-schrift-2`}
       title={entry.shift_name || label}
     >
       {label}
@@ -111,8 +116,8 @@ function ShiftCell({ entry, compact }: ShiftCellProps) {
 
 // ─── Legend ───────────────────────────────────────────────
 
-function buildLegend(data: WeekSchedule): Array<{ label: string; short: string; color: string | null; textColor: string }> {
-  const seen = new Map<string, { label: string; short: string; color: string | null; textColor: string }>();
+function buildLegend(data: WeekSchedule): Array<{ label: string; short: string; color: string | null }> {
+  const seen = new Map<string, { label: string; short: string; color: string | null }>();
   for (const day of data.days) {
     for (const entry of day.entries) {
       const key = entry.display_name;
@@ -122,7 +127,6 @@ function buildLegend(data: WeekSchedule): Array<{ label: string; short: string; 
           short: key,
           label: name,
           color: entry.color_bk && entry.color_bk !== '#FFFFFF' ? entry.color_bk : null,
-          textColor: entry.color_text || '#000000',
         });
       }
     }
@@ -213,6 +217,8 @@ export default function Wochenansicht() {
 
   const legend = data ? buildLegend(data) : [];
   const stats = data ? buildStats(data) : new Map();
+  // Theme provider-frei ermitteln (Muster der Menü-Chips im Dienstplan)
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
 
   const dayHeaders = data
     ? data.days.map((d, i) => ({ ...formatDayHeader(d.date, i), date: d.date }))
@@ -222,8 +228,8 @@ export default function Wochenansicht() {
     <div className="p-4 space-y-4">
       {/* ── Header ── */}
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100">📅 Wochenansicht</h1>
-        <span className="text-sm text-gray-500 dark:text-gray-600 ml-1">
+        <h1 className="text-xl font-extrabold tracking-[-0.02em] text-schrift">📅 Wochenansicht</h1>
+        <span className="text-sm text-schrift-2 font-mono tabular-nums ml-1">
           {data ? formatWeekLabel(data.week_start, data.week_end) : '…'}
         </span>
       </div>
@@ -233,19 +239,19 @@ export default function Wochenansicht() {
         {/* Week nav */}
         <button
           onClick={prevWeek}
-          className="px-3 py-1.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium transition"
+          className="px-3 py-1.5 rounded-ui bg-ebene dark:bg-ebene-2 border border-kontur hover:bg-wash text-schrift text-sm font-medium transition"
         >
           ← Zurück
         </button>
         <button
           onClick={gotoToday}
-          className="px-3 py-1.5 rounded bg-blue-100 dark:bg-blue-900/40 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 text-sm font-medium transition"
+          className="px-3 py-1.5 rounded-ui bg-glut-flaeche border border-[#d9a675] dark:border-[#a15618] text-[#a64a08] dark:text-glut text-sm font-semibold transition"
         >
           Heute
         </button>
         <button
           onClick={nextWeek}
-          className="px-3 py-1.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-sm font-medium transition"
+          className="px-3 py-1.5 rounded-ui bg-ebene dark:bg-ebene-2 border border-kontur hover:bg-wash text-schrift text-sm font-medium transition"
         >
           Vor →
         </button>
@@ -257,14 +263,14 @@ export default function Wochenansicht() {
           onChange={e => {
             if (e.target.value) setWeekDate(getMondayOfWeek(new Date(e.target.value + 'T00:00:00')));
           }}
-          className="px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm"
+          className="px-2 py-1.5 rounded-ui border border-kontur bg-ebene dark:bg-ebene-2 text-schrift text-sm"
         />
 
         {/* Group filter */}
         <select
           value={groupId ?? ''}
           onChange={e => setGroupId(e.target.value ? Number(e.target.value) : null)}
-          className="px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm"
+          className="px-2 py-1.5 rounded-ui border border-kontur bg-ebene dark:bg-ebene-2 text-schrift text-sm"
         >
           <option value="">Alle Gruppen</option>
           {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
@@ -276,53 +282,53 @@ export default function Wochenansicht() {
           placeholder="Mitarbeiter suchen…"
           value={filterText}
           onChange={e => setFilterText(e.target.value)}
-          className="px-2 py-1.5 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 text-sm w-44"
+          className="px-2 py-1.5 rounded-ui border border-kontur bg-ebene dark:bg-ebene-2 text-schrift text-sm w-44"
         />
 
         {/* Compact toggle */}
         <button
           onClick={() => setCompact(prev => !prev)}
-          className={`px-3 py-1.5 rounded text-sm font-medium transition ${compact ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}
+          className={`px-3 py-1.5 rounded-ui border text-sm font-medium transition ${compact ? 'bg-glut-flaeche border-[#d9a675] dark:border-[#a15618] text-[#a64a08] dark:text-glut' : 'bg-ebene dark:bg-ebene-2 border-kontur text-schrift-2 hover:bg-wash'}`}
         >
           {compact ? '🔍 Normal' : '⚡ Kompakt'}
         </button>
 
-        {loading && <span className="text-sm text-gray-600 dark:text-gray-500 animate-pulse">Laden…</span>}
+        {loading && <span className="text-sm text-schrift-3 animate-pulse">Laden…</span>}
       </div>
 
       {error && (
-        <div className="rounded bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 px-4 py-3 text-red-700 dark:text-red-300 text-sm">
+        <div className="rounded-ui bg-signal-flaeche border border-[#eecfcf] dark:border-[#5a2626] px-4 py-3 text-signal text-sm">
           {error}
         </div>
       )}
 
       {/* ── Grid ── */}
       {data && (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-gray-900">
+        <div className="overflow-x-auto rounded-panel border border-kontur bg-ebene">
           <table className="w-full text-sm border-collapse">
             <thead>
-              <tr className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+              <tr className="bg-[#fafbfc] dark:bg-[#0e1522] border-b border-kontur">
                 {/* Employee column */}
-                <th scope="col" className="sticky left-0 z-10 bg-gray-50 dark:bg-gray-800 px-3 py-2 text-left font-semibold text-gray-600 dark:text-gray-300 whitespace-nowrap border-r border-gray-200 dark:border-gray-700 w-40">
+                <th scope="col" className="sticky left-0 z-10 bg-[#fafbfc] dark:bg-[#0e1522] px-3 py-2 text-left uppercase text-[9px] font-bold tracking-[.08em] text-schrift-3 whitespace-nowrap border-r border-kontur w-40">
                   Mitarbeiter
                 </th>
                 {dayHeaders.map(({ day, date, isWeekend, date: d }) => (
                   <th scope="col"
                     key={d}
-                    className={`px-2 py-2 text-center font-semibold whitespace-nowrap min-w-[70px] ${
+                    className={`px-2 py-2 text-center uppercase text-[9px] font-bold tracking-[.08em] whitespace-nowrap min-w-[70px] ${
                       isToday(d)
-                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                        ? 'bg-glut-flaeche text-glut'
                         : isWeekend
-                        ? 'text-gray-600 dark:text-gray-500 bg-gray-100/50 dark:bg-gray-800/50'
-                        : 'text-gray-600 dark:text-gray-300'
+                        ? 'bg-wash text-schrift-3'
+                        : 'text-schrift-3'
                     }`}
                   >
-                    <div className="font-bold">{day}</div>
-                    <div className={`text-xs font-normal ${isToday(d) ? 'text-blue-500' : 'text-gray-600 dark:text-gray-500'}`}>{date}</div>
-                    {isToday(d) && <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mx-auto mt-0.5" />}
+                    <div>{day}</div>
+                    <div className={`text-[9px] font-medium font-mono tabular-nums tracking-normal ${isToday(d) ? 'text-glut' : 'text-schrift-3'}`}>{date}</div>
+                    {isToday(d) && <div className="w-1.5 h-1.5 bg-glut rounded-full mx-auto mt-0.5" />}
                   </th>
                 ))}
-                <th scope="col" className="px-2 py-2 text-center text-xs font-semibold text-gray-500 dark:text-gray-600 whitespace-nowrap min-w-[60px] border-l border-gray-200 dark:border-gray-700">
+                <th scope="col" className="px-2 py-2 text-center uppercase text-[9px] font-bold tracking-[.08em] text-schrift-3 whitespace-nowrap min-w-[60px] border-l border-kontur">
                   Schichten
                 </th>
               </tr>
@@ -330,38 +336,36 @@ export default function Wochenansicht() {
             <tbody>
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="text-center py-8 text-gray-600 dark:text-gray-500">
+                  <td colSpan={9} className="text-center py-8 text-schrift-2">
                     Keine Mitarbeiter gefunden.
                   </td>
                 </tr>
               )}
-              {filtered.map((emp, idx) => {
+              {filtered.map((emp) => {
                 const empStats = stats.get(emp.id) ?? { shifts: 0, absences: 0 };
                 const isHighlighted = highlightEmployee === emp.id;
                 return (
                   <tr
                     key={emp.id}
-                    className={`border-b border-gray-100 dark:border-gray-800 cursor-pointer transition-colors ${
+                    className={`border-b border-kontur-soft cursor-pointer transition-colors ${
                       isHighlighted
-                        ? 'bg-yellow-50 dark:bg-yellow-900/10'
-                        : idx % 2 === 0
-                        ? 'bg-white dark:bg-gray-900'
-                        : 'bg-gray-50/50 dark:bg-gray-800/30'
-                    } hover:bg-blue-50/50 dark:hover:bg-blue-900/10`}
+                        ? 'bg-glut-flaeche shadow-[inset_2px_0_0_var(--glut)]'
+                        : 'bg-ebene hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)]'
+                    }`}
                     onClick={() => setHighlightEmployee(prev => prev === emp.id ? null : emp.id)}
                   >
                     {/* Name */}
-                    <td className="sticky left-0 z-10 bg-inherit px-3 py-1 border-r border-gray-200 dark:border-gray-700 whitespace-nowrap">
+                    <td className="sticky left-0 z-10 bg-inherit px-3 py-1 border-r border-kontur whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <span className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                        <span className="w-7 h-7 rounded-[7px] bg-wash text-schrift-2 text-xs font-bold flex items-center justify-center flex-shrink-0">
                           {emp.short.slice(0, 2)}
                         </span>
                         <div>
-                          <div className={`font-medium text-gray-800 dark:text-gray-100 leading-tight ${compact ? 'text-xs' : 'text-sm'}`}>
+                          <div className={`font-medium text-schrift leading-tight ${compact ? 'text-xs' : 'text-sm'}`}>
                             {emp.name.split(',')[0]}
                           </div>
                           {!compact && (
-                            <div className="text-xs text-gray-600 dark:text-gray-500">{emp.short}</div>
+                            <div className="text-xs text-schrift-3">{emp.short}</div>
                           )}
                         </div>
                       </div>
@@ -375,9 +379,9 @@ export default function Wochenansicht() {
                           key={day.date}
                           className={`px-1 py-1 ${
                             isToday(day.date)
-                              ? 'bg-blue-50/40 dark:bg-blue-900/10'
+                              ? 'bg-[rgba(201,106,20,.045)] dark:bg-[rgba(240,163,92,.05)]'
                               : (isWe === 0 || isWe === 6)
-                              ? 'bg-gray-50/60 dark:bg-gray-800/40'
+                              ? 'bg-wash'
                               : ''
                           }`}
                         >
@@ -386,20 +390,20 @@ export default function Wochenansicht() {
                       );
                     })}
                     {/* Stats */}
-                    <td className="px-2 py-1 text-center border-l border-gray-200 dark:border-gray-700">
+                    <td className="px-2 py-1 text-center border-l border-kontur">
                       <div className="flex flex-col items-center gap-0.5">
                         {empStats.shifts > 0 && (
-                          <span className="px-1.5 py-0.5 rounded text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-medium leading-none">
+                          <span className="px-1.5 py-0.5 rounded-cell text-xs bg-wash text-schrift-2 font-mono tabular-nums font-medium leading-none">
                             {empStats.shifts}S
                           </span>
                         )}
                         {empStats.absences > 0 && (
-                          <span className="px-1.5 py-0.5 rounded text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 font-medium leading-none">
+                          <span className="px-1.5 py-0.5 rounded-cell text-xs border border-dashed border-kontur text-schrift-2 font-mono tabular-nums font-medium leading-none">
                             {empStats.absences}A
                           </span>
                         )}
                         {empStats.shifts === 0 && empStats.absences === 0 && (
-                          <span className="text-gray-300 dark:text-gray-600 text-xs">–</span>
+                          <span className="text-schrift-3 text-xs">–</span>
                         )}
                       </div>
                     </td>
@@ -413,7 +417,7 @@ export default function Wochenansicht() {
 
       {/* ── Summary bar ── */}
       {data && (
-        <div className="flex flex-wrap gap-3 text-sm text-gray-600 dark:text-gray-600">
+        <div className="flex flex-wrap gap-3 text-sm text-schrift-2">
           <span className="font-medium">{filtered.length} Mitarbeiter</span>
           {dayHeaders.map(({ day, date: d, date: dateStr }) => {
             const dayMap = entryMap.get(dateStr);
@@ -421,7 +425,7 @@ export default function Wochenansicht() {
               ? Array.from(dayMap.values()).filter(e => e.kind === 'shift' || e.kind === 'special_shift').length
               : 0;
             return withShift > 0 ? (
-              <span key={d} className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs">
+              <span key={d} className="bg-wash text-schrift-2 border border-kontur-soft px-2 py-0.5 rounded-cell text-xs font-mono tabular-nums">
                 {day}: {withShift}✓
               </span>
             ) : null;
@@ -431,26 +435,30 @@ export default function Wochenansicht() {
 
       {/* ── Legend ── */}
       {legend.length > 0 && (
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-3">
-          <div className="text-xs font-semibold text-gray-500 dark:text-gray-600 mb-2">Legende</div>
+        <div className="bg-ebene rounded-panel border border-kontur p-3">
+          <div className="uppercase text-[9px] font-bold tracking-[.08em] text-schrift-3 mb-2">Legende</div>
           <div className="flex flex-wrap gap-2">
-            {legend.map(item => (
-              <div key={item.short} className="flex items-center gap-1.5">
-                {item.color ? (
-                  <span
-                    className="inline-flex items-center justify-center w-6 h-5 rounded text-xs font-bold"
-                    style={{ backgroundColor: item.color, color: item.textColor }}
-                  >
-                    {item.short}
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center justify-center w-6 h-5 rounded text-xs font-bold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
-                    {item.short}
-                  </span>
-                )}
-                <span className="text-xs text-gray-600 dark:text-gray-600">{item.label}</span>
-              </div>
-            ))}
+            {legend.map(item => {
+              // Rohfarbe normalisiert rendern, Vordergrund wird berechnet
+              const chip = item.color ? shiftCellColorsMemo(item.color, isDark ? 'dark' : 'light') : null;
+              return (
+                <div key={item.short} className="flex items-center gap-1.5">
+                  {chip ? (
+                    <span
+                      className="inline-flex items-center justify-center w-6 h-5 rounded-cell text-xs font-bold"
+                      style={{ backgroundColor: chip.background, color: chip.color }}
+                    >
+                      {item.short}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center justify-center w-6 h-5 rounded-cell text-xs font-bold border border-kontur text-schrift-2">
+                      {item.short}
+                    </span>
+                  )}
+                  <span className="text-xs text-schrift-2">{item.label}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

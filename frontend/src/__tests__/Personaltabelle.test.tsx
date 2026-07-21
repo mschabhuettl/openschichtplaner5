@@ -155,7 +155,7 @@ describe('Personaltabelle', () => {
     renderComp();
     await screen.findByText('Schmidt, Bernd');
     const negative = screen.getByText('-5');
-    expect(negative.className).toContain('text-red-600');
+    expect(negative.className).toContain('text-signal');
     expect(negative.parentElement?.textContent).toBe('30 / -5');
   });
 

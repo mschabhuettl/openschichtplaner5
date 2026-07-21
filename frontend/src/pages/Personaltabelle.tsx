@@ -35,14 +35,10 @@ function pad(n: number): string {
 function SaldoCell({ hours }: { hours: number }) {
   const abs = Math.abs(hours);
   const label = hours >= 0 ? `+${fmt(abs)}` : `−${fmt(abs)}`;
-  const color =
-    hours > 0.5
-      ? 'text-green-700 bg-green-50'
-      : hours < -0.5
-      ? 'text-red-700 bg-red-50'
-      : 'text-slate-500';
+  // Taktwerk: negative Salden in Signal, sonst neutral (Ink2)
+  const color = hours < -0.5 ? 'text-signal' : 'text-schrift-2';
   return (
-    <span className={`inline-block px-2 py-0.5 rounded text-xs font-mono font-semibold ${color}`}>
+    <span className={`inline-block font-mono tabular-nums text-[11px] font-semibold ${color}`}>
       {label}
     </span>
   );
@@ -50,10 +46,10 @@ function SaldoCell({ hours }: { hours: number }) {
 
 function LeaveAccountCell({ taken, remaining }: { taken: number; remaining: number }) {
   return (
-    <span className="font-mono text-xs whitespace-nowrap">
+    <span className="font-mono tabular-nums text-[11px] whitespace-nowrap">
       {fmtDays(taken)}
       {' / '}
-      <span className={remaining < 0 ? 'text-red-600 font-semibold' : 'text-slate-700'}>
+      <span className={remaining < 0 ? 'text-signal font-semibold' : 'text-schrift-2'}>
         {fmtDays(remaining)}
       </span>
     </span>
@@ -61,8 +57,8 @@ function LeaveAccountCell({ taken, remaining }: { taken: number; remaining: numb
 }
 
 function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
-  if (!active) return <span className="ml-1 text-slate-300">↕</span>;
-  return <span className="ml-1 text-blue-600">{dir === 'asc' ? '↑' : '↓'}</span>;
+  if (!active) return <span className="ml-1 text-schrift-3 opacity-50">↕</span>;
+  return <span className="ml-1 text-glut">{dir === 'asc' ? '▴' : '▾'}</span>;
 }
 
 function csvValue(col: ColDef, row: PersonnelTableRow): string {
@@ -245,24 +241,24 @@ export default function Personaltabelle() {
       : `${from} – ${to}`;
 
   const segBtn = (active: boolean) =>
-    `px-3 py-1.5 text-sm transition ${active ? 'bg-slate-700 text-white' : 'bg-white text-slate-700 hover:bg-slate-100'}`;
+    `px-3 py-1.5 text-sm transition ${active ? 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold' : 'bg-ebene text-schrift-2 hover:bg-wash'}`;
 
   return (
     <div className="p-2 sm:p-4 lg:p-6 h-full flex flex-col gap-4">
       {/* Header */}
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-xl font-bold text-slate-800">👤 {t.personaltabelle.title}</h1>
-        <span className="text-slate-600 text-sm no-print">{t.personaltabelle.subtitle}</span>
+        <h1 className="text-xl font-extrabold tracking-[-0.02em] text-schrift">👤 {t.personaltabelle.title}</h1>
+        <span className="text-schrift-2 text-sm no-print">{t.personaltabelle.subtitle}</span>
         <div className="ml-auto flex gap-2 no-print">
           <button
             onClick={() => exportCSV(columns, filtered, from, to)}
-            className="px-3 py-1.5 text-sm bg-emerald-600 text-white rounded hover:bg-emerald-700 transition"
+            className="px-3 py-1.5 text-sm font-semibold bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui hover:opacity-90 transition-opacity"
           >
             ⬇️ CSV
           </button>
           <button
             onClick={() => window.print()}
-            className="px-3 py-1.5 text-sm bg-slate-600 text-white rounded hover:bg-slate-700 transition"
+            className="px-3 py-1.5 text-sm text-schrift bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui hover:bg-wash transition-colors"
           >
             🖨️ {t.personaltabelle.print}
           </button>
@@ -272,7 +268,7 @@ export default function Personaltabelle() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3 no-print">
         {/* Zeitraum-Modus: Monat ⟷ freier Von/Bis-Zeitraum (Spec 3.9.1) */}
-        <div className="flex rounded border border-slate-300 overflow-hidden">
+        <div className="flex rounded-ui border border-kontur overflow-hidden">
           <button onClick={() => setMode('month')} className={segBtn(mode === 'month')}>
             {t.personaltabelle.modeMonth}
           </button>
@@ -285,7 +281,7 @@ export default function Personaltabelle() {
             <select
               value={month}
               onChange={e => setMonth(Number(e.target.value))}
-              className="border border-slate-300 rounded px-3 py-1.5 text-sm bg-white"
+              className="border border-kontur rounded-ui px-3 py-1.5 text-sm bg-ebene dark:bg-ebene-2 text-schrift"
             >
               {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
                 <option key={m} value={m}>
@@ -296,7 +292,7 @@ export default function Personaltabelle() {
             <select
               value={year}
               onChange={e => setYear(Number(e.target.value))}
-              className="border border-slate-300 rounded px-3 py-1.5 text-sm bg-white"
+              className="border border-kontur rounded-ui px-3 py-1.5 text-sm bg-ebene dark:bg-ebene-2 text-schrift"
             >
               {Array.from({ length: 5 }, (_, i) => now.getFullYear() - 2 + i).map(y => (
                 <option key={y} value={y}>{y}</option>
@@ -305,28 +301,28 @@ export default function Personaltabelle() {
           </>
         ) : (
           <div className="flex items-center gap-2">
-            <label className="text-sm text-slate-600">{t.personaltabelle.from}</label>
+            <label className="text-sm text-schrift-2">{t.personaltabelle.from}</label>
             <input
               type="date"
               aria-label={t.personaltabelle.from}
               value={rangeFrom}
               onChange={e => setRangeFrom(e.target.value)}
-              className="border border-slate-300 rounded px-2 py-1.5 text-sm bg-white"
+              className="border border-kontur rounded-ui px-2 py-1.5 text-sm bg-ebene dark:bg-ebene-2 text-schrift font-mono tabular-nums"
             />
-            <label className="text-sm text-slate-600">{t.personaltabelle.to}</label>
+            <label className="text-sm text-schrift-2">{t.personaltabelle.to}</label>
             <input
               type="date"
               aria-label={t.personaltabelle.to}
               value={rangeTo}
               onChange={e => setRangeTo(e.target.value)}
-              className="border border-slate-300 rounded px-2 py-1.5 text-sm bg-white"
+              className="border border-kontur rounded-ui px-2 py-1.5 text-sm bg-ebene dark:bg-ebene-2 text-schrift font-mono tabular-nums"
             />
           </div>
         )}
         <select
           value={groupId}
           onChange={e => setGroupId(e.target.value === '' ? '' : Number(e.target.value))}
-          className="border border-slate-300 rounded px-3 py-1.5 text-sm bg-white min-w-[160px]"
+          className="border border-kontur rounded-ui px-3 py-1.5 text-sm bg-ebene dark:bg-ebene-2 text-schrift min-w-[160px]"
         >
           <option value="">{t.personaltabelle.allGroups}</option>
           {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
@@ -337,30 +333,30 @@ export default function Personaltabelle() {
             placeholder={t.personaltabelle.searchPlaceholder}
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="border border-slate-300 rounded px-3 py-1.5 text-sm bg-white w-48"
+            className="border border-kontur rounded-ui px-3 py-1.5 text-sm bg-ebene dark:bg-ebene-2 text-schrift placeholder:text-schrift-3 w-48"
           />
           {search && (
             <button
               onClick={() => setSearch('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-700"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-schrift-2 hover:text-schrift"
             >
               ×
             </button>
           )}
         </div>
-        <span className="self-center text-sm text-slate-500">
+        <span className="self-center text-sm text-schrift-2">
           {loading ? t.personaltabelle.loading : `${filtered.length} ${t.personaltabelle.employees}`}
         </span>
       </div>
 
       {/* Error / invalid range */}
       {invalidRange && mode === 'range' && (
-        <div className="bg-amber-50 border border-amber-200 text-amber-700 rounded px-4 py-2 text-sm">
+        <div className="bg-signal-flaeche border border-[#eecfcf] dark:border-[#5a2626] text-signal rounded-ui px-4 py-2 text-sm">
           {t.personaltabelle.invalidRange}
         </div>
       )}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 rounded px-4 py-2 text-sm">{error}</div>
+        <div className="bg-signal-flaeche border border-[#eecfcf] dark:border-[#5a2626] text-signal rounded-ui px-4 py-2 text-sm">{error}</div>
       )}
 
       {/* Print heading */}
@@ -369,17 +365,19 @@ export default function Personaltabelle() {
         {groupId && <p className="text-sm">{groups.find(g => g.ID === groupId)?.NAME}</p>}
       </div>
 
-      {/* Table */}
-      <div className="flex-1 overflow-auto rounded-lg border border-slate-200 shadow-sm">
-        <table className="w-full text-sm border-collapse">
-          <thead className="sticky top-0 bg-slate-100 z-10">
+      {/* Table — Taktwerk-Datentabelle: 28px-Zeilen, UPPERCASE-Kopf auf Fläche 2, Zahlen mono rechtsbündig */}
+      <div className="flex-1 overflow-auto rounded-panel border border-kontur bg-ebene">
+        <table className="w-full text-[11px] border-collapse">
+          <thead className="sticky top-0 bg-[#fafbfc] dark:bg-[#0e1522] z-10">
             <tr>
               {columns.map(col => (
                 <th scope="col"
                   key={col.key}
                   title={col.title}
                   onClick={() => handleSort(col.key)}
-                  className={`px-3 py-2 font-semibold text-slate-600 cursor-pointer select-none whitespace-nowrap border-b border-slate-200 hover:bg-slate-200 transition ${col.width ?? ''} ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
+                  className={`px-2.5 py-[6px] text-[9px] font-bold uppercase tracking-[.08em] cursor-pointer select-none whitespace-nowrap border-b border-kontur hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)] ${
+                    sortKey === col.key ? 'text-schrift' : 'text-schrift-3'
+                  } ${col.width ?? ''} ${col.align === 'right' ? 'text-right' : col.align === 'center' ? 'text-center' : 'text-left'}`}
                 >
                   {col.label}
                   <SortIcon active={sortKey === col.key} dir={sortDir} />
@@ -390,25 +388,25 @@ export default function Personaltabelle() {
           <tbody>
             {filtered.length === 0 && !loading && (
               <tr>
-                <td colSpan={columns.length} className="text-center py-12 text-slate-600">
+                <td colSpan={columns.length} className="text-center py-12 text-schrift-2 text-sm">
                   {search ? t.personaltabelle.noResults : t.personaltabelle.noData}
                 </td>
               </tr>
             )}
-            {filtered.map((row, idx) => (
+            {filtered.map(row => (
               <tr
                 key={row.employee_id}
-                className={`border-b border-slate-100 hover:bg-blue-50 transition ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'}`}
+                className="h-[28px] border-b border-kontur-soft hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)]"
               >
                 {columns.map(col => (
                   <td
                     key={col.key}
-                    className={`px-3 py-2 ${
+                    className={`px-2.5 py-0 ${
                       col.key === 'employee_name'
-                        ? 'font-medium text-slate-800'
+                        ? 'text-[11.5px] font-semibold text-schrift'
                         : col.key === 'employee_short'
-                        ? 'text-center text-slate-500 font-mono text-xs'
-                        : 'text-right text-slate-700'
+                        ? 'text-center text-schrift-2 font-mono'
+                        : 'text-right text-schrift font-mono tabular-nums'
                     }`}
                   >
                     {renderCell(col, row)}
@@ -418,13 +416,13 @@ export default function Personaltabelle() {
             ))}
           </tbody>
           {filtered.length > 1 && (
-            <tfoot className="sticky bottom-0 bg-slate-100 border-t-2 border-slate-300">
-              <tr className="font-semibold text-slate-700">
-                <td className="px-3 py-2" colSpan={2}>
+            <tfoot className="sticky bottom-0 bg-[#fafbfc] dark:bg-[#0e1522] border-t border-kontur">
+              <tr className="h-[28px] font-semibold text-schrift">
+                <td className="px-2.5 py-0" colSpan={2}>
                   {t.personaltabelle.total} ({filtered.length} MA)
                 </td>
                 {columns.slice(2).map(col => (
-                  <td key={col.key} className="px-3 py-2 text-right">
+                  <td key={col.key} className="px-2.5 py-0 text-right font-mono tabular-nums">
                     {renderTotal(col)}
                   </td>
                 ))}
@@ -435,12 +433,12 @@ export default function Personaltabelle() {
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-4 text-xs text-slate-600 no-print">
-        <span><span className="text-green-700 font-semibold">+x,x</span> / <span className="text-red-700 font-semibold">−x,x</span> = {t.personaltabelle.legendSaldo}</span>
+      <div className="flex flex-wrap gap-4 text-xs text-schrift-2 no-print">
+        <span><span className="font-mono font-semibold">+x,x</span> / <span className="text-signal font-mono font-semibold">−x,x</span> = {t.personaltabelle.legendSaldo}</span>
         {data?.one_year && (
           <span>
-            <span className="font-semibold">x / y</span> = {t.personaltabelle.legendLeave}{' '}
-            (<span className="text-red-600 font-semibold">{t.personaltabelle.legendLeaveNegative}</span>)
+            <span className="font-mono font-semibold">x / y</span> = {t.personaltabelle.legendLeave}{' '}
+            (<span className="text-signal font-semibold">{t.personaltabelle.legendLeaveNegative}</span>)
           </span>
         )}
       </div>

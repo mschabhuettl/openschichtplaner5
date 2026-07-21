@@ -163,9 +163,9 @@ unverändert.
 
 Der **Dienstplan (Monats-Grid, light + dark)** ist die Taktwerk-
 Referenz-Ansicht und der Review-Zwischenstand für den Maintainer, bevor die
-Migration in die Fläche geht. Die Screenshots unten zeigen den Ist-Stand vor
-der Taktwerk-Migration und werden mit der Referenz-Umsetzung ersetzt
-(synthetischer Datensatz):
+Migration in die Fläche geht. Die Screenshots zeigen die umgesetzte Referenz
+(synthetischer Demo-Datensatz, Juli 2026): Tagbogen, Zeitfaden, normalisierte
+Chips mit Phasenkerben, hohle Abwesenheiten, Glut-Navigation, Signal-Konflikt:
 
 ![Dienstplan light](screenshots/dienstplan-light.png)
 ![Dienstplan dark](screenshots/dienstplan-dark.png)
@@ -174,9 +174,11 @@ der Taktwerk-Migration und werden mit der Referenz-Umsetzung ersetzt
 
 - **T1 Fundament — umgesetzt:** Token als CSS-Variablen + Tailwind-Mapping,
   `shiftColor.ts` (memoisiert, mit Spreizung), Kontrast-/Algorithmus-Tests.
-  Optik der App unverändert; Taktwerk- und Legacy-Token koexistieren.
-- **T2 Referenz-Ansicht Dienstplan (light+dark) — nächster Schritt**, danach
-  Maintainer-Review.
+- **T2 Referenz-Ansicht Dienstplan (light+dark) — umgesetzt** (§8): Fixraster
+  42/25/178 px, Chip-Anatomie mit Phasenkerbe, Tagbogen, Zeitfaden,
+  Hover-Kreuz (imperativ, ohne Grid-Re-Render), Zustands-Kaskade,
+  Header/Menüs/App-Shell tokenisiert; browser-verifiziert light+dark
+  (13 Struktur-Beweise, 0 Seitenfehler). Jetzt Maintainer-Review.
 - **T3 Flächige Migration** aller Ansichten + Primitives (§6), ansichtsweise
   und chirurgisch (Funktion unverändert; Screenshots light+dark je Ansicht;
   jede Migration ein eigener, getesteter Commit; kein Big-Bang), Priorität

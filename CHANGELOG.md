@@ -11,6 +11,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Design-System „Taktwerk" — Referenz-Ansicht Dienstplan (T2).** Das Monats-Grid
+  ist die erste vollständig umgesetzte Taktwerk-Ansicht (light + dark): Fixraster
+  (Tagesspalten 42 px, Zeilen 25 px, Namensspalte 178 px — Inhalt ändert nie Maße),
+  Dienste als massive Chips mit normalisierten Farben und **Phasenkerbe** (Position
+  oben/Mitte/unten = Früh-/Tag-/Nachtdienst — Schichtfolgen als Silhouette lesbar),
+  Abwesenheiten als hohle gestrichelte Chips, **Tagbogen** (Tageslicht-Band über dem
+  Kopf), **Zeitfaden** (Glut-Linie an der Jetzt-Position mit Uhrzeit-Chip), Hover-Kreuz,
+  Glut-Cursor/-Auswahl, Konflikte als einziges Rot im Raster; Saldo je Mitarbeiter in
+  der Namenszelle (negativ in Signal); Kopfzeile, Gruppen-/Summen-/Notizzeilen, Header,
+  Kontextmenüs und die App-Navigation (Rail, aktiver Punkt in Glut) folgen dem
+  Design-System. Verhalten, Schreibpfade und Tastatursteuerung unverändert;
+  browser-verifiziert in beiden Modi (0 Seitenfehler). Screenshots:
+  `docs/screenshots/dienstplan-light.png` / `-dark.png`.
 - **Design-System „Taktwerk" — Fundament (T1).** Das verbindliche Design-System
   (Design-Handoff des Maintainers) ist als Grundlage eingebaut: 15 Farb-Token als
   Light/Dark-Paare (CSS-Variablen + Tailwind-Mapping `bg-ebene`/`text-schrift`/…),

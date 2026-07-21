@@ -5874,7 +5874,7 @@ export default function Schedule() {
           {/* Woche kopieren button */}
           <button
             onClick={() => { setCopyWeekSource(displayEmployees[0]?.ID ?? ''); setCopyWeekTargets(new Set()); setShowCopyWeek(true); }}
-            className="px-2 sm:px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            className="px-2 sm:px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-xs sm:text-sm text-schrift hover:bg-wash flex items-center gap-1 min-h-[32px]"
             title="Schichtwoche eines Mitarbeiters auf andere übertragen"
           >
             📋 <span className="hidden sm:inline">Woche kopieren</span>
@@ -5894,7 +5894,7 @@ export default function Schedule() {
               setSwapDateTo(lastDayStr);
               setShowSwap(true);
             }}
-            className="px-2 sm:px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            className="px-2 sm:px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-xs sm:text-sm text-schrift hover:bg-wash flex items-center gap-1 min-h-[32px]"
             title="Schichten zweier Mitarbeiter für einen Zeitraum tauschen"
           >
             🔄 <span className="hidden sm:inline">Tausch</span>
@@ -5912,7 +5912,7 @@ export default function Schedule() {
           {/* Wochenvorlagen button */}
           <button
             onClick={() => setShowWeekTemplates(true)}
-            className="px-2 sm:px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            className="px-2 sm:px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-xs sm:text-sm text-schrift hover:bg-wash flex items-center gap-1 min-h-[32px]"
             title="Wochenmuster als Vorlage speichern und auf diesen Monat anwenden"
           >
             📐 <span className="hidden sm:inline">Vorlagen</span>
@@ -5928,7 +5928,7 @@ export default function Schedule() {
               setBulkGroupDateTo(`${year}-${pad2(month)}-${pad2(daysInMonth)}`);
               setShowBulkGroup(true);
             }}
-            className="px-2 sm:px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            className="px-2 sm:px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-xs sm:text-sm text-schrift hover:bg-wash flex items-center gap-1 min-h-[32px]"
             title="Schicht für eine ganze Gruppe auf einen Zeitraum zuweisen"
           >
             👥 <span className="hidden sm:inline">Gruppenzuweisung</span>
@@ -5958,7 +5958,7 @@ export default function Schedule() {
               );
               openPrintWindow(html);
             }}
-            className="px-2 sm:px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+            className="px-2 sm:px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-xs sm:text-sm text-schrift hover:bg-wash flex items-center gap-1 min-h-[32px]"
             title="Dienstplan drucken"
           >
             🖨️ <span className="hidden sm:inline">Drucken</span>
@@ -5977,7 +5977,7 @@ export default function Schedule() {
                 // cleanup after print dialog closes
                 setTimeout(() => document.body.classList.remove('print-bw'), 2000);
               }}
-              className="px-2 sm:px-3 py-1.5 bg-slate-500 hover:bg-slate-600 text-white text-xs sm:text-sm flex items-center gap-1 min-h-[32px]"
+              className="px-2 sm:px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur text-xs sm:text-sm text-schrift hover:bg-wash flex items-center gap-1 min-h-[32px]"
               title={`Direktdruck (${printColorMode === 'color' ? 'Farbe' : 'S/W'})`}
             >
               🖨 <span className="hidden sm:inline">{printColorMode === 'color' ? 'Farbe' : 'S/W'}</span>
@@ -6004,7 +6004,7 @@ export default function Schedule() {
           <div className="relative" ref={exportRef}>
             <button
               onClick={() => setShowExportMenu(m => !m)}
-              className="px-2 sm:px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm rounded shadow-sm flex items-center gap-1 min-h-[32px]"
+              className="px-2 sm:px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-xs sm:text-sm text-schrift hover:bg-wash flex items-center gap-1 min-h-[32px]"
             >
               ⬇ <span className="hidden sm:inline">Export</span>
             </button>
@@ -6224,17 +6224,17 @@ export default function Schedule() {
 
       {/* ── Conflict Banner ── */}
       {conflicts.length > 0 && (
-        <div className="mb-3 flex items-center gap-3 px-4 py-2 bg-amber-50 border border-amber-300 rounded-lg text-sm text-amber-800">
+        <div className="mb-3 flex items-center gap-3 px-4 py-2 bg-signal-flaeche border border-[#eecfcf] dark:border-[#5a2626] rounded-ui text-sm text-signal">
           <span className="text-base">⚠️</span>
           <span className="font-semibold">{conflicts.length} Konflikt{conflicts.length !== 1 ? 'e' : ''} gefunden</span>
           <button
-            className="underline hover:text-amber-900 text-sm"
+            className="underline hover:opacity-80 text-sm"
             onClick={e => { e.stopPropagation(); setShowConflictModal(true); }}
           >
             Details anzeigen
           </button>
           <button
-            className="ml-auto px-3 py-1 rounded-lg bg-red-600 text-white text-xs font-medium hover:bg-red-700 transition-colors"
+            className="ml-auto px-3 py-1 rounded-ui bg-signal text-white dark:text-[#1a1108] text-xs font-semibold hover:opacity-90 transition-opacity"
             onClick={() => navigate('/konflikte')}
           >
             ⚠️ Konflikte bereinigen
@@ -6290,7 +6290,7 @@ export default function Schedule() {
                       c.type === 'shift_and_absence'
                         ? 'bg-red-50 border-red-200 text-red-800'
                         : c.type === 'holiday_ban'
-                        ? 'bg-amber-50 border-amber-200 text-amber-800'
+                        ? 'bg-amber-50 border-amber-200 text-signal'
                         : 'bg-orange-50 border-orange-200 text-orange-800'
                     }`}
                   >

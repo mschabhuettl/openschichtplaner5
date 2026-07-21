@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.22.0] - 2026-07-21
+
 ### Added
 
 - **Design-System „Taktwerk" — Referenz-Ansicht Dienstplan (T2).** Das Monats-Grid

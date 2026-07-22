@@ -4,6 +4,7 @@ import { useT } from '../i18n/context';
 import { useSSERefresh } from '../contexts/SSEContext';
 import { HelpTooltip } from '../components/HelpTooltip';
 import { usePermissions } from '../hooks/usePermissions';
+import { shiftCellColorsMemo, tint, spine } from '../utils/shiftColor';
 import PerformanceWidget from '../components/PerformanceWidget';
 import { OnboardingChecklist } from '../components/OnboardingChecklist';
 import type {
@@ -55,13 +56,13 @@ const WEEKDAY_SHORT = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
 function Skeleton({ className = '' }: { className?: string }) {
   return (
-    <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
+    <div className={`animate-shimmer bg-kontur rounded-[3px] ${className}`} />
   );
 }
 
 function KpiSkeleton() {
   return (
-    <div className="bg-white rounded-xl shadow p-5 flex flex-col gap-2">
+    <div className="bg-ebene border border-kontur rounded-panel p-5 flex flex-col gap-2">
       <Skeleton className="h-3 w-24" />
       <Skeleton className="h-8 w-16" />
       <Skeleton className="h-2 w-32" />
@@ -71,7 +72,7 @@ function KpiSkeleton() {
 
 function WidgetSkeleton() {
   return (
-    <div className="bg-white rounded-xl shadow p-5 flex flex-col gap-3">
+    <div className="bg-ebene border border-kontur rounded-panel p-5 flex flex-col gap-3">
       <Skeleton className="h-4 w-36" />
       <Skeleton className="h-3 w-full" />
       <Skeleton className="h-3 w-4/5" />
@@ -91,27 +92,29 @@ interface KpiCardProps {
   help?: string;
 }
 
-const accentMap: Record<string, { bg: string; text: string }> = {
-  blue:   { bg: 'bg-blue-50',   text: 'text-blue-600' },
-  green:  { bg: 'bg-green-50',  text: 'text-green-600' },
-  orange: { bg: 'bg-orange-50', text: 'text-orange-600' },
-  red:    { bg: 'bg-red-50',    text: 'text-red-600' },
-  purple: { bg: 'bg-purple-50', text: 'text-purple-600' },
-  gray:   { bg: 'bg-gray-50',   text: 'text-gray-600' },
-  teal:   { bg: 'bg-teal-50',   text: 'text-teal-600' },
+// Spine-Schiene (hsl(h,55%,42%) light / hsl(h,50%,55%) dark) je Akzent-Hue —
+// die 3px-Farb-Spur an der linken Kante ersetzt die frühere getönte Fläche.
+const accentMap: Record<string, string> = {
+  blue:   'before:bg-[#306ba6] dark:before:bg-[#538cc6]',
+  green:  'before:bg-[#30a652] dark:before:bg-[#53c674]',
+  orange: 'before:bg-[#a67d30] dark:before:bg-[#c69e53]',
+  red:    'before:bg-[#a63030] dark:before:bg-[#c65353]',
+  purple: 'before:bg-[#6b30a6] dark:before:bg-[#8c53c6]',
+  gray:   'before:bg-kontur',
+  teal:   'before:bg-[#30a6a6] dark:before:bg-[#53c6c6]',
 };
 
 function KpiCard({ icon, label, value, sub, accent = 'blue', help }: KpiCardProps) {
-  const ac = accentMap[accent] ?? accentMap.blue;
+  const spineClass = accentMap[accent] ?? accentMap.blue;
   return (
-    <div className={`rounded-xl shadow p-5 flex flex-col gap-1 ${ac.bg}`}>
-      <div className="flex items-center gap-2 text-gray-500 text-xs font-medium uppercase tracking-wide">
+    <div className={`relative overflow-hidden bg-ebene border border-kontur rounded-panel p-5 flex flex-col gap-1 before:absolute before:left-0 before:top-0 before:bottom-0 before:w-[3px] ${spineClass}`}>
+      <div className="flex items-center gap-2 text-schrift-3 text-[9.5px] font-bold uppercase tracking-[.08em]">
         <span>{icon}</span>
         <span>{label}</span>
         {help && <HelpTooltip text={help} position="bottom" />}
       </div>
-      <div className={`text-3xl font-black ${ac.text}`}>{value}</div>
-      {sub && <div className="text-xs text-gray-500">{sub}</div>}
+      <div className="text-2xl font-bold font-mono tabular-nums text-schrift">{value}</div>
+      {sub && <div className="text-xs text-schrift-2">{sub}</div>}
     </div>
   );
 }
@@ -132,12 +135,12 @@ function Widget({
   badge?: string | number;
 }) {
   return (
-    <div className={`bg-white rounded-xl shadow p-5 flex flex-col gap-3 ${className}`}>
-      <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
+    <div className={`bg-ebene border border-kontur rounded-panel p-5 flex flex-col gap-3 ${className}`}>
+      <div className="flex items-center gap-2 border-b border-kontur pb-2">
         <span className="text-lg">{icon}</span>
-        <h2 className="font-semibold text-gray-700 text-sm flex-1">{title}</h2>
+        <h2 className="font-semibold text-schrift text-sm flex-1">{title}</h2>
         {badge !== undefined && (
-          <span className="text-xs font-bold bg-gray-100 text-gray-600 rounded-full px-2 py-0.5">
+          <span className="text-xs font-bold font-mono tabular-nums bg-wash text-schrift-2 rounded-full px-2 py-0.5">
             {badge}
           </span>
         )}
@@ -150,12 +153,15 @@ function Widget({
 // ── Empty state ───────────────────────────────────────────────────────────────
 
 function Empty({ text }: { text: string }) {
-  return <p className="text-sm text-gray-600 italic text-center py-2">{text}</p>;
+  return <p className="text-sm text-schrift-2 italic text-center py-2">{text}</p>;
 }
 
 // ── "Heute im Dienst" Widget ──────────────────────────────────────────────────
 
 function TodayOnDutyWidget({ todayData }: { todayData: DashboardToday | null }) {
+  // Theme direkt vom Dokument lesen (Muster der Menü-Chips in Schedule.tsx)
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+  const theme = isDark ? 'dark' : 'light';
   if (!todayData) return <WidgetSkeleton />;
   const { on_duty } = todayData;
 
@@ -165,36 +171,40 @@ function TodayOnDutyWidget({ todayData }: { todayData: DashboardToday | null }) 
         <Empty text="Heute sind keine Mitarbeiter eingeplant." />
       ) : (
         <ul className="space-y-1.5 max-h-56 overflow-y-auto">
-          {on_duty.map((emp) => (
-            <li
-              key={emp.employee_id}
-              className="flex items-center gap-2 text-sm rounded-lg px-2 py-1.5"
-              style={{ background: emp.color_bk + '18' }}
-            >
-              <span
-                className="inline-flex items-center justify-center rounded px-1.5 py-0.5 text-xs font-bold min-w-[2.5rem] shrink-0"
-                style={{ background: emp.color_bk, color: emp.color_text }}
+          {on_duty.map((emp) => {
+            // DBF-Rohfarbe nie roh rendern: Tint-Fläche + 3px-Spine, Chip normalisiert
+            const chip = emp.color_bk ? shiftCellColorsMemo(emp.color_bk, theme) : null;
+            return (
+              <li
+                key={emp.employee_id}
+                className="flex items-center gap-2 text-sm rounded-ui px-2 py-1.5"
+                style={emp.color_bk ? { background: tint(emp.color_bk, theme), boxShadow: `inset 3px 0 0 ${spine(emp.color_bk, theme)}` } : undefined}
               >
-                {emp.shift_short || '–'}
-              </span>
-              <span className="flex-1 font-medium text-gray-700 truncate">
-                {emp.employee_name}
-              </span>
-              {emp.startend && (
-                <span className="text-xs text-gray-500 shrink-0 font-mono bg-gray-100 rounded px-1">
-                  {emp.startend}
+                <span
+                  className="inline-flex items-center justify-center rounded-cell px-1.5 py-0.5 text-xs font-bold min-w-[2.5rem] shrink-0"
+                  style={chip ? { background: chip.background, color: chip.color } : undefined}
+                >
+                  {emp.shift_short || '–'}
                 </span>
-              )}
-              {emp.workplace_name && (
-                <span className="text-xs text-gray-600 shrink-0 hidden sm:block truncate max-w-[80px]">
-                  {emp.workplace_name}
+                <span className="flex-1 font-medium text-schrift truncate">
+                  {emp.employee_name}
                 </span>
-              )}
-              <span className="text-xs text-gray-600 shrink-0 font-mono">
-                {emp.employee_short}
-              </span>
-            </li>
-          ))}
+                {emp.startend && (
+                  <span className="text-xs text-schrift-2 shrink-0 font-mono tabular-nums">
+                    {emp.startend}
+                  </span>
+                )}
+                {emp.workplace_name && (
+                  <span className="text-xs text-schrift-2 shrink-0 hidden sm:block truncate max-w-[80px]">
+                    {emp.workplace_name}
+                  </span>
+                )}
+                <span className="text-xs text-schrift-2 shrink-0 font-mono">
+                  {emp.employee_short}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       )}
     </Widget>
@@ -204,6 +214,9 @@ function TodayOnDutyWidget({ todayData }: { todayData: DashboardToday | null }) 
 // ── "Abwesenheiten heute" Widget ──────────────────────────────────────────────
 
 function TodayAbsencesWidget({ todayData }: { todayData: DashboardToday | null }) {
+  // Theme direkt vom Dokument lesen (Muster der Menü-Chips in Schedule.tsx)
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+  const theme = isDark ? 'dark' : 'light';
   if (!todayData) return <WidgetSkeleton />;
   const { absences } = todayData;
 
@@ -213,25 +226,29 @@ function TodayAbsencesWidget({ todayData }: { todayData: DashboardToday | null }
         <Empty text="Keine Abwesenheiten für heute. ✅" />
       ) : (
         <ul className="space-y-1.5 max-h-56 overflow-y-auto">
-          {absences.map((emp) => (
-            <li
-              key={emp.employee_id}
-              className="flex items-center gap-2 text-sm rounded-lg px-2 py-1.5 bg-orange-50"
-            >
-              <span
-                className="inline-flex items-center justify-center rounded px-1.5 py-0.5 text-xs font-bold min-w-[3rem] shrink-0"
-                style={{ background: emp.color_bk, color: emp.color_text || '#fff' }}
+          {absences.map((emp) => {
+            // Abwesenheit = hohler Chip (gestrichelte Kontur statt Füllung)
+            const chip = emp.color_bk ? shiftCellColorsMemo(emp.color_bk, theme, { hollow: true }) : null;
+            return (
+              <li
+                key={emp.employee_id}
+                className="flex items-center gap-2 text-sm rounded-ui px-2 py-1.5 bg-wash"
               >
-                {emp.leave_name.substring(0, 5) || '—'}
-              </span>
-              <span className="flex-1 font-medium text-gray-700 truncate">
-                {emp.employee_name}
-              </span>
-              <span className="text-xs text-gray-600 shrink-0 font-mono">
-                {emp.employee_short}
-              </span>
-            </li>
-          ))}
+                <span
+                  className="inline-flex items-center justify-center rounded-cell px-1.5 py-0.5 text-xs font-bold min-w-[3rem] shrink-0"
+                  style={chip ? { border: `1.5px dashed ${chip.color}`, color: chip.color } : undefined}
+                >
+                  {emp.leave_name.substring(0, 5) || '—'}
+                </span>
+                <span className="flex-1 font-medium text-schrift truncate">
+                  {emp.employee_name}
+                </span>
+                <span className="text-xs text-schrift-2 shrink-0 font-mono">
+                  {emp.employee_short}
+                </span>
+              </li>
+            );
+          })}
         </ul>
       )}
     </Widget>
@@ -251,12 +268,12 @@ function WochenpeakWidget({ todayData }: { todayData: DashboardToday | null }) {
       <div className="flex flex-col gap-1">
         {/* Peak summary */}
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-2xl font-black text-indigo-600">{week_peak.count}</span>
-          <span className="text-sm text-gray-500">
-            Mitarbeiter am <strong className="text-gray-700">{week_peak.day}</strong>
+          <span className="text-2xl font-bold font-mono tabular-nums text-schrift">{week_peak.count}</span>
+          <span className="text-sm text-schrift-2">
+            Mitarbeiter am <strong className="text-schrift">{week_peak.day}</strong>
             {' '}({new Date(week_peak.date + 'T00:00:00').toLocaleDateString('de-AT', { day: '2-digit', month: '2-digit' })})
           </span>
-          {week_peak.count > 0 && <span className="ml-auto text-xs bg-indigo-100 text-indigo-700 font-bold rounded-full px-2 py-0.5">Peak 📈</span>}
+          {week_peak.count > 0 && <span className="ml-auto text-xs bg-glut-flaeche text-glut font-bold rounded-full px-2 py-0.5">Peak 📈</span>}
         </div>
 
         {/* Day bars */}
@@ -291,18 +308,18 @@ function WochenpeakWidget({ todayData }: { todayData: DashboardToday | null }) {
                 </div>
                 {/* Count label */}
                 {d.count > 0 && (
-                  <span className="text-[9px] font-bold text-gray-600">{d.count}</span>
+                  <span className="text-[9px] font-bold font-mono tabular-nums text-schrift-2">{d.count}</span>
                 )}
                 {/* Day label */}
                 <span
                   className={`text-[10px] font-medium select-none ${
-                    d.is_today ? 'text-indigo-600 font-black' : d.is_weekend ? 'text-gray-600' : 'text-gray-500'
+                    d.is_today ? 'text-glut font-black' : d.is_weekend ? 'text-schrift-2' : 'text-schrift-3'
                   }`}
                 >
                   {d.weekday_short}
                 </span>
-                {/* Tooltip */}
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] rounded px-1.5 py-0.5 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-10">
+                {/* Tooltip (Umkehrung) */}
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] text-[10px] rounded-cell px-1.5 py-0.5 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-10">
                   {d.weekday_name}: {d.count}
                 </div>
               </div>
@@ -310,12 +327,12 @@ function WochenpeakWidget({ todayData }: { todayData: DashboardToday | null }) {
           })}
         </div>
         {/* Legend */}
-        <div className="flex items-center gap-3 text-[10px] text-gray-600 pt-1">
+        <div className="flex items-center gap-3 text-[10px] text-schrift-2 pt-1">
           <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-[#10b981] inline-block" />Peak</span>
           <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-[#6366f1] inline-block" />Heute</span>
           <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-[#93c5fd] inline-block" />Normal</span>
           {todayData.is_holiday && (
-            <span className="ml-auto text-orange-500 font-bold">🎉 Heute ist Feiertag</span>
+            <span className="ml-auto text-glut font-bold">🎉 Heute ist Feiertag</span>
           )}
         </div>
       </div>
@@ -364,7 +381,7 @@ function MonthHeatmapWidget({ statsData }: { statsData: DashboardStats | null })
       {/* Weekday headers */}
       <div className="grid grid-cols-7 gap-1 mb-1">
         {weekdays.map((d) => (
-          <div key={d} className="text-center text-[10px] font-bold text-gray-600">{d}</div>
+          <div key={d} className="text-center text-[10px] font-bold text-schrift-3">{d}</div>
         ))}
       </div>
       {/* Calendar grid */}
@@ -378,7 +395,7 @@ function MonthHeatmapWidget({ statsData }: { statsData: DashboardStats | null })
           return (
             <div
               key={cell.day}
-              className={`aspect-square rounded flex flex-col items-center justify-center text-[10px] font-bold relative group cursor-default transition-transform hover:scale-110 ${cell.is_today ? 'ring-2 ring-indigo-400 ring-offset-1' : ''}`}
+              className={`aspect-square rounded-cell flex flex-col items-center justify-center text-[10px] font-bold relative group cursor-default transition-transform hover:scale-110 ${cell.is_today ? 'ring-2 ring-glut ring-offset-1' : ''}`}
               style={{ background: color, color: textColor }}
               title={`${cell.day}. ${MONTH_NAMES_DE[month]}: ${cell.count} Schichten${cell.is_weekend ? ' (WE)' : ''}`}
             >
@@ -386,8 +403,8 @@ function MonthHeatmapWidget({ statsData }: { statsData: DashboardStats | null })
               {cell.count > 0 && (
                 <span className="text-[8px] leading-none opacity-80">{cell.count}</span>
               )}
-              {/* Tooltip */}
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] rounded px-1.5 py-0.5 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-10">
+              {/* Tooltip (Umkehrung) */}
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] text-[10px] rounded-cell px-1.5 py-0.5 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-10">
                 {WEEKDAY_SHORT[cell.weekday]} {cell.day}. | {cell.count}
               </div>
             </div>
@@ -395,7 +412,7 @@ function MonthHeatmapWidget({ statsData }: { statsData: DashboardStats | null })
         })}
       </div>
       {/* Legend */}
-      <div className="flex items-center gap-3 text-[10px] text-gray-600 pt-2 flex-wrap">
+      <div className="flex items-center gap-3 text-[10px] text-schrift-2 pt-2 flex-wrap">
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-[#4ade80] inline-block" />Sehr gut</span>
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-[#86efac] inline-block" />Gut</span>
         <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-[#fbbf24] inline-block" />Mittel</span>
@@ -428,25 +445,25 @@ function UpcomingHolidaysWidget({ upcomingData }: { upcomingData: DashboardUpcom
             );
             return (
               <li key={i} className="flex items-start gap-3">
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-indigo-50 flex flex-col items-center justify-center text-xs font-bold text-indigo-600">
+                <div className="flex-shrink-0 w-10 h-10 rounded-ui bg-glut-flaeche flex flex-col items-center justify-center text-xs font-bold text-glut font-mono tabular-nums">
                   <span className="text-base leading-none">
                     {new Date(h.date + 'T00:00:00').getDate()}
                   </span>
-                  <span className="text-[9px] leading-none text-indigo-400">
+                  <span className="text-[9px] leading-none text-schrift-3">
                     {MONTH_NAMES_DE[new Date(h.date + 'T00:00:00').getMonth() + 1]?.substring(0, 3) ?? ''}
                   </span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm text-gray-800 truncate">{h.name}</div>
-                  <div className="text-xs text-gray-600">{formatHolidayDate(h.date)}</div>
+                  <div className="font-semibold text-sm text-schrift truncate">{h.name}</div>
+                  <div className="text-xs text-schrift-2">{formatHolidayDate(h.date)}</div>
                 </div>
                 <div className="shrink-0 text-right">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                     diffDays === 0
-                      ? 'bg-green-100 text-green-700'
+                      ? 'bg-glut text-glut-ink'
                       : diffDays <= 7
-                      ? 'bg-orange-100 text-orange-700'
-                      : 'bg-gray-100 text-gray-500'
+                      ? 'bg-glut-flaeche text-glut'
+                      : 'bg-wash text-schrift-2'
                   }`}>
                     {diffDays === 0 ? 'Heute' : diffDays === 1 ? 'Morgen' : `in ${diffDays}d`}
                   </span>
@@ -510,17 +527,17 @@ function MonthCoverageChart({ statsData }: { statsData: DashboardStats | null })
               <span
                 className={`text-[8px] font-medium select-none ${
                   d.is_today
-                    ? 'text-indigo-600 font-black'
+                    ? 'text-glut font-black'
                     : d.is_weekend
-                    ? 'text-gray-600'
-                    : 'text-gray-500'
+                    ? 'text-schrift-2'
+                    : 'text-schrift-3'
                 }`}
               >
                 {d.day}
               </span>
 
-              {/* Tooltip */}
-              <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] rounded px-1.5 py-0.5 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
+              {/* Tooltip (Umkehrung) */}
+              <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] text-[10px] rounded-cell px-1.5 py-0.5 whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
                 {WEEKDAY_SHORT[d.weekday]} {d.day}. | {d.count}
               </div>
             </div>
@@ -528,7 +545,7 @@ function MonthCoverageChart({ statsData }: { statsData: DashboardStats | null })
         })}
       </div>
       {/* Legend */}
-      <div className="flex items-center gap-4 text-xs text-gray-600 pt-1 flex-wrap">
+      <div className="flex items-center gap-4 text-xs text-schrift-2 pt-1 flex-wrap">
         <span className="flex items-center gap-1">
           <span className="w-3 h-3 rounded-sm bg-[#4ade80] inline-block" />
           Gut belegt
@@ -584,18 +601,18 @@ function BurnoutRadarWidget({ year, month }: { year: number; month: number }) {
       {total === 0 ? (
         <div className="flex flex-col items-center justify-center py-4 gap-2">
           <div className="text-2xl">✅</div>
-          <p className="text-sm text-green-600 font-medium">Alles im grünen Bereich!</p>
-          <p className="text-xs text-gray-600">Keine Überlastungsrisiken erkannt</p>
+          <p className="text-sm text-[#257e3e] dark:text-[#90d5a4] font-medium">Alles im grünen Bereich!</p>
+          <p className="text-xs text-schrift-2">Keine Überlastungsrisiken erkannt</p>
         </div>
       ) : (
         <div className="space-y-2">
           {entries?.map(e => (
             <div
               key={e.employee_id}
-              className={`rounded-lg p-2.5 border ${
+              className={`rounded-ui p-2.5 border ${
                 e.risk_level === 'high'
-                  ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
-                  : 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800'
+                  ? 'bg-signal-flaeche border-[#eecfcf] dark:border-[#5a2626]'
+                  : 'bg-wash border-kontur'
               }`}
             >
               <div className="flex items-center justify-between gap-2">
@@ -603,18 +620,18 @@ function BurnoutRadarWidget({ year, month }: { year: number; month: number }) {
                   <span className="text-base flex-shrink-0">
                     {e.risk_level === 'high' ? '🔴' : '🟡'}
                   </span>
-                  <span className="font-semibold text-sm text-gray-800 dark:text-gray-100 truncate">
+                  <span className="font-semibold text-sm text-schrift truncate">
                     {e.employee_name}
                   </span>
                 </div>
                 <div className="flex gap-1 flex-shrink-0">
                   {e.streak > 0 && (
-                    <span className="text-[10px] px-1.5 py-0.5 bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300 rounded-full font-mono font-bold whitespace-nowrap">
+                    <span className="text-[10px] px-1.5 py-0.5 bg-glut-flaeche text-glut rounded-full font-mono font-bold whitespace-nowrap">
                       🔁 {e.streak}d
                     </span>
                   )}
                   {e.overtime_pct >= 20 && (
-                    <span className="text-[10px] px-1.5 py-0.5 bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 rounded-full font-mono font-bold whitespace-nowrap">
+                    <span className="text-[10px] px-1.5 py-0.5 bg-signal text-white dark:text-[#1a1108] rounded-full font-mono font-bold whitespace-nowrap">
                       ⏱ +{e.overtime_pct.toFixed(0)}%
                     </span>
                   )}
@@ -622,26 +639,26 @@ function BurnoutRadarWidget({ year, month }: { year: number; month: number }) {
               </div>
               <div className="mt-1 ml-7">
                 {e.reasons.map((r, i) => (
-                  <span key={i} className="text-[11px] text-gray-500 dark:text-gray-600 mr-2">• {r}</span>
+                  <span key={i} className="text-[11px] text-schrift-3 mr-2">• {r}</span>
                 ))}
               </div>
               {e.target_hours > 0 && (
                 <div className="mt-1.5 ml-7">
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 relative">
+                  <div className="w-full bg-kontur rounded-full h-1.5 relative">
                     <div
                       className={`h-1.5 rounded-full transition-all ${
-                        e.overtime_pct >= 30 ? 'bg-red-500' : e.overtime_pct >= 20 ? 'bg-amber-500' : 'bg-green-500'
+                        e.overtime_pct >= 30 ? 'bg-signal' : e.overtime_pct >= 20 ? 'bg-glut' : 'bg-[#257e3e] dark:bg-[#90d5a4]'
                       }`}
                       style={{ width: `${Math.min(100, (e.actual_hours / (e.target_hours * 1.5)) * 100)}%` }}
                     />
                     <div
-                      className="absolute top-0 h-1.5 w-0.5 bg-gray-500 dark:bg-gray-300"
+                      className="absolute top-0 h-1.5 w-0.5 bg-schrift-2"
                       style={{ left: `${Math.min(100, (e.target_hours / (e.target_hours * 1.5)) * 100)}%` }}
                       title={`Soll: ${e.target_hours}h`}
                     />
                   </div>
-                  <div className="flex justify-between text-[10px] text-gray-600 mt-0.5">
-                    <span>Ist: <span className="font-semibold text-gray-600 dark:text-gray-300">{e.actual_hours}h</span></span>
+                  <div className="flex justify-between text-[10px] text-schrift-2 font-mono tabular-nums mt-0.5">
+                    <span>Ist: <span className="font-semibold text-schrift">{e.actual_hours}h</span></span>
                     <span>Soll: {e.target_hours}h</span>
                   </div>
                 </div>
@@ -665,15 +682,15 @@ function StaffingWarnings({ warnings }: { warnings: DashboardSummary['staffing_w
       {warnings.map((w, i) => (
         <li
           key={i}
-          className="flex items-center gap-2 text-sm rounded-lg px-3 py-2 bg-red-50 border border-red-100"
+          className="flex items-center gap-2 text-sm rounded-ui px-3 py-2 bg-signal-flaeche border border-[#eecfcf] dark:border-[#5a2626]"
         >
           <span className="text-base">⚠️</span>
-          <span className="font-medium text-red-700">{w.shift}</span>
-          <span className="text-gray-500 text-xs">{formatDateDE(w.date)}</span>
+          <span className="font-medium text-signal">{w.shift}</span>
+          <span className="text-schrift-2 text-xs">{formatDateDE(w.date)}</span>
           <span className="ml-auto flex items-center gap-1">
-            <span className="font-bold text-red-600">{w.actual}</span>
-            <span className="text-gray-600 text-xs">/ {w.required}</span>
-            <span className="text-gray-600 text-xs">geplant</span>
+            <span className="font-bold text-signal font-mono tabular-nums">{w.actual}</span>
+            <span className="text-schrift-2 text-xs font-mono tabular-nums">/ {w.required}</span>
+            <span className="text-schrift-2 text-xs">geplant</span>
           </span>
         </li>
       ))}
@@ -697,16 +714,16 @@ function ZeitkontoAlerts({ alerts }: { alerts: DashboardSummary['zeitkonto_alert
         return (
           <li key={i} className="flex flex-col gap-0.5">
             <div className="flex items-center justify-between text-sm">
-              <span className="font-medium text-gray-700 truncate max-w-[160px]">
+              <span className="font-medium text-schrift truncate max-w-[160px]">
                 {a.employee}
               </span>
-              <span className="font-bold text-red-600 shrink-0">
+              <span className="font-bold text-signal font-mono tabular-nums shrink-0">
                 {formatHoursSign(a.hours_diff)}
               </span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-1.5">
+            <div className="w-full bg-kontur-soft rounded-full h-1.5">
               <div
-                className="bg-red-400 h-1.5 rounded-full transition-all duration-700"
+                className="bg-signal h-1.5 rounded-full transition-all duration-700"
                 style={{ width: `${Math.round(pct * 100)}%` }}
               />
             </div>
@@ -714,7 +731,7 @@ function ZeitkontoAlerts({ alerts }: { alerts: DashboardSummary['zeitkonto_alert
         );
       })}
       {alerts.length > 5 && (
-        <p className="text-xs text-gray-600 text-right">
+        <p className="text-xs text-schrift-3 text-right">
           + {alerts.length - 5} weitere Mitarbeiter
         </p>
       )}
@@ -725,23 +742,30 @@ function ZeitkontoAlerts({ alerts }: { alerts: DashboardSummary['zeitkonto_alert
 // ── Absences by type widget ───────────────────────────────────────────────────
 
 function AbsencesByType({ data }: { data: DashboardSummary['absences_this_month'] }) {
+  // Theme direkt vom Dokument lesen (Muster der Menü-Chips in Schedule.tsx)
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+  const theme = isDark ? 'dark' : 'light';
   if (data.total === 0) {
     return <Empty text="Keine Abwesenheiten diesen Monat." />;
   }
   return (
     <div className="flex flex-col gap-2">
-      {data.by_type.map((t) => (
-        <div key={t.short} className="flex items-center gap-2 text-sm">
-          <span
-            className="inline-block px-2 py-0.5 rounded text-xs font-bold text-white shrink-0"
-            style={{ background: t.color }}
-          >
-            {t.short}
-          </span>
-          <span className="flex-1 text-gray-600 truncate">{t.name}</span>
-          <span className="font-bold text-gray-700 shrink-0">{t.count}</span>
-        </div>
-      ))}
+      {data.by_type.map((t) => {
+        // Abwesenheits-Chip hohl: gestrichelte Kontur in normalisierter Farbe
+        const chip = t.color ? shiftCellColorsMemo(t.color, theme, { hollow: true }) : null;
+        return (
+          <div key={t.short} className="flex items-center gap-2 text-sm">
+            <span
+              className="inline-block px-2 py-0.5 rounded-cell text-xs font-bold shrink-0"
+              style={chip ? { border: `1.5px dashed ${chip.color}`, color: chip.color } : undefined}
+            >
+              {t.short}
+            </span>
+            <span className="flex-1 text-schrift-2 truncate">{t.name}</span>
+            <span className="font-bold text-schrift font-mono tabular-nums shrink-0">{t.count}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -767,18 +791,18 @@ function MonthNav({
     <div className="flex items-center gap-2">
       <button
         onClick={onPrev}
-        className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+        className="p-1.5 rounded-ui hover:bg-wash text-schrift-2 hover:text-schrift transition-colors"
         aria-label="Vorheriger Monat"
       >
         ‹
       </button>
-      <span className="text-sm font-semibold text-gray-700 min-w-[120px] text-center">
+      <span className="text-sm font-semibold text-schrift min-w-[120px] text-center">
         {label || `${month}/${year}`}
       </span>
       <button
         onClick={onNext}
         disabled={disableNext}
-        className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        className="p-1.5 rounded-ui hover:bg-wash text-schrift-2 hover:text-schrift transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         aria-label="Nächster Monat"
       >
         ›
@@ -848,10 +872,10 @@ function MorningBriefingWidget({ todayData, upcomingData, summaryData, loading }
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-r from-slate-700 to-slate-800 rounded-xl shadow-lg p-5 animate-pulse">
-        <div className="h-5 bg-slate-600 rounded w-64 mb-3" />
-        <div className="h-3 bg-slate-600 rounded w-48 mb-2" />
-        <div className="h-3 bg-slate-600 rounded w-56" />
+      <div className="bg-ebene border border-kontur rounded-panel p-5">
+        <Skeleton className="h-5 w-64 mb-3" />
+        <Skeleton className="h-3 w-48 mb-2" />
+        <Skeleton className="h-3 w-56" />
       </div>
     );
   }
@@ -861,60 +885,60 @@ function MorningBriefingWidget({ todayData, upcomingData, summaryData, loading }
   const isHoliday = todayData?.is_holiday ?? false;
 
   return (
-    <div className="bg-gradient-to-r from-slate-700 via-slate-800 to-slate-900 rounded-xl shadow-lg p-5 text-white relative overflow-hidden">
+    <div className="bg-ebene border border-kontur rounded-panel p-5 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute top-0 right-0 w-48 h-48 opacity-5 text-[10rem] leading-none select-none pointer-events-none">☀️</div>
 
       {/* Header: greeting + date */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <p className="text-slate-600 text-xs font-semibold uppercase tracking-widest mb-0.5">{getGreeting()}</p>
-          <h2 className="text-xl font-bold text-white">
+          <p className="text-schrift-3 text-[10px] font-bold uppercase tracking-[.08em] mb-0.5">{getGreeting()}</p>
+          <h2 className="text-xl font-extrabold tracking-tight text-schrift">
             {weekday}, {day}. {month} {year}
             {isHoliday && (
-              <span className="ml-2 text-sm font-normal bg-amber-400 text-amber-900 px-2 py-0.5 rounded-full">
+              <span className="ml-2 text-sm font-normal bg-glut text-glut-ink px-2 py-0.5 rounded-full">
                 🎉 Feiertag
               </span>
             )}
           </h2>
         </div>
-        <div className="text-right text-slate-600 text-xs hidden sm:block">
+        <div className="text-right text-schrift-3 text-xs hidden sm:block">
           Tages-Briefing
         </div>
       </div>
 
       {/* Divider */}
-      <div className="border-t border-slate-600 my-3" />
+      <div className="border-t border-kontur my-3" />
 
       {/* Stats pills */}
       <div className="flex flex-wrap gap-3">
         {/* On duty */}
-        <div className="flex items-center gap-2 bg-slate-600/60 rounded-lg px-3 py-2 text-sm">
+        <div className="flex items-center gap-2 bg-wash rounded-ui px-3 py-2 text-sm">
           <span className="text-2xl leading-none">👷</span>
           <div>
-            <div className="font-bold text-white text-base leading-tight">{onDutyCount}</div>
-            <div className="text-slate-300 text-xs">im Dienst</div>
+            <div className="font-bold text-schrift font-mono tabular-nums text-base leading-tight">{onDutyCount}</div>
+            <div className="text-schrift-2 text-xs">im Dienst</div>
           </div>
         </div>
 
         {/* Absences */}
         {absenceCount > 0 && (
-          <div className="flex items-center gap-2 bg-red-800/50 rounded-lg px-3 py-2 text-sm">
+          <div className="flex items-center gap-2 bg-wash rounded-ui px-3 py-2 text-sm">
             <span className="text-2xl leading-none">🏥</span>
             <div>
-              <div className="font-bold text-white text-base leading-tight">{absenceCount}</div>
-              <div className="text-slate-300 text-xs">{absenceSummary || 'abwesend'}</div>
+              <div className="font-bold text-schrift font-mono tabular-nums text-base leading-tight">{absenceCount}</div>
+              <div className="text-schrift-2 text-xs">{absenceSummary || 'abwesend'}</div>
             </div>
           </div>
         )}
 
         {/* Staffing warnings */}
         {todayWarnings.length > 0 && (
-          <div className="flex items-center gap-2 bg-orange-700/50 rounded-lg px-3 py-2 text-sm">
+          <div className="flex items-center gap-2 bg-signal-flaeche border border-[#eecfcf] dark:border-[#5a2626] rounded-ui px-3 py-2 text-sm">
             <span className="text-2xl leading-none">⚠️</span>
             <div>
-              <div className="font-bold text-white text-base leading-tight">{todayWarnings.length}</div>
-              <div className="text-slate-300 text-xs">
+              <div className="font-bold text-signal font-mono tabular-nums text-base leading-tight">{todayWarnings.length}</div>
+              <div className="text-schrift-2 text-xs">
                 {todayWarnings.length === 1 ? 'Stelle unterbesetzt' : 'Stellen unterbesetzt'}
               </div>
             </div>
@@ -923,21 +947,21 @@ function MorningBriefingWidget({ todayData, upcomingData, summaryData, loading }
 
         {/* Holiday countdown */}
         {holidayInfo && !isHoliday && (
-          <div className="flex items-center gap-2 bg-teal-700/50 rounded-lg px-3 py-2 text-sm">
+          <div className="flex items-center gap-2 bg-glut-flaeche rounded-ui px-3 py-2 text-sm">
             <span className="text-xl leading-none">📅</span>
-            <div className="text-slate-200 text-xs leading-snug max-w-[160px]">{holidayInfo}</div>
+            <div className="text-glut text-xs leading-snug max-w-[160px]">{holidayInfo}</div>
           </div>
         )}
 
         {/* Birthdays */}
         {birthdaysToday.length > 0 && (
-          <div className="flex items-center gap-2 bg-pink-700/50 rounded-lg px-3 py-2 text-sm">
+          <div className="flex items-center gap-2 bg-wash rounded-ui px-3 py-2 text-sm">
             <span className="text-2xl leading-none">🎂</span>
             <div>
-              <div className="text-slate-200 text-xs leading-snug">
+              <div className="text-schrift text-xs leading-snug">
                 {birthdaysToday.map(b => b.name).join(', ')}
               </div>
-              <div className="text-slate-600 text-xs">
+              <div className="text-schrift-3 text-xs">
                 {birthdaysToday.length === 1 ? 'hat heute Geburtstag' : 'haben heute Geburtstag'}
               </div>
             </div>
@@ -946,9 +970,9 @@ function MorningBriefingWidget({ todayData, upcomingData, summaryData, loading }
 
         {/* All good */}
         {absenceCount === 0 && todayWarnings.length === 0 && birthdaysToday.length === 0 && onDutyCount > 0 && (
-          <div className="flex items-center gap-2 bg-green-700/40 rounded-lg px-3 py-2 text-sm">
+          <div className="flex items-center gap-2 bg-wash rounded-ui px-3 py-2 text-sm">
             <span className="text-2xl leading-none">✅</span>
-            <div className="text-slate-200 text-xs">Alles im grünen Bereich</div>
+            <div className="text-[#257e3e] dark:text-[#90d5a4] text-xs">Alles im grünen Bereich</div>
           </div>
         )}
       </div>
@@ -973,51 +997,52 @@ function EmployeeRankingWidget({ statsData, monthLabel }: { statsData: Dashboard
       <div className="space-y-2">
         {topEntries.map((emp, idx) => {
           const pct = maxShifts > 0 ? (emp.shifts_count / maxShifts) * 100 : 0;
+          // Ampel semantisch: über Soll = Signal, deutlich unter Soll = Glut, sonst neutral
           const overtimeColor =
             emp.overtime_hours > 8
-              ? 'text-red-600'
+              ? 'text-signal'
               : emp.overtime_hours < -8
-              ? 'text-orange-500'
-              : 'text-green-600';
-          const barColor =
+              ? 'text-glut'
+              : 'text-schrift-2';
+          const barClass =
             emp.overtime_hours > 8
-              ? '#ef4444'
+              ? 'bg-signal'
               : emp.overtime_hours < -8
-              ? '#f97316'
-              : '#6366f1';
+              ? 'bg-glut'
+              : 'bg-schrift-3';
 
           return (
             <div key={emp.employee_id} className="flex flex-col gap-0.5">
               <div className="flex items-center gap-2 text-sm">
-                <span className="text-[11px] font-bold text-gray-600 w-4 text-right shrink-0">
+                <span className="text-[11px] font-bold font-mono tabular-nums text-schrift-3 w-4 text-right shrink-0">
                   {idx + 1}.
                 </span>
                 <span
-                  className="inline-flex items-center justify-center rounded px-1.5 py-0.5 text-[10px] font-bold min-w-[2rem] shrink-0 bg-indigo-100 text-indigo-700"
+                  className="inline-flex items-center justify-center rounded-cell px-1.5 py-0.5 text-[10px] font-bold font-mono min-w-[2rem] shrink-0 bg-wash text-schrift-2"
                 >
                   {emp.employee_short}
                 </span>
-                <span className="flex-1 font-medium text-gray-700 truncate text-xs">
+                <span className="flex-1 font-medium text-schrift truncate text-xs">
                   {emp.employee_name}
                 </span>
-                <span className="text-xs font-bold text-gray-600 shrink-0">
+                <span className="text-xs font-bold font-mono tabular-nums text-schrift shrink-0">
                   {emp.shifts_count}×
                 </span>
                 {emp.actual_hours > 0 && (
-                  <span className={`text-[11px] font-semibold shrink-0 ${overtimeColor}`}>
+                  <span className={`text-[11px] font-semibold font-mono tabular-nums shrink-0 ${overtimeColor}`}>
                     {emp.actual_hours}h
                   </span>
                 )}
               </div>
               <div className="flex items-center gap-2 pl-8">
-                <div className="flex-1 bg-gray-100 rounded-full h-1.5">
+                <div className="flex-1 bg-kontur-soft rounded-full h-1.5">
                   <div
-                    className="h-1.5 rounded-full transition-all duration-700"
-                    style={{ width: `${pct}%`, background: barColor }}
+                    className={`h-1.5 rounded-full transition-all duration-700 ${barClass}`}
+                    style={{ width: `${pct}%` }}
                   />
                 </div>
                 {emp.target_hours > 0 && (
-                  <span className="text-[10px] text-gray-600 shrink-0 font-mono">
+                  <span className="text-[10px] text-schrift-3 shrink-0 font-mono tabular-nums">
                     / {emp.target_hours}h
                   </span>
                 )}
@@ -1026,7 +1051,7 @@ function EmployeeRankingWidget({ statsData, monthLabel }: { statsData: Dashboard
           );
         })}
         {ranking.length > 8 && (
-          <p className="text-xs text-gray-600 text-right pt-1">
+          <p className="text-xs text-schrift-3 text-right pt-1">
             + {ranking.length - 8} weitere Mitarbeiter
           </p>
         )}
@@ -1060,9 +1085,9 @@ function RecentPagesWidget() {
           <a
             key={p.path}
             href={p.path}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-sm font-medium text-slate-700 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 rounded-ui bg-ebene dark:bg-ebene-2 hover:bg-wash border border-kontur text-sm font-medium text-schrift transition-colors"
           >
-            <span className="text-slate-400 text-xs font-mono truncate max-w-[120px]">{p.title || p.path}</span>
+            <span className="text-schrift-3 text-xs font-mono truncate max-w-[120px]">{p.title || p.path}</span>
           </a>
         ))}
       </div>
@@ -1077,16 +1102,16 @@ interface QuickAction {
   label: string;
   desc: string;
   href: string;
-  accent: string;
 }
 
+// Chrome kennt nur Glut+Signal — Kacheln neutral, keine bunten CTA-Farben
 const QUICK_ACTIONS: QuickAction[] = [
-  { icon: '📅', label: 'Dienstplan',    desc: 'Schichten planen & zuweisen',   href: '/schedule',   accent: 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-700' },
-  { icon: '🏖️', label: 'Urlaub',       desc: 'Urlaubsantrag eintragen',       href: '/vacations',  accent: 'bg-green-50 hover:bg-green-100 border-green-200 text-green-700' },
-  { icon: '👥', label: 'Mitarbeiter',   desc: 'Mitarbeiterdaten bearbeiten',   href: '/employees',  accent: 'bg-purple-50 hover:bg-purple-100 border-purple-200 text-purple-700' },
-  { icon: '⚠️', label: 'Konflikte',    desc: 'Offene Konflikte lösen',        href: '/conflicts',  accent: 'bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700' },
-  { icon: '🔄', label: 'Rotation',     desc: 'Rotationspläne verwalten',      href: '/rotations',  accent: 'bg-indigo-50 hover:bg-indigo-100 border-indigo-200 text-indigo-700' },
-  { icon: '📊', label: 'Auswertung',   desc: 'Berichte & Statistiken',        href: '/reports',    accent: 'bg-teal-50 hover:bg-teal-100 border-teal-200 text-teal-700' },
+  { icon: '📅', label: 'Dienstplan',    desc: 'Schichten planen & zuweisen',   href: '/schedule' },
+  { icon: '🏖️', label: 'Urlaub',       desc: 'Urlaubsantrag eintragen',       href: '/vacations' },
+  { icon: '👥', label: 'Mitarbeiter',   desc: 'Mitarbeiterdaten bearbeiten',   href: '/employees' },
+  { icon: '⚠️', label: 'Konflikte',    desc: 'Offene Konflikte lösen',        href: '/conflicts' },
+  { icon: '🔄', label: 'Rotation',     desc: 'Rotationspläne verwalten',      href: '/rotations' },
+  { icon: '📊', label: 'Auswertung',   desc: 'Berichte & Statistiken',        href: '/reports' },
 ];
 
 function QuickActionsPanel({ conflictsCount }: { conflictsCount: number | null }) {
@@ -1099,13 +1124,13 @@ function QuickActionsPanel({ conflictsCount }: { conflictsCount: number | null }
             <a
               key={action.href}
               href={action.href}
-              className={`relative flex flex-col items-center gap-1.5 rounded-xl border px-3 py-3 text-center transition-all duration-150 group cursor-pointer ${action.accent}`}
+              className="relative flex flex-col items-center gap-1.5 rounded-panel border border-kontur bg-ebene dark:bg-ebene-2 hover:bg-wash text-schrift px-3 py-3 text-center transition-all duration-150 group cursor-pointer"
             >
               <span className="text-2xl group-hover:scale-110 transition-transform">{action.icon}</span>
               <span className="text-xs font-semibold leading-tight">{action.label}</span>
-              <span className="text-[10px] text-gray-600 leading-tight hidden sm:block">{action.desc}</span>
+              <span className="text-[10px] text-schrift-3 leading-tight hidden sm:block">{action.desc}</span>
               {isConflicts && conflictsCount !== null && conflictsCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 text-[10px] font-bold bg-red-500 text-white rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                <span className="absolute -top-1.5 -right-1.5 text-[10px] font-bold font-mono tabular-nums bg-signal text-white dark:text-[#1a1108] rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
                   {conflictsCount}
                 </span>
               )}
@@ -1135,19 +1160,19 @@ function UpcomingBirthdaysWidget({ summaryData }: { summaryData: DashboardSummar
         <div className="space-y-3">
           {thisWeek.length > 0 && (
             <div>
-              <div className="text-[10px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">Diese Woche</div>
+              <div className="text-[9.5px] font-bold text-schrift-3 uppercase tracking-[.08em] mb-1.5">Diese Woche</div>
               <ul className="space-y-1.5">
                 {thisWeek.map((b, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm rounded-lg px-2 py-1.5 bg-pink-50">
+                  <li key={i} className="flex items-center gap-2 text-sm rounded-ui px-2 py-1.5 bg-wash">
                     <span className="text-lg">{b.days_until === 0 ? '🎂' : '🎁'}</span>
-                    <span className="flex-1 font-medium text-gray-700 truncate">{b.name}</span>
-                    <span className="text-xs shrink-0 font-mono text-gray-500">
+                    <span className="flex-1 font-medium text-schrift truncate">{b.name}</span>
+                    <span className="text-xs shrink-0 font-mono tabular-nums text-schrift-2">
                       {b.date.replace('-', '.')}
                     </span>
                     {b.days_until === 0 ? (
-                      <span className="text-[10px] font-bold text-pink-600 bg-pink-100 px-2 py-0.5 rounded-full shrink-0">Heute! 🎉</span>
+                      <span className="text-[10px] font-bold bg-glut text-glut-ink px-2 py-0.5 rounded-full shrink-0">Heute! 🎉</span>
                     ) : (
-                      <span className="text-[10px] text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full shrink-0">in {b.days_until}d</span>
+                      <span className="text-[10px] bg-glut-flaeche text-glut px-2 py-0.5 rounded-full shrink-0">in {b.days_until}d</span>
                     )}
                   </li>
                 ))}
@@ -1156,16 +1181,16 @@ function UpcomingBirthdaysWidget({ summaryData }: { summaryData: DashboardSummar
           )}
           {later.length > 0 && (
             <div>
-              {thisWeek.length > 0 && <div className="text-[10px] font-bold text-gray-600 uppercase tracking-wide mb-1.5">Bald</div>}
+              {thisWeek.length > 0 && <div className="text-[9.5px] font-bold text-schrift-3 uppercase tracking-[.08em] mb-1.5">Bald</div>}
               <ul className="space-y-1.5 max-h-40 overflow-y-auto">
                 {later.map((b, i) => (
-                  <li key={i} className="flex items-center gap-2 text-sm rounded-lg px-2 py-1 text-gray-600">
+                  <li key={i} className="flex items-center gap-2 text-sm rounded-ui px-2 py-1 text-schrift-2">
                     <span className="text-base">🎁</span>
                     <span className="flex-1 font-medium truncate">{b.name}</span>
-                    <span className="text-xs shrink-0 font-mono text-gray-600">
+                    <span className="text-xs shrink-0 font-mono tabular-nums text-schrift-3">
                       {b.date.replace('-', '.')}
                     </span>
-                    <span className="text-[10px] text-gray-600 shrink-0">in {b.days_until}d</span>
+                    <span className="text-[10px] text-schrift-3 shrink-0">in {b.days_until}d</span>
                   </li>
                 ))}
               </ul>
@@ -1292,11 +1317,11 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">📊 {t.dashboard.title}</h1>
+          <h1 className="text-xl font-extrabold tracking-tight text-schrift">📊 {t.dashboard.title}</h1>
           <div className="flex items-center gap-2 mt-0.5">
-            <p className="text-gray-600 text-sm">{todayLocale}</p>
+            <p className="text-schrift-2 text-sm">{todayLocale}</p>
             {companyName && (
-              <span className="text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-2 py-0.5 font-medium">
+              <span className="text-xs bg-wash text-schrift-2 border border-kontur rounded-full px-2 py-0.5 font-medium">
                 🏢 {companyName}
               </span>
             )}
@@ -1305,13 +1330,13 @@ export default function Dashboard() {
         <div className="flex items-center gap-2">
           {/* Auto-refresh indicator */}
           <span
-            className="hidden sm:flex items-center gap-1 text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1 cursor-pointer hover:bg-gray-100"
+            className="hidden sm:flex items-center gap-1 text-xs text-schrift-2 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui px-2 py-1 cursor-pointer hover:bg-wash"
             onClick={() => { fetchAll(true); }}
             title="Klicken zum manuellen Aktualisieren"
           >
-            <span className="animate-pulse text-green-500">●</span>
+            <span className="animate-pulse text-glut">●</span>
             <span>Auto-Refresh</span>
-            <span className="font-mono text-gray-500">
+            <span className="font-mono tabular-nums text-schrift-3">
               {lastRefresh.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit' })}
             </span>
           </span>
@@ -1325,7 +1350,7 @@ export default function Dashboard() {
           />
           <button
             onClick={() => window.print()}
-            className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
+            className="no-print px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur hover:bg-wash text-schrift text-sm rounded-ui flex items-center gap-1"
             title="Seite drucken"
           >
             🖨️ <span className="hidden sm:inline">Drucken</span>
@@ -1335,7 +1360,7 @@ export default function Dashboard() {
 
       {/* Error state */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
+        <div className="bg-signal-flaeche border border-[#eecfcf] dark:border-[#5a2626] rounded-panel p-4 text-signal text-sm">
           ⚠️ {t.dashboard.loadError}: {error}
           <button
             onClick={() => fetchAll(false)}
@@ -1552,53 +1577,53 @@ export default function Dashboard() {
           ) : (
             <div className="flex flex-col gap-3">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Schichten geplant</span>
-                <span className="font-bold text-gray-700">
+                <span className="text-schrift-2">Schichten geplant</span>
+                <span className="font-bold text-schrift font-mono tabular-nums">
                   {summaryData.shifts_this_month.scheduled > 0
                     ? summaryData.shifts_this_month.scheduled
                     : '—'}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Aktive Schichtarten</span>
-                <span className="font-bold text-gray-700">
+                <span className="text-schrift-2">Aktive Schichtarten</span>
+                <span className="font-bold text-schrift font-mono tabular-nums">
                   {statsData.active_shift_types}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Abwesenheiten</span>
-                <span className="font-bold text-gray-700">
+                <span className="text-schrift-2">Abwesenheiten</span>
+                <span className="font-bold text-schrift font-mono tabular-nums">
                   {summaryData.absences_this_month.total > 0
                     ? summaryData.absences_this_month.total
                     : '—'}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Urlaubstage {year}</span>
-                <span className="font-bold text-gray-700">
+                <span className="text-schrift-2">Urlaubstage {year}</span>
+                <span className="font-bold text-schrift font-mono tabular-nums">
                   {statsData.vacation_days_used}
                 </span>
               </div>
               {summaryData.shifts_this_month.scheduled > 0 && (
                 <>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-500">Auslastung</span>
+                    <span className="text-schrift-2">Auslastung</span>
                     <span
-                      className={`font-bold ${
+                      className={`font-bold font-mono tabular-nums ${
                         cov >= 80
-                          ? 'text-green-600'
+                          ? 'text-[#257e3e] dark:text-[#90d5a4]'
                           : cov >= 50
-                          ? 'text-yellow-600'
-                          : 'text-red-600'
+                          ? 'text-glut'
+                          : 'text-signal'
                       }`}
                     >
                       {cov} %
                     </span>
                   </div>
-                  <div className="w-full bg-gray-100 rounded-full h-1.5">
+                  <div className="w-full bg-kontur-soft rounded-full h-1.5">
                     <div
                       className={`h-1.5 rounded-full transition-all duration-700 ${
-                        cov >= 80 ? 'bg-green-500' : cov >= 50 ? 'bg-yellow-400' : 'bg-red-500'
+                        cov >= 80 ? 'bg-[#257e3e] dark:bg-[#90d5a4]' : cov >= 50 ? 'bg-glut' : 'bg-signal'
                       }`}
                       style={{ width: `${Math.min(cov, 100)}%` }}
                     />

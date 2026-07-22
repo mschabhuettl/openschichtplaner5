@@ -134,7 +134,9 @@ describe('Jahresübersicht — Jahresraster (V-8, Spec 4.4)', () => {
 
     const cell = screen.getByTestId('jr-cell-3-15');
     expect(within(cell).getByText('F')).toBeTruthy();
-    expect(cell.style.backgroundColor).toBe('rgb(255, 0, 0)'); // color_bk des Eintrags
+    // color_bk des Eintrags, Taktwerk-normalisiert (nie Rohfarbe):
+    // n('#ff0000', light) = hsl(0, 52%, 38%) = #932f2f
+    expect(cell.style.backgroundColor).toBe('rgb(147, 47, 47)');
     // Eintrag von MA 2 (display_name 'S') taucht im Raster von MA 1 nicht auf
     expect(within(screen.getByTestId('jahresraster')).queryByText('S')).toBeNull();
   });

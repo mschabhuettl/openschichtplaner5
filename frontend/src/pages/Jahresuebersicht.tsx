@@ -9,6 +9,7 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { JahresRaster } from '../components/JahresRaster';
 import { buildDayMap, daysInMonth, toDateStr, MONTH_ABBR, shortLabel } from '../components/jahresRasterUtils';
 import { groupTreeOptions } from '../utils/groupTree';
+import { shiftCellColorsMemo } from '../utils/shiftColor';
 
 // Map: SHORTNAME → { bk, text }
 type ShiftColorMap = Map<string, { bk: string; text: string }>;
@@ -185,21 +186,26 @@ function openPrintWindowJ(html: string) {
 
 
 function ShiftBadge({ label, count, colorMap }: { label: string; count: number; colorMap: ShiftColorMap }) {
+  // Theme provider-frei, Muster der Menü-Chips in Schedule.tsx
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   const col = colorMap.get(label);
   const short = shortLabel(label);
   const text = count > 1 ? `${short}×${count}` : short;
   if (col) {
+    // Rohfarbe aus der DBF nie direkt rendern: Hue-Schiene + berechneter
+    // Vordergrund (Taktwerk §4)
+    const tw = shiftCellColorsMemo(col.bk, isDark ? 'dark' : 'light');
     return (
       <span
-        className="inline-block px-1 rounded font-bold leading-tight max-w-full truncate align-top"
-        style={{ backgroundColor: col.bk, color: col.text, fontSize: '9px' }}
+        className="inline-block px-1 rounded-cell font-bold leading-tight max-w-full truncate align-top"
+        style={{ backgroundColor: tw.background, color: tw.color, fontSize: '9px' }}
         title={label !== short ? label : undefined}
       >{text}</span>
     );
   }
   return (
     <span
-      className="font-mono text-gray-600 inline-block max-w-full truncate align-top"
+      className="font-mono text-schrift-2 inline-block max-w-full truncate align-top"
       style={{ fontSize: '9px' }}
       title={label !== short ? label : undefined}
     >{text}</span>
@@ -215,7 +221,7 @@ function MonthCell({ summary, colorMap }: { summary: MonthSummary; colorMap: Shi
   const overtime = summary.actual_hours - summary.target_hours;
 
   return (
-    <td className={`border border-gray-200 p-1.5 align-top text-xs w-[90px] min-w-[90px] max-w-[90px] ${hasData ? '' : 'bg-gray-50'}`}>
+    <td className={`border border-kontur-soft p-1.5 align-top text-xs w-[90px] min-w-[90px] max-w-[90px] ${hasData ? '' : 'bg-wash'}`}>
       {hasData ? (
         <div className="space-y-0.5">
           {topLabels.length > 0 && (
@@ -225,20 +231,20 @@ function MonthCell({ summary, colorMap }: { summary: MonthSummary; colorMap: Shi
               ))}
             </div>
           )}
-          <div className="flex gap-1 text-[10px]">
+          <div className="flex gap-1 text-[10px] font-mono tabular-nums">
             {summary.shifts > 0 && (
-              <span className="px-1 bg-blue-100 text-blue-700 rounded">{summary.shifts}S</span>
+              <span className="px-1 bg-wash text-schrift-2 rounded-cell">{summary.shifts}S</span>
             )}
             {summary.absences > 0 && (
-              <span className="px-1 bg-amber-100 text-amber-700 rounded">{summary.absences}A</span>
+              <span className="px-1 bg-wash text-schrift-2 rounded-cell">{summary.absences}A</span>
             )}
           </div>
-          <div className={`text-[10px] font-medium ${overtime >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+          <div className={`text-[10px] font-medium font-mono tabular-nums ${overtime < 0 ? 'text-signal' : 'text-schrift-2'}`}>
             {overtime >= 0 ? '+' : ''}{overtime.toFixed(1)}h
           </div>
         </div>
       ) : (
-        <div className="text-gray-300 text-center">—</div>
+        <div className="text-schrift-3 text-center">—</div>
       )}
     </td>
   );
@@ -287,67 +293,67 @@ function SingleEmployeeView({
 
   return (
     <div className="space-y-4">
-      {/* Summary cards */}
+      {/* Summary cards — neutrale Kacheln, negative Salden in Signal */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-blue-50 rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold text-blue-700">{totalShifts}</div>
-          <div className="text-xs text-blue-600">Schichten</div>
+        <div className="bg-ebene border border-kontur rounded-panel p-3 text-center">
+          <div className="text-2xl font-bold font-mono tabular-nums text-schrift">{totalShifts}</div>
+          <div className="text-[10px] font-bold uppercase tracking-[.08em] text-schrift-3">Schichten</div>
         </div>
-        <div className="bg-amber-50 rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold text-amber-700">{totalAbsences}</div>
-          <div className="text-xs text-amber-600">Abwesenheiten</div>
+        <div className="bg-ebene border border-kontur rounded-panel p-3 text-center">
+          <div className="text-2xl font-bold font-mono tabular-nums text-schrift">{totalAbsences}</div>
+          <div className="text-[10px] font-bold uppercase tracking-[.08em] text-schrift-3">Abwesenheiten</div>
         </div>
-        <div className="bg-gray-50 rounded-lg p-3 text-center">
-          <div className="text-2xl font-bold text-gray-700">{totalActual.toFixed(0)}h</div>
-          <div className="text-xs text-gray-600">Ist-Stunden</div>
+        <div className="bg-ebene border border-kontur rounded-panel p-3 text-center">
+          <div className="text-2xl font-bold font-mono tabular-nums text-schrift">{totalActual.toFixed(0)}h</div>
+          <div className="text-[10px] font-bold uppercase tracking-[.08em] text-schrift-3">Ist-Stunden</div>
         </div>
-        <div className={`rounded-lg p-3 text-center ${totalOvertime >= 0 ? 'bg-green-50' : 'bg-red-50'}`}>
-          <div className={`text-2xl font-bold ${totalOvertime >= 0 ? 'text-green-700' : 'text-red-700'}`}>
+        <div className="bg-ebene border border-kontur rounded-panel p-3 text-center">
+          <div className={`text-2xl font-bold font-mono tabular-nums ${totalOvertime < 0 ? 'text-signal' : 'text-schrift'}`}>
             {totalOvertime >= 0 ? '+' : ''}{totalOvertime.toFixed(1)}h
           </div>
-          <div className={`text-xs ${totalOvertime >= 0 ? 'text-green-600' : 'text-red-600'}`}>Überstunden</div>
+          <div className="text-[10px] font-bold uppercase tracking-[.08em] text-schrift-3">Überstunden</div>
         </div>
       </div>
 
-      {/* Month-by-month table */}
+      {/* Month-by-month table — Taktwerk-Datentabelle (28px-Zeilen) */}
       <div className="overflow-x-auto">
-        <table className="border-collapse text-sm w-full min-w-[640px]">
+        <table className="border-collapse text-[11.5px] w-full min-w-[640px]">
           <thead>
-            <tr className="bg-slate-100">
-              <th scope="col" className="px-3 py-2 text-left border border-gray-200">Monat</th>
-              <th scope="col" className="px-3 py-2 text-right border border-gray-200">Schichten</th>
-              <th scope="col" className="px-3 py-2 text-right border border-gray-200">Abwesend</th>
-              <th scope="col" className="px-3 py-2 text-right border border-gray-200">Soll-Std</th>
-              <th scope="col" className="px-3 py-2 text-right border border-gray-200">Ist-Std</th>
-              <th scope="col" className="px-3 py-2 text-right border border-gray-200">Über/Unter</th>
-              <th scope="col" className="px-3 py-2 text-left border border-gray-200">Schichtarten</th>
+            <tr className="bg-[#fafbfc] dark:bg-[#0e1522]">
+              <th scope="col" className="px-3 py-[5px] text-left border-b border-kontur text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3">Monat</th>
+              <th scope="col" className="px-3 py-[5px] text-right border-b border-kontur text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3">Schichten</th>
+              <th scope="col" className="px-3 py-[5px] text-right border-b border-kontur text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3">Abwesend</th>
+              <th scope="col" className="px-3 py-[5px] text-right border-b border-kontur text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3">Soll-Std</th>
+              <th scope="col" className="px-3 py-[5px] text-right border-b border-kontur text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3">Ist-Std</th>
+              <th scope="col" className="px-3 py-[5px] text-right border-b border-kontur text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3">Über/Unter</th>
+              <th scope="col" className="px-3 py-[5px] text-left border-b border-kontur text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3">Schichtarten</th>
             </tr>
           </thead>
           <tbody>
-            {data.map((m, i) => {
+            {data.map(m => {
               const ot = m.actual_hours - m.target_hours;
               const labelEntries = Object.entries(m.label_counts).sort((a, b) => b[1] - a[1]);
               return (
-                <tr key={m.month} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                  <td className="px-3 py-1.5 border border-gray-200 font-medium">
+                <tr key={m.month} className="hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)]">
+                  <td className="px-3 h-[28px] border-b border-kontur-soft font-semibold text-schrift">
                     {MONTH_ABBR[m.month - 1]} {year}
                   </td>
-                  <td className="px-3 py-1.5 border border-gray-200 text-right text-blue-700 font-semibold">
+                  <td className="px-3 h-[28px] border-b border-kontur-soft text-right font-mono tabular-nums text-schrift">
                     {m.shifts > 0 ? m.shifts : '—'}
                   </td>
-                  <td className="px-3 py-1.5 border border-gray-200 text-right text-amber-700">
+                  <td className="px-3 h-[28px] border-b border-kontur-soft text-right font-mono tabular-nums text-schrift-2">
                     {m.absences > 0 ? m.absences : '—'}
                   </td>
-                  <td className="px-3 py-1.5 border border-gray-200 text-right text-gray-600">
+                  <td className="px-3 h-[28px] border-b border-kontur-soft text-right font-mono tabular-nums text-schrift-2">
                     {m.target_hours.toFixed(1)}h
                   </td>
-                  <td className="px-3 py-1.5 border border-gray-200 text-right text-gray-700 font-medium">
+                  <td className="px-3 h-[28px] border-b border-kontur-soft text-right font-mono tabular-nums text-schrift">
                     {m.actual_hours.toFixed(1)}h
                   </td>
-                  <td className={`px-3 py-1.5 border border-gray-200 text-right font-semibold ${ot >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <td className={`px-3 h-[28px] border-b border-kontur-soft text-right font-mono tabular-nums font-semibold ${ot < 0 ? 'text-signal' : 'text-schrift-2'}`}>
                     {ot >= 0 ? '+' : ''}{ot.toFixed(1)}h
                   </td>
-                  <td className="px-3 py-1.5 border border-gray-200">
+                  <td className="px-3 h-[28px] border-b border-kontur-soft">
                     {labelEntries.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
                         {labelEntries.map(([l, c]) => (
@@ -360,16 +366,16 @@ function SingleEmployeeView({
               );
             })}
             {/* Totals row */}
-            <tr className="bg-slate-100 font-bold">
-              <td className="px-3 py-2 border border-gray-300">Gesamt</td>
-              <td className="px-3 py-2 border border-gray-300 text-right text-blue-700">{totalShifts}</td>
-              <td className="px-3 py-2 border border-gray-300 text-right text-amber-700">{totalAbsences}</td>
-              <td className="px-3 py-2 border border-gray-300 text-right">{totalTarget.toFixed(1)}h</td>
-              <td className="px-3 py-2 border border-gray-300 text-right">{totalActual.toFixed(1)}h</td>
-              <td className={`px-3 py-2 border border-gray-300 text-right ${totalOvertime >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+            <tr className="bg-[#fafbfc] dark:bg-[#0e1522] font-bold text-schrift">
+              <td className="px-3 h-[28px] border-t border-kontur">Gesamt</td>
+              <td className="px-3 h-[28px] border-t border-kontur text-right font-mono tabular-nums">{totalShifts}</td>
+              <td className="px-3 h-[28px] border-t border-kontur text-right font-mono tabular-nums">{totalAbsences}</td>
+              <td className="px-3 h-[28px] border-t border-kontur text-right font-mono tabular-nums">{totalTarget.toFixed(1)}h</td>
+              <td className="px-3 h-[28px] border-t border-kontur text-right font-mono tabular-nums">{totalActual.toFixed(1)}h</td>
+              <td className={`px-3 h-[28px] border-t border-kontur text-right font-mono tabular-nums ${totalOvertime < 0 ? 'text-signal' : ''}`}>
                 {totalOvertime >= 0 ? '+' : ''}{totalOvertime.toFixed(1)}h
               </td>
-              <td className="px-3 py-2 border border-gray-300">
+              <td className="px-3 h-[28px] border-t border-kontur">
                 <div className="flex flex-wrap gap-1">
                   {Array.from(allLabels.entries()).sort((a, b) => b[1] - a[1]).map(([l, c]) => (
                     <ShiftBadge key={l} label={l} count={c} colorMap={colorMap} />
@@ -442,22 +448,22 @@ function AllEmployeesView({
     <div className="overflow-x-auto">
       <table className="border-collapse text-xs min-w-[900px]">
         <thead>
-          <tr className="bg-slate-700 text-white">
-            <th scope="col" className="sticky left-0 z-10 bg-slate-700 px-3 py-2 text-left min-w-[160px] border-r border-slate-600">
+          <tr>
+            <th scope="col" className="sticky left-0 z-10 bg-[#fafbfc] dark:bg-[#0e1522] px-3 py-[5px] text-left min-w-[160px] border-r border-b border-kontur text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3">
               Mitarbeiter
             </th>
             {MONTH_ABBR.map((m, i) => (
-              <th scope="col" key={i} className="px-1 py-2 text-center min-w-[90px] border-r border-slate-600">
+              <th scope="col" key={i} className="bg-[#fafbfc] dark:bg-[#0e1522] px-1 py-[5px] text-center min-w-[90px] border-r border-b border-kontur text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3">
                 {m}
               </th>
             ))}
-            <th scope="col" className="px-2 py-2 text-center min-w-[80px] border-l border-slate-500 bg-slate-600">
+            <th scope="col" className="bg-[#fafbfc] dark:bg-[#0e1522] px-2 py-[5px] text-center min-w-[80px] border-l border-b border-kontur text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3">
               Gesamt
             </th>
           </tr>
         </thead>
         <tbody>
-          {filteredEmps.map((emp, idx) => {
+          {filteredEmps.map(emp => {
             const empData = dataMap.get(emp.ID) || [];
             const totalShifts = empData.reduce((a, m) => a + m.shifts, 0);
             const totalActual = empData.reduce((a, m) => a + m.actual_hours, 0);
@@ -465,20 +471,20 @@ function AllEmployeesView({
             const totalOvertime = totalActual - totalTarget;
 
             return (
-              <tr key={emp.ID} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                <td className="sticky left-0 z-10 bg-inherit px-3 py-1 border-r border-gray-200 font-medium whitespace-nowrap border-b border-b-gray-100">
+              <tr key={emp.ID} className="hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)]">
+                <td className="sticky left-0 z-10 bg-ebene px-3 py-1 border-r border-b border-kontur-soft font-medium text-schrift whitespace-nowrap">
                   {emp.NAME}, {emp.FIRSTNAME}
                 </td>
                 {empData.length > 0 ? (
                   empData.map(m => <MonthCell key={m.month} summary={m} colorMap={colorMap} />)
                 ) : (
                   Array.from({ length: 12 }, (_, i) => (
-                    <td key={i} className="border border-gray-200 p-1.5 bg-gray-50 text-center text-gray-300 text-xs">—</td>
+                    <td key={i} className="border border-kontur-soft p-1.5 bg-wash text-center text-schrift-3 text-xs">—</td>
                   ))
                 )}
-                <td className="border border-gray-200 p-1.5 text-center bg-slate-50">
-                  <div className="text-xs font-bold text-blue-700">{totalShifts}S</div>
-                  <div className={`text-xs font-semibold ${totalOvertime >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <td className="border border-kontur-soft p-1.5 text-center bg-wash">
+                  <div className="text-xs font-bold font-mono tabular-nums text-schrift">{totalShifts}S</div>
+                  <div className={`text-xs font-semibold font-mono tabular-nums ${totalOvertime < 0 ? 'text-signal' : 'text-schrift-2'}`}>
                     {totalOvertime >= 0 ? '+' : ''}{totalOvertime.toFixed(0)}h
                   </div>
                 </td>
@@ -547,9 +553,9 @@ function JahresRasterView({
   return (
     <div className="space-y-2">
       <JahresRaster year={year} dayMap={dayMap} holidays={holidays} onMonthClick={onMonthClick} />
-      <div className="text-[11px] text-gray-500 flex flex-wrap gap-x-4 gap-y-1">
-        <span><span className="inline-block w-3 h-3 align-[-2px] rounded-sm border border-slate-300" style={{ backgroundColor: '#f1f5f9' }} /> Wochenende</span>
-        <span><span className="inline-block w-3 h-3 align-[-2px] rounded-sm border border-red-200" style={{ backgroundColor: '#fef2f2' }} /> Feiertag</span>
+      <div className="text-[11px] text-schrift-2 flex flex-wrap gap-x-4 gap-y-1">
+        <span><span className="inline-block w-3 h-3 align-[-2px] rounded-sm border border-kontur bg-wash" /> Wochenende</span>
+        <span><span className="inline-block w-3 h-3 align-[-2px] rounded-sm border border-kontur bg-[rgba(190,59,59,.08)] dark:bg-[rgba(228,105,111,.12)]" /> Feiertag</span>
         {hasCycle && <span>↻ = aus Schichtmodell (Zyklus)</span>}
         <span>Klick auf einen Tag öffnet den Dienstplan des Monats.</span>
       </div>
@@ -673,22 +679,23 @@ export default function Jahresuebersicht() {
           <div className="flex flex-wrap items-center gap-2">
             {/* Year navigation */}
             <div className="flex items-center gap-1">
-              <button onClick={() => setYear(y => y - 1)} aria-label="Vorjahr" className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm" title="Vorjahr">‹</button>
-              <span className="font-bold text-gray-700 min-w-[56px] text-center">{year}</span>
-              <button onClick={() => setYear(y => y + 1)} aria-label="Folgejahr" className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 text-sm" title="Folgejahr">›</button>
+              <button onClick={() => setYear(y => y - 1)} aria-label="Vorjahr" className="px-2 py-1 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-schrift hover:bg-wash text-sm" title="Vorjahr">‹</button>
+              <span className="font-bold font-mono tabular-nums text-schrift min-w-[56px] text-center">{year}</span>
+              <button onClick={() => setYear(y => y + 1)} aria-label="Folgejahr" className="px-2 py-1 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-schrift hover:bg-wash text-sm" title="Folgejahr">›</button>
             </div>
 
-            {/* Modus: Tagesraster (Spec 4.4) vs. Zusammenfassung (Aggregat) */}
-            <div className="flex rounded overflow-hidden border border-gray-300 text-sm">
+            {/* Modus: Tagesraster (Spec 4.4) vs. Zusammenfassung (Aggregat) —
+                aktives Segment = Umkehrung */}
+            <div className="flex rounded-ui overflow-hidden border border-kontur text-sm">
               <button
                 onClick={() => setMode('raster')}
-                className={`px-3 py-1.5 ${mode === 'raster' ? 'bg-slate-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                className={`px-3 py-1.5 ${mode === 'raster' ? 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold' : 'bg-ebene dark:bg-ebene-2 text-schrift hover:bg-wash'}`}
               >
                 Jahresraster
               </button>
               <button
                 onClick={() => setMode('summary')}
-                className={`px-3 py-1.5 border-l ${mode === 'summary' ? 'bg-slate-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                className={`px-3 py-1.5 border-l border-kontur ${mode === 'summary' ? 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold' : 'bg-ebene dark:bg-ebene-2 text-schrift hover:bg-wash'}`}
               >
                 Zusammenfassung
               </button>
@@ -696,16 +703,16 @@ export default function Jahresuebersicht() {
 
             {/* View mode (nur Zusammenfassung) */}
             {mode === 'summary' && (
-              <div className="flex rounded overflow-hidden border border-gray-300 text-sm">
+              <div className="flex rounded-ui overflow-hidden border border-kontur text-sm">
                 <button
                   onClick={() => setViewMode('all')}
-                  className={`px-3 py-1.5 ${viewMode === 'all' ? 'bg-slate-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                  className={`px-3 py-1.5 ${viewMode === 'all' ? 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold' : 'bg-ebene dark:bg-ebene-2 text-schrift hover:bg-wash'}`}
                 >
                   Alle MA
                 </button>
                 <button
                   onClick={() => setViewMode('single')}
-                  className={`px-3 py-1.5 border-l ${viewMode === 'single' ? 'bg-slate-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+                  className={`px-3 py-1.5 border-l border-kontur ${viewMode === 'single' ? 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold' : 'bg-ebene dark:bg-ebene-2 text-schrift hover:bg-wash'}`}
                 >
                   Einzelansicht
                 </button>
@@ -716,7 +723,7 @@ export default function Jahresuebersicht() {
             <select
               value={groupId ?? ''}
               onChange={e => setGroupId(e.target.value ? Number(e.target.value) : undefined)}
-              className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm"
+              className="px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-schrift text-sm"
             >
               <option value="">Alle Gruppen</option>
               {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
@@ -731,13 +738,13 @@ export default function Jahresuebersicht() {
                     disabled={empIdx <= 0}
                     aria-label="Vorheriger Mitarbeiter"
                     title="Vorheriger Mitarbeiter"
-                    className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 disabled:opacity-40 text-sm"
+                    className="px-2 py-1 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-schrift hover:bg-wash disabled:opacity-40 text-sm"
                   >‹</button>
                 )}
                 <select
                   value={selectedEmployeeId ?? ''}
                   onChange={e => setSelectedEmployeeId(Number(e.target.value))}
-                  className="px-3 py-1.5 bg-white border rounded shadow-sm text-sm min-w-[200px]"
+                  className="px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-schrift text-sm min-w-[200px]"
                 >
                   {filteredEmployees.map(e => (
                     <option key={e.ID} value={e.ID}>{e.NAME}, {e.FIRSTNAME}</option>
@@ -749,31 +756,31 @@ export default function Jahresuebersicht() {
                     disabled={empIdx === filteredEmployees.length - 1}
                     aria-label="Nächster Mitarbeiter"
                     title="Nächster Mitarbeiter"
-                    className="px-2 py-1 bg-white border rounded shadow-sm hover:bg-gray-50 disabled:opacity-40 text-sm"
+                    className="px-2 py-1 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-schrift hover:bg-wash disabled:opacity-40 text-sm"
                   >›</button>
                 )}
               </div>
             )}
 
-            {/* Print button */}
+            {/* Print button — Primäraktion als Umkehrung */}
             <button
               onClick={handlePrint}
               disabled={printLoading}
-              className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:opacity-60 text-white text-sm rounded shadow-sm flex items-center gap-1.5"
+              className="no-print px-3 py-1.5 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold disabled:opacity-60 text-sm rounded-ui flex items-center gap-1.5"
               title="Jahresübersicht in neuem Fenster drucken"
             >
-              {printLoading ? <><span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block" /> Lade…</> : '🖨️ Drucken'}
+              {printLoading ? <><span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" /> Lade…</> : '🖨️ Drucken'}
             </button>
           </div>
         }
       />
 
-      {/* Content */}
-      <div className="flex-1 overflow-auto bg-white rounded-lg shadow border border-gray-200 p-4">
+      {/* Content — Fläche ohne Schatten (Taktwerk §3) */}
+      <div className="flex-1 overflow-auto bg-ebene rounded-panel border border-kontur p-4">
         {mode === 'raster' ? (
           selectedEmployee ? (
             <div>
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+              <h2 className="text-base font-bold text-schrift mb-4">
                 {selectedEmployee.NAME}, {selectedEmployee.FIRSTNAME} — Jahresraster {year}
               </h2>
               <JahresRasterView employee={selectedEmployee} year={year} onMonthClick={openDienstplan} />
@@ -787,7 +794,7 @@ export default function Jahresuebersicht() {
           )
         ) : viewMode === 'single' && selectedEmployee ? (
           <div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            <h2 className="text-base font-bold text-schrift mb-4">
               {selectedEmployee.NAME}, {selectedEmployee.FIRSTNAME} — {year}
             </h2>
             <SingleEmployeeView employee={selectedEmployee} year={year} colorMap={colorMap} />

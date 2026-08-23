@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, type CSSProperties } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
@@ -19,6 +19,8 @@ import EmployeeAvatar from '../components/EmployeeAvatar';
 import PhotoCropDialog from '../components/PhotoCropDialog';
 import { useT } from '../i18n';
 import { groupTreeOptions } from '../utils/groupTree';
+import { Badge } from '../components/Badge';
+import { tint, spine, type Theme } from '../utils/shiftColor';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
@@ -232,8 +234,22 @@ function listToWorkdays(list: boolean[]): string {
   return list.map(v => (v ? '1' : '0')).join(' ') + ' 0';
 }
 
+/**
+ * MA-Rohfarbe (DBF, CBKLABEL/CBKSCHED) als normalisierte Tint-Fläche, optional mit
+ * 3px-Spine — Rohfarben nie roh rendern (docs/design-system.md §4). Weiß/0 = keine Farbe.
+ */
+function maFarbStyle(bgr: number | undefined, hex: string | undefined, isDark: boolean, withSpine: boolean): CSSProperties | undefined {
+  if (bgr == null || bgr === 0 || bgr === 16777215 || !hex) return undefined;
+  const theme: Theme = isDark ? 'dark' : 'light';
+  return withSpine
+    ? { backgroundColor: tint(hex, theme), boxShadow: `inset 3px 0 0 ${spine(hex, theme)}` }
+    : { backgroundColor: tint(hex, theme) };
+}
+
 export default function Employees() {
   const t = useT();
+  // Taktwerk: Theme provider-frei ermitteln (nur für Laufzeit-Farbwerte via shiftColor)
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   const { canAdmin, user } = useAuth();
   const can = useCan();
   // G-1: 'Neuer Mitarbeiter' nur für Admin oder Planer mit ADDEMPL-Opt-in
@@ -445,7 +461,10 @@ export default function Employees() {
     if (empSortKey === key) setEmpSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setEmpSortKey(key); setEmpSortDir('asc'); }
   };
-  const sortIcon = (key: EmpSortKey) => empSortKey === key ? (empSortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕';
+  // Taktwerk-Datentabelle: aktive Sortspalte trägt einen Glut-Pfeil, inaktive ein gedämpftes ↕
+  const sortIcon = (key: EmpSortKey) => empSortKey === key
+    ? <span className="ml-1 text-glut">{empSortDir === 'asc' ? '▴' : '▾'}</span>
+    : <span className="ml-1 text-schrift-3 opacity-50">↕</span>;
 
   const empGroupIds = useCallback(
     (empId: number) => groupAssignments.filter(a => a.employee_id === empId).map(a => a.group_id),
@@ -655,7 +674,7 @@ export default function Employees() {
   return (
     <div className="p-4 sm:p-6">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h1 className="text-xl font-bold text-gray-800">
+        <h1 className="text-xl font-extrabold tracking-[-0.02em] text-schrift">
           👥 Mitarbeiter ({filtered.length}{filtered.length !== employees.length ? ` / ${employees.length}` : ''})
         </h1>
         <div className="flex gap-2 flex-wrap">
@@ -664,12 +683,12 @@ export default function Employees() {
             placeholder={t.employees.searchPlaceholder}
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="px-3 py-1.5 border rounded shadow-sm text-sm w-48"
+            className="px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift placeholder:text-schrift-3 w-48"
           />
           <select
             value={filterGroupId}
             onChange={e => setFilterGroupId(e.target.value === '' ? '' : Number(e.target.value))}
-            className="px-2 py-1.5 border rounded shadow-sm text-sm bg-white"
+            className="px-2 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift"
             title="Nach Gruppe filtern"
           >
             <option value="">{t.employees.allGroups}</option>
@@ -678,7 +697,7 @@ export default function Employees() {
           <select
             value={filterHide}
             onChange={e => setFilterHide(e.target.value as 'all' | 'active' | 'hidden')}
-            className="px-2 py-1.5 border rounded shadow-sm text-sm bg-white"
+            className="px-2 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift"
             title="Aktiv/Inaktiv"
           >
             <option value="active">{t.employees.filterActive}</option>
@@ -688,14 +707,14 @@ export default function Employees() {
           {(search || filterGroupId !== '' || filterHide !== 'active' || debouncedSearch) && (
             <button
               onClick={() => { setSearch(''); setFilterGroupId(''); setFilterHide('active'); }}
-              className="px-2 py-1.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded border border-red-200"
+              className="px-2 py-1.5 text-xs text-signal hover:bg-signal-flaeche rounded-ui border border-kontur transition-colors"
               title="Filter zurücksetzen"
             >{t.employees.resetFilter}</button>
           )}
           <button
             onClick={() => printEmployeeList(filtered)}
             disabled={filtered.length === 0}
-            className="px-3 py-1.5 bg-slate-600 hover:bg-slate-700 disabled:opacity-50 text-white rounded text-sm font-semibold transition-colors flex items-center gap-1.5"
+            className="px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur hover:bg-wash disabled:opacity-50 text-schrift rounded-ui text-sm font-semibold transition-colors flex items-center gap-1.5"
             title="Mitarbeiterliste drucken (Landscape)"
           >
             {t.employees.printButton}
@@ -706,7 +725,7 @@ export default function Employees() {
                 .then(() => showToast('CSV exportiert ✓', 'success'))
                 .catch((e: Error) => showToast(`Export-Fehler: ${e.message}`, 'error'));
             }}
-            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-sm font-semibold transition-colors flex items-center gap-1.5"
+            className="px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur hover:bg-wash text-schrift rounded-ui text-sm font-semibold transition-colors flex items-center gap-1.5"
             title="Mitarbeiterliste als CSV exportieren"
           >
             ⬇️ CSV
@@ -717,21 +736,21 @@ export default function Employees() {
                 .then(() => showToast('Excel exportiert ✓', 'success'))
                 .catch((e: Error) => showToast(`Export-Fehler: ${e.message}`, 'error'));
             }}
-            className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-semibold transition-colors flex items-center gap-1.5"
+            className="px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur hover:bg-wash text-schrift rounded-ui text-sm font-semibold transition-colors flex items-center gap-1.5"
             title="Mitarbeiterliste als Excel exportieren"
           >
             📊 Excel
           </button>
           {canAdmin && employees.length > 1 && <button
             onClick={() => setShowReorder(true)}
-            className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm"
+            className="no-print px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur hover:bg-wash text-schrift text-sm rounded-ui"
             title="Mitarbeiter-Reihenfolge manuell festlegen (gilt im Dienstplan)"
           >
             ↕ <span className="hidden sm:inline">Reihenfolge</span>
           </button>}
           {canAddEmployee && <button
             onClick={openCreate}
-            className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
+            className="px-3 py-1.5 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui text-sm font-semibold hover:opacity-90 transition-opacity"
           >
             {t.employees.addButton}
           </button>}
@@ -739,35 +758,35 @@ export default function Employees() {
       </div>
       {/* ── Bulk Action Bar ────────────────────────────────────── */}
       {canAdmin && selectedIds.size > 0 && (
-        <div className="mb-3 flex flex-wrap items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
-          <span className="text-sm font-semibold text-blue-700">{selectedIds.size} {t.employees.selected}</span>
+        <div className="mb-3 flex flex-wrap items-center gap-2 bg-glut-flaeche border border-kontur rounded-panel px-4 py-2">
+          <span className="text-sm font-semibold text-glut">{selectedIds.size} {t.employees.selected}</span>
           {selectedIds.size === 2 && (
             <button
               onClick={() => {
                 const [id1, id2] = Array.from(selectedIds);
                 navigate(`/mitarbeiter-vergleich?emp1=${id1}&emp2=${id2}`);
               }}
-              className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 flex items-center gap-1"
+              className="px-3 py-1 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift text-sm rounded-ui hover:bg-wash flex items-center gap-1"
             >⚖️ Vergleichen</button>
           )}
           <button
             onClick={() => setShowBulkGroupModal(true)}
             disabled={bulkWorking}
-            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
+            className="px-3 py-1 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] text-sm font-semibold rounded-ui hover:opacity-90 disabled:opacity-50 transition-opacity"
           >{t.employees.assignGroup}</button>
           <button
             onClick={() => handleBulkHide(false)}
             disabled={bulkWorking}
-            className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:opacity-50"
+            className="px-3 py-1 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift text-sm rounded-ui hover:bg-wash disabled:opacity-50"
           >{t.employees.showAll}</button>
           <button
             onClick={() => handleBulkHide(true)}
             disabled={bulkWorking}
-            className="px-3 py-1 bg-orange-500 text-white text-sm rounded hover:bg-orange-600 disabled:opacity-50"
+            className="px-3 py-1 bg-ebene dark:bg-ebene-2 border border-kontur text-signal text-sm rounded-ui hover:bg-signal-flaeche disabled:opacity-50"
           >{t.employees.hideSelected}</button>
           <button
             onClick={() => setSelectedIds(new Set())}
-            className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300 ml-auto"
+            className="px-3 py-1 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift text-sm rounded-ui hover:bg-wash ml-auto"
           >{t.employees.clearSelection}</button>
         </div>
       )}
@@ -785,11 +804,11 @@ export default function Employees() {
       ) : (
         <>
           {/* Table layout — scrolls horizontally on mobile */}
-          <ResponsiveTable stickyFirstCol={false} minWidth="800px" className="bg-white dark:bg-gray-800 rounded-lg shadow">
+          <ResponsiveTable stickyFirstCol={false} minWidth="800px" className="bg-ebene border border-kontur rounded-panel">
             <table className="w-full text-sm">
-              <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
+              <thead className="bg-[#fafbfc] dark:bg-[#0e1522] text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3">
                 <tr>
-                  {canAdmin && <th scope="col" className="px-3 py-2 w-8">
+                  {canAdmin && <th scope="col" className="px-3 py-[6px] w-8 border-b border-kontur">
                     <input
                       type="checkbox"
                       checked={filtered.length > 0 && selectedIds.size === filtered.length}
@@ -799,21 +818,21 @@ export default function Employees() {
                       title="Alle auswählen"
                     />
                   </th>}
-                  <th scope="col" className="px-2 py-2 w-10"></th>
-                  <th scope="col" className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[60px]" onClick={() => handleEmpSort('number')}>{t.employees.columns.number}{sortIcon('number')}</th>
-                  <th scope="col" className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[120px]" onClick={() => handleEmpSort('name')}>{t.employees.columns.name}{sortIcon('name')}</th>
-                  <th scope="col" className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[100px]" onClick={() => handleEmpSort('firstname')}>{t.employees.columns.firstname}{sortIcon('firstname')}</th>
-                  <th scope="col" className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap min-w-[70px]" onClick={() => handleEmpSort('shortname')}>{t.employees.columns.shortname}{sortIcon('shortname')}</th>
-                  <th scope="col" className="px-4 py-2 text-right whitespace-nowrap min-w-[60px]">{t.employees.columns.hrsDay}</th>
-                  <th scope="col" className="px-4 py-2 text-center whitespace-nowrap min-w-[140px]">{t.employees.columns.workdays}</th>
-                  <th scope="col" className="px-4 py-2 text-center whitespace-nowrap min-w-[80px]">{t.employees.columns.entry}</th>
-                  <th scope="col" className="px-4 py-2 text-center whitespace-nowrap min-w-[140px]">{t.employees.columns.actions}</th>
+                  <th scope="col" className="px-2 py-[6px] w-10 border-b border-kontur"></th>
+                  <th scope="col" className={`px-4 py-[6px] text-left cursor-pointer select-none whitespace-nowrap min-w-[60px] border-b border-kontur hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)] ${empSortKey === 'number' ? 'text-schrift' : ''}`} onClick={() => handleEmpSort('number')}>{t.employees.columns.number}{sortIcon('number')}</th>
+                  <th scope="col" className={`px-4 py-[6px] text-left cursor-pointer select-none whitespace-nowrap min-w-[120px] border-b border-kontur hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)] ${empSortKey === 'name' ? 'text-schrift' : ''}`} onClick={() => handleEmpSort('name')}>{t.employees.columns.name}{sortIcon('name')}</th>
+                  <th scope="col" className={`px-4 py-[6px] text-left cursor-pointer select-none whitespace-nowrap min-w-[100px] border-b border-kontur hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)] ${empSortKey === 'firstname' ? 'text-schrift' : ''}`} onClick={() => handleEmpSort('firstname')}>{t.employees.columns.firstname}{sortIcon('firstname')}</th>
+                  <th scope="col" className={`px-4 py-[6px] text-left cursor-pointer select-none whitespace-nowrap min-w-[70px] border-b border-kontur hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)] ${empSortKey === 'shortname' ? 'text-schrift' : ''}`} onClick={() => handleEmpSort('shortname')}>{t.employees.columns.shortname}{sortIcon('shortname')}</th>
+                  <th scope="col" className="px-4 py-[6px] text-right whitespace-nowrap min-w-[60px] border-b border-kontur">{t.employees.columns.hrsDay}</th>
+                  <th scope="col" className="px-4 py-[6px] text-center whitespace-nowrap min-w-[140px] border-b border-kontur">{t.employees.columns.workdays}</th>
+                  <th scope="col" className="px-4 py-[6px] text-center whitespace-nowrap min-w-[80px] border-b border-kontur">{t.employees.columns.entry}</th>
+                  <th scope="col" className="px-4 py-[6px] text-center whitespace-nowrap min-w-[140px] border-b border-kontur">{t.employees.columns.actions}</th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((emp, i) => (
-                  <tr key={emp.ID} className={`border-b ${emp.HIDE ? 'opacity-60' : ''} ${selectedIds.has(emp.ID) ? 'bg-blue-50 dark:bg-blue-900/20' : i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'} hover:bg-blue-50 transition-colors`}>
-                    {canAdmin && <td className="px-3 py-2">
+                {filtered.map(emp => (
+                  <tr key={emp.ID} className={`h-[28px] border-b border-kontur-soft ${emp.HIDE ? 'opacity-60' : ''} ${selectedIds.has(emp.ID) ? 'bg-[rgba(201,106,20,.07)] dark:bg-[rgba(240,163,92,.10)] shadow-[inset_2px_0_0_var(--glut)]' : 'hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)]'} transition-colors`}>
+                    {canAdmin && <td className="px-3 py-0">
                       <input
                         type="checkbox"
                         checked={selectedIds.has(emp.ID)}
@@ -821,34 +840,39 @@ export default function Employees() {
                         className="cursor-pointer"
                       />
                     </td>}
-                    <td className="px-2 py-2 w-10">
+                    <td className="px-2 py-0 w-10">
                       <EmployeeAvatar empId={emp.ID} name={emp.NAME} firstname={emp.FIRSTNAME} size={28} />
                     </td>
-                    <td className="px-4 py-2 text-gray-500">{emp.NUMBER}</td>
-                    <td className="px-4 py-2 font-semibold">
+                    <td className="px-4 py-0 text-schrift-2 font-mono tabular-nums">{emp.NUMBER}</td>
+                    {/* MA-Farbe (CBKLABEL, sonst CBKSCHED) als normalisierte Tint-Fläche mit 3px-Spine */}
+                    <td
+                      className="px-4 py-0 font-semibold text-schrift"
+                      style={maFarbStyle(emp.CBKLABEL, bgrToHex(emp.CBKLABEL), isDark, true)
+                        ?? maFarbStyle(emp.CBKSCHED, bgrToHex(emp.CBKSCHED), isDark, true)}
+                    >
                       {emp.NAME}
-                      {!!emp.HIDE && <span className="ml-2 text-[10px] font-semibold px-1.5 py-0.5 bg-gray-300 text-gray-700 rounded-full uppercase">Inaktiv</span>}
+                      {!!emp.HIDE && <Badge variant="gray" className="ml-2 uppercase">Inaktiv</Badge>}
                     </td>
-                    <td className="px-4 py-2">{emp.FIRSTNAME}</td>
-                    <td className="px-4 py-2 text-gray-500">{emp.SHORTNAME}</td>
-                    <td className="px-4 py-2 text-right text-gray-600">{emp.HRSDAY?.toFixed(1)}h</td>
-                    <td className="px-4 py-2 text-center">
+                    <td className="px-4 py-0 text-schrift">{emp.FIRSTNAME}</td>
+                    <td className="px-4 py-0 text-schrift-2">{emp.SHORTNAME}</td>
+                    <td className="px-4 py-0 text-right text-schrift-2 font-mono tabular-nums">{emp.HRSDAY?.toFixed(1)}h</td>
+                    <td className="px-4 py-0 text-center">
                       <div className="flex gap-0.5 justify-center">
                         {(emp.WORKDAYS_LIST || []).slice(0, 7).map((active, idx) => (
-                          <span key={idx} className={`text-[10px] px-1 rounded ${active ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                          <span key={idx} className={`text-[10px] px-1 rounded-cell ${active ? 'bg-wash text-schrift font-semibold' : 'text-schrift-3'}`}>
                             {WEEKDAYS[idx]}
                           </span>
                         ))}
                       </div>
                     </td>
-                    <td className="px-4 py-2 text-center text-gray-500 text-xs">{fmtDate(emp.EMPSTART)}</td>
-                    <td className="px-4 py-2 text-center">
+                    <td className="px-4 py-0 text-center text-schrift-3 text-xs font-mono tabular-nums">{fmtDate(emp.EMPSTART)}</td>
+                    <td className="px-4 py-0 text-center">
                       <div className="flex gap-1 justify-center">
-                        <button onClick={() => navigate(`/mitarbeiter/${emp.ID}`)} className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs hover:bg-purple-200">{t.employees.actions.profile}</button>
-                        <button onClick={() => navigate(`/employees/${emp.ID}/timeline`)} className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs hover:bg-indigo-200">📅 Timeline</button>
-                        {canAdmin && <button onClick={() => openEdit(emp)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">{t.employees.actions.edit}</button>}
-                        {canAdmin && !emp.HIDE && <button onClick={() => handleDelete(emp)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">{t.employees.actions.deactivate}</button>}
-                        {canAdmin && emp.HIDE && <button onClick={() => handleActivate(emp)} className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200">{t.employees.actions.reactivate}</button>}
+                        <button onClick={() => navigate(`/mitarbeiter/${emp.ID}`)} className="px-2 py-0.5 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift rounded-ui text-xs hover:bg-wash">{t.employees.actions.profile}</button>
+                        <button onClick={() => navigate(`/employees/${emp.ID}/timeline`)} className="px-2 py-0.5 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift rounded-ui text-xs hover:bg-wash">📅 Timeline</button>
+                        {canAdmin && <button onClick={() => openEdit(emp)} className="px-2 py-0.5 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift rounded-ui text-xs hover:bg-wash">{t.employees.actions.edit}</button>}
+                        {canAdmin && !emp.HIDE && <button onClick={() => handleDelete(emp)} className="px-2 py-0.5 border border-kontur text-signal rounded-ui text-xs hover:bg-signal-flaeche">{t.employees.actions.deactivate}</button>}
+                        {canAdmin && emp.HIDE && <button onClick={() => handleActivate(emp)} className="px-2 py-0.5 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift rounded-ui text-xs hover:bg-wash">{t.employees.actions.reactivate}</button>}
                       </div>
                     </td>
                   </tr>
@@ -864,7 +888,7 @@ export default function Employees() {
                   />
                 )}
                 {filtered.length === 0 && employees.length > 0 && (
-                  <tr><td colSpan={canAdmin ? 10 : 9} className="text-center py-8 text-gray-600">{t.employees.noResults}</td></tr>
+                  <tr><td colSpan={canAdmin ? 10 : 9} className="text-center py-8 text-schrift-2">{t.employees.noResults}</td></tr>
                 )}
               </tbody>
             </table>
@@ -875,19 +899,19 @@ export default function Employees() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-backdropIn" onClick={() => setShowModal(false)}>
-          <div onClick={e => e.stopPropagation()} className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">
+          <div onClick={e => e.stopPropagation()} className="bg-ebene rounded-[10px] shadow-dialog dark:shadow-dialog-dark dark:border dark:border-kontur animate-scaleIn w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-[13px] font-bold text-schrift -mx-6 px-6 pb-3 mb-4 border-b border-kontur">
               {editId !== null ? 'Mitarbeiter bearbeiten' : 'Neuer Mitarbeiter'}
             </h2>
-            {error && <div className="mb-3 p-2 bg-red-50 text-red-700 rounded text-sm">{error}</div>}
+            {error && <div className="mb-3 p-2 bg-signal-flaeche border border-[#eecfcf] dark:border-[#5a2626] text-signal rounded-ui text-sm">{error}</div>}
 
             {/* Tabs */}
-            <div className="flex border-b mb-4 gap-1">
+            <div className="flex border-b border-kontur mb-4 gap-1">
               {(['basic', 'personal', 'colors', 'notes', ...(editId !== null ? ['groups' as const] : [])] as const).map(tab => {
                 const labels: Record<string, string> = { basic: '📋 Grunddaten', personal: '👤 Person', colors: '🎨 Farben', notes: '📝 Notizen', groups: '🏢 Gruppen' };
                 return (
                   <button key={tab} onClick={() => setActiveTab(tab)}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-t border-b-2 transition-colors ${activeTab === tab ? 'border-blue-500 text-blue-600 bg-blue-50' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-t border-b-2 transition-colors ${activeTab === tab ? 'border-glut text-glut bg-glut-flaeche' : 'border-transparent text-schrift-3 hover:text-schrift-2'}`}>
                     {labels[tab]}
                   </button>
                 );
@@ -901,7 +925,7 @@ export default function Employees() {
                 {editId !== null && (
                   <div className="flex items-center gap-4 mb-4">
                     <div
-                      className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-gray-200 bg-gray-100 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+                      className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-kontur bg-wash flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
                       onClick={() => photoInputRef.current?.click()}
                       title="Foto hochladen"
                     >
@@ -913,7 +937,7 @@ export default function Employees() {
                           onError={() => setPhotoUrl(null)}
                         />
                       ) : (
-                        <span className="text-xl font-bold text-gray-600">
+                        <span className="text-xl font-bold text-schrift-2">
                           {(form.NAME.charAt(0) || '?').toUpperCase()}{(form.FIRSTNAME.charAt(0) || '').toUpperCase()}
                         </span>
                       )}
@@ -922,19 +946,19 @@ export default function Employees() {
                           <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                         </div>
                       )}
-                      <div className="absolute bottom-0 right-0 bg-blue-600 rounded-full p-0.5">
-                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <div className="absolute bottom-0 right-0 bg-[#15171c] dark:bg-[#e9ecf2] rounded-full p-0.5">
+                        <svg className="w-3 h-3 text-white dark:text-[#0e1420]" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
                         </svg>
                       </div>
                     </div>
-                    <div className="text-xs text-gray-500">
-                      <p className="font-semibold text-gray-700">Foto</p>
+                    <div className="text-xs text-schrift-3">
+                      <p className="font-semibold text-schrift-2">Foto</p>
                       <p>JPG, PNG oder GIF</p>
                       <button
                         type="button"
                         onClick={() => photoInputRef.current?.click()}
-                        className="mt-1 text-blue-600 hover:underline"
+                        className="mt-1 text-glut hover:underline"
                       >
                         {photoUrl ? 'Foto ändern' : 'Foto hochladen'}
                       </button>
@@ -950,20 +974,20 @@ export default function Employees() {
                 )}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Nachname *</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Nachname *</label>
                     <input type="text" value={form.NAME}
                       onChange={e => { setForm(f => ({ ...f, NAME: e.target.value })); if (error?.includes('Nachname')) setError(null); }}
                       onBlur={() => setTouched(t => ({ ...t, NAME: true }))}
-                      className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 ${!form.NAME.trim() && (touched.NAME || error?.includes('Nachname')) ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-500'}`} />
-                    {!form.NAME.trim() && (touched.NAME || error?.includes('Nachname')) && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
+                      className={`w-full px-3 py-2 bg-ebene-2 border rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 ${!form.NAME.trim() && (touched.NAME || error?.includes('Nachname')) ? 'border-signal focus:ring-signal' : 'border-kontur focus:ring-glut'}`} />
+                    {!form.NAME.trim() && (touched.NAME || error?.includes('Nachname')) && <p className="text-signal text-xs mt-0.5">Pflichtfeld</p>}
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Vorname</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Vorname</label>
                     <input type="text" value={form.FIRSTNAME} onChange={e => setForm(f => ({ ...f, FIRSTNAME: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Kürzel *</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Kürzel *</label>
                     <input type="text" value={form.SHORTNAME}
                       onChange={e => { setForm(f => ({ ...f, SHORTNAME: e.target.value })); if (error?.includes('Kürzel')) setError(null); }}
                       onBlur={() => setTouched(t => ({ ...t, SHORTNAME: true }))}
@@ -977,74 +1001,74 @@ export default function Employees() {
                           return 'z.B. HMU';
                         })()
                       }
-                      className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 ${!form.SHORTNAME.trim() && (touched.SHORTNAME || error?.includes('Kürzel')) ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-500'}`} />
-                    {!form.SHORTNAME.trim() && (touched.SHORTNAME || error?.includes('Kürzel')) && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
+                      className={`w-full px-3 py-2 bg-ebene-2 border rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 ${!form.SHORTNAME.trim() && (touched.SHORTNAME || error?.includes('Kürzel')) ? 'border-signal focus:ring-signal' : 'border-kontur focus:ring-glut'}`} />
+                    {!form.SHORTNAME.trim() && (touched.SHORTNAME || error?.includes('Kürzel')) && <p className="text-signal text-xs mt-0.5">Pflichtfeld</p>}
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Personalnr.</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Personalnr.</label>
                     <input type="text" value={form.NUMBER} onChange={e => setForm(f => ({ ...f, NUMBER: e.target.value }))}
-                      className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Std/Tag</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Std/Tag</label>
                     <input type="number" step="0.5" value={form.HRSDAY} onChange={e => setForm(f => ({ ...f, HRSDAY: parseFloat(e.target.value) || 0 }))}
-                      className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Std/Woche</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Std/Woche</label>
                     <input type="number" step="0.5" value={form.HRSWEEK} onChange={e => setForm(f => ({ ...f, HRSWEEK: parseFloat(e.target.value) || 0 }))}
-                      className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Std/Monat</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Std/Monat</label>
                     <input type="number" step="0.5" value={form.HRSMONTH} onChange={e => setForm(f => ({ ...f, HRSMONTH: parseFloat(e.target.value) || 0 }))}
-                      className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Gesamtstunden</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Gesamtstunden</label>
                     <input type="number" step="0.5" value={form.HRSTOTAL} onChange={e => setForm(f => ({ ...f, HRSTOTAL: parseFloat(e.target.value) || 0 }))}
-                      className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                   </div>
                 </div>
                 <div className="mt-3">
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Arbeitstage</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Arbeitstage</label>
                   <div className="flex gap-1">
                     {WEEKDAYS.map((d, i) => (
                       <button key={i} type="button" onClick={() => toggleWorkday(i)}
-                        className={`px-2 py-1 rounded text-xs font-semibold transition-colors ${workdaysList[i] ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-600'}`}>
+                        className={`px-2 py-1 rounded-ui text-xs font-semibold transition-colors ${workdaysList[i] ? 'bg-glut text-glut-ink' : 'bg-wash text-schrift-2'}`}>
                         {d}
                       </button>
                     ))}
                   </div>
                 </div>
                 <div className="mt-3 flex gap-4">
-                  <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm text-schrift cursor-pointer">
                     <input type="checkbox" checked={form.HIDE} onChange={e => setForm(f => ({ ...f, HIDE: e.target.checked }))} className="rounded" />
                     Ausgeblendet
                   </label>
-                  <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm text-schrift cursor-pointer">
                     <input type="checkbox" checked={form.BOLD === 1} onChange={e => setForm(f => ({ ...f, BOLD: e.target.checked ? 1 : 0 }))} className="rounded" />
                     Fettschrift
                   </label>
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Berechnungsbasis</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Berechnungsbasis</label>
                     <select value={form.CALCBASE} onChange={e => setForm(f => ({ ...f, CALCBASE: parseInt(e.target.value) }))}
-                      className="w-full px-2 py-2 border dark:border-gray-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100">
+                      className="w-full px-2 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut">
                       <option value="0">{t.employees.worktimeUnit.perDay}</option>
                       <option value="1">{t.employees.worktimeUnit.perWeek}</option>
                       <option value="2">{t.employees.worktimeUnit.perMonth}</option>
                       <option value="3">{t.employees.worktimeUnit.total}</option>
                     </select>
                     {form.CALCBASE === 3 && !(form.EMPSTART && form.EMPEND && form.HRSTOTAL > 0) && (
-                      <p className="text-xs text-amber-600 mt-1">
+                      <p className="text-xs text-signal mt-1">
                         Gesamtstunden-Basis erfordert Eintritt, Austritt und Gesamtstunden &gt; 0.
                       </p>
                     )}
                   </div>
                   <div>
-                    <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer mt-5">
+                    <label className="flex items-center gap-2 text-sm text-schrift cursor-pointer mt-5">
                       <input type="checkbox" checked={form.DEDUCTHOL === 1} onChange={e => setForm(f => ({ ...f, DEDUCTHOL: e.target.checked ? 1 : 0 }))} className="rounded" />
                       Feiertage abziehen
                     </label>
@@ -1053,42 +1077,42 @@ export default function Employees() {
 
                 {/* Restrictions section (only when editing) */}
                 {editId !== null && (
-                  <div className="mt-5 border-t pt-4">
-                    <h3 className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
+                  <div className="mt-5 border-t border-kontur pt-4">
+                    <h3 className="text-sm font-bold text-schrift mb-2 flex items-center gap-2">
                       🚫 Einschränkungen
-                      <span className="text-xs font-normal text-gray-500">(Schichten, die diesem Mitarbeiter nicht zugewiesen werden dürfen)</span>
+                      <span className="text-xs font-normal text-schrift-3">(Schichten, die diesem Mitarbeiter nicht zugewiesen werden dürfen)</span>
                     </h3>
-                    {restrError && <div className="mb-2 p-2 bg-red-50 text-red-700 rounded text-xs">{restrError}</div>}
+                    {restrError && <div className="mb-2 p-2 bg-signal-flaeche border border-[#eecfcf] dark:border-[#5a2626] text-signal rounded-ui text-xs">{restrError}</div>}
                     {restrictions.length > 0 ? (
                       <div className="mb-3 space-y-1">
                         {restrictions.map(r => (
-                          <div key={r.id} className="flex items-center gap-2 bg-orange-50 border border-orange-200 rounded px-3 py-1.5 text-sm">
-                            <span className="font-semibold text-orange-800 text-xs px-1.5 py-0.5 bg-orange-200 rounded">{r.shift_short || r.shift_name}</span>
-                            <span className="text-orange-700 flex-1 text-xs">{r.shift_name}</span>
-                            {r.reason && <span className="text-gray-500 text-xs italic">„{r.reason}"</span>}
-                            <button aria-label="Schließen" onClick={() => handleRemoveRestriction(r)} className="ml-auto text-red-500 hover:text-red-700 text-xs px-1.5 py-0.5 hover:bg-red-100 rounded transition-colors" title="Einschränkung entfernen">✕</button>
+                          <div key={r.id} className="flex items-center gap-2 bg-wash border border-kontur rounded-ui px-3 py-1.5 text-sm">
+                            <span className="font-semibold text-schrift text-xs px-1.5 py-0.5 bg-ebene border border-kontur rounded-cell">{r.shift_short || r.shift_name}</span>
+                            <span className="text-schrift-2 flex-1 text-xs">{r.shift_name}</span>
+                            {r.reason && <span className="text-schrift-3 text-xs italic">„{r.reason}"</span>}
+                            <button aria-label="Schließen" onClick={() => handleRemoveRestriction(r)} className="ml-auto text-signal text-xs px-1.5 py-0.5 hover:bg-signal-flaeche rounded transition-colors" title="Einschränkung entfernen">✕</button>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-gray-600 mb-3">Keine Einschränkungen gesetzt.</p>
+                      <p className="text-xs text-schrift-3 mb-3">Keine Einschränkungen gesetzt.</p>
                     )}
                     <div className="flex gap-2 items-end flex-wrap">
                       <div className="flex-1 min-w-[140px]">
-                        <label className="block text-xs font-semibold text-gray-600 mb-1">Schicht</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Schicht</label>
                         <select value={newRestrShiftId} onChange={e => setNewRestrShiftId(e.target.value ? Number(e.target.value) : '')}
-                          className="w-full px-2 py-1.5 border dark:border-gray-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white dark:bg-gray-700 dark:text-gray-100">
+                          className="w-full px-2 py-1.5 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut">
                           <option value="">Schicht wählen…</option>
                           {availableShifts.map(s => <option key={s.ID} value={s.ID}>{s.SHORTNAME} – {s.NAME}</option>)}
                         </select>
                       </div>
                       <div className="flex-1 min-w-[120px]">
-                        <label className="block text-xs font-semibold text-gray-600 mb-1">Grund (optional)</label>
+                        <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Grund (optional)</label>
                         <input type="text" maxLength={20} placeholder="z.B. Gesundheit" value={newRestrReason} onChange={e => setNewRestrReason(e.target.value)}
-                          className="w-full px-2 py-1.5 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+                          className="w-full px-2 py-1.5 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                       </div>
                       <button onClick={handleAddRestriction} disabled={newRestrShiftId === '' || restrSaving}
-                        className="px-3 py-1.5 bg-orange-500 text-white rounded text-sm font-semibold hover:bg-orange-600 disabled:opacity-40 transition-colors whitespace-nowrap">
+                        className="px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift rounded-ui text-sm font-semibold hover:bg-wash disabled:opacity-40 transition-colors whitespace-nowrap">
                         {restrSaving ? '…' : '+ Hinzufügen'}
                       </button>
                     </div>
@@ -1101,9 +1125,9 @@ export default function Employees() {
             {activeTab === 'personal' && (
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2">
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Anrede</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Anrede</label>
                   <select value={form.SALUTATION} onChange={e => setForm(f => ({ ...f, SALUTATION: e.target.value }))}
-                    className="w-full px-2 py-2 border dark:border-gray-600 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 dark:text-gray-100">
+                    className="w-full px-2 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut">
                     <option value="">—</option>
                     <option value="Herr">{t.employees.salutation.mr}</option>
                     <option value="Frau">{t.employees.salutation.ms}</option>
@@ -1111,64 +1135,64 @@ export default function Employees() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Funktion/Stelle</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Funktion/Stelle</label>
                   <input type="text" value={form.FUNCTION} onChange={e => setForm(f => ({ ...f, FUNCTION: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Geburtstag</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Geburtstag</label>
                   <input type="date" value={form.BIRTHDAY} onChange={e => setForm(f => ({ ...f, BIRTHDAY: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Eintrittsdatum</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Eintrittsdatum</label>
                   <input type="date" value={form.EMPSTART} onChange={e => setForm(f => ({ ...f, EMPSTART: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Austrittsdatum</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Austrittsdatum</label>
                   <input type="date" value={form.EMPEND} onChange={e => setForm(f => ({ ...f, EMPEND: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Straße</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Straße</label>
                   <input type="text" value={form.STREET} onChange={e => setForm(f => ({ ...f, STREET: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">PLZ</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">PLZ</label>
                   <input type="text" value={form.ZIP} onChange={e => setForm(f => ({ ...f, ZIP: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Ort</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Ort</label>
                   <input type="text" value={form.TOWN} onChange={e => setForm(f => ({ ...f, TOWN: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Telefon</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Telefon</label>
                   <input type="tel" value={form.PHONE} onChange={e => setForm(f => ({ ...f, PHONE: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">E-Mail</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">E-Mail</label>
                   <input type="email" value={form.EMAIL} onChange={e => setForm(f => ({ ...f, EMAIL: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">{appSettings.display.zusatzfeldLabel1 || 'Zusatzfeld 1'}</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">{appSettings.display.zusatzfeldLabel1 || 'Zusatzfeld 1'}</label>
                   <input type="text" value={form.ARBITR1} onChange={e => setForm(f => ({ ...f, ARBITR1: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">{appSettings.display.zusatzfeldLabel2 || 'Zusatzfeld 2'}</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">{appSettings.display.zusatzfeldLabel2 || 'Zusatzfeld 2'}</label>
                   <input type="text" value={form.ARBITR2} onChange={e => setForm(f => ({ ...f, ARBITR2: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                 </div>
                 <div className="col-span-2">
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Freies Feld 3</label>
+                  <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Freies Feld 3</label>
                   <input type="text" value={form.ARBITR3} onChange={e => setForm(f => ({ ...f, ARBITR3: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut" />
                 </div>
               </div>
             )}
@@ -1176,7 +1200,9 @@ export default function Employees() {
             {/* Tab: Farben */}
             {activeTab === 'colors' && (
               <div className="space-y-4">
-                <p className="text-xs text-gray-500">Individuelle Farben für die Darstellung im Dienstplan. Leer = Standardfarben des Programms.</p>
+                {/* Farb-Editor: Eingabefelder und Vorschau zeigen bewusst die ROHE DBF-Farbe —
+                    der Nutzer bearbeitet den gespeicherten Wert; normalisiert wird nur die Listendarstellung. */}
+                <p className="text-xs text-schrift-3">Individuelle Farben für die Darstellung im Dienstplan. Leer = Standardfarben des Programms.</p>
                 {[
                   { key: 'CFGLABEL_HEX' as const, label: 'Textfarbe (Label)', desc: 'Schriftfarbe im Namenslabel' },
                   { key: 'CBKLABEL_HEX' as const, label: 'Hintergrundfarbe (Label)', desc: 'Hintergrund des Namenslabels' },
@@ -1184,26 +1210,27 @@ export default function Employees() {
                 ].map(({ key, label, desc }) => (
                   <div key={key} className="flex items-center gap-4">
                     <div className="flex-1">
-                      <label className="block text-xs font-semibold text-gray-600 mb-1">{label}</label>
-                      <p className="text-xs text-gray-600">{desc}</p>
+                      <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">{label}</label>
+                      <p className="text-xs text-schrift-3">{desc}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <input type="color" value={form[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                        className="w-10 h-10 rounded cursor-pointer border-2 border-gray-200" />
-                      <span className="text-xs font-mono text-gray-500">{form[key]}</span>
+                        className="w-10 h-10 rounded-ui cursor-pointer border-2 border-kontur" />
+                      <span className="text-xs font-mono text-schrift-3">{form[key]}</span>
                     </div>
-                    <div className="w-16 h-8 rounded border" style={{ backgroundColor: form[key] }} />
+                    <div className="w-16 h-8 rounded-cell border border-kontur" style={{ backgroundColor: form[key] }} />
                   </div>
                 ))}
-                <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded">
-                  <p className="text-xs font-semibold text-gray-600 mb-1">Vorschau:</p>
+                <div className="p-3 bg-wash rounded-ui">
+                  <p className="text-xs font-semibold text-schrift-2 mb-1">Vorschau:</p>
                   <div className="flex items-center gap-2">
                     <span className="px-3 py-1 rounded text-sm font-semibold"
                       style={{ backgroundColor: form.CBKLABEL_HEX, color: form.CFGLABEL_HEX }}>
                       {form.SHORTNAME || form.NAME || 'Vorname'}
                     </span>
-                    <span className="px-6 py-1 rounded text-sm border" style={{ backgroundColor: form.CBKSCHED_HEX }}>
-                      <span className="text-gray-600 text-xs">← Dienstplanzeile</span>
+                    <span className="px-6 py-1 rounded text-sm border border-kontur" style={{ backgroundColor: form.CBKSCHED_HEX }}>
+                      {/* Rohfarben-Vorschau: fester dunkler Text wie im Original-Dienstplan, themenunabhängig */}
+                      <span className="text-[#15171c] text-xs">← Dienstplanzeile</span>
                     </span>
                   </div>
                 </div>
@@ -1220,9 +1247,9 @@ export default function Employees() {
                   { key: 'NOTE4' as const, label: 'Notiz 4' },
                 ].map(({ key, label }) => (
                   <div key={key}>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">{label}</label>
+                    <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">{label}</label>
                     <textarea value={form[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))} rows={2}
-                      className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
+                      className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:ring-2 focus:ring-glut resize-none" />
                   </div>
                 ))}
               </div>
@@ -1231,15 +1258,15 @@ export default function Employees() {
             {/* Tab: Gruppen */}
             {activeTab === 'groups' && editId !== null && (
               <div className="space-y-3">
-                <p className="text-xs text-gray-500">Gruppen-Zugehörigkeiten dieses Mitarbeiters verwalten.</p>
+                <p className="text-xs text-schrift-3">Gruppen-Zugehörigkeiten dieses Mitarbeiters verwalten.</p>
                 {groups.length === 0 ? (
-                  <div className="text-sm text-gray-600 italic">Keine Gruppen vorhanden.</div>
+                  <div className="text-sm text-schrift-2 italic">Keine Gruppen vorhanden.</div>
                 ) : (
                   <div className="space-y-2 max-h-60 overflow-y-auto">
                     {groups.map(g => {
                       const isMember = empGroupIds_modal.includes(g.ID);
                       return (
-                        <label key={g.ID} className={`flex items-center gap-3 p-2 rounded-lg border cursor-pointer transition-colors ${isMember ? 'bg-blue-50 border-blue-300' : 'bg-gray-50 border-gray-200 hover:bg-gray-100'}`}>
+                        <label key={g.ID} className={`flex items-center gap-3 p-2 rounded-ui border cursor-pointer transition-colors ${isMember ? 'bg-glut-flaeche border-glut' : 'bg-ebene-2 border-kontur hover:bg-wash'}`}>
                           <input
                             type="checkbox"
                             checked={isMember}
@@ -1266,10 +1293,10 @@ export default function Employees() {
                             className="rounded"
                           />
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium text-gray-800">{g.NAME}</div>
-                            {g.SHORTNAME && <div className="text-xs text-gray-500">{g.SHORTNAME}</div>}
+                            <div className="text-sm font-medium text-schrift">{g.NAME}</div>
+                            {g.SHORTNAME && <div className="text-xs text-schrift-3">{g.SHORTNAME}</div>}
                           </div>
-                          {isMember && <span className="text-xs text-blue-600 font-semibold">✓ Mitglied</span>}
+                          {isMember && <span className="text-xs text-glut font-semibold">✓ Mitglied</span>}
                         </label>
                       );
                     })}
@@ -1278,15 +1305,15 @@ export default function Employees() {
               </div>
             )}
 
-            <div className="flex gap-2 mt-5 justify-end border-t pt-4">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200">Abbrechen</button>
+            <div className="flex gap-2 mt-5 justify-end border-t border-kontur pt-4 -mx-6 -mb-6 px-6 pb-4 bg-[#fafbfc] dark:bg-[#0e1522] rounded-b-[10px]">
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift rounded-ui text-sm hover:bg-wash">Abbrechen</button>
               {activeTab !== 'groups' && (
               <button
                 onClick={handleSave}
                 disabled={saving || !form.NAME.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui text-sm font-semibold hover:opacity-90 disabled:opacity-50"
               >
-                {saving ? <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" /> : null}
+                {saving ? <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-1" /> : null}
                 Speichern
               </button>
               )}
@@ -1310,24 +1337,24 @@ export default function Employees() {
       {/* ── Bulk Group Assign Modal ────────────────────────────── */}
       {showBulkGroupModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-backdropIn" onClick={() => setShowBulkGroupModal(false)}>
-          <div onClick={e => e.stopPropagation()} className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl animate-scaleIn w-full max-w-sm mx-4 p-6">
-            <h2 className="text-lg font-bold text-gray-800 dark:text-white mb-1">Gruppe zuweisen</h2>
-            <p className="text-sm text-gray-500 mb-4">{selectedIds.size} Mitarbeiter werden der gewählten Gruppe hinzugefügt.</p>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Zielgruppe</label>
+          <div onClick={e => e.stopPropagation()} className="bg-ebene rounded-[10px] shadow-dialog dark:shadow-dialog-dark dark:border dark:border-kontur animate-scaleIn w-full max-w-sm mx-4 p-6">
+            <h2 className="text-[13px] font-bold text-schrift -mx-6 px-6 pb-3 mb-3 border-b border-kontur">Gruppe zuweisen</h2>
+            <p className="text-sm text-schrift-2 mb-4">{selectedIds.size} Mitarbeiter werden der gewählten Gruppe hinzugefügt.</p>
+            <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Zielgruppe</label>
             <select
               value={bulkGroupId}
               onChange={e => setBulkGroupId(e.target.value === '' ? '' : Number(e.target.value))}
-              className="w-full px-3 py-2 border rounded text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift mb-4 focus:outline-none focus:ring-2 focus:ring-glut"
             >
               <option value="">— Gruppe auswählen —</option>
               {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
             </select>
-            <div className="flex gap-2 justify-end">
-              <button onClick={() => setShowBulkGroupModal(false)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm">Abbrechen</button>
+            <div className="flex gap-2 justify-end border-t border-kontur -mx-6 -mb-6 px-6 py-3 bg-[#fafbfc] dark:bg-[#0e1522] rounded-b-[10px]">
+              <button onClick={() => setShowBulkGroupModal(false)} className="px-4 py-2 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift rounded-ui hover:bg-wash text-sm">Abbrechen</button>
               <button
                 onClick={handleBulkAssignGroup}
                 disabled={bulkGroupId === '' || bulkWorking}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 text-sm font-semibold"
+                className="px-4 py-2 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui hover:opacity-90 disabled:opacity-50 text-sm font-semibold"
               >{bulkWorking ? 'Wird gespeichert...' : 'Zuweisen'}</button>
             </div>
           </div>

@@ -74,6 +74,8 @@ COPY --from=backend-build /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 COPY backend/ ./backend/
+# Demo-Seed-Skripte für SP5_DEMO_SEED im Entrypoint (siehe docker-entrypoint.sh)
+COPY scripts/ ./scripts/
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 # Release-Notes für „Was ist neu?" — die API liest CHANGELOG.md aus
 # SP5_BACKEND_DIR/.. (= /app); ohne diese Datei bliebe die Seite leer.

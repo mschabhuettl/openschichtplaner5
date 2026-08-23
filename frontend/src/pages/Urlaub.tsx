@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { useState, useEffect, useCallback, useMemo, memo, type CSSProperties } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
 import { api } from '../api/client';
 import { isActiveInPeriod } from '../utils/formerEmployees';
@@ -13,7 +13,9 @@ import { useT } from '../i18n';
 import { ResponsiveTable } from '../components/ResponsiveTable';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { EmptyState } from '../components/EmptyState';
+import { Badge } from '../components/Badge';
 import { groupTreeOptions } from '../utils/groupTree';
+import { shiftCellColorsMemo, tint, spine, type Theme } from '../utils/shiftColor';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
@@ -83,6 +85,41 @@ function getAuthHeaders(): Record<string, string> {
   } catch { return {}; }
 }
 
+// ─── Taktwerk-Bausteine (nur Optik) ───────────────────────
+// DBF-Rohfarben der Abwesenheitsarten NIE roh rendern (Design-System §4).
+// Hohl-Chip = Abwesenheits-Signatur: gestrichelte Kontur + Farbtext, keine Füllung.
+function absenceChipStyle(raw: string | undefined, isDark: boolean): CSSProperties {
+  if (!raw) return { border: '1.5px dashed var(--kontur)', color: 'var(--schrift-2)' };
+  const c = shiftCellColorsMemo(raw, isDark ? 'dark' : 'light', { hollow: true });
+  return { border: `1.5px dashed ${c.color}`, color: c.color };
+}
+
+// Leise Lautstärke für Balken/Flächen: Tint-Hintergrund + 3px-Spine-Kante.
+function absenceTintStyle(raw: string | undefined, isDark: boolean): CSSProperties {
+  if (!raw) return { backgroundColor: 'var(--wash)' };
+  const theme: Theme = isDark ? 'dark' : 'light';
+  return { backgroundColor: tint(raw, theme), boxShadow: `inset 3px 0 0 ${spine(raw, theme)}`, color: 'var(--schrift)' };
+}
+
+// Volle Lautstärke (normalisierte Fläche) für Statistik-/Gantt-Balken.
+function absenceFillColor(raw: string | undefined, isDark: boolean): string {
+  if (!raw) return 'var(--kontur)';
+  return shiftCellColorsMemo(raw, isDark ? 'dark' : 'light').background;
+}
+
+// Datentabellen-Muster (03-primitives §5): Kopf auf Fläche 2, UPPERCASE-Label, Hover-Tönung.
+const KOPF_FLAECHE = 'bg-[#fafbfc] dark:bg-[#0e1522]';
+const KOPF_TEXT = 'text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3';
+const ZEILEN_HOVER = 'hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)]';
+
+// Eingabefelder: Fläche 2 + Kontur, Fokus = Glut-Rand + Glut-Ring (03-primitives §7).
+const EINGABE = 'bg-ebene-2 border border-kontur rounded-ui text-schrift placeholder:text-schrift-3 focus:outline-none focus:border-glut focus:shadow-[0_0_0_3px_rgba(201,106,20,.12)] dark:focus:shadow-[0_0_0_3px_rgba(240,163,92,.15)]';
+
+// Buttons: Primär = Umkehrung, Sekundär = Outline, Destruktiv = Signal (Design-System §1).
+const BTN_PRIMAER = 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold rounded-ui hover:opacity-90 transition-opacity';
+const BTN_SEKUNDAER = 'bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-schrift hover:bg-wash transition-colors';
+const BTN_SIGNAL = 'bg-signal text-white dark:text-[#1a1108] font-semibold rounded-ui hover:opacity-90 transition-opacity';
+
 // ─── Shared: Detail Modal (Abwesenheiten) ─────────────────
 interface DetailModalProps {
   employee: Employee;
@@ -98,15 +135,17 @@ function DetailModal({ employee, month, year, absences, leaveTypes, onClose }: D
     return d.getFullYear() === year && d.getMonth() === month && a.EMPLOYEE_ID === employee.ID;
   });
   const getLT = (id: number) => leaveTypes.find(lt => lt.ID === id);
+  // Theme provider-frei vom Dokument lesen (Muster der Menü-Chips im Dienstplan)
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
-      <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
-        <div className="px-6 py-4 border-b flex items-center justify-between">
+      <div className="bg-ebene rounded-[10px] shadow-dialog dark:shadow-dialog-dark dark:border dark:border-kontur animate-scaleIn w-full max-w-md">
+        <div className="px-6 py-4 border-b border-kontur flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-gray-800">{employee.FIRSTNAME} {employee.NAME}</h2>
-            <p className="text-sm text-gray-500">{MONTHS[month]} {year}</p>
+            <h2 className="text-[13px] font-bold text-schrift">{employee.FIRSTNAME} {employee.NAME}</h2>
+            <p className="text-sm text-schrift-2">{MONTHS[month]} {year}</p>
           </div>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-schrift-3 hover:text-schrift text-xl">✕</button>
         </div>
         <div className="px-6 py-4">
           {monthAbs.length === 0 ? (
@@ -116,14 +155,14 @@ function DetailModal({ employee, month, year, absences, leaveTypes, onClose }: D
               {monthAbs.map(ab => {
                 const lt = getLT(ab.LEAVE_TYPE_ID);
                 return (
-                  <div key={ab.ID} className="flex items-center gap-3 p-2 rounded-lg bg-gray-50">
-                    <div className="w-8 h-8 rounded flex items-center justify-center text-xs font-bold flex-shrink-0"
-                      style={{ backgroundColor: lt?.COLORBK_HEX ?? '#e5e7eb', color: lt?.COLORBK_LIGHT ? '#333' : '#fff' }}>
+                  <div key={ab.ID} className="flex items-center gap-3 p-2 rounded-ui bg-wash">
+                    <div className="w-8 h-8 rounded-cell flex items-center justify-center text-xs font-bold flex-shrink-0"
+                      style={absenceChipStyle(lt?.COLORBK_HEX, isDark)}>
                       {lt?.SHORTNAME ?? '?'}
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-gray-800">{new Date(ab.DATE).toLocaleDateString('de-AT')}</div>
-                      <div className="text-xs text-gray-500">{lt?.NAME ?? 'Unbekannt'}</div>
+                      <div className="text-sm font-semibold text-schrift font-mono tabular-nums">{new Date(ab.DATE).toLocaleDateString('de-AT')}</div>
+                      <div className="text-xs text-schrift-2">{lt?.NAME ?? 'Unbekannt'}</div>
                     </div>
                   </div>
                 );
@@ -131,8 +170,8 @@ function DetailModal({ employee, month, year, absences, leaveTypes, onClose }: D
             </div>
           )}
         </div>
-        <div className="px-6 py-3 border-t flex justify-end">
-          <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50">Schließen</button>
+        <div className="px-6 py-3 border-t border-kontur bg-[#fafbfc] dark:bg-[#0e1522] flex justify-end">
+          <button onClick={onClose} className={`px-4 py-2 text-sm ${BTN_SEKUNDAER}`}>Schließen</button>
         </div>
       </div>
     </div>
@@ -249,18 +288,18 @@ export function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewA
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
-      <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg">
-        <div className="px-6 py-4 border-b flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-800">Abwesenheit beantragen</h2>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+      <div className="bg-ebene rounded-[10px] shadow-dialog dark:shadow-dialog-dark dark:border dark:border-kontur animate-scaleIn w-full max-w-lg">
+        <div className="px-6 py-4 border-b border-kontur flex items-center justify-between">
+          <h2 className="text-[13px] font-bold text-schrift">Abwesenheit beantragen</h2>
+          <button aria-label="Schließen" onClick={onClose} className="text-schrift-3 hover:text-schrift text-xl">✕</button>
         </div>
         {error && (
-          <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-sm text-red-700">
+          <div className="mx-6 mt-4 p-3 bg-signal-flaeche border border-[#eecfcf] dark:border-[#5a2626] rounded-ui flex items-center gap-2 text-sm text-signal">
             <span>⚠️</span><span>{error}</span>
           </div>
         )}
         {warnings.length > 0 && (
-          <div className="mx-6 mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+          <div className="mx-6 mt-4 p-3 bg-glut-flaeche border border-kontur rounded-ui text-sm text-schrift">
             <div className="font-semibold mb-1">⚠️ Hinweise:</div>
             <ul className="list-disc list-inside space-y-1">
               {warnings.map((w, i) => <li key={i}>{w}</li>)}
@@ -269,40 +308,40 @@ export function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewA
         )}
         <div className="px-6 py-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Mitarbeiter</label>
+            <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Mitarbeiter</label>
             <select value={employeeId} onChange={e => setEmployeeId(Number(e.target.value))}
               required aria-required="true"
-              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              className={`w-full px-3 py-2 text-sm ${EINGABE}`}>
               {employees.map(e => <option key={e.ID} value={e.ID}>{e.NAME}, {e.FIRSTNAME}</option>)}
             </select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Von</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Von</label>
               <input type="date" value={fromDate}
                 onChange={e => { setFromDate(e.target.value); if (e.target.value > toDate) setToDate(e.target.value); }}
                 required aria-required="true"
-                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className={`w-full px-3 py-2 text-sm ${EINGABE}`} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bis</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Bis</label>
               <input type="date" value={toDate} min={fromDate} onChange={e => setToDate(e.target.value)}
                 required aria-required="true"
-                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className={`w-full px-3 py-2 text-sm ${EINGABE}`} />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Art der Abwesenheit</label>
+            <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Art der Abwesenheit</label>
             <select value={leaveTypeId} onChange={e => setLeaveTypeId(Number(e.target.value))}
               required aria-required="true"
-              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              className={`w-full px-3 py-2 text-sm ${EINGABE}`}>
               {leaveTypes.map(lt => <option key={lt.ID} value={lt.ID}>{lt.NAME} ({lt.SHORTNAME})</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Tageszeit</label>
+            <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Tageszeit</label>
             <select value={interval} onChange={e => setInterval(Number(e.target.value) as 0 | 1 | 2 | 3)}
-              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              className={`w-full px-3 py-2 text-sm ${EINGABE}`}>
               <option value={0}>Ganztägig</option>
               <option value={1}>Vormittags (halber Tag)</option>
               <option value={2}>Nachmittags (halber Tag)</option>
@@ -312,26 +351,26 @@ export function NewAbsenceModal({ employees, leaveTypes, onSave, onClose }: NewA
           {interval === 3 && (
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Von (Uhrzeit)</label>
+                <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Von (Uhrzeit)</label>
                 <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className={`w-full px-3 py-2 text-sm ${EINGABE}`} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Bis (Uhrzeit)</label>
+                <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Bis (Uhrzeit)</label>
                 <input type="time" value={endTime} onChange={e => setEndTime(e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                <p className="text-xs text-gray-500 mt-0.5">Ende vor Beginn = über Mitternacht.</p>
+                  className={`w-full px-3 py-2 text-sm ${EINGABE}`} />
+                <p className="text-xs text-schrift-3 mt-0.5">Ende vor Beginn = über Mitternacht.</p>
               </div>
             </div>
           )}
         </div>
-        <div className="px-6 py-4 border-t flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50">
+        <div className="px-6 py-4 border-t border-kontur bg-[#fafbfc] dark:bg-[#0e1522] flex justify-end gap-3">
+          <button onClick={onClose} className={`px-4 py-2 text-sm ${BTN_SEKUNDAER}`}>
             {warnings.length > 0 ? 'Schließen' : 'Abbrechen'}
           </button>
           {warnings.length === 0 && (
             <button onClick={handleSubmit} disabled={saving || !employeeId || !leaveTypeId}
-              className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60">
+              className={`px-4 py-2 text-sm ${BTN_PRIMAER} disabled:opacity-60`}>
               {saving ? '⟳' : 'Beantragen'}
             </button>
           )}
@@ -360,38 +399,40 @@ interface AbsenceKalenderDetailProps {
   onClose: () => void;
 }
 function AbsenceKalenderDetail({ entries, dateLabel, onClose }: AbsenceKalenderDetailProps) {
+  // Theme provider-frei vom Dokument lesen (Muster der Menü-Chips im Dienstplan)
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn" onClick={onClose}>
-      <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md max-h-[80vh] flex flex-col"
+      <div className="bg-ebene rounded-[10px] shadow-dialog dark:shadow-dialog-dark dark:border dark:border-kontur animate-scaleIn w-full max-w-md max-h-[80vh] flex flex-col"
         onClick={e => e.stopPropagation()}>
-        <div className="px-6 py-4 border-b flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-kontur flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-gray-800">🗓️ Abwesenheiten</h2>
-            <p className="text-sm text-gray-500">{dateLabel}</p>
+            <h2 className="text-[13px] font-bold text-schrift">🗓️ Abwesenheiten</h2>
+            <p className="text-sm text-schrift-2">{dateLabel}</p>
           </div>
-          <button aria-label="Schließen" onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+          <button aria-label="Schließen" onClick={onClose} className="text-schrift-3 hover:text-schrift text-xl">✕</button>
         </div>
         <div className="px-6 py-4 overflow-y-auto space-y-2">
           {entries.map((entry, i) => {
             const lt = entry.leaveType;
             return (
-              <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
+              <div key={i} className="flex items-center gap-3 p-3 rounded-ui bg-wash">
                 <div
-                  className="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
-                  style={{ backgroundColor: lt?.COLORBK_HEX ?? '#6b7280', color: lt?.COLORBK_LIGHT ? '#1f2937' : '#fff' }}
+                  className="w-10 h-10 rounded-cell flex items-center justify-center text-xs font-bold flex-shrink-0"
+                  style={absenceChipStyle(lt?.COLORBK_HEX, isDark)}
                 >
                   {lt?.SHORTNAME ?? '?'}
                 </div>
                 <div>
-                  <div className="font-semibold text-gray-800">{entry.employee.NAME}, {entry.employee.FIRSTNAME}</div>
-                  <div className="text-xs text-gray-500">{lt?.NAME ?? 'Unbekannt'} · Nr. {entry.employee.NUMBER}</div>
+                  <div className="font-semibold text-schrift">{entry.employee.NAME}, {entry.employee.FIRSTNAME}</div>
+                  <div className="text-xs text-schrift-2">{lt?.NAME ?? 'Unbekannt'} · Nr. {entry.employee.NUMBER}</div>
                 </div>
               </div>
             );
           })}
         </div>
-        <div className="px-6 py-3 border-t flex justify-end">
-          <button onClick={onClose} className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50">Schließen</button>
+        <div className="px-6 py-3 border-t border-kontur bg-[#fafbfc] dark:bg-[#0e1522] flex justify-end">
+          <button onClick={onClose} className={`px-4 py-2 text-sm ${BTN_SEKUNDAER}`}>Schließen</button>
         </div>
       </div>
     </div>
@@ -405,6 +446,8 @@ interface AbwesenheitenKalenderProps {
   loading: boolean;
 }
 function AbwesenheitenKalender({ employees, leaveTypes, absences, loading }: AbwesenheitenKalenderProps) {
+  // Theme provider-frei vom Dokument lesen (Muster der Menü-Chips im Dienstplan)
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   const todayObj = new Date();
   const [month, setMonth] = useState(todayObj.getMonth());
   const [year, setYear] = useState(todayObj.getFullYear());
@@ -490,42 +533,38 @@ function AbwesenheitenKalender({ employees, leaveTypes, absences, loading }: Abw
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <button onClick={prevMonth}
-            className="px-3 py-1.5 border rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors">
+            className={`px-3 py-1.5 text-sm font-medium ${BTN_SEKUNDAER}`}>
             ‹
           </button>
-          <h2 className="text-base sm:text-lg font-bold text-gray-800 min-w-[160px] sm:min-w-[200px] text-center">
+          <h2 className="text-base sm:text-lg font-bold text-schrift min-w-[160px] sm:min-w-[200px] text-center">
             {MONTH_NAMES_LONG[month]} {year}
           </h2>
           <button onClick={nextMonth}
-            className="px-3 py-1.5 border rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors">
+            className={`px-3 py-1.5 text-sm font-medium ${BTN_SEKUNDAER}`}>
             ›
           </button>
           <button onClick={goToday}
-            className="px-3 py-1.5 border rounded-lg hover:bg-gray-50 text-xs sm:text-sm transition-colors">
+            className={`px-3 py-1.5 text-xs sm:text-sm ${BTN_SEKUNDAER}`}>
             Heute
           </button>
         </div>
         {/* Quick stats */}
-        <div className="flex gap-3 text-xs text-gray-500">
-          <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded-lg font-semibold">
+        <div className="flex gap-3 text-xs text-schrift-2">
+          <span className="bg-wash text-schrift-2 px-2 py-1 rounded-ui font-semibold font-mono tabular-nums">
             {uniqueEmployees} MA betroffen
           </span>
-          <span className="bg-amber-50 text-amber-700 px-2 py-1 rounded-lg font-semibold">
+          <span className="bg-wash text-schrift-2 px-2 py-1 rounded-ui font-semibold font-mono tabular-nums">
             {totalAbsenceDays} Abwesenheitstage
           </span>
         </div>
       </div>
 
-      {/* Legend */}
+      {/* Legende: Abwesenheitsarten hohl (gestrichelt + Farbtext), nie roh */}
       <div className="flex flex-wrap gap-1.5 mb-3">
         {leaveTypes.map(lt => (
           <span key={lt.ID}
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border"
-            style={{
-              backgroundColor: lt.COLORBK_HEX,
-              color: lt.COLORBK_LIGHT ? '#374151' : '#fff',
-              borderColor: lt.COLORBAR_HEX,
-            }}>
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
+            style={absenceChipStyle(lt.COLORBK_HEX, isDark)}>
             {lt.SHORTNAME} – {lt.NAME}
           </span>
         ))}
@@ -535,24 +574,24 @@ function AbwesenheitenKalender({ employees, leaveTypes, absences, loading }: Abw
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <div className="bg-white rounded-xl shadow border overflow-hidden">
-          {/* Day headers */}
-          <div className="grid grid-cols-7 bg-slate-700 text-white">
+        <div className="bg-ebene border border-kontur rounded-panel overflow-hidden">
+          {/* Wochentags-Kopf auf Fläche 2 (Datentabellen-Muster) */}
+          <div className={`grid grid-cols-7 ${KOPF_FLAECHE} border-b border-kontur`}>
             {WEEKDAYS_LONG.map((d, i) => (
               <div key={d}
-                className={`py-2 text-center text-xs font-semibold ${i >= 5 ? 'text-slate-300' : ''}`}>
+                className={`py-2 text-center ${KOPF_TEXT} ${i >= 5 ? 'opacity-70' : ''}`}>
                 {d}
               </div>
             ))}
           </div>
           {/* Week rows */}
           {weeks.map((week, wi) => (
-            <div key={wi} className="grid grid-cols-7 border-t border-gray-100">
+            <div key={wi} className="grid grid-cols-7 border-t border-kontur-soft">
               {week.map((day, di) => {
                 if (day === null) {
                   return (
                     <div key={di}
-                      className="min-h-[80px] sm:min-h-[110px] bg-gray-50/60 border-r border-gray-100 last:border-r-0 p-1" />
+                      className="min-h-[80px] sm:min-h-[110px] bg-wash border-r border-kontur-soft last:border-r-0 p-1" />
                   );
                 }
                 const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -564,19 +603,19 @@ function AbwesenheitenKalender({ employees, leaveTypes, absences, loading }: Abw
                 return (
                   <div
                     key={di}
-                    className={`min-h-[80px] sm:min-h-[110px] border-r border-gray-100 last:border-r-0 p-1 transition-colors ${
-                      isWeekend ? 'bg-slate-50/70' : 'bg-white'
-                    } ${hasEntries ? 'cursor-pointer hover:bg-blue-50/50' : ''}`}
+                    className={`min-h-[80px] sm:min-h-[110px] border-r border-kontur-soft last:border-r-0 p-1 transition-colors ${
+                      isWeekend ? 'bg-wash' : 'bg-ebene'
+                    } ${hasEntries ? `cursor-pointer ${ZEILEN_HOVER}` : ''}`}
                     onClick={() => hasEntries && handleDayClick(day)}
                   >
                     {/* Day number */}
                     <div className="flex justify-end mb-1">
-                      <span className={`inline-flex items-center justify-center w-6 h-6 text-xs font-semibold rounded-full leading-none ${
+                      <span className={`inline-flex items-center justify-center w-6 h-6 text-xs font-semibold rounded-full leading-none font-mono tabular-nums ${
                         isToday
-                          ? 'bg-blue-600 text-white'
+                          ? 'bg-glut text-glut-ink'
                           : isWeekend
-                          ? 'text-gray-600'
-                          : 'text-gray-700'
+                          ? 'text-schrift-2'
+                          : 'text-schrift'
                       }`}>
                         {day}
                       </span>
@@ -590,11 +629,8 @@ function AbwesenheitenKalender({ employees, leaveTypes, absences, loading }: Abw
                         return (
                           <div
                             key={ei}
-                            className="flex items-center gap-1 px-1.5 py-0.5 rounded text-xs truncate leading-tight"
-                            style={{
-                              backgroundColor: lt?.COLORBK_HEX ?? '#6b7280',
-                              color: lt?.COLORBK_LIGHT ? '#1f2937' : '#fff',
-                            }}
+                            className="flex items-center gap-1 px-1.5 py-0.5 rounded-cell text-xs truncate leading-tight"
+                            style={absenceTintStyle(lt?.COLORBK_HEX, isDark)}
                             title={`${entry.employee.NAME}, ${entry.employee.FIRSTNAME} – ${lt?.NAME ?? 'Unbekannt'}`}
                           >
                             <span className="font-bold truncate">{initials}</span>
@@ -605,7 +641,7 @@ function AbwesenheitenKalender({ employees, leaveTypes, absences, loading }: Abw
                         );
                       })}
                       {entries.length > 4 && (
-                        <div className="text-center text-[10px] text-gray-600 font-semibold">
+                        <div className="text-center text-[10px] text-schrift-3 font-semibold">
                           +{entries.length - 4} mehr
                         </div>
                       )}
@@ -619,7 +655,7 @@ function AbwesenheitenKalender({ employees, leaveTypes, absences, loading }: Abw
       )}
 
       {/* Hint */}
-      <p className="mt-2 text-xs text-gray-600 text-center">
+      <p className="mt-2 text-xs text-schrift-3 text-center">
         Klick auf einen Tag mit Abwesenheiten für Details
       </p>
 
@@ -645,6 +681,8 @@ interface AbwesenheitenTabProps {
   loading: boolean;
 }
 function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, loading }: AbwesenheitenTabProps) {
+  // Theme provider-frei vom Dokument lesen (Muster der Menü-Chips im Dienstplan)
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   const { canEditAbsences } = usePermissions();
   const can = useCan();
   // G-1: direkte Verwaltungs-Erfassung nur mit WABSENCES (Spec 9.5.3)
@@ -694,12 +732,13 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
       const d = new Date(a.DATE);
       return a.EMPLOYEE_ID === empId && d.getFullYear() === year && d.getMonth() === month;
     });
-    if (!monthAbs.length) return { bg: null, light: true };
+    if (!monthAbs.length) return { bg: null };
     const counts: Record<number, number> = {};
     monthAbs.forEach(a => { counts[a.LEAVE_TYPE_ID] = (counts[a.LEAVE_TYPE_ID] ?? 0) + 1; });
     const domId = Number(Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]);
     const lt = leaveTypes.find(l => l.ID === domId);
-    return { bg: lt?.COLORBK_HEX ?? null, light: lt?.COLORBK_LIGHT ?? true };
+    // Vordergrund/Kontrast wird von shiftColor berechnet — COLORBK_LIGHT wird nicht mehr benötigt
+    return { bg: lt?.COLORBK_HEX ?? null };
   };
 
   const vacTypeIds = new Set(leaveTypes.filter(lt => lt.ENTITLED).map(lt => lt.ID));
@@ -710,22 +749,22 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
     <>
       {/* View toggle + actions */}
       <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-        <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+        <div className="flex items-center gap-1 bg-wash rounded-ui p-1">
           <button
             onClick={() => setViewMode('kalender')}
-            className={`px-3 py-1.5 text-sm rounded-md font-medium transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 text-sm rounded-ui font-medium transition-colors flex items-center gap-1.5 ${
               viewMode === 'kalender'
-                ? 'bg-white shadow text-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-ebene border border-kontur text-schrift'
+                : 'text-schrift-2 hover:text-schrift'
             }`}>
             🗓️ <span className="hidden sm:inline">Kalender</span>
           </button>
           <button
             onClick={() => setViewMode('liste')}
-            className={`px-3 py-1.5 text-sm rounded-md font-medium transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 text-sm rounded-ui font-medium transition-colors flex items-center gap-1.5 ${
               viewMode === 'liste'
-                ? 'bg-white shadow text-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-ebene border border-kontur text-schrift'
+                : 'text-schrift-2 hover:text-schrift'
             }`}>
             📋 <span className="hidden sm:inline">Jahresübersicht</span>
           </button>
@@ -733,21 +772,21 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
         <div className="flex items-center gap-2">
           {/* Mitarbeiter-Suche (immer sichtbar) */}
           <input type="text" placeholder="🔍 Mitarbeiter..." value={search} onChange={e => setSearch(e.target.value)}
-            className="px-3 py-1.5 border rounded shadow-sm text-sm w-36" />
+            className={`px-3 py-1.5 text-sm w-36 ${EINGABE}`} />
           {/* Advanced filter toggle */}
           <button
             onClick={() => setShowAdvFilters(v => !v)}
-            className={`px-3 py-1.5 text-sm rounded-lg border flex items-center gap-1.5 transition-colors ${
-              hasAdvFilters ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+            className={`px-3 py-1.5 text-sm rounded-ui border flex items-center gap-1.5 transition-colors ${
+              hasAdvFilters ? 'bg-glut-flaeche border-glut text-glut' : 'bg-ebene border-kontur text-schrift-2 hover:bg-wash'
             }`}
             title="Erweiterte Filter"
           >
-            ⚙️ Filter {hasAdvFilters && <span className="px-1.5 py-0.5 text-[10px] font-bold bg-blue-500 text-white rounded-full">{[filterVon, filterBis, filterLeaveTypeIds.length > 0 ? 1 : 0].filter(Boolean).length}</span>}
+            ⚙️ Filter {hasAdvFilters && <span className="px-1.5 py-0.5 text-[10px] font-bold font-mono bg-glut text-glut-ink rounded-full">{[filterVon, filterBis, filterLeaveTypeIds.length > 0 ? 1 : 0].filter(Boolean).length}</span>}
             <span className="text-xs">{showAdvFilters ? '▲' : '▼'}</span>
           </button>
           {canManageAbsences && (
             <button onClick={() => setShowNewModal(true)}
-              className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 flex items-center gap-1.5">
+              className={`px-4 py-1.5 text-sm ${BTN_PRIMAER} flex items-center gap-1.5`}>
               ＋ <span className="hidden sm:inline">Abwesenheit</span>
             </button>
           )}
@@ -756,38 +795,38 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
 
       {/* Advanced filter panel */}
       {showAdvFilters && (
-        <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="mb-3 p-3 bg-wash border border-kontur rounded-panel">
           <div className="flex flex-wrap gap-4 items-start">
             {/* Zeitraum */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-gray-600">📅 Zeitraum</label>
+              <label className="text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3">📅 Zeitraum</label>
               <div className="flex items-center gap-1.5">
                 <input type="date" value={filterVon} onChange={e => setFilterVon(e.target.value)}
-                  className="text-xs px-2 py-1 border rounded bg-white" placeholder="Von" />
-                <span className="text-xs text-gray-600">–</span>
+                  className={`text-xs px-2 py-1 ${EINGABE}`} placeholder="Von" />
+                <span className="text-xs text-schrift-2">–</span>
                 <input type="date" value={filterBis} onChange={e => setFilterBis(e.target.value)}
-                  className="text-xs px-2 py-1 border rounded bg-white" placeholder="Bis" />
+                  className={`text-xs px-2 py-1 ${EINGABE}`} placeholder="Bis" />
                 {(filterVon || filterBis) && (
                   <button aria-label="Schließen" onClick={() => { setFilterVon(''); setFilterBis(''); }}
-                    className="text-xs text-red-400 hover:text-red-600">×</button>
+                    className="text-xs text-signal hover:opacity-80">×</button>
                 )}
               </div>
             </div>
 
-            {/* Abwesenheitstyp */}
+            {/* Abwesenheitstyp: Hohl-Chips, Auswahl = Glut-Ring */}
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-semibold text-gray-600">🏷️ Abwesenheitsart</label>
+              <label className="text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3">🏷️ Abwesenheitsart</label>
               <div className="flex flex-wrap gap-1.5">
                 {leaveTypes.map(lt => (
-                  <label key={lt.ID} className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs cursor-pointer border transition-all ${
-                    filterLeaveTypeIds.includes(lt.ID) ? 'ring-2 ring-blue-500 opacity-100' : 'opacity-70 hover:opacity-100'
-                  }`} style={{ backgroundColor: lt.COLORBK_HEX, color: lt.COLORBK_LIGHT ? '#374151' : '#fff', borderColor: lt.COLORBAR_HEX }}>
+                  <label key={lt.ID} className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs cursor-pointer transition-all ${
+                    filterLeaveTypeIds.includes(lt.ID) ? 'ring-2 ring-glut opacity-100' : 'opacity-70 hover:opacity-100'
+                  }`} style={absenceChipStyle(lt.COLORBK_HEX, isDark)}>
                     <input type="checkbox" className="sr-only" checked={filterLeaveTypeIds.includes(lt.ID)} onChange={() => toggleLeaveType(lt.ID)} />
                     {lt.SHORTNAME} – {lt.NAME}
                   </label>
                 ))}
                 {filterLeaveTypeIds.length > 0 && (
-                  <button onClick={() => setFilterLeaveTypeIds([])} className="text-xs text-red-400 hover:text-red-600 px-1">× Alle</button>
+                  <button onClick={() => setFilterLeaveTypeIds([])} className="text-xs text-signal hover:opacity-80 px-1">× Alle</button>
                 )}
               </div>
             </div>
@@ -797,7 +836,7 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
               <div className="flex items-end ml-auto">
                 <button
                   onClick={() => { setFilterVon(''); setFilterBis(''); setFilterLeaveTypeIds([]); }}
-                  className="text-xs px-3 py-1.5 bg-white border border-red-300 text-red-600 rounded hover:bg-red-50"
+                  className="text-xs px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur text-signal rounded-ui hover:bg-wash"
                 >
                   × Alle Filter zurücksetzen
                 </button>
@@ -821,58 +860,58 @@ function AbwesenheitenTab({ year, employees, leaveTypes, absences, setAbsences, 
       {viewMode === 'liste' && (<>
       <div className="flex flex-wrap gap-2 mb-3">
         {leaveTypes.map(lt => (
-          <span key={lt.ID} className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border"
-            style={{ backgroundColor: lt.COLORBK_HEX, color: lt.COLORBK_LIGHT ? '#374151' : '#fff', borderColor: lt.COLORBAR_HEX }}>
+          <span key={lt.ID} className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+            style={absenceChipStyle(lt.COLORBK_HEX, isDark)}>
             {lt.SHORTNAME} – {lt.NAME}
           </span>
         ))}
       </div>
 
-      <ResponsiveTable minWidth="700px" className="bg-white rounded-lg shadow mb-6">
+      <ResponsiveTable minWidth="700px" className="bg-ebene border border-kontur rounded-panel overflow-hidden mb-6">
         <table className="text-xs w-full">
           <thead>
-            <tr className="bg-slate-700 text-white">
-              <th scope="col" className="px-3 py-2 text-left sticky left-0 bg-slate-700 min-w-[160px]">Mitarbeiter</th>
+            <tr className={`${KOPF_FLAECHE} ${KOPF_TEXT} border-b border-kontur`}>
+              <th scope="col" className={`px-3 py-2 text-left sticky left-0 ${KOPF_FLAECHE} min-w-[160px]`}>Mitarbeiter</th>
               {MONTHS.map(m => <th scope="col" key={m} className="px-2 py-2 text-center min-w-[44px]">{m}</th>)}
               <th scope="col" className="px-3 py-2 text-center min-w-[52px]">Σ</th>
               <th scope="col" className="px-3 py-2 text-center min-w-[52px]">Rest</th>
             </tr>
           </thead>
           <tbody>
-            {loading && <tr><td colSpan={15} className="text-center py-10 text-gray-600">⟳ Lade...</td></tr>}
-            {!loading && filteredEmployees.map((emp, i) => {
+            {loading && <tr><td colSpan={15} className="text-center py-10 text-schrift-2">⟳ Lade...</td></tr>}
+            {!loading && filteredEmployees.map(emp => {
               const used = getUsed(emp.ID);
               const remaining = 30 - used; // simplified
               return (
-                <tr key={emp.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
-                  <td className={`px-3 py-2 sticky left-0 font-semibold text-gray-800 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                <tr key={emp.ID} className={`border-b border-kontur-soft ${ZEILEN_HOVER}`}>
+                  <td className="px-3 py-2 sticky left-0 font-semibold text-schrift bg-ebene">
                     <div>{emp.NAME}, {emp.FIRSTNAME}</div>
-                    <div className="text-gray-600 font-normal">{emp.NUMBER}</div>
+                    <div className="text-schrift-2 font-normal">{emp.NUMBER}</div>
                   </td>
                   {MONTHS.map((_, mi) => {
                     const count = getMonthCount(emp.ID, mi);
-                    const { bg, light } = getCellStyle(emp.ID, mi);
+                    const { bg } = getCellStyle(emp.ID, mi);
                     return (
                       <td key={mi} className="px-1 py-1.5 text-center cursor-pointer hover:opacity-80"
                         onClick={() => count > 0 && setDetailTarget({ employee: emp, month: mi })}>
                         {count > 0 ? (
-                          <span className="inline-flex items-center justify-center w-7 h-6 rounded font-bold text-xs"
-                            style={{ backgroundColor: bg ?? '#6b7280', color: light ? '#1f2937' : '#fff' }}>
+                          <span className="inline-flex items-center justify-center w-7 h-6 rounded-cell font-bold text-xs font-mono tabular-nums"
+                            style={absenceChipStyle(bg ?? undefined, isDark)}>
                             {count}
                           </span>
-                        ) : <span className="text-gray-200">·</span>}
+                        ) : <span className="text-schrift-3">·</span>}
                       </td>
                     );
                   })}
-                  <td className="px-3 py-2 text-center font-bold text-gray-700">{used}</td>
-                  <td className={`px-3 py-2 text-center font-bold ${remaining < 0 ? 'text-red-600' : remaining <= 5 ? 'text-amber-600' : 'text-green-600'}`}>
+                  <td className="px-3 py-2 text-center font-bold text-schrift font-mono tabular-nums">{used}</td>
+                  <td className={`px-3 py-2 text-center font-bold font-mono tabular-nums ${remaining < 0 ? 'text-signal' : 'text-schrift-2'}`}>
                     {remaining}
                   </td>
                 </tr>
               );
             })}
             {!loading && filteredEmployees.length === 0 && (
-              <tr><td colSpan={15} className="text-center py-8 text-gray-600">Keine Mitarbeiter gefunden</td></tr>
+              <tr><td colSpan={15} className="text-center py-8 text-schrift-2">Keine Mitarbeiter gefunden</td></tr>
             )}
           </tbody>
         </table>
@@ -977,27 +1016,28 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
     `${b.employee_name ?? ''} ${b.employee_number ?? ''}`.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Nur negative Salden tragen Signal — Chrome kennt sonst keine Chroma-Farbe (Design-System §1).
   const restColor = (remaining: number) =>
-    remaining > 5 ? 'text-green-600 bg-green-50' : remaining > 0 ? 'text-amber-600 bg-amber-50' : 'text-red-600 bg-red-50';
+    remaining < 0 ? 'text-signal bg-signal-flaeche' : 'text-schrift-2 bg-wash';
 
   return (
     <div>
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <select value={groupId ?? ''} onChange={e => setGroupId(e.target.value ? Number(e.target.value) : null)}
-          className="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          className={`px-3 py-1.5 text-sm ${EINGABE}`}>
           <option value="">{t.urlaub.allGroups}</option>
           {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
         <input type="text" placeholder="Suchen..." value={search} onChange={e => setSearch(e.target.value)}
-          className="px-3 py-1.5 border rounded shadow-sm text-sm w-36" />
-        <button onClick={load} className="px-3 py-1.5 border rounded text-sm hover:bg-gray-50">↻ Neu laden</button>
-        <span className="text-xs text-gray-600">Klicken Sie auf Anspruch-Zahl zum Bearbeiten</span>
+          className={`px-3 py-1.5 text-sm w-36 ${EINGABE}`} />
+        <button onClick={load} className={`px-3 py-1.5 text-sm ${BTN_SEKUNDAER}`}>↻ Neu laden</button>
+        <span className="text-xs text-schrift-2">Klicken Sie auf Anspruch-Zahl zum Bearbeiten</span>
       </div>
 
-      <ResponsiveTable minWidth="650px" className="bg-white rounded-lg shadow">
+      <ResponsiveTable minWidth="650px" className="bg-ebene border border-kontur rounded-panel overflow-hidden">
         <table className="text-sm w-full">
           <thead>
-            <tr className="bg-slate-700 text-white text-xs">
+            <tr className={`${KOPF_FLAECHE} ${KOPF_TEXT} border-b border-kontur`}>
               <th scope="col" className="px-4 py-3 text-left">Mitarbeiter</th>
               <th scope="col" className="px-3 py-3 text-center">Anspruch</th>
               <th scope="col" className="px-3 py-3 text-center">Übertrag</th>
@@ -1009,13 +1049,13 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
           </thead>
           <tbody>
             {loading && (
-              <tr><td colSpan={7} className="text-center py-10 text-gray-600">⟳ Lade Urlaubskonten...</td></tr>
+              <tr><td colSpan={7} className="text-center py-10 text-schrift-2">⟳ Lade Urlaubskonten...</td></tr>
             )}
-            {!loading && filtered.map((b, i) => (
-              <tr key={b.employee_id} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
+            {!loading && filtered.map(b => (
+              <tr key={b.employee_id} className={`border-b border-kontur-soft ${ZEILEN_HOVER}`}>
                 <td className="px-4 py-2">
-                  <div className="font-semibold text-gray-800">{b.employee_name}</div>
-                  <div className="text-xs text-gray-600">{b.employee_number}</div>
+                  <div className="font-semibold text-schrift">{b.employee_name}</div>
+                  <div className="text-xs text-schrift-2">{b.employee_number}</div>
                 </td>
                 {/* Anspruch - editable */}
                 <td className="px-3 py-2 text-center">
@@ -1024,7 +1064,7 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
                       <input
                         type="number" value={editValue} min="0" max="365" step="1"
                         onChange={e => setEditValue(e.target.value)}
-                        className="w-14 border rounded px-1 py-0.5 text-center text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className={`w-14 px-1 py-0.5 text-center text-sm font-mono tabular-nums ${EINGABE}`}
                         autoFocus
                         onKeyDown={e => {
                           if (e.key === 'Enter') saveEntitlement(b.employee_id, Number(editValue));
@@ -1032,29 +1072,29 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
                         }}
                       />
                       <button onClick={() => saveEntitlement(b.employee_id, Number(editValue))} disabled={saving}
-                        className="text-green-600 hover:text-green-800 text-xs font-bold">✓</button>
-                      <button aria-label="Schließen" onClick={() => setEditingId(null)} className="text-gray-400 hover:text-gray-600 text-xs">✕</button>
+                        className="text-glut hover:opacity-80 text-xs font-bold">✓</button>
+                      <button aria-label="Schließen" onClick={() => setEditingId(null)} className="text-schrift-3 hover:text-schrift text-xs">✕</button>
                     </div>
                   ) : canEditAbsences ? (
                     <button
                       onClick={() => { setEditingId(b.employee_id); setEditValue(String(b.entitlement)); }}
-                      className="font-bold text-blue-600 hover:underline hover:text-blue-800 cursor-pointer px-2 py-0.5 rounded hover:bg-blue-50"
+                      className="font-bold font-mono tabular-nums text-glut hover:underline cursor-pointer px-2 py-0.5 rounded-ui hover:bg-glut-flaeche"
                       title="Klicken zum Bearbeiten">
                       {b.entitlement}
                     </button>
                   ) : (
-                    <span className="font-bold text-gray-700">{b.entitlement}</span>
+                    <span className="font-bold text-schrift font-mono tabular-nums">{b.entitlement}</span>
                   )}
                 </td>
-                <td className="px-3 py-2 text-center text-gray-600">{b.carry_forward}</td>
-                <td className="px-3 py-2 text-center font-semibold text-gray-700">{b.total}</td>
-                <td className="px-3 py-2 text-center text-amber-600 font-semibold">{b.used}</td>
+                <td className="px-3 py-2 text-center text-schrift-2 font-mono tabular-nums">{b.carry_forward}</td>
+                <td className="px-3 py-2 text-center font-semibold text-schrift font-mono tabular-nums">{b.total}</td>
+                <td className="px-3 py-2 text-center text-schrift-2 font-semibold font-mono tabular-nums">{b.used}</td>
                 <td className="px-3 py-2 text-center">
-                  <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${restColor(b.remaining)}`}>
+                  <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold font-mono tabular-nums ${restColor(b.remaining)}`}>
                     {b.remaining}
                   </span>
                 </td>
-                <td className="px-3 py-2 text-center text-xs text-gray-500">
+                <td className="px-3 py-2 text-center text-xs text-schrift-3 font-mono tabular-nums">
                   {b.forfeiture_date ? new Date(b.forfeiture_date).toLocaleDateString('de-AT') : '–'}
                 </td>
               </tr>
@@ -1075,14 +1115,14 @@ function AnsprüecheTab({ year, employees, groups }: AnsprüecheTabProps) {
       {!loading && filtered.length > 0 && (
         <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: 'Mitarbeiter', value: filtered.length, color: 'text-gray-700' },
-            { label: 'Ø Anspruch', value: (filtered.reduce((s, b) => s + b.entitlement, 0) / filtered.length).toFixed(1), color: 'text-blue-700' },
-            { label: 'Gesamt genommen', value: filtered.reduce((s, b) => s + b.used, 0), color: 'text-amber-700' },
-            { label: 'Gesamt Rest', value: filtered.reduce((s, b) => s + b.remaining, 0), color: filtered.reduce((s, b) => s + b.remaining, 0) > 0 ? 'text-green-700' : 'text-red-700' },
+            { label: 'Mitarbeiter', value: filtered.length, color: 'text-schrift' },
+            { label: 'Ø Anspruch', value: (filtered.reduce((s, b) => s + b.entitlement, 0) / filtered.length).toFixed(1), color: 'text-schrift' },
+            { label: 'Gesamt genommen', value: filtered.reduce((s, b) => s + b.used, 0), color: 'text-schrift' },
+            { label: 'Gesamt Rest', value: filtered.reduce((s, b) => s + b.remaining, 0), color: filtered.reduce((s, b) => s + b.remaining, 0) < 0 ? 'text-signal' : 'text-schrift' },
           ].map(({ label, value, color }) => (
-            <div key={label} className="bg-white rounded-lg border p-3 shadow-sm text-center">
-              <div className={`text-xl font-bold ${color}`}>{value}</div>
-              <div className="text-xs text-gray-500 mt-0.5">{label}</div>
+            <div key={label} className="bg-ebene rounded-panel border border-kontur p-3 text-center">
+              <div className={`text-xl font-bold font-mono tabular-nums ${color}`}>{value}</div>
+              <div className="text-xs text-schrift-3 mt-0.5">{label}</div>
             </div>
           ))}
         </div>
@@ -1198,77 +1238,77 @@ function SperrenTab({ groups }: SperrenTabProps) {
     <div>
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <select value={groupId ?? ''} onChange={e => setGroupId(e.target.value ? Number(e.target.value) : null)}
-          className="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          className={`px-3 py-1.5 text-sm ${EINGABE}`}>
           <option value="">{t.urlaub.allGroups}</option>
           {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
         {canEditAbsences && (
         <button onClick={() => { if (showForm) { cancelForm(); } else { setEditId(null); resetForm(); setShowForm(true); } }}
-          className="px-4 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center gap-1.5">
+          className={`px-4 py-1.5 text-sm ${BTN_SIGNAL} flex items-center gap-1.5`}>
           ＋ Urlaubssperre anlegen
         </button>
         )}
       </div>
 
       {error && (
-        <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">⚠️ {error}</div>
+        <div className="mb-3 p-3 bg-signal-flaeche border border-[#eecfcf] dark:border-[#5a2626] rounded-ui text-sm text-signal">⚠️ {error}</div>
       )}
 
       {/* Create form */}
       {showForm && (
-        <div className="mb-4 bg-white rounded-lg border shadow-sm p-4">
-          <h3 className="font-semibold text-gray-800 mb-3">{editId !== null ? 'Urlaubssperre bearbeiten' : 'Neue Urlaubssperre'}</h3>
+        <div className="mb-4 bg-ebene rounded-panel border border-kontur p-4">
+          <h3 className="font-semibold text-schrift mb-3">{editId !== null ? 'Urlaubssperre bearbeiten' : 'Neue Urlaubssperre'}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Gruppe</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Gruppe</label>
               <select value={form.group_id} onChange={e => setForm(f => ({ ...f, group_id: Number(e.target.value) }))}
-                className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                className={`w-full px-3 py-2 text-sm ${EINGABE}`}>
                 {groupTreeOptions(groups).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Von</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Von</label>
               <input type="date" value={form.start_date}
                 onChange={e => { setForm(f => ({ ...f, start_date: e.target.value })); if (e.target.value > form.end_date) setForm(f => ({ ...f, end_date: e.target.value })); }}
-                className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className={`w-full px-3 py-2 text-sm ${EINGABE}`} />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Bis</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Bis</label>
               <input type="date" value={form.end_date} min={form.start_date}
                 onChange={e => setForm(f => ({ ...f, end_date: e.target.value }))}
-                className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className={`w-full px-3 py-2 text-sm ${EINGABE}`} />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Grund</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Grund</label>
               <input type="text" value={form.reason} placeholder="z.B. Messewoche, Hochsaison..."
                 onChange={e => setForm(f => ({ ...f, reason: e.target.value }))}
-                className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className={`w-full px-3 py-2 text-sm ${EINGABE}`} />
             </div>
           </div>
           <div className="flex gap-2 mt-3">
             <button onClick={saveBan} disabled={saving}
-              className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60 flex items-center gap-2">
+              className={`px-4 py-2 text-sm ${BTN_SIGNAL} disabled:opacity-60 flex items-center gap-2`}>
               {saving && <span className="animate-spin">⟳</span>} {editId !== null ? 'Speichern' : 'Sperre anlegen'}
             </button>
-            <button onClick={cancelForm} className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50">Abbrechen</button>
+            <button onClick={cancelForm} className={`px-4 py-2 text-sm ${BTN_SEKUNDAER}`}>Abbrechen</button>
           </div>
         </div>
       )}
 
       {/* Bans list */}
       {loading ? (
-        <div className="text-center py-10 text-gray-600">⟳ Lade...</div>
+        <div className="text-center py-10 text-schrift-2">⟳ Lade...</div>
       ) : bans.length === 0 ? (
-        <div className="bg-white rounded-lg border p-8 text-center text-gray-600">
+        <div className="bg-ebene rounded-panel border border-kontur p-8 text-center text-schrift-2">
           <div className="text-4xl mb-2">🚫</div>
           <div>{t.urlaub.noLockouts}</div>
           <div className="text-xs mt-1">Klicken Sie auf "Urlaubssperre anlegen" um eine neue anzulegen.</div>
         </div>
       ) : (
-        <ResponsiveTable minWidth="650px" className="bg-white rounded-lg shadow">
+        <ResponsiveTable minWidth="650px" className="bg-ebene border border-kontur rounded-panel overflow-hidden">
           <table className="text-sm w-full">
             <thead>
-              <tr className="bg-slate-700 text-white text-xs">
+              <tr className={`${KOPF_FLAECHE} ${KOPF_TEXT} border-b border-kontur`}>
                 <th scope="col" className="px-4 py-3 text-left">Zeitraum</th>
                 <th scope="col" className="px-4 py-3 text-left">Gruppe</th>
                 <th scope="col" className="px-4 py-3 text-left">Grund</th>
@@ -1277,32 +1317,32 @@ function SperrenTab({ groups }: SperrenTabProps) {
               </tr>
             </thead>
             <tbody>
-              {bans.map((ban, i) => {
+              {bans.map(ban => {
                 const start = ban.start_date ? new Date(ban.start_date) : null;
                 const end = ban.end_date ? new Date(ban.end_date) : null;
                 const days = start && end
                   ? Math.round((end.getTime() - start.getTime()) / 86400000) + 1
                   : 0;
                 return (
-                  <tr key={ban.id} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-red-50`}>
+                  <tr key={ban.id} className={`border-b border-kontur-soft ${ZEILEN_HOVER}`}>
                     <td className="px-4 py-3">
-                      <div className="font-semibold text-red-700 flex items-center gap-2">
+                      <div className="font-semibold text-signal flex items-center gap-2">
                         <span>🚫</span>
                         {formatDateRange(ban.start_date, ban.end_date)}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-700">{ban.group_name || groupName(ban.group_id)}</td>
-                    <td className="px-4 py-3 text-gray-600">{ban.reason || <span className="text-gray-300 italic">Kein Grund angegeben</span>}</td>
-                    <td className="px-4 py-3 text-center text-gray-600 font-semibold">{days}</td>
+                    <td className="px-4 py-3 text-schrift">{ban.group_name || groupName(ban.group_id)}</td>
+                    <td className="px-4 py-3 text-schrift-2">{ban.reason || <span className="text-schrift-3 italic">Kein Grund angegeben</span>}</td>
+                    <td className="px-4 py-3 text-center text-schrift-2 font-semibold font-mono tabular-nums">{days}</td>
                     <td className="px-4 py-3 text-center">
                       {canEditAbsences && (
                       <div className="flex items-center justify-center gap-1">
                         <button onClick={() => startEdit(ban)} title="Urlaubssperre bearbeiten"
-                          className="text-blue-500 hover:text-blue-700 text-sm px-2 py-1 rounded hover:bg-blue-50">
+                          className="text-schrift-2 hover:text-schrift text-sm px-2 py-1 rounded-ui hover:bg-wash">
                           ✏️
                         </button>
                         <button onClick={() => deleteBan(ban.id)} disabled={deleting === ban.id}
-                          className="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded hover:bg-red-50">
+                          className="text-signal hover:opacity-80 text-sm px-2 py-1 rounded-ui hover:bg-signal-flaeche">
                           {deleting === ban.id ? '⟳' : '🗑️'}
                         </button>
                       </div>
@@ -1317,7 +1357,7 @@ function SperrenTab({ groups }: SperrenTabProps) {
       )}
 
       {/* Info box */}
-      <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-700 flex items-start gap-2">
+      <div className="mt-4 p-3 bg-wash border border-kontur rounded-ui text-xs text-schrift-2 flex items-start gap-2">
         <span className="text-base flex-shrink-0">ℹ️</span>
         <span>Urlaubssperren verhindern die Genehmigung von Urlaubsanträgen in gesperrten Zeiträumen.
           Gesperrte Tage werden im Kalender rot/schraffiert angezeigt.</span>
@@ -1341,6 +1381,8 @@ interface AntraegeTabProps {
 interface AbsenceStatusEntry { status: AbsenceStatus; reject_reason: string; }
 
 function AntraegeTab({ year, employees, leaveTypes, absences, loading }: AntraegeTabProps) {
+  // Theme provider-frei vom Dokument lesen (Muster der Menü-Chips im Dienstplan)
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   const t = useT();
   const { showToast } = useToast();
   const { canEditAbsences } = usePermissions();
@@ -1427,16 +1469,17 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
     return true;
   }).sort((a, b) => b.DATE.localeCompare(a.DATE));
 
+  // Status als Taktwerk-Status-Pille (components/Badge)
   const statusBadge = (entry: AbsenceStatusEntry) => {
     const { status, reject_reason } = entry;
-    if (status === 'approved') return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">✅ Genehmigt</span>;
+    if (status === 'approved') return <Badge variant="green">Genehmigt</Badge>;
     if (status === 'rejected') return (
       <span className="inline-flex flex-col items-center gap-0.5">
-        <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">❌ Abgelehnt</span>
-        {reject_reason && <span className="text-xs text-red-500 italic max-w-[160px] truncate" title={reject_reason}>{reject_reason}</span>}
+        <Badge variant="red">Abgelehnt</Badge>
+        {reject_reason && <span className="text-xs text-signal italic max-w-[160px] truncate" title={reject_reason}>{reject_reason}</span>}
       </span>
     );
-    return <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700">⏳ Beantragt</span>;
+    return <Badge variant="orange">Beantragt</Badge>;
   };
 
   const pendingCount = absences.filter(a => a.DATE?.startsWith(String(year)) && getStatus(a.ID) === 'pending').length;
@@ -1449,7 +1492,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
         <select
           value={filterStatus}
           onChange={e => setFilterStatus(e.target.value as AbsenceStatus | '')}
-          className="border rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className={`px-3 py-1.5 text-sm ${EINGABE}`}
         >
           <option value="">{t.urlaub.allStatus}</option>
           <option value="pending">{t.urlaub.statusPending} ({pendingCount})</option>
@@ -1461,16 +1504,16 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
           placeholder="Mitarbeiter suchen..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="px-3 py-1.5 border rounded shadow-sm text-sm w-44"
+          className={`px-3 py-1.5 text-sm w-44 ${EINGABE}`}
         />
-        <span className="text-xs text-gray-600">{filtered.length} Einträge</span>
+        <span className="text-xs text-schrift-2">{filtered.length} Einträge</span>
       </div>
 
       {/* Table */}
-      <ResponsiveTable minWidth="650px" className="bg-white rounded-lg shadow">
+      <ResponsiveTable minWidth="650px" className="bg-ebene border border-kontur rounded-panel overflow-hidden">
         <table className="text-sm w-full">
           <thead>
-            <tr className="bg-slate-700 text-white text-xs">
+            <tr className={`${KOPF_FLAECHE} ${KOPF_TEXT} border-b border-kontur`}>
               <th scope="col" className="px-4 py-3 text-left">Mitarbeiter</th>
               <th scope="col" className="px-4 py-3 text-left">Datum</th>
               <th scope="col" className="px-4 py-3 text-left">Abwesenheitsart</th>
@@ -1480,7 +1523,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
           </thead>
           <tbody>
             {(loading || statusLoading) && (
-              <tr><td colSpan={5} className="text-center py-10 text-gray-600">⟳ Lade...</td></tr>
+              <tr><td colSpan={5} className="text-center py-10 text-schrift-2">⟳ Lade...</td></tr>
             )}
             {!loading && !statusLoading && filtered.length === 0 && (
               <EmptyState
@@ -1490,33 +1533,33 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
                 description="Noch keine Anträge in diesem Zeitraum vorhanden."
               />
             )}
-            {!loading && !statusLoading && filtered.map((ab, i) => {
+            {!loading && !statusLoading && filtered.map(ab => {
               const emp = getEmp(ab.EMPLOYEE_ID);
               const lt = getLT(ab.LEAVE_TYPE_ID);
               const statusEntry = getStatusEntry(ab.ID);
               const status = statusEntry.status;
               const isUpdating = updatingId === ab.ID;
               return (
-                <tr key={ab.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
+                <tr key={ab.ID} className={`border-b border-kontur-soft ${ZEILEN_HOVER}`}>
                   <td className="px-4 py-2.5">
-                    <div className="font-semibold text-gray-800">
+                    <div className="font-semibold text-schrift">
                       {emp ? `${emp.NAME}, ${emp.FIRSTNAME}` : `MA #${ab.EMPLOYEE_ID}`}
                     </div>
-                    <div className="text-xs text-gray-600">{emp?.NUMBER}</div>
+                    <div className="text-xs text-schrift-2">{emp?.NUMBER}</div>
                   </td>
-                  <td className="px-4 py-2.5 text-gray-700">
+                  <td className="px-4 py-2.5 text-schrift-2 font-mono tabular-nums">
                     {new Date(ab.DATE).toLocaleDateString('de-AT')}
                   </td>
                   <td className="px-4 py-2.5">
                     {lt ? (
                       <span
-                        className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold"
-                        style={{ backgroundColor: lt.COLORBK_HEX, color: lt.COLORBK_LIGHT ? '#374151' : '#fff' }}
+                        className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-cell text-xs font-semibold"
+                        style={absenceChipStyle(lt.COLORBK_HEX, isDark)}
                       >
                         {lt.SHORTNAME} – {lt.NAME}
                       </span>
                     ) : (
-                      <span className="text-gray-600">Art #{ab.LEAVE_TYPE_ID}</span>
+                      <span className="text-schrift-2">Art #{ab.LEAVE_TYPE_ID}</span>
                     )}
                   </td>
                   <td className="px-4 py-2.5 text-center">
@@ -1527,7 +1570,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
                       {/* G-1: Genehmigen/Ablehnen nur mit WABSENCES */}
                       {!canApprove ? (
                         <span
-                          className="text-xs text-gray-400"
+                          className="text-xs text-schrift-3"
                           title="Keine Schreibberechtigung für Abwesenheiten (WABSENCES)"
                         >—</span>
                       ) : status === 'pending' ? (
@@ -1535,7 +1578,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
                           <button
                             onClick={() => updateStatus(ab.ID, 'approved')}
                             disabled={isUpdating}
-                            className="px-2.5 py-1 text-xs rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:opacity-60"
+                            className={`px-2.5 py-1 text-xs ${BTN_PRIMAER} disabled:opacity-60`}
                             title={t.urlaub.actionApprove}
                           >
                             {isUpdating ? '⟳' : `✅ ${t.urlaub.actionApprove}`}
@@ -1543,7 +1586,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
                           <button
                             onClick={() => { setRejectModal({ id: ab.ID }); setRejectReason(''); }}
                             disabled={isUpdating}
-                            className="px-2.5 py-1 text-xs rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
+                            className={`px-2.5 py-1 text-xs ${BTN_SIGNAL} disabled:opacity-60`}
                             title={t.urlaub.actionReject}
                           >
                             {isUpdating ? '⟳' : `❌ ${t.urlaub.actionReject}`}
@@ -1553,7 +1596,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
                         <button
                           onClick={() => updateStatus(ab.ID, 'pending')}
                           disabled={isUpdating}
-                          className="px-2 py-1 text-xs text-gray-500 hover:text-gray-700 border rounded hover:bg-gray-50 disabled:opacity-60"
+                          className="px-2 py-1 text-xs text-schrift-2 hover:text-schrift border border-kontur rounded-ui hover:bg-wash disabled:opacity-60"
                           title={t.urlaub.actionReset}
                         >
                           {isUpdating ? '⟳' : `↺ ${t.urlaub.actionReset}`}
@@ -1561,7 +1604,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
                       )}
                       <button
                         onClick={() => printAntrag(ab)}
-                        className="px-2 py-1 text-xs rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50"
+                        className="px-2 py-1 text-xs rounded-ui border border-kontur text-schrift-2 hover:bg-wash"
                         title="Urlaubsantrag als PDF drucken (mit Unterschriftszeilen)"
                       >
                         📄
@@ -1576,7 +1619,7 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
       </ResponsiveTable>
 
       {/* Info */}
-      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700 flex items-start gap-2">
+      <div className="mt-4 p-3 bg-wash border border-kontur rounded-ui text-xs text-schrift-2 flex items-start gap-2">
         <span className="text-base flex-shrink-0">ℹ️</span>
         <span>
           Neue Abwesenheiten starten mit Status „Beantragt" und müssen genehmigt oder abgelehnt werden.
@@ -1587,29 +1630,29 @@ function AntraegeTab({ year, employees, leaveTypes, absences, loading }: Antraeg
       {/* Rejection reason modal */}
       {rejectModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
-          <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md">
-            <div className="px-6 py-4 border-b flex items-center justify-between">
-              <h2 className="text-base font-bold text-gray-800">❌ Antrag ablehnen</h2>
-              <button aria-label="Schließen" onClick={() => setRejectModal(null)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
+          <div className="bg-ebene rounded-[10px] shadow-dialog dark:shadow-dialog-dark dark:border dark:border-kontur animate-scaleIn w-full max-w-md">
+            <div className="px-6 py-4 border-b border-kontur flex items-center justify-between">
+              <h2 className="text-[13px] font-bold text-schrift">❌ Antrag ablehnen</h2>
+              <button aria-label="Schließen" onClick={() => setRejectModal(null)} className="text-schrift-3 hover:text-schrift text-xl">✕</button>
             </div>
             <div className="px-6 py-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Begründung (optional)</label>
+              <label className="block text-[10px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Begründung (optional)</label>
               <textarea
                 value={rejectReason}
                 onChange={e => setRejectReason(e.target.value)}
                 placeholder="z.B. Personalmangel in diesem Zeitraum..."
                 rows={3}
                 maxLength={500}
-                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
+                className={`w-full px-3 py-2 text-sm resize-none ${EINGABE}`}
               />
-              <div className="text-xs text-gray-600 text-right mt-1">{rejectReason.length}/500</div>
+              <div className="text-xs text-schrift-3 text-right mt-1 font-mono tabular-nums">{rejectReason.length}/500</div>
             </div>
-            <div className="px-6 py-3 border-t flex justify-end gap-3">
-              <button onClick={() => setRejectModal(null)} className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50">Abbrechen</button>
+            <div className="px-6 py-3 border-t border-kontur bg-[#fafbfc] dark:bg-[#0e1522] flex justify-end gap-3">
+              <button onClick={() => setRejectModal(null)} className={`px-4 py-2 text-sm ${BTN_SEKUNDAER}`}>Abbrechen</button>
               <button
                 onClick={handleRejectConfirm}
                 disabled={updatingId !== null}
-                className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60"
+                className={`px-4 py-2 text-sm ${BTN_SIGNAL} disabled:opacity-60`}
               >
                 {updatingId !== null ? '⟳' : 'Ablehnen'}
               </button>
@@ -1632,6 +1675,8 @@ interface StatistikTabProps {
 }
 
 function StatistikTab({ year, employees, leaveTypes, absences, loading }: StatistikTabProps) {
+  // Theme provider-frei vom Dokument lesen (Muster der Menü-Chips im Dienstplan)
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   const [viewMode, setViewMode] = useState<'types' | 'monthly' | 'employee'>('types');
   const [selectedLeaveType, setSelectedLeaveType] = useState<number | null>(null);
 
@@ -1692,7 +1737,7 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
       .sort((a, b) => b.total - a.total);
   }, [employees, byEmployee]);
 
-  if (loading) return <div className="py-10 text-center text-gray-600">⟳ Lade...</div>;
+  if (loading) return <div className="py-10 text-center text-schrift-2">⟳ Lade...</div>;
 
   return (
     <div className="space-y-5">
@@ -1700,18 +1745,18 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
       <div className="flex items-center gap-2 flex-wrap">
         {(['types', 'monthly', 'employee'] as const).map(v => (
           <button key={v} onClick={() => setViewMode(v)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${viewMode === v ? 'bg-slate-700 text-white' : 'bg-white border hover:bg-gray-50 text-gray-700'}`}>
+            className={`px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === v ? BTN_PRIMAER : BTN_SEKUNDAER}`}>
             {v === 'types' ? '📊 Nach Typ' : v === 'monthly' ? '📅 Monatsverlauf' : '👤 Pro Mitarbeiter'}
           </button>
         ))}
-        <span className="ml-auto text-xs text-gray-600">{totalDays} Abwesenheitstage in {year}</span>
+        <span className="ml-auto text-xs text-schrift-2">{totalDays} Abwesenheitstage in {year}</span>
       </div>
 
       {/* ─── View: By Type ─── */}
       {viewMode === 'types' && (
-        <div className="bg-white rounded-xl shadow border overflow-hidden">
-          <div className="px-5 py-3 bg-slate-50 border-b">
-            <h3 className="font-semibold text-gray-800 text-sm">Abwesenheitstypen {year}</h3>
+        <div className="bg-ebene border border-kontur rounded-panel overflow-hidden">
+          <div className={`px-5 py-3 ${KOPF_FLAECHE} border-b border-kontur`}>
+            <h3 className="font-semibold text-schrift text-sm">Abwesenheitstypen {year}</h3>
           </div>
           <div className="p-5 space-y-3">
             {leaveTypes
@@ -1724,36 +1769,36 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
                   <div key={lt.ID} className="space-y-1">
                     <div className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded flex items-center justify-center text-xs font-bold flex-shrink-0"
-                          style={{ backgroundColor: lt.COLORBK_HEX ?? '#e5e7eb', color: lt.COLORBK_LIGHT ? '#333' : '#fff' }}>
+                        <div className="w-6 h-6 rounded-cell flex items-center justify-center text-xs font-bold flex-shrink-0"
+                          style={absenceChipStyle(lt.COLORBK_HEX, isDark)}>
                           {lt.SHORTNAME}
                         </div>
-                        <span className="font-medium text-gray-800">{lt.NAME}</span>
+                        <span className="font-medium text-schrift">{lt.NAME}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-gray-500 text-xs">{pct.toFixed(1)}%</span>
-                        <span className="font-bold text-gray-800">{count} Tage</span>
+                        <span className="text-schrift-3 text-xs font-mono tabular-nums">{pct.toFixed(1)}%</span>
+                        <span className="font-bold text-schrift font-mono tabular-nums">{count} Tage</span>
                       </div>
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div className="w-full bg-wash rounded-full h-2">
                       <div className="h-2 rounded-full transition-all"
-                        style={{ width: `${pct}%`, backgroundColor: lt.COLORBK_HEX ?? '#6b7280' }} />
+                        style={{ width: `${pct}%`, backgroundColor: absenceFillColor(lt.COLORBK_HEX, isDark) }} />
                     </div>
                   </div>
                 );
               })}
-            {byType.size === 0 && <p className="text-gray-600 text-sm text-center py-4">Keine Abwesenheiten in {year}</p>}
+            {byType.size === 0 && <p className="text-schrift-2 text-sm text-center py-4">Keine Abwesenheiten in {year}</p>}
           </div>
         </div>
       )}
 
       {/* ─── View: Monthly ─── */}
       {viewMode === 'monthly' && (
-        <div className="bg-white rounded-xl shadow border overflow-hidden">
-          <div className="px-5 py-3 bg-slate-50 border-b flex items-center justify-between">
-            <h3 className="font-semibold text-gray-800 text-sm">Monatsverlauf {year}</h3>
+        <div className="bg-ebene border border-kontur rounded-panel overflow-hidden">
+          <div className={`px-5 py-3 ${KOPF_FLAECHE} border-b border-kontur flex items-center justify-between`}>
+            <h3 className="font-semibold text-schrift text-sm">Monatsverlauf {year}</h3>
             <select value={selectedLeaveType ?? ''} onChange={e => setSelectedLeaveType(e.target.value ? Number(e.target.value) : null)}
-              className="border rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400">
+              className={`px-2 py-1 text-xs ${EINGABE}`}>
               <option value="">Alle Typen</option>
               {leaveTypes.filter(lt => byType.has(lt.ID)).map(lt =>
                 <option key={lt.ID} value={lt.ID}>{lt.NAME}</option>)}
@@ -1763,14 +1808,14 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
             <div className="flex items-end gap-1.5 h-48">
               {byMonth.map((count, m) => (
                 <div key={m} className="flex flex-col items-center gap-1 flex-1 min-w-0">
-                  <span className="text-xs font-bold text-gray-700">{count > 0 ? count : ''}</span>
+                  <span className="text-xs font-bold text-schrift font-mono tabular-nums">{count > 0 ? count : ''}</span>
                   <div className="w-full rounded-t transition-all"
                     style={{
                       height: `${(count / maxMonthly) * 160}px`,
                       minHeight: count > 0 ? '4px' : '0',
-                      backgroundColor: count > 0 ? '#3b82f6' : '#e5e7eb',
+                      backgroundColor: count > 0 ? 'var(--glut)' : 'var(--wash)',
                     }} />
-                  <span className="text-xs text-gray-500">{MONTHS_SHORT[m]}</span>
+                  <span className="text-xs text-schrift-3">{MONTHS_SHORT[m]}</span>
                 </div>
               ))}
             </div>
@@ -1780,22 +1825,22 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
 
       {/* ─── View: Per Employee ─── */}
       {viewMode === 'employee' && (
-        <div className="bg-white rounded-xl shadow border overflow-hidden">
-          <div className="px-5 py-3 bg-slate-50 border-b">
-            <h3 className="font-semibold text-gray-800 text-sm">Abwesenheiten pro Mitarbeiter {year}</h3>
+        <div className="bg-ebene border border-kontur rounded-panel overflow-hidden">
+          <div className={`px-5 py-3 ${KOPF_FLAECHE} border-b border-kontur`}>
+            <h3 className="font-semibold text-schrift text-sm">Abwesenheiten pro Mitarbeiter {year}</h3>
           </div>
           {sortedEmployees.length === 0 ? (
             <EmptyState icon="📊" title="Keine Abwesenheiten" description={`Im Jahr ${year} wurden noch keine Abwesenheiten erfasst.`} />
           ) : (
             <table className="text-sm w-full">
               <thead>
-                <tr className="bg-slate-700 text-white text-xs">
+                <tr className={`${KOPF_FLAECHE} ${KOPF_TEXT} border-b border-kontur`}>
                   <th scope="col" className="px-4 py-3 text-left">Mitarbeiter</th>
                   <th scope="col" className="px-4 py-3 text-center">Gesamt</th>
                   {leaveTypes.filter(lt => byType.has(lt.ID)).map(lt => (
                     <th scope="col" key={lt.ID} className="px-3 py-3 text-center">
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded text-xs font-bold"
-                        style={{ backgroundColor: lt.COLORBK_HEX ?? '#e5e7eb', color: lt.COLORBK_LIGHT ? '#333' : '#fff' }}>
+                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-cell text-xs font-bold normal-case tracking-normal"
+                        style={absenceChipStyle(lt.COLORBK_HEX, isDark)}>
                         {lt.SHORTNAME}
                       </span>
                     </th>
@@ -1803,18 +1848,18 @@ function StatistikTab({ year, employees, leaveTypes, absences, loading }: Statis
                 </tr>
               </thead>
               <tbody>
-                {sortedEmployees.map(({ emp, ltMap, total }, i) => (
-                  <tr key={emp.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50`}>
+                {sortedEmployees.map(({ emp, ltMap, total }) => (
+                  <tr key={emp.ID} className={`border-b border-kontur-soft ${ZEILEN_HOVER}`}>
                     <td className="px-4 py-2.5">
-                      <div className="font-semibold text-gray-800">{emp.NAME}, {emp.FIRSTNAME}</div>
-                      <div className="text-xs text-gray-600">Nr. {emp.NUMBER}</div>
+                      <div className="font-semibold text-schrift">{emp.NAME}, {emp.FIRSTNAME}</div>
+                      <div className="text-xs text-schrift-2">Nr. {emp.NUMBER}</div>
                     </td>
-                    <td className="px-4 py-2.5 text-center font-bold text-gray-700">{total}</td>
+                    <td className="px-4 py-2.5 text-center font-bold text-schrift font-mono tabular-nums">{total}</td>
                     {leaveTypes.filter(lt => byType.has(lt.ID)).map(lt => {
                       const c = ltMap.get(lt.ID) ?? 0;
                       return (
-                        <td key={lt.ID} className="px-3 py-2.5 text-center text-sm text-gray-600">
-                          {c > 0 ? <span className="font-semibold text-gray-800">{c}</span> : <span className="text-gray-300">–</span>}
+                        <td key={lt.ID} className="px-3 py-2.5 text-center text-sm text-schrift-2">
+                          {c > 0 ? <span className="font-semibold text-schrift font-mono tabular-nums">{c}</span> : <span className="text-schrift-3">–</span>}
                         </td>
                       );
                     })}
@@ -1859,59 +1904,61 @@ interface TimelineGridProps {
 export const TimelineGrid = memo(function TimelineGrid({
   year, employees, leaveTypes, absMap, countByEmployee, filterLeaveType, onHover,
 }: TimelineGridProps) {
+  // Theme provider-frei vom Dokument lesen (Muster der Menü-Chips im Dienstplan)
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   const MONTH_DAYS = Array.from({length: 12}, (_, m) =>
     new Date(year, m + 1, 0).getDate()
   );
   const getLT = (id: number) => leaveTypes.find(lt => lt.ID === id);
 
   return (
-    <ResponsiveTable stickyFirstCol minWidth="900px" className="rounded-xl border border-gray-200 shadow-sm">
+    <ResponsiveTable stickyFirstCol minWidth="900px" className="bg-ebene rounded-panel border border-kontur overflow-hidden">
       <table className="text-xs w-full border-collapse">
         <thead>
-          <tr className="bg-gray-100 border-b">
-            <th scope="col" className="sticky left-0 z-10 bg-gray-100 text-left px-3 py-2 font-semibold text-gray-700 min-w-[160px] border-r">
+          <tr className={`${KOPF_FLAECHE} ${KOPF_TEXT} border-b border-kontur`}>
+            <th scope="col" className={`sticky left-0 z-10 ${KOPF_FLAECHE} text-left px-3 py-2 min-w-[160px] border-r border-kontur`}>
               Mitarbeiter
             </th>
             {MONTH_NAMES.map((m, mi) => (
               <th scope="col" key={mi} colSpan={MONTH_DAYS[mi]}
-                className="text-center font-semibold text-gray-600 py-1 border-r border-gray-300"
+                className="text-center py-1 border-r border-kontur"
                 style={{minWidth: `${MONTH_DAYS[mi] * 8}px`}}>
                 {m}
               </th>
             ))}
-            <th scope="col" className="text-center px-2 py-2 font-semibold text-gray-700 min-w-[40px]">∑</th>
+            <th scope="col" className="text-center px-2 py-2 min-w-[40px]">∑</th>
           </tr>
-          <tr className="bg-gray-50 border-b">
-            <th scope="col" className="sticky left-0 z-10 bg-gray-50 border-r"></th>
+          <tr className={`${KOPF_FLAECHE} border-b border-kontur`}>
+            <th scope="col" className={`sticky left-0 z-10 ${KOPF_FLAECHE} border-r border-kontur`}></th>
             {MONTH_NAMES.map((_, mi) =>
               Array.from({length: MONTH_DAYS[mi]}, (__, d) => (
                 <th scope="col" key={`${mi}-${d}`}
-                  className={`text-center font-normal py-0.5 border-r border-gray-100 ${
+                  className={`text-center font-normal font-mono py-0.5 border-r border-kontur-soft ${
                     new Date(year, mi, d + 1).getDay() === 0 || new Date(year, mi, d + 1).getDay() === 6
-                      ? 'bg-gray-200 text-gray-600' : 'text-gray-300'
+                      ? 'bg-wash text-schrift-2' : 'text-schrift-3'
                   }`}
                   style={{width: '8px', fontSize: '7px', padding: '1px 0'}}>
                   {d + 1 === 1 || d + 1 === 5 || d + 1 === 10 || d + 1 === 15 || d + 1 === 20 || d + 1 === 25 ? d + 1 : ''}
                 </th>
               ))
             )}
-            <th scope="col" className="border-r"></th>
+            <th scope="col" className="border-r border-kontur"></th>
           </tr>
         </thead>
         <tbody>
           {employees.length === 0 ? (
             <tr>
-              <td colSpan={366 + 2} className="text-center text-gray-600 py-8">
+              <td colSpan={366 + 2} className="text-center text-schrift-2 py-8">
                 Keine Mitarbeiter gefunden
               </td>
             </tr>
           ) : (
-            employees.map((emp, rowIdx) => {
+            employees.map(emp => {
               const empCount = countByEmployee.get(emp.ID) ?? 0;
               return (
                 <tr key={emp.ID}
-                  className={`border-b transition-colors hover:bg-blue-50/30 ${rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}`}>
-                  <td className={`sticky left-0 z-10 px-3 py-1 border-r font-medium text-gray-800 whitespace-nowrap ${rowIdx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                  className={`border-b border-kontur-soft transition-colors ${ZEILEN_HOVER}`}>
+                  <td className="sticky left-0 z-10 px-3 py-1 border-r border-kontur font-medium text-schrift whitespace-nowrap bg-ebene">
                     {emp.FIRSTNAME} {emp.NAME}
                   </td>
                   {MONTH_NAMES.map((_, mi) =>
@@ -1930,11 +1977,12 @@ export const TimelineGrid = memo(function TimelineGrid({
                             minWidth: '8px',
                             maxWidth: '8px',
                             padding: 0,
+                            // 8px-Zellen: normalisierte Voll-Fläche (hohl ist hier nicht darstellbar)
                             backgroundColor: absence && show && lt
-                              ? (lt.COLORBAR_HEX ?? lt.COLORBK_HEX ?? '#3b82f6')
-                              : isWeekend ? '#f3f4f6' : undefined,
+                              ? absenceFillColor(lt.COLORBAR_HEX ?? lt.COLORBK_HEX, isDark)
+                              : isWeekend ? 'var(--wash)' : undefined,
                           }}
-                          className={`border-r border-gray-100 ${absence && show ? 'cursor-pointer' : ''}`}
+                          className={`border-r border-kontur-soft ${absence && show ? 'cursor-pointer' : ''}`}
                           onMouseEnter={absence && show && lt ? (e) => {
                             onHover({
                               x: e.clientX,
@@ -1947,8 +1995,8 @@ export const TimelineGrid = memo(function TimelineGrid({
                       );
                     })
                   )}
-                  <td className="text-center px-1 font-bold text-gray-600 border-l">
-                    {empCount > 0 ? <span className="text-blue-600">{empCount}</span> : <span className="text-gray-300">—</span>}
+                  <td className="text-center px-1 font-bold border-l border-kontur font-mono tabular-nums">
+                    {empCount > 0 ? <span className="text-schrift">{empCount}</span> : <span className="text-schrift-3">—</span>}
                   </td>
                 </tr>
               );
@@ -1961,6 +2009,8 @@ export const TimelineGrid = memo(function TimelineGrid({
 });
 
 function TimelineTab({ year, employees, leaveTypes, absences, loading }: TimelineTabProps) {
+  // Theme provider-frei vom Dokument lesen (Muster der Menü-Chips im Dienstplan)
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   const [filterLeaveType, setFilterLeaveType] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const [tooltip, setTooltip] = useState<{x: number; y: number; text: string} | null>(null);
@@ -2013,27 +2063,27 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
           placeholder="🔍 Mitarbeiter suchen..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="px-3 py-1.5 text-sm border rounded-lg w-48"
+          className={`px-3 py-1.5 text-sm w-48 ${EINGABE}`}
         />
         <select
           value={filterLeaveType ?? ''}
           onChange={e => setFilterLeaveType(e.target.value ? Number(e.target.value) : null)}
-          className="px-3 py-1.5 text-sm border rounded-lg"
+          className={`px-3 py-1.5 text-sm ${EINGABE}`}
         >
           <option value="">Alle Abwesenheitsarten</option>
           {leaveTypes.filter(lt => usedLeaveTypeIds.has(lt.ID)).map(lt => (
             <option key={lt.ID} value={lt.ID}>{lt.NAME}</option>
           ))}
         </select>
-        <span className="text-xs text-gray-600 ml-auto">{filteredEmployees.length} Mitarbeiter</span>
+        <span className="text-xs text-schrift-2 ml-auto">{filteredEmployees.length} Mitarbeiter</span>
       </div>
 
       {/* Legend */}
       <div className="flex flex-wrap gap-2 text-xs">
         {leaveTypes.filter(lt => usedLeaveTypeIds.has(lt.ID)).map(lt => (
-          <span key={lt.ID} className="flex items-center gap-1 px-2 py-0.5 rounded-full border"
-            style={{backgroundColor: lt.COLORBK_HEX ?? '#e5e7eb', color: lt.COLORBK_LIGHT ? '#333' : '#fff'}}>
-            <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{backgroundColor: lt.COLORBAR_HEX ?? lt.COLORBK_HEX ?? '#aaa'}}></span>
+          <span key={lt.ID} className="flex items-center gap-1 px-2 py-0.5 rounded-full"
+            style={absenceChipStyle(lt.COLORBK_HEX, isDark)}>
+            <span className="w-2.5 h-2.5 rounded-sm inline-block" style={{backgroundColor: absenceFillColor(lt.COLORBAR_HEX ?? lt.COLORBK_HEX, isDark)}}></span>
             {lt.SHORTNAME} = {lt.NAME}
           </span>
         ))}
@@ -2054,7 +2104,7 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
           löst über den space-y-4-Sibling-Selektor bei jedem Hover einen
           Style-Recalc der kompletten ~11k-Zellen-Tabelle aus (~67 ms/Hover) */}
       <div
-        className="fixed z-50 bg-gray-900 text-white text-xs rounded-lg px-3 py-2 shadow-xl pointer-events-none whitespace-pre"
+        className="fixed z-50 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] text-xs rounded-ui px-3 py-2 shadow-overlay dark:shadow-overlay-dark pointer-events-none whitespace-pre"
         style={tooltip ? {left: tooltip.x + 12, top: tooltip.y - 10} : {display: 'none'}}
       >
         {tooltip?.text}
@@ -2067,15 +2117,14 @@ function TimelineTab({ year, employees, leaveTypes, absences, loading }: Timelin
             a.EMPLOYEE_ID > 0 && a.LEAVE_TYPE_ID === lt.ID
           ).length;
           return count > 0 ? (
-            <div key={lt.ID} className="bg-white rounded-xl border p-3 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
-                style={{backgroundColor: lt.COLORBK_HEX ?? '#e5e7eb', color: lt.COLORBK_LIGHT ? '#333' : '#fff',
-                  border: `2px solid ${lt.COLORBAR_HEX ?? '#aaa'}`}}>
+            <div key={lt.ID} className="bg-ebene rounded-panel border border-kontur p-3 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-cell flex items-center justify-center text-xs font-bold flex-shrink-0"
+                style={absenceChipStyle(lt.COLORBK_HEX, isDark)}>
                 {lt.SHORTNAME}
               </div>
               <div>
-                <div className="text-lg font-bold text-gray-800">{count}</div>
-                <div className="text-xs text-gray-500">{lt.NAME}</div>
+                <div className="text-lg font-bold text-schrift font-mono tabular-nums">{count}</div>
+                <div className="text-xs text-schrift-3">{lt.NAME}</div>
               </div>
             </div>
           ) : null;
@@ -2155,14 +2204,14 @@ export default function Urlaub() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">🏖️ Urlaubsverwaltung</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Ansprüche, Abwesenheiten und Sperrzeiten</p>
+          <h1 className="text-xl font-extrabold tracking-[-0.02em] text-schrift">🏖️ Urlaubsverwaltung</h1>
+          <p className="text-sm text-schrift-2 mt-0.5">Ansprüche, Abwesenheiten und Sperrzeiten</p>
         </div>
         <div className="flex items-center gap-1">
-          <button aria-label="Vorheriges Jahr" onClick={() => setYear(y => y - 1)} className="px-2 py-1.5 min-w-[32px] rounded border hover:bg-gray-50 text-sm">‹</button>
-          <span className="px-3 py-1 font-bold text-gray-800 text-sm">{year}</span>
-          <button aria-label="Nächstes Jahr" onClick={() => setYear(y => y + 1)} className="px-2 py-1.5 min-w-[32px] rounded border hover:bg-gray-50 text-sm">›</button>
-          <label className="no-print flex items-center gap-1.5 cursor-pointer select-none text-xs text-gray-500 ml-2">
+          <button aria-label="Vorheriges Jahr" onClick={() => setYear(y => y - 1)} className={`px-2 py-1.5 min-w-[32px] text-sm ${BTN_SEKUNDAER}`}>‹</button>
+          <span className="px-3 py-1 font-bold text-schrift text-sm font-mono tabular-nums">{year}</span>
+          <button aria-label="Nächstes Jahr" onClick={() => setYear(y => y + 1)} className={`px-2 py-1.5 min-w-[32px] text-sm ${BTN_SEKUNDAER}`}>›</button>
+          <label className="no-print flex items-center gap-1.5 cursor-pointer select-none text-xs text-schrift-2 ml-2">
             <input
               type="checkbox"
               checked={showFormer}
@@ -2173,7 +2222,7 @@ export default function Urlaub() {
           </label>
           <button
             onClick={() => window.print()}
-            className="no-print ml-2 px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
+            className={`no-print ml-2 px-3 py-1.5 text-sm ${BTN_SEKUNDAER} flex items-center gap-1`}
             title="Seite drucken"
           >
             🖨️ <span className="hidden sm:inline">Drucken</span>
@@ -2184,7 +2233,7 @@ export default function Urlaub() {
                 .then(() => showToast('CSV exportiert ✓', 'success'))
                 .catch((e: Error) => showToast(`Export-Fehler: ${e.message}`, 'error'));
             }}
-            className="no-print px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
+            className={`no-print px-3 py-1.5 text-sm ${BTN_SEKUNDAER} flex items-center gap-1`}
             title="Abwesenheiten als CSV exportieren"
           >
             ⬇️ <span className="hidden sm:inline">CSV</span>
@@ -2195,7 +2244,7 @@ export default function Urlaub() {
                 .then(() => showToast('Excel exportiert ✓', 'success'))
                 .catch((e: Error) => showToast(`Export-Fehler: ${e.message}`, 'error'));
             }}
-            className="no-print px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
+            className={`no-print px-3 py-1.5 text-sm ${BTN_SEKUNDAER} flex items-center gap-1`}
             title="Abwesenheiten als Excel exportieren"
           >
             📊 <span className="hidden sm:inline">Excel</span>
@@ -2204,13 +2253,13 @@ export default function Urlaub() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-0.5 sm:gap-1 mb-4 border-b overflow-x-auto">
+      <div className="flex gap-0.5 sm:gap-1 mb-4 border-b border-kontur overflow-x-auto">
         {tabs.map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
             className={`px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-t-lg transition-colors flex items-center gap-1 whitespace-nowrap ${
               activeTab === tab.id
-                ? 'bg-white border border-b-white text-blue-600 -mb-px'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                ? 'bg-ebene border border-kontur border-b-ebene text-glut -mb-px'
+                : 'text-schrift-2 hover:text-schrift hover:bg-wash'
             }`}>
             <span>{tab.icon}</span> <span className="hidden sm:inline">{tab.label}</span>
           </button>

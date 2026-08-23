@@ -9,6 +9,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Multi-Arch-Release-Build repariert.** `npm ci` der Frontend-Build-Stage
+  hing im arm64-Teil des Docker-Release-Builds unter QEMU-Emulation
+  reproduzierbar fest (kein Output über >45 Minuten), wodurch für v1.23.0
+  keine Images erschienen sind. Die Frontend-Stage läuft jetzt nativ auf dem
+  Build-Host (`--platform=$BUILDPLATFORM`) — die erzeugte SPA-dist ist
+  architektur-unabhängig und wird in beide Zielarchitekturen kopiert.
+  Dieses Release ist damit die erste ausgelieferte Fassung der unter
+  [1.23.0] beschriebenen Änderungen.
+
 ---
 
 ## [1.23.0] - 2026-08-23

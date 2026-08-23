@@ -29,10 +29,10 @@ export function ThemeToggle({ size = 'sm' }: { size?: 'sm' | 'md' }) {
       className={`
         relative ${pill} flex-shrink-0
         ${isDark
-          ? 'bg-indigo-600 hover:bg-indigo-500'
-          : 'bg-slate-300 hover:bg-slate-400'}
+          ? 'bg-glut hover:brightness-110'
+          : 'bg-kontur hover:bg-schrift-3'}
         transition-colors duration-200 ease-in-out
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-glut focus-visible:ring-offset-2
       `}
       style={{ minHeight: 'unset', minWidth: 'unset' }}
     >

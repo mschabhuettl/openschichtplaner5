@@ -715,8 +715,8 @@ function AppInner() {
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[99999]
-                   focus:px-4 focus:py-2 focus:bg-white focus:text-slate-900 focus:rounded-lg
-                   focus:shadow-lg focus:text-sm focus:font-medium focus:ring-2 focus:ring-blue-500"
+                   focus:px-4 focus:py-2 focus:bg-ebene focus:text-schrift focus:rounded-lg
+                   focus:shadow-lg focus:text-sm focus:font-medium focus:ring-2 focus:ring-glut"
       >
         Zum Hauptinhalt springen
       </a>
@@ -824,7 +824,7 @@ function AppInner() {
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Menü öffnen"
-            className="flex items-center justify-center w-11 h-11 rounded-lg text-xl text-slate-300 hover:text-white hover:bg-slate-700 transition-colors flex-shrink-0"
+            className="flex items-center justify-center w-11 h-11 rounded-lg text-xl text-schrift-2 hover:text-schrift hover:bg-wash transition-colors flex-shrink-0"
           >
             ☰
           </button>
@@ -838,7 +838,7 @@ function AppInner() {
             onClick={() => setSpotlightOpen(true)}
             title="Schnellsuche"
             aria-label="Schnellsuche öffnen"
-            className="flex items-center justify-center w-11 h-11 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-colors text-base flex-shrink-0"
+            className="flex items-center justify-center w-11 h-11 rounded-lg text-schrift-2 hover:text-schrift hover:bg-wash transition-colors text-base flex-shrink-0"
           >
             🔍
           </button>

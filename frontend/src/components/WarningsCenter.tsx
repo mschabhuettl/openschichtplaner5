@@ -320,13 +320,13 @@ export default function WarningsCenter() {
         aria-label={totalUnread > 0 ? `Benachrichtigungen öffnen, ${totalUnread} ungelesen` : 'Benachrichtigungen öffnen'}
         aria-expanded={open}
         aria-haspopup="true"
-        className="relative text-slate-400 hover:text-white p-1 rounded hover:bg-slate-700 transition-colors"
+        className="relative text-schrift-2 hover:text-schrift p-1 rounded hover:bg-wash transition-colors"
       >
         <span aria-hidden="true" className="text-base leading-none">🔔</span>
         {totalUnread > 0 && (
           <span
             className="absolute -top-1 -right-1 inline-flex items-center justify-center
-                       min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white
+                       min-w-[16px] h-4 px-1 rounded-full bg-signal text-white dark:text-[#1a1108]
                        text-[10px] font-bold leading-none"
           >
             {totalUnread > 99 ? '99+' : totalUnread}

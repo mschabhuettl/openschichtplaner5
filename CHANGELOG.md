@@ -9,6 +9,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Design-System „Taktwerk" — flächige Migration abgeschlossen (T3).** Alle
+  verbliebenen Hauptansichten folgen jetzt dem Taktwerk-System (light + dark):
+  Urlaubsverwaltung, Mitarbeiter, Einsatzplan, Schichtarten, Gruppen,
+  Abwesenheitsarten, Abrechnungszeiträume, Feiertage, Arbeitsplätze,
+  Schichteinschränkungen und Zeitzuschläge — Datentabellen nach §5
+  (28px-Zeilen, Fläche-2-Köpfe, kein Zebra, font-mono-Zahlen), DBF-Rohfarben
+  durchgehend normalisiert (Dienste massiv, Abwesenheiten hohl, Tint+Spine
+  für Personen-/Gruppenfarben; Farb-Eingabefelder zeigen weiterhin den
+  Roh-Wert), Eigenbau-Modals auf die Dialog-Spezifikation, Primäraktionen als
+  Umkehrung, Destruktives in Signal. Ebenso tokenisiert: Shell-Reste
+  (Skip-Link, mobile Kopfleiste, Benachrichtigungs-Glocken, Theme-Umschalter,
+  Avatar-Initialen) und die Dashboard-Widgets „Erste Schritte" und
+  „System-Performance" (entampelt: gesund = neutral, Auffälliges = Glut,
+  Fehler = Signal). Browser-belegt: 15 Ansichten in beiden Modi ohne
+  Altklassen-Reste und ohne Seitenfehler.
+
 ### Added
 
 - **Selbst-seedende Demo-Instanzen.** Das All-in-One-Image kann ein leeres

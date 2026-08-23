@@ -1,0 +1,134 @@
+# ==============================================================================
+# OpenSchichtplaner5 — Demo-Instanzen (rein synthetische Daten)
+#
+# Vier unabhängige All-in-One-Instanzen (SPA + API je Container), die sich beim
+# ersten Start selbst mit einer eindeutig fiktiven Demo-Datenbank befüllen
+# (SP5_DEMO_SEED im Entrypoint: Fixtures + 120 Mitarbeiter, 13 Monate
+# Dienstplan, Abwesenheiten/Wünsche/Tauschanfragen). Demo-Logins:
+# admin / planer / leser (Passwort jeweils Test1234, via SP5_SEED_DEMO_USERS).
+#
+#   demo           :8090  aktuelles Release (ghcr :latest)
+#   demo-readonly  :8091  wie demo, komplette Instanz schreibgeschützt
+#   demo-coreonly  :8092  wie demo, nur Kern-Funktionsumfang des Originals
+#   dev            :8094  lokaler Build aus diesem Checkout (main)
+#
+# Jede Instanz hat EIGENE Named Volumes (Daten + Laufzeit-State) — kein Sharing.
+# Das Seeding läuft im Entrypoint VOR dem API-Start und nur in ein leeres
+# Daten-Verzeichnis; vorhandene Daten werden nie überschrieben.
+#
+# Start:   docker compose -f docker-compose.demo.yml up -d
+# Update:  docker compose -f docker-compose.demo.yml pull && \
+#          docker compose -f docker-compose.demo.yml up -d
+# Reset:   docker compose -f docker-compose.demo.yml down -v   (Volumes weg → neu geseedet)
+#
+# Self-contained: KEINE .env nötig. Alle Werte sind bewusst fest verdrahtet —
+# NUR für Demo-Zwecke, niemals für echte Daten oder Produktion verwenden.
+# ==============================================================================
+
+x-demo-env: &demo-env
+  # Fest-synthetischer Schlüssel — NUR Demo (öffentliche Instanzen mit rein
+  # fiktiven Daten). Für echte Deployments IMMER eigenen Schlüssel setzen!
+  SECRET_KEY: "demo-only-0f2a7c1e9b4d8a635e0c7f1b2d4a6c8e-nie-fuer-echte-daten"
+  SP5_DEV_MODE: "false"
+  SP5_DEMO_SEED: "1"
+  SP5_DEMO_EMPLOYEES: "120"
+  SP5_DEMO_MONTHS: "13"
+  SP5_SEED_DEMO_USERS: "1"
+
+x-demo-service: &demo-service
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+  tmpfs:
+    - /tmp
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+    # Erster Start seedet die Demo-DB (120 MA × 13 Monate) vor dem API-Start
+    start_period: 300s
+
+services:
+
+  demo:
+    <<: *demo-service
+    image: ghcr.io/mschabhuettl/openschichtplaner5:latest
+    pull_policy: always
+    ports:
+      - "8090:8000"
+    environment:
+      <<: *demo-env
+      ALLOWED_ORIGINS: "http://192.168.11.114:8090,http://localhost:8090"
+    volumes:
+      - demo_data:/app/data
+      - demo_state:/app/backend/data
+      - demo_api_state:/app/backend/api
+      - demo_backups:/app/backend/backups
+
+  demo-readonly:
+    <<: *demo-service
+    image: ghcr.io/mschabhuettl/openschichtplaner5:latest
+    pull_policy: always
+    ports:
+      - "8091:8000"
+    environment:
+      <<: *demo-env
+      # Seeding läuft davon unberührt im Entrypoint (vor dem API-Start);
+      # SP5_READONLY schützt danach die komplette HTTP-Schreibschicht.
+      SP5_READONLY: "true"
+      ALLOWED_ORIGINS: "http://192.168.11.114:8091,http://localhost:8091"
+    volumes:
+      - demo_ro_data:/app/data
+      - demo_ro_state:/app/backend/data
+      - demo_ro_api_state:/app/backend/api
+      - demo_ro_backups:/app/backend/backups
+
+  demo-coreonly:
+    <<: *demo-service
+    image: ghcr.io/mschabhuettl/openschichtplaner5:latest
+    pull_policy: always
+    ports:
+      - "8092:8000"
+    environment:
+      <<: *demo-env
+      SP5_CORE_ONLY: "true"
+      ALLOWED_ORIGINS: "http://192.168.11.114:8092,http://localhost:8092"
+    volumes:
+      - demo_core_data:/app/data
+      - demo_core_state:/app/backend/data
+      - demo_core_api_state:/app/backend/api
+      - demo_core_backups:/app/backend/backups
+
+  dev:
+    <<: *demo-service
+    build:
+      context: .
+    ports:
+      - "8094:8000"
+    environment:
+      <<: *demo-env
+      ALLOWED_ORIGINS: "http://192.168.11.114:8094,http://localhost:8094"
+    volumes:
+      - dev_data:/app/data
+      - dev_state:/app/backend/data
+      - dev_api_state:/app/backend/api
+      - dev_backups:/app/backend/backups
+
+volumes:
+  demo_data:
+  demo_state:
+  demo_api_state:
+  demo_backups:
+  demo_ro_data:
+  demo_ro_state:
+  demo_ro_api_state:
+  demo_ro_backups:
+  demo_core_data:
+  demo_core_state:
+  demo_core_api_state:
+  demo_core_backups:
+  dev_data:
+  dev_state:
+  dev_api_state:
+  dev_backups:

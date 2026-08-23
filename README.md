@@ -126,6 +126,27 @@ and runs inside the API process (a separate "lib service" would only add
 network overhead without any isolation benefit). Details in
 [docs/architecture.md](docs/architecture.md).
 
+### Demo instances (synthetic data)
+
+`docker-compose.demo.yml` runs self-seeding demo instances: on first start —
+and only into an **empty** data volume — the entrypoint copies the bundled
+schema fixtures and generates a clearly fictitious dataset (120 employees,
+~13 months of shift plans, plus absences, wishes and swap requests spread
+over the year) before the API starts:
+
+```bash
+docker compose -f docker-compose.demo.yml up -d   # demo :8090, read-only :8091, core-only :8092, local build :8094
+docker compose -f docker-compose.demo.yml pull && \
+  docker compose -f docker-compose.demo.yml up -d # update to the latest release
+```
+
+Seeding is controlled by `SP5_DEMO_SEED` (enable), `SP5_DEMO_EMPLOYEES`
+(default 120) and `SP5_DEMO_MONTHS` (default 13). A `.demo-seeded` marker
+prevents re-seeding and a data directory that already contains a database is
+never touched — still, these instances are **demo only**: the compose file
+ships a fixed synthetic `SECRET_KEY` and the demo logins listed above. Never
+use it for real data or production.
+
 ### Local without Docker
 
 Prerequisites: Python 3.12+, Node.js 20+, access to the SP5 `.DBF` files.

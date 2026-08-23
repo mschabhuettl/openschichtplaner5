@@ -176,8 +176,14 @@ Swagger/ReDoc unter `/docs` bzw. `/redoc` (vom API-Paket geliefert).
 Frontend-Build (nur bei Änderung) → `uvicorn sp5api.main:app` mit `SP5_BACKEND_DIR`
 (PID-Datei `/tmp/sp5-backend.pid`).
 
-**Python-Skripte:** `scripts/seed_demo_data.py` (Demo-MA/Gruppen/Schichten),
-`scripts/generate_demo_schedule.py <daten_dir>` (realistischer Demo-Plan, idempotent),
+**Python-Skripte:** `scripts/seed_demo_data.py` (fiktive Demo-MA/Bewegungsdaten;
+skaliert über `--employees`/`--months`), `scripts/generate_demo_schedule.py
+<daten_dir>` (realistischer Demo-Plan, idempotent; große Volumina in O(n) über
+die sp5lib-Schreibpfade). Beide sind ins Image kopiert: der Entrypoint befüllt
+mit `SP5_DEMO_SEED=1` ein **leeres** Daten-Verzeichnis vor dem API-Start selbst
+(Fixtures → seed → generate, Marker `.demo-seeded`; siehe
+`docker-compose.demo.yml` für vier so geseedete Demo-Instanzen).
+Weitere Skripte:
 `backend/scripts/seed_postgresql.py` (DBF → PostgreSQL Voll-Sync),
 `backend/scripts/migrate_add_company.py` (idempotente Company-Migration),
 `take_screenshots.py` (Playwright-Screenshots aller Seiten → `docs/screenshots/`),

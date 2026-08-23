@@ -9,6 +9,30 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Selbst-seedende Demo-Instanzen.** Das All-in-One-Image kann ein leeres
+  Daten-Verzeichnis beim ersten Start selbst mit einer rein synthetischen
+  Demo-Datenbank befüllen (`SP5_DEMO_SEED=1`, Umfang über `SP5_DEMO_EMPLOYEES`
+  = Default 120 und `SP5_DEMO_MONTHS` = Default 13): Fixtures plus fiktive
+  Mitarbeiter (kombinatorisch erweiterter Muster-Namens-Pool, Team-Zuordnung,
+  Teilzeit-Profile), ~13 Monate rotierender Dienstplan sowie über das Jahr
+  verteilte Abwesenheiten, Wünsche, Tauschanfragen, Urlaubsansprüche und
+  Personalbedarf. Ein bereits befülltes Daten-Verzeichnis wird nie angetastet
+  (5EMPL-Erkennung + `.demo-seeded`-Marker); ein Fehler im Seed räumt den
+  halben Stand weg und bricht den Container-Start ab. Die Seed-Skripte
+  skalieren dafür jetzt (`seed_demo_data.py --employees/--months`,
+  `generate_demo_schedule.py --months`) und schreiben große Volumina in O(n)
+  über die sp5lib-Schreibpfade — 30–50k Dienstplan-Sätze in Sekunden statt
+  Minuten (IDs vorab fortlaufend vergeben, Änderungsjournal 5MASHI-L in
+  derselben Reihenfolge nachgezogen, byte-identisch zu Einzel-Writes).
+- **`docker-compose.demo.yml`.** Self-contained Compose-Datei (keine `.env`
+  nötig) für vier unabhängige Demo-Instanzen: aktuelles Release auf :8090,
+  schreibgeschützt (`SP5_READONLY`) auf :8091, Core-Modus (`SP5_CORE_ONLY`)
+  auf :8092 und der lokale main-Build auf :8094 — je Instanz eigene Named
+  Volumes für Daten und Laufzeit-State, Demo-Konten via
+  `SP5_SEED_DEMO_USERS`, Update per `pull && up -d`.
+
 ---
 
 ## [1.22.0] - 2026-07-21

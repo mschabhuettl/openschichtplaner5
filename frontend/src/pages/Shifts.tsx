@@ -9,6 +9,8 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { HelpTooltip } from '../components/HelpTooltip';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import ReorderDialog from '../components/ReorderDialog';
+import { Badge as StatusPille } from '../components/Badge';
+import { Badge as DienstChip } from '../components/ui/Badge';
 import {
   DAY_TYPES,
   validateStartend,
@@ -42,6 +44,13 @@ interface ShiftForm {
 }
 
 const emptyDays = (): DayTimeRow[] => Array.from({ length: 8 }, () => ({ startend: '', duration: 0 }));
+
+// Taktwerk-Basisklassen (docs/design-system.md §1/§3/§6)
+const EINGABE = 'bg-ebene-2 border border-kontur rounded-ui text-schrift placeholder:text-schrift-3 focus:outline-none focus:border-glut focus:shadow-[0_0_0_3px_rgba(201,106,20,.12)] dark:focus:shadow-[0_0_0_3px_rgba(240,163,92,.15)]';
+const EINGABE_FEHLER = 'bg-ebene-2 border border-signal rounded-ui text-schrift placeholder:text-schrift-3 focus:outline-none focus:shadow-[0_0_0_3px_rgba(190,59,59,.15)]';
+const BTN_PRIMAER = 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold rounded-ui hover:opacity-90 transition-opacity';
+const BTN_SEKUNDAER = 'bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-schrift hover:bg-wash transition-colors';
+const ZEILEN_HOVER = 'hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)]';
 
 const EMPTY_FORM: ShiftForm = {
   NAME: '',
@@ -89,7 +98,10 @@ export default function Shifts() {
     if (shiftSortKey === key) setShiftSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setShiftSortKey(key); setShiftSortDir('asc'); }
   };
-  const shiftSortIcon = (key: ShiftSortKey) => shiftSortKey === key ? (shiftSortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕';
+  // Taktwerk-Sortpfeil: aktive Spalte Glut, inaktiv gedämpftes ↕
+  const shiftSortIcon = (key: ShiftSortKey) => shiftSortKey === key
+    ? <span className="ml-1 text-glut">{shiftSortDir === 'asc' ? '▴' : '▾'}</span>
+    : <span className="ml-1 text-schrift-3 opacity-50">↕</span>;
 
   const sortedShifts = useMemo(() => {
     const q = debouncedShiftSearch.toLowerCase();
@@ -227,7 +239,7 @@ export default function Shifts() {
   return (
     <div className="p-4 sm:p-6">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h1 className="text-xl font-bold text-gray-800">
+        <h1 className="text-xl font-extrabold tracking-[-0.02em] text-schrift">
           🕐 Schichtarten ({sortedShifts.length}{sortedShifts.length !== shifts.length ? ` / ${shifts.length}` : ''})
         </h1>
         <div className="flex items-center gap-2 flex-wrap">
@@ -236,17 +248,17 @@ export default function Shifts() {
             placeholder="🔍 Suchen..."
             value={shiftSearch}
             onChange={e => setShiftSearch(e.target.value)}
-            className="px-3 py-1.5 border rounded shadow-sm text-sm w-40"
+            className={`px-3 py-1.5 text-sm w-40 ${EINGABE}`}
           />
           {shiftSearch && (
             <button
               onClick={() => setShiftSearch('')}
-              className="px-2 py-1.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded border border-red-200"
+              className={`px-2 py-1.5 text-xs ${BTN_SEKUNDAER}`}
               title="Suche zurücksetzen" aria-label="Suche zurücksetzen"
             >✕</button>
           )}
           {hiddenShiftCount > 0 && (
-            <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer select-none whitespace-nowrap">
+            <label className="flex items-center gap-1.5 text-sm text-schrift-2 cursor-pointer select-none whitespace-nowrap">
               <input
                 type="checkbox"
                 checked={showHidden}
@@ -257,21 +269,21 @@ export default function Shifts() {
           )}
           <button
             onClick={() => window.print()}
-            className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
+            className={`no-print px-3 py-1.5 text-sm flex items-center gap-1 ${BTN_SEKUNDAER}`}
             title="Seite drucken"
           >
             🖨️ <span className="hidden sm:inline">Drucken</span>
           </button>
           {canAdmin && shifts.length > 1 && <button
             onClick={() => setShowReorder(true)}
-            className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm"
+            className={`no-print px-3 py-1.5 text-sm ${BTN_SEKUNDAER}`}
             title="Reihenfolge der Schichtarten manuell festlegen"
           >
             ↕ <span className="hidden sm:inline">Reihenfolge</span>
           </button>}
           {canAdmin && <button
             onClick={openCreate}
-            className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
+            className={`px-3 py-1.5 text-sm ${BTN_PRIMAER}`}
           >
             + Neu
           </button>}
@@ -281,72 +293,66 @@ export default function Shifts() {
         <LoadingSpinner />
       ) : (
         <>
-          {/* Desktop: Table layout */}
-          <div className="bg-white rounded-lg shadow overflow-x-auto">
+          {/* Desktop: Table layout (Taktwerk-Datentabelle: Kopf Fläche 2, Zeilen 28px, kein Zebra) */}
+          <div className="bg-ebene border border-kontur rounded-panel overflow-x-auto">
             <table className="w-full text-sm min-w-[600px]">
-              <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
-                <tr>
-                  <th scope="col" className="px-4 py-2 text-left">Farbe</th>
-                  <th scope="col" className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleShiftSort('name')}>Name{shiftSortIcon('name')}</th>
-                  <th scope="col" className="px-4 py-2 text-left cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleShiftSort('shortname')}>Kürzel{shiftSortIcon('shortname')}</th>
-                  <th scope="col" className="px-4 py-2 text-center">Mo–Fr</th>
-                  <th scope="col" className="px-4 py-2 text-center">Sa</th>
-                  <th scope="col" className="px-4 py-2 text-center">So</th>
-                  <th scope="col" className="px-4 py-2 text-right cursor-pointer hover:bg-slate-600 select-none whitespace-nowrap" onClick={() => handleShiftSort('duration')}>Dauer (Mo){shiftSortIcon('duration')}</th>
-                  <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
+              <thead className="bg-[#fafbfc] dark:bg-[#0e1522] text-[9px] font-bold uppercase tracking-[.08em]">
+                <tr className="border-b border-kontur">
+                  <th scope="col" className="px-4 py-2 text-left text-schrift-3">Farbe</th>
+                  <th scope="col" className={`px-4 py-2 text-left cursor-pointer select-none whitespace-nowrap ${ZEILEN_HOVER} ${shiftSortKey === 'name' ? 'text-schrift' : 'text-schrift-3'}`} onClick={() => handleShiftSort('name')}>Name{shiftSortIcon('name')}</th>
+                  <th scope="col" className={`px-4 py-2 text-left cursor-pointer select-none whitespace-nowrap ${ZEILEN_HOVER} ${shiftSortKey === 'shortname' ? 'text-schrift' : 'text-schrift-3'}`} onClick={() => handleShiftSort('shortname')}>Kürzel{shiftSortIcon('shortname')}</th>
+                  <th scope="col" className="px-4 py-2 text-center text-schrift-3">Mo–Fr</th>
+                  <th scope="col" className="px-4 py-2 text-center text-schrift-3">Sa</th>
+                  <th scope="col" className="px-4 py-2 text-center text-schrift-3">So</th>
+                  <th scope="col" className={`px-4 py-2 text-right cursor-pointer select-none whitespace-nowrap ${ZEILEN_HOVER} ${shiftSortKey === 'duration' ? 'text-schrift' : 'text-schrift-3'}`} onClick={() => handleShiftSort('duration')}>Dauer (Mo){shiftSortIcon('duration')}</th>
+                  <th scope="col" className="px-4 py-2 text-center text-schrift-3">Aktionen</th>
                 </tr>
               </thead>
               <tbody>
-                {sortedShifts.map((s, i) => {
+                {sortedShifts.map((s) => {
                   const times = s.TIMES_BY_WEEKDAY || {};
                   const weekdayTime = times['0'] || null;
                   const satTime = times['5'] || null;
                   const sunTime = times['6'] || null;
                   const indiv = hasIndividualTimes(s);
                   return (
-                    <tr key={s.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors ${s.HIDE ? 'opacity-60' : ''}`}>
-                      <td className="px-4 py-2">
-                        <div
-                          className="w-8 h-6 rounded border border-gray-300 flex items-center justify-center text-[10px] font-bold"
-                          style={{ backgroundColor: s.COLORBK_HEX, color: s.COLORBK_LIGHT ? '#333' : '#fff' }}
-                        >
-                          {s.SHORTNAME}
-                        </div>
+                    <tr key={s.ID} className={`h-[28px] border-b border-kontur-soft ${ZEILEN_HOVER} transition-colors ${s.HIDE ? 'opacity-60' : ''}`}>
+                      <td className="px-4 py-1">
+                        {/* Normalisierter 19px-Dienst-Chip (Rohfarbe wird nie direkt gerendert) */}
+                        <DienstChip label={s.SHORTNAME || ''} bgColor={s.COLORBK_HEX} />
                       </td>
-                      <td className="px-4 py-2 font-semibold">
+                      <td className="px-4 py-1 font-semibold text-schrift">
                         {s.NAME}
                         {s.HIDE && (
-                          <span className="ml-2 inline-block px-1.5 py-0.5 text-[10px] font-medium rounded bg-gray-200 text-gray-600 align-middle">
-                            Ausgeblendet
-                          </span>
+                          <StatusPille variant="gray" className="ml-2 align-middle">Ausgeblendet</StatusPille>
                         )}
                       </td>
-                      <td className="px-4 py-2 text-gray-500">{s.SHORTNAME}</td>
-                      <td className="px-4 py-2 text-center text-gray-600 font-mono text-xs">
+                      <td className="px-4 py-1 text-schrift-2">{s.SHORTNAME}</td>
+                      <td className="px-4 py-1 text-center text-schrift-2 font-mono tabular-nums text-xs">
                         {indiv
-                          ? <span className="text-purple-600 font-semibold">Individuell</span>
+                          ? <span className="font-sans font-semibold text-schrift-2">Individuell</span>
                           : weekdayTime ? `${weekdayTime.start}–${weekdayTime.end}` : '—'}
                       </td>
-                      <td className="px-4 py-2 text-center text-gray-500 font-mono text-xs">
+                      <td className="px-4 py-1 text-center text-schrift-2 font-mono tabular-nums text-xs">
                         {indiv ? '' : satTime ? `${satTime.start}–${satTime.end}` : '—'}
                       </td>
-                      <td className="px-4 py-2 text-center text-gray-500 font-mono text-xs">
+                      <td className="px-4 py-1 text-center text-schrift-2 font-mono tabular-nums text-xs">
                         {indiv ? '' : sunTime ? `${sunTime.start}–${sunTime.end}` : '—'}
                       </td>
-                      <td className="px-4 py-2 text-right text-gray-600">
+                      <td className="px-4 py-1 text-right text-schrift font-mono tabular-nums">
                         {s.DURATION0 ? `${s.DURATION0}h` : '—'}
                       </td>
-                      <td className="px-4 py-2 text-center">
+                      <td className="px-4 py-1 text-center">
                         <div className="flex gap-1 justify-center">
-                          {canAdmin && <button onClick={() => openEdit(s)} className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>}
-                          {canAdmin && <button onClick={() => handleDelete(s)} className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Ausblenden</button>}
+                          {canAdmin && <button onClick={() => openEdit(s)} className={`px-2 py-0.5 text-xs ${BTN_SEKUNDAER}`}>Bearbeiten</button>}
+                          {canAdmin && <button onClick={() => handleDelete(s)} className="px-2 py-0.5 text-xs border border-kontur rounded-ui text-signal hover:bg-signal-flaeche transition-colors">Ausblenden</button>}
                         </div>
                       </td>
                     </tr>
                   );
                 })}
                 {shifts.length === 0 && (
-                  <tr><td colSpan={8} className="text-center py-8 text-gray-600">Keine Schichtarten</td></tr>
+                  <tr><td colSpan={8} className="text-center py-8 text-schrift-2">Keine Schichtarten</td></tr>
                 )}
               </tbody>
             </table>
@@ -359,26 +365,26 @@ export default function Shifts() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn">
-          <div className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">
+          <div className="bg-ebene rounded-[10px] shadow-dialog dark:shadow-dialog-dark dark:border dark:border-kontur animate-scaleIn w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="px-5 py-3 text-[13px] font-bold text-schrift border-b border-kontur">
               {editId !== null ? 'Schichtart bearbeiten' : 'Neue Schichtart'}
             </h2>
-            {error && <div className="mb-3 p-2 bg-red-50 text-red-700 rounded text-sm">{error}</div>}
-            <div className="space-y-3">
+            {error && <div className="mx-5 mt-3 p-2 bg-signal-flaeche border border-[#eecfcf] dark:border-[#5a2626] text-signal rounded-ui text-sm">{error}</div>}
+            <div className="space-y-3 px-5 py-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Name *</label>
+                <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Name *</label>
                 <input
                   type="text"
                   autoFocus value={form.NAME}
                   aria-label="Name"
                   required aria-required="true"
                   onChange={e => { setForm(f => ({ ...f, NAME: e.target.value })); if (error?.includes('Bezeichnung')) setError(null); }}
-                  className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 ${!form.NAME.trim() && error?.includes('Bezeichnung') ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-500'}`}
+                  className={`w-full px-3 py-2 text-sm ${!form.NAME.trim() && error?.includes('Bezeichnung') ? EINGABE_FEHLER : EINGABE}`}
                 />
-                {!form.NAME.trim() && error?.includes('Bezeichnung') && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
+                {!form.NAME.trim() && error?.includes('Bezeichnung') && <p className="text-signal text-xs mt-0.5">Pflichtfeld</p>}
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1 flex items-center gap-1">
+                <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1 flex items-center gap-1">
                   Kürzel *
                   <HelpTooltip text={"Kurzes Kürzel für die Schicht (1–4 Zeichen), das im Dienstplan angezeigt wird.\nBeispiel: F = Frühschicht, S = Spätschicht, N = Nachtschicht"} position="right" />
                 </label>
@@ -388,51 +394,55 @@ export default function Shifts() {
                   aria-label="Kürzel"
                   required aria-required="true"
                   onChange={e => { setForm(f => ({ ...f, SHORTNAME: e.target.value })); if (error?.includes('Kürzel')) setError(null); }}
-                  className={`w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 ${!form.SHORTNAME.trim() && error?.includes('Kürzel') ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-500'}`}
+                  className={`w-full px-3 py-2 text-sm ${!form.SHORTNAME.trim() && error?.includes('Kürzel') ? EINGABE_FEHLER : EINGABE}`}
                 />
-                {!form.SHORTNAME.trim() && error?.includes('Kürzel') && <p className="text-red-500 text-xs mt-0.5">Pflichtfeld</p>}
+                {!form.SHORTNAME.trim() && error?.includes('Kürzel') && <p className="text-signal text-xs mt-0.5">Pflichtfeld</p>}
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Farben</label>
+                <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Farben</label>
                 <div className="flex items-center gap-3 flex-wrap">
-                  <label className="flex items-center gap-1.5 text-xs text-gray-600">
+                  <label className="flex items-center gap-1.5 text-xs text-schrift-2">
                     <input
                       type="color"
                       aria-label="Hintergrundfarbe"
                       value={form.colorHex}
                       onChange={e => setForm(f => ({ ...f, colorHex: e.target.value }))}
-                      className="w-10 h-9 rounded border cursor-pointer"
+                      className="w-10 h-9 rounded-ui border border-kontur cursor-pointer"
                     />
                     Hintergrund
                   </label>
-                  <label className="flex items-center gap-1.5 text-xs text-gray-600">
+                  <label className="flex items-center gap-1.5 text-xs text-schrift-2">
                     <input
                       type="color"
                       aria-label="Textfarbe"
                       value={form.colorTextHex}
                       onChange={e => setForm(f => ({ ...f, colorTextHex: e.target.value }))}
-                      className="w-10 h-9 rounded border cursor-pointer"
+                      className="w-10 h-9 rounded-ui border border-kontur cursor-pointer"
                     />
                     Text
                   </label>
-                  <label className="flex items-center gap-1.5 text-xs text-gray-600">
+                  <label className="flex items-center gap-1.5 text-xs text-schrift-2">
                     <input
                       type="color"
                       aria-label="Balkenfarbe"
                       value={form.colorBarHex}
                       onChange={e => setForm(f => ({ ...f, colorBarHex: e.target.value }))}
-                      className="w-10 h-9 rounded border cursor-pointer"
+                      className="w-10 h-9 rounded-ui border border-kontur cursor-pointer"
                     />
                     Balken
                   </label>
+                  {/* Rohfarben-Vorschau: zeigt bewusst den DBF-Wert, den der Nutzer bearbeitet */}
                   <div
-                    className="flex-1 min-w-[5rem] h-9 rounded border border-gray-200 flex items-center justify-center text-sm"
+                    className="flex-1 min-w-[5rem] h-9 rounded-ui border border-kontur flex items-center justify-center text-sm"
+                    title="Rohfarbe (DBF-Wert)"
                     style={{ backgroundColor: form.colorHex, color: form.colorTextHex, borderLeft: `5px solid ${form.colorBarHex}`, fontWeight: form.bold ? 'bold' : 'normal' }}
                   >
                     {form.SHORTNAME || form.NAME}
                   </div>
+                  {/* Daneben die normalisierte Darstellung, wie sie im Plan erscheint */}
+                  <DienstChip label={form.SHORTNAME || form.NAME || '—'} bgColor={form.colorHex} title="Darstellung im Plan (normalisiert)" />
                 </div>
-                <label className="flex items-center gap-1.5 text-xs text-gray-600 mt-2">
+                <label className="flex items-center gap-1.5 text-xs text-schrift-2 mt-2">
                   <input
                     type="checkbox"
                     aria-label="Fette Schrift"
@@ -444,9 +454,9 @@ export default function Shifts() {
               </div>
 
               {/* Zeiten-Tabelle: 8 Tagestypen Mo..So + Ft (R5.5-4..R5.5-13) */}
-              <div className="border rounded-lg p-3 bg-gray-50">
+              <div className="border border-kontur rounded-panel p-3 bg-ebene">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold text-gray-700 flex items-center gap-1">
+                  <span className="text-[10px] font-bold uppercase tracking-[.08em] text-schrift-3 flex items-center gap-1">
                     ⏱️ Zeiten je Tagestyp
                     <HelpTooltip text={'Bis zu drei Zeiträume je Tagestyp, leerzeichengetrennt:\n06:00-10:00 14:00-18:00\nLeer = Schichtart an diesem Tag nicht gültig.\n"Ft" = Feiertag (eigener 8. Tagestyp).'} position="right" />
                   </span>
@@ -457,7 +467,7 @@ export default function Shifts() {
                       const days = f.days.map((d, i) => (i >= 1 && i <= 6 ? { ...mo } : d));
                       return { ...f, days };
                     })}
-                    className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                    className="text-xs text-schrift-2 hover:text-schrift hover:underline"
                     title="Zeiten und Arbeitszeit von Mo auf Di–So übertragen"
                   >
                     Mo → Di–So übernehmen
@@ -465,10 +475,10 @@ export default function Shifts() {
                 </div>
                 <table className="w-full text-xs border-collapse">
                   <thead>
-                    <tr className="bg-gray-100">
-                      <th scope="col" className="text-left px-2 py-1 text-gray-600 w-10">Tag</th>
-                      <th scope="col" className="text-left px-2 py-1 text-gray-600">Zeiträume (max. 3)</th>
-                      <th scope="col" className="text-left px-2 py-1 text-gray-600 w-24">Arbeitszeit (h)</th>
+                    <tr className="bg-[#fafbfc] dark:bg-[#0e1522] border-b border-kontur">
+                      <th scope="col" className="text-left px-2 py-1 text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3 w-10">Tag</th>
+                      <th scope="col" className="text-left px-2 py-1 text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3">Zeiträume (max. 3)</th>
+                      <th scope="col" className="text-left px-2 py-1 text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3 w-24">Arbeitszeit (h)</th>
                       <th scope="col" className="px-1 py-1 w-8"><span className="sr-only">Berechnen</span></th>
                     </tr>
                   </thead>
@@ -476,8 +486,8 @@ export default function Shifts() {
                     {DAY_TYPES.map((day, i) => {
                       const rowErr = validateStartend(form.days[i].startend);
                       return (
-                        <tr key={day} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className={`px-2 py-1 font-semibold ${i === 7 ? 'text-red-600' : 'text-gray-700'}`} title={i === 7 ? 'Feiertag' : undefined}>{day}</td>
+                        <tr key={day} className="border-b border-kontur-soft">
+                          <td className={`px-2 py-1 font-semibold ${i === 7 ? 'text-signal' : 'text-schrift-2'}`} title={i === 7 ? 'Feiertag' : undefined}>{day}</td>
                           <td className="px-1 py-0.5">
                             <input
                               type="text"
@@ -489,7 +499,7 @@ export default function Shifts() {
                                 days[i] = { ...days[i], startend: e.target.value };
                                 setForm(f => ({ ...f, days }));
                               }}
-                              className={`w-full px-1 py-1 border rounded text-xs font-mono focus:outline-none focus:ring-1 ${rowErr ? 'border-red-400 focus:ring-red-400' : 'focus:ring-blue-400'}`}
+                              className={`w-full px-1 py-1 text-xs font-mono tabular-nums ${rowErr ? EINGABE_FEHLER : EINGABE}`}
                             />
                           </td>
                           <td className="px-1 py-0.5">
@@ -505,7 +515,7 @@ export default function Shifts() {
                                 days[i] = { ...days[i], duration: parseFloat(e.target.value) || 0 };
                                 setForm(f => ({ ...f, days }));
                               }}
-                              className="w-full px-1 py-1 border rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-400"
+                              className={`w-full px-1 py-1 text-xs font-mono tabular-nums ${EINGABE}`}
                             />
                           </td>
                           <td className="px-1 py-0.5 text-center">
@@ -517,7 +527,7 @@ export default function Shifts() {
                                 setForm(f => ({ ...f, days }));
                               }}
                               disabled={!!rowErr || !form.days[i].startend.trim()}
-                              className="px-1.5 py-1 rounded border text-xs hover:bg-blue-50 disabled:opacity-40"
+                              className={`px-1.5 py-1 text-xs ${BTN_SEKUNDAER} disabled:opacity-40`}
                               title={`Arbeitszeit ${day} aus den Zeiträumen berechnen`}
                               aria-label={`Arbeitszeit ${day} berechnen`}
                             >
@@ -529,14 +539,14 @@ export default function Shifts() {
                     })}
                   </tbody>
                 </table>
-                <p className="mt-2 text-[11px] text-gray-500 leading-snug">
+                <p className="mt-2 text-[11px] text-schrift-3 leading-snug">
                   Ende ≤ Beginn bedeutet Tageswechsel (z. B. 22:00-06:00 endet am Folgetag).
                   Leere Zeile = Schichtart an diesem Tag nicht gültig. Die Arbeitszeit ist frei
                   setzbar (z. B. für Pausenabzug) — 🧮 berechnet die Summe der Zeiträume.
                 </p>
               </div>
 
-              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-schrift-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={form.NOEXTRA}
@@ -545,7 +555,7 @@ export default function Shifts() {
                 Keine Arbeitszeitzuschläge berechnen
               </label>
 
-              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-schrift-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={form.HIDE}
@@ -554,14 +564,15 @@ export default function Shifts() {
                 Ausgeblendet
               </label>
             </div>
-            <div className="flex gap-2 mt-5 justify-end">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200">Abbrechen</button>
+            {/* Dialog-Fußzeile auf Fläche 2 (Taktwerk §7) */}
+            <div className="flex gap-2 justify-end px-5 py-3 bg-[#fafbfc] dark:bg-[#0e1522] border-t border-kontur">
+              <button onClick={() => setShowModal(false)} className={`px-4 py-2 text-sm ${BTN_SEKUNDAER}`}>Abbrechen</button>
               <button
                 onClick={handleSave}
                 disabled={saving || !form.NAME.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 disabled:opacity-50"
+                className={`px-4 py-2 text-sm ${BTN_PRIMAER} disabled:opacity-50`}
               >
-                {saving ? <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" /> : null}
+                {saving ? <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-1" /> : null}
                 Speichern
               </button>
             </div>

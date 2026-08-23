@@ -188,25 +188,25 @@ export default function Workplaces() {
       {/* Left: Workplaces list */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-xl font-bold text-gray-800">🏭 Arbeitsplätze ({workplaces.length})</h1>
+          <h1 className="text-xl font-extrabold tracking-[-0.02em] text-schrift">🏭 Arbeitsplätze ({workplaces.length})</h1>
           <div className="flex items-center gap-2">
             <button
               onClick={() => window.print()}
-              className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
+              className="no-print px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur hover:bg-wash text-schrift text-sm rounded-ui flex items-center gap-1"
               title="Seite drucken"
             >
               🖨️ <span className="hidden sm:inline">Drucken</span>
             </button>
             {canAdmin && workplaces.length > 1 && <button
               onClick={() => setShowReorder(true)}
-              className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm"
+              className="no-print px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur hover:bg-wash text-schrift text-sm rounded-ui"
               title="Reihenfolge der Arbeitsplätze manuell festlegen"
             >
               ↕ <span className="hidden sm:inline">Reihenfolge</span>
             </button>}
             {canAdmin && <button
               onClick={openCreate}
-              className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
+              className="px-3 py-1.5 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui text-sm font-semibold hover:opacity-90 transition-opacity"
             >
               + Neu
             </button>}
@@ -222,10 +222,10 @@ export default function Workplaces() {
               placeholder="🔍 Arbeitsplatz suchen…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full sm:w-72 px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-full sm:w-72 px-3 py-1.5 border border-kontur rounded-ui text-sm bg-ebene dark:bg-ebene-2 text-schrift placeholder:text-schrift-3 focus:outline-none focus:border-glut focus:ring-[3px] focus:ring-[rgba(201,106,20,.12)] dark:focus:ring-[rgba(240,163,92,.15)]"
             />
             {workplaces.some(w => w.HIDE) && (
-              <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer select-none whitespace-nowrap">
+              <label className="flex items-center gap-1.5 text-sm text-schrift cursor-pointer select-none whitespace-nowrap">
                 <input
                   type="checkbox"
                   checked={showHidden}
@@ -235,46 +235,46 @@ export default function Workplaces() {
               </label>
             )}
           </div>
-          <div className="bg-white rounded-lg shadow overflow-x-auto">
+          <div className="bg-ebene rounded-panel border border-kontur overflow-x-auto">
             <table className="w-full text-sm min-w-[500px]">
-              <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
+              <thead className="bg-[#fafbfc] dark:bg-[#0e1522]">
                 <tr>
-                  <th scope="col" className="px-4 py-2 text-left">Name</th>
-                  <th scope="col" className="px-4 py-2 text-left">Kürzel</th>
-                  <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
+                  <th scope="col" className="px-4 py-[6px] text-left text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3 border-b border-kontur">Name</th>
+                  <th scope="col" className="px-4 py-[6px] text-left text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3 border-b border-kontur">Kürzel</th>
+                  <th scope="col" className="px-4 py-[6px] text-center text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3 border-b border-kontur">Aktionen</th>
                 </tr>
               </thead>
               <tbody>
-                {workplaces.filter(w => showHidden || !w.HIDE).filter(w => !search || w.NAME.toLowerCase().includes(search.toLowerCase()) || (w.SHORTNAME || '').toLowerCase().includes(search.toLowerCase())).map((w, i) => (
+                {workplaces.filter(w => showHidden || !w.HIDE).filter(w => !search || w.NAME.toLowerCase().includes(search.toLowerCase()) || (w.SHORTNAME || '').toLowerCase().includes(search.toLowerCase())).map(w => (
                   <tr
                     key={w.ID}
-                    className={`border-b cursor-pointer ${
+                    className={`h-[28px] border-b border-kontur-soft cursor-pointer ${
                       selectedWp?.ID === w.ID
-                        ? 'bg-blue-50 border-blue-200'
-                        : i % 2 === 0 ? 'bg-white' : 'bg-gray-50'
-                    } hover:bg-blue-50 transition-colors ${w.HIDE ? 'opacity-60' : ''}`}
+                        ? 'bg-[rgba(201,106,20,.07)] dark:bg-[rgba(240,163,92,.10)] shadow-[inset_2px_0_0_var(--glut)]'
+                        : 'hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)]'
+                    } transition-colors ${w.HIDE ? 'opacity-60' : ''}`}
                     onClick={() => openDetail(w)}
                   >
-                    <td className="px-4 py-2 font-semibold">
+                    <td className="px-4 py-0 font-semibold text-schrift">
                       {w.NAME}
                       {w.HIDE && (
-                        <span className="ml-2 inline-block px-1.5 py-0.5 text-[10px] font-medium rounded bg-gray-200 text-gray-600 align-middle">
+                        <span className="ml-2 inline-block px-1.5 py-0.5 text-[10px] font-medium rounded-cell bg-wash text-schrift-2 border border-kontur align-middle">
                           Ausgeblendet
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-2 text-gray-500">{w.SHORTNAME}</td>
-                    <td className="px-4 py-2 text-center" onClick={e => e.stopPropagation()}>
+                    <td className="px-4 py-0 text-xs font-mono text-schrift-2">{w.SHORTNAME}</td>
+                    <td className="px-4 py-0 text-center" onClick={e => e.stopPropagation()}>
                       <div className="flex gap-1 justify-center">
                         <button
                           onClick={() => openEdit(w)}
-                          className="px-2 py-1 min-h-[2rem] bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200"
+                          className="px-2 py-0.5 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift rounded-ui text-xs hover:bg-wash"
                         >
                           Bearbeiten
                         </button>
                         <button
                           onClick={() => handleDelete(w)}
-                          className="px-2 py-1 min-h-[2rem] bg-red-100 text-red-700 rounded text-xs hover:bg-red-200"
+                          className="px-2 py-0.5 text-signal rounded-ui text-xs hover:bg-signal-flaeche"
                         >
                           Ausblenden
                         </button>
@@ -283,7 +283,7 @@ export default function Workplaces() {
                   </tr>
                 ))}
                 {workplaces.length === 0 && (
-                  <tr><td colSpan={3} className="text-center py-8 text-gray-600">Keine Arbeitsplätze</td></tr>
+                  <tr><td colSpan={3} className="text-center py-8 text-schrift-2">Keine Arbeitsplätze</td></tr>
                 )}
               </tbody>
             </table>
@@ -295,19 +295,19 @@ export default function Workplaces() {
       {/* Right: Detail / Assignment panel */}
       {selectedWp && (
         <div className="w-80 flex-shrink-0">
-          <div className="bg-white rounded-lg shadow p-4">
+          <div className="bg-ebene rounded-panel border border-kontur p-4">
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded flex items-center justify-center text-xs font-bold border border-gray-200 bg-slate-100 text-slate-700">
+              <div className="w-8 h-8 rounded-ui flex items-center justify-center text-xs font-bold border border-kontur bg-wash text-schrift-2">
                 {selectedWp.SHORTNAME?.slice(0, 2)}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-gray-800 truncate">{selectedWp.NAME}</div>
-                <div className="text-xs text-gray-500">ID: {selectedWp.ID}</div>
+                <div className="font-bold text-schrift truncate">{selectedWp.NAME}</div>
+                <div className="text-xs font-mono tabular-nums text-schrift-3">ID: {selectedWp.ID}</div>
               </div>
               <button
                 onClick={() => setSelectedWp(null)}
-                className="text-gray-400 hover:text-gray-600 text-lg leading-none"
+                className="text-schrift-3 hover:text-schrift text-lg leading-none"
                 title="Schließen"
               >
                 ×
@@ -317,34 +317,34 @@ export default function Workplaces() {
             {/* Assigned employees */}
             <div className="mb-3">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-gray-700">
+                <h3 className="text-sm font-semibold text-schrift">
                   👥 Zugeordnete Mitarbeiter ({wpEmployees.length})
                 </h3>
                 <button
                   onClick={() => setShowAssignPanel(v => !v)}
-                  className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded hover:bg-green-200"
+                  className="text-xs px-2 py-0.5 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift rounded-ui hover:bg-wash"
                 >
                   {showAssignPanel ? 'Schließen' : '+ Zuordnen'}
                 </button>
               </div>
               {detailLoading ? (
                 <div className="flex justify-center py-4">
-                  <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-kontur border-t-glut rounded-full animate-spin" />
                 </div>
               ) : wpEmployees.length === 0 ? (
-                <div className="text-xs text-gray-600 py-2 text-center">Keine Mitarbeiter zugeordnet</div>
+                <div className="text-xs text-schrift-2 py-2 text-center">Keine Mitarbeiter zugeordnet</div>
               ) : (
                 <ul className="space-y-1">
                   {wpEmployees.map(e => (
-                    <li key={e.ID} className="flex items-center justify-between bg-gray-50 rounded px-2 py-1">
-                      <span className="text-sm text-gray-800">
+                    <li key={e.ID} className="flex items-center justify-between bg-wash rounded-ui px-2 py-1">
+                      <span className="text-sm text-schrift">
                         {e.FIRSTNAME} {e.NAME}
-                        {e.SHORTNAME && <span className="text-gray-600 ml-1">({e.SHORTNAME})</span>}
+                        {e.SHORTNAME && <span className="text-schrift-2 ml-1">({e.SHORTNAME})</span>}
                       </span>
                       <button
                         onClick={() => handleRemove(e.ID)}
                         disabled={assignBusy === e.ID}
-                        className="ml-2 text-xs text-red-500 hover:text-red-700 disabled:opacity-40"
+                        className="ml-2 text-xs text-signal hover:opacity-75 disabled:opacity-40"
                         title="Zuordnung entfernen"
                       >
                         {assignBusy === e.ID ? '…' : '✕'}
@@ -357,28 +357,28 @@ export default function Workplaces() {
 
             {/* Assignment picker */}
             {showAssignPanel && (
-              <div className="border-t pt-3">
-                <div className="text-xs font-semibold text-gray-600 mb-2">Mitarbeiter zuordnen:</div>
+              <div className="border-t border-kontur pt-3">
+                <div className="text-[10px] font-bold uppercase tracking-[.08em] text-schrift-3 mb-2">Mitarbeiter zuordnen:</div>
                 <div className="max-h-56 overflow-y-auto space-y-0.5">
                   {allEmployees
                     .filter(e => !assignedIds.has(e.ID))
                     .map(e => (
                       <div
                         key={e.ID}
-                        className="flex items-center justify-between hover:bg-blue-50 rounded px-2 py-1 cursor-pointer"
+                        className="flex items-center justify-between hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)] rounded-ui px-2 py-1 cursor-pointer"
                         onClick={() => handleAssign(e.ID)}
                       >
-                        <span className="text-sm text-gray-700">
+                        <span className="text-sm text-schrift">
                           {e.FIRSTNAME} {e.NAME}
-                          {e.SHORTNAME && <span className="text-gray-600 ml-1">({e.SHORTNAME})</span>}
+                          {e.SHORTNAME && <span className="text-schrift-2 ml-1">({e.SHORTNAME})</span>}
                         </span>
-                        <span className="text-xs text-green-600 font-bold">
+                        <span className="text-xs text-schrift-2 font-bold">
                           {assignBusy === e.ID ? '…' : '+'}
                         </span>
                       </div>
                     ))}
                   {allEmployees.filter(e => !assignedIds.has(e.ID)).length === 0 && (
-                    <div className="text-xs text-gray-600 py-2 text-center">Alle Mitarbeiter zugeordnet</div>
+                    <div className="text-xs text-schrift-2 py-2 text-center">Alle Mitarbeiter zugeordnet</div>
                   )}
                 </div>
               </div>
@@ -390,31 +390,31 @@ export default function Workplaces() {
       {/* Create/Edit Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn" onClick={() => setShowModal(false)}>
-          <div onClick={e => e.stopPropagation()} className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md mx-4 p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">
+          <div onClick={e => e.stopPropagation()} className="bg-ebene rounded-[10px] shadow-dialog dark:shadow-dialog-dark dark:border dark:border-kontur animate-scaleIn w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-[13px] font-bold text-schrift px-4 py-3 border-b border-kontur">
               {editId !== null ? 'Arbeitsplatz bearbeiten' : 'Neuer Arbeitsplatz'}
             </h2>
-            {error && <div className="mb-3 p-2 bg-red-50 text-red-700 rounded text-sm">{error}</div>}
-            <div className="space-y-3">
+            {error && <div className="mx-4 mt-3 p-2 bg-signal-flaeche text-signal rounded-ui text-sm">{error}</div>}
+            <div className="space-y-3 px-4 py-3.5">
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Name *</label>
+                <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Name *</label>
                 <input
                   type="text"
                   autoFocus value={form.NAME}
                   onChange={e => setForm(f => ({ ...f, NAME: e.target.value }))}
-                  className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-kontur rounded-ui text-sm bg-ebene dark:bg-ebene-2 text-schrift focus:outline-none focus:border-glut focus:ring-[3px] focus:ring-[rgba(201,106,20,.12)] dark:focus:ring-[rgba(240,163,92,.15)]"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Kürzel</label>
+                <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Kürzel</label>
                 <input
                   type="text"
                   value={form.SHORTNAME}
                   onChange={e => setForm(f => ({ ...f, SHORTNAME: e.target.value }))}
-                  className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-kontur rounded-ui text-sm bg-ebene dark:bg-ebene-2 text-schrift focus:outline-none focus:border-glut focus:ring-[3px] focus:ring-[rgba(201,106,20,.12)] dark:focus:ring-[rgba(240,163,92,.15)]"
                 />
               </div>
-              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-schrift cursor-pointer">
                 <input
                   type="checkbox"
                   checked={form.HIDE}
@@ -423,19 +423,19 @@ export default function Workplaces() {
                 Ausgeblendet
               </label>
             </div>
-            <div className="flex gap-2 mt-5 justify-end">
+            <div className="flex gap-2 justify-end px-4 py-3 border-t border-kontur bg-[#fafbfc] dark:bg-[#0e1522]">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200"
+                className="px-4 py-2 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift rounded-ui text-sm hover:bg-wash"
               >
                 Abbrechen
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving || !form.NAME.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui text-sm font-semibold hover:opacity-90 disabled:opacity-50"
               >
-                {saving ? <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" /> : null}
+                {saving ? <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-1" /> : null}
                 Speichern
               </button>
             </div>

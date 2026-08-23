@@ -51,23 +51,25 @@ const RESPONSE_WARN = 500;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function statusColor(status: string): { dot: string; text: string; bg: string } {
+// Taktwerk kennt kein Ampel-Grün: gesund ist der Normalzustand und bleibt
+// neutral; nur degraded (Glut) und Fehler (Signal) werden markiert.
+function statusColor(status: string): { dot: string; text: string; badge: string } {
   switch (status) {
     case 'ok':
     case 'healthy':
-      return { dot: 'bg-green-500', text: 'text-green-700', bg: 'bg-green-50' };
+      return { dot: 'bg-schrift-3', text: 'text-schrift', badge: 'border border-kontur text-schrift-2' };
     case 'warning':
     case 'degraded':
-      return { dot: 'bg-yellow-500', text: 'text-yellow-700', bg: 'bg-yellow-50' };
+      return { dot: 'bg-glut', text: 'text-glut', badge: 'bg-glut-flaeche text-glut' };
     default:
-      return { dot: 'bg-red-500', text: 'text-red-700', bg: 'bg-red-50' };
+      return { dot: 'bg-signal', text: 'text-signal', badge: 'bg-signal-flaeche text-signal' };
   }
 }
 
 function responseTimeColor(ms: number): { dot: string; text: string; label: string } {
-  if (ms <= RESPONSE_GOOD) return { dot: 'bg-green-500', text: 'text-green-700', label: 'Schnell' };
-  if (ms <= RESPONSE_WARN) return { dot: 'bg-yellow-500', text: 'text-yellow-700', label: 'OK' };
-  return { dot: 'bg-red-500', text: 'text-red-700', label: 'Langsam' };
+  if (ms <= RESPONSE_GOOD) return { dot: 'bg-schrift-3', text: 'text-schrift', label: 'Schnell' };
+  if (ms <= RESPONSE_WARN) return { dot: 'bg-glut', text: 'text-glut', label: 'OK' };
+  return { dot: 'bg-signal', text: 'text-signal', label: 'Langsam' };
 }
 
 function formatBytes(mb: number): string {
@@ -116,14 +118,14 @@ export default function PerformanceWidget() {
   // ── Loading skeleton ──
   if (loading && !data) {
     return (
-      <div className="bg-white rounded-xl shadow p-5 flex flex-col gap-3" data-testid="performance-widget-skeleton">
-        <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
+      <div className="bg-ebene border border-kontur rounded-panel p-5 flex flex-col gap-3" data-testid="performance-widget-skeleton">
+        <div className="flex items-center gap-2 border-b border-kontur-soft pb-2">
           <span className="text-lg">⚡</span>
-          <div className="animate-pulse bg-gray-200 rounded h-4 w-40" />
+          <div className="animate-shimmer bg-wash rounded h-4 w-40" />
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="animate-pulse bg-gray-100 rounded-lg p-3 h-16" />
+            <div key={i} className="animate-shimmer bg-wash rounded-lg p-3 h-16" />
           ))}
         </div>
       </div>
@@ -133,12 +135,12 @@ export default function PerformanceWidget() {
   // ── Error state ──
   if (error && !data) {
     return (
-      <div className="bg-white rounded-xl shadow p-5" data-testid="performance-widget-error">
-        <div className="flex items-center gap-2 border-b border-gray-100 pb-2 mb-3">
+      <div className="bg-ebene border border-kontur rounded-panel p-5" data-testid="performance-widget-error">
+        <div className="flex items-center gap-2 border-b border-kontur-soft pb-2 mb-3">
           <span className="text-lg">⚡</span>
-          <h2 className="font-semibold text-gray-700 text-sm">System-Performance</h2>
+          <h2 className="font-semibold text-schrift text-sm">System-Performance</h2>
         </div>
-        <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+        <div className="bg-signal-flaeche border border-[#eecfcf] dark:border-[#5a2626] rounded-panel p-3 text-sm text-signal">
           ⚠️ Health-Check fehlgeschlagen: {error}
           <button
             onClick={() => fetchHealth(false)}
@@ -161,19 +163,19 @@ export default function PerformanceWidget() {
   const diskColor = statusColor(health.checks.disk);
 
   return (
-    <div className="bg-white rounded-xl shadow p-5 flex flex-col gap-3" data-testid="performance-widget">
-      {/* Header */}
-      <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
+    <div className="bg-ebene border border-kontur rounded-panel p-5 flex flex-col gap-3" data-testid="performance-widget">
+      {/* Kopfzeile */}
+      <div className="flex items-center gap-2 border-b border-kontur-soft pb-2">
         <span className="text-lg">⚡</span>
-        <h2 className="font-semibold text-gray-700 text-sm flex-1">System-Performance</h2>
-        {/* Overall status badge */}
-        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${overallColor.bg} ${overallColor.text}`}>
+        <h2 className="font-semibold text-schrift text-sm flex-1">System-Performance</h2>
+        {/* Gesamtstatus: gesund = neutrale Outline-Pille, sonst Glut-/Signal-Fläche */}
+        <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${overallColor.badge}`}>
           {health.status}
         </span>
-        {/* Manual refresh */}
+        {/* Manuell aktualisieren */}
         <button
           onClick={() => fetchHealth(true)}
-          className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded hover:bg-gray-50"
+          className="text-schrift-2 hover:text-schrift transition-colors p-1 rounded hover:bg-wash"
           title="Manuell aktualisieren"
           data-testid="performance-refresh-btn"
         >
@@ -184,96 +186,96 @@ export default function PerformanceWidget() {
       {/* Metrics grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {/* API Response Time */}
-        <div className="rounded-lg border border-gray-100 p-3 flex flex-col gap-1" data-testid="metric-response-time">
-          <div className="flex items-center gap-1.5 text-[10px] font-medium text-gray-500 uppercase tracking-wide">
+        <div className="rounded-lg border border-kontur-soft p-3 flex flex-col gap-1" data-testid="metric-response-time">
+          <div className="flex items-center gap-1.5 text-[10px] font-medium text-schrift-3 uppercase tracking-wide">
             <span className={`w-2 h-2 rounded-full ${rtColor.dot}`} />
             Antwortzeit
           </div>
-          <div className={`text-xl font-black ${rtColor.text}`} data-testid="response-time-value">
+          <div className={`text-xl font-bold font-mono tabular-nums ${rtColor.text}`} data-testid="response-time-value">
             {`${responseTimeMs} ms`}
           </div>
-          <div className="text-[10px] text-gray-400" data-testid="response-time-label">{rtColor.label}</div>
+          <div className="text-[10px] text-schrift-3" data-testid="response-time-label">{rtColor.label}</div>
         </div>
 
         {/* DB Status */}
-        <div className="rounded-lg border border-gray-100 p-3 flex flex-col gap-1" data-testid="metric-db-status">
-          <div className="flex items-center gap-1.5 text-[10px] font-medium text-gray-500 uppercase tracking-wide">
+        <div className="rounded-lg border border-kontur-soft p-3 flex flex-col gap-1" data-testid="metric-db-status">
+          <div className="flex items-center gap-1.5 text-[10px] font-medium text-schrift-3 uppercase tracking-wide">
             <span className={`w-2 h-2 rounded-full ${dbColor.dot}`} />
             Datenbank
           </div>
-          <div className={`text-xl font-black ${dbColor.text}`}>
+          <div className={`text-xl font-bold font-mono tabular-nums ${dbColor.text}`}>
             {health.checks.db === 'ok' ? '✓' : '✗'}
           </div>
-          <div className="text-[10px] text-gray-400">
+          <div className="text-[10px] text-schrift-3">
             {health.db.dbf_ok} DBF OK
             {health.db.dbf_missing.length > 0 && `, ${health.db.dbf_missing.length} fehlt`}
           </div>
         </div>
 
         {/* Uptime */}
-        <div className="rounded-lg border border-gray-100 p-3 flex flex-col gap-1" data-testid="metric-uptime">
-          <div className="flex items-center gap-1.5 text-[10px] font-medium text-gray-500 uppercase tracking-wide">
-            <span className="w-2 h-2 rounded-full bg-blue-500" />
+        <div className="rounded-lg border border-kontur-soft p-3 flex flex-col gap-1" data-testid="metric-uptime">
+          <div className="flex items-center gap-1.5 text-[10px] font-medium text-schrift-3 uppercase tracking-wide">
+            <span className="w-2 h-2 rounded-full bg-schrift-3" />
             Uptime
           </div>
-          <div className="text-xl font-black text-blue-700">
+          <div className="text-xl font-bold font-mono tabular-nums text-schrift">
             {health.uptime}
           </div>
-          <div className="text-[10px] text-gray-400">v{health.version}</div>
+          <div className="text-[10px] text-schrift-3">v{health.version}</div>
         </div>
 
         {/* Memory (Process RSS) */}
-        <div className="rounded-lg border border-gray-100 p-3 flex flex-col gap-1" data-testid="metric-memory">
-          <div className="flex items-center gap-1.5 text-[10px] font-medium text-gray-500 uppercase tracking-wide">
+        <div className="rounded-lg border border-kontur-soft p-3 flex flex-col gap-1" data-testid="metric-memory">
+          <div className="flex items-center gap-1.5 text-[10px] font-medium text-schrift-3 uppercase tracking-wide">
             <span className={`w-2 h-2 rounded-full ${memColor.dot}`} />
             Speicher (RSS)
           </div>
-          <div className={`text-xl font-black ${memColor.text}`}>
+          <div className={`text-xl font-bold font-mono tabular-nums ${memColor.text}`}>
             {formatBytes(health.memory.rss_mb)}
           </div>
-          <div className="text-[10px] text-gray-400">
+          <div className="text-[10px] text-schrift-3">
             System: {health.memory.system_used_percent}% belegt
           </div>
         </div>
 
         {/* Disk */}
-        <div className="rounded-lg border border-gray-100 p-3 flex flex-col gap-1" data-testid="metric-disk">
-          <div className="flex items-center gap-1.5 text-[10px] font-medium text-gray-500 uppercase tracking-wide">
+        <div className="rounded-lg border border-kontur-soft p-3 flex flex-col gap-1" data-testid="metric-disk">
+          <div className="flex items-center gap-1.5 text-[10px] font-medium text-schrift-3 uppercase tracking-wide">
             <span className={`w-2 h-2 rounded-full ${diskColor.dot}`} />
             Festplatte
           </div>
-          <div className={`text-xl font-black ${diskColor.text}`}>
+          <div className={`text-xl font-bold font-mono tabular-nums ${diskColor.text}`}>
             {health.disk.used_percent}%
           </div>
-          <div className="text-[10px] text-gray-400">
+          <div className="text-[10px] text-schrift-3">
             {formatBytes(health.disk.free_mb)} frei
           </div>
         </div>
 
         {/* Sessions */}
-        <div className="rounded-lg border border-gray-100 p-3 flex flex-col gap-1" data-testid="metric-sessions">
-          <div className="flex items-center gap-1.5 text-[10px] font-medium text-gray-500 uppercase tracking-wide">
-            <span className="w-2 h-2 rounded-full bg-purple-500" />
+        <div className="rounded-lg border border-kontur-soft p-3 flex flex-col gap-1" data-testid="metric-sessions">
+          <div className="flex items-center gap-1.5 text-[10px] font-medium text-schrift-3 uppercase tracking-wide">
+            <span className="w-2 h-2 rounded-full bg-schrift-3" />
             Sessions
           </div>
-          <div className="text-xl font-black text-purple-700">
+          <div className="text-xl font-bold font-mono tabular-nums text-schrift">
             {health.sessions.active}
           </div>
-          <div className="text-[10px] text-gray-400">aktive Sitzungen</div>
+          <div className="text-[10px] text-schrift-3">aktive Sitzungen</div>
         </div>
       </div>
 
-      {/* Footer: last refresh time */}
-      <div className="flex items-center justify-between text-[10px] text-gray-400 pt-1 border-t border-gray-50">
+      {/* Fußzeile: letzter Refresh */}
+      <div className="flex items-center justify-between text-[10px] text-schrift-3 pt-1 border-t border-kontur-soft">
         <span>
           Aktualisiert: {fetchedAt.toLocaleTimeString('de-AT', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
         </span>
         <span className="flex items-center gap-1">
-          <span className="animate-pulse text-green-400">●</span>
+          <span className="animate-pulse text-schrift-3">●</span>
           Auto-Refresh 30s
         </span>
         {error && (
-          <span className="text-orange-500">⚠ Letzter Refresh fehlgeschlagen</span>
+          <span className="text-glut">⚠ Letzter Refresh fehlgeschlagen</span>
         )}
       </div>
     </div>

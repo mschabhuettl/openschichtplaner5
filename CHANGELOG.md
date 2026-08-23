@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.23.0] - 2026-08-23
+
 ### Changed
 
 - **Design-System „Taktwerk" — flächige Migration abgeschlossen (T3).** Alle

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { CSSProperties } from 'react';
 import { api } from '../api/client';
 import type { LeaveType } from '../types';
 import { useToast } from '../hooks/useToast';
@@ -8,6 +9,8 @@ import { ConfirmDialog } from '../components/ConfirmDialog';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import ReorderDialog from '../components/ReorderDialog';
 import { EmptyState } from '../components/EmptyState';
+import { Badge } from '../components/Badge';
+import { shiftCellColorsMemo } from '../utils/shiftColor';
 
 function hexToBGR(hex: string): number {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -15,6 +18,19 @@ function hexToBGR(hex: string): number {
   const b = parseInt(hex.slice(5, 7), 16);
   return (b << 16) | (g << 8) | r;
 }
+
+// Abwesenheit ist im System immer hohl: gestrichelte Kontur + Hohl-Textfarbe,
+// keine Füllung. Farblose Arten (weißer DBF-Hintergrund) neutral gestrichelt.
+function leaveChipStyle(raw: string | undefined, isDark: boolean): CSSProperties {
+  if (!raw || raw.toUpperCase() === '#FFFFFF') {
+    return { border: '1.5px dashed var(--kontur)', color: 'var(--schrift-2)' };
+  }
+  const c = shiftCellColorsMemo(raw, isDark ? 'dark' : 'light', { hollow: true });
+  return { border: `1.5px dashed ${c.color}`, color: c.color };
+}
+
+// Einheitliche Input-Optik (Taktwerk): Ebene-Fläche, Kontur-Rand, Glut-Fokusring
+const INPUT_KLASSE = 'border border-kontur rounded-ui text-sm bg-ebene dark:bg-ebene-2 text-schrift placeholder:text-schrift-3 focus:outline-none focus:border-glut focus:ring-2 focus:ring-[rgba(201,106,20,.12)] dark:focus:ring-[rgba(240,163,92,.15)]';
 
 /** 5LEAVT-Anrechnungsfelder (Spec 5.2/5.3, Gap V-4) — noch nicht im gemeinsamen
  *  LeaveType-Typ; werden von der API als DBF-Felder durchgereicht. */
@@ -178,28 +194,31 @@ export default function LeaveTypes() {
     }
   };
 
+  // Theme provider-frei ermitteln (html.dark-Klasse) — nur für die Chip-Normalisierung
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+
   return (
     <div className="p-2 sm:p-4 lg:p-6">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold text-gray-800">🏖️ Abwesenheitsarten ({leaveTypes.length})</h1>
+        <h1 className="text-xl font-extrabold tracking-[-0.02em] text-schrift">🏖️ Abwesenheitsarten ({leaveTypes.length})</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={() => window.print()}
-            className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
+            className="no-print px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-schrift text-sm hover:bg-wash flex items-center gap-1"
             title="Seite drucken"
           >
             🖨️ <span className="hidden sm:inline">Drucken</span>
           </button>
           {canAdmin && leaveTypes.length > 1 && <button
             onClick={() => setShowReorder(true)}
-            className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm"
+            className="no-print px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-schrift text-sm hover:bg-wash"
             title="Reihenfolge der Abwesenheitsarten manuell festlegen"
           >
             ↕ <span className="hidden sm:inline">Reihenfolge</span>
           </button>}
           {canAdmin && <button
             onClick={openCreate}
-            className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
+            className="px-3 py-1.5 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui text-sm font-semibold"
           >
             + Neu
           </button>}
@@ -215,19 +234,19 @@ export default function LeaveTypes() {
             placeholder="🔍 Abwesenheitsart suchen…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full sm:w-72 px-3 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className={`w-full sm:w-72 px-3 py-1.5 ${INPUT_KLASSE}`}
           />
           {leaveTypes.some(lt => lt.HIDE) && (
-            <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer select-none whitespace-nowrap">
+            <label className="flex items-center gap-1.5 text-sm text-schrift cursor-pointer select-none whitespace-nowrap">
               <input type="checkbox" checked={showHidden} onChange={e => setShowHidden(e.target.checked)} />
               Ausgeblendete anzeigen ({leaveTypes.filter(lt => lt.HIDE).length})
             </label>
           )}
         </div>
-        <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <div className="bg-ebene border border-kontur rounded-panel overflow-x-auto">
           <table className="w-full text-sm min-w-[600px]">
-            <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
-              <tr>
+            <thead className="bg-[#fafbfc] dark:bg-[#0e1522] text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3">
+              <tr className="border-b border-kontur">
                 <th scope="col" className="px-4 py-2 text-left">Farbe</th>
                 <th scope="col" className="px-4 py-2 text-left">Name</th>
                 <th scope="col" className="px-4 py-2 text-left">Kürzel</th>
@@ -237,34 +256,34 @@ export default function LeaveTypes() {
               </tr>
             </thead>
             <tbody>
-              {leaveTypes.filter(lt => showHidden || !lt.HIDE).filter(lt => !search || lt.NAME.toLowerCase().includes(search.toLowerCase()) || (lt.SHORTNAME || '').toLowerCase().includes(search.toLowerCase())).map((lt, i) => (
-                <tr key={lt.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors ${lt.HIDE ? 'opacity-60' : ''}`}>
-                  <td className="px-4 py-2">
+              {leaveTypes.filter(lt => showHidden || !lt.HIDE).filter(lt => !search || lt.NAME.toLowerCase().includes(search.toLowerCase()) || (lt.SHORTNAME || '').toLowerCase().includes(search.toLowerCase())).map(lt => (
+                <tr key={lt.ID} className={`h-[28px] border-b border-kontur-soft hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)] ${lt.HIDE ? 'opacity-60' : ''}`}>
+                  <td className="px-4">
                     <div
-                      className="w-8 h-6 rounded border border-gray-300 flex items-center justify-center text-[10px] font-bold"
-                      style={{ backgroundColor: lt.COLORBK_HEX, color: lt.COLORBK_LIGHT ? '#333' : '#fff', borderColor: lt.COLORBAR_HEX }}
+                      className="inline-block min-w-[32px] max-w-[76px] px-1.5 text-center text-[9.5px] font-bold leading-[16px] rounded-cell whitespace-nowrap overflow-hidden text-ellipsis box-border align-middle"
+                      style={leaveChipStyle(lt.COLORBK_HEX, isDark)}
                     >
                       {lt.SHORTNAME}
                     </div>
                   </td>
-                  <td className="px-4 py-2 font-semibold">
+                  <td className="px-4 font-semibold text-schrift">
                     {lt.NAME}
-                    {lt.HIDE && (<span className="ml-2 inline-block px-1.5 py-0.5 text-[10px] font-medium rounded bg-gray-200 text-gray-600 align-middle">Ausgeblendet</span>)}
+                    {lt.HIDE && (<Badge variant="gray" className="ml-2 align-middle">Ausgeblendet</Badge>)}
                   </td>
-                  <td className="px-4 py-2 text-gray-500">{lt.SHORTNAME}</td>
-                  <td className="px-4 py-2 text-center">
+                  <td className="px-4 text-schrift-2">{lt.SHORTNAME}</td>
+                  <td className="px-4 text-center">
                     {lt.ENTITLED
-                      ? <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-semibold">Ja</span>
-                      : <span className="bg-gray-100 text-gray-500 px-2 py-0.5 rounded text-xs">Nein</span>
+                      ? <Badge variant="green">Ja</Badge>
+                      : <span className="text-xs text-schrift-3">Nein</span>
                     }
                   </td>
-                  <td className="px-4 py-2 text-right text-gray-600">
+                  <td className="px-4 text-right font-mono tabular-nums text-schrift-2">
                     {lt.ENTITLED && lt.STDENTIT ? `${lt.STDENTIT} Tage` : '—'}
                   </td>
-                  <td className="px-4 py-2 text-center">
+                  <td className="px-4 text-center">
                     <div className="flex gap-1 justify-center">
-                      {canAdmin && <button onClick={() => openEdit(lt)} className="px-2 py-1 min-h-[2rem] bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>}
-                      {canAdmin && <button onClick={() => handleDelete(lt)} className="px-2 py-1 min-h-[2rem] bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Ausblenden</button>}
+                      {canAdmin && <button onClick={() => openEdit(lt)} className="px-2 py-0.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-xs text-schrift hover:bg-wash">Bearbeiten</button>}
+                      {canAdmin && <button onClick={() => handleDelete(lt)} className="px-2 py-0.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-xs text-signal hover:bg-wash">Ausblenden</button>}
                     </div>
                   </td>
                 </tr>
@@ -289,71 +308,71 @@ export default function LeaveTypes() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn" onClick={() => setShowModal(false)}>
-          <div onClick={e => e.stopPropagation()} className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md mx-4 p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">
+          <div onClick={e => e.stopPropagation()} className="bg-ebene rounded-[10px] shadow-dialog dark:shadow-dialog-dark dark:border dark:border-kontur animate-scaleIn w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-[13px] font-bold text-schrift px-6 py-3 border-b border-kontur">
               {editId !== null ? 'Abwesenheitsart bearbeiten' : 'Neue Abwesenheitsart'}
             </h2>
-            {error && <div className="mb-3 p-2 bg-red-50 text-red-700 rounded text-sm">{error}</div>}
-            <div className="space-y-3">
+            {error && <div className="mx-6 mt-3 p-2 bg-signal-flaeche text-signal rounded-ui text-sm">{error}</div>}
+            <div className="space-y-3 px-6 py-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Name *</label>
+                <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Name *</label>
                 <input
                   type="text"
                   autoFocus value={form.NAME}
                   onChange={e => setForm(f => ({ ...f, NAME: e.target.value }))}
-                  className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 ${INPUT_KLASSE}`}
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Kürzel</label>
+                <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Kürzel</label>
                 <input
                   type="text"
                   value={form.SHORTNAME}
                   onChange={e => setForm(f => ({ ...f, SHORTNAME: e.target.value }))}
-                  className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 ${INPUT_KLASSE}`}
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Farben</label>
+                <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Farben</label>
                 <div className="flex items-center gap-3 flex-wrap">
-                  <label className="flex items-center gap-1.5 text-xs text-gray-600">
+                  <label className="flex items-center gap-1.5 text-xs text-schrift-2">
                     <input
                       type="color"
                       aria-label="Hintergrundfarbe"
                       value={form.colorHex}
                       onChange={e => setForm(f => ({ ...f, colorHex: e.target.value }))}
-                      className="w-10 h-9 rounded border cursor-pointer"
+                      className="w-10 h-9 rounded-ui border border-kontur cursor-pointer"
                     />
                     Hintergrund
                   </label>
-                  <label className="flex items-center gap-1.5 text-xs text-gray-600">
+                  <label className="flex items-center gap-1.5 text-xs text-schrift-2">
                     <input
                       type="color"
                       aria-label="Textfarbe"
                       value={form.colorTextHex}
                       onChange={e => setForm(f => ({ ...f, colorTextHex: e.target.value }))}
-                      className="w-10 h-9 rounded border cursor-pointer"
+                      className="w-10 h-9 rounded-ui border border-kontur cursor-pointer"
                     />
                     Text
                   </label>
-                  <label className="flex items-center gap-1.5 text-xs text-gray-600">
+                  <label className="flex items-center gap-1.5 text-xs text-schrift-2">
                     <input
                       type="color"
                       aria-label="Balkenfarbe"
                       value={form.colorBarHex}
                       onChange={e => setForm(f => ({ ...f, colorBarHex: e.target.value }))}
-                      className="w-10 h-9 rounded border cursor-pointer"
+                      className="w-10 h-9 rounded-ui border border-kontur cursor-pointer"
                     />
                     Balken
                   </label>
                   <div
-                    className="flex-1 min-w-[5rem] h-9 rounded border border-gray-200 flex items-center justify-center text-sm"
+                    className="flex-1 min-w-[5rem] h-9 rounded-ui border border-kontur flex items-center justify-center text-sm"
                     style={{ backgroundColor: form.colorHex, color: form.colorTextHex, borderLeft: `5px solid ${form.colorBarHex}`, fontWeight: form.bold ? 'bold' : 'normal' }}
                   >
                     {form.SHORTNAME || form.NAME}
                   </div>
                 </div>
-                <label className="flex items-center gap-1.5 text-xs text-gray-600 mt-2">
+                <label className="flex items-center gap-1.5 text-xs text-schrift-2 mt-2">
                   <input
                     type="checkbox"
                     aria-label="Fette Schrift"
@@ -363,11 +382,11 @@ export default function LeaveTypes() {
                   Fette Schrift im Plan
                 </label>
               </div>
-              <fieldset className="border rounded p-2">
-                <legend className="text-xs font-semibold text-gray-600 px-1">Anzurechnende Arbeitszeit</legend>
+              <fieldset className="border border-kontur rounded-ui p-2">
+                <legend className="text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 px-1">Anzurechnende Arbeitszeit</legend>
                 <div className="space-y-1">
                   {CHARGETYP_OPTIONS.map(opt => (
-                    <label key={opt.value} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <label key={opt.value} className="flex items-center gap-2 text-sm text-schrift cursor-pointer">
                       <input
                         type="radio"
                         name="chargetyp"
@@ -380,19 +399,19 @@ export default function LeaveTypes() {
                 </div>
                 {form.CHARGETYP === 2 && (
                   <div className="mt-2">
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Stundenzahl je Tag</label>
+                    <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Stundenzahl je Tag</label>
                     <input
                       type="number"
                       step="0.25"
                       min="0"
                       value={form.CHARGEHRS}
                       onChange={e => setForm(f => ({ ...f, CHARGEHRS: parseFloat(e.target.value) || 0 }))}
-                      className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 ${INPUT_KLASSE}`}
                     />
                   </div>
                 )}
               </fieldset>
-              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-schrift cursor-pointer">
                 <input
                   type="checkbox"
                   checked={form.ENTITLED}
@@ -403,16 +422,16 @@ export default function LeaveTypes() {
               {form.ENTITLED && (
                 <div className="pl-6 space-y-3">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Standardanspruch (Tage)</label>
+                    <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Standardanspruch (Tage)</label>
                     <input
                       type="number"
                       step="1"
                       value={form.STDENTIT}
                       onChange={e => setForm(f => ({ ...f, STDENTIT: parseFloat(e.target.value) || 0 }))}
-                      className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className={`w-full px-3 py-2 ${INPUT_KLASSE}`}
                     />
                   </div>
-                  <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                  <label className="flex items-center gap-2 text-sm text-schrift cursor-pointer">
                     <input
                       type="checkbox"
                       checked={form.CARRYFWD}
@@ -422,7 +441,7 @@ export default function LeaveTypes() {
                   </label>
                 </div>
               )}
-              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-schrift cursor-pointer">
                 <input
                   type="checkbox"
                   checked={form.COUNTALL}
@@ -430,7 +449,7 @@ export default function LeaveTypes() {
                 />
                 Alle Abwesenheitstage zählen (auch arbeitsfreie Tage)
               </label>
-              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <label className="flex items-center gap-2 text-sm text-schrift cursor-pointer">
                 <input
                   type="checkbox"
                   checked={form.HIDE}
@@ -439,14 +458,14 @@ export default function LeaveTypes() {
                 Ausgeblendet
               </label>
             </div>
-            <div className="flex gap-2 mt-5 justify-end">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200">Abbrechen</button>
+            <div className="flex gap-2 justify-end px-6 py-3 bg-[#fafbfc] dark:bg-[#0e1522] border-t border-kontur">
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift hover:bg-wash">Abbrechen</button>
               <button
                 onClick={handleSave}
                 disabled={saving || !form.NAME.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui text-sm font-semibold disabled:opacity-50"
               >
-                {saving ? <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" /> : null}
+                {saving ? <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-1" /> : null}
                 Speichern
               </button>
             </div>

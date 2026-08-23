@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.23.1] - 2026-08-23
+
 ### Fixed
 
 - **Multi-Arch-Release-Build repariert.** `npm ci` der Frontend-Build-Stage

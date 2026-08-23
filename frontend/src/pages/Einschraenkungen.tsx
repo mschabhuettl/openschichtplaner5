@@ -5,8 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { LoadingSpinner } from '../components/LoadingSpinner';
-
-
+import { EmptyState } from '../components/EmptyState';
+import { shiftCellColorsMemo } from '../utils/shiftColor';
 
 interface Restriction {
   id: number;
@@ -18,8 +18,16 @@ interface Restriction {
 
 const WEEKDAY_LABELS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
+// Eingabefeld-Optik nach Taktwerk: Kontur-Rand, Fokus = Glut-Rand + Ring
+const INPUT_CLS =
+  'w-full bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui px-3 py-2 text-sm text-schrift focus:outline-none focus:border-glut focus:shadow-[0_0_0_3px_rgba(201,106,20,.12)] dark:focus:shadow-[0_0_0_3px_rgba(240,163,92,.15)]';
+// Feldlabel: UPPERCASE 10px/700 mit Tracking
+const LABEL_CLS = 'block text-[10px] font-bold uppercase tracking-[.08em] text-schrift-3 mb-1';
+
 export default function Einschraenkungen() {
   const { canAdmin } = useAuth();
+  // Theme provider-frei: die dark-Klasse am <html> entscheidet
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [shifts, setShifts] = useState<ShiftType[]>([]);
@@ -123,22 +131,22 @@ export default function Einschraenkungen() {
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">🚫 Schichteinschränkungen</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-xl font-extrabold tracking-tight text-schrift">🚫 Schichteinschränkungen</h1>
+          <p className="text-sm text-schrift-2 mt-0.5">
             Gesperrte Schichtarten pro Mitarbeiter – verhindert automatische Zuweisung
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => window.print()}
-            className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
+            className="no-print px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-schrift text-sm hover:bg-wash flex items-center gap-1"
             title="Seite drucken"
           >
             🖨️ <span className="hidden sm:inline">Drucken</span>
           </button>
           {canAdmin && <button
             onClick={() => setShowForm(!showForm)}
-            className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 flex items-center gap-2 shadow-sm"
+            className="px-4 py-2 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold text-sm rounded-ui hover:opacity-90 flex items-center gap-2"
           >
             ＋ Einschränkung anlegen
           </button>}
@@ -146,23 +154,23 @@ export default function Einschraenkungen() {
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+        <div className="mb-4 px-4 py-2 bg-signal-flaeche border border-[#eecfcf] dark:border-[#5a2626] rounded-ui text-sm text-signal">
           ⚠️ {error}
-          <button aria-label="Schließen" onClick={() => setError(null)} className="ml-3 text-red-400 hover:text-red-600">✕</button>
+          <button aria-label="Schließen" onClick={() => setError(null)} className="ml-3 text-signal opacity-60 hover:opacity-100">✕</button>
         </div>
       )}
 
       {/* Create form */}
       {showForm && (
-        <div className="mb-5 bg-white rounded-xl border shadow-sm p-5">
-          <h3 className="font-semibold text-gray-800 mb-4">Neue Schichteinschränkung</h3>
+        <div className="mb-5 bg-ebene rounded-panel border border-kontur p-5">
+          <h3 className="text-[15px] font-bold text-schrift mb-4">Neue Schichteinschränkung</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Mitarbeiter</label>
+              <label className={LABEL_CLS}>Mitarbeiter</label>
               <select
                 value={formEmpId}
                 onChange={e => setFormEmpId(Number(e.target.value))}
-                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                className={INPUT_CLS}
               >
                 {employees.map(e => (
                   <option key={e.ID} value={e.ID}>{e.NAME}, {e.FIRSTNAME}</option>
@@ -170,11 +178,11 @@ export default function Einschraenkungen() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Schichtart</label>
+              <label className={LABEL_CLS}>Schichtart</label>
               <select
                 value={formShiftId}
                 onChange={e => setFormShiftId(Number(e.target.value))}
-                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                className={INPUT_CLS}
               >
                 {shifts.filter(s => !s.HIDE).map(s => (
                   <option key={s.ID} value={s.ID}>{s.SHORTNAME} – {s.NAME}</option>
@@ -182,11 +190,11 @@ export default function Einschraenkungen() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Wochentag</label>
+              <label className={LABEL_CLS}>Wochentag</label>
               <select
                 value={formWeekday}
                 onChange={e => setFormWeekday(Number(e.target.value))}
-                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                className={INPUT_CLS}
               >
                 {WEEKDAY_LABELS.map((l, i) => (
                   <option key={i} value={i}>{l}</option>
@@ -195,11 +203,11 @@ export default function Einschraenkungen() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Grad</label>
+              <label className={LABEL_CLS}>Grad</label>
               <select
                 value={formGrade}
                 onChange={e => setFormGrade(Number(e.target.value))}
-                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                className={INPUT_CLS}
                 title="nie = harte Sperre, auf Anfrage = nur mit Warnung einteilbar"
               >
                 <option value={2}>nie (Sperre)</option>
@@ -208,13 +216,13 @@ export default function Einschraenkungen() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-700 mb-1">Begründung</label>
+              <label className={LABEL_CLS}>Begründung</label>
               <input
                 type="text"
                 value={formReason}
                 onChange={e => setFormReason(e.target.value)}
                 placeholder="z.B. Ausbildung, Gesundheit..."
-                className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                className={INPUT_CLS}
               />
             </div>
           </div>
@@ -222,14 +230,14 @@ export default function Einschraenkungen() {
             <button
               onClick={handleCreate}
               disabled={saving || !formEmpId || !formShiftId}
-              className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-60 flex items-center gap-2"
+              className="px-4 py-2 text-sm rounded-ui bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold hover:opacity-90 disabled:opacity-60 flex items-center gap-2"
             >
               {saving && <span className="animate-spin">⟳</span>}
               Einschränkung speichern
             </button>
             <button
               onClick={() => setShowForm(false)}
-              className="px-4 py-2 text-sm rounded-lg border hover:bg-gray-50"
+              className="px-4 py-2 text-sm rounded-ui bg-ebene dark:bg-ebene-2 border border-kontur text-schrift hover:bg-wash"
             >
               Abbrechen
             </button>
@@ -244,9 +252,9 @@ export default function Einschraenkungen() {
           placeholder="Mitarbeiter suchen..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="px-3 py-1.5 border rounded-lg shadow-sm text-sm w-52 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift placeholder:text-schrift-3 w-52 focus:outline-none focus:border-glut focus:shadow-[0_0_0_3px_rgba(201,106,20,.12)] dark:focus:shadow-[0_0_0_3px_rgba(240,163,92,.15)]"
         />
-        <span className="text-xs text-gray-600">
+        <span className="text-xs text-schrift-2">
           {restrictions.length} Einschränkung{restrictions.length !== 1 ? 'en' : ''} gesamt
         </span>
       </div>
@@ -261,42 +269,43 @@ export default function Einschraenkungen() {
             .map(emp => {
               const empRestr = empRestrictions(emp.ID);
               return (
-                <div key={emp.ID} className="bg-white rounded-xl border shadow-sm overflow-hidden">
-                  <div className="px-4 py-3 bg-gray-50 border-b flex items-center justify-between">
+                <div key={emp.ID} className="bg-ebene rounded-panel border border-kontur overflow-hidden">
+                  <div className="px-4 py-3 bg-[#fafbfc] dark:bg-[#0e1522] border-b border-kontur flex items-center justify-between">
                     <div>
-                      <span className="font-semibold text-gray-800">{emp.NAME}, {emp.FIRSTNAME}</span>
-                      <span className="ml-2 text-xs text-gray-600">{emp.NUMBER}</span>
+                      <span className="font-semibold text-schrift">{emp.NAME}, {emp.FIRSTNAME}</span>
+                      <span className="ml-2 text-xs text-schrift-2 font-mono tabular-nums">{emp.NUMBER}</span>
                     </div>
                     {empRestr.length === 0 ? (
-                      <span className="text-xs text-gray-300 italic">Keine Einschränkungen</span>
+                      <span className="text-xs text-schrift-3 italic">Keine Einschränkungen</span>
                     ) : (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700 font-semibold">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-signal-flaeche text-signal border border-[#eecfcf] dark:border-[#5a2626] font-semibold">
                         {empRestr.length} Einschränkung{empRestr.length !== 1 ? 'en' : ''}
                       </span>
                     )}
                   </div>
                   {empRestr.length > 0 && (
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-kontur-soft">
                       {empRestr.map(r => {
                         const shift = getShift(r.shift_id);
                         const key = `${r.employee_id}-${r.shift_id}-${r.weekday}`;
+                        // DBF-Rohfarbe nie roh rendern — normalisieren, Vordergrund wird berechnet
+                        const chip = shift?.COLORBK_HEX
+                          ? shiftCellColorsMemo(shift.COLORBK_HEX, isDark ? 'dark' : 'light')
+                          : null;
                         return (
                           <div key={r.id ?? key} className="px-4 py-2.5 flex items-center gap-3">
-                            {/* Shift badge */}
+                            {/* Schicht-Chip (normalisierte Fläche) */}
                             <span
-                              className="inline-flex items-center justify-center w-7 h-7 rounded text-xs font-bold flex-shrink-0"
-                              style={{
-                                backgroundColor: shift?.COLORBK_HEX ?? '#e5e7eb',
-                                color: shift?.COLORTEXT_HEX ?? '#374151',
-                              }}
+                              className={`inline-flex items-center justify-center w-7 h-7 rounded-cell text-xs font-bold flex-shrink-0 ${chip ? '' : 'bg-wash text-schrift-2'}`}
+                              style={chip ? { backgroundColor: chip.background, color: chip.color } : undefined}
                             >
                               {shift?.SHORTNAME?.[0] ?? '?'}
                             </span>
                             <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-gray-800 truncate">
+                              <div className="text-sm font-medium text-schrift truncate">
                                 {getShiftName(r.shift_id)}
                               </div>
-                              <div className="text-xs text-gray-500 flex items-center gap-2">
+                              <div className="text-xs text-schrift-2 flex items-center gap-2">
                                 <span>
                                   {r.weekday === 7
                                     ? '📅 Nur Feiertag'
@@ -304,7 +313,7 @@ export default function Einschraenkungen() {
                                 </span>
                                 {r.reason && (
                                   <>
-                                    <span className="text-gray-300">|</span>
+                                    <span className="text-schrift-3">|</span>
                                     <span className="italic">{r.reason}</span>
                                   </>
                                 )}
@@ -313,7 +322,7 @@ export default function Einschraenkungen() {
                             {canAdmin && <button
                               onClick={() => handleDelete(r.employee_id, r.shift_id, r.weekday)}
                               disabled={deleting === key}
-                              className="ml-auto text-red-400 hover:text-red-600 text-sm px-2 py-1 rounded hover:bg-red-50 flex-shrink-0"
+                              className="ml-auto text-signal opacity-70 hover:opacity-100 text-sm px-2 py-1 rounded-ui hover:bg-signal-flaeche flex-shrink-0"
                               title="Einschränkung löschen"
                             >
                               {deleting === key ? '⟳' : '🗑️'}
@@ -327,16 +336,13 @@ export default function Einschraenkungen() {
               );
             })}
           {filteredEmps.length === 0 && (
-            <div className="text-center py-10 text-gray-600">
-              <div className="text-4xl mb-2">🔍</div>
-              <div>Keine Mitarbeiter gefunden</div>
-            </div>
+            <EmptyState icon="🔍" title="Keine Mitarbeiter gefunden" />
           )}
         </div>
       )}
 
       {/* Info box */}
-      <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-700 flex items-start gap-2">
+      <div className="mt-6 p-3 bg-wash border border-kontur rounded-panel text-xs text-schrift-2 flex items-start gap-2">
         <span className="text-base flex-shrink-0">ℹ️</span>
         <span>
           <strong>Schichteinschränkungen</strong> verhindern die automatische Zuweisung bestimmter Schichtarten an einen Mitarbeiter.

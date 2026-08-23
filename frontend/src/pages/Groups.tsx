@@ -10,6 +10,7 @@ import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { EmptyState } from '../components/EmptyState';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { spine } from '../utils/shiftColor';
 
 interface GroupForm {
   NAME: string;
@@ -55,9 +56,18 @@ function bgrToHex(bgr: number | undefined): string {
   return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
 }
 
+/** Gruppenfarbe für die Baum-Spur (Plan-Hintergrund, sonst Label-Hintergrund); Weiß/Schwarz = keine Farbe gesetzt. */
+function groupRawColor(g: Group): string | null {
+  if (g.CBKSCHED != null && g.CBKSCHED !== 16777215 && g.CBKSCHED !== 0 && g.CBKSCHED_HEX) return g.CBKSCHED_HEX;
+  if (g.CBKLABEL != null && g.CBKLABEL !== 16777215 && g.CBKLABEL !== 0 && g.CBKLABEL_HEX) return g.CBKLABEL_HEX;
+  return null;
+}
+
 export default function Groups() {
   const { canAdmin } = useAuth();
   const navigate = useNavigate();
+  // Taktwerk: Theme provider-frei aus der html-Klasse ableiten (nur für Laufzeitfarben)
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [allEmployees, setAllEmployees] = useState<Employee[]>([]);
@@ -228,22 +238,31 @@ export default function Groups() {
 
   const renderGroup = (g: Group, depth = 0) => {
     const children = childrenOf(g.ID);
+    // Gruppenfarbe normalisiert als 3px-Spine (nie roh rendern)
+    const raw = groupRawColor(g);
     return (
       <div key={g.ID}>
         <div
-          className="flex items-center gap-2 sm:gap-3 py-2.5 border-b border-gray-100 hover:bg-blue-50 transition-colors pr-3"
+          className="flex items-center gap-2 sm:gap-3 py-2.5 border-b border-kontur-soft hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)] transition-colors pr-3"
           style={{ paddingLeft: `${16 + depth * 24}px` }}
         >
-          <span className="text-gray-600 flex-shrink-0">{depth > 0 ? '└' : '●'}</span>
+          <span className="text-schrift-3 flex-shrink-0">{depth > 0 ? '└' : '●'}</span>
+          {raw && (
+            <span
+              aria-hidden="true"
+              className="w-[3px] h-4 rounded-[2px] flex-shrink-0"
+              style={{ background: spine(raw, isDark ? 'dark' : 'light') }}
+            />
+          )}
           <div className="flex-1 min-w-0">
-            <span className="font-semibold text-gray-800 truncate">{g.NAME}</span>
+            <span className="font-semibold text-schrift truncate">{g.NAME}</span>
             {g.SHORTNAME && g.SHORTNAME !== g.NAME && (
-              <span className="ml-2 text-xs text-gray-600 hidden sm:inline">({g.SHORTNAME})</span>
+              <span className="ml-2 text-xs text-schrift-2 hidden sm:inline">({g.SHORTNAME})</span>
             )}
           </div>
           <button
             onClick={() => toggleMembers(g.ID)}
-            className={`text-xs px-2 py-0.5 rounded-full flex-shrink-0 transition-colors ${expandedGroups.has(g.ID) ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500 hover:bg-blue-100'}`}
+            className={`text-xs font-mono tabular-nums px-2 py-0.5 rounded-full flex-shrink-0 transition-colors ${expandedGroups.has(g.ID) ? 'bg-glut text-glut-ink' : 'bg-wash text-schrift-2 hover:bg-glut-flaeche hover:text-glut'}`}
             title="Mitglieder anzeigen"
           >
             {g.member_count ?? 0} MA {expandedGroups.has(g.ID) ? '▲' : '▼'}
@@ -251,46 +270,46 @@ export default function Groups() {
           {canAdmin && <div className="flex gap-1 flex-shrink-0">
             <button
               onClick={() => openEdit(g)}
-              className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 hidden sm:block"
+              className="px-2 py-1 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift rounded-ui text-xs hover:bg-wash hidden sm:block"
             >Bearbeiten</button>
             <button
               onClick={() => openEdit(g)}
-              className="p-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 text-base leading-none sm:hidden"
+              className="p-2 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift rounded-ui hover:bg-wash text-base leading-none sm:hidden"
               title="Bearbeiten"
             >✏️</button>
             <button
               onClick={() => handleDelete(g)}
-              className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200 hidden sm:block"
+              className="px-2 py-1 bg-ebene dark:bg-ebene-2 border border-kontur text-signal rounded-ui text-xs hover:bg-signal-flaeche hidden sm:block"
             >Ausblenden</button>
             <button
               onClick={() => handleDelete(g)}
-              className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-base leading-none sm:hidden"
+              className="p-2 bg-ebene dark:bg-ebene-2 border border-kontur text-signal rounded-ui hover:bg-signal-flaeche text-base leading-none sm:hidden"
               title="Ausblenden"
             >🗑️</button>
           </div>}
         </div>
         {expandedGroups.has(g.ID) && (
-          <div className="border-b border-gray-100 bg-blue-50/50" style={{ paddingLeft: `${32 + depth * 24}px`, paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
+          <div className="border-b border-kontur-soft bg-wash" style={{ paddingLeft: `${32 + depth * 24}px`, paddingRight: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
             {membersLoading.has(g.ID) ? (
-              <div className="flex items-center gap-2 text-xs text-gray-600 py-2">
-                <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+              <div className="flex items-center gap-2 text-xs text-schrift-2 py-2">
+                <div className="w-3 h-3 border-2 border-glut border-t-transparent rounded-full animate-spin" />
                 Lade Mitglieder...
               </div>
             ) : (
               <>
                 {(groupMembers[g.ID] ?? []).length === 0 ? (
-                  <div className="text-xs text-gray-600 italic py-1">Keine Mitglieder in dieser Gruppe.</div>
+                  <div className="text-xs text-schrift-2 italic py-1">Keine Mitglieder in dieser Gruppe.</div>
                 ) : (
                   <div className="flex flex-wrap gap-1.5 mb-2">
                     {(groupMembers[g.ID] ?? []).map(emp => (
-                      <span key={emp.ID} className="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-gray-200 rounded-full text-xs text-gray-700 shadow-sm">
-                        <button onClick={() => navigate(`/mitarbeiter/${emp.ID}`)} className="font-medium hover:text-blue-600 transition-colors">
+                      <span key={emp.ID} className="inline-flex items-center gap-1 px-2 py-0.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-full text-xs text-schrift">
+                        <button onClick={() => navigate(`/mitarbeiter/${emp.ID}`)} className="font-medium hover:text-glut transition-colors">
                           {emp.FIRSTNAME} {emp.NAME}
                         </button>
                         {canAdmin && (
                           <button aria-label="Schließen"
                             onClick={() => handleRemoveMember(g.ID, emp.ID)}
-                            className="ml-0.5 text-gray-300 hover:text-red-500 transition-colors font-bold text-xs leading-none"
+                            className="ml-0.5 text-schrift-3 hover:text-signal transition-colors font-bold text-xs leading-none"
                             title="Aus Gruppe entfernen"
                           >×</button>
                         )}
@@ -305,10 +324,10 @@ export default function Groups() {
                       placeholder="🔍 Mitarbeiter hinzufügen..."
                       value={memberSearch[g.ID] ?? ''}
                       onChange={e => setMemberSearch(prev => ({ ...prev, [g.ID]: e.target.value }))}
-                      className="px-2 py-1 border rounded text-xs w-48 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                      className="px-2 py-1 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-xs text-schrift placeholder:text-schrift-3 w-48 focus:outline-none focus:border-glut focus:ring-[3px] focus:ring-[rgba(201,106,20,.12)] dark:focus:ring-[rgba(240,163,92,.15)]"
                     />
                     {memberSearch[g.ID] && (
-                      <div className="absolute z-20 bg-white border rounded shadow-lg mt-6 max-h-32 overflow-y-auto w-48" style={{ marginTop: '28px', position: 'absolute' }}>
+                      <div className="absolute z-20 bg-ebene dark:bg-ebene-2 border border-kontur rounded-panel shadow-overlay dark:shadow-overlay-dark mt-6 max-h-32 overflow-y-auto w-48" style={{ marginTop: '28px', position: 'absolute' }}>
                         {allEmployees
                           .filter(e => !e.HIDE && !((groupMembers[g.ID] ?? []).find(m => m.ID === e.ID)) &&
                             `${e.NAME} ${e.FIRSTNAME} ${e.SHORTNAME}`.toLowerCase().includes((memberSearch[g.ID] ?? '').toLowerCase()))
@@ -317,9 +336,9 @@ export default function Groups() {
                             <button
                               key={emp.ID}
                               onClick={() => { handleAddMember(g.ID, emp.ID); setMemberSearch(prev => ({ ...prev, [g.ID]: '' })); }}
-                              className="block w-full text-left px-3 py-1.5 text-xs hover:bg-blue-50 transition-colors"
+                              className="block w-full text-left px-3 py-1.5 text-xs text-schrift hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] transition-colors"
                             >
-                              {emp.FIRSTNAME} {emp.NAME} <span className="text-gray-600">({emp.SHORTNAME})</span>
+                              {emp.FIRSTNAME} {emp.NAME} <span className="text-schrift-2">({emp.SHORTNAME})</span>
                             </button>
                           ))}
                       </div>
@@ -346,19 +365,19 @@ export default function Groups() {
               placeholder="🔍 Suchen..."
               value={groupSearch}
               onChange={e => setGroupSearch(e.target.value)}
-              className="px-3 py-1.5 border rounded shadow-sm text-sm w-44"
+              className="px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift placeholder:text-schrift-3 w-44 focus:outline-none focus:border-glut focus:ring-[3px] focus:ring-[rgba(201,106,20,.12)] dark:focus:ring-[rgba(240,163,92,.15)]"
             />
             {groupSearch && (
               <button
                 onClick={() => setGroupSearch('')}
-                className="px-2 py-1.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 rounded border border-red-200"
+                className="px-2 py-1.5 text-xs text-signal hover:bg-signal-flaeche rounded-ui border border-kontur"
                 title="Suche zurücksetzen"
               >✕ Reset</button>
             )}
             <select
               value={groupSort}
               onChange={e => setGroupSort(e.target.value as typeof groupSort)}
-              className="px-3 py-1.5 border rounded shadow-sm text-sm bg-white"
+              className="px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift"
               title="Sortierung"
             >
               <option value="default">Reihenfolge ↕</option>
@@ -368,13 +387,13 @@ export default function Groups() {
             </select>
             {canAdmin && <button
               onClick={openCreate}
-              className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
+              className="px-3 py-1.5 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui text-sm font-semibold hover:opacity-90 transition-opacity"
             >
               + Neu
             </button>}
             <button
               onClick={() => window.print()}
-              className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
+              className="no-print px-3 py-1.5 bg-ebene dark:bg-ebene-2 border border-kontur text-schrift hover:bg-wash text-sm rounded-ui flex items-center gap-1"
               title="Seite drucken"
             >
               🖨️ <span className="hidden sm:inline">Drucken</span>
@@ -385,7 +404,7 @@ export default function Groups() {
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <div className="bg-ebene border border-kontur rounded-panel overflow-x-auto">
           {topLevel.length === 0 && (
             <EmptyState
               icon="📂"
@@ -402,81 +421,82 @@ export default function Groups() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-backdropIn" onClick={() => setShowModal(false)}>
-          <div onClick={e => e.stopPropagation()} className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md mx-4 p-6 max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">
+          <div onClick={e => e.stopPropagation()} className="bg-ebene rounded-[10px] shadow-dialog dark:shadow-dialog-dark dark:border dark:border-kontur animate-scaleIn w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-[13px] font-bold text-schrift px-6 py-3 border-b border-kontur">
               {editId !== null ? 'Gruppe bearbeiten' : 'Neue Gruppe'}
             </h2>
-            {error && <div className="mb-3 p-2 bg-red-50 text-red-700 rounded text-sm">{error}</div>}
-            <div className="space-y-3">
+            {error && <div className="mx-6 mt-3 p-2 bg-signal-flaeche text-signal rounded-ui text-sm">{error}</div>}
+            <div className="space-y-3 px-6 py-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Name *</label>
+                  <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Name *</label>
                   <input type="text" autoFocus value={form.NAME} onChange={e => setForm(f => ({ ...f, NAME: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:border-glut focus:ring-[3px] focus:ring-[rgba(201,106,20,.12)] dark:focus:ring-[rgba(240,163,92,.15)]" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Kürzel</label>
+                  <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Kürzel</label>
                   <input type="text" value={form.SHORTNAME} onChange={e => setForm(f => ({ ...f, SHORTNAME: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:border-glut focus:ring-[3px] focus:ring-[rgba(201,106,20,.12)] dark:focus:ring-[rgba(240,163,92,.15)]" />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Übergeordnete Gruppe</label>
+                <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Übergeordnete Gruppe</label>
                 <select value={form.SUPERID} onChange={e => setForm(f => ({ ...f, SUPERID: parseInt(e.target.value) || 0 }))}
-                  className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  className="w-full px-3 py-2 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:border-glut focus:ring-[3px] focus:ring-[rgba(201,106,20,.12)] dark:focus:ring-[rgba(240,163,92,.15)]">
                   <option value={0}>— keine —</option>
                   {groups.filter(g => g.ID !== editId).map(g => <option key={g.ID} value={g.ID}>{g.NAME}</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Tagesbedarf</label>
+                  <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Tagesbedarf</label>
                   <input type="number" min="0" value={form.DAILYDEM} onChange={e => setForm(f => ({ ...f, DAILYDEM: parseInt(e.target.value) || 0 }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:border-glut focus:ring-[3px] focus:ring-[rgba(201,106,20,.12)] dark:focus:ring-[rgba(240,163,92,.15)]" />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Freies Feld</label>
+                  <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Freies Feld</label>
                   <input type="text" value={form.ARBITR} onChange={e => setForm(f => ({ ...f, ARBITR: e.target.value }))}
-                    className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="w-full px-3 py-2 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift focus:outline-none focus:border-glut focus:ring-[3px] focus:ring-[rgba(201,106,20,.12)] dark:focus:ring-[rgba(240,163,92,.15)]" />
                 </div>
               </div>
               <div className="flex gap-4">
-                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <label className="flex items-center gap-2 text-sm text-schrift cursor-pointer">
                   <input type="checkbox" checked={form.HIDE} onChange={e => setForm(f => ({ ...f, HIDE: e.target.checked }))} />
                   Ausgeblendet
                 </label>
-                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <label className="flex items-center gap-2 text-sm text-schrift cursor-pointer">
                   <input type="checkbox" checked={form.BOLD === 1} onChange={e => setForm(f => ({ ...f, BOLD: e.target.checked ? 1 : 0 }))} />
                   Fettschrift
                 </label>
               </div>
               {/* Color settings */}
-              <div className="border-t pt-3">
-                <p className="text-xs font-semibold text-gray-600 mb-2">🎨 Gruppenfarben</p>
+              <div className="border-t border-kontur pt-3">
+                <p className="text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-2">🎨 Gruppenfarben</p>
                 {[
                   { key: 'CFGLABEL_HEX' as const, label: 'Textfarbe' },
                   { key: 'CBKLABEL_HEX' as const, label: 'Hintergrundfarbe (Label)' },
                   { key: 'CBKSCHED_HEX' as const, label: 'Hintergrundfarbe (Plan)' },
                 ].map(({ key, label }) => (
                   <div key={key} className="flex items-center gap-3 mb-2">
-                    <label className="text-xs text-gray-600 w-40 flex-shrink-0">{label}</label>
+                    <label className="text-xs text-schrift-2 w-40 flex-shrink-0">{label}</label>
+                    {/* Farb-Eingabe + Editor-Vorschau zeigen bewusst den ROHEN DBF-Wert (Bearbeitungssicht) */}
                     <input type="color" value={form[key]} onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                      className="w-8 h-8 rounded cursor-pointer border border-gray-200" />
-                    <div className="w-20 h-6 rounded border text-center" style={{ backgroundColor: form[key] }}>
+                      className="w-8 h-8 rounded-ui cursor-pointer border border-kontur" />
+                    <div className="w-20 h-6 rounded-cell border border-kontur text-center" style={{ backgroundColor: form[key] }}>
                       <span className="text-xs font-mono" style={{ color: key === 'CFGLABEL_HEX' ? form['CBKLABEL_HEX'] : form['CFGLABEL_HEX'] }}>{form.SHORTNAME || form.NAME}</span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-            <div className="flex gap-2 mt-5 justify-end">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200">Abbrechen</button>
+            <div className="flex gap-2 justify-end px-6 py-3 bg-[#fafbfc] dark:bg-[#0e1522] border-t border-kontur">
+              <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-sm text-schrift hover:bg-wash">Abbrechen</button>
               <button
                 onClick={handleSave}
                 disabled={saving || !form.NAME.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
               >
-                {saving ? <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" /> : null}
+                {saving ? <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-1" /> : null}
                 Speichern
               </button>
             </div>

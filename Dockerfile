@@ -15,7 +15,10 @@
 # ==============================================================================
 
 # Stage 1: Build Frontend
-FROM node:20-alpine AS frontend-build
+# --platform=$BUILDPLATFORM: die SPA-dist ist architektur-unabhängig — nativ
+# auf dem Build-Host bauen statt unter QEMU (arm64-Emulation von npm ci hängt
+# sonst minuten- bis stundenlang im Multi-Arch-Build).
+FROM --platform=$BUILDPLATFORM node:20-alpine AS frontend-build
 WORKDIR /app
 COPY frontend/package*.json ./frontend/
 RUN cd frontend && npm ci

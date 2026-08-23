@@ -152,19 +152,19 @@ export function OnboardingChecklist() {
   const progressPct = Math.round((completedCount / totalSteps) * 100);
 
   return (
-    <div className="bg-white rounded-xl shadow-md border border-blue-100 p-5 relative overflow-hidden">
-      {/* Background gradient accent */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
+    <div className="bg-ebene rounded-panel border border-kontur p-5 relative overflow-hidden">
+      {/* Glut-Linie als oberer Akzent */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-glut" />
 
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <span className="text-2xl">🚀</span>
           <div>
-            <h2 className="font-bold text-gray-800 text-base">
+            <h2 className="font-bold text-schrift text-base">
               {allDone ? 'Setup abgeschlossen!' : 'Erste Schritte'}
             </h2>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-schrift-2 mt-0.5">
               {allDone
                 ? 'Alle Schritte erledigt — Sie können loslegen!'
                 : `${completedCount} von ${totalSteps} Schritten erledigt`}
@@ -173,7 +173,7 @@ export function OnboardingChecklist() {
         </div>
         <button
           onClick={handleDismiss}
-          className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
+          className="text-schrift-2 hover:text-schrift transition-colors p-1 rounded-ui hover:bg-wash"
           title={allDone ? 'Checkliste schließen' : 'Checkliste ausblenden'}
           aria-label="Checkliste schließen"
         >
@@ -181,19 +181,15 @@ export function OnboardingChecklist() {
         </button>
       </div>
 
-      {/* Progress bar */}
+      {/* Fortschrittsbalken */}
       <div className="mb-4">
-        <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+        <div className="flex items-center justify-between text-xs text-schrift-2 mb-1">
           <span>Fortschritt</span>
-          <span className="font-bold">{progressPct}%</span>
+          <span className="font-bold font-mono">{progressPct}%</span>
         </div>
-        <div className="w-full bg-gray-100 rounded-full h-2">
+        <div className="w-full bg-wash rounded-full h-2">
           <div
-            className={`h-2 rounded-full transition-all duration-700 ${
-              allDone
-                ? 'bg-gradient-to-r from-green-400 to-emerald-500'
-                : 'bg-gradient-to-r from-blue-500 to-indigo-500'
-            }`}
+            className="h-2 rounded-full bg-glut transition-all duration-[140ms] ease-out"
             style={{ width: `${progressPct}%` }}
           />
         </div>
@@ -207,17 +203,17 @@ export function OnboardingChecklist() {
             <a
               key={step.id}
               href={step.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all duration-150 group ${
+              className={`flex items-center gap-3 rounded-ui px-3 py-2.5 transition-all duration-150 group border ${
                 done
-                  ? 'bg-green-50 hover:bg-green-100'
-                  : 'bg-gray-50 hover:bg-blue-50 hover:border-blue-200'
-              } border border-transparent`}
+                  ? 'border-transparent'
+                  : 'border-kontur hover:bg-wash'
+              }`}
             >
-              {/* Checkbox icon */}
+              {/* Haken-Kreis bzw. Schritt-Icon */}
               <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                 done
-                  ? 'bg-green-500 text-white'
-                  : 'bg-gray-200 text-gray-500 group-hover:bg-blue-200 group-hover:text-blue-700'
+                  ? 'bg-glut text-glut-ink'
+                  : 'bg-wash text-schrift-2'
               }`}>
                 {done ? '✓' : step.icon}
               </span>
@@ -225,20 +221,20 @@ export function OnboardingChecklist() {
               {/* Text */}
               <div className="flex-1 min-w-0">
                 <span className={`text-sm font-medium block ${
-                  done ? 'text-green-700 line-through' : 'text-gray-700'
+                  done ? 'text-schrift-3 line-through' : 'text-schrift'
                 }`}>
                   {step.title}
                 </span>
                 {!done && (
-                  <span className="text-xs text-gray-400 block truncate">
+                  <span className="text-xs text-schrift-3 block truncate">
                     {step.description}
                   </span>
                 )}
               </div>
 
-              {/* Arrow */}
+              {/* Pfeil */}
               {!done && (
-                <span className="text-gray-300 group-hover:text-blue-500 transition-colors flex-shrink-0">
+                <span className="text-schrift-3 group-hover:text-glut transition-colors flex-shrink-0">
                   →
                 </span>
               )}
@@ -249,13 +245,13 @@ export function OnboardingChecklist() {
 
       {/* All done celebration */}
       {allDone && (
-        <div className="mt-4 pt-3 border-t border-green-100 flex items-center justify-between">
-          <span className="text-sm text-green-600 font-medium">
+        <div className="mt-4 pt-3 border-t border-kontur flex items-center justify-between">
+          <span className="text-sm text-schrift-2 font-medium">
             🎉 Alles eingerichtet — viel Erfolg!
           </span>
           <button
             onClick={handleDismiss}
-            className="text-xs bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg transition-colors font-medium"
+            className="text-xs bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] px-3 py-1.5 rounded-ui transition-colors font-semibold"
           >
             Checkliste schließen
           </button>

@@ -7,6 +7,15 @@ import { useConfirm } from '../hooks/useConfirm';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import type { LeaveType } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { Badge } from '../components/Badge';
+
+// Taktwerk-Eingabefeld (docs/design-system.md §1/§3): Ebene-2-Fläche, Kontur, Glut-Fokusring.
+const EINGABE =
+  'bg-ebene-2 border border-kontur rounded-ui text-schrift placeholder:text-schrift-3 focus:outline-none focus:border-glut focus:shadow-[0_0_0_3px_rgba(201,106,20,.12)] dark:focus:shadow-[0_0_0_3px_rgba(240,163,92,.15)]';
+
+// Taktwerk-Buttons (docs/design-system.md §1/§6): Primär = Umkehrung, Sekundär = Kontur-Fläche.
+const BTN_PRIMAER = 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold rounded-ui hover:opacity-90 transition-opacity';
+const BTN_SEKUNDAER = 'bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui text-schrift hover:bg-wash transition-colors';
 
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
@@ -237,22 +246,22 @@ export default function Holidays() {
     <div className="p-2 sm:p-4 lg:p-6">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <div className="flex items-center gap-4 flex-wrap">
-          <h1 className="text-xl font-bold text-gray-800">📅 Feiertage</h1>
+          <h1 className="text-xl font-extrabold tracking-[-0.02em] text-schrift">📅 Feiertage</h1>
           <select
             value={year}
             onChange={e => setYear(Number(e.target.value))}
-            className="px-3 py-1.5 border rounded shadow-sm text-sm"
+            className={`px-3 py-1.5 text-sm font-mono tabular-nums ${EINGABE}`}
           >
             {Array.from({ length: 10 }, (_, i) => currentYear - 2 + i).map(y => (
               <option key={y} value={y}>{y}</option>
             ))}
           </select>
-          <span className="text-sm text-gray-500">{holidays.length} Feiertage</span>
+          <span className="text-sm text-schrift-2"><span className="font-mono tabular-nums">{holidays.length}</span> Feiertage</span>
         </div>
         <div className="flex gap-2">
           <button
             onClick={() => window.print()}
-            className="no-print px-3 py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded shadow-sm flex items-center gap-1"
+            className={`no-print px-3 py-1.5 text-sm flex items-center gap-1 ${BTN_SEKUNDAER}`}
             title="Seite drucken"
           >
             🖨️ <span className="hidden sm:inline">Drucken</span>
@@ -260,14 +269,14 @@ export default function Holidays() {
           <button
             onClick={handleImportAustria}
             disabled={importing}
-            className="px-3 py-1.5 bg-red-600 text-white rounded text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-50"
+            className={`px-3 py-1.5 text-sm font-semibold disabled:opacity-50 ${BTN_SEKUNDAER}`}
             title="Österreichische Feiertage für das gewählte Jahr importieren" aria-label="Österreichische Feiertage für das gewählte Jahr importieren"
           >
             {importing ? '⟳ Importiere...' : '🇦🇹 Österreich importieren'}
           </button>
           {canAdmin && <button
             onClick={openCreate}
-            className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 transition-colors"
+            className={`px-3 py-1.5 text-sm ${BTN_PRIMAER}`}
           >
             + Neu
           </button>}
@@ -276,46 +285,49 @@ export default function Holidays() {
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <div className="bg-ebene border border-kontur rounded-panel overflow-x-auto">
           <table className="w-full text-sm min-w-[500px]">
-            <thead className="bg-slate-700 text-white text-xs uppercase tracking-wide">
-              <tr>
-                <th scope="col" className="px-4 py-2 text-left">Datum</th>
-                <th scope="col" className="px-4 py-2 text-left">Wochentag</th>
-                <th scope="col" className="px-4 py-2 text-left">Name</th>
-                <th scope="col" className="px-4 py-2 text-center">Dauer</th>
-                <th scope="col" className="px-4 py-2 text-center">Aktionen</th>
+            <thead className="bg-[#fafbfc] dark:bg-[#0e1522] text-[9px] font-bold uppercase tracking-[.08em] text-schrift-3">
+              <tr className="border-b border-kontur">
+                <th scope="col" className="px-4 py-[5px] text-left">Datum</th>
+                <th scope="col" className="px-4 py-[5px] text-left">Wochentag</th>
+                <th scope="col" className="px-4 py-[5px] text-left">Name</th>
+                <th scope="col" className="px-4 py-[5px] text-center">Dauer</th>
+                <th scope="col" className="px-4 py-[5px] text-center">Aktionen</th>
               </tr>
             </thead>
             <tbody>
-              {holidays.map((h, i) => (
-                <tr key={h.ID} className={`border-b ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-blue-50 transition-colors`}>
-                  <td className="px-4 py-2 font-mono text-gray-700">{h.DATE}</td>
-                  <td className="px-4 py-2 text-gray-500">{getWeekday(h.DATE)}</td>
-                  <td className="px-4 py-2 font-semibold">{h.NAME}</td>
-                  <td className="px-4 py-2 text-center">
+              {holidays.map(h => (
+                <tr key={h.ID} className="h-[28px] border-b border-kontur-soft hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)] transition-colors">
+                  {/* Feiertags-Kennzeichnung in Signal — wie die Feiertagsspalten im Dienstplan-Kopf */}
+                  <td className="px-4 py-1 font-mono tabular-nums text-signal">{h.DATE}</td>
+                  <td className="px-4 py-1 text-schrift-2">{getWeekday(h.DATE)}</td>
+                  <td className="px-4 py-1 font-semibold text-schrift">{h.NAME}</td>
+                  <td className="px-4 py-1 text-center">
                     {h.INTERVAL === 1 || h.INTERVAL === 2 ? (
+                      // Status-Pille lokal (Urlaubs-Schiene h≈40), weil der UNSICHER-Tooltip am Element bleiben muss
                       <span
-                        className="inline-block px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-semibold"
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold whitespace-nowrap text-[#7e5f25] border-[#e7dbc6] dark:text-[#d5bd90] dark:border-[#604f2e]"
                         title={INTERVAL_UNSURE_HINT}
                       >
+                        <span className="w-[5px] h-[5px] rounded-full bg-current flex-shrink-0" aria-hidden="true" />
                         {intervalLabel(h.INTERVAL)}
                       </span>
                     ) : (
-                      <span className="inline-block px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs">Ganztägig</span>
+                      <Badge>Ganztägig</Badge>
                     )}
                   </td>
-                  <td className="px-4 py-2 text-center">
+                  <td className="px-4 py-1 text-center">
                     <div className="flex gap-1 justify-center flex-wrap">
-                      {canAdmin && <button onClick={() => openBulkAbsModal(h)} className="px-2 py-1 min-h-[2rem] bg-teal-100 text-teal-700 rounded text-xs hover:bg-teal-200" title="Als Abwesenheit für alle MA eintragen">👥 Bulk</button>}
-                      {canAdmin && <button onClick={() => openEdit(h)} className="px-2 py-1 min-h-[2rem] bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200">Bearbeiten</button>}
-                      {canAdmin && <button onClick={() => handleDelete(h)} className="px-2 py-1 min-h-[2rem] bg-red-100 text-red-700 rounded text-xs hover:bg-red-200">Löschen</button>}
+                      {canAdmin && <button onClick={() => openBulkAbsModal(h)} className={`px-2 py-0.5 text-xs ${BTN_SEKUNDAER}`} title="Als Abwesenheit für alle MA eintragen">👥 Bulk</button>}
+                      {canAdmin && <button onClick={() => openEdit(h)} className={`px-2 py-0.5 text-xs ${BTN_SEKUNDAER}`}>Bearbeiten</button>}
+                      {canAdmin && <button onClick={() => handleDelete(h)} className="px-2 py-0.5 text-xs border border-kontur rounded-ui text-signal hover:bg-signal-flaeche transition-colors">Löschen</button>}
                     </div>
                   </td>
                 </tr>
               ))}
               {holidays.length === 0 && (
-                <tr><td colSpan={5} className="text-center py-8 text-gray-600">Keine Feiertage für {year}</td></tr>
+                <tr><td colSpan={5} className="text-center py-8 text-schrift-2">Keine Feiertage für {year}</td></tr>
               )}
             </tbody>
           </table>
@@ -325,38 +337,38 @@ export default function Holidays() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-backdropIn" onClick={() => setShowModal(false)}>
-          <div onClick={e => e.stopPropagation()} className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-md mx-4 p-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">
+          <div onClick={e => e.stopPropagation()} className="bg-ebene rounded-[10px] shadow-dialog dark:shadow-dialog-dark dark:border dark:border-kontur animate-scaleIn w-full max-w-md mx-4 overflow-hidden">
+            <h2 className="text-[13px] font-bold text-schrift px-6 py-3 border-b border-kontur">
               {editId !== null ? 'Feiertag bearbeiten' : 'Neuer Feiertag'}
             </h2>
-            {error && <div className="mb-3 p-2 bg-red-50 text-red-700 rounded text-sm">{error}</div>}
-            <div className="space-y-3">
+            {error && <div className="mx-6 mt-3 p-2 bg-signal-flaeche text-signal rounded-ui text-sm">{error}</div>}
+            <div className="space-y-3 px-6 py-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Datum *</label>
+                <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Datum *</label>
                 <input
                   type="date"
                   value={form.DATE}
                   onChange={e => setForm(f => ({ ...f, DATE: e.target.value }))}
-                  className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 text-sm font-mono tabular-nums ${EINGABE}`}
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Name *</label>
+                <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Name *</label>
                 <input
                   type="text"
                   autoFocus value={form.NAME}
                   onChange={e => setForm(f => ({ ...f, NAME: e.target.value }))}
-                  className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 text-sm ${EINGABE}`}
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1" title={INTERVAL_UNSURE_HINT}>
-                  Dauer <span className="cursor-help text-gray-400" aria-label={INTERVAL_UNSURE_HINT}>ⓘ</span>
+                <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1" title={INTERVAL_UNSURE_HINT}>
+                  Dauer <span className="cursor-help text-schrift-3" aria-label={INTERVAL_UNSURE_HINT}>ⓘ</span>
                 </label>
                 <select
                   value={form.INTERVAL}
                   onChange={e => setForm(f => ({ ...f, INTERVAL: parseInt(e.target.value) || 0 }))}
-                  className="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-3 py-2 text-sm ${EINGABE}`}
                   title={INTERVAL_UNSURE_HINT}
                 >
                   <option value={0}>Ganztägig</option>
@@ -365,9 +377,10 @@ export default function Holidays() {
                 </select>
               </div>
               {editId === null && (
-                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <label className="flex items-center gap-2 text-sm text-schrift cursor-pointer">
                   <input
                     type="checkbox"
+                    className="accent-glut"
                     checked={repeatYears}
                     onChange={e => setRepeatYears(e.target.checked)}
                   />
@@ -375,14 +388,14 @@ export default function Holidays() {
                 </label>
               )}
             </div>
-            <div className="flex gap-2 mt-5 justify-end">
-              <button onClick={() => setShowModal(false)} className="px-4 py-2 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200">Abbrechen</button>
+            <div className="flex gap-2 justify-end px-6 py-3 bg-[#fafbfc] dark:bg-[#0e1522] border-t border-kontur">
+              <button onClick={() => setShowModal(false)} className={`px-4 py-2 text-sm ${BTN_SEKUNDAER}`}>Abbrechen</button>
               <button
                 onClick={handleSave}
                 disabled={saving || !form.NAME.trim() || !form.DATE}
-                className="px-4 py-2 bg-blue-600 text-white rounded text-sm font-semibold hover:bg-blue-700 disabled:opacity-50"
+                className={`px-4 py-2 text-sm disabled:opacity-50 ${BTN_PRIMAER}`}
               >
-                {saving ? <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1" /> : null}
+                {saving ? <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-1" /> : null}
                 Speichern
               </button>
             </div>
@@ -395,26 +408,26 @@ export default function Holidays() {
       {/* ── Bulk Absence Modal ────────────────────────────────── */}
       {showBulkAbsModal && bulkAbsHoliday && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-backdropIn" onClick={() => setShowBulkAbsModal(false)}>
-          <div onClick={e => e.stopPropagation()} className="bg-white rounded-xl shadow-2xl animate-scaleIn w-full max-w-sm mx-4 p-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-1">Feiertag für alle eintragen</h2>
-            <p className="text-sm text-gray-500 mb-4">
+          <div onClick={e => e.stopPropagation()} className="bg-ebene rounded-[10px] shadow-dialog dark:shadow-dialog-dark dark:border dark:border-kontur animate-scaleIn w-full max-w-sm mx-4 overflow-hidden">
+            <h2 className="text-[13px] font-bold text-schrift px-6 py-3 border-b border-kontur">Feiertag für alle eintragen</h2>
+            <p className="text-sm text-schrift-2 px-6 pt-3 mb-4">
               Trägt <strong>{bulkAbsHoliday.NAME}</strong> ({bulkAbsHoliday.DATE}) als Abwesenheit für alle aktiven Mitarbeiter ein.
             </p>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Abwesenheitstyp</label>
+            <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1 px-6">Abwesenheitstyp</label>
             <select
               value={bulkAbsLeaveTypeId}
               onChange={e => setBulkAbsLeaveTypeId(e.target.value === '' ? '' : Number(e.target.value))}
-              className="w-full px-3 py-2 border rounded text-sm mb-4 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className={`w-[calc(100%-3rem)] mx-6 px-3 py-2 text-sm mb-4 ${EINGABE}`}
             >
               <option value="">— Typ auswählen —</option>
               {leaveTypes.map(lt => <option key={lt.ID} value={lt.ID}>{lt.NAME}{lt.SHORTNAME ? ` (${lt.SHORTNAME})` : ''}</option>)}
             </select>
-            <div className="flex gap-2 justify-end">
-              <button onClick={() => setShowBulkAbsModal(false)} className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm">Abbrechen</button>
+            <div className="flex gap-2 justify-end px-6 py-3 bg-[#fafbfc] dark:bg-[#0e1522] border-t border-kontur">
+              <button onClick={() => setShowBulkAbsModal(false)} className={`px-4 py-2 text-sm ${BTN_SEKUNDAER}`}>Abbrechen</button>
               <button
                 onClick={handleBulkAbsence}
                 disabled={bulkAbsLeaveTypeId === '' || bulkAbsWorking}
-                className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 disabled:opacity-50 text-sm font-semibold"
+                className={`px-4 py-2 text-sm disabled:opacity-50 ${BTN_PRIMAER}`}
               >{bulkAbsWorking ? 'Wird eingetragen...' : 'Für alle eintragen'}</button>
             </div>
           </div>

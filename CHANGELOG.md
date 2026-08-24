@@ -11,6 +11,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Dienstplan-Druck für freien Zeitraum (Spec 7.4.1, Bericht #6 „Dienstplan →
+  Sonstiger Zeitraum").** Neue Berichts-Karte „Dienstplan (Zeitraum)" mit
+  Von/Bis-Datumsfeldern und Gruppenfilter: Plan-Raster (Mitarbeiter × Tage) wie
+  der Monatsdruck, aber für einen frei wählbaren Zeitraum — z. B.
+  14-Tage-Aushang, monatsübergreifende Zeiträume oder ein Halbjahr (deckt
+  funktional auch Bericht #2 Halbjahr und #5 Spezieller Zeitraum ab). Bisher
+  gab es den freien Zeitraum nur als Liste („Dienstplaneinträge"). Spaltenkopf
+  mit Kalenderwoche und Wochentag, Wochenenden/Feiertage markiert (Feiertagsname
+  als Tooltip), Legende der verwendeten Schicht-/Abwesenheitsarten in
+  POSITION-Reihenfolge; bei langen Zeiträumen Seitenumbruch je Wochen-Block
+  (Schnitt nur an Montagen, max. 4 Wochen je Druckseite, Folgeseiten mit
+  „Fortsetzung" — Spec 7.4.1 Nr. 5 „Zeitraum je Druckseite"). Datenquelle sind
+  die bestehenden Monats-Schedule-Endpunkte, über Monatsgrenzen zusammengefügt
+  (kein neuer API-Endpunkt). Validierung: leere Felder, Von nach Bis und
+  Zeiträume über 185 Tage (Halbjahr) werden als Feldfehler gemeldet. Pure
+  Helfer (`rangeGrid.ts`: Tagesspalten mit KW/WE/Feiertags-Flags, Monats- und
+  Wochen-Block-Ableitung) mit Unit-Tests plus Komponententest der Karte.
+
 - **Arbeitszeitprüfung: Prüfoptionen statt starrem Schwellwert.** Die Seite
   „Arbeitszeit-Regelwerk" (App-EXTRA ohne Original-Vorbild) bekommt einen
   Prüfoptionen-Block: die Grenzen (max. Stunden/Tag, max. Stunden/Woche,

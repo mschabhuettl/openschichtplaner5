@@ -8,6 +8,7 @@ import { escapeHtml, safeColor } from '../utils/escapeHtml';
 import { entryArt, groupReportRows, withEmptyEmployees, groupChargeDaysByEmployee, type ReportGroupMode } from '../utils/reportRows';
 import { groupTreeOptions } from '../utils/groupTree';
 import { orderShiftLabels } from '../utils/sortOrder';
+import { validateRange, monthsInRange, buildRangeDays, chunkIntoWeekBlocks, type RangeDay } from '../utils/rangeGrid';
 
 const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -195,6 +196,123 @@ async function reportMonthlySchedule(year: number, month: number, groupId: numbe
 </table>
 </div>`;
   printHtml(html, `Dienstplan ${MONTHS[month - 1]} ${year}`);
+}
+
+// ── Report: Dienstplan (Zeitraum) ─────────────────────────────
+// Spec 7.4.1, Bericht #6 „Dienstplan → Sonstiger Zeitraum" (freies Von/Bis);
+// deckt funktional auch #2 Halbjahr (= 6-Monats-Zeitraum) und #5 „Spezieller
+// Zeitraum" ab. Plan-Raster MA × Tage wie der Monatsdruck, über Monatsgrenzen
+// hinweg (mehrere Monats-Calls zusammengefügt); Seitenumbruch je Wochen-Block
+// (Spec 7.4.1 Nr. 5 „Zeitraum je Druckseite"), Legende in POSITION-Reihenfolge.
+
+async function reportZeitraumSchedule(
+  fromDate: string,
+  toDate: string,
+  groupId: number | null,
+  employees: Employee[],
+  groups: Group[],
+  shifts: ShiftType[],
+) {
+  const rangeError = validateRange(fromDate, toDate);
+  if (rangeError) { alert(rangeError); return; }
+
+  const monthKeys = monthsInRange(fromDate, toDate);
+  const years = [...new Set(monthKeys.map(k => k.year))];
+  const holidayLists = await Promise.all(years.map(y => api.getHolidays(y)));
+  const holidayNames = new Map(holidayLists.flat().map(h => [h.DATE, h.NAME]));
+  const entries = (await Promise.all(monthKeys.map(k => api.getSchedule(k.year, k.month, groupId ?? undefined))))
+    .flat()
+    .filter(e => e.date >= fromDate && e.date <= toDate);
+
+  let emps = employees;
+  if (groupId) {
+    const memberIds = new Set<number>();
+    (await api.getGroupAssignments()).filter(a => a.group_id === groupId).forEach(a => memberIds.add(a.employee_id));
+    emps = employees.filter(e => memberIds.has(e.ID));
+  }
+
+  type Entry = typeof entries[0];
+  const idx: Record<string, Entry> = {};
+  for (const e of entries) idx[`${e.employee_id}::${e.date}`] = e;
+
+  const days = buildRangeDays(fromDate, toDate, new Set(holidayNames.keys()));
+  const blocks = chunkIntoWeekBlocks(days);
+  const fmtDate = (d: RangeDay) => `${padZero(d.day)}.${padZero(d.month)}.${d.year}`;
+
+  const thStyle = 'background:#334155;color:#fff;padding:2px 4px;font-size:10px;text-align:center;border:1px solid #475569;';
+  const nameStyle = 'padding:2px 4px;font-size:10px;font-weight:bold;white-space:nowrap;border:1px solid #ddd;background:#f8fafc;';
+
+  let html = '';
+  blocks.forEach((block, bi) => {
+    // KW-Kopfzeile: eine Zelle je zusammenhängender Kalenderwoche
+    let kwCols = '';
+    for (let i = 0; i < block.length; ) {
+      let span = 1;
+      while (i + span < block.length && block[i + span].isoWeek === block[i].isoWeek) span++;
+      kwCols += `<th scope="col" colspan="${span}" style="${thStyle}">KW ${block[i].isoWeek}</th>`;
+      i += span;
+    }
+
+    let dayCols = '';
+    for (const d of block) {
+      const bg = d.isHoliday ? '#b91c1c' : d.isWeekend ? '#1e293b' : '#334155';
+      const title = d.isHoliday ? ` title="${escapeHtml(holidayNames.get(d.date) ?? 'Feiertag')}"` : '';
+      dayCols += `<th scope="col" style="${thStyle};background:${bg};min-width:26px"${title}>${padZero(d.day)}.${padZero(d.month)}.<br><span style="font-size:8px">${DAY_SHORT_DE[d.weekday]}</span></th>`;
+    }
+
+    let rows = '';
+    for (const emp of emps) {
+      let cells = `<td style="${nameStyle}">${escapeHtml(emp.NAME)} ${escapeHtml(emp.FIRSTNAME ? emp.FIRSTNAME.charAt(0) + '.' : '')}</td>`;
+      for (const d of block) {
+        const entry = idx[`${emp.ID}::${d.date}`];
+        const cellBg = d.isHoliday ? '#fee2e2' : d.isWeekend ? '#f1f5f9' : '#fff';
+        if (entry) {
+          cells += `<td style="border:1px solid #ddd;padding:1px;text-align:center;background:${safeColor(entry.color_bk || cellBg)}">
+<span style="color:${safeColor(entry.color_text || '#000')};font-size:9px;font-weight:bold">${escapeHtml(entry.display_name || '')}</span></td>`;
+        } else {
+          cells += `<td style="border:1px solid #ddd;background:${cellBg}"></td>`;
+        }
+      }
+      rows += `<tr>${cells}</tr>`;
+    }
+
+    // Seitenumbruch: jeder Wochen-Block nach dem ersten beginnt eine neue Druckseite
+    html += `<div style="${bi > 0 ? 'page-break-before:always;break-before:page;' : ''}margin-bottom:12px">
+<div style="font-size:11px;color:#475569;margin:8px 0 4px">${fmtDate(block[0])} – ${fmtDate(block[block.length - 1])}${bi > 0 ? ' (Fortsetzung)' : ''}</div>
+<table style="border-collapse:collapse;font-size:10px">
+<thead><tr><th scope="col" rowspan="2" style="${thStyle};text-align:left;min-width:80px">Mitarbeiter</th>${kwCols}</tr>
+<tr>${dayCols}</tr></thead>
+<tbody>${rows}</tbody>
+</table>
+</div>`;
+  });
+
+  // Legende in POSITION-Reihenfolge der Schichtarten (orderShiftLabels)
+  const legendColors = new Map<string, { bg: string; text: string }>();
+  for (const e of entries) {
+    if (e.display_name && !legendColors.has(e.display_name)) {
+      legendColors.set(e.display_name, { bg: e.color_bk || '#fff', text: e.color_text || '#000' });
+    }
+  }
+  const legendNames = orderShiftLabels(legendColors.keys(), shifts);
+  if (legendNames.length > 0) {
+    let chips = '';
+    for (const name of legendNames) {
+      const c = legendColors.get(name);
+      if (!c) continue;
+      chips += `<span class="badge" style="background:${safeColor(c.bg)};color:${safeColor(c.text)};border:1px solid #cbd5e1;margin-right:4px">${escapeHtml(name)}</span>`;
+    }
+    chips += `<span class="badge" style="background:#fee2e2;color:#991b1b;border:1px solid #cbd5e1;margin-right:4px">Feiertag</span>`;
+    chips += `<span class="badge" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1">Wochenende</span>`;
+    html += `<div style="margin-top:4px"><span style="font-size:10px;color:#64748b;font-weight:600;text-transform:uppercase;margin-right:6px">Legende</span>${chips}</div>`;
+  }
+
+  const groupName = groupId ? (groups.find(g => g.ID === groupId)?.NAME ?? `Gruppe ${groupId}`) : 'Alle';
+  const now = new Date().toLocaleString('de-AT');
+  html = `<h1>📅 Dienstplan (Zeitraum)</h1>
+<div class="subtitle">Zeitraum: ${fromDate} bis ${toDate} (${days.length} Tage) &nbsp;|&nbsp; Gruppe: ${groupName} &nbsp;|&nbsp; ${emps.length} Mitarbeiter &nbsp;|&nbsp; Stand: ${now}</div>
+${html}`;
+  printHtml(html, `Dienstplan ${fromDate} – ${toDate}`);
 }
 
 // ── Report: Urlaubsliste ──────────────────────────────────────
@@ -1453,6 +1571,19 @@ export default function Berichte() {
   const [listGroup, setListGroup] = useState<ReportGroupMode>('none');
   const [listShowEmpty, setListShowEmpty] = useState(false);
 
+  // Dienstplan (Zeitraum) — Spec 7.4.1 Bericht #6: freies Von/Bis-Plan-Raster;
+  // Default = 14-Tage-Aushang ab heute
+  const [rangeFrom, setRangeFrom] = useState(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${padZero(d.getMonth() + 1)}-${padZero(d.getDate())}`;
+  });
+  const [rangeTo, setRangeTo] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 13);
+    return `${d.getFullYear()}-${padZero(d.getMonth() + 1)}-${padZero(d.getDate())}`;
+  });
+  const rangeError = validateRange(rangeFrom, rangeTo);
+
   const [loading, setLoading] = useState(false);
   const { showToast } = useToast();
 
@@ -1572,6 +1703,17 @@ export default function Berichte() {
       title: 'Jahres-Dienstplan',
       description: `Kompakte Jahresübersicht ${year} — 12 Monate, Schichthäufigkeit pro Mitarbeiter.`,
       action: () => run(() => reportYearSchedule(year, groupId, employees, groups)),
+      color: 'green',
+      category: 'Dienstplan',
+    },
+    {
+      icon: '🗓️',
+      title: 'Dienstplan (Zeitraum)',
+      description: `Plan-Raster (Mitarbeiter × Tage) wie der Monatsdruck für den freien Zeitraum ${rangeFrom} bis ${rangeTo} — z. B. 14-Tage-Aushang, monatsübergreifend oder Halbjahr; Spaltenkopf mit Kalenderwoche und Wochentag, Wochenenden/Feiertage markiert, Seitenumbruch je Wochen-Block.`,
+      action: () => {
+        if (rangeError) { showToast(rangeError, 'error'); return; }
+        run(() => reportZeitraumSchedule(rangeFrom, rangeTo, groupId, employees, groups, shifts));
+      },
       color: 'green',
       category: 'Dienstplan',
     },
@@ -1797,6 +1939,40 @@ export default function Berichte() {
                 />
               </div>
             </div>
+          </div>
+
+          {/* Dienstplan (Zeitraum) — Spec 7.4.1 Bericht #6 */}
+          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-600">
+            <div className="font-semibold text-gray-700 mb-2 text-sm">🗓️ Dienstplan (Zeitraum) – Parameter</div>
+            <div className="flex flex-wrap gap-3 items-end">
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Von</label>
+                <input
+                  type="date"
+                  aria-label="Zeitraum von"
+                  value={rangeFrom}
+                  onChange={e => setRangeFrom(e.target.value)}
+                  className="px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Bis</label>
+                <input
+                  type="date"
+                  aria-label="Zeitraum bis"
+                  value={rangeTo}
+                  min={rangeFrom}
+                  onChange={e => setRangeTo(e.target.value)}
+                  className="px-3 py-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                />
+              </div>
+              <div className="text-xs text-gray-500 max-w-xs pb-2">
+                Gruppenfilter oben wird berücksichtigt. Maximal ein Halbjahr (185 Tage).
+              </div>
+            </div>
+            {rangeError && (
+              <div className="mt-2 text-xs font-semibold text-red-600" role="alert">{rangeError}</div>
+            )}
           </div>
 
           {/* Dienstplaneinträge-Liste (R-1) */}

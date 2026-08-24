@@ -5,6 +5,19 @@ import type { ScheduleEntry } from '../types';
 
 export const MONTH_ABBR = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
 
+/** Spaltenausrichtung des Jahresrasters (Spec 4.11.11-1, Radio-Logik):
+ *  'kalendertage' = 1…31 untereinander (Default), 'wochentage' = Mo…So
+ *  untereinander (37 Spalten: max. Offset 6 + 31 Tage). */
+export type JahresAusrichtung = 'kalendertage' | 'wochentage';
+
+export const WEEKDAY_ABBR = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+
+/** Spalten-Offset einer Monatszeile bei Wochentags-Ausrichtung
+ *  (Spec 4.11.11-1b): Wochentag des Monatsersten, Mo=0…So=6. */
+export function monthStartOffset(year: number, month: number): number {
+  return (new Date(year, month - 1, 1).getDay() + 6) % 7;
+}
+
 /** Tage im Monat (month 1–12); Date-Rollover: Tag 0 des Folgemonats. */
 export function daysInMonth(year: number, month: number): number {
   return new Date(year, month, 0).getDate();

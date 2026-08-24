@@ -7,7 +7,7 @@ import { EmptyState, ApiErrorState } from '../components/EmptyState';
 import { PageHeader } from '../components/PageHeader';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { JahresRaster } from '../components/JahresRaster';
-import { buildDayMap, daysInMonth, toDateStr, MONTH_ABBR, shortLabel } from '../components/jahresRasterUtils';
+import { buildDayMap, daysInMonth, monthStartOffset, toDateStr, MONTH_ABBR, WEEKDAY_ABBR, shortLabel, type JahresAusrichtung } from '../components/jahresRasterUtils';
 import { groupTreeOptions } from '../utils/groupTree';
 import { shiftCellColorsMemo } from '../utils/shiftColor';
 
@@ -31,17 +31,24 @@ function buildJahresrasterHTML(
   year: number,
   dayMap: Map<string, ScheduleEntry[]>,
   holidays: Set<string>,
+  ausrichtung: JahresAusrichtung,
 ): string {
+  // Spaltenausrichtung wie in der Ansicht (Spec 4.11.11-1):
+  // Kalendertage 1…31 (31 Spalten) oder Wochentage Mo…So (37 Spalten)
+  const isWt = ausrichtung === 'wochentage';
+  const colCount = isWt ? 37 : 31;
   const thStyle = 'border:1px solid #aaa;padding:2px 3px;background:#334155;color:#fff;font-size:10px;text-align:center;';
   let headerCells = `<th scope="col" style="${thStyle}text-align:left;min-width:42px">Monat</th>`;
-  for (let d = 1; d <= 31; d++) headerCells += `<th scope="col" style="${thStyle}min-width:22px">${d}</th>`;
+  for (let c = 0; c < colCount; c++) headerCells += `<th scope="col" style="${thStyle}min-width:22px">${isWt ? WEEKDAY_ABBR[c % 7] : c + 1}</th>`;
 
   let bodyRows = '';
   for (let m = 1; m <= 12; m++) {
     const dim = daysInMonth(year, m);
+    const offset = isWt ? monthStartOffset(year, m) : 0;
     let cells = `<th scope="row" style="border:1px solid #ddd;padding:2px 6px;background:#f1f5f9;font-size:10px;text-align:left">${MONTH_ABBR[m - 1]}</th>`;
-    for (let d = 1; d <= 31; d++) {
-      if (d > dim) { cells += '<td style="border:1px solid #eee;background:#e2e8f0"></td>'; continue; }
+    for (let c = 0; c < colCount; c++) {
+      const d = c - offset + 1;
+      if (d < 1 || d > dim) { cells += '<td style="border:1px solid #eee;background:#e2e8f0"></td>'; continue; }
       const dateStr = toDateStr(year, m, d);
       const entries = dayMap.get(dateStr) ?? [];
       const wd = new Date(year, m - 1, d).getDay();
@@ -502,10 +509,14 @@ function JahresRasterView({
   employee,
   year,
   onMonthClick,
+  ausrichtung,
+  maxEintraege,
 }: {
   employee: Employee;
   year: number;
   onMonthClick: (month: number) => void;
+  ausrichtung: JahresAusrichtung;
+  maxEintraege: number;
 }) {
   const [yearEntries, setYearEntries] = useState<ScheduleEntry[]>([]);
   const [holidays, setHolidays] = useState<Set<string>>(new Set());
@@ -552,7 +563,7 @@ function JahresRasterView({
 
   return (
     <div className="space-y-2">
-      <JahresRaster year={year} dayMap={dayMap} holidays={holidays} onMonthClick={onMonthClick} />
+      <JahresRaster year={year} dayMap={dayMap} holidays={holidays} onMonthClick={onMonthClick} ausrichtung={ausrichtung} maxEintraege={maxEintraege} />
       <div className="text-[11px] text-schrift-2 flex flex-wrap gap-x-4 gap-y-1">
         <span><span className="inline-block w-3 h-3 align-[-2px] rounded-sm border border-kontur bg-wash" /> Wochenende</span>
         <span><span className="inline-block w-3 h-3 align-[-2px] rounded-sm border border-kontur bg-[rgba(190,59,59,.08)] dark:bg-[rgba(228,105,111,.12)]" /> Feiertag</span>
@@ -570,6 +581,12 @@ export default function Jahresuebersicht() {
   // 'raster' = Jahres-Tagesraster (Original-Verhalten, Spec 4.4);
   // 'summary' = bisherige Aggregat-Ansicht (Zusammenfassung, kein Feature-Verlust)
   const [mode, setMode] = useState<'raster' | 'summary'>('raster');
+  // Spaltenausrichtung (Spec 4.11.11-1, Radio-Logik), Default = Kalendertage
+  const [ausrichtung, setAusrichtung] = useState<JahresAusrichtung>('kalendertage');
+  // Sichtbare Einträge je Feld (Spec 4.11.11-2): 1 oder 2 — Taktwerk §11
+  // fixiert die Zelle auf 21×20px, mehr Slots wären dort nicht lesbar;
+  // Überzählige signalisiert ▾ (Spec 4.13-3)
+  const [maxEintraege, setMaxEintraege] = useState(2);
   const [viewMode, setViewMode] = useState<'single' | 'all'>('single');
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | undefined>(undefined);
   const [groupId, setGroupId] = useState<number | undefined>(undefined);
@@ -636,7 +653,7 @@ export default function Jahresuebersicht() {
           api.getHolidays(year),
         ]);
         const dayMap = buildDayMap(months.flat().filter(e => e.employee_id === selectedEmployee.ID));
-        openPrintWindowJ(buildJahresrasterHTML(selectedEmployee, year, dayMap, new Set(hols.map(h => h.DATE))));
+        openPrintWindowJ(buildJahresrasterHTML(selectedEmployee, year, dayMap, new Set(hols.map(h => h.DATE)), ausrichtung));
         return;
       }
       const emps = filteredEmployees.length > 0 ? filteredEmployees : employees;
@@ -700,6 +717,43 @@ export default function Jahresuebersicht() {
                 Zusammenfassung
               </button>
             </div>
+
+            {/* Spaltenausrichtung (Spec 4.11.11-1, Radio-Logik) — nur Raster */}
+            {mode === 'raster' && (
+              <div className="flex rounded-ui overflow-hidden border border-kontur text-sm">
+                <button
+                  onClick={() => setAusrichtung('kalendertage')}
+                  aria-pressed={ausrichtung === 'kalendertage'}
+                  title="Spalten nach Kalendertagen ausrichten: Tage mit gleicher Monatstag-Nummer stehen untereinander"
+                  className={`px-3 py-1.5 ${ausrichtung === 'kalendertage' ? 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold' : 'bg-ebene dark:bg-ebene-2 text-schrift hover:bg-wash'}`}
+                >
+                  Kalendertage
+                </button>
+                <button
+                  onClick={() => setAusrichtung('wochentage')}
+                  aria-pressed={ausrichtung === 'wochentage'}
+                  title="Spalten nach Wochentagen ausrichten: gleiche Wochentage stehen untereinander"
+                  className={`px-3 py-1.5 border-l border-kontur ${ausrichtung === 'wochentage' ? 'bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] font-semibold' : 'bg-ebene dark:bg-ebene-2 text-schrift hover:bg-wash'}`}
+                >
+                  Wochentage
+                </button>
+              </div>
+            )}
+
+            {/* Sichtbare Einträge je Feld (Spec 4.11.11-2) — nur Raster */}
+            {mode === 'raster' && (
+              <label className="flex items-center gap-1.5 text-sm text-schrift" title="Sichtbare Einträge je Feld — überzählige Einträge zeigt ein ▾ an">
+                Einträge je Feld:
+                <select
+                  value={maxEintraege}
+                  onChange={e => setMaxEintraege(Number(e.target.value))}
+                  className="border border-kontur rounded-ui px-2 py-1.5 text-sm bg-ebene dark:bg-ebene-2 text-schrift"
+                >
+                  <option value={1}>1</option>
+                  <option value={2}>2</option>
+                </select>
+              </label>
+            )}
 
             {/* View mode (nur Zusammenfassung) */}
             {mode === 'summary' && (
@@ -783,7 +837,7 @@ export default function Jahresuebersicht() {
               <h2 className="text-base font-bold text-schrift mb-4">
                 {selectedEmployee.NAME}, {selectedEmployee.FIRSTNAME} — Jahresraster {year}
               </h2>
-              <JahresRasterView employee={selectedEmployee} year={year} onMonthClick={openDienstplan} />
+              <JahresRasterView employee={selectedEmployee} year={year} onMonthClick={openDienstplan} ausrichtung={ausrichtung} maxEintraege={maxEintraege} />
             </div>
           ) : (
             <EmptyState

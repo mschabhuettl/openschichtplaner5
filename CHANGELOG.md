@@ -11,6 +11,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Jahresraster-Anzeigeoptionen (Spec 4.11.11).** a) **Spaltenausrichtung**
+  als Radio-Umschalter wie im Original: **Kalendertage** (1…31 untereinander,
+  Default = bisheriges Verhalten) oder **Wochentage** (Mo…So untereinander,
+  37 Spalten = Mo…So ×5 + Mo Di; jede Monatszeile beginnt in der Spalte
+  ihres ersten Wochentags, davor/danach tote Zellen). b) **Sichtbare
+  Einträge je Feld** (1 oder 2, Default 2): überzählige Einträge
+  signalisiert ein nach unten gerichtetes Dreieck ▾ in der Zelle
+  (Spec 4.13-3) samt Tooltip — bisher wurden dritte und weitere Einträge
+  stillschweigend abgeschnitten. Das Taktwerk-Zellmaß 21×20px bleibt in
+  beiden Optionen unverändert; statt „frei wählbarer Anzahl" daher 1/2,
+  mehr Slots wären in der fixen 20px-Zelle nicht lesbar. Der Druck folgt
+  der gewählten Spaltenausrichtung.
+
 - **Personaltabellen-Ansichtsoptionen (Spec 4.11.12-1/2).** Wie im Original:
   a) **Spaltenauswahl** — kompaktes „Spalten"-Popover mit Checkbox je Spalte
   (Standardspalten und dynamische Schicht-/Abwesenheitsspalten); die

@@ -84,9 +84,11 @@ export default function Shifts() {
   const { showToast } = useToast();
   const { confirm: confirmDialog, dialogProps: confirmDialogProps } = useConfirm();
 
-  type ShiftSortKey = 'name' | 'shortname' | 'duration';
+  // 'order' = Original-Reihenfolge (POSITION, wie die API liefert) — Initialzustand
+  // wie die Verwaltungsliste des Originals.
+  type ShiftSortKey = 'order' | 'name' | 'shortname' | 'duration';
   type ShiftSortDir = 'asc' | 'desc';
-  const [shiftSortKey, setShiftSortKey] = useState<ShiftSortKey>('name');
+  const [shiftSortKey, setShiftSortKey] = useState<ShiftSortKey>('order');
   const [shiftSortDir, setShiftSortDir] = useState<ShiftSortDir>('asc');
   const [shiftSearch, setShiftSearch] = useState('');
   const debouncedShiftSearch = useDebounce(shiftSearch, 300);
@@ -111,6 +113,7 @@ export default function Shifts() {
       .sort((a, b) => {
         let av = '', bv = '';
         switch (shiftSortKey) {
+          case 'order':     return shiftSortDir === 'asc' ? (a.POSITION ?? 0) - (b.POSITION ?? 0) : (b.POSITION ?? 0) - (a.POSITION ?? 0);
           case 'name':      av = a.NAME || ''; bv = b.NAME || ''; break;
           case 'shortname': av = a.SHORTNAME || ''; bv = b.SHORTNAME || ''; break;
           case 'duration':  return shiftSortDir === 'asc' ? (a.DURATION0 || 0) - (b.DURATION0 || 0) : (b.DURATION0 || 0) - (a.DURATION0 || 0);
@@ -298,7 +301,7 @@ export default function Shifts() {
             <table className="w-full text-sm min-w-[600px]">
               <thead className="bg-[#fafbfc] dark:bg-[#0e1522] text-[9px] font-bold uppercase tracking-[.08em]">
                 <tr className="border-b border-kontur">
-                  <th scope="col" className="px-4 py-2 text-left text-schrift-3">Farbe</th>
+                  <th scope="col" className={`px-4 py-2 text-left cursor-pointer select-none whitespace-nowrap ${ZEILEN_HOVER} ${shiftSortKey === 'order' ? 'text-schrift' : 'text-schrift-3'}`} onClick={() => handleShiftSort('order')} title="Original-Reihenfolge (Position)">Reihenfolge{shiftSortIcon('order')}</th>
                   <th scope="col" className={`px-4 py-2 text-left cursor-pointer select-none whitespace-nowrap ${ZEILEN_HOVER} ${shiftSortKey === 'name' ? 'text-schrift' : 'text-schrift-3'}`} onClick={() => handleShiftSort('name')}>Name{shiftSortIcon('name')}</th>
                   <th scope="col" className={`px-4 py-2 text-left cursor-pointer select-none whitespace-nowrap ${ZEILEN_HOVER} ${shiftSortKey === 'shortname' ? 'text-schrift' : 'text-schrift-3'}`} onClick={() => handleShiftSort('shortname')}>Kürzel{shiftSortIcon('shortname')}</th>
                   <th scope="col" className="px-4 py-2 text-center text-schrift-3">Mo–Fr</th>

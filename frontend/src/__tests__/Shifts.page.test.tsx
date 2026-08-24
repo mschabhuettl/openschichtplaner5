@@ -95,6 +95,39 @@ describe('Shifts page', () => {
     });
   });
 
+  // Original-Parität: Verwaltungsliste initial in POSITION-Reihenfolge (wie die
+  // API liefert), NICHT alphabetisch nach Name.
+  describe('Sortiermodus „Reihenfolge"', () => {
+    // Namen absichtlich alphabetisch verdreht gegenüber der API-Ordnung
+    const apiOrdered = [
+      { ID: 1, NAME: 'Zwischendienst', SHORTNAME: 'Z', DURATION0: 8, POSITION: 1, HIDE: 0 },
+      { ID: 2, NAME: 'Mitteldienst', SHORTNAME: 'M', DURATION0: 8, POSITION: 2, HIDE: 0 },
+      { ID: 3, NAME: 'Abenddienst', SHORTNAME: 'A', DURATION0: 8, POSITION: 3, HIDE: 0 },
+    ];
+
+    const rowNames = (container: HTMLElement) =>
+      Array.from(container.querySelectorAll('tbody tr td:nth-child(2)')).map(td => td.textContent);
+
+    it('zeigt initial die API-Ordnung (POSITION), nicht alphabetisch', async () => {
+      vi.mocked(api.getShifts).mockResolvedValue(apiOrdered as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+      const { container } = renderShifts();
+      await waitFor(() => expect(screen.getAllByText('Zwischendienst').length).toBeGreaterThan(0));
+      expect(rowNames(container)).toEqual(['Zwischendienst', 'Mitteldienst', 'Abenddienst']);
+    });
+
+    it('kehrt nach Namens-Sortierung per Kopf „Reihenfolge" zur API-Ordnung zurück', async () => {
+      vi.mocked(api.getShifts).mockResolvedValue(apiOrdered as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+      const { container } = renderShifts();
+      await waitFor(() => expect(screen.getAllByText('Zwischendienst').length).toBeGreaterThan(0));
+
+      fireEvent.click(screen.getByRole('columnheader', { name: /^Name/ }));
+      expect(rowNames(container)).toEqual(['Abenddienst', 'Mitteldienst', 'Zwischendienst']);
+
+      fireEvent.click(screen.getByRole('columnheader', { name: /Reihenfolge/ }));
+      expect(rowNames(container)).toEqual(['Zwischendienst', 'Mitteldienst', 'Abenddienst']);
+    });
+  });
+
   // P-VOLLERFASSUNG Lücke #10: eigene Text-/Balkenfarbe je Schichtart wählbar.
   describe('Farben (Text/Balken)', () => {
     const colored = [

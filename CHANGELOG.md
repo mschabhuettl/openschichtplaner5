@@ -19,6 +19,11 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   (POSITION = API-Ordnung von `/api/shifts`); Sonderdienste mit eigenem
   Namen folgen deterministisch alphabetisch am Ende (neuer zentraler
   Helfer `orderShiftLabels` in `utils/sortOrder`).
+- **Schichtarten-Verwaltungsliste startet in Original-Reihenfolge.** Die
+  Stammdaten-Seite „Schichtarten" sortierte initial alphabetisch nach Name;
+  das Original zeigt die Verwaltungsliste in POSITION-Reihenfolge. Neuer
+  Sortiermodus „Reihenfolge" (= API-Ordnung) als Initialzustand und per
+  Spaltenkopf wieder anwählbar; Name/Kürzel/Dauer unverändert sortierbar.
 
 ---
 

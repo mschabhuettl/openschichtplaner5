@@ -1,8 +1,16 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { api } from '../api/client';
 import type { PersonnelTableRow, PersonnelTableResponse } from '../api/client';
 import { useT } from '../i18n';
 import { groupTreeOptions } from '../utils/groupTree';
+import { maLabelHex, maBadgeStyle } from './einsatzplanUtils';
+import {
+  PERSONALTABELLE_ANSICHT_KEY,
+  NAME_SPALTE,
+  ladeAnsicht,
+  sichtbareSpalten,
+  type PersonaltabelleAnsicht,
+} from './personaltabelleUtils';
 
 type SortDir = 'asc' | 'desc';
 type PeriodMode = 'month' | 'range';
@@ -103,6 +111,51 @@ export default function Personaltabelle() {
   const [sortKey, setSortKey] = useState<string>('employee_name');
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [search, setSearch] = useState('');
+  // Taktwerk: Theme provider-frei ermitteln (nur für Laufzeit-Farbwerte via shiftColor)
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+
+  // Ansichts-Optionen wie das Original (Spec 4.11.12-1/2), persistiert in localStorage
+  const [ansicht, setAnsichtState] = useState<PersonaltabelleAnsicht>(() => {
+    try {
+      return ladeAnsicht(localStorage.getItem(PERSONALTABELLE_ANSICHT_KEY));
+    } catch {
+      return ladeAnsicht(null);
+    }
+  });
+  const setAnsicht = (next: PersonaltabelleAnsicht) => {
+    setAnsichtState(next);
+    try {
+      localStorage.setItem(PERSONALTABELLE_ANSICHT_KEY, JSON.stringify(next));
+    } catch { /* ignore */ }
+  };
+  const [spaltenOffen, setSpaltenOffen] = useState(false);
+  const spaltenRef = useRef<HTMLDivElement>(null);
+
+  // Spalten-Popover bei Klick außerhalb schließen
+  useEffect(() => {
+    if (!spaltenOffen) return;
+    const onDown = (e: MouseEvent) => {
+      if (spaltenRef.current && !spaltenRef.current.contains(e.target as Node)) setSpaltenOffen(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, [spaltenOffen]);
+
+  // Option „individuelle Farben" (Spec 4.11.12-2): empId → MA-Farbe; die
+  // Tabellenzeilen tragen keine MA-Farben, daher lazy aus der Mitarbeiterliste
+  // gemappt (kein neuer Endpunkt, Muster Einsatzplan); null = ungeladen
+  const [maFarbMap, setMaFarbMap] = useState<Map<number, string> | null>(null);
+  useEffect(() => {
+    if (!ansicht.maFarben || maFarbMap) return;
+    api.getEmployees().then(list => {
+      const m = new Map<number, string>();
+      for (const emp of list) {
+        const hex = maLabelHex(emp);
+        if (hex) m.set(emp.ID, hex);
+      }
+      setMaFarbMap(m);
+    }).catch(() => {});
+  }, [ansicht.maFarben, maFarbMap]);
 
   // Auswertungszeitraum [von, bis] (Spec 3.9.1): Monatsmodus oder freier Von/Bis-Zeitraum
   const { from, to } = useMemo(() => {
@@ -176,6 +229,24 @@ export default function Personaltabelle() {
     }
     return cols;
   }, [data, t]);
+
+  // Spaltenauswahl (Spec 4.11.12-1): Auswahl filtert den Spaltensatz, Name bleibt immer
+  const visColumns = useMemo(() => sichtbareSpalten(columns, ansicht.versteckt), [columns, ansicht.versteckt]);
+  // führende Textspalten (Name, ggf. Kürzel) für die Summenzeile
+  const leadCount = visColumns.filter(c => c.kind === 'text').length;
+
+  const toggleSpalte = (key: string) => {
+    const hidden = ansicht.versteckt.includes(key);
+    setAnsicht({
+      ...ansicht,
+      versteckt: hidden ? ansicht.versteckt.filter(k => k !== key) : [...ansicht.versteckt, key],
+    });
+    // wird die aktuell sortierte Spalte ausgeblendet, zurück zur Namenssortierung
+    if (!hidden && sortKey === key) {
+      setSortKey(NAME_SPALTE);
+      setSortDir('asc');
+    }
+  };
 
   const handleSort = (key: string) => {
     if (sortKey === key) {
@@ -251,7 +322,7 @@ export default function Personaltabelle() {
         <span className="text-schrift-2 text-sm no-print">{t.personaltabelle.subtitle}</span>
         <div className="ml-auto flex gap-2 no-print">
           <button
-            onClick={() => exportCSV(columns, filtered, from, to)}
+            onClick={() => exportCSV(visColumns, filtered, from, to)}
             className="px-3 py-1.5 text-sm font-semibold bg-[#15171c] text-white dark:bg-[#e9ecf2] dark:text-[#0e1420] rounded-ui hover:opacity-90 transition-opacity"
           >
             ⬇️ CSV
@@ -344,6 +415,52 @@ export default function Personaltabelle() {
             </button>
           )}
         </div>
+        {/* Spaltenauswahl (Spec 4.11.12-1): kompaktes Checkbox-Popover, Namensspalte nicht abwählbar */}
+        <div className="relative" ref={spaltenRef}>
+          <button
+            onClick={() => setSpaltenOffen(v => !v)}
+            aria-expanded={spaltenOffen}
+            data-testid="spalten-toggle"
+            title={t.personaltabelle.columnsTitle}
+            className={`px-3 py-1.5 text-sm rounded-ui flex items-center gap-1.5 border ${spaltenOffen || ansicht.versteckt.length > 0 ? 'bg-glut-flaeche border-[#d9a675] dark:border-[#a15618] text-[#a64a08] dark:text-glut' : 'bg-ebene dark:bg-ebene-2 border-kontur text-schrift-2 hover:bg-wash'}`}
+          >
+            🧾 {t.personaltabelle.columns} ▾
+          </button>
+          {spaltenOffen && (
+            <div
+              data-testid="spalten-popover"
+              className="absolute left-0 top-full mt-1 z-20 w-60 max-h-80 overflow-auto bg-ebene dark:bg-ebene-2 border border-kontur rounded-ui shadow-lg py-1"
+            >
+              {/* Namensspalte immer vorhanden (Spec 4.11.12-1) */}
+              <label className="flex items-center gap-2 px-2.5 h-[28px] text-sm text-schrift-3 select-none cursor-not-allowed">
+                <input type="checkbox" checked disabled />
+                <span className="truncate">{t.personaltabelle.colName} ({t.personaltabelle.columnsAlways})</span>
+              </label>
+              {columns.filter(c => c.key !== NAME_SPALTE).map(col => (
+                <label
+                  key={col.key}
+                  className="flex items-center gap-2 px-2.5 h-[28px] text-sm text-schrift hover:bg-wash select-none cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={!ansicht.versteckt.includes(col.key)}
+                    onChange={() => toggleSpalte(col.key)}
+                  />
+                  <span className="truncate" title={col.title}>{col.label}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+        {/* Option „individuelle Farben" (Spec 4.11.12-2), Default aus */}
+        <button
+          onClick={() => setAnsicht({ ...ansicht, maFarben: !ansicht.maFarben })}
+          aria-pressed={ansicht.maFarben}
+          title={t.personaltabelle.maColorsTitle}
+          className={`px-3 py-1.5 text-sm rounded-ui flex items-center gap-1.5 border ${ansicht.maFarben ? 'bg-glut-flaeche border-[#d9a675] dark:border-[#a15618] text-[#a64a08] dark:text-glut' : 'bg-ebene dark:bg-ebene-2 border-kontur text-schrift-2 hover:bg-wash'}`}
+        >
+          🎨 {t.personaltabelle.maColors}
+        </button>
         <span className="self-center text-sm text-schrift-2">
           {loading ? t.personaltabelle.loading : `${filtered.length} ${t.personaltabelle.employees}`}
         </span>
@@ -370,7 +487,7 @@ export default function Personaltabelle() {
         <table className="w-full text-[11px] border-collapse">
           <thead className="sticky top-0 bg-[#fafbfc] dark:bg-[#0e1522] z-10">
             <tr>
-              {columns.map(col => (
+              {visColumns.map(col => (
                 <th scope="col"
                   key={col.key}
                   title={col.title}
@@ -388,7 +505,7 @@ export default function Personaltabelle() {
           <tbody>
             {filtered.length === 0 && !loading && (
               <tr>
-                <td colSpan={columns.length} className="text-center py-12 text-schrift-2 text-sm">
+                <td colSpan={visColumns.length} className="text-center py-12 text-schrift-2 text-sm">
                   {search ? t.personaltabelle.noResults : t.personaltabelle.noData}
                 </td>
               </tr>
@@ -398,9 +515,16 @@ export default function Personaltabelle() {
                 key={row.employee_id}
                 className="h-[28px] border-b border-kontur-soft hover:bg-[rgba(21,23,28,.025)] dark:hover:bg-[rgba(233,236,242,.035)]"
               >
-                {columns.map(col => (
+                {visColumns.map(col => (
                   <td
                     key={col.key}
+                    // Option „individuelle Farben" (Spec 4.11.12-2): Namenszelle als
+                    // Tint-Fläche + 3px-Spine (nie Rohfarbe, Muster Mitarbeiterliste)
+                    style={
+                      col.key === NAME_SPALTE && ansicht.maFarben
+                        ? maBadgeStyle(maFarbMap?.get(row.employee_id), isDark)
+                        : undefined
+                    }
                     className={`px-2.5 py-0 ${
                       col.key === 'employee_name'
                         ? 'text-[11.5px] font-semibold text-schrift'
@@ -418,10 +542,10 @@ export default function Personaltabelle() {
           {filtered.length > 1 && (
             <tfoot className="sticky bottom-0 bg-[#fafbfc] dark:bg-[#0e1522] border-t border-kontur">
               <tr className="h-[28px] font-semibold text-schrift">
-                <td className="px-2.5 py-0" colSpan={2}>
+                <td className="px-2.5 py-0" colSpan={leadCount}>
                   {t.personaltabelle.total} ({filtered.length} MA)
                 </td>
-                {columns.slice(2).map(col => (
+                {visColumns.slice(leadCount).map(col => (
                   <td key={col.key} className="px-2.5 py-0 text-right font-mono tabular-nums">
                     {renderTotal(col)}
                   </td>

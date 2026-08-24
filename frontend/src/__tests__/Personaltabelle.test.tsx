@@ -12,15 +12,18 @@ vi.mock('../api/client', () => ({
   api: {
     getPersonnelTable: vi.fn(),
     getGroups: vi.fn(),
+    getEmployees: vi.fn(),
   },
 }));
 
 import { api } from '../api/client';
 import Personaltabelle from '../pages/Personaltabelle';
+import { PERSONALTABELLE_ANSICHT_KEY } from '../pages/personaltabelleUtils';
 
 const mockedApi = api as unknown as {
   getPersonnelTable: ReturnType<typeof vi.fn>;
   getGroups: ReturnType<typeof vi.fn>;
+  getEmployees: ReturnType<typeof vi.fn>;
 };
 
 const renderComp = () =>
@@ -99,6 +102,7 @@ beforeEach(() => {
   localStorage.setItem('sp5_language', 'de');
   mockedApi.getPersonnelTable.mockResolvedValue(oneYearResponse);
   mockedApi.getGroups.mockResolvedValue([]);
+  mockedApi.getEmployees.mockResolvedValue([]);
 });
 
 afterEach(() => {
@@ -225,5 +229,114 @@ describe('Personaltabelle', () => {
     expect(within(totalRow).getByText('17')).toBeTruthy(); // Σ Frühdienst 12+5
     const totalRemaining = within(totalRow).getByText('2'); // Σ Rest 7+(-5)
     expect(totalRemaining.parentElement?.textContent).toBe('48 / 2');
+  });
+});
+
+// ── Ansichts-Optionen wie das Original (Spec 4.11.12-1/2) ─────────────────────
+
+describe('Personaltabelle — Spaltenauswahl (Spec 4.11.12-1)', () => {
+  it('Default: alle Spalten sichtbar, keine gespeicherte Ansicht nötig', async () => {
+    renderComp();
+    await screen.findByText('Müller, Anna');
+    const table = screen.getByRole('table');
+    for (const label of ['Name', 'Kürzel', 'Sonntagsdienste', 'Sonderdienste']) {
+      expect(within(table).getByText(label)).toBeTruthy();
+    }
+    expect(within(table).getByTitle('Frühdienst')).toBeTruthy();
+  });
+
+  it('Spalte abwählen: Kopf und Zellen verschwinden, erneut anwählen bringt sie zurück', async () => {
+    renderComp();
+    await screen.findByText('Müller, Anna');
+    fireEvent.click(screen.getByRole('button', { name: /Spalten/ }));
+    const popover = screen.getByTestId('spalten-popover');
+
+    // Schichtart-Spalte „F" (Frühdienst) abwählen
+    fireEvent.click(within(popover).getByLabelText('F'));
+    const table = screen.getByRole('table');
+    expect(within(table).queryByTitle('Frühdienst')).toBeNull(); // th weg
+    expect(within(table).queryByText('12')).toBeNull();          // td Müller weg
+    expect(within(table).queryByText('17')).toBeNull();          // Summenzelle weg
+    // Nachtdienst bleibt unberührt
+    expect(within(table).getByTitle('Nachtdienst')).toBeTruthy();
+
+    // wieder anwählen → Spalte kehrt zurück
+    fireEvent.click(within(popover).getByLabelText('F'));
+    expect(within(table).getByTitle('Frühdienst')).toBeTruthy();
+    expect(within(table).getByText('12')).toBeTruthy();
+  });
+
+  it('Namensspalte ist immer an und nicht abwählbar', async () => {
+    renderComp();
+    await screen.findByText('Müller, Anna');
+    fireEvent.click(screen.getByRole('button', { name: /Spalten/ }));
+    const popover = screen.getByTestId('spalten-popover');
+    const nameBox = within(popover).getByLabelText(/Name/) as HTMLInputElement;
+    expect(nameBox.checked).toBe(true);
+    expect(nameBox.disabled).toBe(true);
+  });
+
+  it('persistiert die Abwahl in localStorage und stellt sie beim Neuaufbau wieder her', async () => {
+    const first = renderComp();
+    await screen.findByText('Müller, Anna');
+    fireEvent.click(screen.getByRole('button', { name: /Spalten/ }));
+    fireEvent.click(within(screen.getByTestId('spalten-popover')).getByLabelText('Sonntagsdienste'));
+
+    const gespeichert = JSON.parse(localStorage.getItem(PERSONALTABELLE_ANSICHT_KEY)!);
+    expect(gespeichert.versteckt).toContain('sonntag');
+
+    first.unmount();
+    renderComp();
+    await screen.findByText('Müller, Anna');
+    const table = screen.getByRole('table');
+    expect(within(table).queryByText('Sonntagsdienste')).toBeNull();
+    expect(within(table).getByText('Feiertagsdienste')).toBeTruthy();
+  });
+
+  it('ist robust gegen unbekannte/entfallene Keys und abgewählte Namensspalte im Speicher', async () => {
+    localStorage.setItem(
+      PERSONALTABELLE_ANSICHT_KEY,
+      JSON.stringify({ versteckt: ['employee_name', 'gibt_es_nicht', 'leave_99'], maFarben: false })
+    );
+    renderComp();
+    await screen.findByText('Müller, Anna');
+    const table = screen.getByRole('table');
+    expect(within(table).getByText('Name')).toBeTruthy(); // Namensspalte trotzdem da
+    expect(within(table).getByText('Sonntagsdienste')).toBeTruthy();
+  });
+});
+
+describe('Personaltabelle — Option „MA-Farben" (Spec 4.11.12-2)', () => {
+  const mitFarben = [
+    { ID: 1, NAME: 'Müller', FIRSTNAME: 'Anna', CBKLABEL: 255, CBKLABEL_HEX: '#ff0000' },
+    { ID: 2, NAME: 'Schmidt', FIRSTNAME: 'Bernd' }, // ohne individuelle Farbe
+  ];
+
+  it('Default AUS: Namenszelle ohne Tint/Spine — heutiges Bild unverändert', async () => {
+    renderComp();
+    const nameCell = (await screen.findByText('Müller, Anna')).closest('td') as HTMLElement;
+    expect(nameCell.style.boxShadow).toBe('');
+    expect(nameCell.style.backgroundColor).toBe('');
+    expect(screen.getByRole('button', { name: /MA-Farben/ }).getAttribute('aria-pressed')).toBe('false');
+  });
+
+  it('Toggle an: Namenszelle bekommt Tint-Fläche + 3px-Spine, MA ohne Farbe bleibt neutral', async () => {
+    mockedApi.getEmployees.mockResolvedValue(mitFarben);
+    renderComp();
+    await screen.findByText('Müller, Anna');
+    fireEvent.click(screen.getByRole('button', { name: /MA-Farben/ }));
+    await waitFor(() => {
+      const cell = screen.getByText('Müller, Anna').closest('td') as HTMLElement;
+      expect(cell.style.boxShadow).toContain('inset 3px 0 0');
+      expect(cell.style.backgroundColor).not.toBe('');
+    });
+    // MA ohne individuelle Farbe: Zelle bleibt neutral
+    const schmidt = screen.getByText('Schmidt, Bernd').closest('td') as HTMLElement;
+    expect(schmidt.style.boxShadow).toBe('');
+
+    // Toggle aus → zurück zum heutigen Bild
+    fireEvent.click(screen.getByRole('button', { name: /MA-Farben/ }));
+    const cell = screen.getByText('Müller, Anna').closest('td') as HTMLElement;
+    expect(cell.style.boxShadow).toBe('');
   });
 });

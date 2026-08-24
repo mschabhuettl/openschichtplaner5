@@ -11,6 +11,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Personaltabellen-Ansichtsoptionen (Spec 4.11.12-1/2).** Wie im Original:
+  a) **Spaltenauswahl** — kompaktes „Spalten"-Popover mit Checkbox je Spalte
+  (Standardspalten und dynamische Schicht-/Abwesenheitsspalten); die
+  Namensspalte ist immer sichtbar und nicht abwählbar. Die Abwahl wird in
+  localStorage persistiert (Negativliste — neue Spalten erscheinen automatisch,
+  unbekannte/entfallene Keys sind unschädlich) und wirkt auch auf Summenzeile,
+  CSV-Export und Druck. b) Option **„MA-Farben"** — Mitarbeiternamen in den
+  individuellen Farben (Labelfarbe, Fallback Planfarbe) als Tint-Fläche +
+  3px-Spine wie in Mitarbeiterliste/Einsatzplan, nie die Rohfarbe; Default aus,
+  das heutige Bild bleibt unverändert. Pure Helfer (`ladeAnsicht`,
+  `sichtbareSpalten`) mit Unit-Tests.
+
 - **Einsatzplan-Anzeigeoptionen „Mitarbeitername" (Spec 4.11.10-3).** Zwei
   neue Toolbar-Toggles wie im Original, beide Default aus: a) Mitarbeiternamen
   in den **individuellen Farben** des Mitarbeiters (Labelfarbe, Fallback

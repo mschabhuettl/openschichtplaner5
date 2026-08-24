@@ -4,7 +4,7 @@
  * Beginnzeit→Name.
  */
 import { describe, it, expect } from 'vitest';
-import { byNameFirstname, byPosition, byStartTimeThenName, deCompare } from '../utils/sortOrder';
+import { byNameFirstname, byPosition, byStartTimeThenName, deCompare, orderShiftLabels } from '../utils/sortOrder';
 
 describe('sortOrder', () => {
   it('byNameFirstname: Name vor Vorname, deutsch kollationiert', () => {
@@ -39,5 +39,28 @@ describe('sortOrder', () => {
 
   it('deCompare: deutsche Kollation (ä bei a)', () => {
     expect(['Zorn', 'Ärger', 'Apfel'].sort((a, b) => deCompare(a, b))).toEqual(['Apfel', 'Ärger', 'Zorn']);
+  });
+});
+
+describe('orderShiftLabels: Schichtarten in Stammdaten-/API-Ordnung (E3)', () => {
+  // API-Ordnung von /api/shifts (= POSITION), bewusst NICHT alphabetisch
+  const shifts = [
+    { SHORTNAME: 'F', NAME: 'Frühdienst' },
+    { SHORTNAME: 'S', NAME: 'Spätdienst' },
+    { SHORTNAME: 'N', NAME: 'Nachtdienst' },
+    { SHORTNAME: 'B', NAME: 'Bereitschaft' },
+  ];
+
+  it('Dienststatistik-Spalten: benutzte Arten in API-Ordnung statt alphabetisch, Sonderdienste alphabetisch hinten', () => {
+    // alphabetisch wäre: Aushilfe, F, N, S, Zusatz X — gefordert ist F, S, N
+    const used = ['N', 'Zusatz X', 'F', 'Aushilfe', 'S'];
+    expect(orderShiftLabels(used, shifts)).toEqual(['F', 'S', 'N', 'Aushilfe', 'Zusatz X']);
+  });
+
+  it('Druckvorschau (Legende/Schicht-Zähler): Erst-Vorkommens-Reihenfolge wird auf API-Ordnung normiert', () => {
+    // Plan-Einträge sehen S zuerst, dann N, dann F — Ausgabe trotzdem F, S, N
+    expect(orderShiftLabels(['S', 'N', 'F'], shifts)).toEqual(['F', 'S', 'N']);
+    // unbenutzte Arten (B) erscheinen nicht, Duplikate nur einmal
+    expect(orderShiftLabels(['N', 'N', 'F'], shifts)).toEqual(['F', 'N']);
   });
 });

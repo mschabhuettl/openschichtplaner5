@@ -7,6 +7,7 @@ import { LoadingSpinner } from '../components/LoadingSpinner';
 import { escapeHtml, safeColor } from '../utils/escapeHtml';
 import { entryArt, groupReportRows, withEmptyEmployees, groupChargeDaysByEmployee, type ReportGroupMode } from '../utils/reportRows';
 import { groupTreeOptions } from '../utils/groupTree';
+import { orderShiftLabels } from '../utils/sortOrder';
 
 const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
@@ -992,7 +993,7 @@ async function reportAbsenceStats(year: number, groupId: number | null, employee
 
 // ── Report: Dienststatistik ───────────────────────────────────
 
-async function reportShiftStats(year: number, month: number, groupId: number | null, employees: Employee[], groups: Group[]) {
+async function reportShiftStats(year: number, month: number, groupId: number | null, employees: Employee[], groups: Group[], shifts: ShiftType[]) {
   const groupName = groupId ? (groups.find(g => g.ID === groupId)?.NAME ?? `Gruppe ${groupId}`) : 'Alle';
   const now = new Date().toLocaleString('de-AT');
 
@@ -1006,8 +1007,9 @@ async function reportShiftStats(year: number, month: number, groupId: number | n
   const entries = await api.getSchedule(year, month, groupId ?? undefined);
   const shiftEntries = entries.filter(e => e.kind === 'shift' || e.kind === 'special_shift');
 
-  // Collect all shift types used
-  const shiftLabels = [...new Set(shiftEntries.map(e => e.display_name || '?'))].sort();
+  // Spalten in Stammdaten-Reihenfolge (API-Ordnung von /api/shifts), auf
+  // benutzte Arten gefiltert; Sonderdienste mit eigenem Namen hinten
+  const shiftLabels = orderShiftLabels(shiftEntries.map(e => e.display_name || '?'), shifts);
 
   // Build stats: emp → shiftLabel → count
   const stats: Record<number, Record<string, number>> = {};
@@ -1649,7 +1651,7 @@ export default function Berichte() {
       icon: '📈',
       title: 'Dienststatistik',
       description: `Schichtanzahl pro Mitarbeiter für ${MONTHS[month - 1]} ${year}.`,
-      action: () => run(() => reportShiftStats(year, month, groupId, employees, groups)),
+      action: () => run(() => reportShiftStats(year, month, groupId, employees, groups, shifts)),
       color: 'teal',
       category: 'Statistik',
     },

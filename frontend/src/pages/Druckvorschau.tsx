@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import type { Employee, Group, ScheduleEntry, ShiftType } from '../types';
 import { LoadingSpinner } from '../components/LoadingSpinner';
+import { orderShiftLabels } from '../utils/sortOrder';
 
 // ── Constants ─────────────────────────────────────────────
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
@@ -71,7 +72,7 @@ function PrintGrid({
   holidays,
   year,
   month,
-  shifts: _shifts,
+  shifts,
   config,
 }: {
   employees: Employee[];
@@ -95,9 +96,10 @@ function PrintGrid({
   const fontSizeClass = config.fontSize === 'small' ? 'text-[9px]' : config.fontSize === 'large' ? 'text-[12px]' : 'text-[10px]';
   const headerFontClass = config.fontSize === 'small' ? 'text-[8px]' : config.fontSize === 'large' ? 'text-[11px]' : 'text-[9px]';
 
-  // Shift summary per employee
+  // Shift summary per employee — in Stammdaten-Reihenfolge (API-Ordnung
+  // von /api/shifts), nicht in Erst-Vorkommens-Reihenfolge der Einträge
   const shiftCounts = useMemo(() => {
-    const counts = new Map<number, Map<string, number>>();
+    const counts = new Map<number, [string, number][]>();
     for (const emp of employees) {
       const m = new Map<string, number>();
       for (const day of visibleDays) {
@@ -106,10 +108,10 @@ function PrintGrid({
           m.set(e.display_name, (m.get(e.display_name) ?? 0) + 1);
         }
       }
-      counts.set(emp.ID, m);
+      counts.set(emp.ID, orderShiftLabels(m.keys(), shifts).map((name): [string, number] => [name, m.get(name) ?? 0]));
     }
     return counts;
-  }, [employees, visibleDays, entryMap]);
+  }, [employees, visibleDays, entryMap, shifts]);
 
   return (
     <div className={`print-grid ${fontSizeClass}`}>
@@ -199,7 +201,7 @@ function PrintGrid({
                 })}
                 {config.showSummary && (
                   <td className="border border-gray-300 px-1 py-0.5 text-center text-gray-600">
-                    {Array.from(shiftCounts.get(emp.ID)?.entries() ?? []).map(([name, cnt]) => (
+                    {(shiftCounts.get(emp.ID) ?? []).map(([name, cnt]) => (
                       <span key={name} className="inline-block mr-0.5">{name}:{cnt}</span>
                     ))}
                   </td>
@@ -322,6 +324,13 @@ export default function Druckvorschau() {
     }
     return map;
   }, [scheduleEntries]);
+
+  // Legende in Stammdaten-Reihenfolge (API-Ordnung von /api/shifts),
+  // nicht in Erst-Vorkommens-Reihenfolge der Plan-Einträge
+  const legendNames = useMemo(
+    () => orderShiftLabels(shiftColors.keys(), _shifts),
+    [shiftColors, _shifts],
+  );
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -542,18 +551,21 @@ export default function Druckvorschau() {
               <div className="mt-4 pt-3 border-t border-gray-200">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Legende</p>
                 <div className="flex flex-wrap gap-2">
-                  {Array.from(shiftColors.entries()).map(([name, { bg, color }]) => (
-                    <div
-                      key={name}
-                      className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-xs"
-                      style={{
-                        background: applyColorMode(bg, config.colorMode),
-                        color,
-                      }}
-                    >
-                      <span className="font-bold">{name}</span>
-                    </div>
-                  ))}
+                  {legendNames.map(name => {
+                    const c = shiftColors.get(name);
+                    return c ? (
+                      <div
+                        key={name}
+                        className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-xs"
+                        style={{
+                          background: applyColorMode(c.bg, config.colorMode),
+                          color: c.color,
+                        }}
+                      >
+                        <span className="font-bold">{name}</span>
+                      </div>
+                    ) : null;
+                  })}
                   <div className="flex items-center gap-1 border border-gray-200 rounded px-2 py-0.5 text-xs bg-red-100 text-red-800">
                     <span>Feiertag</span>
                   </div>

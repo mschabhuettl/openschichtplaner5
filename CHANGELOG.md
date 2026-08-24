@@ -9,6 +9,17 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Schichtarten-Reihenfolge in Dienststatistik und Druckvorschau
+  original-treu (E3).** Der Bericht „Dienststatistik" sortierte seine
+  Schichtarten-Spalten alphabetisch, die Dienstplan-Druckvorschau listete
+  Legende und Schicht-Zähler je Mitarbeiter in Erst-Vorkommens-Reihenfolge
+  der Plan-Einträge. Beide folgen jetzt der Stammdaten-Reihenfolge
+  (POSITION = API-Ordnung von `/api/shifts`); Sonderdienste mit eigenem
+  Namen folgen deterministisch alphabetisch am Ende (neuer zentraler
+  Helfer `orderShiftLabels` in `utils/sortOrder`).
+
 ---
 
 ## [1.23.2] - 2026-08-24

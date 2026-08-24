@@ -25,6 +25,14 @@ Versioning follows [Semantic Versioning](https://semver.org/).
   Sortiermodus „Reihenfolge" (= API-Ordnung) als Initialzustand und per
   Spaltenkopf wieder anwählbar; Name/Kürzel/Dauer unverändert sortierbar.
 
+### Changed
+
+- **Dienstplan-Helfer extrahiert und getestet.** Gruppen-Schnittmengen-Filter
+  (`utils/groupFilter`) und ISO-8601-Kalenderwoche (`utils/isoWeek`) aus
+  `Schedule.tsx` in pure Helferfunktionen ausgelagert (keine
+  Verhaltensänderung) und mit Unit-Tests abgedeckt (Schnittmenge vs.
+  Vereinigung; Jahreswechsel W52/W53/W01 und KW-Kopf-Vertrag).
+
 ---
 
 ## [1.23.2] - 2026-08-24

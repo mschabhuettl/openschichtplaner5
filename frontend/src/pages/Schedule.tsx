@@ -32,6 +32,8 @@ import type { DndAssignPayload, DndMovePayload } from '../components/ScheduleCal
 import { ResponsiveTable } from '../components/ResponsiveTable';
 import { EmptyState } from '../components/EmptyState';
 import { groupTreeOptions } from '../utils/groupTree';
+import { intersectGroupMembers } from '../utils/groupFilter';
+import { getISOWeek } from '../utils/isoWeek';
 import { shiftCellColorsMemo, tint, spine } from '../utils/shiftColor';
 import { phaseForStart, formatSaldo, sunTimesForMonth, tagbogenGradient, zeitfadenLeft, type Phase } from '../utils/scheduleVisuals';
 import '../styles/schedule-taktwerk.css';
@@ -193,16 +195,6 @@ function openPrintWindow(html: string) {
 const WEEKDAY_ABBR = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
 const WEEKDAY_NAMES = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
-/** ISO-8601 Kalenderwoche (Spec 4.11: „Kalenderwoche anzeigen"). */
-function getISOWeek(year: number, month: number, day: number): number {
-  const date = new Date(Date.UTC(year, month - 1, day));
-  const dayNum = (date.getUTCDay() + 6) % 7; // Mo=0 … So=6
-  date.setUTCDate(date.getUTCDate() - dayNum + 3); // Donnerstag dieser Woche
-  const firstThursday = new Date(Date.UTC(date.getUTCFullYear(), 0, 4));
-  const firstDayNum = (firstThursday.getUTCDay() + 6) % 7;
-  firstThursday.setUTCDate(firstThursday.getUTCDate() - firstDayNum + 3);
-  return 1 + Math.round((date.getTime() - firstThursday.getTime()) / (7 * 864e5));
-}
 const MONTH_NAMES = [
   '', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
   'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember',
@@ -3273,10 +3265,8 @@ export default function Schedule() {
 
     // Schnittmenge (Spec 4.6.3): nur MA in ALLEN gewählten Gruppen, flache Liste
     if (groupCombineMode === 'intersection' && selectedGroupIds.length > 1) {
-      const inter = employees.filter(e =>
-        selectedGroupIds.every(gid => (groupMembersMap.get(gid) ?? new Set<number>()).has(e.ID))
-        && matchesSearch(e) && isActive(e),
-      );
+      const inter = intersectGroupMembers(employees, selectedGroupIds, groupMembersMap)
+        .filter(e => matchesSearch(e) && isActive(e));
       const label = selectedGroupIds
         .map(gid => groups.find(g => g.ID === gid)?.NAME ?? `Gruppe ${gid}`)
         .join(' ∩ ');

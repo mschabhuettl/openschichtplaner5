@@ -11,6 +11,21 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Arbeitszeitprüfung: Prüfoptionen statt starrem Schwellwert.** Die Seite
+  „Arbeitszeit-Regelwerk" (App-EXTRA ohne Original-Vorbild) bekommt einen
+  Prüfoptionen-Block: die Grenzen (max. Stunden/Tag, max. Stunden/Woche,
+  Mindestruhezeit, max. Folgetage) lassen sich pro Prüfung überschreiben,
+  und ein Umschalter prüft die Wochengrenze wahlweise **fest** oder
+  **relativ zum Wochenstundenmodell** des Mitarbeiters (CALCBASE-Sollstunden
+  × Faktor, Default 1.0). Ohne Änderungen gilt weiterhin die gespeicherte
+  Konfiguration (kein Parameter wird gesendet). Zugleich behoben: der Client
+  schickte die Prüf-Anfragen als JSON-Body (`date_from`/`date_to`) und
+  erwartete ein Antwortformat (`rule_type`/`message`/`results`), das die API
+  nie geliefert hat — beide Prüfungen liefen ins Leere (422). Der Client
+  sendet jetzt die Query-Parameter der API (`employee_id`/`from`/`to`,
+  `group_id`) und rendert das echte Antwortformat (`violations` + `summary`);
+  die Gruppenprüfung gruppiert die Verstöße clientseitig je Mitarbeiter.
+
 - **Auslastungsbereich-Optionen (Spec 4.11.9-5/6).** Der Auslastungsbereich des
   Dienstplans bekommt eine Kopfzeilen-Leiste mit drei Bedienelementen wie im
   Original: a) **eigene Zusammenstellung** — ein Schichtarten-MultiSelect

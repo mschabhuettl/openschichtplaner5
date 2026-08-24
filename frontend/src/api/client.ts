@@ -2403,10 +2403,10 @@ export const api = {
     fetchJSON<WorkTimeRulesConfig>('/api/v1/work-time-rules'),
   updateWorkTimeRules: (data: WorkTimeRulesConfig) =>
     putJSON<WorkTimeRulesConfig>('/api/v1/work-time-rules', data),
-  checkWorkTimeRules: (params: { employee_id: number; date_from: string; date_to: string }) =>
-    postJSON<WorkTimeCheckResult>('/api/v1/work-time-rules/check', params),
-  checkAllWorkTimeRules: (params: { group_id?: number; date_from: string; date_to: string }) =>
-    postJSON<WorkTimeCheckAllResult>('/api/v1/work-time-rules/check-all', params),
+  checkWorkTimeRules: (params: { employee_id: number; from: string; to: string } & WorkTimeCheckLimits) =>
+    postJSON<WorkTimeCheckResult>(`/api/v1/work-time-rules/check?${workTimeCheckQuery(params)}`, {}),
+  checkAllWorkTimeRules: (params: { group_id?: number; from: string; to: string } & WorkTimeCheckLimits) =>
+    postJSON<WorkTimeCheckAllResult>(`/api/v1/work-time-rules/check-all?${workTimeCheckQuery(params)}`, {}),
 
   // ── Conflict Report (Q083) ─────────────────────────────────────────
   getConflictReport: (params: { group_id?: number; from: string; to: string }) => {
@@ -2436,31 +2436,45 @@ export interface WorkTimeRulesConfig {
   updated_at?: string;
 }
 
+/**
+ * Optionale Grenzen für einen einzelnen Prüf-Aufruf; ohne Angabe gilt die
+ * gespeicherte Konfiguration (Default-Verhalten). `week_limit_mode: 'model'`
+ * prüft die Wochengrenze relativ zum Wochenstundenmodell des Mitarbeiters
+ * (CALCBASE-Sollstunden × `week_limit_factor`).
+ */
+export interface WorkTimeCheckLimits {
+  max_hours_per_day?: number;
+  max_hours_per_week?: number;
+  min_rest_hours_between_shifts?: number;
+  max_consecutive_days?: number;
+  week_limit_mode?: 'fixed' | 'model';
+  week_limit_factor?: number;
+}
+
+function workTimeCheckQuery(params: object): string {
+  const p = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined) p.set(k, String(v));
+  }
+  return p.toString();
+}
+
 export interface WorkTimeViolation {
-  rule_type: string;
-  severity: 'warning' | 'error';
+  type: string;
   date: string;
-  message: string;
-  value?: number;
-  limit?: number;
+  employee_id: number;
+  description: string;
+  severity: 'warning' | 'error';
+  value: number;
+  limit: number;
 }
 
 export interface WorkTimeCheckResult {
-  employee_id: number;
-  employee_name: string;
-  date_from: string;
-  date_to: string;
-  violation_count: number;
   violations: WorkTimeViolation[];
+  summary: { total: number; warnings: number; errors: number };
 }
 
-export interface WorkTimeCheckAllResult {
-  date_from: string;
-  date_to: string;
-  employee_count: number;
-  total_violations: number;
-  results: WorkTimeCheckResult[];
-}
+export type WorkTimeCheckAllResult = WorkTimeCheckResult;
 
 // ─── Notification Settings (Q080) ────────────────────────────────
 export interface NotificationSettings {

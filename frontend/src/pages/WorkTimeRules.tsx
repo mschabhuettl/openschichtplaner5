@@ -1,8 +1,12 @@
 /**
  * WorkTimeRules.tsx — Arbeitszeit-Regelwerk UI (Q081)
  *
- * Admins konfigurieren die Arbeitszeit-Regeln; Admins wie Planer
- * to run violation checks per employee or group.
+ * Admins konfigurieren die Arbeitszeit-Regeln; Admins wie Planer führen die
+ * Verstoß-Prüfungen je Mitarbeiter oder Gruppe aus. Die Grenzen sind kein
+ * starrer Schwellwert: pro Prüfung lassen sie sich überschreiben, und die
+ * Wochengrenze kann wahlweise fest oder relativ zum Wochenstundenmodell des
+ * Mitarbeiters (CALCBASE-Sollstunden × Faktor) geprüft werden. Ohne
+ * Änderungen an den Prüfoptionen gilt die gespeicherte Konfiguration.
  */
 
 import { useState, useEffect, useCallback } from 'react';
@@ -10,6 +14,7 @@ import { api } from '../api/client';
 import { groupTreeOptions } from '../utils/groupTree';
 import type {
   WorkTimeRulesConfig,
+  WorkTimeCheckLimits,
   WorkTimeViolation,
   WorkTimeCheckResult,
   WorkTimeCheckAllResult,
@@ -81,15 +86,13 @@ function ViolationList({ violations, label }: ViolationListProps) {
         >
           <div className="flex items-center gap-2 mb-1">
             {severityBadge(v.severity)}
-            <span className="font-medium">{violationLabel(v.rule_type)}</span>
+            <span className="font-medium">{violationLabel(v.type)}</span>
             <span className="ml-auto text-gray-400 text-xs">{v.date}</span>
           </div>
-          <div className="text-gray-600">{v.message}</div>
-          {v.value !== undefined && v.limit !== undefined && (
-            <div className="text-xs text-gray-500 mt-1">
-              Wert: <strong>{v.value}</strong> — Limit: <strong>{v.limit}</strong>
-            </div>
-          )}
+          <div className="text-gray-600">{v.description}</div>
+          <div className="text-xs text-gray-500 mt-1">
+            Wert: <strong>{v.value}</strong> — Limit: <strong>{v.limit}</strong>
+          </div>
         </div>
       ))}
     </div>
@@ -138,6 +141,15 @@ export default function WorkTimeRules({ role: roleProp }: WorkTimeRulesProps = {
   const [maxConsecDays, setMaxConsecDays]       = useState<number>(6);
   const [rulesEnabled, setRulesEnabled]         = useState<boolean>(true);
 
+  // ── Prüfoptionen (pro Aufruf, ohne Änderung = gespeicherte Konfiguration) ──
+  const [weekLimitMode, setWeekLimitMode]   = useState<'fixed' | 'model'>('fixed');
+  const [weekLimitFactor, setWeekLimitFactor] = useState<number>(1);
+  const [overrideLimits, setOverrideLimits] = useState<boolean>(false);
+  const [ovMaxDay, setOvMaxDay]             = useState<number>(10);
+  const [ovMaxWeek, setOvMaxWeek]           = useState<number>(48);
+  const [ovMinRest, setOvMinRest]           = useState<number>(11);
+  const [ovMaxConsec, setOvMaxConsec]       = useState<number>(6);
+
   useEffect(() => {
     setConfigLoading(true);
     api.getWorkTimeRules()
@@ -148,10 +160,32 @@ export default function WorkTimeRules({ role: roleProp }: WorkTimeRulesProps = {
         setMinRestHours(cfg.min_rest_hours_between_shifts);
         setMaxConsecDays(cfg.max_consecutive_days);
         setRulesEnabled(cfg.enabled);
+        // Prüf-Überschreibungen mit der Konfiguration vorbelegen
+        setOvMaxDay(cfg.max_hours_per_day);
+        setOvMaxWeek(cfg.max_hours_per_week);
+        setOvMinRest(cfg.min_rest_hours_between_shifts);
+        setOvMaxConsec(cfg.max_consecutive_days);
       })
       .catch(e => setConfigError(String(e)))
       .finally(() => setConfigLoading(false));
   }, []);
+
+  /** Nur tatsächlich abweichende Prüfoptionen als Parameter senden —
+   *  im Default-Zustand geht KEIN Parameter mit (Verhalten wie bisher). */
+  const limitParams = useCallback((): WorkTimeCheckLimits => {
+    const p: WorkTimeCheckLimits = {};
+    if (overrideLimits) {
+      p.max_hours_per_day = ovMaxDay;
+      p.max_hours_per_week = ovMaxWeek;
+      p.min_rest_hours_between_shifts = ovMinRest;
+      p.max_consecutive_days = ovMaxConsec;
+    }
+    if (weekLimitMode === 'model') {
+      p.week_limit_mode = 'model';
+      p.week_limit_factor = weekLimitFactor;
+    }
+    return p;
+  }, [overrideLimits, ovMaxDay, ovMaxWeek, ovMinRest, ovMaxConsec, weekLimitMode, weekLimitFactor]);
 
   const saveConfig = useCallback(async () => {
     setConfigSaving(true);
@@ -198,8 +232,9 @@ export default function WorkTimeRules({ role: roleProp }: WorkTimeRulesProps = {
     try {
       const result = await api.checkWorkTimeRules({
         employee_id: Number(checkEmpId),
-        date_from: checkFrom,
-        date_to: checkTo,
+        from: checkFrom,
+        to: checkTo,
+        ...limitParams(),
       });
       setCheckResult(result);
     } catch (e) {
@@ -207,7 +242,7 @@ export default function WorkTimeRules({ role: roleProp }: WorkTimeRulesProps = {
     } finally {
       setCheckLoading(false);
     }
-  }, [checkEmpId, checkFrom, checkTo]);
+  }, [checkEmpId, checkFrom, checkTo, limitParams]);
 
   // ── Group Check ─────────────────────────────────────────────────────────
   const [checkAllGroupId, setCheckAllGroupId]   = useState<number | ''>('');
@@ -224,8 +259,9 @@ export default function WorkTimeRules({ role: roleProp }: WorkTimeRulesProps = {
     try {
       const result = await api.checkAllWorkTimeRules({
         group_id: checkAllGroupId !== '' ? Number(checkAllGroupId) : undefined,
-        date_from: checkAllFrom,
-        date_to: checkAllTo,
+        from: checkAllFrom,
+        to: checkAllTo,
+        ...limitParams(),
       });
       setCheckAllResult(result);
     } catch (e) {
@@ -233,7 +269,12 @@ export default function WorkTimeRules({ role: roleProp }: WorkTimeRulesProps = {
     } finally {
       setCheckAllLoading(false);
     }
-  }, [checkAllGroupId, checkAllFrom, checkAllTo]);
+  }, [checkAllGroupId, checkAllFrom, checkAllTo, limitParams]);
+
+  const employeeName = (id: number): string => {
+    const emp = employees.find(e => e.ID === id);
+    return emp ? `${emp.NAME} ${emp.FIRSTNAME}` : `MA #${id}`;
+  };
 
   // ── Render ───────────────────────────────────────────────────────────────
   return (
@@ -377,6 +418,143 @@ export default function WorkTimeRules({ role: roleProp }: WorkTimeRulesProps = {
         </section>
       )}
 
+      {/* ── Prüfoptionen (gelten für beide Prüfungen unten) ───────────────── */}
+      <section
+        className="bg-white rounded-lg border border-gray-200 shadow-sm p-5"
+        aria-label="Prüfoptionen"
+      >
+        <h2 className="text-lg font-semibold text-gray-700 mb-1">🎛️ Prüfoptionen</h2>
+        <p className="text-gray-500 text-sm mb-4">
+          Gelten für die Prüfungen unten. Ohne Änderungen wird mit der
+          gespeicherten Konfiguration geprüft.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          {/* Wochengrenzen-Modus: fest | relativ zum Wochenmodell */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1" htmlFor="week-limit-mode">
+              Wochengrenze
+            </label>
+            <select
+              id="week-limit-mode"
+              value={weekLimitMode}
+              onChange={e => setWeekLimitMode(e.target.value === 'model' ? 'model' : 'fixed')}
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              aria-label="Wochengrenzen-Modus"
+            >
+              <option value="fixed">Fest (Stundenwert)</option>
+              <option value="model">Relativ zum Wochenstundenmodell</option>
+            </select>
+          </div>
+
+          {weekLimitMode === 'model' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-600 mb-1" htmlFor="week-limit-factor">
+                Faktor auf das Wochenstundenmodell
+              </label>
+              <input
+                id="week-limit-factor"
+                type="number"
+                min={0.1}
+                step={0.1}
+                value={weekLimitFactor}
+                onChange={e => setWeekLimitFactor(Number(e.target.value))}
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                aria-label="Faktor Wochenstundenmodell"
+              />
+              <p className="text-xs text-gray-400 mt-1">
+                Grenze je Woche = Vertrags-Wochenstunden des Mitarbeiters × Faktor.
+              </p>
+            </div>
+          )}
+
+          {/* Grenzen pro Prüfung überschreiben */}
+          <div className="sm:col-span-2 flex items-center gap-3">
+            <input
+              id="override-limits"
+              type="checkbox"
+              checked={overrideLimits}
+              onChange={e => setOverrideLimits(e.target.checked)}
+              className="w-4 h-4 accent-blue-600"
+              aria-label="Grenzen für diese Prüfung überschreiben"
+            />
+            <label htmlFor="override-limits" className="text-sm font-medium text-gray-700">
+              Grenzen für diese Prüfung überschreiben
+            </label>
+          </div>
+
+          {overrideLimits && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1" htmlFor="ov-max-day">
+                  Max. Stunden pro Tag (Prüfung)
+                </label>
+                <input
+                  id="ov-max-day"
+                  type="number"
+                  min={0}
+                  max={24}
+                  value={ovMaxDay}
+                  onChange={e => setOvMaxDay(Number(e.target.value))}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  aria-label="Max. Stunden pro Tag (Prüfung)"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1" htmlFor="ov-max-week">
+                  Max. Stunden pro Woche (Prüfung)
+                </label>
+                <input
+                  id="ov-max-week"
+                  type="number"
+                  min={0}
+                  max={168}
+                  value={ovMaxWeek}
+                  onChange={e => setOvMaxWeek(Number(e.target.value))}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  aria-label="Max. Stunden pro Woche (Prüfung)"
+                />
+                {weekLimitMode === 'model' && (
+                  <p className="text-xs text-gray-400 mt-1">
+                    Im Modell-Modus greift statt dessen die relative Wochengrenze.
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1" htmlFor="ov-min-rest">
+                  Mindestruhezeit zwischen Schichten (Prüfung)
+                </label>
+                <input
+                  id="ov-min-rest"
+                  type="number"
+                  min={0}
+                  max={24}
+                  value={ovMinRest}
+                  onChange={e => setOvMinRest(Number(e.target.value))}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  aria-label="Mindestruhezeit zwischen Schichten (Prüfung)"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 mb-1" htmlFor="ov-max-consec">
+                  Max. aufeinanderfolgende Arbeitstage (Prüfung)
+                </label>
+                <input
+                  id="ov-max-consec"
+                  type="number"
+                  min={0}
+                  max={31}
+                  value={ovMaxConsec}
+                  onChange={e => setOvMaxConsec(Number(e.target.value))}
+                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  aria-label="Max. aufeinanderfolgende Arbeitstage (Prüfung)"
+                />
+              </div>
+            </>
+          )}
+        </div>
+      </section>
+
       {/* ── Per-Employee Violation Check ──────────────────────────────────── */}
       <section
         className="bg-white rounded-lg border border-gray-200 shadow-sm p-5"
@@ -452,15 +630,15 @@ export default function WorkTimeRules({ role: roleProp }: WorkTimeRulesProps = {
         {checkResult && (
           <div className="mt-4">
             <div className="text-sm text-gray-500 mb-1">
-              Mitarbeiter: <strong>{checkResult.employee_name}</strong> — Zeitraum:{' '}
-              {checkResult.date_from} bis {checkResult.date_to} —{' '}
-              <span className={checkResult.violation_count > 0 ? 'text-red-600 font-semibold' : 'text-green-600'}>
-                {checkResult.violation_count} Verstoß{checkResult.violation_count !== 1 ? 'e' : ''}
+              Mitarbeiter: <strong>{checkEmpId !== '' ? employeeName(Number(checkEmpId)) : '–'}</strong> — Zeitraum:{' '}
+              {checkFrom} bis {checkTo} —{' '}
+              <span className={checkResult.summary.total > 0 ? 'text-red-600 font-semibold' : 'text-green-600'}>
+                {checkResult.summary.total} Verstoß{checkResult.summary.total !== 1 ? 'e' : ''}
               </span>
             </div>
             <ViolationList
               violations={checkResult.violations}
-              label={checkResult.employee_name}
+              label={checkEmpId !== '' ? employeeName(Number(checkEmpId)) : undefined}
             />
           </div>
         )}
@@ -537,14 +715,14 @@ export default function WorkTimeRules({ role: roleProp }: WorkTimeRulesProps = {
         {checkAllResult && (
           <div className="mt-4">
             <div className="text-sm text-gray-500 mb-2">
-              Geprüfte Mitarbeiter: <strong>{checkAllResult.employee_count}</strong> —{' '}
               Verstöße gesamt:{' '}
-              <span className={checkAllResult.total_violations > 0 ? 'text-red-600 font-semibold' : 'text-green-600'}>
-                {checkAllResult.total_violations}
+              <span className={checkAllResult.summary.total > 0 ? 'text-red-600 font-semibold' : 'text-green-600'}>
+                {checkAllResult.summary.total}
               </span>
+              {' '}(⛔ {checkAllResult.summary.errors} / ⚠️ {checkAllResult.summary.warnings})
             </div>
 
-            {checkAllResult.results.length === 0 ? (
+            {checkAllResult.summary.total === 0 ? (
               <div className="p-3 rounded bg-green-50 border border-green-200 text-green-700 text-sm">
                 ✅ Keine Verstöße in der gesamten Gruppe gefunden.
               </div>
@@ -561,22 +739,23 @@ export default function WorkTimeRules({ role: roleProp }: WorkTimeRulesProps = {
                     </tr>
                   </thead>
                   <tbody>
-                    {checkAllResult.results.map((row, i) => {
-                      const errors   = row.violations.filter(v => v.severity === 'error').length;
-                      const warnings = row.violations.filter(v => v.severity === 'warning').length;
+                    {[...checkAllResult.violations.reduce((m, v) => {
+                      const list = m.get(v.employee_id) ?? [];
+                      list.push(v);
+                      m.set(v.employee_id, list);
+                      return m;
+                    }, new Map<number, WorkTimeViolation[]>()).entries()].map(([empId, list]) => {
+                      const errors   = list.filter(v => v.severity === 'error').length;
+                      const warnings = list.filter(v => v.severity === 'warning').length;
                       return (
                         <tr
-                          key={i}
+                          key={empId}
                           className={`border-b border-gray-100 ${
-                            errors > 0
-                              ? 'bg-red-50'
-                              : warnings > 0
-                              ? 'bg-yellow-50'
-                              : ''
+                            errors > 0 ? 'bg-red-50' : 'bg-yellow-50'
                           }`}
                         >
-                          <td className="px-3 py-2 font-medium">{row.employee_name}</td>
-                          <td className="px-3 py-2 text-center">{row.violation_count}</td>
+                          <td className="px-3 py-2 font-medium">{employeeName(empId)}</td>
+                          <td className="px-3 py-2 text-center">{list.length}</td>
                           <td className="px-3 py-2 text-center">
                             {errors > 0 ? (
                               <span className="text-red-600 font-semibold">{errors}</span>
@@ -594,9 +773,7 @@ export default function WorkTimeRules({ role: roleProp }: WorkTimeRulesProps = {
                           <td className="px-3 py-2">
                             {errors > 0
                               ? <span className="text-red-600">⛔ Fehler</span>
-                              : warnings > 0
-                              ? <span className="text-yellow-600">⚠️ Warnung</span>
-                              : <span className="text-green-600">✅ OK</span>
+                              : <span className="text-yellow-600">⚠️ Warnung</span>
                             }
                           </td>
                         </tr>

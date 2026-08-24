@@ -1,12 +1,13 @@
 /**
  * WorkTimeRules.test.tsx — Frontend tests for Q081: Arbeitszeit-Regelwerk UI
  *
- * 14 tests covering:
+ * 18 tests covering:
  *  - Rules config section (Admin only)
  *  - Employee violation check
  *  - Group violation check
  *  - Violation rendering (color coding, labels)
  *  - Role-based visibility
+ *  - Prüfoptionen: Grenzen pro Prüfung + Wochenmodell-Umschalter
  */
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -48,48 +49,30 @@ const mockGroups = [
 ];
 
 const mockCheckResult = {
-  employee_id: 1,
-  employee_name: 'Muster Max',
-  date_from: '2025-01-01',
-  date_to: '2025-01-31',
-  violation_count: 2,
   violations: [
     {
-      rule_type: 'max_hours_per_day',
-      severity: 'error' as const,
+      type: 'max_hours_per_day',
       date: '2025-01-05',
-      message: 'Maximale Tagesarbeitszeit überschritten.',
+      employee_id: 1,
+      description: 'Worked 12.0h on 2025-01-05 (max 10h)',
+      severity: 'error' as const,
       value: 12,
       limit: 10,
     },
     {
-      rule_type: 'min_rest_hours_between_shifts',
-      severity: 'warning' as const,
+      type: 'min_rest_hours_between_shifts',
       date: '2025-01-07',
-      message: 'Mindestruhezeit unterschritten.',
+      employee_id: 1,
+      description: 'Only 9.0h rest before shift on 2025-01-07 (min 11h required)',
+      severity: 'warning' as const,
       value: 9,
       limit: 11,
     },
   ],
+  summary: { total: 2, warnings: 1, errors: 1 },
 };
 
-const mockCheckAllResult = {
-  date_from: '2025-01-01',
-  date_to: '2025-01-31',
-  employee_count: 2,
-  total_violations: 2,
-  results: [
-    { ...mockCheckResult },
-    {
-      employee_id: 2,
-      employee_name: 'Test Eva',
-      date_from: '2025-01-01',
-      date_to: '2025-01-31',
-      violation_count: 0,
-      violations: [],
-    },
-  ],
-};
+const mockCheckAllResult = mockCheckResult;
 
 function setup(role: 'Admin' | 'Planer' | 'Leser' = 'Admin') {
   vi.mocked(api.getWorkTimeRules).mockResolvedValue(defaultConfig);
@@ -229,10 +212,10 @@ describe('WorkTimeRules page', () => {
     fireEvent.click(screen.getByLabelText('Alle prüfen'));
 
     await waitFor(() => expect(api.checkAllWorkTimeRules).toHaveBeenCalledTimes(1));
-    await waitFor(() => screen.getByText(/Geprüfte Mitarbeiter/));
-    // Total violations is rendered as a number in a span
-    const allCells = screen.getAllByText('2');
-    expect(allCells.length).toBeGreaterThan(0);
+    await waitFor(() => screen.getByText(/Verstöße gesamt/));
+    // Verstöße gruppiert je Mitarbeiter: Name des MA 1 erscheint in der Tabelle
+    await waitFor(() => screen.getByText('Muster Max'));
+    expect(screen.getByText('Muster Max')).toBeTruthy();
   });
 
   // 13 ── group selector shows groups
@@ -249,14 +232,86 @@ describe('WorkTimeRules page', () => {
   // 14 ── no violations shows green OK message
   it('shows green OK message when no violations', async () => {
     vi.mocked(api.checkWorkTimeRules).mockResolvedValue({
-      ...mockCheckResult,
-      violation_count: 0,
       violations: [],
+      summary: { total: 0, warnings: 0, errors: 0 },
     });
     setup();
     await selectEmployeeAndCheck();
 
     await waitFor(() => screen.getByText(/Keine Verstöße gefunden/));
     expect(screen.getByText(/Keine Verstöße gefunden/)).toBeTruthy();
+  });
+
+  // ── Prüfoptionen: Grenzen + Wochenmodell-Umschalter ─────────────────────
+
+  // 15 ── Default: keine Zusatzparameter (Verhalten wie bisher)
+  it('sends no limit overrides by default (regression)', async () => {
+    vi.mocked(api.checkWorkTimeRules).mockResolvedValue(mockCheckResult);
+    setup();
+    await selectEmployeeAndCheck();
+
+    await waitFor(() => expect(api.checkWorkTimeRules).toHaveBeenCalledTimes(1));
+    const call = vi.mocked(api.checkWorkTimeRules).mock.calls[0][0];
+    expect(call.employee_id).toBe(1);
+    expect(call.max_hours_per_day).toBeUndefined();
+    expect(call.max_hours_per_week).toBeUndefined();
+    expect(call.min_rest_hours_between_shifts).toBeUndefined();
+    expect(call.max_consecutive_days).toBeUndefined();
+    expect(call.week_limit_mode).toBeUndefined();
+    expect(call.week_limit_factor).toBeUndefined();
+  });
+
+  // 16 ── Umschalter „relativ zum Wochenmodell" sendet Modus + Faktor
+  it('model mode sends week_limit_mode and week_limit_factor', async () => {
+    vi.mocked(api.checkWorkTimeRules).mockResolvedValue(mockCheckResult);
+    setup();
+    await waitFor(() => screen.getByLabelText('Wochengrenzen-Modus'));
+
+    fireEvent.change(screen.getByLabelText('Wochengrenzen-Modus'), { target: { value: 'model' } });
+    await waitFor(() => screen.getByLabelText('Faktor Wochenstundenmodell'));
+    fireEvent.change(screen.getByLabelText('Faktor Wochenstundenmodell'), { target: { value: '1.5' } });
+    await selectEmployeeAndCheck();
+
+    await waitFor(() => expect(api.checkWorkTimeRules).toHaveBeenCalledTimes(1));
+    const call = vi.mocked(api.checkWorkTimeRules).mock.calls[0][0];
+    expect(call.week_limit_mode).toBe('model');
+    expect(call.week_limit_factor).toBe(1.5);
+  });
+
+  // 17 ── Überschriebene Grenzen werden als Parameter gesendet
+  it('override checkbox sends the limit fields as parameters', async () => {
+    vi.mocked(api.checkWorkTimeRules).mockResolvedValue(mockCheckResult);
+    setup();
+    // Erst warten, bis die Konfiguration geladen ist (sie belegt die Felder vor)
+    await waitFor(() => screen.getByLabelText('Max. Stunden pro Tag'));
+
+    fireEvent.click(screen.getByLabelText('Grenzen für diese Prüfung überschreiben'));
+    await waitFor(() => screen.getByLabelText('Max. Stunden pro Tag (Prüfung)'));
+    fireEvent.change(screen.getByLabelText('Max. Stunden pro Tag (Prüfung)'), { target: { value: '8' } });
+    await selectEmployeeAndCheck();
+
+    await waitFor(() => expect(api.checkWorkTimeRules).toHaveBeenCalledTimes(1));
+    const call = vi.mocked(api.checkWorkTimeRules).mock.calls[0][0];
+    expect(call.max_hours_per_day).toBe(8);
+    // Die übrigen Felder gehen mit der geladenen Konfiguration mit
+    expect(call.max_hours_per_week).toBe(48);
+    expect(call.min_rest_hours_between_shifts).toBe(11);
+    expect(call.max_consecutive_days).toBe(6);
+    expect(call.week_limit_mode).toBeUndefined();
+  });
+
+  // 18 ── Gruppenprüfung nutzt dieselben Prüfoptionen
+  it('"Alle prüfen" forwards the same limit parameters', async () => {
+    vi.mocked(api.checkAllWorkTimeRules).mockResolvedValue(mockCheckAllResult);
+    setup();
+    await waitFor(() => screen.getByLabelText('Wochengrenzen-Modus'));
+
+    fireEvent.change(screen.getByLabelText('Wochengrenzen-Modus'), { target: { value: 'model' } });
+    fireEvent.click(screen.getByLabelText('Alle prüfen'));
+
+    await waitFor(() => expect(api.checkAllWorkTimeRules).toHaveBeenCalledTimes(1));
+    const call = vi.mocked(api.checkAllWorkTimeRules).mock.calls[0][0];
+    expect(call.week_limit_mode).toBe('model');
+    expect(call.week_limit_factor).toBe(1);
   });
 });

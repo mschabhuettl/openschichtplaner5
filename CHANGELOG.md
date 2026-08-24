@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.24.0] - 2026-08-24
+
 ### Added
 
 - **Dienstplan-Druck für freien Zeitraum (Spec 7.4.1, Bericht #6 „Dienstplan →

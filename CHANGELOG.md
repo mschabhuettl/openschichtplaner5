@@ -11,6 +11,19 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Auslastungsbereich-Optionen (Spec 4.11.9-5/6).** Der Auslastungsbereich des
+  Dienstplans bekommt eine Kopfzeilen-Leiste mit drei Bedienelementen wie im
+  Original: a) **eigene Zusammenstellung** — ein Schichtarten-MultiSelect
+  (leer = automatisch alle aktiven Schichtarten, das heutige Bild); eine Auswahl
+  zeigt genau die gewählten Schichtarten in Positions-Reihenfolge, auch solche
+  ohne Einträge/Soll im Monat. b) **„Bedarf"** — je Schichtart erscheint eine
+  Unterzeile „└ Bedarf" mit dem Mindestbedarf pro Tag (dieselbe Soll-Quelle wie
+  der Zell-Tooltip „X eingeteilt / Soll: min–max", kein neuer Endpunkt); Tage
+  ohne Soll bleiben leer. c) **„Max"** — zusätzlich zum Mindestbedarf auch den
+  Maximalbedarf als „min–max" anzeigen. Alle Optionen Default aus; pure Helfer
+  (`zusammenstellungZeilen`, `bedarfZellText`) mit Unit-Tests plus
+  Komponenten-Tests.
+
 - **Jahresraster-Anzeigeoptionen (Spec 4.11.11).** a) **Spaltenausrichtung**
   als Radio-Umschalter wie im Original: **Kalendertage** (1…31 untereinander,
   Default = bisheriges Verhalten) oder **Wochentage** (Mo…So untereinander,

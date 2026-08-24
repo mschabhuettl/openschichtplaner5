@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, memo, useCallback, forwardRef, useImperativeHandle, type CSSProperties, type Dispatch, type SetStateAction } from 'react';
+import { useState, useEffect, useRef, useMemo, memo, useCallback, forwardRef, useImperativeHandle, Fragment, type CSSProperties, type Dispatch, type SetStateAction } from 'react';
 import { useSSERefresh } from '../contexts/SSEContext';
 import { useNavigate } from 'react-router-dom';
 import { usePermissions } from '../hooks/usePermissions';
@@ -34,6 +34,7 @@ import { EmptyState } from '../components/EmptyState';
 import { groupTreeOptions } from '../utils/groupTree';
 import { intersectGroupMembers } from '../utils/groupFilter';
 import { idInSelection, rowMatchesScheduleFilters } from '../utils/scheduleFilter';
+import { zusammenstellungZeilen, bedarfZellText } from '../utils/auslastung';
 import { MultiSelect } from '../components/ui/MultiSelect';
 import { getISOWeek } from '../utils/isoWeek';
 import { shiftCellColorsMemo, tint, spine } from '../utils/shiftColor';
@@ -1122,7 +1123,7 @@ function NoteDetailPopup({
 }
 
 // ── Auslastungsbereich ────────────────────────────────────────
-const AuslastungsBereich = memo(function AuslastungsBereich({
+export const AuslastungsBereich = memo(function AuslastungsBereich({
   shifts,
   days,
   year,
@@ -1192,7 +1193,17 @@ const AuslastungsBereich = memo(function AuslastungsBereich({
 
   const { isDark } = useTheme();
 
-  if (activeShifts.length === 0) return null;
+  // Eigene Zusammenstellung (Spec 4.11.9-5): leer = automatisch alle aktiven
+  // Schichtarten (heutiges Bild); Auswahl bleibt bei Gruppenwechsel bestehen.
+  const [auswahlIds, setAuswahlIds] = useState<number[]>([]);
+  // Personalbedarf-Unterzeile (Spec 4.11.9-5) + Maximalbedarf (Spec 4.11.9-6),
+  // beide Default AUS — heutiges Bild unverändert.
+  const [bedarfAn, setBedarfAn] = useState(false);
+  const [maxAn, setMaxAn] = useState(false);
+
+  const zeilen = zusammenstellungZeilen(activeShifts, shifts, auswahlIds);
+
+  if (activeShifts.length === 0 && auswahlIds.length === 0) return null;
 
   function getCellStyle(shiftId: number, day: number): CSSProperties {
     const jsWd = getWeekday(year, month, day);
@@ -1232,11 +1243,41 @@ const AuslastungsBereich = memo(function AuslastungsBereich({
 
   return (
     <div className="mt-3 bg-white dark:bg-gray-900 rounded-lg shadow border border-gray-200 dark:border-gray-600 overflow-auto">
-      <div className="px-3 py-2 bg-slate-50 border-b border-gray-200 flex items-center gap-2">
+      <div className="px-3 py-2 bg-slate-50 border-b border-gray-200 flex items-center gap-2 flex-wrap">
         <span className="text-xs font-semibold text-slate-600">📊 Auslastung nach Schichtart</span>
         <span className="text-[10px] text-gray-600">
           Grün = OK · Rot = Unterbesetzt · Orange = Überbesetzt · Grau = kein Soll
         </span>
+        {/* Eigene Zusammenstellung + Bedarfs-Unterzeile (Spec 4.11.9-5/6) */}
+        <div className="no-print ml-auto flex items-center gap-1.5">
+          <MultiSelect
+            options={shifts.map(s => ({
+              value: s.ID,
+              label: s.NAME && s.NAME !== s.SHORTNAME ? `${s.SHORTNAME} – ${s.NAME}` : (s.SHORTNAME || `#${s.ID}`),
+            }))}
+            selected={auswahlIds}
+            onChange={setAuswahlIds}
+            allLabel="Alle Schichtarten"
+          />
+          <button
+            onClick={() => setBedarfAn(v => !v)}
+            aria-pressed={bedarfAn}
+            className={`px-2 py-[5px] text-[11px] rounded-ui border ${bedarfAn ? 'bg-glut-flaeche border-[#d9a675] dark:border-[#a15618] text-[#a64a08] dark:text-glut' : 'bg-ebene dark:bg-ebene-2 border-kontur text-schrift-2 hover:bg-wash'}`}
+            title="Personalbedarf je Schichtart als Unterzeile anzeigen"
+          >
+            Bedarf
+          </button>
+          {bedarfAn && (
+            <button
+              onClick={() => setMaxAn(v => !v)}
+              aria-pressed={maxAn}
+              className={`px-2 py-[5px] text-[11px] rounded-ui border ${maxAn ? 'bg-glut-flaeche border-[#d9a675] dark:border-[#a15618] text-[#a64a08] dark:text-glut' : 'bg-ebene dark:bg-ebene-2 border-kontur text-schrift-2 hover:bg-wash'}`}
+              title="Zusätzlich zum Mindestbedarf auch den Maximalbedarf anzeigen"
+            >
+              Max
+            </button>
+          )}
+        </div>
       </div>
       <table className="border-collapse text-xs w-full">
         <thead>
@@ -1261,8 +1302,9 @@ const AuslastungsBereich = memo(function AuslastungsBereich({
           </tr>
         </thead>
         <tbody>
-          {activeShifts.map(shift => (
-            <tr key={shift.ID}>
+          {zeilen.map(shift => (
+            <Fragment key={shift.ID}>
+            <tr>
               <td className="sticky left-0 z-10 bg-white dark:bg-gray-900 px-3 py-1 border-r border-gray-200 dark:border-gray-700 border-b border-b-gray-100 dark:border-b-gray-700 whitespace-nowrap">
                 <span
                   className="inline-flex items-center gap-1.5"
@@ -1293,6 +1335,28 @@ const AuslastungsBereich = memo(function AuslastungsBereich({
                 );
               })}
             </tr>
+            {/* Bedarfs-Unterzeile (Spec 4.11.9-5/6): Soll je Wochentag, Quelle wie Tooltip */}
+            {bedarfAn && (
+              <tr data-testid={`bedarf-zeile-${shift.ID}`}>
+                <td className="sticky left-0 z-10 bg-white dark:bg-gray-900 pl-9 pr-3 py-0.5 border-r border-gray-200 dark:border-gray-700 border-b border-b-gray-100 dark:border-b-gray-700 whitespace-nowrap text-[10px] text-slate-400 dark:text-slate-500">
+                  └ Bedarf{maxAn ? ' (min–max)' : ''}
+                </td>
+                {days.map(day => {
+                  const jsWd = getWeekday(year, month, day);
+                  const txt = bedarfZellText(reqsLookup.get(jsWdToDbWd(jsWd))?.get(shift.ID), maxAn);
+                  const isWe = jsWd === 0 || jsWd === 6;
+                  return (
+                    <td
+                      key={day}
+                      className={`border border-gray-100 dark:border-gray-700 text-center py-0.5 font-mono tabular-nums text-[10px] text-slate-500 dark:text-slate-400 ${isWe ? 'opacity-70' : ''}`}
+                    >
+                      {txt || <span className="opacity-30">·</span>}
+                    </td>
+                  );
+                })}
+              </tr>
+            )}
+            </Fragment>
           ))}
         </tbody>
       </table>

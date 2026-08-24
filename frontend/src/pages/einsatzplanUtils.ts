@@ -1,9 +1,11 @@
 /**
  * Pure Hilfsfunktionen für den Einsatzplan.
  */
+import type { CSSProperties } from 'react';
 import type { DayEntry } from '../api/client';
 import { deCompare } from '../utils/sortOrder';
-import type { ShiftType } from '../types';
+import { tint, spine } from '../utils/shiftColor';
+import type { Employee, ShiftType } from '../types';
 
 /**
  * Voreingestellte Arbeitsstunden eines Sonderdienstes für einen Tag (A6):
@@ -59,4 +61,41 @@ export function occupiedShiftIds(entries: Iterable<DayEntry>): Set<number> {
  */
 export function byEmployeeName(a: DayEntry, b: DayEntry): number {
   return deCompare(a.employee_name, b.employee_name);
+}
+
+/**
+ * Effektive individuelle MA-Farbe für die Anzeigeoption „Mitarbeiternamen in
+ * individuellen Farben" (Spec 4.11.10-3a): Labelfarbe CBKLABEL, Fallback
+ * Planfarbe CBKSCHED — wie in der Mitarbeiterliste. Weiß/0/fehlend = keine Farbe.
+ */
+export function maLabelHex(
+  emp: Pick<Employee, 'CBKLABEL' | 'CBKLABEL_HEX' | 'CBKSCHED' | 'CBKSCHED_HEX'> | undefined,
+): string | undefined {
+  if (!emp) return undefined;
+  const pick = (bgr?: number, hex?: string) =>
+    bgr == null || bgr === 0 || bgr === 16777215 || !hex ? undefined : hex;
+  return pick(emp.CBKLABEL, emp.CBKLABEL_HEX) ?? pick(emp.CBKSCHED, emp.CBKSCHED_HEX);
+}
+
+/**
+ * Namens-Badge in MA-Farbe: Tint-Fläche + 3px-Spine, Text = Schrift-Token
+ * (Rohfarben nie roh rendern, docs/design-system.md §4). Ohne Farbe kein Stil.
+ */
+export function maBadgeStyle(hex: string | undefined, isDark: boolean): CSSProperties | undefined {
+  if (!hex) return undefined;
+  const theme = isDark ? 'dark' : 'light';
+  return { backgroundColor: tint(hex, theme), boxShadow: `inset 3px 0 0 ${spine(hex, theme)}` };
+}
+
+/**
+ * Anzeigeoption „Arbeitsplatz voranstellen" (Spec 4.11.10-3b): bei Diensten mit
+ * zugeordnetem Arbeitsplatz dessen Bezeichnung als Präfix „<Arbeitsplatz>: ".
+ * Abwesenheits- und Frei-Einträge bleiben ohne Präfix.
+ */
+export function arbeitsplatzPraefix(
+  entry: Pick<DayEntry, 'kind' | 'workplace_id' | 'workplace_name'>,
+): string {
+  if (entry.kind !== 'shift' && entry.kind !== 'special_shift') return '';
+  if (!entry.workplace_id || !entry.workplace_name) return '';
+  return `${entry.workplace_name}: `;
 }

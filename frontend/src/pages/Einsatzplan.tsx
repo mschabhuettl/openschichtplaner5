@@ -12,7 +12,7 @@ import { useUndoRedo } from '../hooks/useUndoRedo';
 import type { UndoableAction } from '../hooks/useUndoRedo';
 import { UndoRedoStatus } from '../components/UndoRedoStatus';
 import { ResponsiveTable } from '../components/ResponsiveTable';
-import { occupiedShiftIds, shiftDurationForDate, datesInRange, byEmployeeName } from './einsatzplanUtils';
+import { occupiedShiftIds, shiftDurationForDate, datesInRange, byEmployeeName, maLabelHex, maBadgeStyle, arbeitsplatzPraefix } from './einsatzplanUtils';
 import { groupTreeOptions } from '../utils/groupTree';
 import { shiftCellColorsMemo, tint, spine } from '../utils/shiftColor';
 
@@ -698,10 +698,14 @@ function EinsatzplanNotePopup({
 
 // Badge der Schichtzuweisung eines MA
 function ShiftBadge({
-  entry, notes, onNoteClick, onContextMenu,
+  entry, notes, maFarbe, mitArbeitsplatz, onNoteClick, onContextMenu,
 }: {
   entry: DayEntry;
   notes?: Note[];
+  /** 4.11.10-3a: individuelle MA-Farbe (Hex); undefined = Option aus/keine Farbe */
+  maFarbe?: string;
+  /** 4.11.10-3b: Arbeitsplatz-Bezeichnung dem MA-Namen voranstellen */
+  mitArbeitsplatz?: boolean;
   onNoteClick?: (e: React.MouseEvent, notes: Note[]) => void;
   onContextMenu?: (e: React.MouseEvent, entry: DayEntry) => void;
 }) {
@@ -716,13 +720,16 @@ function ShiftBadge({
   // Abwesenheiten als Hohl-Chip (gestrichelt, keine Füllung).
   const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   const chip = entry.color_bk ? shiftCellColorsMemo(entry.color_bk, isDark ? 'dark' : 'light', { hollow: isAbsence }) : null;
+  // 4.11.10-3a: Badge in MA-Farbe (Tint + Spine); Abwesenheiten bleiben hohl
+  const maStyle = !isAbsence ? maBadgeStyle(maFarbe, isDark) : undefined;
 
   return (
     <div
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-cell text-xs font-semibold cursor-context-menu ${chip ? '' : 'text-schrift-2'}`}
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-cell text-xs font-semibold cursor-context-menu ${maStyle ? 'text-schrift' : chip ? '' : 'text-schrift-2'}`}
       style={{
-        backgroundColor: chip && !isAbsence ? chip.background : undefined,
-        color: chip ? chip.color : undefined,
+        backgroundColor: maStyle ? maStyle.backgroundColor : chip && !isAbsence ? chip.background : undefined,
+        color: maStyle ? undefined : chip ? chip.color : undefined,
+        boxShadow: maStyle?.boxShadow,
         border: isAbsence
           ? `1.5px dashed ${chip ? chip.color : 'var(--kontur)'}`
           : isDeviation
@@ -741,7 +748,7 @@ function ShiftBadge({
       {isSpshi && !isDeviation && <span className="text-[9px]">★</span>}
       {isCycle && <span className="text-[9px]" aria-hidden="true">↻</span>}
       <span>{entry.display_name || '?'}</span>
-      <span className="opacity-70 font-normal">{entry.employee_name}</span>
+      <span className="opacity-70 font-normal">{mitArbeitsplatz ? arbeitsplatzPraefix(entry) : ''}{entry.employee_name}</span>
       {hasNote && (
         <button
           className="ml-0.5 text-[10px] hover:scale-125 transition-transform leading-none"
@@ -758,14 +765,19 @@ function ShiftBadge({
 // ── Leere MA-Zelle (Rechtsklick zum Hinzufügen) ──────────────
 function EmptyEmployeeCell({
   entry,
+  maFarbe,
   onContextMenu,
 }: {
   entry: DayEntry;
+  /** 4.11.10-3a: individuelle MA-Farbe (Hex); undefined = Option aus/keine Farbe */
+  maFarbe?: string;
   onContextMenu?: (e: React.MouseEvent, entry: DayEntry) => void;
 }) {
+  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
   return (
     <span
       className="text-xs px-2 py-0.5 bg-wash rounded-cell text-schrift-2 cursor-context-menu hover:text-schrift"
+      style={maBadgeStyle(maFarbe, isDark)}
       onContextMenu={e => { e.preventDefault(); onContextMenu?.(e, entry); }}
       title="Rechtsklick für Optionen"
     >
@@ -780,6 +792,8 @@ export function DayView({
   entries,
   shifts,
   notesByEmpId,
+  maFarben,
+  mitArbeitsplatz,
   onNoteClick,
   onContextMenu,
   listMode = 'alle',
@@ -788,6 +802,10 @@ export function DayView({
   entries: DayEntry[];
   shifts: ShiftType[];
   notesByEmpId?: Map<number, Note[]>;
+  /** 4.11.10-3a: empId → individuelle MA-Farbe (Hex); undefined = Option aus */
+  maFarben?: Map<number, string>;
+  /** 4.11.10-3b: Arbeitsplatz-Bezeichnung dem MA-Namen voranstellen */
+  mitArbeitsplatz?: boolean;
   onNoteClick?: (e: React.MouseEvent, notes: Note[]) => void;
   onContextMenu?: (e: React.MouseEvent, entry: DayEntry) => void;
   /** Auflisten-Modus wie das Original (Spec 4.3): alle | arbeitend | abwesend */
@@ -844,6 +862,8 @@ export function DayView({
                     key={e.employee_id}
                     entry={e}
                     notes={notesByEmpId?.get(e.employee_id)}
+                    maFarbe={maFarben?.get(e.employee_id)}
+                    mitArbeitsplatz={mitArbeitsplatz}
                     onNoteClick={onNoteClick}
                     onContextMenu={onContextMenu}
                   />
@@ -886,7 +906,7 @@ export function DayView({
             <span className="text-xs text-schrift-3 italic">Alle eingeteilt</span>
           ) : (
             freeEntries.map(e => (
-              <EmptyEmployeeCell key={e.employee_id} entry={e} onContextMenu={onContextMenu} />
+              <EmptyEmployeeCell key={e.employee_id} entry={e} maFarbe={maFarben?.get(e.employee_id)} onContextMenu={onContextMenu} />
             ))
           )}
         </div>
@@ -903,6 +923,8 @@ function WeekView({
   shifts,
   leaveTypes,
   hideEmpty,
+  maFarben,
+  mitArbeitsplatz,
   onContextMenu,
 }: {
   weekDates: string[];
@@ -910,6 +932,10 @@ function WeekView({
   shifts: ShiftType[];
   leaveTypes: LeaveType[];
   hideEmpty: boolean;
+  /** 4.11.10-3a: empId → individuelle MA-Farbe (Hex); undefined = Option aus */
+  maFarben?: Map<number, string>;
+  /** 4.11.10-3b: Arbeitsplatz-Bezeichnung dem MA-Namen voranstellen */
+  mitArbeitsplatz?: boolean;
   onContextMenu?: (e: React.MouseEvent, entry: DayEntry, date: string) => void;
 }) {
   // Original-Layout (Spec 4.3): unter den Schichtzeilen eine Zeile JE
@@ -971,13 +997,16 @@ function WeekView({
                         const isCycle = e.source === 'cycle';
                         // Rohfarbe normalisieren, Vordergrund berechnen (nie COLORTEXT)
                         const chip = e.color_bk ? shiftCellColorsMemo(e.color_bk, isDark ? 'dark' : 'light') : null;
+                        // 4.11.10-3a: Namens-Badge in MA-Farbe (Tint + Spine) statt Schichtfarbe
+                        const maStyle = maBadgeStyle(maFarben?.get(e.employee_id), isDark);
                         return (
                           <div
                             key={e.employee_id}
-                            className={`px-1 py-0.5 rounded-cell text-[10px] font-semibold cursor-context-menu ${chip ? '' : 'text-schrift-2'}`}
+                            className={`px-1 py-0.5 rounded-cell text-[10px] font-semibold cursor-context-menu ${maStyle ? 'text-schrift' : chip ? '' : 'text-schrift-2'}`}
                             style={{
-                              backgroundColor: chip?.background,
-                              color: chip?.color,
+                              backgroundColor: maStyle ? maStyle.backgroundColor : chip?.background,
+                              color: maStyle ? undefined : chip?.color,
+                              boxShadow: maStyle?.boxShadow,
                               border: isDeviation
                                 ? '2px dashed var(--glut)'
                                 : isSpshi
@@ -993,7 +1022,7 @@ function WeekView({
                             {isDeviation && '⏱'}
                             {isSpshi && !isDeviation && '★'}
                             {isCycle && '↻ '}
-                            {e.employee_name}
+                            {mitArbeitsplatz ? arbeitsplatzPraefix(e) : ''}{e.employee_name}
                           </div>
                         );
                       })}
@@ -1058,6 +1087,7 @@ function WeekView({
                       <div
                         key={e.employee_id}
                         className="text-[10px] text-schrift-3 cursor-context-menu px-1 py-0.5 rounded-cell hover:text-schrift"
+                        style={maBadgeStyle(maFarben?.get(e.employee_id), isDark)}
                         onContextMenu={ev => { ev.preventDefault(); onContextMenu?.(ev, e, d); }}
                         title="Rechtsklick für Optionen"
                       >
@@ -1453,6 +1483,26 @@ export default function Einsatzplan() {
 
   // Leere Schichtzeilen im sichtbaren Zeitraum ausblenden (Spec 4.3-5 / 4.11.10-2)
   const [hideEmptyShifts, setHideEmptyShifts] = useState(false);
+
+  // Anzeigeoptionen „Mitarbeitername" wie das Original (Spec 4.11.10-3a/b),
+  // beide Default AUS — heutiges Bild unverändert.
+  const [maFarbenAn, setMaFarbenAn] = useState(false);
+  const [arbeitsplatzAn, setArbeitsplatzAn] = useState(false);
+  // empId → individuelle MA-Farbe; die Tageseinträge tragen keine MA-Farben,
+  // daher lazy aus der Mitarbeiterliste gemappt (kein neuer Endpunkt); null = ungeladen
+  const [maFarbMap, setMaFarbMap] = useState<Map<number, string> | null>(null);
+
+  useEffect(() => {
+    if (!maFarbenAn || maFarbMap) return;
+    api.getEmployees().then(list => {
+      const m = new Map<number, string>();
+      for (const emp of list) {
+        const hex = maLabelHex(emp);
+        if (hex) m.set(emp.ID, hex);
+      }
+      setMaFarbMap(m);
+    }).catch(() => {});
+  }, [maFarbenAn, maFarbMap]);
 
   // Notizen der Tagesansicht: empId → Note[]
   const [dayNotesMap, setDayNotesMap] = useState<Map<number, Note[]>>(new Map());
@@ -1972,6 +2022,24 @@ export default function Einsatzplan() {
           {hideEmptyShifts ? '👁️' : '🚫'} Leere Zeilen ausblenden
         </button>
 
+        {/* Anzeigeoptionen „Mitarbeitername" (Spec 4.11.10-3a/b), Default beide aus */}
+        <button
+          onClick={() => setMaFarbenAn(v => !v)}
+          aria-pressed={maFarbenAn}
+          className={`no-print px-3 py-1.5 text-sm rounded-ui flex items-center gap-1.5 border ${maFarbenAn ? 'bg-glut-flaeche border-[#d9a675] dark:border-[#a15618] text-[#a64a08] dark:text-glut' : 'bg-ebene dark:bg-ebene-2 border-kontur text-schrift-2 hover:bg-wash'}`}
+          title="Mitarbeiternamen in den individuellen Farben des Mitarbeiters anzeigen"
+        >
+          🎨 MA-Farben
+        </button>
+        <button
+          onClick={() => setArbeitsplatzAn(v => !v)}
+          aria-pressed={arbeitsplatzAn}
+          className={`no-print px-3 py-1.5 text-sm rounded-ui flex items-center gap-1.5 border ${arbeitsplatzAn ? 'bg-glut-flaeche border-[#d9a675] dark:border-[#a15618] text-[#a64a08] dark:text-glut' : 'bg-ebene dark:bg-ebene-2 border-kontur text-schrift-2 hover:bg-wash'}`}
+          title="Bei Diensten die Bezeichnung des zugeordneten Arbeitsplatzes voranstellen"
+        >
+          🏷️ Arbeitsplatz
+        </button>
+
         {viewMode === 'day' && (
           <label className="no-print flex items-center gap-1.5 text-sm text-schrift">
             Auflisten:
@@ -2124,6 +2192,8 @@ export default function Einsatzplan() {
             entries={filteredDayEntries}
             shifts={visibleShifts}
             notesByEmpId={dayNotesMap}
+            maFarben={maFarbenAn ? maFarbMap ?? undefined : undefined}
+            mitArbeitsplatz={arbeitsplatzAn}
             onNoteClick={(e, notes) => {
               e.stopPropagation();
               setNotePopup({ x: e.clientX, y: e.clientY, notes });
@@ -2137,6 +2207,8 @@ export default function Einsatzplan() {
             weekDates={weekDates}
             entriesByDate={filteredWeekEntries}
             shifts={visibleShifts}
+            maFarben={maFarbenAn ? maFarbMap ?? undefined : undefined}
+            mitArbeitsplatz={arbeitsplatzAn}
             onContextMenu={(e, entry, date) => handleOpenContextMenu(e, entry, date)}
           />
         )}

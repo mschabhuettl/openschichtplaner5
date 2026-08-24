@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { occupiedShiftIds, shiftDurationForDate, datesInRange, byEmployeeName } from '../pages/einsatzplanUtils';
+import { occupiedShiftIds, shiftDurationForDate, datesInRange, byEmployeeName, maLabelHex, maBadgeStyle, arbeitsplatzPraefix } from '../pages/einsatzplanUtils';
+import { tint, spine } from '../utils/shiftColor';
 import type { DayEntry } from '../api/client';
 import type { ShiftType } from '../types';
 
@@ -97,5 +98,68 @@ describe('byEmployeeName', () => {
     ];
     const sorted = [...list].sort(byEmployeeName);
     expect(sorted.map(e => e.employee_id)).toEqual([4, 2, 3, 1]);
+  });
+});
+
+// Anzeigeoption „Mitarbeiternamen in individuellen Farben" (Spec 4.11.10-3a)
+describe('maLabelHex', () => {
+  it('nimmt die Labelfarbe CBKLABEL', () => {
+    expect(maLabelHex({ CBKLABEL: 255, CBKLABEL_HEX: '#ff0000' })).toBe('#ff0000');
+  });
+
+  it('fällt auf die Planfarbe CBKSCHED zurück, wenn die Labelfarbe fehlt/weiß ist', () => {
+    expect(maLabelHex({ CBKSCHED: 16711680, CBKSCHED_HEX: '#0000ff' })).toBe('#0000ff');
+    expect(maLabelHex({
+      CBKLABEL: 16777215, CBKLABEL_HEX: '#ffffff',
+      CBKSCHED: 16711680, CBKSCHED_HEX: '#0000ff',
+    })).toBe('#0000ff');
+  });
+
+  it('Weiß/0/fehlend = keine Farbe', () => {
+    expect(maLabelHex(undefined)).toBeUndefined();
+    expect(maLabelHex({})).toBeUndefined();
+    expect(maLabelHex({ CBKLABEL: 0, CBKLABEL_HEX: '#000000' })).toBeUndefined();
+    expect(maLabelHex({ CBKLABEL: 16777215, CBKLABEL_HEX: '#ffffff' })).toBeUndefined();
+  });
+});
+
+describe('maBadgeStyle', () => {
+  it('ohne Farbe kein Stil (Default-Rendering bleibt neutral)', () => {
+    expect(maBadgeStyle(undefined, false)).toBeUndefined();
+    expect(maBadgeStyle(undefined, true)).toBeUndefined();
+  });
+
+  it('Tint-Fläche + 3px-Spine — nie die Rohfarbe', () => {
+    const st = maBadgeStyle('#ff0000', false)!;
+    expect(st.backgroundColor).toBe(tint('#ff0000', 'light'));
+    expect(st.boxShadow).toBe(`inset 3px 0 0 ${spine('#ff0000', 'light')}`);
+    expect(st.backgroundColor).not.toBe('#ff0000');
+  });
+
+  it('nutzt im Dark-Modus die Dark-Schienen', () => {
+    const st = maBadgeStyle('#ff0000', true)!;
+    expect(st.backgroundColor).toBe(tint('#ff0000', 'dark'));
+    expect(st.boxShadow).toBe(`inset 3px 0 0 ${spine('#ff0000', 'dark')}`);
+  });
+});
+
+// Anzeigeoption „Arbeitsplatz voranstellen" (Spec 4.11.10-3b)
+describe('arbeitsplatzPraefix', () => {
+  it('Dienst mit zugeordnetem Arbeitsplatz → „<Arbeitsplatz>: "', () => {
+    expect(arbeitsplatzPraefix(entry({ kind: 'shift', workplace_id: 3, workplace_name: 'OP-Saal' })))
+      .toBe('OP-Saal: ');
+    expect(arbeitsplatzPraefix(entry({ kind: 'special_shift', workplace_id: 3, workplace_name: 'OP-Saal' })))
+      .toBe('OP-Saal: ');
+  });
+
+  it('ohne Arbeitsplatz kein Präfix', () => {
+    expect(arbeitsplatzPraefix(entry({ kind: 'shift' }))).toBe('');
+    expect(arbeitsplatzPraefix(entry({ kind: 'shift', workplace_id: 0, workplace_name: 'X' }))).toBe('');
+    expect(arbeitsplatzPraefix(entry({ kind: 'shift', workplace_id: 3, workplace_name: '' }))).toBe('');
+  });
+
+  it('Abwesenheits- und Frei-Einträge bleiben ohne Präfix', () => {
+    expect(arbeitsplatzPraefix(entry({ kind: 'absence', workplace_id: 3, workplace_name: 'OP-Saal' }))).toBe('');
+    expect(arbeitsplatzPraefix(entry({ kind: null, workplace_id: 3, workplace_name: 'OP-Saal' }))).toBe('');
   });
 });

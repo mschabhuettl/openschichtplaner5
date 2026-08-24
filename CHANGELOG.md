@@ -11,6 +11,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Einsatzplan-Anzeigeoptionen „Mitarbeitername" (Spec 4.11.10-3).** Zwei
+  neue Toolbar-Toggles wie im Original, beide Default aus: a) Mitarbeiternamen
+  in den **individuellen Farben** des Mitarbeiters (Labelfarbe, Fallback
+  Planfarbe; als Tint-Fläche + 3px-Spine wie in der Mitarbeiterliste — nie die
+  Rohfarbe; Weiß/0 = neutral, Abwesenheits-Badges bleiben hohl); b) bei
+  Diensten die Bezeichnung eines zugeordneten **Arbeitsplatzes** voranstellen
+  („Arbeitsplatz: Name"). Wirken in Tages- und Wochenansicht; pure Helfer
+  (`maLabelHex`, `maBadgeStyle`, `arbeitsplatzPraefix`) mit Unit-Tests.
+
 - **Mehrfachauswahl der Dienstplan-Filter (Spec 4.7).** Die drei Filter
   Schichtart, Abwesenheitsart und Arbeitsplatz im Dienstplan sind jetzt
   Mehrfachauswahlen (Taktwerk-`MultiSelect` statt Einzel-Dropdowns):

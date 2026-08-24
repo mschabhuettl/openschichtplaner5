@@ -323,7 +323,7 @@ export default function Shifts() {
                       </td>
                       <td className="px-4 py-1 font-semibold text-schrift">
                         {s.NAME}
-                        {s.HIDE && (
+                        {!!s.HIDE && (
                           <StatusPille variant="gray" className="ml-2 align-middle">Ausgeblendet</StatusPille>
                         )}
                       </td>

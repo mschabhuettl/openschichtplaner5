@@ -268,7 +268,7 @@ export default function LeaveTypes() {
                   </td>
                   <td className="px-4 font-semibold text-schrift">
                     {lt.NAME}
-                    {lt.HIDE && (<Badge variant="gray" className="ml-2 align-middle">Ausgeblendet</Badge>)}
+                    {!!lt.HIDE && (<Badge variant="gray" className="ml-2 align-middle">Ausgeblendet</Badge>)}
                   </td>
                   <td className="px-4 text-schrift-2">{lt.SHORTNAME}</td>
                   <td className="px-4 text-center">
@@ -419,7 +419,7 @@ export default function LeaveTypes() {
                 />
                 Mit Anspruch verbunden (verbraucht Urlaubsanspruch)
               </label>
-              {form.ENTITLED && (
+              {!!form.ENTITLED && (
                 <div className="pl-6 space-y-3">
                   <div>
                     <label className="block text-[9.5px] font-bold uppercase tracking-[.06em] text-schrift-3 mb-1">Standardanspruch (Tage)</label>

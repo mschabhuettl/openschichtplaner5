@@ -257,7 +257,7 @@ export default function Workplaces() {
                   >
                     <td className="px-4 py-0 font-semibold text-schrift">
                       {w.NAME}
-                      {w.HIDE && (
+                      {!!w.HIDE && (
                         <span className="ml-2 inline-block px-1.5 py-0.5 text-[10px] font-medium rounded-cell bg-wash text-schrift-2 border border-kontur align-middle">
                           Ausgeblendet
                         </span>

@@ -40,7 +40,7 @@ const mockLeaveTypes = [
   {
     ID: 1, NAME: 'Urlaub', SHORTNAME: 'U', POSITION: 1,
     COLORBK_HEX: '#ffffff', COLORBAR_HEX: '#000000', COLORBK_LIGHT: true,
-    ENTITLED: true, STDENTIT: 25, HIDE: false,
+    ENTITLED: 1, STDENTIT: 25, HIDE: 0,
     CHARGETYP: 2, CHARGEHRS: 7.7, CARRYFWD: 1, COUNTALL: 1,
   },
 ];
@@ -59,6 +59,8 @@ describe('LeaveTypes page — Anrechnungs-Konfiguration (V-4)', () => {
   it('create dialog shows CHARGETYP options; Stundenfeld nur bei Typ 2', async () => {
     render(<LeaveTypes />);
     await waitFor(() => expect(screen.getByText('Urlaub')).toBeTruthy());
+    // Regression {lt.HIDE && …}: HIDE=0 (DBF-int) darf keine literale „0" rendern
+    expect(screen.getByText('Urlaub').closest('td')?.textContent).toBe('Urlaub');
 
     fireEvent.click(screen.getByText('+ Neu'));
     expect(screen.getByText('Anzurechnende Arbeitszeit')).toBeTruthy();

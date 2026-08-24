@@ -44,8 +44,8 @@ import { api } from '../api/client';
 import Workplaces from '../pages/Workplaces';
 
 const mockWorkplaces = [
-  { ID: 1, NAME: 'Station A', SHORTNAME: 'A', COLOR: 0xFFFFFF, HIDE: false },
-  { ID: 2, NAME: 'Station B', SHORTNAME: 'B', COLOR: 0x00FF00, HIDE: false },
+  { ID: 1, NAME: 'Station A', SHORTNAME: 'A', COLOR: 0xFFFFFF, HIDE: 0 },
+  { ID: 2, NAME: 'Station B', SHORTNAME: 'B', COLOR: 0x00FF00, HIDE: 0 },
 ];
 
 function renderWorkplaces() {

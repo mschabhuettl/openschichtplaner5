@@ -40,8 +40,8 @@ import { api } from '../api/client';
 import Shifts from '../pages/Shifts';
 
 const mockShifts = [
-  { ID: 1, NAME: 'Frühschicht', SHORTNAME: 'F', DURATION0: 8, COLOR: 0xFFFFFF, HIDE: false },
-  { ID: 2, NAME: 'Spätschicht', SHORTNAME: 'S', DURATION0: 8, COLOR: 0x0000FF, HIDE: false },
+  { ID: 1, NAME: 'Frühschicht', SHORTNAME: 'F', DURATION0: 8, COLOR: 0xFFFFFF, HIDE: 0 },
+  { ID: 2, NAME: 'Spätschicht', SHORTNAME: 'S', DURATION0: 8, COLOR: 0x0000FF, HIDE: 0 },
 ];
 
 function renderShifts() {
@@ -81,7 +81,9 @@ describe('Shifts page', () => {
     await waitFor(() => {
       expect(screen.getAllByText('Frühschicht').length).toBeGreaterThan(0);
       expect(screen.getAllByText('Spätschicht').length).toBeGreaterThan(0);
-    });
+      // Regression {s.HIDE && …}: HIDE=0 (DBF-int) darf keine literale „0" rendern
+    expect(screen.getByText('Frühschicht').closest('td')?.textContent ?? '').not.toContain('0');
+  });
   });
 
   it('shows error state on API failure', async () => {
@@ -96,7 +98,7 @@ describe('Shifts page', () => {
   // P-VOLLERFASSUNG Lücke #10: eigene Text-/Balkenfarbe je Schichtart wählbar.
   describe('Farben (Text/Balken)', () => {
     const colored = [
-      { ID: 1, NAME: 'Frühschicht', SHORTNAME: 'F', DURATION0: 8, HIDE: false,
+      { ID: 1, NAME: 'Frühschicht', SHORTNAME: 'F', DURATION0: 8, HIDE: 0,
         COLORBK_HEX: '#ffffff', COLORTEXT_HEX: '#000000', COLORBAR_HEX: '#000000' },
     ];
 
@@ -141,7 +143,7 @@ describe('Shifts page', () => {
   describe('Ausgeblendete Schichtarten', () => {
     const mockWithHidden = [
       ...mockShifts,
-      { ID: 3, NAME: 'Nachtschicht', SHORTNAME: 'N', DURATION0: 8, COLOR: 0x000000, HIDE: true },
+      { ID: 3, NAME: 'Nachtschicht', SHORTNAME: 'N', DURATION0: 8, COLOR: 0x000000, HIDE: 1 },
     ];
 
     it('lädt inklusive ausgeblendeter (include_hidden=true)', async () => {

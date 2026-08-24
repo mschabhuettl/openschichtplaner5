@@ -9,6 +9,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Literale „0" hinter Namen in Stammdaten-Listen.** Schichtarten,
+  Abwesenheitsarten und Arbeitsplätze zeigten hinter jedem sichtbaren Eintrag
+  eine „0" (React rendert `0 && X` als „0"; `HIDE` ist die DBF-Ganzzahl 0 —
+  dieselbe Klasse wie der frühere Mitarbeiterlisten-Fund, durch die
+  Taktwerk-Badges neu eingeschleppt); ebenso ein „0"-Artefakt im
+  Abwesenheitsarten-Dialog (`ENTITLED`). Die Seiten-Tests verwenden jetzt die
+  echten Ganzzahl-Feldformen statt Booleans, damit die Klasse testfest bleibt.
+
 ---
 
 ## [1.23.1] - 2026-08-23

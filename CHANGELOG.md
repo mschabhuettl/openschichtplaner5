@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.23.2] - 2026-08-24
+
 ### Fixed
 
 - **Literale „0" hinter Namen in Stammdaten-Listen.** Schichtarten,

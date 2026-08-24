@@ -33,6 +33,8 @@ import { ResponsiveTable } from '../components/ResponsiveTable';
 import { EmptyState } from '../components/EmptyState';
 import { groupTreeOptions } from '../utils/groupTree';
 import { intersectGroupMembers } from '../utils/groupFilter';
+import { idInSelection, rowMatchesScheduleFilters } from '../utils/scheduleFilter';
+import { MultiSelect } from '../components/ui/MultiSelect';
 import { getISOWeek } from '../utils/isoWeek';
 import { shiftCellColorsMemo, tint, spine } from '../utils/shiftColor';
 import { phaseForStart, formatSaldo, sunTimesForMonth, tagbogenGradient, zeitfadenLeft, type Phase } from '../utils/scheduleVisuals';
@@ -1315,92 +1317,6 @@ const EmployeeCountBadge = memo(function EmployeeCountBadge({ visible, total }: 
   );
 });
 
-// ── Shift Filter Dropdown (colored badges) ────────────────────
-function ShiftFilterDropdown({
-  shifts,
-  value,
-  onChange,
-}: {
-  shifts: ShiftType[];
-  value: number | '';
-  onChange: (id: number | '') => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
-  }, [open]);
-
-  const selected = value !== '' ? shifts.find(s => s.ID === value) : null;
-
-  return (
-    <div className="relative" ref={ref}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-1.5 px-2 py-1 border dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-xs hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] dark:hover:bg-gray-600 dark:text-gray-200"
-      >
-        {selected ? (
-          <>
-            <span
-              className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
-              style={{ backgroundColor: selected.COLORBK_HEX, color: selected.COLORTEXT_HEX }}
-            >
-              {selected.SHORTNAME?.[0] || '?'}
-            </span>
-            <span className="max-w-[120px] truncate">{selected.SHORTNAME} – {selected.NAME}</span>
-          </>
-        ) : (
-          <span className="text-gray-500">Alle Schichten</span>
-        )}
-        <span className="text-gray-600 ml-1">▾</span>
-      </button>
-      {open && (
-        <div className="absolute top-full mt-1 left-0 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl min-w-[200px] py-1">
-          <button
-            className="w-full px-3 py-1.5 text-left text-xs hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
-            onClick={() => { onChange(''); setOpen(false); }}
-          >
-            <span
-              className={`w-4 h-4 rounded border flex items-center justify-center text-[10px] flex-shrink-0 ${
-                value === '' ? 'bg-blue-500 border-blue-500 text-white' : 'border-gray-300'
-              }`}
-            >
-              {value === '' ? '✓' : ''}
-            </span>
-            Alle Schichten
-          </button>
-          <div className="border-t border-kontur my-1" />
-          {shifts.map(s => (
-            <button
-              key={s.ID}
-              className="w-full px-3 py-1.5 text-left text-xs hover:bg-[rgba(201,106,20,.08)] dark:hover:bg-[rgba(240,163,92,.12)] flex items-center gap-2"
-              onClick={() => { onChange(s.ID); setOpen(false); }}
-            >
-              <span
-                className="inline-block w-4 h-4 rounded text-center text-[9px] font-bold leading-4 flex-shrink-0"
-                style={{ backgroundColor: s.COLORBK_HEX, color: s.COLORTEXT_HEX }}
-              >
-                {s.SHORTNAME?.[0] || '?'}
-              </span>
-              <span className="flex-1 text-left">
-                <span className="font-semibold">{s.SHORTNAME}</span>
-                {s.NAME !== s.SHORTNAME && <span className="text-gray-500 ml-1">– {s.NAME}</span>}
-              </span>
-              {value === s.ID && <span className="text-blue-500 text-[10px]">✓</span>}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ── BulkContextMenu ───────────────────────────────────────────
 interface BulkContextMenuProps {
   x: number;
@@ -2104,8 +2020,8 @@ export interface EmployeeRowProps {
   isLeserView: boolean;
   currentUserEmpId: number | null;
   showWorkloadBars: boolean;
-  filterShiftId: number | '';
-  filterLeaveId: number | '';
+  filterShiftIds: number[];
+  filterLeaveIds: number[];
   // Zeilen-lokale Minimal-Props (nur betroffene Zeilen ändern sich → memo bailt aus)
   selectedDay: number | null;
   dndSrcDay: number | null;
@@ -2135,7 +2051,7 @@ export const EmployeeRow = memo(function EmployeeRow({
   emp, displayedDays, year, month, todayDay, todayStr,
   entryMap, holidays, notesMap, wishMap, conflictMap, workloadMap,
   shifts, leaveTypes, darstellungsModi, phaseMap, grid, isDark, isLeserView, currentUserEmpId,
-  showWorkloadBars, filterShiftId, filterLeaveId,
+  showWorkloadBars, filterShiftIds, filterLeaveIds,
   selectedDay, dndSrcDay, dndTgtDay, activePickerDay, selInBand, selMinDay, selMaxDay,
   isRowHighlighted, isDimmed, cb, hover, setActivePicker, setNotePopup, setHighlightedEmpId,
 }: EmployeeRowProps) {
@@ -2254,8 +2170,8 @@ export const EmployeeRow = memo(function EmployeeRow({
 
         // Highlight if any cell entry matches active filter
         const isFilterMatch = cellEntries.some(en =>
-          (filterShiftId !== '' && en.shift_id === filterShiftId) ||
-          (filterLeaveId !== '' && en.leave_type_id === filterLeaveId));
+          idInSelection(filterShiftIds, en.shift_id) ||
+          idInSelection(filterLeaveIds, en.leave_type_id));
 
         const isSelected = selInBand && day >= selMinDay && day <= selMaxDay;
         const isCursor = selectedDay === day;
@@ -2669,10 +2585,10 @@ export default function Schedule() {
   const [showKbHelp, setShowKbHelp] = useState(false);
   const [showWorkloadBars, setShowWorkloadBars] = useState(false);
 
-  // Filters
-  const [filterShiftId, setFilterShiftId] = useState<number | ''>('');
-  const [filterLeaveId, setFilterLeaveId] = useState<number | ''>('');
-  const [filterWorkplaceId, setFilterWorkplaceId] = useState<number | ''>('');
+  // Filters (Mehrfachauswahl je Dimension, [] = „Alle" — Spec 4.7)
+  const [filterShiftIds, setFilterShiftIds] = useState<number[]>([]);
+  const [filterLeaveIds, setFilterLeaveIds] = useState<number[]>([]);
+  const [filterWorkplaceIds, setFilterWorkplaceIds] = useState<number[]>([]);
   const [employeeSearch, setEmployeeSearch] = useState('');
   const [filterLetter, setFilterLetter] = useState('');
   const [filterEmployeeIds, setFilterEmployeeIds] = useState<number[]>([]);
@@ -3310,21 +3226,19 @@ export default function Schedule() {
 
   // Apply shift/leave/workplace filter: which employee rows to show
   const filteredDisplayRows = useMemo(() => {
-    if (!filterShiftId && !filterLeaveId && !filterWorkplaceId) return displayRows;
+    if (filterShiftIds.length === 0 && filterLeaveIds.length === 0 && filterWorkplaceIds.length === 0) return displayRows;
     return displayRows.filter(row => {
       if (row.type === 'group-header') return true; // always show group headers
       const emp = row.employee!;
-      // Hat dieser MA die gewählte Schicht/Abwesenheit/Arbeitsplatz an irgendeinem Tag?
+      // Hat dieser MA je aktiver Dimension einen Treffer an irgendeinem Tag?
+      const empEntries: ScheduleEntry[] = [];
       for (let d = 1; d <= daysInMonth; d++) {
-        for (const entry of entryMap.get(`${emp.ID}-${d}`) ?? []) {
-          if (filterShiftId && entry.shift_id === filterShiftId) return true;
-          if (filterLeaveId && entry.leave_type_id === filterLeaveId) return true;
-          if (filterWorkplaceId && entry.workplace_id === filterWorkplaceId) return true;
-        }
+        const cell = entryMap.get(`${emp.ID}-${d}`);
+        if (cell) empEntries.push(...cell);
       }
-      return false;
+      return rowMatchesScheduleFilters(empEntries, filterShiftIds, filterLeaveIds, filterWorkplaceIds);
     });
-  }, [displayRows, filterShiftId, filterLeaveId, filterWorkplaceId, entryMap, daysInMonth]);
+  }, [displayRows, filterShiftIds, filterLeaveIds, filterWorkplaceIds, entryMap, daysInMonth]);
 
   // Arbeitsplätze aus den geladenen Einträgen (id → Name) für den Filter (Spec 4.7)
   const workplaceOptions = useMemo(() => {
@@ -6027,9 +5941,9 @@ export default function Schedule() {
       {/* ── Filter Panel ── */}
       {(() => {
         const activeFilterCount = [
-          filterShiftId !== '',
-          filterLeaveId !== '',
-          filterWorkplaceId !== '',
+          filterShiftIds.length > 0,
+          filterLeaveIds.length > 0,
+          filterWorkplaceIds.length > 0,
           employeeSearch !== '',
           filterLetter !== '',
           filterEmployeeIds.length > 0,
@@ -6050,7 +5964,7 @@ export default function Schedule() {
               {activeFilterCount > 0 && (
                 <button
                   className="ml-auto text-xs px-2 py-0.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                  onClick={e => { e.stopPropagation(); setFilterShiftId(''); setFilterLeaveId(''); setFilterWorkplaceId(''); setEmployeeSearch(''); setFilterLetter(''); setFilterEmployeeIds([]); }}
+                  onClick={e => { e.stopPropagation(); setFilterShiftIds([]); setFilterLeaveIds([]); setFilterWorkplaceIds([]); setEmployeeSearch(''); setFilterLetter(''); setFilterEmployeeIds([]); }}
                 >
                   × Zurücksetzen
                 </button>
@@ -6060,45 +5974,41 @@ export default function Schedule() {
             {/* Collapsible filter controls */}
             {showFilterPanel && (
               <div className="flex items-center gap-3 px-3 pb-2 flex-wrap border-t border-gray-100 pt-2">
-                {/* Shift filter */}
+                {/* Shift filter (Mehrfachauswahl, Spec 4.7) */}
                 <div className="flex items-center gap-1.5">
                   <label className="text-xs text-gray-500 whitespace-nowrap">Schicht:</label>
-                  <ShiftFilterDropdown
-                    shifts={shifts}
-                    value={filterShiftId}
-                    onChange={setFilterShiftId}
+                  <MultiSelect
+                    options={shifts.map(s => ({
+                      value: s.ID,
+                      label: s.NAME && s.NAME !== s.SHORTNAME ? `${s.SHORTNAME} – ${s.NAME}` : (s.SHORTNAME || `#${s.ID}`),
+                    }))}
+                    selected={filterShiftIds}
+                    onChange={setFilterShiftIds}
+                    allLabel="Alle Schichten"
                   />
                 </div>
 
-                {/* Leave filter */}
+                {/* Leave filter (Mehrfachauswahl, Spec 4.7) */}
                 <div className="flex items-center gap-1.5">
                   <label className="text-xs text-gray-500 whitespace-nowrap">Abw.-Art:</label>
-                  <select
-                    value={filterLeaveId}
-                    onChange={e => setFilterLeaveId(e.target.value ? Number(e.target.value) : '')}
-                    className="text-xs px-2 py-1 border rounded bg-white"
-                  >
-                    <option value="">Alle</option>
-                    {leaveTypes.map(lt => (
-                      <option key={lt.ID} value={lt.ID}>{lt.SHORTNAME} – {lt.NAME}</option>
-                    ))}
-                  </select>
+                  <MultiSelect
+                    options={leaveTypes.map(lt => ({ value: lt.ID, label: `${lt.SHORTNAME} – ${lt.NAME}` }))}
+                    selected={filterLeaveIds}
+                    onChange={setFilterLeaveIds}
+                    allLabel="Alle Abw.-Arten"
+                  />
                 </div>
 
-                {/* Workplace filter (Spec 4.7) */}
+                {/* Workplace filter (Mehrfachauswahl, Spec 4.7) */}
                 {workplaceOptions.length > 0 && (
                   <div className="flex items-center gap-1.5">
                     <label className="text-xs text-gray-500 whitespace-nowrap">Arbeitsplatz:</label>
-                    <select
-                      value={filterWorkplaceId}
-                      onChange={e => setFilterWorkplaceId(e.target.value ? Number(e.target.value) : '')}
-                      className="text-xs px-2 py-1 border rounded bg-white"
-                    >
-                      <option value="">Alle</option>
-                      {workplaceOptions.map(wp => (
-                        <option key={wp.id} value={wp.id}>{wp.name}</option>
-                      ))}
-                    </select>
+                    <MultiSelect
+                      options={workplaceOptions.map(wp => ({ value: wp.id, label: wp.name }))}
+                      selected={filterWorkplaceIds}
+                      onChange={setFilterWorkplaceIds}
+                      allLabel="Alle Arbeitsplätze"
+                    />
                   </div>
                 )}
 
@@ -6757,8 +6667,8 @@ export default function Schedule() {
                   isLeserView={isLeserView}
                   currentUserEmpId={currentUserEmpId}
                   showWorkloadBars={showWorkloadBars}
-                  filterShiftId={filterShiftId}
-                  filterLeaveId={filterLeaveId}
+                  filterShiftIds={filterShiftIds}
+                  filterLeaveIds={filterLeaveIds}
                   selectedDay={selectedCell?.empId === emp.ID ? selectedCell.day : null}
                   dndSrcDay={dndSource?.empId === emp.ID ? dndSource.day : null}
                   dndTgtDay={dndTarget?.empId === emp.ID ? dndTarget.day : null}

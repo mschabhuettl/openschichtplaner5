@@ -9,6 +9,15 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Mehrfachauswahl der Dienstplan-Filter (Spec 4.7).** Die drei Filter
+  Schichtart, Abwesenheitsart und Arbeitsplatz im Dienstplan sind jetzt
+  Mehrfachauswahlen (Taktwerk-`MultiSelect` statt Einzel-Dropdowns):
+  leere Auswahl = „Alle", innerhalb einer Dimension ODER, zwischen den
+  Dimensionen UND. Mengen-Logik als purer Helfer `utils/scheduleFilter`
+  mit Unit-Tests (leer/Einzel/Mehrfach/Kombination).
+
 ---
 
 ## [1.23.3] - 2026-08-24

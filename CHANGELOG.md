@@ -9,6 +9,10 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+---
+
+## [1.23.3] - 2026-08-24
+
 ### Fixed
 
 - **Schichtarten-Reihenfolge in Dienststatistik und Druckvorschau

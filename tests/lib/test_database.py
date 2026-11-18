@@ -132,7 +132,7 @@ def test_insert_master_record(db):
     shift = db.get("SHIFT", 6)
     assert shift["NAME"] == "Zwischendienst" and shift["DURATION0"] == 0.0 and shift["HIDE"] == 0
     assert db.journal("SHIFT") == [
-        {"NUMBER": 1, "CHANGEID1": 6, "CHANGEID2": 0, "CHANGEID3": 0, "CHANGE": 1}
+        {"NUMBER": 1, "CHANGEID1": 6, "CHANGEID2": 0, "CHANGEID3": 0, "CHANGE": 0}
     ]
     assert_index_matches(db, "SHIFT")
 

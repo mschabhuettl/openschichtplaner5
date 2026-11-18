@@ -165,7 +165,7 @@ def test_insert_update_delete(writer, db_dir):
     assert writer.get("/api/tables/5MASHI/1,101").status_code == 404
     assert writer.delete("/api/tables/5MASHI/1,101").status_code == 404
     journal = SP5Database(db_dir).journal("MASHI")
-    assert [r["CHANGE"] for r in journal] == [1, 1, 2]
+    assert [r["CHANGE"] for r in journal] == [0, 1, 2]
 
 
 def test_insert_master_record(writer):

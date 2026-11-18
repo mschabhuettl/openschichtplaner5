@@ -6,7 +6,6 @@ from datetime import date
 
 import pytest
 
-from sp5lib import dbf_writer
 from sp5lib.cdx_writer import _build_keys, read_cdx
 from sp5lib.dbf_reader import read_dbf, read_header
 from sp5lib.dbf_writer import (
@@ -118,7 +117,7 @@ def test_append_writes_journal(db_dir):
     append_record(path, get_table_fields(path), record)
     journal = read_dbf(f"{db_dir}/5MASHI-L.DBF")
     assert journal == [
-        {"NUMBER": 1, "CHANGEID1": 77, "CHANGEID2": 101, "CHANGEID3": 0, "CHANGE": 1}
+        {"NUMBER": 1, "CHANGEID1": 77, "CHANGEID2": 101, "CHANGEID3": 0, "CHANGE": 0}
     ]
     assert index_matches(f"{db_dir}/5MASHI-L.DBF")
 
@@ -252,29 +251,74 @@ def test_find_all_records(db_dir):
 # --- index and journal upkeep ---
 
 
-def test_index_deleted_when_not_rebuilt(db_dir, monkeypatch):
-    monkeypatch.setattr(dbf_writer, "WRITE_CDX", False)
+def test_missing_index_is_created(db_dir):
     path = f"{db_dir}/5WOPL.DBF"
+    os.remove(f"{db_dir}/5WOPL.CDX")
+    os.remove(f"{db_dir}/5WOPL-L.CDX")
     append_record(path, get_table_fields(path), {"ID": 3})
-    assert not os.path.exists(f"{db_dir}/5WOPL.CDX")
-    assert not os.path.exists(f"{db_dir}/5WOPL-L.CDX")
+    assert index_matches(path) and index_matches(f"{db_dir}/5WOPL-L.DBF")
 
 
-def test_index_left_alone_when_upkeep_is_off(db_dir, monkeypatch):
-    monkeypatch.setattr(dbf_writer, "WRITE_CDX", False)
-    monkeypatch.setattr(dbf_writer, "INVALIDATE_CDX", False)
-    path = f"{db_dir}/5WOPL.DBF"
-    before = open(f"{db_dir}/5WOPL.CDX", "rb").read()
-    append_record(path, get_table_fields(path), {"ID": 3})
-    assert open(f"{db_dir}/5WOPL.CDX", "rb").read() == before
-
-
-def test_damaged_index_is_deleted(db_dir):
+def test_damaged_index_is_replaced(db_dir):
     path = f"{db_dir}/5WOPL.DBF"
     with open(f"{db_dir}/5WOPL.CDX", "wb") as f:
         f.write(b"\x00" * 100)
     append_record(path, get_table_fields(path), {"ID": 3})
-    assert not os.path.exists(f"{db_dir}/5WOPL.CDX")
+    assert index_matches(path)
+
+
+def test_index_counter_follows_key_changes(db_dir):
+    path = f"{db_dir}/5WOPL.DBF"
+    cdx = f"{db_dir}/5WOPL.CDX"
+    fields = get_table_fields(path)
+    start = read_cdx(cdx).counter
+    append_record(path, fields, {"ID": 3})
+    assert read_cdx(cdx).counter == start + 1
+    before = open(cdx, "rb").read()
+    update_record(path, fields, 0, {"NAME": "Pforte", "ID": 1})
+    assert open(cdx, "rb").read() == before  # no key changed
+    update_record(path, fields, 0, {"ID": 7})
+    assert read_cdx(cdx).counter == start + 2 and index_matches(path)
+    delete_record(path, fields, 1)
+    assert read_cdx(cdx).counter == start + 3 and index_matches(path)
+
+
+def test_index_of_other_tables_is_not_touched(db_dir, caplog):
+    os.rename(f"{db_dir}/5WOPL.DBF", f"{db_dir}/OTHER.DBF")
+    os.remove(f"{db_dir}/5WOPL.CDX")
+    with caplog.at_level(logging.WARNING):
+        append_record(f"{db_dir}/OTHER.DBF", get_table_fields(f"{db_dir}/OTHER.DBF"), {"ID": 3})
+    assert "not an SP5 table" in caplog.text
+    assert not os.path.exists(f"{db_dir}/OTHER.CDX")
+
+
+def test_database_change_counter(db_dir):
+    def counter():
+        return read_dbf(f"{db_dir}/5BUILD.DBF")[0]["CHANGE"]
+
+    build_files = {n: open(f"{db_dir}/{n}", "rb").read() for n in ("5BUILD.CDX", "5BUILD-L.DBF")}
+    path = f"{db_dir}/5WOPL.DBF"
+    fields = get_table_fields(path)
+    assert counter() == 1
+    append_record(path, fields, {"ID": 3})
+    update_record(path, fields, 0, {"BOLD": 1})
+    delete_record(path, fields, 1)
+    assert counter() == 4
+    assert pack_table(path) == 1
+    assert counter() == 5
+    for name, content in build_files.items():
+        assert open(f"{db_dir}/{name}", "rb").read() == content
+    # Writing 5BUILD itself is an ordinary write without counting.
+    build = f"{db_dir}/5BUILD.DBF"
+    update_record(build, get_table_fields(build), 0, {"HELPER": 3})
+    assert counter() == 5
+
+
+def test_database_without_build_table(db_dir):
+    os.remove(f"{db_dir}/5BUILD.DBF")
+    path = f"{db_dir}/5WOPL.DBF"
+    append_record(path, get_table_fields(path), {"ID": 3})
+    assert len(read_dbf(path)) == 3
 
 
 def test_missing_journal_is_tolerated(db_dir, caplog):
@@ -295,10 +339,13 @@ def test_unwritable_journal_is_tolerated(db_dir, caplog):
     assert "not writable" in caplog.text
 
 
-def test_header_date_is_stamped(db_dir):
+def test_header_date_is_left_alone(db_dir):
+    """SP5 does not change the date in the header when it writes."""
     path = f"{db_dir}/5WOPL.DBF"
     with open(path, "r+b") as f:
         f.seek(1)
         f.write(bytes([13, 2, 12]))
-    update_record(path, get_table_fields(path), 0, {"BOLD": 1})
-    assert read_header(path).last_update == date.today()
+    fields = get_table_fields(path)
+    update_record(path, fields, 0, {"BOLD": 1})
+    append_record(path, fields, {"ID": 3})
+    assert read_header(path).last_update == date(2013, 2, 12)

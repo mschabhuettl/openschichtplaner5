@@ -15,10 +15,10 @@ File layout (pages of 512 bytes, see ``docs/format.md`` for details):
   page 5.. nodes of the tag: leaves, followed by the interior nodes if the
            keys need more than one leaf; the root node is the last page
 
-The writer reproduces the index files of the SP5 sample database byte for
-byte, except for a change counter in the directory header (offset 8) that
-cannot be derived from the table content; it is taken over from the
-existing file.
+The writer reproduces the index files of the SP5 sample database, and those
+SP5 itself writes after a change, byte for byte. The directory header holds
+a counter (offset 8) that SP5 raises by one with every change of the index;
+it is taken over from the existing file.
 """
 
 import os
@@ -27,7 +27,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from .dbf_reader import DELETED, _dedupe_names, _parse_record, get_table_fields
-from .schema import FOR_EXPRESSION, TABLE_TAG
+from .schema import FOR_EXPRESSION, TABLE_TAG, table_schema
 
 __all__ = ["CdxIndex", "build_cdx", "build_cdx_bytes", "read_cdx", "write_cdx"]
 
@@ -127,11 +127,18 @@ def _build_keys(filepath: str, key_expr: str) -> list[Key]:
 # --- nodes ---
 
 
-def _entry_bit_layout(keylen: int) -> tuple[int, int]:
-    """Bits used for the record number and for each of the two counts in a
-    leaf entry of three bytes."""
-    count_bits = 4 if keylen <= 15 else 5 if keylen <= 31 else 6
-    return 24 - 2 * count_bits, count_bits
+def _entry_bit_layout(keylen: int, record_count: int = 0) -> tuple[int, int, int]:
+    """Layout of a leaf entry: bits for the record number, bits for each of
+    the two counts and the size of the entry in bytes.
+
+    The counts get as many bits as the key length needs. The record number
+    gets as many as the number of records in the table needs, at least 12,
+    plus what is left to fill whole bytes.
+    """
+    count_bits = keylen.bit_length()
+    recno_bits = max(12, record_count.bit_length())
+    recno_bits += -(recno_bits + 2 * count_bits) % 8
+    return recno_bits, count_bits, (recno_bits + 2 * count_bits) // 8
 
 
 def _compress(key: bytes, prev: bytes, keylen: int, pad: bytes) -> tuple[int, int]:
@@ -149,7 +156,9 @@ def _compress(key: bytes, prev: bytes, keylen: int, pad: bytes) -> tuple[int, in
     return dup, trail
 
 
-def _split_into_leaves(keys: list[Key], keylen: int, pad: bytes) -> list[list[Key]]:
+def _split_into_leaves(
+    keys: list[Key], keylen: int, pad: bytes, entry_size: int
+) -> list[list[Key]]:
     """Fill leaves one after the other with as many keys as fit."""
     pages: list[list[Key]] = []
     cur: list[Key] = []
@@ -158,7 +167,7 @@ def _split_into_leaves(keys: list[Key], keylen: int, pad: bytes) -> list[list[Ke
     for key, recno in keys:
         dup, trail = _compress(key, prev, keylen, pad)
         fresh = keylen - dup - trail
-        if cur and 24 + (len(cur) + 1) * 3 + used + fresh > PAGE:
+        if cur and 24 + (len(cur) + 1) * entry_size + used + fresh > PAGE:
             pages.append(cur)
             cur, used = [], 0
             dup, trail = _compress(key, b"", keylen, pad)
@@ -172,9 +181,15 @@ def _split_into_leaves(keys: list[Key], keylen: int, pad: bytes) -> list[list[Ke
 
 
 def _encode_leaf(
-    keys: list[Key], keylen: int, pad: bytes, attr: int, left: int, right: int
+    keys: list[Key],
+    keylen: int,
+    pad: bytes,
+    layout: tuple[int, int, int],
+    attr: int,
+    left: int,
+    right: int,
 ) -> bytes:
-    recno_bits, count_bits = _entry_bit_layout(keylen)
+    recno_bits, count_bits, entry_size = layout
     recno_mask = (1 << recno_bits) - 1
     count_mask = (1 << count_bits) - 1
     entries = bytearray()
@@ -182,8 +197,8 @@ def _encode_leaf(
     prev = b""
     for key, recno in keys:
         dup, trail = _compress(key, prev, keylen, pad)
-        value = (recno & recno_mask) | (dup << recno_bits) | (trail << (recno_bits + count_bits))
-        entries += value.to_bytes(3, "little")
+        value = recno | (dup << recno_bits) | (trail << (recno_bits + count_bits))
+        entries += value.to_bytes(entry_size, "little")
         chunks.append(key[dup : keylen - trail])
         prev = key
     # Key bytes are stored from the end of the page towards the entries.
@@ -192,7 +207,7 @@ def _encode_leaf(
     page = bytearray(PAGE)
     struct.pack_into("<HHii", page, 0, attr, len(keys), left, right)
     struct.pack_into("<HI", page, 12, PAGE - 24 - len(entries) - len(chars), recno_mask)
-    page[18:24] = bytes([count_mask, count_mask, recno_bits, count_bits, count_bits, 3])
+    page[18:24] = bytes([count_mask, count_mask, recno_bits, count_bits, count_bits, entry_size])
     page[24 : 24 + len(entries)] = entries
     page[PAGE - len(chars) :] = chars
     return bytes(page)
@@ -243,15 +258,18 @@ def _encode_taglist_leaf(tag_name: str) -> bytes:
     return bytes(page)
 
 
-def _build_tag_nodes(keys: list[Key], keylen: int, pad: bytes) -> tuple[list[bytes], int]:
+def _build_tag_nodes(
+    keys: list[Key], keylen: int, pad: bytes, record_count: int
+) -> tuple[list[bytes], int]:
     """Node pages of the tag and the page number of its root.
 
     The leaves come first, then one level of interior nodes after the
     other; the root is the last page.
     """
-    chunks = _split_into_leaves(keys, keylen, pad)
+    layout = _entry_bit_layout(keylen, record_count)
+    chunks = _split_into_leaves(keys, keylen, pad, layout[2])
     if len(chunks) == 1:
-        return [_encode_leaf(keys, keylen, pad, 0x0003, -1, -1)], _FIRST_NODE
+        return [_encode_leaf(keys, keylen, pad, layout, 0x0003, -1, -1)], _FIRST_NODE
 
     def siblings(i: int, count: int, first_page: int) -> tuple[int, int]:
         offset = (first_page + i) * PAGE
@@ -261,7 +279,7 @@ def _build_tag_nodes(keys: list[Key], keylen: int, pad: bytes) -> tuple[list[byt
     level = []  # (last key, its record number, page offset) of every node
     for i, chunk in enumerate(chunks):
         pages.append(
-            _encode_leaf(chunk, keylen, pad, 0x0002, *siblings(i, len(chunks), _FIRST_NODE))
+            _encode_leaf(chunk, keylen, pad, layout, 0x0002, *siblings(i, len(chunks), _FIRST_NODE))
         )
         level.append((chunk[-1][0], chunk[-1][1], (_FIRST_NODE + i) * PAGE))
     capacity = (PAGE - 12) // (keylen + 8)
@@ -278,10 +296,22 @@ def _build_tag_nodes(keys: list[Key], keylen: int, pad: bytes) -> tuple[list[byt
     return pages, _FIRST_NODE + len(pages) - 1
 
 
-def build_cdx(keys: list[Key], key_expr: str, tag_name: str = TABLE_TAG, counter: int = 0) -> bytes:
-    """Build an index file from sorted ``(key, record number)`` pairs."""
+def build_cdx(
+    keys: list[Key],
+    key_expr: str,
+    tag_name: str = TABLE_TAG,
+    counter: int = 0,
+    record_count: int | None = None,
+) -> bytes:
+    """Build an index file from sorted ``(key, record number)`` pairs.
+
+    *record_count* is the number of records in the table including deleted
+    ones (default: the highest record number in *keys*).
+    """
     keylen, pad = _key_shape(key_expr)
-    nodes, root_page = _build_tag_nodes(keys, keylen, pad)
+    if record_count is None:
+        record_count = max((recno for _, recno in keys), default=0)
+    nodes, root_page = _build_tag_nodes(keys, keylen, pad, record_count)
     expressions = key_expr.encode("ascii") + b"\x00" + FOR_EXPRESSION.encode("ascii") + b"\x00"
     pages = [
         _encode_index_header(_TAGLIST_ROOT, counter, _TAGLIST_KEYLEN, 0xE0, None),
@@ -295,7 +325,10 @@ def build_cdx(keys: list[Key], key_expr: str, tag_name: str = TABLE_TAG, counter
 
 def build_cdx_bytes(filepath: str, key_expr: str, counter: int, tag_name: str = TABLE_TAG) -> bytes:
     """Build the index file for the current content of the table *filepath*."""
-    return build_cdx(_build_keys(filepath, key_expr), key_expr, tag_name, counter)
+    with open(filepath, "rb") as f:
+        record_count = struct.unpack_from("<I", f.read(8), 4)[0]
+    keys = _build_keys(filepath, key_expr)
+    return build_cdx(keys, key_expr, tag_name, counter, record_count)
 
 
 # --- reading ---
@@ -377,21 +410,30 @@ def _read_key_expr(cdx_path: str) -> str | None:
         return None
 
 
-def write_cdx(filepath: str) -> str | None:
+def write_cdx(filepath: str, changes: int = 0) -> str | None:
     """Rebuild the index file of the table *filepath* from its content.
 
     Tag name, key expression and change counter are taken from the existing
-    index file. Returns its path, or ``None`` if there is no readable index
-    file. Raises ``ValueError`` for a key expression that is not supported.
+    index file; *changes* is added to the counter. If there is no readable
+    index file, a new one is created for a table of the SP5 layout. Returns
+    the path of the index file, or ``None`` if the table is not an SP5 table
+    and has no readable index. Raises ``ValueError`` for a key expression
+    that is not supported.
     """
     cdx_path = _cdx_path(filepath)
-    if cdx_path is None:
-        return None
     try:
+        if cdx_path is None:
+            raise ValueError("no index file")
         old = read_cdx(cdx_path)
+        key_expr, counter, tag = old.key_expression, old.counter, old.tag
     except (OSError, ValueError, UnicodeDecodeError, struct.error):
-        return None
-    data = build_cdx_bytes(filepath, old.key_expression, old.counter, old.tag)
+        try:
+            table = table_schema(filepath)
+        except KeyError:
+            return None
+        key_expr, counter, tag = table.key_expression, 0, table.tag
+        cdx_path = cdx_path or os.path.splitext(filepath)[0] + ".CDX"
+    data = build_cdx_bytes(filepath, key_expr, (counter + changes) & 0xFFFFFFFF, tag)
     tmp = cdx_path + ".tmp"
     with open(tmp, "wb") as f:
         f.write(data)

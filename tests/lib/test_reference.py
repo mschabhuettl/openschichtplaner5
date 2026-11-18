@@ -182,9 +182,13 @@ def test_write_roundtrip_on_copy(sample_dir, tmp_path):
     assert len(changed) == 1 and db.get("SHIFT", shift)["NAME"] == "Geändert"
     assert after["5GRASG"][0][0:1] == b"*" and after["5GRASG"][0][1:] == before["5GRASG"][0][1:]
     assert after["5GRASG"][1:] == before["5GRASG"][1:]
-    for name in set(schema.TABLES) - {"5EMPL", "5MASHI", "5SHIFT", "5GRASG"}:
+    for name in set(schema.TABLES) - {"5EMPL", "5MASHI", "5SHIFT", "5GRASG", "5BUILD"}:
         assert after[name] == before[name]
-    assert [len(db.journal(n)) for n in ("EMPL", "MASHI", "SHIFT", "GRASG")] == [1, 1, 1, 1]
+    assert [db.journal(n)[0]["CHANGE"] for n in ("EMPL", "MASHI", "SHIFT", "GRASG")] == [0, 0, 1, 2]
+    assert db.read("BUILD")[0]["CHANGE"] == 1 + 4  # one step per write
+    assert (
+        read_cdx(f"{copy}/5MASHI.CDX").counter == read_cdx(f"{sample_dir}/5MASHI.CDX").counter + 1
+    )
     assert cli.main(["validate", copy]) == 0
 
     # Reading everything back gives the same records as before the write.

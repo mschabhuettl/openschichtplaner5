@@ -126,7 +126,7 @@ def test_deleted_records_are_not_indexed(db_dir):
     assert [recno for _, recno in index.entries] == list(range(2, 66))
 
 
-def test_write_cdx_keeps_counter_and_tag(db_dir):
+def test_write_cdx_keeps_tag_and_raises_counter(db_dir):
     cdx = f"{db_dir}/5WOPL.CDX"
     with open(cdx, "r+b") as f:
         f.seek(8)
@@ -134,18 +134,60 @@ def test_write_cdx_keeps_counter_and_tag(db_dir):
     path = f"{db_dir}/5WOPL.DBF"
     append_record(path, get_table_fields(path), {"ID": 9, "NAME": "x"})
     index = read_cdx(cdx)
-    assert (index.counter, index.tag, len(index.entries)) == (4711, "ID_TAG", 3)
-    assert open(cdx, "rb").read() == build_cdx_bytes(path, "ID", 4711)
+    assert (index.counter, index.tag, len(index.entries)) == (4712, "ID_TAG", 3)
+    assert open(cdx, "rb").read() == build_cdx_bytes(path, "ID", 4712)
+    assert write_cdx(path) == cdx and read_cdx(cdx).counter == 4712
 
 
-def test_write_cdx_without_usable_index(db_dir):
-    path = f"{db_dir}/5WOPL.DBF"
+def test_write_cdx_creates_missing_index_from_schema(db_dir):
+    path = f"{db_dir}/5GRASG.DBF"
+    expected = open(f"{db_dir}/5GRASG.CDX", "rb").read()
+    os.remove(f"{db_dir}/5GRASG.CDX")
+    assert write_cdx(path) == f"{db_dir}/5GRASG.CDX"
+    created = open(f"{db_dir}/5GRASG.CDX", "rb").read()
+    assert created[:8] + created[12:] == expected[:8] + expected[12:]
+    assert read_cdx(f"{db_dir}/5GRASG.CDX").counter == 0
+
     os.rename(f"{db_dir}/5WOPL.CDX", f"{db_dir}/5WOPL.cdx")
-    assert write_cdx(path) == f"{db_dir}/5WOPL.cdx"
-    os.remove(f"{db_dir}/5WOPL.cdx")
-    assert write_cdx(path) is None
+    assert write_cdx(f"{db_dir}/5WOPL.DBF") == f"{db_dir}/5WOPL.cdx"
+
+
+def test_write_cdx_for_other_tables(db_dir):
+    os.rename(f"{db_dir}/5WOPL.DBF", f"{db_dir}/OTHER.DBF")
+    assert write_cdx(f"{db_dir}/OTHER.DBF") is None
+    os.rename(f"{db_dir}/5WOPL.CDX", f"{db_dir}/OTHER.CDX")
+    assert write_cdx(f"{db_dir}/OTHER.DBF") == f"{db_dir}/OTHER.CDX"
     assert cdx_writer._read_key_expr(f"{db_dir}/5WOPL.CDX") is None
     assert cdx_writer._read_tag_name(f"{db_dir}/5WOPL.CDX") is None
+
+
+@pytest.mark.parametrize(
+    ("keylen", "records", "expected"),
+    [
+        (8, 0, (16, 4, 3)),
+        (10, 0, (16, 4, 3)),
+        (22, 0, (14, 5, 3)),
+        (33, 0, (12, 6, 3)),
+        (33, 4095, (12, 6, 3)),
+        (33, 4096, (20, 6, 4)),
+        (22, 16383, (14, 5, 3)),
+        (22, 16384, (22, 5, 4)),
+        (8, 65535, (16, 4, 3)),
+        (8, 65536, (24, 4, 4)),
+    ],
+)
+def test_leaf_entry_layout(keylen, records, expected):
+    assert cdx_writer._entry_bit_layout(keylen, records) == expected
+
+
+def test_record_numbers_beyond_three_byte_entries(tmp_path):
+    rows = [{"ID": 1, "EMPLOYEEID": 1 + n, "CYCLEASSID": 1} for n in range(5000)]
+    path = create_table(str(tmp_path), "CYEXC", rows)
+    data = open(tmp_path / "5CYEXC.CDX", "rb").read()
+    assert data[5 * PAGE + 20 : 5 * PAGE + 24] == bytes([20, 6, 6, 4])
+    index = read_cdx(str(tmp_path / "5CYEXC.CDX"))
+    assert index.entries == _build_keys(path, index.key_expression)
+    assert index.entries[-1][1] == 5000
 
 
 @pytest.mark.parametrize("size", [100, 3 * PAGE, 6 * PAGE + 1])

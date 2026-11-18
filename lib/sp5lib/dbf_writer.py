@@ -16,17 +16,18 @@ Field encoding (see ``docs/format.md``):
   * numeric (N): right-aligned decimal integer
   * float (F):   right-aligned decimal number with four decimals
 
-Every change is also recorded in the journal table (``<table>-L.DBF``) the
-way SP5 does it, so that running SP5 clients notice the change.
+Every change is recorded the way SP5 does it, so that SP5 and running SP5
+clients accept it:
 
-The index file (``.CDX``) of a changed table is rebuilt after every write.
-If it cannot be rebuilt it is deleted; SP5 recreates missing index files
-when it opens the database. Set ``WRITE_CDX = False`` to always delete.
+  * a row in the journal table (``<table>-L.DBF``),
+  * the index file (``.CDX``) of the table is rebuilt and its change counter
+    raised (SP5 does not open a database with a missing index file),
+  * the change counter of the database (``5BUILD.CHANGE``) is raised.
 
 Locking: every write holds an exclusive ``flock`` on the file (POSIX only;
 there is no locking on other platforms). SP5 itself uses byte-range locks
 that this module does not take part in, so do not write while an SP5 client
-has the database open.
+is changing the database.
 """
 
 import logging
@@ -65,11 +66,8 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-#: Rebuild the .CDX of a table after a write (``SP5_CDX_WRITE=0`` turns it off).
-WRITE_CDX = os.environ.get("SP5_CDX_WRITE", "1") != "0"
-#: Delete the .CDX after a write if it was not rebuilt, so that SP5 recreates it.
-INVALIDATE_CDX = True
-
+#: Values of ``CHANGE`` in a journal row.
+JOURNAL_ADDED = 0
 JOURNAL_CHANGED = 1
 JOURNAL_DELETED = 2
 
@@ -167,12 +165,6 @@ def _read_header_info(filepath: str) -> tuple[int, int, int]:
     return struct.unpack_from("<IHH", hdr, 4)
 
 
-def _stamp_header(f: IO[bytes]) -> None:
-    today = date.today()
-    f.seek(1)
-    f.write(bytes([today.year % 100, today.month, today.day]))
-
-
 def _update_record_count(f: IO[bytes], new_count: int) -> None:
     f.seek(4)
     f.write(struct.pack("<I", new_count))
@@ -214,25 +206,45 @@ def _journal_path(filepath: str) -> str | None:
     return None
 
 
-def _invalidate_cdx(filepath: str) -> None:
-    """Bring the index file in line with the table: rebuild it, else delete it."""
-    if WRITE_CDX:
-        from . import cdx_writer
+def _update_index(filepath: str) -> None:
+    """Rebuild the index file of a table after its keys have changed."""
+    from . import cdx_writer
 
-        try:
-            if cdx_writer.write_cdx(filepath) is not None:
-                return
-        except (ValueError, OSError) as exc:
-            logger.warning("index of %s not rebuilt (%s), deleting it", filepath, exc)
-    if not INVALIDATE_CDX:
+    try:
+        if cdx_writer.write_cdx(filepath, changes=1) is None:
+            logger.warning("%s is not an SP5 table, its index was not updated", filepath)
+    except (ValueError, OSError) as exc:
+        logger.warning("index of %s not rebuilt: %s", filepath, exc)
+
+
+def _bump_change_counter(filepath: str) -> None:
+    """Raise ``5BUILD.CHANGE``, the change counter of the database."""
+    directory = os.path.dirname(filepath)
+    for name in ("5BUILD.DBF", "5build.dbf"):
+        path = os.path.join(directory, name)
+        if os.path.exists(path):
+            break
+    else:
         return
-    base = os.path.splitext(filepath)[0]
-    for ext in (".CDX", ".cdx"):
-        if os.path.exists(base + ext):
-            try:
-                os.remove(base + ext)
-            except OSError as exc:
-                logger.warning("could not remove stale index %s: %s", base + ext, exc)
+    fields = get_table_fields(path)
+    names = [f["name"] for f in fields]
+    if "CHANGE" not in names or _table_stem(filepath) == "5BUILD":
+        return
+    position = names.index("CHANGE")
+    start = 1 + sum(f["len"] for f in fields[:position])
+    try:
+        count, header_size, record_size = _read_header_info(path)
+        with _exclusive_open(path) as f:
+            for i in range(count):
+                f.seek(header_size + i * record_size)
+                raw = f.read(record_size)
+                if len(raw) == record_size and raw[0] != DELETED:
+                    value = int(raw[start : start + fields[position]["len"]].strip() or 0) + 1
+                    f.seek(header_size + i * record_size + start)
+                    f.write(_encode_field(value, fields[position]))
+                    return
+    except (OSError, ValueError) as exc:
+        logger.warning("change counter in %s not raised: %s", path, exc)
 
 
 def _append_journal(filepath: str, record: Record, change: int) -> None:
@@ -261,16 +273,10 @@ def _append_journal(filepath: str, record: Record, change: int) -> None:
         logger.warning("journal %s not writable (%s), change not recorded", jpath, exc)
 
 
-def _finish(f: IO[bytes], filepath: str) -> None:
-    """Stamp the header and update the index while the table is still locked."""
-    _stamp_header(f)
-    f.flush()
-    _invalidate_cdx(filepath)
-
-
 def _after_write(filepath: str, record: Record, change: int) -> None:
     if not _is_journal_file(filepath):
         _append_journal(filepath, record, change)
+        _bump_change_counter(filepath)
 
 
 # --- public API ---
@@ -361,9 +367,10 @@ def append_record(
             f.write(b"\x1a")
             f.truncate()
             raise
-        _finish(f, filepath)
+        f.flush()
+        _update_index(filepath)
 
-    _after_write(filepath, record, JOURNAL_CHANGED)
+    _after_write(filepath, record, JOURNAL_ADDED)
     return num_records + 1
 
 
@@ -390,7 +397,8 @@ def delete_record(filepath: str, fields: list[FieldDict], record_index: int) -> 
             return
         f.seek(offset)
         f.write(bytes([DELETED]))
-        _finish(f, filepath)
+        f.flush()
+        _update_index(filepath)
     _after_write(filepath, _parse_record(raw, fields), JOURNAL_DELETED)
 
 
@@ -407,14 +415,21 @@ def update_record(filepath: str, fields: list[FieldDict], record_index: int, dat
         raw = bytearray(f.read(record_size))
         if raw[0] == DELETED:
             raise ValueError(f"Record {record_index} is already deleted")
+        table = TABLES.get(_table_stem(filepath))
+        key_fields = table.key_fields if table else names
+        key_changed = False
         pos = 1
         for field, fname in zip(fields, names, strict=True):
             if fname in data:
-                raw[pos : pos + field["len"]] = _encode_field(data[fname], field)
+                encoded = _encode_field(data[fname], field)
+                key_changed |= fname in key_fields and encoded != raw[pos : pos + field["len"]]
+                raw[pos : pos + field["len"]] = encoded
             pos += field["len"]
         f.seek(offset)
         f.write(bytes(raw))
-        _finish(f, filepath)
+        f.flush()
+        if key_changed:
+            _update_index(filepath)
     _after_write(filepath, _parse_record(bytes(raw), fields), JOURNAL_CHANGED)
 
 
@@ -429,7 +444,8 @@ def _zap_journal(filepath: str) -> None:
         f.write(b"\x1a")
         f.truncate()
         _update_record_count(f, 0)
-        _finish(f, jpath)
+        f.flush()
+        _update_index(jpath)
 
 
 def pack_table(filepath: str) -> int:
@@ -455,10 +471,12 @@ def pack_table(filepath: str) -> int:
         f.write(b"".join(kept) + b"\x1a")
         f.truncate()
         _update_record_count(f, len(kept))
-        _finish(f, filepath)
+        f.flush()
+        _update_index(filepath)
 
     if not _is_journal_file(filepath):
         _zap_journal(filepath)
+        _bump_change_counter(filepath)
     return removed
 
 

@@ -295,8 +295,11 @@ has seven (no holiday place).
 **Times of day.** Numeric time fields (`START`, `END`) hold minutes since
 midnight, 0 to 1440. An end that is not after the start lies on the next day.
 
-**Working times.** `STARTEND` fields hold up to three time ranges
-`HH:MM-HH:MM` separated by a space, for example `08:00-12:00 13:00-17:00`. An
+**Working times.** `STARTEND` fields hold a time range `HH:MM-HH:MM`. The
+field has room for three ranges, and the library reads several ranges
+separated by a space, but SP5's shift dialog showed only the first range of
+`08:00-12:00 13:00-17:00`, so how SP5 itself stores more than one range is
+not known. An
 end that is not after the start lies on the next day (`22:00-06:00`); an end
 of `00:00` is midnight at the end of the day. An empty field means the shift
 does not take place on that day. The hours that count are stored separately
@@ -365,7 +368,7 @@ Key `ID`. 10 records. Groups form a tree.
 | ID | N11 | |
 | NAME, SHORTNAME | C200 | |
 | ARBITR | C200 | additional field |
-| SUPERID | N11 | -> 5GROUP, the parent group; 0 for a group at the top |
+| SUPERID | N11 | -> 5GROUP, the parent group; 0 for the group at the top. The sample has one such group, and SP5 did not show a second one in its group tree *(verified)* |
 | POSITION | N11 | |
 | DAILYDEM | C48 | eight numbers, each followed by a space (single-byte): staff demand of the group per day, Monday to Sunday and holidays *(program; all zero in the sample; whether a minimum or a maximum is unknown)* |
 | CFGLABEL, CBKLABEL, CBKSCHED | N11 | colours |
@@ -513,7 +516,7 @@ Key `ID`, `EMPLOYEEID`. No records in the sample.
 | ID | N11 | counted per employee |
 | EMPLOYEEID | N11 | -> 5EMPL |
 | CYCLEID | N11 | -> 5CYCLE |
-| START, END | D | first and last day of the assignment; no end means open |
+| START, END | D | first and last day of the assignment. The library treats a missing end as open, but SP5 showed no cycle duties for an assignment written without an end *(verified)*; what SP5 stores for an assignment without end is not known |
 | ENTRANCE | N5 | where in the cycle the employee starts ("Einstieg"): the week for a cycle of weeks, the day for a cycle of days, counted from 0 *(assumed)* |
 | RESERVED | C20 | |
 
@@ -591,7 +594,7 @@ Key `ID`, `EMPLOYEEID`. No records in the sample.
 | Field | Type | Meaning |
 |---|---|---|
 | ID | N11 | counted per employee |
-| EMPLOYEEID | N11 | -> 5EMPL, 0 for a note on the day as a whole *(assumed)* |
+| EMPLOYEEID | N11 | -> 5EMPL; SP5 refuses to open a database with a note for employee 0 *(verified)* |
 | DATE | D | |
 | TEXT1, TEXT2 | C252 | one text of up to 250 characters, continued from the first field to the second *(program)* |
 | RESERVED | C20 | |
@@ -828,12 +831,23 @@ Observed with SP5 5.0.13 for one duty entered and deleted again in the
 plan: the files that changed were 5MASHI.DBF and .CDX, 5MASHI-L.DBF and
 .CDX and 5BUILD.DBF; SP5 wrote them at once, not when it was closed.
 
+Renaming a shift changed one record of 5SHIFT in place, added a journal
+record with `CHANGE` 1 and raised `5BUILD.CHANGE` by one; the index file of
+5SHIFT was not touched, because the key did not change. Entering a shift on
+a day that already has one and choosing to replace it adds the new record
+(journal `CHANGE` 0) and then deletes the old one (journal `CHANGE` 2);
+`5BUILD.CHANGE` rises by one for the whole action, not once per journal
+record.
+
 ## 7. Writing
 
 What another program must do to change a database so that SP5 keeps working
 with it. This library does all of it, and for the changes that were
-compared (a duty added and deleted) its files are identical to those of
-SP5, except for `HELPER` in 5BUILD.
+compared (a duty added and deleted, a shift renamed) its files are
+identical to those of SP5, except for `HELPER` in 5BUILD. In a table of
+40000 records SP5 changes the index in place when one record is added,
+while the library writes the index anew; the entries are the same, the
+pages are not, and SP5 accepts both.
 
 - Append records at the end of the table, before the end-of-file byte, and
   raise the record count in the header. Never reorder records: the index
@@ -843,6 +857,12 @@ SP5, except for `HELPER` in 5BUILD.
 - Number a new record as SP5 does: the highest `ID` so far plus one, counted
   per owner in tables with a key of several parts *(assumed from the data)*.
 - Delete by setting the deletion flag.
+- Refer only to records that exist. SP5 checks references when it opens a
+  database and refuses the whole directory ("Die Datenbank in diesem
+  Verzeichnis kann nicht geöffnet werden") if, for example, an absence
+  names a leave type that does not exist or a note names employee 0
+  *(verified)*. Which references it checks was not determined one by one.
+  The library does not check references.
 - Keep the index file in step with the table and raise its counter. **SP5
   does not recreate a missing index file.** If one is missing, SP5 refuses
   the whole directory ("keine gültige Datenbank"). An index file must

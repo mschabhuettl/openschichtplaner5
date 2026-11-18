@@ -97,8 +97,12 @@ per employee, group, user or cycle, so their key is a tuple;
 Please note:
 
 - Make a backup first. The write path was checked against the original
-  program for adding and deleting duties and for index files of large
-  tables; other tables go through the same code but were not each checked.
+  program for adding and deleting duties, for changing a shift and for
+  index files of large tables; other tables go through the same code but
+  were not each checked.
+- Refer only to records that exist. Schichtplaner 5 refuses to open a
+  database in which, for example, an absence names a missing leave type.
+  The library does not check this.
 - Do not write while Schichtplaner 5 is changing the same database. The
   library does not take part in the file locks of the original program.
 - The library does not check that a record makes sense (that a shift or

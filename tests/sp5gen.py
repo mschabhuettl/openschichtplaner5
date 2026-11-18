@@ -76,7 +76,7 @@ def groups() -> Rows:
         ("Betrieb", "BT", 0),
         ("Station A", "STA", 1),
         ("Station B", "STB", 1),
-        ("Büro", "BÜ", 0),
+        ("Büro", "BÜ", 1),
     ]
     return [
         {
@@ -112,7 +112,7 @@ def shifts() -> Rows:
         ("Frühdienst", "F", "06:00-14:00", 8.0, 0x00FFFF, 7, 0),
         ("Spätdienst", "S", "14:00-22:00", 8.0, 0x0080FF, 7, 0),
         ("Nachtdienst", "N", "22:00-06:00", 8.0, 0xFF8000, 8, 0),
-        ("Tagdienst", "T", "08:00-12:00 13:00-17:00", 8.0, WHITE, 5, 0),
+        ("Tagdienst", "T", "08:00-16:00", 8.0, WHITE, 5, 0),
         ("Bereitschaft alt", "B", "00:00-00:00", 24.0, 0xC0C0C0, 8, 1),
     ]
     rows = []
@@ -201,7 +201,7 @@ def cycles() -> tuple[Rows, Rows, Rows, Rows]:
     ]
     assignments = [
         {"ID": 1, "EMPLOYEEID": 101 + i, "CYCLEID": 1, "START": MONTH_START, "ENTRANCE": i % 2,
-         "END": date(YEAR, 3, 31) if i == 2 else None}
+         "END": date(YEAR, 3 if i == 2 else 12, 31)}
         for i in range(3)
     ]  # fmt: skip
     exceptions = [
@@ -308,7 +308,7 @@ def tables() -> dict[str, Rows]:
         "5NOTE": [
             {
                 "ID": 1,
-                "EMPLOYEEID": 0,
+                "EMPLOYEEID": 101,
                 "DATE": date(YEAR, 1, 8),
                 "TEXT1": "Betriebsversammlung 14 Uhr",
             },

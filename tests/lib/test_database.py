@@ -43,7 +43,7 @@ def test_employees(db):
 def test_groups_and_members(db):
     groups = db.get_groups()
     assert [g["NAME"] for g in groups] == ["Betrieb", "Station A", "Station B", "Büro"]
-    assert [g["SUPERID"] for g in groups] == [0, 1, 1, 0]
+    assert [g["SUPERID"] for g in groups] == [0, 1, 1, 1]
     assert db.get_group_members(4) == [101, 106, 111, 113, 114]
     assert db.get_employee_groups(101) == [2, 4]
     assert db.get_employee_groups(999) == []
@@ -94,7 +94,7 @@ def test_dated_tables(db):
         f"2024-01-{day}" for day in range(15, 20)
     ]
     assert len(db.get_special_shifts("2024-01-20", "2024-01-20")) == 2
-    assert [n["EMPLOYEEID"] for n in db.get_notes("2024-01-08", "2024-01-08")] == [0, 102]
+    assert [n["EMPLOYEEID"] for n in db.get_notes("2024-01-08", "2024-01-08")] == [101, 102]
     assert [o["HOURS"] for o in db.get_overtimes()] == [1.5, -0.75]
     assert [b["VALUE"] for b in db.get_bookings(end="2024-01-01")] == [12.25]
 
@@ -206,3 +206,10 @@ def test_delete_and_compact(db):
         assert_index_matches(db, table)
     assert db.compact() == 0
     assert db.read("BUILD")[0]["BUILD"] == 3
+
+
+def test_generated_rows_refer_to_existing_employees(db):
+    # SP5 refuses to open a database with a row for an employee that does not exist
+    employees = {e["ID"] for e in db.get_employees()}
+    for table in ("5MASHI", "5SPSHI", "5ABSEN", "5NOTE", "5OVER", "5BOOK", "5CYASS", "5CYEXC"):
+        assert {r["EMPLOYEEID"] for r in db.read(table)} <= employees, table

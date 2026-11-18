@@ -180,6 +180,8 @@ def _locked(filepath: str, mode: str) -> Iterator[IO[bytes]]:
         try:
             yield f
         finally:
+            # Buffered writes must reach the file before the lock is given up.
+            f.flush()
             if fcntl is not None:
                 fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 

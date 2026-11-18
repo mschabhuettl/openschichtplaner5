@@ -9,6 +9,7 @@ fields.
 
 import os
 import struct
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import date
 from typing import Any
@@ -78,6 +79,23 @@ class Table:
 
     def field_dicts(self) -> list[dict[str, Any]]:
         return [f.as_dict() for f in self.fields]
+
+    def new_record(self, values: dict[str, Any]) -> dict[str, Any]:
+        """A complete record: *values* plus the empty value of every other
+        field as SP5 writes it (0, empty text, no date).
+
+        The second of two fields with the same name gets the suffix ``2``.
+        Raises ``KeyError`` for a name that is not a field of the table.
+        """
+        defaults: dict[str, Any] = {"number": 0, "float": 0.0, "date": None, "binary": b""}
+        record: dict[str, Any] = {}
+        for field in self.fields:
+            key = f"{field.name}2" if field.name in record else field.name
+            record[key] = values.get(key, defaults.get(field.kind, ""))
+        unknown = set(values) - set(record)
+        if unknown:
+            raise KeyError(f"{self.name} has no field {sorted(unknown)[0]}")
+        return record
 
 
 _LAYOUT: dict[str, tuple[str, tuple[tuple[str, str, int], ...]]] = {
@@ -602,20 +620,34 @@ def _dbf_header(table: Table, stamp: date) -> bytes:
     return bytes(header) + b"\x0d"
 
 
-def create_table(directory: str, name: str, stamp: date | None = None) -> str:
-    """Create an empty table with its index file, replacing existing files.
+def create_table(
+    directory: str,
+    name: str,
+    records: Iterable[dict[str, Any]] = (),
+    stamp: date | None = None,
+) -> str:
+    """Create a table with its index file, replacing existing files.
 
-    Returns the path of the ``.DBF`` file. *stamp* is the date written into
-    the header (default: today).
+    *records* are written in the given order, completed with
+    :meth:`Table.new_record`; no journal entries are made. *stamp* is the
+    date written into the header (default: today). Returns the path of the
+    ``.DBF`` file.
     """
-    from .cdx_writer import build_cdx
+    from .cdx_writer import build_cdx_bytes
+    from .dbf_reader import _dedupe_names
+    from .dbf_writer import _encode_record
 
     table = table_schema(name)
+    fields = table.field_dicts()
+    names = _dedupe_names([f.name for f in table.fields])
+    rows = [_encode_record(table.new_record(r), fields, names) for r in records]
+    header = bytearray(_dbf_header(table, stamp or date.today()))
+    struct.pack_into("<I", header, 4, len(rows))
     path = os.path.join(directory, table.name + ".DBF")
     with open(path, "wb") as f:
-        f.write(_dbf_header(table, stamp or date.today()) + b"\x1a")
+        f.write(bytes(header) + b"".join(rows) + b"\x1a")
     with open(os.path.join(directory, table.name + ".CDX"), "wb") as f:
-        f.write(build_cdx([], table.key_expression, table.tag))
+        f.write(build_cdx_bytes(path, table.key_expression, len(rows), table.tag))
     return path
 
 
@@ -627,5 +659,5 @@ def create_database(directory: str, stamp: date | None = None) -> None:
     """
     os.makedirs(directory, exist_ok=True)
     for name in TABLES:
-        create_table(directory, name, stamp)
-        create_table(directory, name + JOURNAL_SUFFIX, stamp)
+        create_table(directory, name, stamp=stamp)
+        create_table(directory, name + JOURNAL_SUFFIX, stamp=stamp)

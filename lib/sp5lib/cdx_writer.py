@@ -12,8 +12,8 @@ File layout (pages of 512 bytes, see ``docs/format.md`` for details):
   page 2   header of the tag
   page 3   key expression and filter expression of the tag
   page 4   root leaf of the tag directory (tag name -> page 2)
-  page 5.. nodes of the tag: leaves, followed by one interior root node if
-           the keys need more than one leaf
+  page 5.. nodes of the tag: leaves, followed by the interior nodes if the
+           keys need more than one leaf; the root node is the last page
 
 The writer reproduces the index files of the SP5 sample database byte for
 byte, except for a change counter in the directory header (offset 8) that
@@ -197,11 +197,13 @@ def _encode_leaf(
     return bytes(page)
 
 
-def _encode_interior(separators: list[tuple[bytes, int, int]], keylen: int) -> bytes:
-    """Root node above the leaves: last key, its record number and the page
-    offset of every leaf."""
+def _encode_interior(
+    separators: list[tuple[bytes, int, int]], keylen: int, attr: int, left: int, right: int
+) -> bytes:
+    """Interior node: for every child its last key, the record number of
+    that key and the page offset of the child."""
     page = bytearray(PAGE)
-    struct.pack_into("<HHii", page, 0, 0x0001, len(separators), -1, -1)
+    struct.pack_into("<HHii", page, 0, attr, len(separators), left, right)
     off = 12
     for key, recno, child in separators:
         page[off : off + keylen] = key
@@ -241,23 +243,38 @@ def _encode_taglist_leaf(tag_name: str) -> bytes:
 
 
 def _build_tag_nodes(keys: list[Key], keylen: int, pad: bytes) -> tuple[list[bytes], int]:
-    """Node pages of the tag and the page number of its root."""
+    """Node pages of the tag and the page number of its root.
+
+    The leaves come first, then one level of interior nodes after the
+    other; the root is the last page.
+    """
     chunks = _split_into_leaves(keys, keylen, pad)
     if len(chunks) == 1:
         return [_encode_leaf(keys, keylen, pad, 0x0003, -1, -1)], _FIRST_NODE
-    if len(chunks) * (keylen + 8) > PAGE - 12:
-        raise ValueError("table too large for an index with one interior node")
+
+    def siblings(i: int, count: int, first_page: int) -> tuple[int, int]:
+        offset = (first_page + i) * PAGE
+        return (offset - PAGE if i > 0 else -1, offset + PAGE if i < count - 1 else -1)
+
     pages = []
-    separators = []
-    last = len(chunks) - 1
+    level = []  # (last key, its record number, page offset) of every node
     for i, chunk in enumerate(chunks):
-        offset = (_FIRST_NODE + i) * PAGE
-        left = offset - PAGE if i > 0 else -1
-        right = offset + PAGE if i < last else -1
-        pages.append(_encode_leaf(chunk, keylen, pad, 0x0002, left, right))
-        separators.append((chunk[-1][0], chunk[-1][1], offset))
-    pages.append(_encode_interior(separators, keylen))
-    return pages, _FIRST_NODE + len(chunks)
+        pages.append(
+            _encode_leaf(chunk, keylen, pad, 0x0002, *siblings(i, len(chunks), _FIRST_NODE))
+        )
+        level.append((chunk[-1][0], chunk[-1][1], (_FIRST_NODE + i) * PAGE))
+    capacity = (PAGE - 12) // (keylen + 8)
+    while len(level) > 1:
+        first_page = _FIRST_NODE + len(pages)
+        groups = [level[i : i + capacity] for i in range(0, len(level), capacity)]
+        attr = 0x0001 if len(groups) == 1 else 0x0000
+        level = []
+        for i, group in enumerate(groups):
+            pages.append(
+                _encode_interior(group, keylen, attr, *siblings(i, len(groups), first_page))
+            )
+            level.append((group[-1][0], group[-1][1], (first_page + i) * PAGE))
+    return pages, _FIRST_NODE + len(pages) - 1
 
 
 def build_cdx(keys: list[Key], key_expr: str, tag_name: str = TABLE_TAG, counter: int = 0) -> bytes:

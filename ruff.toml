@@ -6,3 +6,6 @@ select = ["E", "W", "F", "I", "B", "UP"]
 
 [lint.isort]
 known-first-party = ["sp5lib", "sp5api", "sp5gen"]
+
+[lint.per-file-ignores]
+"tests/sp5gen.py" = ["E501"]

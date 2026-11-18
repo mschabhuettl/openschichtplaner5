@@ -296,14 +296,7 @@ class SP5Database:
         """
         schema = table_schema(table)
         path = self.table_path(table)
-        defaults: dict[str, Any] = {"number": 0, "float": 0.0, "date": None, "binary": b""}
-        row: Record = {}
-        for field in schema.fields:
-            key = f"{field.name}2" if field.name in row else field.name
-            row[key] = record.get(key, defaults.get(field.kind, ""))
-        unknown = set(record) - set(row)
-        if unknown:
-            raise KeyError(f"{schema.name} has no field {sorted(unknown)[0]}")
+        row = schema.new_record(record)
         append_record(
             path,
             get_table_fields(path),

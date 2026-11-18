@@ -261,10 +261,16 @@ def _append_journal(filepath: str, record: Record, change: int) -> None:
         logger.warning("journal %s not writable (%s), change not recorded", jpath, exc)
 
 
+def _finish(f: IO[bytes], filepath: str) -> None:
+    """Stamp the header and update the index while the table is still locked."""
+    _stamp_header(f)
+    f.flush()
+    _invalidate_cdx(filepath)
+
+
 def _after_write(filepath: str, record: Record, change: int) -> None:
     if not _is_journal_file(filepath):
         _append_journal(filepath, record, change)
-    _invalidate_cdx(filepath)
 
 
 # --- public API ---
@@ -350,12 +356,12 @@ def append_record(
             f.write(row + b"\x1a")
             f.truncate()
             _update_record_count(f, num_records + 1)
-            _stamp_header(f)
         except Exception:
             f.seek(write_pos)
             f.write(b"\x1a")
             f.truncate()
             raise
+        _finish(f, filepath)
 
     _after_write(filepath, record, JOURNAL_CHANGED)
     return num_records + 1
@@ -384,7 +390,7 @@ def delete_record(filepath: str, fields: list[FieldDict], record_index: int) -> 
             return
         f.seek(offset)
         f.write(bytes([DELETED]))
-        _stamp_header(f)
+        _finish(f, filepath)
     _after_write(filepath, _parse_record(raw, fields), JOURNAL_DELETED)
 
 
@@ -408,7 +414,7 @@ def update_record(filepath: str, fields: list[FieldDict], record_index: int, dat
             pos += field["len"]
         f.seek(offset)
         f.write(bytes(raw))
-        _stamp_header(f)
+        _finish(f, filepath)
     _after_write(filepath, _parse_record(bytes(raw), fields), JOURNAL_CHANGED)
 
 
@@ -423,8 +429,7 @@ def _zap_journal(filepath: str) -> None:
         f.write(b"\x1a")
         f.truncate()
         _update_record_count(f, 0)
-        _stamp_header(f)
-    _invalidate_cdx(jpath)
+        _finish(f, jpath)
 
 
 def pack_table(filepath: str) -> int:
@@ -450,11 +455,10 @@ def pack_table(filepath: str) -> int:
         f.write(b"".join(kept) + b"\x1a")
         f.truncate()
         _update_record_count(f, len(kept))
-        _stamp_header(f)
+        _finish(f, filepath)
 
     if not _is_journal_file(filepath):
         _zap_journal(filepath)
-    _invalidate_cdx(filepath)
     return removed
 
 

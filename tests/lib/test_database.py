@@ -185,15 +185,24 @@ def test_update_refuses_keys_and_unknown_fields(db):
         db.update("ABSEN", 2, {"START": 1})
 
 
-def test_delete_and_pack(db):
+def test_delete_and_compact(db):
     db.delete("NOTE", (1, 102))
     assert [n["ID"] for n in db.get_notes(employee_id=102)] == [2]
     assert db.journal("NOTE")[-1] == {
         "NUMBER": 1, "CHANGEID1": 1, "CHANGEID2": 102, "CHANGEID3": 0, "CHANGE": 2,
     }  # fmt: skip
-    assert db.pack("NOTE") == 1
-    assert db.journal("NOTE") == []
-    assert len(db.read("NOTE")) == 2
-    assert_index_matches(db, "NOTE")
+    db.insert("WOPL", {"NAME": "Lager"})
     with pytest.raises(KeyError):
         db.delete("NOTE", (1, 102))
+    build = db.read("BUILD")[0]
+    assert (build["BUILD"], build["CHANGE"]) == (1, 3)
+
+    assert db.compact() == 1
+    assert len(db.read("NOTE")) == 2 and len(db.read("WOPL")) == 3
+    assert db.journal("NOTE") == [] and db.journal("WOPL") == []
+    build = db.read("BUILD")[0]
+    assert (build["BUILD"], build["CHANGE"]) == (2, 0)
+    for table in ("NOTE", "WOPL"):
+        assert_index_matches(db, table)
+    assert db.compact() == 0
+    assert db.read("BUILD")[0]["BUILD"] == 3

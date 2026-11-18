@@ -57,6 +57,7 @@ except ImportError:  # not available on Windows
 
 __all__ = [
     "append_record",
+    "compact_database",
     "delete_record",
     "find_all_records",
     "get_table_fields",
@@ -206,19 +207,20 @@ def _journal_path(filepath: str) -> str | None:
     return None
 
 
-def _update_index(filepath: str) -> None:
+def _update_index(filepath: str, changes: int = 1) -> None:
     """Rebuild the index file of a table after its keys have changed."""
     from . import cdx_writer
 
     try:
-        if cdx_writer.write_cdx(filepath, changes=1) is None:
+        if cdx_writer.write_cdx(filepath, changes) is None:
             logger.warning("%s is not an SP5 table, its index was not updated", filepath)
     except (ValueError, OSError) as exc:
         logger.warning("index of %s not rebuilt: %s", filepath, exc)
 
 
-def _bump_change_counter(filepath: str) -> None:
-    """Raise ``5BUILD.CHANGE``, the change counter of the database."""
+def _update_build(filepath: str, **changes: Any) -> None:
+    """Change counters in the 5BUILD record of the database *filepath*
+    belongs to, without journal entry. A value of ``None`` adds one."""
     directory = os.path.dirname(filepath)
     for name in ("5BUILD.DBF", "5build.dbf"):
         path = os.path.join(directory, name)
@@ -228,23 +230,26 @@ def _bump_change_counter(filepath: str) -> None:
         return
     fields = get_table_fields(path)
     names = [f["name"] for f in fields]
-    if "CHANGE" not in names or _table_stem(filepath) == "5BUILD":
+    if not set(changes) <= set(names) or _table_stem(filepath) == "5BUILD":
         return
-    position = names.index("CHANGE")
-    start = 1 + sum(f["len"] for f in fields[:position])
     try:
         count, header_size, record_size = _read_header_info(path)
         with _exclusive_open(path) as f:
             for i in range(count):
                 f.seek(header_size + i * record_size)
                 raw = f.read(record_size)
-                if len(raw) == record_size and raw[0] != DELETED:
-                    value = int(raw[start : start + fields[position]["len"]].strip() or 0) + 1
+                if len(raw) < record_size or raw[0] == DELETED:
+                    continue
+                for name, value in changes.items():
+                    field = fields[names.index(name)]
+                    start = 1 + sum(f["len"] for f in fields[: names.index(name)])
+                    if value is None:
+                        value = int(raw[start : start + field["len"]].strip() or 0) + 1
                     f.seek(header_size + i * record_size + start)
-                    f.write(_encode_field(value, fields[position]))
-                    return
+                    f.write(_encode_field(value, field))
+                return
     except (OSError, ValueError) as exc:
-        logger.warning("change counter in %s not raised: %s", path, exc)
+        logger.warning("counters in %s not updated: %s", path, exc)
 
 
 def _append_journal(filepath: str, record: Record, change: int) -> None:
@@ -276,7 +281,7 @@ def _append_journal(filepath: str, record: Record, change: int) -> None:
 def _after_write(filepath: str, record: Record, change: int) -> None:
     if not _is_journal_file(filepath):
         _append_journal(filepath, record, change)
-        _bump_change_counter(filepath)
+        _update_build(filepath, CHANGE=None)
 
 
 # --- public API ---
@@ -445,7 +450,7 @@ def _zap_journal(filepath: str) -> None:
         f.truncate()
         _update_record_count(f, 0)
         f.flush()
-        _update_index(jpath)
+        _update_index(jpath, changes=0)
 
 
 def pack_table(filepath: str) -> int:
@@ -472,11 +477,30 @@ def pack_table(filepath: str) -> int:
         f.truncate()
         _update_record_count(f, len(kept))
         f.flush()
-        _update_index(filepath)
+        _update_index(filepath, changes=0)
 
     if not _is_journal_file(filepath):
         _zap_journal(filepath)
-        _bump_change_counter(filepath)
+        _update_build(filepath, CHANGE=None)
+    return removed
+
+
+def compact_database(directory: str) -> int:
+    """Remove the deleted records of all tables in *directory* and empty all
+    journals, like "compress database" in SP5. Returns the number of records
+    removed.
+
+    SP5 marks the new state in 5BUILD: ``BUILD`` is raised by one and
+    ``CHANGE`` starts again at 0.
+    """
+    removed = 0
+    for name in TABLES:
+        for candidate in (name + ".DBF", name.lower() + ".dbf"):
+            path = os.path.join(directory, candidate)
+            if os.path.exists(path):
+                removed += pack_table(path)
+                _zap_journal(path)
+    _update_build(os.path.join(directory, "x"), BUILD=None, CHANGE=0)
     return removed
 
 

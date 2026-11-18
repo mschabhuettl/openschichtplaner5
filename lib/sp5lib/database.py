@@ -14,9 +14,9 @@ from . import calculations
 from .dbf_reader import Record, _dedupe_names, get_table_fields, read_dbf
 from .dbf_writer import (
     append_record,
+    compact_database,
     delete_record,
     find_all_records,
-    pack_table,
     update_record,
 )
 from .schema import JOURNAL_SUFFIX, TABLES, Table, table_schema
@@ -334,6 +334,7 @@ class SP5Database:
         path = self.table_path(table)
         delete_record(path, get_table_fields(path), self._index_of(table, key))
 
-    def pack(self, table: str) -> int:
-        """Remove the deleted records of a table for good; returns their number."""
-        return pack_table(self.table_path(table))
+    def compact(self) -> int:
+        """Remove all deleted records for good and empty the journals, like
+        "compress database" in SP5. Returns the number of records removed."""
+        return compact_database(self.path)

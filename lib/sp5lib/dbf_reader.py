@@ -96,17 +96,16 @@ def _decode_string(raw: bytes) -> str:
 def _decode_text(raw: bytes) -> str:
     """Decode a UTF-16 text field.
 
-    A field written by SP5 always carries the terminator, which makes the
-    decoding exact for every script. Fields without it (filled to the last
-    byte, or written by other tools) fall back to the heuristic.
+    The text ends at the terminator. A text that fills the field has none.
+    A field without terminator that ends with a space was not written by
+    SP5; it is taken as single-byte text if it looks like it.
     """
     end = _terminator(raw)
     if end >= 0:
-        try:
-            return raw[:end].decode("utf-16-le").strip()
-        except UnicodeDecodeError:
-            pass
-    return _decode_string(raw)
+        raw = raw[:end]
+    elif raw.endswith(b"\x20"):
+        return _decode_string(raw)
+    return raw[: len(raw) & ~1].decode("utf-16-le", errors="replace").strip()
 
 
 def _parse_date(raw: str) -> str | None:

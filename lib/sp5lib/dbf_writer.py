@@ -12,7 +12,8 @@ Field encoding (see ``docs/format.md``):
   * ascii (C):   single-byte text padded with spaces
   * binary (C):  raw bytes padded with zero bytes
   * RESERVED:    zero bytes
-  * date (D):    ``YYYYMMDD``, spaces if empty
+  * date (D):    ``YYYYMMDD``, spaces if empty; the value ``"invalid"`` is
+                 written as that word, as SP5 does for dates never set
   * numeric (N): right-aligned decimal integer
   * float (F):   right-aligned decimal number with four decimals
 
@@ -81,17 +82,19 @@ def _is_ascii_c_field(name: str) -> bool:
 
 
 def _encode_string(value: str, field_len: int) -> bytes:
-    """Encode text as UTF-16 LE + terminator + spaces, cut to the field length."""
-    if field_len < 2:
-        return b"\x00" * max(field_len, 0)
+    """Encode text as UTF-16 LE + terminator + spaces.
+
+    A field of n bytes holds n / 2 characters; a text of that length fills
+    the field and has no terminator. Longer text is cut.
+    """
     encoded = value.encode("utf-16-le") if value else b""
-    capacity = (field_len - 2) & ~1
+    capacity = field_len & ~1
     if len(encoded) > capacity:
         logger.warning(
             "text of %d characters cut to the field capacity of %d", len(value), capacity // 2
         )
         encoded = encoded[:capacity]
-    return (encoded + b"\x00\x00").ljust(field_len, b"\x20")
+    return (encoded + b"\x00\x00")[:field_len].ljust(field_len, b"\x20")
 
 
 def _encode_field(value: Any, field: FieldDict) -> bytes:
@@ -117,6 +120,8 @@ def _encode_field(value: Any, field: FieldDict) -> bytes:
 
     if ftype == "D":
         s = value.isoformat() if isinstance(value, date) else str(value).strip()
+        if s == "invalid":  # SP5 writes this word for a date that was never set
+            return s.encode("ascii").ljust(flen)[:flen]
         s = s[:10].replace("-", "")
         if len(s) == 8 and s.isdigit():
             return s.encode("ascii").ljust(flen)[:flen]

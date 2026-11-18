@@ -37,6 +37,7 @@ def test_encode_string():
     assert _encode_string("", 8) == b"\x00\x00" + b" " * 6
     assert _encode_string("ab", 8) == b"a\x00b\x00\x00\x00  "
     assert _encode_string("abc", 8) == b"a\x00b\x00c\x00\x00\x00"
+    assert _encode_string("abcd", 8) == b"a\x00b\x00c\x00d\x00"  # fills the field
     assert _encode_string("x", 1) == b"\x00"
     assert _encode_string("x", 0) == b""
 
@@ -44,8 +45,17 @@ def test_encode_string():
 def test_encode_string_truncates_with_warning(caplog):
     with caplog.at_level(logging.WARNING):
         encoded = _encode_string("abcdefgh", 8)
-    assert encoded == b"a\x00b\x00c\x00\x00\x00"
+    assert encoded == b"a\x00b\x00c\x00d\x00"
     assert "cut" in caplog.text
+
+
+def test_text_of_full_field_length_roundtrip(db_dir):
+    path = f"{db_dir}/5WOPL.DBF"
+    fields = get_table_fields(path)
+    for name in ("N" * 100, "示" * 100, "x" * 99):
+        update_record(path, fields, 0, {"NAME": name, "SHORTNAME": "kurz"})
+        row = read_dbf(path)[0]
+        assert (row["NAME"], row["SHORTNAME"]) == (name, "kurz")
 
 
 @pytest.mark.parametrize(
@@ -64,6 +74,7 @@ def test_encode_string_truncates_with_warning(caplog):
         (date(2024, 2, 29), field("DATE", "D", 8), b"20240229"),
         (None, field("DATE", "D", 8), b"        "),
         ("soon", field("DATE", "D", 8), b"        "),
+        ("invalid", field("DATE", "D", 8), b"invalid "),
         ("1 1 0", field("WORKDAYS", "C", 8), b"1 1 0   "),
         (None, field("WORKDAYS", "C", 8), b"        "),
         ("06:00-14:00", field("STARTEND3", "C", 12), b"06:00-14:00 "),

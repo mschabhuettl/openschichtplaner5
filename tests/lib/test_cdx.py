@@ -116,6 +116,35 @@ def test_tree_with_several_interior_levels(tmp_path):
     assert read_cdx(str(path)).entries == keys
 
 
+def test_interior_nodes_are_written_as_they_fill(tmp_path):
+    """Page order of a tree with two interior nodes, as SP5 builds it for a
+    table with 3000 numeric keys: 31 leaves, their interior node, the other
+    26 leaves, their interior node, the root."""
+    keys = [(_numeric_key(n), n) for n in range(1, 3001)]
+    data = build_cdx(keys, "ID")
+    nodes = [struct.unpack_from("<HHii", data, n * PAGE) for n in range(5, len(data) // PAGE)]
+    kinds = [attr for attr, *_ in nodes]
+    assert kinds == [2] * 31 + [0] + [2] * 26 + [0, 1]
+    assert [count for attr, count, *_ in nodes if attr != 2] == [31, 26, 2]
+    assert nodes[31][2:] == (-1, 63 * PAGE) and nodes[58][2:] == (36 * PAGE, -1)
+    assert nodes[30][3] == 37 * PAGE and nodes[32][2] == 35 * PAGE  # leaves link past it
+    assert struct.unpack_from("<I", data, 2 * PAGE)[0] == 64 * PAGE
+
+
+def test_full_interior_node_becomes_the_root(tmp_path):
+    """Exactly as many leaves as one interior node holds: no second level."""
+    for count in range(1500, 1800):
+        keys = [(_numeric_key(n), n) for n in range(1, count + 1)]
+        data = build_cdx(keys, "ID")
+        if len(data) // PAGE == 5 + 31 + 1:
+            break
+    nodes = [struct.unpack_from("<HH", data, n * PAGE) for n in range(5, len(data) // PAGE)]
+    assert [attr for attr, _ in nodes] == [2] * 31 + [1] and nodes[-1][1] == 31
+    path = tmp_path / "X.CDX"
+    path.write_bytes(data)
+    assert read_cdx(str(path)).entries == keys
+
+
 def test_deleted_records_are_not_indexed(db_dir):
     path = f"{db_dir}/5HOLID.DBF"
     with open(path, "r+b") as f:

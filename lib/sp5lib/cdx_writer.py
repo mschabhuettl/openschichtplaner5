@@ -26,7 +26,7 @@ import struct
 from dataclasses import dataclass
 from typing import Any
 
-from .dbf_reader import DELETED, _dedupe_names, _parse_record, get_table_fields
+from .dbf_reader import DELETED, _dedupe_names, get_table_fields
 from .schema import FOR_EXPRESSION, TABLE_TAG, table_schema
 
 __all__ = ["CdxIndex", "build_cdx", "build_cdx_bytes", "read_cdx", "write_cdx"]
@@ -100,26 +100,39 @@ def _char_key(record: dict, terms: list[tuple[str, int]]) -> bytes:
 
 def _build_keys(filepath: str, key_expr: str) -> list[Key]:
     """Sorted keys of all records of a table that are not deleted."""
+    kind, spec = _parse_key_expr(key_expr)
+    terms = [(spec, 0)] if kind == "numeric" else spec
     fields = get_table_fields(filepath)
     names = _dedupe_names([str(f["name"]) for f in fields])
-    kind, spec = _parse_key_expr(key_expr)
+    offsets = {}
+    offset = 1
+    for field, name in zip(fields, names, strict=True):
+        offsets[name] = (offset, offset + field["len"])
+        offset += field["len"]
+    slices = [offsets[name] for name, _ in terms]
     with open(filepath, "rb") as f:
-        head = f.read(32)
-        num_records, header_size, record_size = struct.unpack_from("<IHH", head, 4)
+        num_records, header_size, record_size = struct.unpack_from("<IHH", f.read(32), 4)
         f.seek(header_size)
-        keys: list[Key] = []
-        for raw_idx in range(num_records):
-            raw = f.read(record_size)
-            if len(raw) < record_size:
-                break
-            if raw[0] == DELETED:
-                continue
-            record = _parse_record(raw, fields, names)
-            if kind == "numeric":
-                key = _numeric_key(record.get(spec) or 0)
-            else:
-                key = _char_key(record, spec)
-            keys.append((key, raw_idx + 1))
+        area = f.read(num_records * record_size)
+    keys: list[Key] = []
+    for recno in range(1, len(area) // record_size + 1):
+        start = (recno - 1) * record_size
+        if area[start] == DELETED:
+            continue
+        values = []
+        for lo, hi in slices:
+            try:
+                values.append(int(area[start + lo : start + hi]))
+            except ValueError:
+                values.append(0)
+        if kind == "numeric":
+            keys.append((_numeric_key(values[0]), recno))
+        else:
+            key = b"".join(
+                str(v).rjust(width).encode("ascii")[:width]
+                for v, (_, width) in zip(values, terms, strict=True)
+            )
+            keys.append((key, recno))
     keys.sort()
     return keys
 
@@ -147,12 +160,12 @@ def _compress(key: bytes, prev: bytes, keylen: int, pad: bytes) -> tuple[int, in
     Trailing bytes are only dropped from character keys.
     """
     dup = 0
-    while dup < keylen and dup < len(prev) and prev[dup] == key[dup]:
-        dup += 1
+    if prev:
+        difference = int.from_bytes(key, "big") ^ int.from_bytes(prev, "big")
+        dup = keylen - (difference.bit_length() + 7) // 8
     trail = 0
     if pad == b"\x20":
-        while trail < keylen - dup and key[keylen - 1 - trail] == 0x20:
-            trail += 1
+        trail = min(keylen - len(key.rstrip(b"\x20")), keylen - dup)
     return dup, trail
 
 
@@ -263,37 +276,64 @@ def _build_tag_nodes(
 ) -> tuple[list[bytes], int]:
     """Node pages of the tag and the page number of its root.
 
-    The leaves come first, then one level of interior nodes after the
-    other; the root is the last page.
+    The pages are in the order in which SP5 writes them when it builds an
+    index: the leaves one after the other, each interior node as soon as it
+    is full, and what is left at the end from the lowest level up. The root
+    is the last page.
     """
     layout = _entry_bit_layout(keylen, record_count)
     chunks = _split_into_leaves(keys, keylen, pad, layout[2])
     if len(chunks) == 1:
         return [_encode_leaf(keys, keylen, pad, layout, 0x0003, -1, -1)], _FIRST_NODE
 
-    def siblings(i: int, count: int, first_page: int) -> tuple[int, int]:
-        offset = (first_page + i) * PAGE
-        return (offset - PAGE if i > 0 else -1, offset + PAGE if i < count - 1 else -1)
+    capacity = (PAGE - 12) // (keylen + 8)
+    # A node is [level, content, page]; the content of a leaf is its keys,
+    # that of an interior node the list of its children.
+    order: list[list] = []
+    pending: list[list[list]] = []
+
+    def place(level: int, content: list) -> None:
+        node = [level, content, _FIRST_NODE + len(order)]
+        order.append(node)
+        if len(pending) < level + 1:
+            pending.append([])
+        pending[level].append(node)
+        if len(pending[level]) == capacity:
+            place(level + 1, pending[level][:])
+            pending[level].clear()
+
+    for chunk in chunks:
+        place(0, chunk)
+    level = 0
+    while level < len(pending):
+        if pending[level] and (len(pending[level]) > 1 or level < len(pending) - 1):
+            place(level + 1, pending[level][:])
+            pending[level].clear()
+        level += 1
+
+    def last_key(node: list) -> Key:
+        while node[0]:
+            node = node[1][-1]
+        return node[1][-1]
+
+    by_level: dict[int, list[int]] = {}
+    position = {}
+    for level, _, page in order:
+        position[page] = len(by_level.setdefault(level, []))
+        by_level[level].append(page)
 
     pages = []
-    level = []  # (last key, its record number, page offset) of every node
-    for i, chunk in enumerate(chunks):
-        pages.append(
-            _encode_leaf(chunk, keylen, pad, layout, 0x0002, *siblings(i, len(chunks), _FIRST_NODE))
-        )
-        level.append((chunk[-1][0], chunk[-1][1], (_FIRST_NODE + i) * PAGE))
-    capacity = (PAGE - 12) // (keylen + 8)
-    while len(level) > 1:
-        first_page = _FIRST_NODE + len(pages)
-        groups = [level[i : i + capacity] for i in range(0, len(level), capacity)]
-        attr = 0x0001 if len(groups) == 1 else 0x0000
-        level = []
-        for i, group in enumerate(groups):
-            pages.append(
-                _encode_interior(group, keylen, attr, *siblings(i, len(groups), first_page))
-            )
-            level.append((group[-1][0], group[-1][1], (first_page + i) * PAGE))
-    return pages, _FIRST_NODE + len(pages) - 1
+    for i, (level, content, page) in enumerate(order):
+        same, at = by_level[level], position[page]
+        left = same[at - 1] * PAGE if at > 0 else -1
+        right = same[at + 1] * PAGE if at < len(same) - 1 else -1
+        if level == 0:
+            pages.append(_encode_leaf(content, keylen, pad, layout, 0x0002, left, right))
+        else:
+            separators = [(*last_key(child), child[2] * PAGE) for child in content]
+            attr = 0x0001 if i == len(order) - 1 else 0x0000
+            pages.append(_encode_interior(separators, keylen, attr, left, right))
+    return pages, order[-1][2]
 
 
 def build_cdx(

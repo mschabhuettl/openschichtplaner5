@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=77.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "libopenschichtplaner5"
+dynamic = ["version"]
+description = "Read and write the database files (DBF/CDX) of Schichtplaner 5"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Matthias Schabhüttl" }]
+requires-python = ">=3.11"
+keywords = ["schichtplaner5", "dbf", "cdx", "dbase", "shift-planning"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Database",
+    "Topic :: Office/Business :: Scheduling",
+    "Typing :: Typed",
+]
+
+[project.scripts]
+sp5lib = "sp5lib.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/mschabhuettl/openschichtplaner5"
+Changelog = "https://github.com/mschabhuettl/openschichtplaner5/blob/main/CHANGELOG.md"
+
+[tool.setuptools]
+packages = ["sp5lib"]
+
+[tool.setuptools.dynamic]
+version = { attr = "sp5lib.__version__" }
+
+[tool.setuptools.package-data]
+sp5lib = ["py.typed"]

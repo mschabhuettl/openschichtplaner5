@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=77.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openschichtplaner5-api"
+dynamic = ["version"]
+description = "REST API for Schichtplaner 5 databases, built on libopenschichtplaner5"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Matthias Schabhüttl" }]
+requires-python = ">=3.11"
+keywords = ["schichtplaner5", "rest-api", "fastapi", "shift-planning"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: FastAPI",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Office/Business :: Scheduling",
+]
+dependencies = [
+    "libopenschichtplaner5>=1.0,<2",
+    "fastapi>=0.110",
+    "uvicorn>=0.27",
+]
+
+[project.scripts]
+sp5api = "sp5api.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/mschabhuettl/openschichtplaner5"
+
+[tool.setuptools]
+packages = ["sp5api"]
+
+[tool.setuptools.dynamic]
+version = { attr = "sp5api.__version__" }

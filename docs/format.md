@@ -593,7 +593,7 @@ Key `ID`, `EMPLOYEEID`. No records in the sample.
 | ID | N11 | counted per employee |
 | EMPLOYEEID | N11 | -> 5EMPL, 0 for a note on the day as a whole *(assumed)* |
 | DATE | D | |
-| TEXT1, TEXT2 | C252 | the text, up to 126 characters each |
+| TEXT1, TEXT2 | C252 | one text of up to 250 characters, continued from the first field to the second *(program)* |
 | RESERVED | C20 | |
 
 #### 5PERIO: marked periods
@@ -664,7 +664,7 @@ not get on a day of the week.
 |---|---|---|
 | ID | N11 | counted per employee |
 | EMPLOYEEID | N11 | -> 5EMPL |
-| WEEKDAY | N5 | day number, 7 for holidays *(assumed)* |
+| WEEKDAY | N5 | day number, 7 for holidays; on a holiday only 7 applies *(program)* |
 | SHIFTID | N11 | -> 5SHIFT |
 | RESTRICT | N5 | 0: no restriction, 1: assign only on request, 2: never assign *(program)* |
 | RESERVED | C20 | |

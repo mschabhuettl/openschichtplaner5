@@ -1124,7 +1124,7 @@ def personnel_table_row(
 ) -> dict[str, float]:
     """The standard personnel table columns for one employee."""
     leave_types_by_id = leave_types_by_id or {}
-    plan = dict(
+    plan: dict[str, Any] = dict(
         holidays=holidays,
         shifts_by_id=shifts_by_id,
         manual_shifts=manual_shifts,

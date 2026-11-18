@@ -93,7 +93,9 @@ class SP5Database:
         names = table_schema(table).key_fields
         if len(values) > len(names):
             raise KeyError(f"{table_schema(table).name} is keyed by {names}")
-        return find_all_records(self.table_path(table), **dict(zip(names, values, strict=False)))
+        return find_all_records(
+            self.table_path(table), None, **dict(zip(names, values, strict=False))
+        )
 
     def get(self, table: str, key: Key) -> Record | None:
         """The record with the given key, or ``None``.

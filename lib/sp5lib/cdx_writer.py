@@ -24,6 +24,7 @@ existing file.
 import os
 import struct
 from dataclasses import dataclass
+from typing import Any
 
 from .dbf_reader import DELETED, _dedupe_names, _parse_record, get_table_fields
 from .schema import FOR_EXPRESSION, TABLE_TAG
@@ -54,7 +55,7 @@ class CdxIndex:
 # --- keys ---
 
 
-def _parse_key_expr(key_expr: str) -> tuple[str, object]:
+def _parse_key_expr(key_expr: str) -> tuple[str, Any]:
     """Return ``("numeric", field)`` or ``("char", [(field, width), ...])``."""
     expr = key_expr.strip()
     if "+" not in expr and "(" not in expr:
@@ -76,7 +77,7 @@ def _key_shape(key_expr: str) -> tuple[int, bytes]:
     kind, spec = _parse_key_expr(key_expr)
     if kind == "numeric":
         return 8, b"\x00"
-    return sum(width for _, width in spec), b"\x20"  # type: ignore[union-attr]
+    return sum(width for _, width in spec), b"\x20"
 
 
 def _numeric_key(value: float) -> bytes:
@@ -115,9 +116,9 @@ def _build_keys(filepath: str, key_expr: str) -> list[Key]:
                 continue
             record = _parse_record(raw, fields, names)
             if kind == "numeric":
-                key = _numeric_key(record.get(spec) or 0)  # type: ignore[call-overload]
+                key = _numeric_key(record.get(spec) or 0)
             else:
-                key = _char_key(record, spec)  # type: ignore[arg-type]
+                key = _char_key(record, spec)
             keys.append((key, raw_idx + 1))
     keys.sort()
     return keys

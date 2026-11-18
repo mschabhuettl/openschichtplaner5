@@ -412,6 +412,7 @@ def tables() -> dict[str, Rows]:
                 "START": 1320,
                 "END": 360,
                 "VALIDDAYS": _slots(1, 1, 1, 1, 1, 1, 1),
+                "DATE": "invalid",
             },
             {
                 "ID": 2,
@@ -421,6 +422,7 @@ def tables() -> dict[str, Rows]:
                 "END": 0,
                 "VALIDDAYS": _slots(0, 0, 0, 0, 0, 0, 1),
                 "HOLRULE": 1,
+                "DATE": "invalid",
             },
         ],  # fmt: skip
         "5USER": user_rows,

@@ -77,6 +77,12 @@ def create_app(
         except KeyError:
             raise HTTPException(404, f"unknown table {table}") from None
 
+    def find(name: str, key: str) -> Record | None:
+        try:
+            return db.get(name, _parse_key(key))
+        except KeyError as exc:
+            raise HTTPException(422, str(exc.args[0])) from None
+
     def writable(table: str) -> str:
         if readonly:
             raise HTTPException(403, "the API is read only")
@@ -130,7 +136,7 @@ def create_app(
     @app.get("/api/tables/{table}/{key}")
     def table_record(table: str, key: str) -> Record:
         name = table_name(table)
-        record = db.get(name, _parse_key(key)) if name in TABLES else None
+        record = find(name, key) if name in TABLES else None
         if record is None:
             raise HTTPException(404, f"no record {key} in {name}")
         record.pop("DIGEST", None)
@@ -150,7 +156,7 @@ def create_app(
     def update_record(table: str, key: str, changes: Annotated[Record, Body()]) -> Record:
         name = writable(table)
         parsed = _parse_key(key)
-        if db.get(name, parsed) is None:
+        if find(name, key) is None:
             raise HTTPException(404, f"no record {key} in {name}")
         try:
             db.update(name, parsed, changes)
@@ -161,10 +167,9 @@ def create_app(
     @app.delete("/api/tables/{table}/{key}", status_code=204)
     def delete_record(table: str, key: str) -> None:
         name = writable(table)
-        try:
-            db.delete(name, _parse_key(key))
-        except KeyError:
-            raise HTTPException(404, f"no record {key} in {name}") from None
+        if find(name, key) is None:
+            raise HTTPException(404, f"no record {key} in {name}")
+        db.delete(name, _parse_key(key))
 
     # --- master data ---
 

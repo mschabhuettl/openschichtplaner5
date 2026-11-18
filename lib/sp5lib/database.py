@@ -327,6 +327,12 @@ class SP5Database:
         refused = set(changes) - allowed
         if refused:
             raise KeyError(f"cannot set field {sorted(refused)[0]}")
+        for field, name in zip(fields, _dedupe_names([f["name"] for f in fields]), strict=True):
+            if name in changes and field["type"] in "NF":
+                try:
+                    float(changes[name])
+                except (TypeError, ValueError):
+                    raise ValueError(f"{name} must be a number") from None
         update_record(path, fields, self._index_of(table, key), changes)
 
     def delete(self, table: str, key: Key) -> None:

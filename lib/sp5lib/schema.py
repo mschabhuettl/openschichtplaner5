@@ -85,13 +85,21 @@ class Table:
         field as SP5 writes it (0, empty text, no date).
 
         The second of two fields with the same name gets the suffix ``2``.
-        Raises ``KeyError`` for a name that is not a field of the table.
+        Numbers given as text are converted. Raises ``KeyError`` for a name
+        that is not a field of the table and ``ValueError`` for a value
+        that is not a number where one is needed.
         """
         defaults: dict[str, Any] = {"number": 0, "float": 0.0, "date": None, "binary": b""}
         record: dict[str, Any] = {}
         for field in self.fields:
             key = f"{field.name}2" if field.name in record else field.name
-            record[key] = values.get(key, defaults.get(field.kind, ""))
+            value = values.get(key, defaults.get(field.kind, ""))
+            if field.kind in ("number", "float"):
+                try:
+                    value = int(value) if field.kind == "number" else float(value)
+                except (TypeError, ValueError):
+                    raise ValueError(f"{self.name}.{key} must be a number") from None
+            record[key] = value
         unknown = set(values) - set(record)
         if unknown:
             raise KeyError(f"{self.name} has no field {sorted(unknown)[0]}")

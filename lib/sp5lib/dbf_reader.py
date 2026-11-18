@@ -97,13 +97,13 @@ def _decode_text(raw: bytes) -> str:
     """Decode a UTF-16 text field.
 
     The text ends at the terminator. A text that fills the field has none.
-    A field without terminator that ends with a space was not written by
-    SP5; it is taken as single-byte text if it looks like it.
+    A field without terminator that consists of printable ASCII and ends
+    with a space was not written by SP5; it is taken as single-byte text.
     """
     end = _terminator(raw)
     if end >= 0:
         raw = raw[:end]
-    elif raw.endswith(b"\x20"):
+    elif raw.endswith(b"\x20") and all(0x20 <= b < 0x7F for b in raw):
         return _decode_string(raw)
     return raw[: len(raw) & ~1].decode("utf-16-le", errors="replace").strip()
 

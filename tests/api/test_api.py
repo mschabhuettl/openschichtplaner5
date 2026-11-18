@@ -200,3 +200,21 @@ def test_main_needs_a_database(monkeypatch):
     monkeypatch.delenv("SP5_DB_PATH", raising=False)
     with pytest.raises(SystemExit):
         __main__.main([])
+
+
+def test_owner_given_as_text_is_numbered_correctly(writer):
+    highest = max(d["ID"] for d in writer.get("/api/duties?employee_id=104").json())
+    created = writer.post(
+        "/api/tables/5MASHI", json={"EMPLOYEEID": "104", "DATE": "2024-02-01", "SHIFTID": 1}
+    )
+    assert created.json() == {"ID": highest + 1, "key": f"{highest + 1},104"}
+    assert writer.get("/api/tables/5MASHI/1,104").status_code == 200
+    assert writer.post("/api/tables/5MASHI", json={"EMPLOYEEID": "x"}).status_code == 422
+    assert writer.put("/api/tables/5MASHI/1,104", json={"SHIFTID": "x"}).status_code == 422
+    assert writer.get("/api/tables/5MASHI/1,104").json()["SHIFTID"] != 0
+
+
+def test_key_with_too_many_parts(writer):
+    assert writer.get("/api/tables/5WOPL/1,2").status_code == 422
+    assert writer.put("/api/tables/5WOPL/1,2", json={"NAME": "x"}).status_code == 422
+    assert writer.delete("/api/tables/5WOPL/1,2").status_code == 422

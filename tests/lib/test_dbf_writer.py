@@ -52,7 +52,7 @@ def test_encode_string_truncates_with_warning(caplog):
 def test_text_of_full_field_length_roundtrip(db_dir):
     path = f"{db_dir}/5WOPL.DBF"
     fields = get_table_fields(path)
-    for name in ("N" * 100, "示" * 100, "x" * 99):
+    for name in ("N" * 100, "示" * 100, "x" * 99, "€" * 100, "示" * 99 + "”"):
         update_record(path, fields, 0, {"NAME": name, "SHORTNAME": "kurz"})
         row = read_dbf(path)[0]
         assert (row["NAME"], row["SHORTNAME"]) == (name, "kurz")

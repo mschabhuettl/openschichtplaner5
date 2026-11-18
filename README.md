@@ -146,7 +146,10 @@ Interactive documentation of all endpoints is at `/docs`. The main ones:
 Settings, as environment variables: `SP5_DB_PATH` (the database directory),
 `SP5_API_TOKEN` (if set, requests need `Authorization: Bearer <token>`),
 `SP5_READONLY=0` (enable writing). The API has no user management. It never
-returns password digests and does not write the user table. Put it behind a
+returns password digests and does not write the user table. The notes on
+writing above apply to the write endpoints as well: deleting a record that
+others refer to can leave a database that Schichtplaner 5 refuses to open.
+Put it behind a
 reverse proxy with TLS if it is reachable from other machines.
 
 ## Development

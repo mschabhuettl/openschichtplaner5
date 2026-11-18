@@ -7,6 +7,11 @@ library of the same name (last version 1.32.3), `sp5api` replaces the
 earlier `openschichtplaner5-api`. Both were rebuilt around the file format
 and checked against Schichtplaner 5.0.13; version numbers start again at 1.0.
 
+Known limits: references between records are not checked, although
+Schichtplaner 5 refuses a database with a reference to a missing record; a
+cycle assignment without end is read as open, while Schichtplaner 5 showed
+no duties for one. See `docs/format.md`, sections 7 and 8.
+
 ### sp5lib
 
 Added

@@ -275,7 +275,9 @@ again. A reference to nothing is written as 0.
 sorted by hand.
 
 **Hiding.** Master data is not deleted but hidden with `HIDE = 1`, so that
-older plan entries still find their shift, employee or absence type.
+older plan entries still find their shift, employee or absence type. Where
+SP5 leaves hidden records out was not determined: a hidden employee was
+still listed in the plan.
 
 **Colours.** Colours are Windows `COLORREF` numbers stored as decimal
 integers: `red + 256 * green + 65536 * blue`. White is 16777215, black 0,
@@ -837,7 +839,8 @@ record with `CHANGE` 1 and raised `5BUILD.CHANGE` by one; the index file of
 a day that already has one and choosing to replace it adds the new record
 (journal `CHANGE` 0) and then deletes the old one (journal `CHANGE` 2);
 `5BUILD.CHANGE` rises by one for the whole action, not once per journal
-record.
+record. The library raises it once per call, so a replacement made as an
+insert and a delete leaves it one higher than SP5 does.
 
 ## 7. Writing
 

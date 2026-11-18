@@ -81,25 +81,29 @@ and 1 (flags). SP5 always writes a number, `0` for nothing.
 right-aligned in 19 bytes: `"             7.7000"`. The descriptor declares
 no decimals all the same.
 
-**D, date.** Eight ASCII digits `YYYYMMDD`. An unset date is eight spaces.
-The four records of 5XCHAR in the sample hold the text `invalid ` in their
-unused `DATE` field; readers must treat anything that is not a date as unset.
+**D, date.** Eight ASCII digits `YYYYMMDD`. SP5 knows two kinds of missing
+date: "empty" is written as eight spaces, and "invalid", the state of a date
+that was never set, as the text `invalid ` *(program)*. The latter occurs in
+the `DATE` field of all 5XCHAR records of the sample. Readers must treat
+anything that is not eight digits as no date.
 
 **C, character.** Character fields are used in four different ways. Which
 one applies depends on the field, not on a marker in the file:
 
 - *Text.* UTF-16 LE, followed by a zero code unit (two zero bytes) and
   padded with spaces (`0x20`) to the field length. An empty text is two zero
-  bytes followed by spaces. A field of length n therefore holds at most
-  `n / 2 - 1` characters: 99 for the common length 200, 125 for length 252,
-  29 for length 60. All names, descriptions and notes are text fields.
+  bytes followed by spaces. A field of length n holds up to `n / 2`
+  characters: 100 for the common length 200, 126 for length 252, 30 for
+  length 60. A text of that full length fills the field and has no
+  terminator *(program)*. All names, descriptions and notes are text fields.
 - *Single-byte text.* ASCII, padded with spaces, no terminator. These are
   the fields `WORKDAYS`, `VALIDDAYS`, `DAILYDEM`, `STARTEND` and
   `STARTEND0` to `STARTEND7`, and in 5USER `CATEGORY` and `REPORT`. They
   hold lists of numbers or times, see section 4.
 - *Binary.* Raw bytes: `DIGEST` in 5USER, `CREATIME` and `UUID` in 5BUILD.
 - *Reserved.* Every table ends with a field `RESERVED` of 20, 50 or 200
-  bytes. In every record of the sample it consists of zero bytes only.
+  bytes. SP5 does not interpret it; it writes zero bytes into new records
+  and writes back unchanged what it has read.
 
 There is no code page: the code page byte in the header is zero, and text is
 stored as UTF-16, so any script can be stored. The single-byte fields hold
@@ -262,8 +266,10 @@ tables (employees, groups, shifts and so on) the `ID` identifies the record.
 The other tables belong to an owner (an employee, group, user or cycle) and
 number their records per owner: the `ID` is only unique together with the
 owner field, and both together form the key. The sample shows this in
-5GRASG, where the IDs 1 to 4 repeat for every employee. A reference to a
-record that does not exist is written as 0.
+5GRASG, where the IDs 1 to 4 repeat for every employee. A new record gets
+the highest `ID` of its table (or of its owner) plus one, starting at 1;
+there is no stored counter, so the number of a deleted last record is used
+again. A reference to nothing is written as 0.
 
 **Positions.** `POSITION` is the place of a record in lists the user has
 sorted by hand.
@@ -296,8 +302,19 @@ of `00:00` is midnight at the end of the day. An empty field means the shift
 does not take place on that day. The hours that count are stored separately
 in `DURATION` and are not derived from the ranges.
 
-**Half days.** `INTERVAL` in 5HOLID and 5ABSEN: 0 the whole day, 1 the first
-half (until 12:00), 2 the second half *(program; the sample contains only 0)*.
+**Half days.** `INTERVAL` in 5HOLID and 5ABSEN: 0 the whole day, 1 the
+morning (until 12:00), 2 the afternoon *(program; the sample contains only
+0)*.
+
+**Plan types.** SP5 can keep two plans side by side, the actual plan
+("Istplan") and the intended plan ("Sollplan"). `TYPE` in 5MASHI is 0 for
+the actual and 1 for the intended plan *(program)*; `TYPE` in 5SPSHI, 5ABSEN
+and 5CYEXC very likely means the same *(assumed)*.
+
+**Categories.** A shift type, an absence type, special shifts as a whole and
+overtime can be tied to a numbered category from 1 to 19. A user may enter
+such things only with the right for that category (`CATEGORY` in 5USER).
+Category 0 means that no special right is needed.
 
 ## 5. Tables
 
@@ -323,10 +340,10 @@ Key `ID`. 30 records in the sample.
 | SALUTATION | C100 | form of address |
 | STREET, ZIP, TOWN | C100, C60, C60 | address |
 | PHONE, EMAIL | C200 | |
-| PHOTO | C200 | file name of a photo *(assumed; empty in the sample)* |
+| PHOTO | C200 | file name of a photo *(program; empty in the sample)* |
 | FUNCTION | C200 | function or job title |
-| ARBITR1, ARBITR2, ARBITR3 | C200 | free fields whose meaning the user defines |
-| SEX | N5 | 0 not set, 1 male, 2 female *(assumed; the sample has 0 and 1)* |
+| ARBITR1, ARBITR2, ARBITR3 | C200 | additional fields ("Zusatzfeld 1" to 3) for the user's own purposes |
+| SEX | N5 | 0 male, 1 female *(program; the sample has 0 and 1)* |
 | BIRTHDAY | D | |
 | EMPSTART, EMPEND | D | first and last day of employment, unset means open |
 | CALCBASE | N5 | basis of the nominal hours: 0 per day (`HRSDAY` for each working day), 1 per week (`HRSWEEK`), 2 per month (`HRSMONTH`), 3 a total for the whole employment (`HRSTOTAL`) |
@@ -336,7 +353,7 @@ Key `ID`. 30 records in the sample.
 | CFGLABEL, CBKLABEL, CBKSCHED | N11 | colours |
 | BOLD | N1 | 1: shown in bold |
 | HIDE | N1 | 1: hidden |
-| NOTE1 to NOTE4 | C252 | notes |
+| NOTE1 to NOTE4 | C252 | one note of up to 500 characters, continued from field to field *(program)* |
 | RESERVED | C200 | |
 
 #### 5GROUP: groups
@@ -347,10 +364,10 @@ Key `ID`. 10 records. Groups form a tree.
 |---|---|---|
 | ID | N11 | |
 | NAME, SHORTNAME | C200 | |
-| ARBITR | C200 | free field |
+| ARBITR | C200 | additional field |
 | SUPERID | N11 | -> 5GROUP, the parent group; 0 for a group at the top |
 | POSITION | N11 | |
-| DAILYDEM | C48 | eight numbers, each followed by a space (single-byte): staff needed per day, Monday to Sunday and holidays *(assumed; all zero in the sample)* |
+| DAILYDEM | C48 | eight numbers, each followed by a space (single-byte): staff demand of the group per day, Monday to Sunday and holidays *(program; all zero in the sample; whether a minimum or a maximum is unknown)* |
 | CFGLABEL, CBKLABEL, CBKSCHED | N11 | colours |
 | BOLD, HIDE | N1 | |
 | RESERVED | C200 | |
@@ -380,7 +397,7 @@ Key `ID`. 5 records.
 | STARTEND0 to STARTEND7 | C36 | working times (single-byte) for Monday to Sunday and for holidays |
 | DURATION0 to DURATION7 | F19 | hours counted for the same eight days |
 | NOEXTRA | N1 | 1: no time surcharges for this shift |
-| CATEGORY | N5 | category of the shift *(unknown; 0 in the sample)* |
+| CATEGORY | N5 | category needed to enter this shift, 0 for none *(program)* |
 | HIDE | N1 | |
 | RESERVED | C200 | |
 
@@ -397,15 +414,15 @@ Key `ID`. 8 records.
 | BOLD | N1 | |
 | CHARGETYP | N5 | how a day of absence counts as working time: 0 not at all, 1 with the hours the employee would have worked, 2 with the fixed hours in `CHARGEHRS` |
 | CHARGEHRS | F19 | hours per day for `CHARGETYP` 2 |
-| DEDUCTACT | N1 | 1: the hours are deducted from the actual hours instead of added *(program)* |
-| DEDUCTOVT | N1 | 1: the hours are deducted from the overtime account *(program)* |
+| DEDUCTACT | N1 | 1: the hours are deducted from the actual hours instead of added *(assumed)* |
+| DEDUCTOVT | N1 | 1: the hours are deducted from the overtime account *(assumed)* |
 | ENTITLED | N1 | 1: employees have an entitlement for this type (as for vacation) |
 | STDENTIT | F19 | standard entitlement per year |
 | CARRYFWD | N1 | 1: what is left is carried over to the next year |
 | COUNTALL | N1 | 1: every calendar day counts, 0: only the working days of the employee |
-| IGNORED | N1 | *(unknown; 0 in the sample)* |
-| VALIDDAYS | C16 | day list (single-byte), all set in the sample *(effect unknown)* |
-| CATEGORY | N5 | *(unknown; 0 in the sample)* |
+| IGNORED | N1 | 1: vacation bans (5HOBAN) do not apply to this type *(program; other effects unknown)* |
+| VALIDDAYS | C16 | day list (single-byte): the days on which this type may be entered *(program)* |
+| CATEGORY | N5 | category needed to enter this type, 0 for none *(program)* |
 | HIDE | N1 | |
 | RESERVED | C200 | |
 
@@ -432,7 +449,7 @@ holiday of every year is its own record.
 | ID | N11 | |
 | DATE | D | |
 | NAME | C200 | |
-| INTERVAL | N5 | 0 whole day, 1 first half, 2 second half *(program)* |
+| INTERVAL | N5 | 0 whole day, 1 morning, 2 afternoon *(program)* |
 | RESERVED | C50 | |
 
 #### 5XCHAR: time surcharges
@@ -448,8 +465,8 @@ into a time window, for example night work.
 | START, END | N5 | the time window in minutes since midnight; 1200 to 360 is 20:00 to 06:00 |
 | VALIDITY | N5 | 0: valid on the days of the week in `VALIDDAYS`; 1: valid on the date in `DATE` *(program; 0 in the sample)* |
 | VALIDDAYS | C14 | day list with seven places (single-byte) |
-| HOLRULE | N5 | holidays: 0 no special treatment, 1 only on holidays, 2 not on holidays *(program)* |
-| DATE | D | the date for `VALIDITY` 1; holds the text `invalid ` in the sample |
+| HOLRULE | N5 | 0 also on holidays, 1 only on holidays, 2 not on holidays *(program)*. On a half holiday, 1 and 2 apply to the matching half of the day. |
+| DATE | D | the date for `VALIDITY` 1, otherwise `invalid ` |
 | HIDE | N1 | |
 | RESERVED | C200 | |
 
@@ -497,7 +514,7 @@ Key `ID`, `EMPLOYEEID`. No records in the sample.
 | EMPLOYEEID | N11 | -> 5EMPL |
 | CYCLEID | N11 | -> 5CYCLE |
 | START, END | D | first and last day of the assignment; no end means open |
-| ENTRANCE | N5 | where in the cycle the employee starts, from 0: the week for a cycle of weeks, the day for a cycle of days *(program)* |
+| ENTRANCE | N5 | where in the cycle the employee starts ("Einstieg"): the week for a cycle of weeks, the day for a cycle of days, counted from 0 *(assumed)* |
 | RESERVED | C20 | |
 
 #### 5CYEXC: exceptions from a cycle
@@ -510,7 +527,7 @@ Key `ID`, `EMPLOYEEID`, `CYCLEASSID`. No records in the sample.
 | EMPLOYEEID | N11 | -> 5EMPL |
 | CYCLEASSID | N11 | -> 5CYASS (the `ID` of the assignment of that employee) |
 | DATE | D | the day on which the duty from the cycle does not apply |
-| TYPE | N5 | *(unknown)* |
+| TYPE | N5 | plan type *(assumed)* |
 | RESERVED | C20 | |
 
 ### 5.3 The plan
@@ -527,7 +544,7 @@ one employee on one day.
 | DATE | D | |
 | SHIFTID | N11 | -> 5SHIFT |
 | WORKPLACID | N11 | -> 5WOPL, 0 for none |
-| TYPE | N5 | 0: the plan as worked (actual), 1: the plan as intended (nominal) *(program)* |
+| TYPE | N5 | plan type: 0 actual plan, 1 intended plan *(program)*. SP5 writes 0 for a duty entered in the normal plan. |
 | RESERVED | C20 | |
 
 #### 5SPSHI: special shifts
@@ -541,9 +558,9 @@ with its own name, times and colours, entered for one employee and day.
 | EMPLOYEEID | N11 | -> 5EMPL |
 | DATE | D | |
 | NAME, SHORTNAME | C200 | |
-| SHIFTID | N11 | -> 5SHIFT if the record changes the working time of a regular shift on that day, 0 for a duty of its own *(program)* |
+| SHIFTID | N11 | -> 5SHIFT if the record changes the working time of that regular shift on that day ("Arbeitszeitabweichung"), 0 for a duty of its own ("Sonderdienst") *(program)* |
 | WORKPLACID | N11 | -> 5WOPL, 0 for none |
-| TYPE | N5 | *(unknown)* |
+| TYPE | N5 | plan type *(assumed)* |
 | COLORTEXT, COLORBAR, COLORBK | N11 | colours |
 | BOLD | N1 | |
 | STARTEND | C36 | working times (single-byte) |
@@ -562,9 +579,9 @@ and day; a vacation of a week is five or seven records.
 | EMPLOYEEID | N11 | -> 5EMPL |
 | DATE | D | |
 | LEAVETYPID | N11 | -> 5LEAVT |
-| TYPE | N5 | *(unknown)* |
-| INTERVAL | N5 | 0 whole day, 1 first half, 2 second half, 3 from `START` to `END` *(program)* |
-| START, END | N5 | minutes since midnight, for `INTERVAL` 3 |
+| TYPE | N5 | plan type *(assumed)* |
+| INTERVAL | N5 | 0 whole day, 1 morning, 2 afternoon, 3 from `START` to `END` *(program)* |
+| START, END | N5 | minutes since midnight, for `INTERVAL` 3; SP5 does not let such an absence cross midnight |
 | RESERVED | C20 | |
 
 #### 5NOTE: notes
@@ -576,7 +593,7 @@ Key `ID`, `EMPLOYEEID`. No records in the sample.
 | ID | N11 | counted per employee |
 | EMPLOYEEID | N11 | -> 5EMPL, 0 for a note on the day as a whole *(assumed)* |
 | DATE | D | |
-| TEXT1, TEXT2 | C252 | the text |
+| TEXT1, TEXT2 | C252 | the text, up to 126 characters each |
 | RESERVED | C20 | |
 
 #### 5PERIO: marked periods
@@ -616,7 +633,7 @@ employee's hour accounts.
 | ID | N11 | counted per employee |
 | EMPLOYEEID | N11 | -> 5EMPL |
 | DATE | D | |
-| TYPE | N5 | the account: 0 actual hours, 1 nominal hours, 2 overtime *(program)* |
+| TYPE | N5 | the account: 0 actual hours, 1 nominal hours *(program)*; 2 overtime *(assumed)* |
 | VALUE | F19 | hours, may be negative |
 | NOTE | C200 | |
 | RESERVED | C20 | |
@@ -633,7 +650,7 @@ Key `ID`, `EMPLOYEEID`. No records in the sample.
 | LEAVETYPID | N11 | -> 5LEAVT |
 | ENTITLEMNT | F19 | entitlement for the year |
 | REST | F19 | carried over from the year before |
-| INDAYS | N1 | 1: the amounts are days, 0: hours *(program)* |
+| INDAYS | N1 | 1: the amounts are days, 0: hours *(assumed)* |
 | RESERVED | C20 | |
 
 ### 5.5 Rules and demand
@@ -647,9 +664,9 @@ not get on a day of the week.
 |---|---|---|
 | ID | N11 | counted per employee |
 | EMPLOYEEID | N11 | -> 5EMPL |
-| WEEKDAY | N5 | day number, 7 for holidays *(program)* |
+| WEEKDAY | N5 | day number, 7 for holidays *(assumed)* |
 | SHIFTID | N11 | -> 5SHIFT |
-| RESTRICT | N5 | 1: only on request, 2: never *(program)* |
+| RESTRICT | N5 | 0: no restriction, 1: assign only on request, 2: never assign *(program)* |
 | RESERVED | C20 | |
 
 #### 5HOBAN: vacation bans
@@ -661,7 +678,7 @@ Key `ID`, `GROUPID`. No records in the sample.
 | ID | N11 | counted per group |
 | GROUPID | N11 | -> 5GROUP |
 | START, END | D | first and last day |
-| RESTRICT | N11 | *(unknown)* |
+| RESTRICT | N11 | 0: no entries at all in the period, 1: only no absences of types with an entitlement *(program)*. SP5 only warns. |
 | DESCRIPT | C200 | description |
 | RESERVED | C20 | |
 
@@ -673,7 +690,7 @@ Key `ID`, `GROUPID`. No records in the sample.
 |---|---|---|
 | ID | N11 | counted per group |
 | GROUPID | N11 | -> 5GROUP |
-| WEEKDAY | N5 | day number, 7 for holidays *(program)* |
+| WEEKDAY | N5 | day number, 7 for holidays *(assumed)* |
 | SHIFTID | N11 | -> 5SHIFT |
 | WORKPLACID | N11 | -> 5WOPL, 0 for any |
 | MIN, MAX | N5 | fewest and most employees wanted |
@@ -694,7 +711,7 @@ Key `ID`, `GROUPID`. No records in the sample.
 | GROUPID | N11 | -> 5GROUP |
 | START | D | first day |
 | START | D | last day. The field has the same name as the one before it; the header of the table really contains the name twice. This library calls the second one `START2`. |
-| DAILYDEM | C48 | as in 5GROUP *(assumed)* |
+| DAILYDEM | C48 | as in 5GROUP: the demand of the group in this period *(program)* |
 | DESCRIPT | C200 | description |
 | RESERVED | C20 | |
 
@@ -711,24 +728,25 @@ Key `ID`. 6 records.
 | NAME | C200 | login name |
 | DESCRIP | C200 | description |
 | ADMIN | N1 | 1: may manage users |
-| DIGEST | C16 | binary: MD5 of the password as UTF-16 LE text without terminator. A user without password has the MD5 of the empty input. |
-| RIGHTS | N5 | 0: may change everything, 1: may only read, 2: rights per group and employee, see 5GRACC and 5EMACC *(program)* |
-| CATEGORY | C40 | twenty flags, each followed by a space (single-byte) *(meaning unknown)* |
+| DIGEST | C16 | binary: MD5 of the password as UTF-16 LE text without terminator. A user without password has the MD5 of the empty input. When checking a password SP5 also accepts the MD5 of the password in the Windows code page, which older versions stored *(program)*. |
+| RIGHTS | N5 | 0: may read and change everything, 1: may only read, 2: rights per group and employee (5GRACC, 5EMACC), 3: no access *(program)* |
+| CATEGORY | C40 | twenty flags, each followed by a space (single-byte): flag n is the right for category n; flag 0 is not used *(program)* |
 | ADDEMPL | N1 | may add employees |
 | WDUTIES, WABSENCES, WOVERTIMES, WNOTES | N1 | may change duties, absences, overtime, notes |
 | WDEVIATION | N1 | may change working times of single duties |
 | WCYCLEASS | N1 | may change cycle assignments |
-| WSWAPONLY | N1 | may only swap duties *(assumed)* |
+| WSWAPONLY | N1 | "swap only" *(effect unknown)* |
 | WPAST | N1 | may change the past |
-| WACCEMWND, WACCGRWND | N1 | may change data in the employee and group windows *(assumed)* |
-| SHOWABS | N5 | absences of others: 0 shown, 1 shown without their type, 2 not shown *(program)* |
+| WACCEMWND, WACCGRWND | N1 | may change data in the employee and group windows *(program)* |
+| SHOWABS | N5 | absences: 0 shown in full, 1 shown without their type (see `ANOA` fields in 5USETT), 2 not shown *(program)* |
 | SHOWNOTES, SHOWSTATS | N1 | sees notes, statistics |
-| RACCEMWND, RACCGRWND | N1 | may open the employee and group windows *(assumed)* |
+| RACCEMWND, RACCGRWND | N1 | may open the employee and group windows *(program)* |
 | BACKUP | N1 | may make backups |
-| HIDEBARIN, HIDEBARNO | N1 | *(unknown)* |
-| ACCVOWND, ACCADMWND | N1 | *(unknown)* |
+| HIDEBARIN, HIDEBARNO | N1 | the information bar and the notes bar are hidden *(program)* |
+| ACCVOWND | N1 | may open the view options *(program)* |
+| ACCADMWND | N1 | may open the administration window *(program)* |
 | MINITABLE | N1 | *(unknown)* |
-| REPORT | C40 | twenty flags like `CATEGORY`: the reports the user may print *(assumed)* |
+| REPORT | C40 | twenty flags like `CATEGORY`, for reports *(which flag stands for which report is unknown)* |
 | HIDE | N1 | |
 | RESERVED | C200 | |
 
@@ -741,10 +759,13 @@ Key `ID`, `USERID`. 3 records in 5GRACC, none in 5EMACC.
 | ID | N11 | counted per user |
 | USERID | N11 | -> 5USER |
 | GROUPID or EMPLOYEEID | N11 | -> 5GROUP in 5GRACC, -> 5EMPL in 5EMACC |
-| RIGHTS | N5 | 0 may change, 1 may read, 2 no access *(program)* |
+| RIGHTS | N5 | 0 may read and change, 1 may only read; in 5EMACC also 2 no access *(program)* |
 | RESERVED | C20 | |
 
-Rights for a group include its subgroups.
+These tables apply to users with `RIGHTS` 2. Rights for a group include its
+subgroups. A record in 5EMACC decides for that employee; without one, the
+rights of the groups the employee belongs to apply, and an employee in none
+of the user's groups is not accessible *(program)*.
 
 #### 5USETT: settings
 
@@ -753,13 +774,14 @@ Key `ID`. One record with the `ID` 0.
 | Field | Type | Meaning |
 |---|---|---|
 | ID | N11 | 0 |
-| LOGIN | N1 | 1: users must log in *(assumed; 0 in the sample)* |
-| SPSHCAT, OVERTCAT | N5 | *(unknown)* |
+| LOGIN | N1 | 1: user management is on and users must log in *(program; 0 in the sample)* |
+| SPSHCAT | N5 | category needed to enter special shifts, 0 for none *(program)* |
+| OVERTCAT | N5 | category needed to enter overtime, 0 for none *(program)* |
 | ANOANAME, ANOASHORT | C200 | name and short name shown for an absence whose type the user may not see |
 | ANOACRTXT, ANOACRBAR, ANOACRBK | N11 | its colours |
 | ANOABOLD | N1 | |
-| BACKUPFR | N1 | *(unknown)* |
-| CHANGELOG | N1 | *(unknown; 0 in the sample)* |
+| BACKUPFR | N1 | 1: users who may change everything may make backups *(program)* |
+| CHANGELOG | N1 | *(unknown; 0 in the sample)*. It does not switch the journals on or off. |
 | RESERVED | C200 | |
 
 #### 5BUILD: identity of the database
@@ -769,11 +791,11 @@ Key `ID`. One record.
 | Field | Type | Meaning |
 |---|---|---|
 | ID | N11 | 1 |
-| BUILD | N11 | raised by one each time the database is compressed; 1 in the sample |
+| BUILD | N11 | generation of the database: raised by one each time it is rebuilt (compressed, restored from a backup); 1 in the sample. A running SP5 that sees it grow reads everything again. |
 | CHANGE | N11 | number of changes since the database was last compressed, see section 6 |
-| CREATIME | C8 | binary: when the database was created, as Windows `FILETIME` (100 ns since 1601, little endian) |
-| UUID | C16 | binary: an identifier of the database |
-| HELPER | N11 | *(unknown)* 0 in the sample; SP5 sets it to 45977 with its first change |
+| CREATIME | C8 | binary: when the database was created (UTC), as Windows `FILETIME` (100 ns since 1601, little endian) |
+| UUID | C16 | binary: a GUID that identifies the database |
+| HELPER | N11 | *(unknown)* 0 in the sample; SP5 sets it to 45977 with its first change. Other writers should leave it alone. |
 | RESERVED | C200 | |
 
 ## 6. Change journals and counters
@@ -787,12 +809,16 @@ Every table has a journal `5NAME-L.DBF` with the fields
 | CHANGE | N1 | 0: the record was added, 1: the record was changed, 2: the record was deleted |
 
 and the index tag `NUMBER_TAG` on `NUMBER`. SP5 adds a journal record for
-every record it adds, changes or deletes, independent of any setting. A
-running SP5 reads the journals to notice changes made by other programs on
-the same database.
+every record it adds, changes or deletes, independent of any setting.
+Replacing a duty by another one is recorded as a new record and a deleted
+one.
 
-With every change SP5 also raises `CHANGE` in the one record of 5BUILD by
-one. This write is not journalled and does not touch the index of 5BUILD.
+With every operation SP5 also raises `CHANGE` in the one record of 5BUILD
+by one. This write is not journalled and does not touch the index of
+5BUILD. A running SP5 watches this counter; when it has grown, it reads the
+new journal records (those with a `NUMBER` above the last one it has seen)
+and applies them *(program)*. This is how several SP5 on one database, and
+SP5 and another program, see each other's changes.
 
 Compressing the database ("Datei, Datenbank, Komprimieren" in SP5) removes
 the deleted records from all tables, empties all journals and rebuilds all
@@ -822,18 +848,22 @@ SP5, except for `HELPER` in 5BUILD.
   the whole directory ("keine gültige Datenbank"). An index file must
   therefore never be deleted.
 - Add a journal record and raise `5BUILD.CHANGE`.
-- Do not write while SP5 is writing. SP5 locks through CodeBase, this
-  library uses `flock` on POSIX systems, and the two do not see each other.
-  SP5 keeps no file open while it is idle, and it picks up changes through
-  the journals, but two writers at the same moment are not protected from
-  each other.
+- Do not write while SP5 is writing. For a change SP5 locks the table and
+  its journal as a whole through CodeBase (byte-range locks) *(program)*;
+  this library uses `flock` on POSIX systems, and the two do not see each
+  other. SP5 keeps no file open while it is idle, and it picks up changes
+  through the journals, but two writers at the same moment are not
+  protected from each other.
 
 ## 8. Not understood
 
-- The fields marked *(unknown)* above: `TYPE` in 5ABSEN, 5SPSHI and 5CYEXC,
-  `RESTRICT` in 5HOBAN, `CATEGORY` in 5SHIFT, 5LEAVT and 5USER, `IGNORED`
-  and the effect of `VALIDDAYS` in 5LEAVT, `SPSHCAT`, `OVERTCAT`, `BACKUPFR`
-  and `CHANGELOG` in 5USETT, `HELPER` in 5BUILD, several flags
-  in 5USER.
+- `HELPER` in 5BUILD and `CHANGELOG` in 5USETT.
+- `MINITABLE` and `WSWAPONLY` in 5USER, and which report each flag of
+  `REPORT` stands for.
+- Whether `DAILYDEM` is a minimum or a maximum, and how SP5 uses it.
+- `TYPE` in 5SPSHI, 5ABSEN and 5CYEXC is taken to be the plan type but was
+  not seen with a value other than 0. `TYPE` 2 in 5BOOK was not found in
+  the program.
+- What else `IGNORED` in 5LEAVT does.
 - How SP5 rearranges a large index when single records are added.
-- Whether the `RESERVED` fields are ever used.
+- The byte ranges SP5 locks.

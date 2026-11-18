@@ -37,7 +37,7 @@ The tables are plain dBASE III files.
 | Offset | Size | Content |
 |---|---|---|
 | 0 | 1 | `0x03` (dBASE III without memo) |
-| 1 | 3 | date of the last change: year minus 2000 (two digits), month, day |
+| 1 | 3 | a date: year minus 2000 (two digits), month, day. SP5 does not update it when it changes the table. |
 | 4 | 4 | number of records, little endian, including deleted ones |
 | 8 | 2 | size of the header in bytes: `32 + 32 * fields + 1` |
 | 10 | 2 | size of a record in bytes: `1 +` the sum of the field lengths |
@@ -165,10 +165,11 @@ Header page (pages 0 and 2):
 The option bits are `0x20` compact index, `0x40` compound index header,
 `0x80` tag directory, `0x08` index with a filter.
 
-The counter at offset 8 of page 0 grows as SP5 changes the table. It does
-not follow from the content of the table (the sample has tables with no
-records and a counter of 194). This library keeps the value it finds when it
-rebuilds an index.
+The counter at offset 8 of page 0 counts the changes of the index: SP5
+raises it by one whenever it adds a key to the index or removes one (a new
+record, a deleted record). Compressing the database (section 6) keeps it. It
+does not follow from the content of the table: the sample has tables with no
+records and a counter of 194.
 
 ### 3.2 Nodes
 
@@ -203,26 +204,56 @@ the end. Only character keys have trailing bytes (spaces) cut off. The
 remaining bytes of each key are stored from the end of the page backwards:
 the bytes of the first key are the last bytes of the page.
 
-The bits per count depend on the key length: 4 for keys up to 15 bytes, 5 up
-to 31 bytes, 6 above. The record number gets the remaining bits of the 24
-(16, 14 or 12 bits). Record numbers start at 1. In the tag directory the
-"record number" is the file offset of the tag header.
+The size of an entry is not fixed. Each count gets as many bits as the key
+length needs (4 bits for the 8 and 10 byte keys, 5 for 22 bytes, 6 for 33
+bytes). The record number gets as many bits as the number of records in the
+table needs, but at least 12, plus as many more as it takes to make the
+entry a whole number of bytes:
 
-Note: with 16, 14 or 12 bits, record numbers above 65535, 16383 or 4095 do
-not fit an entry of three bytes. How SP5 lays out the leaves of larger
-tables is *(unknown)*; this library writes the format described here and
-refuses nothing, so index files of tables with more records than that
-should be deleted rather than rebuilt (see section 7).
+| Key length | Records in the table | Bits for the record number | Entry size |
+|---|---|---|---|
+| 8 | up to 65535 | 16 | 3 |
+| 8 | 65536 and more | 24 | 4 |
+| 22 | up to 16383 | 14 | 3 |
+| 22 | 16384 and more | 22 | 4 |
+| 33 | up to 4095 | 12 | 3 |
+| 33 | 4096 and more | 20 | 4 |
+
+The number of records counts deleted ones, as in the table header. Record
+numbers start at 1. In the tag directory the "record number" is the file
+offset of the tag header.
 
 **Interior node.** After the 12-byte header, one entry per child node: the
 last key of the child (full key length, not compressed), the record number
 of that key and the file offset of the child, both as 4-byte **big-endian**
 numbers.
 
-A tag that fits one leaf has that leaf as its root (attributes 3). In the
-sample only 5HOLID (96 records) needs more: two leaves on pages 5 and 6 and
-the root on page 7. Leaves are filled one after the other until the next key
-does not fit.
+An interior node of a tag with 8 byte keys holds up to 31 entries, with 22
+byte keys 16, with 33 byte keys 12.
+
+### 3.3 Order of the pages
+
+A tag that fits one leaf has that leaf as its root (attributes 3), on page
+5. For larger tables, SP5 builds the tree in one pass over the sorted keys
+and writes each node when it is complete:
+
+- Leaves are filled one after the other until the next key does not fit.
+  The compression starts again in every leaf.
+- An interior node is written as soon as it is full, directly after the
+  last of its children.
+- At the end the nodes that are not full yet are written from the lowest
+  level up. The root is the last page of the file.
+
+In the sample only 5HOLID (96 records) needs more than one leaf: two leaves
+on pages 5 and 6 and the root on page 7. A table with 3000 records and a
+numeric key has 31 leaves (pages 5 to 35), their interior node (page 36), 26
+more leaves (37 to 62), their interior node (63) and the root (64).
+
+SP5 writes a file of this form when it builds an index from scratch
+("compress database") and, as far as observed, also when it adds a single
+record to a small table. How it rearranges the pages of a large index when
+records are added one by one was not examined; a file built as described
+here is accepted in any case.
 
 ## 4. Conventions shared by many tables
 
@@ -738,14 +769,14 @@ Key `ID`. One record.
 | Field | Type | Meaning |
 |---|---|---|
 | ID | N11 | 1 |
-| BUILD | N11 | version of the table layout *(assumed; 1 in the sample)* |
-| CHANGE | N11 | *(unknown; 1 in the sample)* |
+| BUILD | N11 | raised by one each time the database is compressed; 1 in the sample |
+| CHANGE | N11 | number of changes since the database was last compressed, see section 6 |
 | CREATIME | C8 | binary: when the database was created, as Windows `FILETIME` (100 ns since 1601, little endian) |
 | UUID | C16 | binary: an identifier of the database |
-| HELPER | N11 | *(unknown; 0 in the sample)* |
+| HELPER | N11 | *(unknown)* 0 in the sample; SP5 sets it to 45977 with its first change |
 | RESERVED | C200 | |
 
-## 6. Change journals
+## 6. Change journals and counters
 
 Every table has a journal `5NAME-L.DBF` with the fields
 
@@ -753,40 +784,56 @@ Every table has a journal `5NAME-L.DBF` with the fields
 |---|---|---|
 | NUMBER | N11 | running number, starting at 1 |
 | CHANGEID1, CHANGEID2, CHANGEID3 | N11 | the key of the changed record: the values of the key fields in the order of the index key, 0 for unused parts |
-| CHANGE | N1 | 1: the record was added or changed, 2: the record was deleted |
+| CHANGE | N1 | 0: the record was added, 1: the record was changed, 2: the record was deleted |
 
-and the index tag `NUMBER_TAG` on `NUMBER`. SP5 clients that have the
-database open read the journals to notice changes made by other clients.
-All journals of the sample are empty. *(program; see section 7 for what was
-observed)*
+and the index tag `NUMBER_TAG` on `NUMBER`. SP5 adds a journal record for
+every record it adds, changes or deletes, independent of any setting. A
+running SP5 reads the journals to notice changes made by other programs on
+the same database.
+
+With every change SP5 also raises `CHANGE` in the one record of 5BUILD by
+one. This write is not journalled and does not touch the index of 5BUILD.
+
+Compressing the database ("Datei, Datenbank, Komprimieren" in SP5) removes
+the deleted records from all tables, empties all journals and rebuilds all
+index files. It raises `BUILD` in 5BUILD by one and sets `CHANGE` to 0.
+
+Observed with SP5 5.0.13 for one duty entered and deleted again in the
+plan: the files that changed were 5MASHI.DBF and .CDX, 5MASHI-L.DBF and
+.CDX and 5BUILD.DBF; SP5 wrote them at once, not when it was closed.
 
 ## 7. Writing
 
-What a program must do to change a database so that SP5 keeps working with
-it, and how this library does it:
+What another program must do to change a database so that SP5 keeps working
+with it. This library does all of it, and for the changes that were
+compared (a duty added and deleted) its files are identical to those of
+SP5, except for `HELPER` in 5BUILD.
 
 - Append records at the end of the table, before the end-of-file byte, and
-  raise the record count in the header. Never reorder records: index
-  entries and nothing else refer to record numbers.
-- Write every field in the format of section 2.3, numbers for all numeric
-  fields and terminated text for all text fields.
+  raise the record count in the header. Never reorder records: the index
+  refers to them by number.
+- Write every field in the format of section 2.3: a number in every numeric
+  field, terminated text in every text field, zero bytes in `RESERVED`.
+- Number a new record as SP5 does: the highest `ID` so far plus one, counted
+  per owner in tables with a key of several parts *(assumed from the data)*.
 - Delete by setting the deletion flag.
-- Keep the index in step. The library rebuilds the index file of a table
-  after every change. If it cannot, it deletes the file: SP5 creates missing
-  index files when it opens the database.
-- Add a journal record for every change.
-- Do not write while SP5 has the database open. SP5 locks byte ranges of the
-  files through CodeBase; this library uses `flock` on POSIX systems, and
-  the two do not see each other.
+- Keep the index file in step with the table and raise its counter. **SP5
+  does not recreate a missing index file.** If one is missing, SP5 refuses
+  the whole directory ("keine gültige Datenbank"). An index file must
+  therefore never be deleted.
+- Add a journal record and raise `5BUILD.CHANGE`.
+- Do not write while SP5 is writing. SP5 locks through CodeBase, this
+  library uses `flock` on POSIX systems, and the two do not see each other.
+  SP5 keeps no file open while it is idle, and it picks up changes through
+  the journals, but two writers at the same moment are not protected from
+  each other.
 
 ## 8. Not understood
 
 - The fields marked *(unknown)* above: `TYPE` in 5ABSEN, 5SPSHI and 5CYEXC,
   `RESTRICT` in 5HOBAN, `CATEGORY` in 5SHIFT, 5LEAVT and 5USER, `IGNORED`
   and the effect of `VALIDDAYS` in 5LEAVT, `SPSHCAT`, `OVERTCAT`, `BACKUPFR`
-  and `CHANGELOG` in 5USETT, `CHANGE` and `HELPER` in 5BUILD, several flags
+  and `CHANGELOG` in 5USETT, `HELPER` in 5BUILD, several flags
   in 5USER.
-- The counter in the index header.
-- Index files of tables with more records than fit the three-byte leaf
-  entries.
+- How SP5 rearranges a large index when single records are added.
 - Whether the `RESERVED` fields are ever used.

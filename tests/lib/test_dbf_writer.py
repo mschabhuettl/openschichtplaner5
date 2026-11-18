@@ -349,3 +349,43 @@ def test_header_date_is_left_alone(db_dir):
     update_record(path, fields, 0, {"BOLD": 1})
     append_record(path, fields, {"ID": 3})
     assert read_header(path).last_update == date(2013, 2, 12)
+
+
+def test_missing_and_truncated_table_files(tmp_path):
+    missing = str(tmp_path / "5WOPL.DBF")
+    fields = TABLES["5WOPL"].field_dicts()
+    with pytest.raises(FileNotFoundError):
+        append_record(missing, fields, {"ID": 1})
+    with pytest.raises(FileNotFoundError):
+        delete_record(missing, fields, 0)
+    assert find_all_records(missing, fields) == []
+    (tmp_path / "5WOPL.DBF").write_bytes(b"\x03" * 20)
+    with pytest.raises(ValueError, match="Truncated"):
+        update_record(missing, fields, 0, {})
+    assert find_all_records(missing, fields) == []
+
+
+def test_concurrent_writes_keep_existing_records(db_dir):
+    path = f"{db_dir}/5MASHI.DBF"
+    fields = get_table_fields(path)
+    before = read_dbf(path)
+
+    def work(employee):
+        for day in range(1, 6):
+            record = {"EMPLOYEEID": employee, "DATE": f"2024-03-{day:02d}", "SHIFTID": 1}
+            append_record(path, fields, record, autoid_field="ID", autoid_within=("EMPLOYEEID",))
+
+    staff = [101, 102, 103, 114]  # employees without entered duties
+    threads = [threading.Thread(target=work, args=(e,)) for e in staff]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    after = read_dbf(path)
+    assert after[: len(before)] == before and len(after) == len(before) + 20
+    new = after[len(before) :]
+    assert sorted((r["EMPLOYEEID"], r["ID"]) for r in new) == [
+        (e, i) for e in staff for i in range(1, 6)
+    ]
+    assert index_matches(path)
+    assert read_dbf(f"{db_dir}/5BUILD.DBF")[0]["CHANGE"] == 21

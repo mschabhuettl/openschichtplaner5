@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
+import sp5lib
 from sp5api import __main__, __version__
 from sp5api.app import create_app
 from sp5lib.database import SP5Database
@@ -18,8 +19,12 @@ def writer(db_dir):
 
 def test_health(client):
     assert client.get("/api/health").json() == {
-        "status": "ok", "version": __version__, "sp5lib": "1.0.0", "tables": 30, "readonly": True,
-    }  # fmt: skip
+        "status": "ok",
+        "version": __version__,
+        "sp5lib": sp5lib.__version__,
+        "tables": 30,
+        "readonly": True,
+    }
 
 
 def test_tables(client):

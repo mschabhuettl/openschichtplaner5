@@ -46,6 +46,13 @@ pip install "libopenschichtplaner5 @ git+https://github.com/mschabhuettl/opensch
             "openschichtplaner5-api @ git+https://github.com/mschabhuettl/openschichtplaner5#subdirectory=api"
 ```
 
+Upgrading from the earlier `libopenschichtplaner5` (up to 1.32.3) or
+`openschichtplaner5-api` (up to 1.33.0): the version numbers started again
+at 1.0, so pip regards the old package as newer and keeps it. Remove it
+first (`pip uninstall libopenschichtplaner5 openschichtplaner5-api`), then
+install as above. In a requirements file pin the new line, for example
+`libopenschichtplaner5>=1.0,<2`.
+
 ## The library
 
 ```python

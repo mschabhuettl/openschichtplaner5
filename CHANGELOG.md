@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.1
+
+- A cycle assignment without end date no longer yields duties
+  (`calculations.expand_cycle_assignments`, `SP5Database.get_cycle_duties`,
+  the API views built on them). Schichtplaner 5 always stores an end date
+  and treats a record without one as never in effect; 1.0.0 and the earlier
+  library read it as open. An assignment that should run on needs a far end
+  date such as 9999-12-31. `docs/format.md` describes what Schichtplaner 5
+  stores and shows.
+- `docs/format.md`: how the day in a cycle is found, what Schichtplaner 5
+  writes to 5CYEXC.
+- README: how to upgrade from the earlier packages.
+
 ## 1.0.0
 
 First release of the combined repository. `sp5lib` continues the earlier
@@ -8,9 +21,8 @@ earlier `openschichtplaner5-api`. Both were rebuilt around the file format
 and checked against Schichtplaner 5.0.13; version numbers start again at 1.0.
 
 Known limits: references between records are not checked, although
-Schichtplaner 5 refuses a database with a reference to a missing record; a
-cycle assignment without end is read as open, while Schichtplaner 5 showed
-no duties for one. See `docs/format.md`, sections 7 and 8.
+Schichtplaner 5 refuses a database with a reference to a missing record.
+See `docs/format.md`, sections 7 and 8.
 
 ### sp5lib
 

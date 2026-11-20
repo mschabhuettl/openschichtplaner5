@@ -579,7 +579,16 @@ CYCLE_ENTRIES = (
 
 def test_cycle_expansion_three_week_pattern():
     days = calc.expand_cycle_assignments(
-        [{"ID": 1, "EMPLOYEEID": 40, "CYCLEID": 8, "START": "2024-01-01", "ENTRANCE": 0}],
+        [
+            {
+                "ID": 1,
+                "EMPLOYEEID": 40,
+                "CYCLEID": 8,
+                "START": "2024-01-01",
+                "END": "9999-12-31",
+                "ENTRANCE": 0,
+            }
+        ],
         cycles=[CYCLE],
         cycle_entries=CYCLE_ENTRIES,
         von=date(2024, 1, 1),
@@ -601,7 +610,16 @@ DAY_CYCLE_ENTRIES = [{"CYCLEEID": 9, "INDEX": 2, "SHIFTID": 1, "WORKPLACID": 0}]
 def test_cycle_expansion_tages_modell():
     """UNIT=0: length = SIZE days (not SIZE*7), independent of the weekday."""
     days = calc.expand_cycle_assignments(
-        [{"ID": 1, "EMPLOYEEID": 40, "CYCLEID": 9, "START": "2024-01-01", "ENTRANCE": 0}],
+        [
+            {
+                "ID": 1,
+                "EMPLOYEEID": 40,
+                "CYCLEID": 9,
+                "START": "2024-01-01",
+                "END": "9999-12-31",
+                "ENTRANCE": 0,
+            }
+        ],
         cycles=[DAY_CYCLE],
         cycle_entries=DAY_CYCLE_ENTRIES,
         von=date(2024, 1, 1),
@@ -613,7 +631,16 @@ def test_cycle_expansion_tages_modell():
 def test_cycle_expansion_tages_modell_entrance():
     """UNIT=0: ENTRANCE is the direct day offset (no week factor)."""
     days = calc.expand_cycle_assignments(
-        [{"ID": 1, "EMPLOYEEID": 40, "CYCLEID": 9, "START": "2024-01-01", "ENTRANCE": 2}],
+        [
+            {
+                "ID": 1,
+                "EMPLOYEEID": 40,
+                "CYCLEID": 9,
+                "START": "2024-01-01",
+                "END": "9999-12-31",
+                "ENTRANCE": 2,
+            }
+        ],
         cycles=[DAY_CYCLE],
         cycle_entries=DAY_CYCLE_ENTRIES,
         von=date(2024, 1, 1),
@@ -624,7 +651,16 @@ def test_cycle_expansion_tages_modell_entrance():
 
 def test_cycle_expansion_entrance_offset():
     days = calc.expand_cycle_assignments(
-        [{"ID": 1, "EMPLOYEEID": 40, "CYCLEID": 8, "START": "2024-01-01", "ENTRANCE": 1}],
+        [
+            {
+                "ID": 1,
+                "EMPLOYEEID": 40,
+                "CYCLEID": 8,
+                "START": "2024-01-01",
+                "END": "9999-12-31",
+                "ENTRANCE": 1,
+            }
+        ],
         cycles=[CYCLE],
         cycle_entries=CYCLE_ENTRIES,
         von=date(2024, 1, 1),
@@ -636,7 +672,16 @@ def test_cycle_expansion_entrance_offset():
 def test_cycle_expansion_midweek_start_aligns_weekday():
     """Within the model row the weekday of the date aligns."""
     days = calc.expand_cycle_assignments(
-        [{"ID": 1, "EMPLOYEEID": 40, "CYCLEID": 8, "START": "2024-01-03", "ENTRANCE": 0}],
+        [
+            {
+                "ID": 1,
+                "EMPLOYEEID": 40,
+                "CYCLEID": 8,
+                "START": "2024-01-03",
+                "END": "9999-12-31",
+                "ENTRANCE": 0,
+            }
+        ],
         cycles=[CYCLE],
         cycle_entries=CYCLE_ENTRIES,
         von=date(2024, 1, 3),
@@ -648,7 +693,16 @@ def test_cycle_expansion_midweek_start_aligns_weekday():
 
 def test_cycle_expansion_exception_suppresses():
     days = calc.expand_cycle_assignments(
-        [{"ID": 1, "EMPLOYEEID": 40, "CYCLEID": 8, "START": "2024-01-01", "ENTRANCE": 0}],
+        [
+            {
+                "ID": 1,
+                "EMPLOYEEID": 40,
+                "CYCLEID": 8,
+                "START": "2024-01-01",
+                "END": "9999-12-31",
+                "ENTRANCE": 0,
+            }
+        ],
         cycles=[CYCLE],
         cycle_entries=CYCLE_ENTRIES,
         cycle_exceptions=[{"EMPLOYEEID": 40, "CYCLEASSID": 1, "DATE": "2024-01-02"}],
@@ -662,13 +716,41 @@ def test_cycle_expansion_exception_suppresses():
 def test_cycle_expansion_rolls_over():
     """The model repeats modulo its length."""
     days = calc.expand_cycle_assignments(
-        [{"ID": 1, "EMPLOYEEID": 40, "CYCLEID": 8, "START": "2024-01-01", "ENTRANCE": 0}],
+        [
+            {
+                "ID": 1,
+                "EMPLOYEEID": 40,
+                "CYCLEID": 8,
+                "START": "2024-01-01",
+                "END": "9999-12-31",
+                "ENTRANCE": 0,
+            }
+        ],
         cycles=[CYCLE],
         cycle_entries=CYCLE_ENTRIES,
         von=date(2024, 1, 22),
         bis=date(2024, 1, 26),
     )
     assert {r["SHIFTID"] for r in days} == {1}  # week 4 = week 1 again
+
+
+@pytest.mark.parametrize(
+    ("start", "end", "days"),
+    [
+        ("2024-01-01", "2024-01-03", ["2024-01-01", "2024-01-02", "2024-01-03"]),  # END counts
+        ("2024-01-01", None, []),  # SP5 never applies an assignment without end
+        (None, "2024-01-03", []),
+    ],
+)
+def test_cycle_expansion_needs_start_and_end(start, end, days):
+    result = calc.expand_cycle_assignments(
+        [{"ID": 1, "EMPLOYEEID": 40, "CYCLEID": 8, "START": start, "END": end, "ENTRANCE": 0}],
+        cycles=[CYCLE],
+        cycle_entries=CYCLE_ENTRIES,
+        von=date(2024, 1, 1),
+        bis=date(2024, 1, 31),
+    )
+    assert [r["DATE"] for r in result] == days
 
 
 # --- personnel table / utilization ---

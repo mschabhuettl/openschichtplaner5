@@ -204,9 +204,7 @@ def cycles() -> tuple[Rows, Rows, Rows, Rows]:
          "END": date(YEAR, 3 if i == 2 else 12, 31)}
         for i in range(3)
     ]  # fmt: skip
-    exceptions = [
-        {"ID": 1, "EMPLOYEEID": 101, "CYCLEASSID": 1, "DATE": date(YEAR, 1, 9), "TYPE": 1}
-    ]
+    exceptions = [{"ID": 1, "EMPLOYEEID": 101, "CYCLEASSID": 1, "DATE": date(YEAR, 1, 9)}]
     return cycle, entries, assignments, exceptions
 
 

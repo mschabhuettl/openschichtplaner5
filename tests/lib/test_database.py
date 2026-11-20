@@ -78,6 +78,17 @@ def test_cycles(db):
     assert duties, "cycle assignments expand to duties"
 
 
+def test_cycle_assignment_without_end_gives_no_duties(db):
+    week = (date(2024, 1, 8), date(2024, 1, 14))
+    db.insert("CYASS", {"EMPLOYEEID": 104, "CYCLEID": 1, "START": date(2024, 1, 1)})
+    assert db.get_cycle_assignments(104)[0]["END"] is None
+    assert [d for d in db.get_cycle_duties(*week) if d["EMPLOYEEID"] == 104] == []
+    db.update("CYASS", (1, 104), {"END": date(9999, 12, 31)})
+    assert len([d for d in db.get_cycle_duties(*week) if d["EMPLOYEEID"] == 104]) == 5
+    far = db.get_cycle_duties(date(2031, 3, 3), date(2031, 3, 9))
+    assert {d["EMPLOYEEID"] for d in far} == {104}
+
+
 def test_users_hide_the_digest(db):
     users = db.get_users()
     assert [u["NAME"] for u in users] == ["Leitung", "Station"]

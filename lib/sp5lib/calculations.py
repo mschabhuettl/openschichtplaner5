@@ -1245,6 +1245,10 @@ def expand_cycle_assignments(
     Cycle positions without a 5CYENT entry (or SHIFTID 0) are free days;
     5CYEXC records suppress the cycle duty on their DATE.
 
+    An assignment runs from START to END, both included. SP5 always stores
+    both dates; an assignment without START or END yields no duties, as in
+    SP5. An assignment meant to stay open carries a far END (9999-12-31).
+
     Returns 5MASHI-shaped dicts (EMPLOYEEID, DATE, SHIFTID, WORKPLACID).
     """
     cycles_by_id = {int(rec.get("ID") or 0): rec for rec in cycles}
@@ -1263,16 +1267,16 @@ def expand_cycle_assignments(
     for ass in assignments:
         cycle = cycles_by_id.get(int(ass.get("CYCLEID") or 0))
         start = to_date(ass.get("START"))
-        if cycle is None or start is None:
+        end = to_date(ass.get("END"))
+        if cycle is None or start is None or end is None:
             continue
         size = int(cycle.get("SIZE") or 0)
         week_model = int(cycle.get("UNIT") or 0) == 1
         length = size * 7 if week_model else size
         if length <= 0:
             continue
-        end = to_date(ass.get("END"))
         lo = max(von, start)
-        hi = bis if end is None else min(bis, end)
+        hi = min(bis, end)
         entrance = int(ass.get("ENTRANCE") or 0)
         base = entrance * 7 + start.weekday() if week_model else entrance
         positions = entries_by_cycle.get(int(cycle.get("ID") or 0), {})

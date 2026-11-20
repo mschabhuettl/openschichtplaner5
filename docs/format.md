@@ -518,9 +518,50 @@ Key `ID`, `EMPLOYEEID`. No records in the sample.
 | ID | N11 | counted per employee |
 | EMPLOYEEID | N11 | -> 5EMPL |
 | CYCLEID | N11 | -> 5CYCLE |
-| START, END | D | first and last day of the assignment. The library treats a missing end as open, but SP5 showed no cycle duties for an assignment written without an end *(verified)*; what SP5 stores for an assignment without end is not known |
-| ENTRANCE | N5 | where in the cycle the employee starts ("Einstieg"): the week for a cycle of weeks, the day for a cycle of days, counted from 0 *(assumed)* |
+| START, END | D | first and last day of the assignment, both included; SP5 always stores both (see below) |
+| ENTRANCE | N5 | where in the cycle the employee starts ("Einstieg"): the week for a cycle of weeks, the day for a cycle of days, counted from 0. The dialog counts from 1: "Einstieg" 1 is stored as 0 *(verified for this value)* |
 | RESERVED | C20 | |
+
+**The end of an assignment** *(verified with SP5 5.0.13)*. SP5 has no
+assignment without end. Its two dialogs ("Zuordnung erfassen" in the
+employee dialog, and "Zuordnen" in the list of cycles) have a start and an
+end date and no option for "unlimited"; the end is preset to 31 December of
+the current year in the first and to the current day in the second. If the
+user empties the end field, SP5 stores the current day as `END`. A record
+written by SP5 therefore always has a date in `END`.
+
+A record with a blank `END` (eight spaces), which only another program can
+write, is not an open assignment for SP5 but one that is never in effect:
+SP5 shows no duties from it on any day, counts no hours for it and does not
+list it among the assignments of the employee. Only the `END` bytes decide
+this; with a date in them the same record works.
+
+An assignment that should run on needs a date far ahead. SP5 accepts
+`99991231` and then shows the duties of the cycle in every month looked at,
+more than two years after the start included. This is an ordinary date and
+not a marker of SP5.
+
+A reader that wants to see what SP5 shows must therefore produce duties from
+an assignment only for `START <= day <= END` and none at all when `START`
+or `END` is blank. This library does so.
+
+**The day in the cycle.** For day `d` of an assignment the entry of 5CYENT
+with this `INDEX` applies:
+
+- cycle of days (`UNIT` 0): `(ENTRANCE + days from START to d) mod SIZE`
+- cycle of weeks (`UNIT` 1): `(ENTRANCE * 7 + weekday of START + days from
+  START to d) mod (SIZE * 7)`, with Monday as weekday 0. The week of the
+  cycle thus begins on the Monday of the week in which `START` lies, and a
+  day keeps its weekday.
+
+No entry, or an entry with `SHIFTID` 0, is a free day. The formula for weeks
+agrees with what SP5 showed for assignments starting on a Monday and on a
+Saturday; the one for days was taken over from the earlier library and not
+compared with SP5.
+
+SP5 writes an assignment made in the employee dialog when that dialog is
+closed with OK, together with a journal record for the employee; an
+assignment made in the list of cycles is written at once.
 
 #### 5CYEXC: exceptions from a cycle
 
@@ -532,8 +573,14 @@ Key `ID`, `EMPLOYEEID`, `CYCLEASSID`. No records in the sample.
 | EMPLOYEEID | N11 | -> 5EMPL |
 | CYCLEASSID | N11 | -> 5CYASS (the `ID` of the assignment of that employee) |
 | DATE | D | the day on which the duty from the cycle does not apply |
-| TYPE | N5 | plan type *(assumed)* |
+| TYPE | N5 | plan type *(assumed)*; 0 in the records SP5 wrote |
 | RESERVED | C20 | |
+
+`ID` is counted per employee *(verified)*. Deleting the duty of a cycle on
+one day in the plan adds one record here and nothing else. Entering another
+shift on that day adds one record here and the new duty in 5MASHI
+*(verified)*. The journal of 5CYEXC carries `ID`, `EMPLOYEEID` and
+`CYCLEASSID` in `CHANGEID1` to `CHANGEID3`.
 
 ### 5.3 The plan
 
